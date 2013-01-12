@@ -14,7 +14,7 @@ Countly Mobile Analytics - Unity SDK is developed by [Panteon Technologies](http
 2. Click Countly game object on Hierarchy. 
 3. Set following variables from inspector in Countly script:
 - Server URL: Set your server URL. Enter https://cloud.count.ly for Countly Cloud, or your servername if you are going to have your own server.
-- App Key: Your Application Key. You can get it from Countly web site after login. "Management -> Application -> Your Application -> Application Key"
+- App Key: Your Application Key. You can get it from Countly web site after login. `Management -> Application -> Your Application -> Application Key`
 - App Version: Your application version.
 
 ##Optional features & settings
