@@ -41,6 +41,8 @@ There are also other Countly SDK repositories below.
 - [Countly Blackberry Cascades SDK](https://github.com/craigmj/countly-sdk-blackberry10-cascades) (Community supported)
 - [Countly Mac OS X SDK](https://github.com/mrballoon/countly-sdk-osx) (Community supported)
 - [Countly Appcelerator Titanium SDK](https://github.com/euforic/Titanium-Count.ly) (Community supported)
+- [Countly Unity3D SDK](https://github.com/Countly/countly-sdk-unity) (Community supported)
+
 
 ##How can I help you with your efforts?
 Glad you asked. We need ideas, feedbacks and constructive comments. All your suggestions will be taken care with upmost importance. 
