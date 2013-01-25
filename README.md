@@ -10,6 +10,8 @@ Countly Mobile Analytics - Unity SDK is developed by [Panteon Technologies](http
 
 ##Installing Unity SDK
 
+You need Unity3D 4.0. It won't work on Unity3D 3.5 and below without modification.
+
 1. Add Countly prefab to your scene.
 2. Click Countly game object on Hierarchy. 
 3. Set following variables from inspector in Countly script:
