@@ -6,7 +6,7 @@ mobile application usage and end-user behavior. There are two parts of Countly:
 the server that collects and analyzes data, and mobile SDK that sends this data. 
 Both parts are open source with different licensing terms.
 
-Countly Mobile Analytics - Unity SDK is developed by [Panteon Technologies](http://panteon.com.tr/).
+Countly Mobile Analytics - Unity SDK is developed by [Panteon Technologies](http://panteon.com.tr/) (ufuk@panteon.com.tr).
 
 ##Installing Unity SDK
 
