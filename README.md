@@ -1,5 +1,6 @@
 
-** IMPORTANT: This SDK is oudated. Please use [Mário Freitas's Unity SDK](https://github.com/imkira/unity-countly).**
+
+**WARNING:** This SDK is oudated. Please use [Mário Freitas's Unity SDK](https://github.com/imkira/unity-countly).
 
 
 ##Installing Unity SDK
