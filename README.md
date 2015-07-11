@@ -1,6 +1,4 @@
 
 ## Unity SDK for Countly 
 
-This SDK is outdated. Please use [Mário Freitas's Unity SDK](https://github.com/imkira/unity-countly).
-
-
+We are updating Countly SDK for Countly and expect to have an update very soon.
