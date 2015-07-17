@@ -12,7 +12,7 @@ This repository includes the Countly Unity3D SDK. It includes support for the fo
 * Push notifications for APNS (iOS)
 * Crash reporting (Enterprise Edition)
 
-Upcoming features: 
+Upcoming features (due July, 2015):
 
 * Push notifications for GCM (Android)
 * Referral tracking (Enterprise Edition) 
@@ -21,7 +21,7 @@ Upcoming features:
 
 This SDK needs one of the following Countly Editions to work: 
 
-* Countly Community Edition, [downloadable from](https://github.com/Countly/countly-server)
+* Countly Community Edition, [downloadable from Github](https://github.com/Countly/countly-server)
 * [Countly Cloud Edition](http://count.ly/cloud-edition)
 * [Countly Enterprise Edition](http://count.ly/enterprise-edition)
 
