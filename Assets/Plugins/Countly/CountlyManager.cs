@@ -80,6 +80,8 @@ namespace Countly
         return _eventQueue;
       }
     }
+			
+	
 
     public void Init(string appKey)
     {
@@ -103,15 +105,6 @@ namespace Countly
       StartCoroutine(RunTimer());
     }
 
-	public Profile GetProfile() {
-	  userProfile = new Profile();
-		userProfile.Init();
-	  return userProfile;
-	}
-	
-	public void SendProfile() {
-	  UpdateProfile();
-	}
 
     public void RecordEvent(Event e)
     {
@@ -190,7 +183,7 @@ namespace Countly
       ProcessConnectionQueue();
     }
 
-	protected void UpdateProfile() {
+	public void UpdateProfile() {
 		DeviceInfo info = GetDeviceInfo();
 		StringBuilder builder = InitConnectionData(info);
 
@@ -199,6 +192,17 @@ namespace Countly
 		
 		ConnectionQueue.Enqueue(builder.ToString());
 		ProcessConnectionQueue();
+	}
+
+	public void Attribute(string campaign_id) {
+		
+		
+		StringBuilder builder = new StringBuilder(1024);
+			
+		builder.Append("at/"+campaign_id);
+			Log (builder.ToString());
+			ConnectionQueue.Enqueue(builder.ToString());
+			ProcessConnectionQueue(true);
 	}
 
 	public void SendReport() {
@@ -336,7 +340,7 @@ namespace Countly
     }
 
 #region Utility Methods
-	protected void ProcessConnectionQueue()
+	protected void ProcessConnectionQueue(bool request = false)
 	{
 	  if ((_isProcessingConnection == true) ||
 	      (ConnectionQueue.Count <= 0))
@@ -345,16 +349,22 @@ namespace Countly
 	  }
 			
 	  _isProcessingConnection = true;
-	  StartCoroutine(_ProcessConnectionQueue());
+	  StartCoroutine(_ProcessConnectionQueue(request));
 	}
 
-    protected IEnumerator _ProcessConnectionQueue()
+    protected IEnumerator _ProcessConnectionQueue(bool request)
     {
 	  int retry = 0;
       while (ConnectionQueue.Count > 0)
       {
         string data = ConnectionQueue.Peek();
-        string urlString = appHost + "/i?" + data;
+		string urlString;
+		
+		if (!request) {
+        	urlString = appHost + "/i?" + data;
+		} else {
+			urlString = appHost + "/" + data;
+		}
 
         Log("Request started: " + urlString);
 
@@ -384,6 +394,30 @@ namespace Countly
 
       _isProcessingConnection = false;
     }
+
+	protected IEnumerator HTTPRequest(string request)
+	{
+
+		string urlString = appHost + "/" + request;
+				
+		Log("Request started: " + urlString);
+				
+		WWW www = new WWW(urlString)
+		{
+			threadPriority = ThreadPriority.Low
+		};
+				
+		yield return www;
+				
+		if (string.IsNullOrEmpty(www.error) == false)
+		{
+			Log("Request failed: " + www.error);
+		}
+		else {
+			Log("Request successful");
+		}
+				
+	}
 
     protected DeviceInfo GetDeviceInfo()
     {
@@ -569,6 +603,27 @@ public class CountlyManager : Countly.Manager
     DontDestroyOnLoad(gameObject);
   }
 
+  public static void Attribute(string campaign_id) {
+	Instance.Attribute(campaign_id);
+  }
+
+
+  public static Countly.Profile GetProfile() {
+    Instance.userProfile = new Countly.Profile();
+	Instance.userProfile.Init();
+	return Instance.userProfile;
+  }
+
+ 
+  public static void SendProfile() {
+    Instance.UpdateProfile();
+  }
+
+  public static void SendReport() {
+	Instance.SendReport();
+  }
+ 
+
   public static new void Init(string appKey = null)
   {
     Countly.Manager instance = Instance;
@@ -648,6 +703,7 @@ public class CountlyManager : Countly.Manager
       instance.RecordEvent(e);
     }
   }
+
 
   public static void Emit(Countly.Event e)
   {

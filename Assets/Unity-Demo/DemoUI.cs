@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
@@ -17,11 +17,12 @@ public class DemoUI : MonoBehaviour {
 
 	void Start() {
 		segmentation = new Dictionary<string, string>();
-		profile = CountlyManager.Instance.GetProfile(); //Get link to user profile 
+		profile = CountlyManager.GetProfile(); //Get link to user profile 
 
 		profile.custom.Add("Surname", "Smith");			
 		profile.custom.Add("Additional info", "Any text here");
 		//Here we add custom values to user profile
+
 	}
 
 	void OnGUI() {
@@ -61,7 +62,7 @@ public class DemoUI : MonoBehaviour {
 			GUILayout.Label("These are defined by user.");
 			GUILayout.Label("If you leave any of the values blank, they will not be sent.");
 			if (GUILayout.Button("Send profile")) {
-				CountlyManager.Instance.SendProfile(); // use this to send profile to server
+				CountlyManager.SendProfile(); // use this to send profile to server
 			}
 		break;
 	    case 2:
@@ -89,6 +90,7 @@ public class DemoUI : MonoBehaviour {
 				GUILayout.Label("All the parameters except event key are optional.");
 			if (GUILayout.Button("Send event")) {
 				CountlyManager.Emit(key, count, price, segmentation); //Send the event with selected parameters to server
+
 			}
 			
 		break;
@@ -96,18 +98,18 @@ public class DemoUI : MonoBehaviour {
 			GUILayout.Label("Reports");
 			GUILayout.Label("Countly will automatically send latest crash report logged by unity on start of each session. \bHowever, you can add more info to reports by generating them yourself. Here's an example report.");
 			if (CrashReporter.reports.Count > 0) {
-			LayoutKeys(CrashReporter.reports[0].parameters);
-			GUILayout.Label("Crash reports can also include user-defined keys.");
-			LayoutKeys(CrashReporter.reports[0].custom);
-			GUILayout.Label("All parameters except _error are optional.");
-			if (CrashReporter.reports[0].custom.Count < 5 ) {
-				newKey = GUILayout.TextField(newKey);
-				if (newKey != "" && GUILayout.Button(string.Format("Add key: {0}", newKey)))
-					CrashReporter.reports[0].custom.Add(newKey,"");
-			}
-				if (GUILayout.Button("Send report")) {
+			  LayoutKeys(CrashReporter.reports[0].parameters);
+			  GUILayout.Label("Crash reports can also include user-defined keys.");
+			  LayoutKeys(CrashReporter.reports[0].custom);
+			  GUILayout.Label("All parameters except _error are optional.");
+			  if (CrashReporter.reports[0].custom.Count < 5 ) {
+			  	  newKey = GUILayout.TextField(newKey);
+				  if (newKey != "" && GUILayout.Button(string.Format("Add key: {0}", newKey)))
+					  CrashReporter.reports[0].custom.Add(newKey,"");
+			  }
+			  if (GUILayout.Button("Send report")) {
 					CrashReporter.SendLastReport(); //Sends the last available report to the server
-				}
+			  }
 			}
 			else if (GUILayout.Button("Create report")) {
 				CrashReporter.reports.Add(new CrashReporter.CountlyCrashReport("Error")); // Manually creating a report with error value "Error"
