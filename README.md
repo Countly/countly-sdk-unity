@@ -11,11 +11,11 @@ This repository includes the Countly Unity3D SDK. It includes support for the fo
 * User profiles (Enterprise Edition)
 * Push notifications for APNS (iOS)
 * Crash reporting (Enterprise Edition)
+* Referral tracking (Enterprise Edition) 
 
-Upcoming features (due July, 2015):
+Upcoming features (due August, 2015):
 
 * Push notifications for GCM (Android)
-* Referral tracking (Enterprise Edition) 
 
 ### Other Github resources ###
 
