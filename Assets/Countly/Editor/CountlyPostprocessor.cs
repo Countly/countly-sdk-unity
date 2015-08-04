@@ -35,7 +35,7 @@ public class CountlyPostprocessor : Editor
   public static void OnPostprocessBuild(BuildTarget target,
       string pathToBuildProject)
   {
-    if (target != BuildTarget.iPhone)
+    if (target != BuildTarget.iOS)
     {
       return;
     }

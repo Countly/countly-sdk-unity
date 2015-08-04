@@ -7,9 +7,6 @@ namespace Countly
 {
   public static class CrashReporter {
 	
-	public static void SendLastReport() {
-		CountlyManager.Instance.SendReport();
-	}
 	
     public class CountlyCrashReport {
 	public CrashReport error;
@@ -47,9 +44,16 @@ namespace Countly
       DeviceInfo info = new DeviceInfo();
 	  info.Update();
 	  parameters["_os"] = info.OSName;
-      parameters["_os_version"] = info.OSVersion;
+	  parameters["_os_version"] = info.OSVersion;
 	  parameters["_app_version"] = CountlyManager.Instance.appVersion;
-      parameters["_error"] = error.text;
+	  parameters["_error"] = error.text;
+	  parameters["_online"] = Application.internetReachability.ToString();
+	  parameters["_opengl"] = SystemInfo.graphicsDeviceVersion;
+	  parameters["_cpu"] = SystemInfo.processorType;
+	  parameters["_device"] = info.Device.ToString();
+	  parameters["_resolution"] = info.Resolution;
+	  parameters["_ram_total"] = SystemInfo.systemMemorySize.ToString();
+	  parameters["_run"] = Time.realtimeSinceStartup.ToString();
 	  custom = new Dictionary<string, string>();
 	}
 
@@ -86,9 +90,18 @@ namespace Countly
 	  parameters["_os_version"] = info.OSVersion;
 	  parameters["_app_version"] = CountlyManager.Instance.appVersion;
 	  parameters["_error"] = errorText;
+	  parameters["_online"] = Application.internetReachability.ToString();
+	  parameters["_opengl"] = SystemInfo.graphicsDeviceVersion;
+	  parameters["_cpu"] = SystemInfo.processorType;
+	  parameters["_device"] = info.Device.ToString();
+	  parameters["_resolution"] = info.Resolution;
+	  parameters["_ram_total"] = SystemInfo.systemMemorySize.ToString();
+	  parameters["_run"] = Time.realtimeSinceStartup.ToString();
 	  custom = new Dictionary<string, string>();
 	}
   }
+
+	public static Dictionary<string, int> reported;
 
 	public static List<CountlyCrashReport> reports {
 	  get {
@@ -99,8 +112,20 @@ namespace Countly
 	  }
 	}
 
+    public static void Clear() {
+	  reports.Clear();
+	}
+
 	public static void Init() {
 	  reports = new List<CountlyCrashReport>();
+	  reported = new Dictionary<string, int>();
+	  Application.logMessageReceived += exceptionHandler; 
+	}
+
+	public static void UpdateReports() {
+		for (int i = 0; i < reported.Count; i++) {
+		  reports[i].custom["_count"] = reported[reports[i].parameters["_logs"]].ToString();
+		}
 	}
 
 	static List<CountlyCrashReport> _reports;
@@ -118,6 +143,22 @@ namespace Countly
 	  }
 	  else return false;
     }
+
+	static void exceptionHandler(string error, string stack, LogType type) {
+		switch (type) {
+	      case LogType.Error:
+		  case LogType.Exception:
+			if (reported.ContainsKey(stack)) {
+			  reported[stack]++;
+			}
+			else {
+			  reports.Add(new CountlyCrashReport(error));
+			  reports[reports.Count-1].parameters["_logs"] = stack;
+			  reported.Add(stack, 1);
+			}
+		  break;
+		}
+	} 
 
 	public static StringBuilder JSONSerializeReport(CountlyCrashReport report)
 	{

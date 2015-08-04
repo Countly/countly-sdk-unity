@@ -108,11 +108,12 @@ public class DemoUI : MonoBehaviour {
 					  CrashReporter.reports[0].custom.Add(newKey,"");
 			  }
 			  if (GUILayout.Button("Send report")) {
-					CrashReporter.SendLastReport(); //Sends the last available report to the server
+					CountlyManager.SendReports(); //Sends the last available report to the server
 			  }
 			}
 			else if (GUILayout.Button("Create report")) {
-				CrashReporter.reports.Add(new CrashReporter.CountlyCrashReport("Error")); // Manually creating a report with error value "Error"
+				throw new System.Exception("test report");
+				//CrashReporter.reports.Add(new CrashReporter.CountlyCrashReport("Error")); // Manually creating a report with error value "Error"
 			}
 		break;
 	  }

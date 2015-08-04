@@ -60,13 +60,13 @@ public class UnityCountlyDemo : MonoBehaviour
 		CountlyManager.Instance.userProfile.username = GUILayout.TextField(CountlyManager.Instance.userProfile.username);
 		CountlyManager.Instance.userProfile.byear = GUILayout.TextField(CountlyManager.Instance.userProfile.byear);
 		  if (GUILayout.Button("Send Profile")) {
-			CountlyManager.Instance.SendProfile();
+			CountlyManager.SendProfile();
 		  }
 			
 			if (GUILayout.Button("Generate crash report")) {
 			  if (!CrashReporter.fetchReports()) {
 				CrashReporter.reports.Add(new CrashReporter.CountlyCrashReport("Test report"));
-				CountlyManager.Instance.SendReport();
+				CountlyManager.SendReports();
 			  }
 	        }
 		GUILayout.EndVertical();

@@ -135,6 +135,7 @@ MonoBehaviour:
   queueLimit: 1024
   maxRetries: 5
   queueUsesStorage: 1
+  manualReports: 0
 --- !u!1 &1041877846
 GameObject:
   m_ObjectHideFlags: 0

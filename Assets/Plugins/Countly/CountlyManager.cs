@@ -40,6 +40,7 @@ namespace Countly
     public int queueLimit = 1024;
 	public int maxRetries = 5;
     public bool queueUsesStorage = true;
+	public bool manualReports = false;
 	public Profile userProfile;
 
     public const string SDK_VERSION = "2.0";
@@ -205,7 +206,7 @@ namespace Countly
 			ProcessConnectionQueue(true);
 	}
 
-	public void SendReport() {
+	public void SendReport(int id) {
 		if (CrashReporter.reports == null || CrashReporter.reports.Count == 0) {
 			Log("No crash reports found");
 			return;
@@ -214,13 +215,12 @@ namespace Countly
 		StringBuilder builder = InitConnectionData(info);
 			
 		builder.Append("&crash=");
-		string report = CrashReporter.JSONSerializeReport(CrashReporter.reports[CrashReporter.reports.Count-1]).ToString();
+		string report = CrashReporter.JSONSerializeReport(CrashReporter.reports[id]).ToString();
 		AppendConnectionData(builder, report);
 			
 		ConnectionQueue.Enqueue(builder.ToString());
 		ProcessConnectionQueue();
         
-		CrashReporter.reports.RemoveAt(CrashReporter.reports.Count-1);
 	}
 	
 
@@ -284,7 +284,11 @@ namespace Countly
 
         // device info may have changed
         UpdateDeviceInfo();
-
+		
+		if (!manualReports && CrashReporter.reports.Count > 0) {
+		  CountlyManager.SendReports();
+		} 
+		
         // record any pending events
         FlushEvents(0);
 
@@ -310,7 +314,7 @@ namespace Countly
       UpdateDeviceInfo();
 
 		if (CrashReporter.fetchReports()) {
-		  SendReport();
+		  CountlyManager.SendReports();
 		}
 
       BeginSession();
@@ -619,8 +623,12 @@ public class CountlyManager : Countly.Manager
     Instance.UpdateProfile();
   }
 
-  public static void SendReport() {
-	Instance.SendReport();
+  public static void SendReports() {
+	for (int i = 0; i < Countly.CrashReporter.reports.Count; i++) {
+	  Instance.SendReport(i);
+	}
+
+	Countly.CrashReporter.Clear();
   }
  
 
