@@ -43,6 +43,8 @@ namespace Countly
 	public bool manualReports = false;
 	public Profile userProfile;
 
+	public bool updateDataOnResume = false;
+
     public const string SDK_VERSION = "2.0";
 
     protected DeviceInfo _deviceInfo = null;
@@ -52,6 +54,8 @@ namespace Countly
     protected bool _isSuspended = true;
     protected double _sessionLastSentAt = 0.0;
     protected double _unsentSessionLength = 0f;
+	public bool canReceivePush = false;
+	public string[] sender_IDs;
 
     protected StringBuilder _connectionStringBuilder = null;
     protected bool _isProcessingConnection = false;
@@ -91,6 +95,16 @@ namespace Countly
         return;
       }
 
+	  if (canReceivePush) {
+				GCM.SetMessageCallback((Dictionary<string, object> table) => {
+					string[] keys = new string[1024];
+					table.Keys.CopyTo(keys, 0);
+					CountlyManager.Emit("[CLY]_push_open", 1, new Dictionary<string, string>() {
+						{"i", table[keys[1]].ToString()}
+					});});
+	  }
+	
+	 
       this.appKey = appKey;
 
       if ((_isRunning == true) ||
@@ -102,7 +116,9 @@ namespace Countly
       Log("Initialize: " + appKey);
 
       _isRunning = true;
+		UpdateDeviceInfo();
       Resume();
+	  
       StartCoroutine(RunTimer());
     }
 
@@ -123,6 +139,9 @@ namespace Countly
 #region Unity Methods
     protected void Start()
     {
+	  if (canReceivePush) {
+		GCM.Initialize();
+	  }
 	  CrashReporter.Init();
 
       _isReady = true;
@@ -163,6 +182,11 @@ namespace Countly
 #region Session Methods
     protected void BeginSession()
     {
+	  if (canReceivePush) {
+		GCM.Register(sender_IDs);		
+	  }
+
+
       DeviceInfo info = GetDeviceInfo();
       StringBuilder builder = InitConnectionDataStringBuilder();
 
@@ -176,6 +200,12 @@ namespace Countly
       AppendConnectionData(builder, SDK_VERSION);
 
       builder.Append("&begin_session=1");
+
+	  if (canReceivePush) {
+		builder.Append("&token_session=1");
+		builder.Append("&test_mode=0");
+		builder.Append("&test_token="+GCM.GetRegistrationId());
+	  }
 
       builder.Append("&metrics=");
 	  AppendConnectionData(builder, metricsString);
@@ -207,24 +237,27 @@ namespace Countly
 	}
 
 	public void SendReport(int id) {
+		SendReportWithoutCoroutineCall(id);
+		ProcessConnectionQueue();
+	}
+
+	public void SendReportWithoutCoroutineCall(int id) {
 		if (CrashReporter.reports == null || CrashReporter.reports.Count == 0) {
 			Log("No crash reports found");
 			return;
-	    }
+		}
 		DeviceInfo info = GetDeviceInfo();
 		StringBuilder builder = InitConnectionData(info);
-			
+		
 		builder.Append("&crash=");
 		string report = CrashReporter.JSONSerializeReport(CrashReporter.reports[id]).ToString();
 		AppendConnectionData(builder, report);
-			
+		
 		ConnectionQueue.Enqueue(builder.ToString());
-		ProcessConnectionQueue();
-        
 	}
 	
-
-    protected void UpdateSession(long duration)
+	
+	protected void UpdateSession(long duration)
     {
       DeviceInfo info = GetDeviceInfo();
       StringBuilder builder = InitConnectionData(info);
@@ -275,7 +308,7 @@ namespace Countly
     {
       while (true)
       {
-        yield return new WaitForSeconds(updateInterval);
+        yield return new WaitForSeconds(updateInterval / 4); //it's better to do 4 small tasks than one big task
 
         if (_isSuspended == true)
         {
@@ -284,13 +317,17 @@ namespace Countly
 
         // device info may have changed
         UpdateDeviceInfo();
-		
-		if (!manualReports && CrashReporter.reports.Count > 0) {
-		  CountlyManager.SendReports();
-		} 
+		yield return new WaitForSeconds(updateInterval / 4);
+
+		//check and send any pending crash reports
+		if (!manualReports && CrashReporter.fetchReports()) {
+			CountlyManager.SendReports();
+		}
+		yield return new WaitForSeconds(updateInterval / 4);
 		
         // record any pending events
         FlushEvents(0);
+		yield return new WaitForSeconds(updateInterval / 4);
 
         long duration = TrackSessionLength();
         UpdateSession(duration);
@@ -310,11 +347,9 @@ namespace Countly
       _isSuspended = false;
       _sessionLastSentAt = Utils.GetCurrentTime();
 
-      // device info may have changed
-      UpdateDeviceInfo();
-
-		if (CrashReporter.fetchReports()) {
-		  CountlyManager.SendReports();
+		if (updateDataOnResume) { //we shouldn't usually update device info betwen hide/show apps
+			// device info may have changed
+			UpdateDeviceInfo();
 		}
 
       BeginSession();
@@ -332,6 +367,9 @@ namespace Countly
       Log("Suspending...");
 
       _isSuspended = true;
+	  if (canReceivePush) {
+		GCM.Unregister();
+	  }
 
       // device info may have changed
       UpdateDeviceInfo();
@@ -344,7 +382,7 @@ namespace Countly
     }
 
 #region Utility Methods
-	protected void ProcessConnectionQueue(bool request = false)
+	public void ProcessConnectionQueue(bool request = false)
 	{
 	  if ((_isProcessingConnection == true) ||
 	      (ConnectionQueue.Count <= 0))
@@ -390,38 +428,18 @@ namespace Countly
 		    Log(string.Format ("Request failed after {0} retries", retry));
 		  }
 		  else {
-			Log("Request successful");
+			Log("Request successful: <" + www.text + ">");
 		  }
 		  retry = 0;
 	    }
+
+		if (ConnectionQueue.Count > 0) { //if we have more requests
+			yield return new WaitForSeconds(0.2f); //don't allow to send more than 5 request per second
+		}
 	  }
 
       _isProcessingConnection = false;
     }
-
-	protected IEnumerator HTTPRequest(string request)
-	{
-
-		string urlString = appHost + "/" + request;
-				
-		Log("Request started: " + urlString);
-				
-		WWW www = new WWW(urlString)
-		{
-			threadPriority = ThreadPriority.Low
-		};
-				
-		yield return www;
-				
-		if (string.IsNullOrEmpty(www.error) == false)
-		{
-			Log("Request failed: " + www.error);
-		}
-		else {
-			Log("Request successful");
-		}
-				
-	}
 
     protected DeviceInfo GetDeviceInfo()
     {
@@ -625,9 +643,10 @@ public class CountlyManager : Countly.Manager
 
   public static void SendReports() {
 	for (int i = 0; i < Countly.CrashReporter.reports.Count; i++) {
-	  Instance.SendReport(i);
+		Instance.SendReportWithoutCoroutineCall(i);
 	}
-
+	
+	Instance.ProcessConnectionQueue();
 	Countly.CrashReporter.Clear();
   }
  
