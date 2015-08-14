@@ -6,8 +6,22 @@ using Countly;
 
 public class DemoUI : MonoBehaviour {
 
+	class SaveLogListener : LogListener {
+		private StringBuilder strBuilder;
+
+		public SaveLogListener(StringBuilder strBuilder) {
+			this.strBuilder = strBuilder;
+		}
+
+		public void log(string logText) {
+			strBuilder.Append(logText);
+			strBuilder.Append ("\n");
+		}
+	}
+
 	int id = 0;
 	Vector2 scrollPos;
+	Vector2 txtScrollVector;
 	Profile profile;
 	Dictionary<string, string> segmentation;
 	string key = "";
@@ -15,14 +29,20 @@ public class DemoUI : MonoBehaviour {
 	double price = 0;
 	string newKey = "";
 
+	StringBuilder logStrBuilder = new StringBuilder();
+
+	private SaveLogListener logListener;
+
 	void Start() {
+		logListener = new SaveLogListener(logStrBuilder);
+		CountlyManager.Instance.setLogListener(logListener);
+
 		segmentation = new Dictionary<string, string>();
 		profile = CountlyManager.GetProfile(); //Get link to user profile 
 
 		profile.custom.Add("Surname", "Smith");			
 		profile.custom.Add("Additional info", "Any text here");
 		//Here we add custom values to user profile
-
 	}
 
 	void OnGUI() {
@@ -31,6 +51,7 @@ public class DemoUI : MonoBehaviour {
 		if (GUILayout.Button("Profile")) id = 1;
 		if (GUILayout.Button("Events")) id = 2;
 		if (GUILayout.Button("Reports")) id = 3;
+		if (GUILayout.Button("Debug log")) id = 4;
 	GUILayout.EndArea();
 	
 		GUILayout.BeginArea(new Rect(Screen.width/4, 20, Screen.width*.75f-20, Screen.height-40));
@@ -113,8 +134,13 @@ public class DemoUI : MonoBehaviour {
 			}
 			else if (GUILayout.Button("Create report")) {
 				throw new System.Exception("test report");
-				//CrashReporter.reports.Add(new CrashReporter.CountlyCrashReport("Error")); // Manually creating a report with error value "Error"
 			}
+		break;
+		case 4:
+			GUILayout.Label("Debug log");
+			txtScrollVector = GUILayout.BeginScrollView(txtScrollVector);
+			GUILayout.TextArea(logStrBuilder.ToString());
+			GUILayout.EndScrollView();
 		break;
 	  }
 	  GUILayout.EndScrollView();

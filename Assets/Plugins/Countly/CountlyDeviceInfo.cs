@@ -36,6 +36,7 @@ namespace Countly
     public string Resolution {get; set;}
     public string Locale {get; set;}
     public string AppVersion {get; set;}
+	public string DPI {get;set;}
 
     protected bool _isInitialized = false;
 
@@ -47,14 +48,19 @@ namespace Countly
 
         UDID = DetectUDID();
 
+		OSVersion = GetOsVersion();
+		Debug.Log("dpi: " + Screen.dpi);
+
+		DPI = GetDPIAsStringValue();
+
 #if UNITY_EDITOR
         Device = "Unity Editor";
         OSName = "Unity Editor";
 #elif UNITY_IPHONE
-        Device = iPhone.generation.ToString();
+        Device = "iPhone";
         OSName = "iOS";
 #elif UNITY_ANDROID
-        Device = SystemInfo.deviceModel;
+        Device = "Android";
         OSName = "Android";
 #elif UNITY_STANDALONE_OSX
         Device = "MAC";
@@ -67,7 +73,7 @@ namespace Countly
         OSName = "Unknown";
 #endif
 
-        OSVersion = SystemInfo.operatingSystem;
+        
         AppVersion = Bindings.GetAppVersion();
       }
 
@@ -89,6 +95,9 @@ namespace Countly
 
       builder.Append(",\"_os_version\":");
       Utils.JSONSerializeString(builder, OSVersion);
+
+	  builder.Append(",\"_density\":");
+      Utils.JSONSerializeString(builder, DPI);
 
       if (Carrier != null)
       {
@@ -125,5 +134,49 @@ namespace Countly
       Resolution resolution = Screen.currentResolution;
       return resolution.width + "x" + resolution.height;
     }
+
+	public static string GetOsVersion() {
+		string version = "0";
+		string osName = SystemInfo.operatingSystem;
+		Debug.Log("os: " + osName);
+		string[] parts = osName.Split(' ');
+		if (osName.Contains("Mac")) {
+			return GetNextTokenAfter(parts, "X");
+		} else if (osName.Contains ("Android")) {
+			return GetNextTokenAfter (parts, "OS");
+		} else if (osName.Contains ("Windows")) {
+			return GetNextTokenAfter(parts, "Windows");
+		}
+
+		return osName;
+	}
+
+	public static string GetDPIAsStringValue() {
+		float dpi = Screen.dpi;
+		if (dpi <= 120f) {
+			return "LDPI";
+		} else if (dpi > 120 && dpi <= 160) {
+			return "MDPI";
+		} else if (dpi > 160 && dpi <= 240) {
+			return "HDPI";
+		} else if (dpi > 240 && dpi <= 320) {
+			return "XHDPI";
+		} else if (dpi > 320 && dpi <= 480) {
+			return "XXHDPI";
+		} else if (dpi > 480) {
+			return "XXXHDPI";
+		}
+
+		return dpi + "";
+	}
+
+	private static string GetNextTokenAfter(string[] items, string token) {
+		for(int i = 0; i < items.Length; i++) {
+			if (items[i] == token && i < items.Length - 1) {
+				return items[i + 1];
+			}
+		}
+		return "unknown";
+	}
   }
 }

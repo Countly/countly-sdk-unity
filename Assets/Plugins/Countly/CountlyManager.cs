@@ -29,7 +29,11 @@ using System.Net;
 
 namespace Countly
 {
-  public class Manager : MonoBehaviour
+  public interface LogListener {
+		void log(string logText);
+  }
+  
+	public class Manager : MonoBehaviour
   {
     public string appHost = "https://cloud.count.ly";
     public string appKey;
@@ -72,8 +76,12 @@ namespace Countly
       }
     }
 
+	protected LogListener logListener;
+
+
     protected StringBuilder _eventStringBuilder = null;
     protected List<Event> _eventQueue = null;
+	protected Queue logQ;
     protected List<Event> EventQueue
     {
       get
@@ -85,13 +93,17 @@ namespace Countly
         return _eventQueue;
       }
     }
-			
-	
+
+	public void setLogListener(LogListener logListener) {
+		this.logListener = logListener;
+	}
 
     public void Init(string appKey)
     {
+	  Log ("Start init...");
       if (string.IsNullOrEmpty(appKey) == true)
       {
+		Log ("Empty app key, exit from init");
         return;
       }
 
@@ -110,13 +122,13 @@ namespace Countly
       if ((_isRunning == true) ||
           (_isReady == false))
       {
+		Log ("Exit from init. isRunning & isReady states: " + _isRunning + ", " + _isReady);
         return;
       }
 
       Log("Initialize: " + appKey);
 
       _isRunning = true;
-		UpdateDeviceInfo();
       Resume();
 	  
       StartCoroutine(RunTimer());
@@ -139,6 +151,10 @@ namespace Countly
 #region Unity Methods
     protected void Start()
     {
+	  logQ = new Queue(128, 128, false);
+
+	  Log ("Start Countly Manager instance");
+
 	  if (canReceivePush) {
 		GCM.Initialize();
 	  }
@@ -182,19 +198,18 @@ namespace Countly
 #region Session Methods
     protected void BeginSession()
     {
+		Log ("Start session");
 	  if (canReceivePush) {
 		GCM.Register(sender_IDs);		
 	  }
 
-
-      DeviceInfo info = GetDeviceInfo();
       StringBuilder builder = InitConnectionDataStringBuilder();
 
       // compute metrics
-      info.JSONSerializeMetrics(builder);
+	  _deviceInfo.JSONSerializeMetrics(builder);
       string metricsString = builder.ToString();
 
-      builder = InitConnectionData(info);
+			builder = InitConnectionData(_deviceInfo);
 
       builder.Append("&sdk_version=");
       AppendConnectionData(builder, SDK_VERSION);
@@ -215,8 +230,7 @@ namespace Countly
     }
 
 	public void UpdateProfile() {
-		DeviceInfo info = GetDeviceInfo();
-		StringBuilder builder = InitConnectionData(info);
+		StringBuilder builder = InitConnectionData(_deviceInfo);
 
 		builder.Append("&user_details=");
 		AppendConnectionData(builder, userProfile.JSONSerializeProfile().ToString());
@@ -226,8 +240,6 @@ namespace Countly
 	}
 
 	public void Attribute(string campaign_id) {
-		
-		
 		StringBuilder builder = new StringBuilder(1024);
 			
 		builder.Append("at/"+campaign_id);
@@ -246,8 +258,8 @@ namespace Countly
 			Log("No crash reports found");
 			return;
 		}
-		DeviceInfo info = GetDeviceInfo();
-		StringBuilder builder = InitConnectionData(info);
+
+		StringBuilder builder = InitConnectionData(_deviceInfo);
 		
 		builder.Append("&crash=");
 		string report = CrashReporter.JSONSerializeReport(CrashReporter.reports[id]).ToString();
@@ -259,20 +271,20 @@ namespace Countly
 	
 	protected void UpdateSession(long duration)
     {
-      DeviceInfo info = GetDeviceInfo();
-      StringBuilder builder = InitConnectionData(info);
+	  Log ("Update session");
+      StringBuilder builder = InitConnectionData(_deviceInfo);
 
       builder.Append("&session_duration=");
       AppendConnectionData(builder, duration.ToString());
 
       ConnectionQueue.Enqueue(builder.ToString());
-      ProcessConnectionQueue();
+			ProcessConnectionQueue();
     }
 
     protected void EndSession(long duration)
     {
-      DeviceInfo info = GetDeviceInfo();
-      StringBuilder builder = InitConnectionData(info);
+	  Log ("End session");
+			StringBuilder builder = InitConnectionData(_deviceInfo);
 
       builder.Append("&end_session=1");
 
@@ -292,8 +304,7 @@ namespace Countly
 
     protected void RecordEvents(List<Event> events)
     {
-      DeviceInfo info = GetDeviceInfo();
-      StringBuilder builder = InitConnectionData(info);
+	  StringBuilder builder = InitConnectionData(_deviceInfo);
 
       builder.Append("&events=");
       string eventsString = JSONSerializeEvents(events);
@@ -339,6 +350,7 @@ namespace Countly
       // already in unsuspeded state?
       if (_isSuspended == false)
       {
+		Log ("In suspended state, exit from Resume()");
         return;
       }
 
@@ -347,11 +359,7 @@ namespace Countly
       _isSuspended = false;
       _sessionLastSentAt = Utils.GetCurrentTime();
 
-		if (updateDataOnResume) { //we shouldn't usually update device info betwen hide/show apps
-			// device info may have changed
-			UpdateDeviceInfo();
-		}
-
+	  UpdateDeviceInfo();	
       BeginSession();
 		
     }
@@ -396,6 +404,7 @@ namespace Countly
 
     protected IEnumerator _ProcessConnectionQueue(bool request)
     {
+	  Log("Start send requests");
 	  int retry = 0;
       while (ConnectionQueue.Count > 0)
       {
@@ -408,7 +417,7 @@ namespace Countly
 			urlString = appHost + "/" + data;
 		}
 
-        Log("Request started: " + urlString);
+        Log("Request started: <" + WWW.UnEscapeURL(urlString) + ">");
 
         WWW www = new WWW(urlString)
         {
@@ -420,10 +429,12 @@ namespace Countly
         if (string.IsNullOrEmpty(www.error) == false && retry < maxRetries)
         {
           Log("Request failed: " + www.error);
+		  Log ("Wait 5 seconds before try again");
+		  yield return new WaitForSeconds(5f); //wait 5 seconds before try to send analytics again
 		  retry++;
         }
 		else {
-          ConnectionQueue.Dequeue();
+		  ConnectionQueue.Dequeue();
 		  if (retry >=maxRetries) {
 		    Log(string.Format ("Request failed after {0} retries", retry));
 		  }
@@ -434,27 +445,28 @@ namespace Countly
 	    }
 
 		if (ConnectionQueue.Count > 0) { //if we have more requests
+			Log ("Wait 0.2 sec before exit");
 			yield return new WaitForSeconds(0.2f); //don't allow to send more than 5 request per second
 		}
 	  }
 
       _isProcessingConnection = false;
-    }
-
-    protected DeviceInfo GetDeviceInfo()
-    {
-      if (_deviceInfo == null)
-      {
-        _deviceInfo = new DeviceInfo();
-      }
-      return _deviceInfo;
+		Log ("End send requests");
     }
 
     protected DeviceInfo UpdateDeviceInfo()
     {
-      DeviceInfo info = GetDeviceInfo();
-      info.Update();
-      return info;
+		try {
+			if (_deviceInfo == null) {
+				_deviceInfo = new DeviceInfo();
+			}
+			_deviceInfo.Update();
+			Log ("Succesfully updated device info");
+			return _deviceInfo;
+		} catch(System.Exception ex) {
+			Log ("Error during obtaining device info: " + ex.StackTrace.ToString());
+		}
+     return null;
     }
 
     protected void FlushEvents(int threshold)
@@ -585,6 +597,16 @@ namespace Countly
       if (allowDebug == true)
       {
         Debug.Log(str);
+
+		logQ.Enqueue(str);
+		if (logListener != null) {
+			while(logQ.Count > 0) {
+				string logItem = logQ.Peek();
+				logListener.log(logItem);
+				logQ.Dequeue();
+			}
+			
+		}
       }
     }
 #endregion
@@ -649,8 +671,7 @@ public class CountlyManager : Countly.Manager
 	Instance.ProcessConnectionQueue();
 	Countly.CrashReporter.Clear();
   }
- 
-
+	
   public static new void Init(string appKey = null)
   {
     Countly.Manager instance = Instance;
