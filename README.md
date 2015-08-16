@@ -3,9 +3,9 @@
 [Countly](http://count.ly) is an innovative, real-time, open source mobile analytics and push notifications platform. It collects data from mobile devices, and visualizes this information to analyze mobile application 
 usage and end-user behavior. There are two parts of Countly: [the server that collects and analyzes data](http://github.com/countly/countly-server), and mobile SDK that sends this data. Both parts are open source with different licensing terms.
 
-##About
+##Unity SDK
 
-This repository includes the Countly Unity3D SDK. It includes support for the following: 
+This repository includes the Countly Unity3D SDK. It has support for the following: 
 
 * Complete analytics
 * User profiles (Enterprise Edition)
@@ -16,6 +16,8 @@ This repository includes the Countly Unity3D SDK. It includes support for the fo
 Upcoming features (due August, 2015):
 
 * Push notifications for GCM (Android)
+
+Documentation on setting up SDK, sending custom events, sending crash reports and data about User Profiles [can be found in Countly Resources page](http://resources.count.ly/docs/countly-sdk-for-unity).
 
 ### Other Github resources ###
 
