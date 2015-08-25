@@ -25,9 +25,11 @@ public class GCM {
 	
 	public static void ShowToast (string message) {
 		if (Application.platform == RuntimePlatform.Android) {
+#if UNITY_ANDROID
 			using (AndroidJavaClass cls = new AndroidJavaClass ("com.kskkbys.unitygcmplugin.Util")) {;
 				cls.CallStatic ("showToast", message);
 			}
+#endif
 		}
 	}
 	
@@ -39,10 +41,12 @@ public class GCM {
 	/// </param>
 	public static void Register (params string[] senderIds) {
 		if (Application.platform == RuntimePlatform.Android) {
+#if UNITY_ANDROID
 			using (AndroidJavaClass cls = new AndroidJavaClass (CLASS_NAME)) {
 				string senderIdsStr = string.Join (",", senderIds);
 				cls.CallStatic ("register", senderIdsStr);
 			}
+#endif
 		}
 	}
 	
@@ -51,9 +55,11 @@ public class GCM {
 	/// </summary>
 	public static void Unregister () {
 		if (Application.platform == RuntimePlatform.Android) {
+#if UNITY_ANDROID
 			using (AndroidJavaClass cls = new AndroidJavaClass (CLASS_NAME)) {
 				cls.CallStatic ("unregister");
 			}
+#endif
 		}
 	}
 	
@@ -65,12 +71,13 @@ public class GCM {
 	/// </returns>
 	public static bool IsRegistered () {
 		if (Application.platform == RuntimePlatform.Android) {
+#if UNITY_ANDROID
 			using (AndroidJavaClass cls = new AndroidJavaClass (CLASS_NAME)) {
 				return cls.CallStatic<bool> ("isRegistered");
 			}
-		} else {
-			return false;
-		}
+#endif
+		} 
+		return false;
 	}
 	
 	/// <summary>
@@ -81,12 +88,13 @@ public class GCM {
 	/// </returns>
 	public static string GetRegistrationId () {
 		if (Application.platform == RuntimePlatform.Android) {
+#if UNITY_ANDROID
 			using (AndroidJavaClass cls = new AndroidJavaClass (CLASS_NAME)) {
 				return cls.CallStatic<string> ("getRegistrationId");
 			}
-		} else {
-			return null;
+#endif
 		}
+		return null;
 	}
 	
 	/// <summary>
@@ -97,9 +105,11 @@ public class GCM {
 	/// </param>
 	public static void SetRegisteredOnServer (bool isRegistered) {
 		if (Application.platform == RuntimePlatform.Android) {
+#if UNITY_ANDROID
 			using (AndroidJavaClass cls = new AndroidJavaClass (CLASS_NAME)) {
 				cls.CallStatic ("setRegisteredOnServer", isRegistered);
 			}
+#endif
 		}
 	}
 	
@@ -111,12 +121,13 @@ public class GCM {
 	/// </returns>
 	public static bool IsRegisteredOnServer () {
 		if (Application.platform == RuntimePlatform.Android) {
+#if UNITY_ANDROID
 			using (AndroidJavaClass cls = new AndroidJavaClass (CLASS_NAME)) {
 				return cls.CallStatic<bool> ("isRegisteredOnServer");
 			}
-		} else {
-			return false;
-		}
+#endif
+		} 
+		return false;
 	}
 	
 	/// <summary>
@@ -127,9 +138,11 @@ public class GCM {
 	/// </param>
 	public static void SetRegisterOnServerLifespan (long lifespan) {
 		if (Application.platform == RuntimePlatform.Android) {
+#if UNITY_ANDROID
 			using (AndroidJavaClass cls = new AndroidJavaClass (CLASS_NAME)) {
 				cls.CallStatic ("setRegisterOnServerLifespan", lifespan);
 			}
+#endif
 		}
 	}
 	
@@ -141,12 +154,13 @@ public class GCM {
 	/// </returns>
 	public static long GetRegisterOnServerLifespan () {
 		if (Application.platform == RuntimePlatform.Android) {
+#if UNITY_ANDROID
 			using (AndroidJavaClass cls = new AndroidJavaClass (CLASS_NAME)) {
 				return cls.CallStatic<long> ("getRegisterOnServerLifespan");
 			}
-		} else {
-			return 0L;
-		}
+#endif
+		} 
+		return 0L;
 	}
 	
 	/// <summary>
