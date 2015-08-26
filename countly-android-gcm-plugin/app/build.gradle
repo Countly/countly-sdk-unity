@@ -1,0 +1,51 @@
+//apply plugin: 'com.android.application'
+
+//apply plugin: 'android-library'
+
+apply plugin: 'android-library'
+
+android {
+    compileSdkVersion 23
+    buildToolsVersion "23.0.0"
+
+    defaultConfig {
+        //applicationId "hupp.tech.countly.android.gcm.plugin"
+        minSdkVersion 15
+        targetSdkVersion 23
+        versionCode 1
+        versionName "1.0"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_6
+        targetCompatibility JavaVersion.VERSION_1_6
+    }
+}
+
+dependencies {
+    compile 'com.android.support:appcompat-v7:23.0.0'
+    compile 'com.google.android.gms:play-services:6.+'
+    compile files('libs/unity-classes.jar')
+}
+
+//task to delete the old jar
+task deleteOldJar(type: Delete) {
+    delete 'build/libs/countly-plugin.jar'
+}
+
+//task to export contents as jar
+task exportJar(type: Copy) {
+    from('build/intermediates/bundles/release/')
+    into('release/')
+    include('classes.jar')
+    ///Give whatever name you want to give
+    rename('classes.jar', 'countly-plugin.jar')
+}
+
+exportJar.dependsOn(deleteOldJar, build)
+
