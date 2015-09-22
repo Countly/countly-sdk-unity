@@ -26,6 +26,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using System.Net;
+#if UNITY_IOS
+using System.Runtime.InteropServices;
+#endif
 
 namespace Countly {
   public interface LogListener {
@@ -90,6 +93,7 @@ namespace Countly {
         return _eventQueue;
       }
     }
+
 
 	public void setLogListener(LogListener logListener) {
 		this.logListener = logListener;

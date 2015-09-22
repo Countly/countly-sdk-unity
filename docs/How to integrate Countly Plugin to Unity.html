@@ -5888,8 +5888,8 @@ Error message and password prompt
 <div modified="20150826113212918" title="$:/state/showeditpreview">
 <pre>yes</pre>
 </div>
-<div modified="20150826133929813" title="$:/state/sidebar">
-<pre>no</pre>
+<div modified="20150911115211700" title="$:/state/sidebar">
+<pre>yes</pre>
 </div>
 <div modified="20150826122352796" title="$:/state/tab--1963855381">
 <pre>$:/core/ui/ControlPanel/StoryView</pre>
@@ -6122,7 +6122,7 @@ Your native code should call this methods. This methods has comments, so look Co
 
 </pre>
 </div>
-<div created="20150826113152575" modified="20150826133731587" tags="" title="How to integrate Unity Countly Plugin?">
+<div created="20150826113152575" modified="20150911122830223" tags="" title="How to integrate Unity Countly Plugin?">
 <pre>!! How to integrate Countly plugin to Unity
 
 !!! Copy assets - for all platforms
@@ -6207,6 +6207,13 @@ If you have any troubles or you think you made something wrong, just see DemoPro
 
 When you made all steps, just reopen your Unity project to reload assets.
 
+!! iOS support
+
+To support iOS, make sure you include JSONKit.h in your exported XCode project before you run it. Just put it into &quot;Libraries&quot; folder and it will be used in the build. 
+
+Also, in &quot;Buld settings&quot; tab set &quot;Objective-C Automatic Reference Counting&quot; off if build produces errors. 
+
+
 !! Adding gameObject
 
 Final step is to add gameObject to your scene:
@@ -6219,9 +6226,11 @@ Final step is to add gameObject to your scene:
 * Add CountlyManager.cs script from Assets/Plugins/Countly folder to this CountlyManager game object.
 [img[data/common/2.png]]
 
-It's all! Countly plugin is installed. See next step - [[How to setup Countly Plugin?]]</pre>
+It's all! Countly plugin is installed. See next step - [[How to setup Countly Plugin?]]
+
+</pre>
 </div>
-<div created="20150826122134652" modified="20150826124507468" tags="" title="How to setup Countly Plugin?">
+<div created="20150826122134652" modified="20150911122223368" tags="" title="How to setup Countly Plugin?">
 <pre>Look to the image below. I will explain some fields:
 
 [img[data/common/2.png]]
@@ -6237,7 +6246,11 @@ It's all! Countly plugin is installed. See next step - [[How to setup Countly Pl
 !!! Next field about GCM support
 * ''Can Receive Push'' - if you want to add possibility to get Google Cloud Messaging (GCM) push messages, check this checkbox.
 * ''Push Test Mode'' - Countly provides two modes for push message - Test and Production. If you will check this field, you will receive test only messages.
-* ''GCM Project Number'' - you should provide Project Number from Google API Console. See this link - http://resources.count.ly/docs/countly-sdk-for-android.</pre>
+* ''GCM Project Number'' - you should provide Project Number from Google API Console. See this link - http://resources.count.ly/docs/countly-sdk-for-android.
+
+
+!!! iOS values
+For iOS, everything you need to setup is your bundle identifier accordingly with the one in your developer console. Variables for GCM also affect iOS push behaviour, so if you set Can Receive Push to false, you'll not be able to recieve push notifications on iOS.</pre>
 </div>
 
 </div>

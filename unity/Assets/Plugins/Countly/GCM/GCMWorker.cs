@@ -14,7 +14,9 @@ public class GCMWorker {
 	public GCMWorker() {
 		gcmDict = new Dictionary<string, IGCM>();
 		gcmDict.Add("android", new AndroidGCM());
-		gcmDict.Add ("default", new StubGCM()); 
+		gcmDict.Add ("ios", new iOSGCM()); 
+		gcmDict.Add ("default", new StubGCM());
+		
 	
 		logQ = new Queue<string>();
 	}
@@ -47,6 +49,8 @@ public class GCMWorker {
 		string osName = SystemInfo.operatingSystem;
 		if (osName.ToLower().Contains ("android")) {
 			return "android";
+		} else if (osName.ToLower().Contains ("ios")) {
+			return "ios";
 		} else {
 			return "default";
 		}
