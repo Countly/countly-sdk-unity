@@ -12,10 +12,7 @@ This repository includes the Countly Unity3D SDK. It has support for the followi
 * Push notifications for GCM (Android)
 * Crash reporting (Enterprise Edition)
 * Referral tracking (Enterprise Edition) 
-
-Upcoming features (due August, 2015):
-
-* Push notifications for APNS (iOS)
+* Push notifications for APNS (iOS) -- untested
 
 Documentation on setting up Unity SDK, sending custom events, sending crash reports and data about User Profiles [can be found in Countly Resources page](http://resources.count.ly/docs/countly-sdk-for-unity).
 
