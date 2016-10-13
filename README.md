@@ -37,4 +37,4 @@ If you liked Countly, [why not use one of our badges](https://count.ly/brand-ass
 
 ###  Support
 
-For community support page, see [http://support.count.ly](http://support.count.ly "Countly Support").
+Questions? Visit [http://community.count.ly](http://community.count.ly).
