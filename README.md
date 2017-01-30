@@ -9,7 +9,6 @@ This repository includes the Countly Unity3D SDK. It has support for the followi
 
 * Complete analytics
 * Push notifications for GCM (Android)
-* Push notifications for APNS-- untested
 * Crash reporting
 * Referral tracking (Enterprise Edition) 
 * User profiles (Enterprise Edition)
