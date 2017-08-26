@@ -1,3 +1,5 @@
+**Important Note:** This community-supported SDK is discontinued and shouldn't be deployed in a production environment. Use it at your own risk. 
+
 ## What's Countly?
 
 [Countly](http://count.ly) is an innovative, real-time, open source mobile analytics and push notifications platform. It collects data from mobile devices, and visualizes this information to analyze mobile application 
