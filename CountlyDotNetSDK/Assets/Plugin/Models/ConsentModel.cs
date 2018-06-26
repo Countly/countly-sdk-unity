@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Assets.Plugin.Models
 {
-    public class ConsentModel
+    class ConsentModel
     {
         #region Fields
 

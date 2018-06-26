@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Assets.Plugin.Models
 {
-    public class TimeMetricModel
+    class TimeMetricModel
     {
         public string timestamp;
         public int hour;
@@ -11,7 +11,7 @@ namespace Assets.Plugin.Models
         public string tz;
 
         //variable to hold last used timestamp
-        private DateTime _lastMilliSecTimeStamp;
+        private DateTimeOffset _lastMilliSecTimeStamp = DateTimeOffset.UtcNow;
 
         static TimeMetricModel() { }
         private TimeMetricModel() { }
@@ -38,13 +38,13 @@ namespace Assets.Plugin.Models
         private string GetUniqueMilliSecTimeStamp()
         {
             //get current timestamp in miliseconds
-            var currentMilliSecTimeSatmp = DateTime.Now;
+            var currentMilliSecTimeSatmp = DateTimeOffset.UtcNow;
 
             _lastMilliSecTimeStamp = _lastMilliSecTimeStamp >= currentMilliSecTimeSatmp
                                     ? _lastMilliSecTimeStamp.AddMilliseconds(1)
                                     : _lastMilliSecTimeStamp = currentMilliSecTimeSatmp;
 
-            return _lastMilliSecTimeStamp.ToString("HHmmssffff");
+            return _lastMilliSecTimeStamp.ToUnixTimeMilliseconds().ToString();
         }
     }
 }

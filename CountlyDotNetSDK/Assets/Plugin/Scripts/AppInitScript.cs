@@ -1,6 +1,5 @@
 ﻿using Assets.Plugin.Scripts;
 using UnityEngine;
-using Helpers;
 
 public class AppInitScript : MonoBehaviour
 {
@@ -36,10 +35,12 @@ public class AppInitScript : MonoBehaviour
     {
         //Note that iOS applications are usually suspended and do not quit. 
         //You should tick "Exit on Suspend" in Player settings for iOS builds to cause the game to quit and not suspend
+#if UNITY_IPHONE
         if (pause)
         {
             Instance.EndSession();
         }
+#endif
     }
 
     // Whenever app is enabled

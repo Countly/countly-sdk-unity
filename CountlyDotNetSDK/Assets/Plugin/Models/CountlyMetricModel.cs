@@ -4,7 +4,7 @@ using UnityEngine;
 namespace CountlyModels
 {
     [Serializable]
-    public class CountlyMetricModel
+    class CountlyMetricModel
     {
         public string _os;
         public string _os_version;
@@ -27,12 +27,17 @@ namespace CountlyModels
                 _os_version = SystemInfo.operatingSystem,
                 _device = SystemInfo.deviceModel,
                 _resolution = Screen.currentResolution.ToString(),
-                //_carrier =
-                //_app_version =
+                //??
+                _carrier = null,
+                //??
+                _app_version = Application.version,
                 _density = Screen.dpi.ToString(),
-                //_store =
-                //_browser =
-                //_browser_version =
+                //??
+                _store = null,
+                //??
+                _browser = null,
+                //??
+                _browser_version = null,
             };
     }
 }

@@ -10,7 +10,7 @@ using UnityEngine;
 
 namespace Helpers
 {
-    public class CountlyHelper
+    class CountlyHelper : MonoBehaviour
     {
         #region Fields
 
@@ -31,36 +31,50 @@ namespace Helpers
 
             //"i" added to the countly server url
             request.AppendFormat(Countly.ServerUrl[Countly.ServerUrl.Length - 1] == '/' ? "{0}i?" : "{0}/i?", Countly.ServerUrl);
+
+            //Required information
             request.AppendFormat("app_key={0}", Countly.AppKey);
             request.AppendFormat("&device_id={0}", Countly.DeviceId);
 
+            //Metrics added to each request
             foreach (var item in TimeMetricModel.GetTimeMetricModel())
             {
                 request.AppendFormat("&{0}={1}", item.Key, item.Value);
             }
+
+            //Query params supplied for creating request
             foreach (var item in queryParams)
             {
                 if (!string.IsNullOrEmpty(item.Key) && item.Value != null)
                     request.AppendFormat("&{0}={1}", item.Key, item.Value);
             }
+
+            //location information
+            if (!string.IsNullOrEmpty(Countly.CountryCode))
+                request.AppendFormat("&country_code={0}", Countly.CountryCode);
+            if (!string.IsNullOrEmpty(Countly.City))
+                request.AppendFormat("&city={0}", Countly.City);
+            if (!string.IsNullOrEmpty(Countly.Location))
+                request.AppendFormat("&location={0}", Countly.Location);
+
             return request.ToString();
         }
 
-        public static void GetResponse(string uri, string postData = null)
+        public static string GetResponse(string uri, string postData = null)
         {
-            if (Countly.PostRequestEnabled)
+            if (Countly.PostRequestEnabled && uri.Length < 2000)
             {
-                Post(uri, postData);
+                return Post(uri, postData);
             }
             else
             {
-                Get(uri);
+                return Get(uri);
             }
         }
 
         public static async Task<string> GetResponseAsync(string uri, string postData = null)
         {
-            if (Countly.PostRequestEnabled)
+            if (Countly.PostRequestEnabled && uri.Length < 2000)
             {
                 return await PostAsync(uri, postData);
             }

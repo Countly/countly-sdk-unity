@@ -1,6 +1,6 @@
 ﻿namespace Assets.Plugin.Enums
 {
-    public enum FeaturesEnum
+    enum FeaturesEnum
     {
         Sessions,
         Events,

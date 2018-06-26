@@ -4,7 +4,8 @@
     Since: 06/12/2018
 */
 
-using Assets.Plugin.Enums;
+#region Usings
+
 using Assets.Plugin.Models;
 using CountlyModels;
 using Helpers;
@@ -12,6 +13,8 @@ using System;
 using System.Collections.Generic;
 using System.Timers;
 using UnityEngine;
+
+#endregion
 
 namespace Assets.Plugin.Scripts
 {
@@ -31,12 +34,16 @@ namespace Assets.Plugin.Scripts
         public static string CountryCode;
         public static string City;
         public static string Location;
+        public static string IPAddress;
+
         public static string Salt;
         public static bool PostRequestEnabled;
         public static bool RequestQueuingEnabled;
         public static bool PreventRequestTanmpering;
         public static bool EnableConsoleErrorLogging;
         public static bool IgnoreSessionCooldown;
+        public static Dictionary<string, DateTime> TotalEvents = new Dictionary<string, DateTime>();
+        private static CountlyEventModel _countlyEventModel;
 
         //#region Consents
         //public static bool ConsentGranted;
@@ -61,11 +68,23 @@ namespace Assets.Plugin.Scripts
 
         #region Public Methods
 
+        #region Initialization
+        /// <summary>
+        /// Initializes the countly 
+        /// </summary>
+        /// <param name="serverUrl"></param>
+        /// <param name="appKey"></param>
+        /// <param name="deviceId"></param>
         public Countly(string serverUrl, string appKey, string deviceId = null)
         {
             ServerUrl = serverUrl;
             AppKey = appKey;
             DeviceId = deviceId ?? CountlyHelper.GenerateUniqueDeviceID();
+
+            if (string.IsNullOrEmpty(ServerUrl))
+                throw new ArgumentNullException(serverUrl, "ServerURL is required.");
+            if (string.IsNullOrEmpty(AppKey))
+                throw new ArgumentNullException(appKey, "AppKey is required.");
             //ConsentGranted = consentGranted;
         }
 
@@ -92,28 +111,87 @@ namespace Assets.Plugin.Scripts
             InitTimer(_extenSessionInterval);
         }
 
+        #endregion
+
+        #region Optional Parameters
+
+        public void SetCountryCode(string country_code)
+        {
+            CountryCode = country_code;
+        }
+
+        public void SetCity(string city)
+        {
+            City = city;
+        }
+
+        public void SetLocation(double latitude, double longitude)
+        {
+            Location = latitude + "," + longitude;
+        }
+
+        public void SetIPAddress(string ip_address)
+        {
+            IPAddress = ip_address;
+        }
+
+        #endregion
+
+        #region Crash Reporting
+
         /// <summary>
         /// Called when there is an exception 
         /// </summary>
-        /// <param name="condition">Exception Class</param>
+        /// <param name="message">Exception Class</param>
         /// <param name="stackTrace">Stack Trace</param>
         /// <param name="type">Excpetion type like error, warning, etc</param>
-        public void LogCallback(string condition, string stackTrace, LogType type)
+        internal void LogCallback(string message, string stackTrace, LogType type)
         {
             if (type == LogType.Error
-                || type == LogType.Exception
-                || type == LogType.Log)
+                || type == LogType.Exception)
             {
-                SendCrashReport(condition, stackTrace, type);
+                SendCrashReport(message, stackTrace, type, null, true);
             }
         }
+
+        /// <summary>
+        /// Sends details regarding crash
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="stackTrace"></param>
+        /// <param name="type"></param>
+        public string SendCrashReport(string message, string stackTrace, LogType type, string customParams, bool nonfatal = false)
+        {
+            //if (ConsentModel.CheckConsent(FeaturesEnum.Crashes.ToString()))
+            //{
+            var model = CountlyExceptionDetailModel.ExceptionDetailModel;
+            model._error = stackTrace;
+            model._name = message;
+            model._nonfatal = nonfatal;
+            model._custom = customParams;
+#if UNITY_IOS
+            model._manufacture = iPhone.generation.ToString(),
+#endif
+#if UNITY_ANDROID
+            model._manufacture = SystemInfo.deviceModel;
+#endif
+            var requestParams = new Dictionary<string, object>
+            {
+                { "crash", JsonUtility.ToJson(model) }
+            };
+            _requestString = CountlyHelper.BuildRequest(requestParams);
+            return CountlyHelper.GetResponse(_requestString);
+            //}
+        }
+
+        #endregion
 
         #region Sessions
 
         /// <summary>
         /// Initiates a session by setting begin_session
         /// </summary>
-        public void BeginSession()
+        public string BeginSession()
         {
             _lastSessionRequestTime = DateTime.Now;
             //if (ConsentModel.CheckConsent(FeaturesEnum.Sessions.ToString()))
@@ -125,18 +203,23 @@ namespace Assets.Plugin.Scripts
                         { "ignore_cooldown", IgnoreSessionCooldown }
                 };
             requestParams.Add("metrics", JsonUtility.ToJson(CountlyMetricModel.Metrics));
+
+            if (!string.IsNullOrEmpty(IPAddress))
+                requestParams.Add("ip_address", IPAddress);
+
             _requestString = CountlyHelper.BuildRequest(requestParams);
-            CountlyHelper.GetResponse(_requestString);
+            var response = CountlyHelper.GetResponse(_requestString);
 
             //Extend session only after session has begun
             _timer.Start();
             //}
+            return response;
         }
 
         /// <summary>
         /// Ends a session by setting end_session
         /// </summary>
-        public void EndSession()
+        public string EndSession()
         {
             //if (ConsentModel.CheckConsent(FeaturesEnum.Sessions.ToString()))
             //{
@@ -145,21 +228,24 @@ namespace Assets.Plugin.Scripts
                 {
                         { "end_session", 1 },
                         { "session_duration", (DateTime.Now - _lastSessionRequestTime).Seconds },
-                        { "ignore_cooldown", IgnoreSessionCooldown }
+                        { "ignore_cooldown", IgnoreSessionCooldown.ToString().ToLower() }
                 };
             requestParams.Add("metrics", JsonUtility.ToJson(CountlyMetricModel.Metrics));
             _requestString = CountlyHelper.BuildRequest(requestParams);
-            CountlyHelper.GetResponse(_requestString);
+            var response = CountlyHelper.GetResponse(_requestString);
 
             //Do not extend session after session ends
             _timer.Stop();
+            _timer.Dispose();
+            _timer.Close();
             //}
+            return response;
         }
 
         /// <summary>
         /// Extends a session by another 60 seconds
         /// </summary>
-        public void ExtendSession()
+        public string ExtendSession()
         {
             _lastSessionRequestTime = DateTime.Now;
             //if (ConsentModel.CheckConsent(FeaturesEnum.Sessions.ToString()))
@@ -168,40 +254,39 @@ namespace Assets.Plugin.Scripts
                 new Dictionary<string, object>
                 {
                         { "session_duration", 60 },
-                        { "ignore_cooldown", IgnoreSessionCooldown }
+                        { "ignore_cooldown", IgnoreSessionCooldown.ToString().ToLower() }
                 };
             requestParams.Add("metrics", JsonUtility.ToJson(CountlyMetricModel.Metrics));
             _requestString = CountlyHelper.BuildRequest(requestParams);
-            CountlyHelper.GetResponse(_requestString);
+            return CountlyHelper.GetResponse(_requestString);
             //}
         }
 
         #endregion
 
-        /// <summary>
-        /// Sends details regarding crash
-        /// </summary>
-        /// <param name="condition"></param>
-        /// <param name="stackTrace"></param>
-        /// <param name="type"></param>
-        public void SendCrashReport(string condition, string stackTrace, LogType type)
+        #region Events
+
+        public void StartEvent(string key)
         {
-            //if (ConsentModel.CheckConsent(FeaturesEnum.Crashes.ToString()))
-            //{
-            var model = CountlyExceptionDetailModel.ExceptionDetailModel;
-            model._error = stackTrace;
-            model._name = condition;
-#if UNITY_IOS
-            model._manufacture = iPhone.generation.ToString(),
-#endif
-#if UNITY_ANDROID
-            model._manufacture = SystemInfo.deviceModel;
-#endif
-            var requestParams = new Dictionary<string, object> { { "device_id", "testing" }, { "crash", JsonUtility.ToJson(model) } };
-            _requestString = CountlyHelper.BuildRequest(requestParams);
-            CountlyHelper.GetResponse(_requestString);
-            //}
+            _countlyEventModel = new CountlyEventModel(key);
         }
+
+        public bool EndEvent(string key)
+        {
+            _countlyEventModel.key = key;
+            return _countlyEventModel.End();
+        }
+
+        public bool EndEvent(string key, string segmentation, int? count = 1, double? sum = 0)
+        {
+            _countlyEventModel.key = key;
+            _countlyEventModel.segmentation = segmentation;
+            _countlyEventModel.count = count;
+            _countlyEventModel.sum = sum;
+            return _countlyEventModel.End();
+        }
+
+        #endregion
 
         #region Consents
 
