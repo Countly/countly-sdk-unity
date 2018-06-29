@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Helpers;
+using Newtonsoft.Json;
+using System;
 using UnityEngine;
 
 namespace CountlyModels
@@ -6,16 +8,26 @@ namespace CountlyModels
     [Serializable]
     class CountlyMetricModel
     {
-        public string _os;
-        public string _os_version;
-        public string _device;
-        public string _resolution;
-        public string _carrier;
-        public string _app_version;
-        public string _density;
-        public string _store;
-        public string _browser;
-        public string _browser_version;
+        [JsonProperty("_os")]
+        public string OS { get; set; }
+        [JsonProperty("_os_version")]
+        public string OSVersion { get; set; }
+        [JsonProperty("_device")]
+        public string Device { get; set; }
+        [JsonProperty("_resolution")]
+        public string Resolution { get; set; }
+        [JsonProperty("_carrier")]
+        public string Carrier { get; set; }
+        [JsonProperty("_app_version")]
+        public string AppVersion { get; set; }
+        [JsonProperty("_density")]
+        public string Density { get; set; }
+        [JsonProperty("_store")]
+        public string Store { get; set; }
+        [JsonProperty("_browser")]
+        public string Browser { get; set; }
+        [JsonProperty("_browser_version")]
+        public string BrowserVersion { get; set; }
 
         static CountlyMetricModel() { }
         private CountlyMetricModel() { }
@@ -23,21 +35,21 @@ namespace CountlyModels
         public static readonly CountlyMetricModel Metrics =
             new CountlyMetricModel
             {
-                _os = SystemInfo.operatingSystem,
-                _os_version = SystemInfo.operatingSystem,
-                _device = SystemInfo.deviceModel,
-                _resolution = Screen.currentResolution.ToString(),
+                OS = CountlyHelper.OperationSystem,
+                OSVersion = CountlyHelper.OperationSystem,
+                Device = SystemInfo.deviceModel,
+                Resolution = Screen.currentResolution.ToString(),
                 //??
-                _carrier = null,
+                Carrier = null,
                 //??
-                _app_version = Application.version,
-                _density = Screen.dpi.ToString(),
+                AppVersion = Application.version,
+                Density = Screen.dpi.ToString(),
                 //??
-                _store = null,
+                Store = null,
                 //??
-                _browser = null,
+                Browser = null,
                 //??
-                _browser_version = null,
+                BrowserVersion = null,
             };
     }
 }

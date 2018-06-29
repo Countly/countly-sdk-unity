@@ -10,9 +10,11 @@ using UnityEngine;
 
 namespace Helpers
 {
-    class CountlyHelper : MonoBehaviour
+    class CountlyHelper
     {
         #region Fields
+
+        internal static readonly string OperationSystem = SystemInfo.operatingSystem;
 
         #endregion
 
@@ -62,7 +64,7 @@ namespace Helpers
 
         public static string GetResponse(string uri, string postData = null)
         {
-            if (Countly.PostRequestEnabled && uri.Length < 2000)
+            if (Countly.PostRequestEnabled || uri.Length > 2000)
             {
                 return Post(uri, postData);
             }
@@ -74,7 +76,7 @@ namespace Helpers
 
         public static async Task<string> GetResponseAsync(string uri, string postData = null)
         {
-            if (Countly.PostRequestEnabled && uri.Length < 2000)
+            if (Countly.PostRequestEnabled || uri.Length > 2000)
             {
                 return await PostAsync(uri, postData);
             }

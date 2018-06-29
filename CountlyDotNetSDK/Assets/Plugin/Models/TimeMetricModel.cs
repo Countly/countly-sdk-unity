@@ -1,14 +1,19 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 
 namespace Assets.Plugin.Models
 {
     class TimeMetricModel
     {
-        public string timestamp;
-        public int hour;
-        public int dow;
-        public string tz;
+        [JsonProperty("timestamp")]
+        public string Timestamp { get; set; }
+        [JsonProperty("hour")]
+        public int Hour { get; set; }
+        [JsonProperty("dow")]
+        public int DayOfWeek { get; set; }
+        [JsonProperty("tz")]
+        public string TZ { get; set; }
 
         //variable to hold last used timestamp
         private DateTimeOffset _lastMilliSecTimeStamp = DateTimeOffset.UtcNow;
@@ -16,22 +21,22 @@ namespace Assets.Plugin.Models
         static TimeMetricModel() { }
         private TimeMetricModel() { }
 
-        public static Dictionary<string, object> GetTimeMetricModel()
+        internal static Dictionary<string, object> GetTimeMetricModel()
         {
             var currentDateTime = DateTime.Now;
-            var model = 
+            var model =
                 new TimeMetricModel
                 {
-                    hour = currentDateTime.TimeOfDay.Hours,
-                    dow = (int)currentDateTime.DayOfWeek,
+                    Hour = currentDateTime.TimeOfDay.Hours,
+                    DayOfWeek = (int)currentDateTime.DayOfWeek,
                 };
-            model.timestamp = model.GetUniqueMilliSecTimeStamp();
+            model.Timestamp = model.GetUniqueMilliSecTimeStamp();
 
             return new Dictionary<string, object>
             {
-                {"timestamp", model.timestamp },
-                {"hour", model.hour },
-                {"dow", model.dow },
+                {"timestamp", model.Timestamp },
+                {"hour", model.Hour },
+                {"dow", model.DayOfWeek },
             };
         }
 

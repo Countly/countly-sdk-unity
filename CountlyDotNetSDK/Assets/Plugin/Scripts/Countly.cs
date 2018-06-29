@@ -13,6 +13,8 @@ using System;
 using System.Collections.Generic;
 using System.Timers;
 using UnityEngine;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 #endregion
 
@@ -26,6 +28,8 @@ namespace Assets.Plugin.Scripts
         private const int _extenSessionInterval = 60;
         private static Timer _timer;
         private static DateTime _lastSessionRequestTime;
+        private static string _lastView;
+        private static DateTime _lastViewStartTime;
 
         public static string ServerUrl { get; private set; }
         public static string AppKey { get; private set; }
@@ -165,19 +169,20 @@ namespace Assets.Plugin.Scripts
             //if (ConsentModel.CheckConsent(FeaturesEnum.Crashes.ToString()))
             //{
             var model = CountlyExceptionDetailModel.ExceptionDetailModel;
-            model._error = stackTrace;
-            model._name = message;
-            model._nonfatal = nonfatal;
-            model._custom = customParams;
+            model.Error = stackTrace;
+            model.Name = message;
+            model.Nonfatal = nonfatal;
+            model.Custom = customParams;
 #if UNITY_IOS
             model._manufacture = iPhone.generation.ToString(),
 #endif
 #if UNITY_ANDROID
-            model._manufacture = SystemInfo.deviceModel;
+            model.Manufacture = SystemInfo.deviceModel;
 #endif
             var requestParams = new Dictionary<string, object>
             {
-                { "crash", JsonUtility.ToJson(model) }
+                { "crash", JsonConvert.SerializeObject(model, Formatting.Indented,
+                                    new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }) }
             };
             _requestString = CountlyHelper.BuildRequest(requestParams);
             return CountlyHelper.GetResponse(_requestString);
@@ -202,7 +207,8 @@ namespace Assets.Plugin.Scripts
                         { "begin_session", 1 },
                         { "ignore_cooldown", IgnoreSessionCooldown }
                 };
-            requestParams.Add("metrics", JsonUtility.ToJson(CountlyMetricModel.Metrics));
+            requestParams.Add("metrics", JsonConvert.SerializeObject(CountlyMetricModel.Metrics, Formatting.Indented,
+                                            new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }));
 
             if (!string.IsNullOrEmpty(IPAddress))
                 requestParams.Add("ip_address", IPAddress);
@@ -230,7 +236,8 @@ namespace Assets.Plugin.Scripts
                         { "session_duration", (DateTime.Now - _lastSessionRequestTime).Seconds },
                         { "ignore_cooldown", IgnoreSessionCooldown.ToString().ToLower() }
                 };
-            requestParams.Add("metrics", JsonUtility.ToJson(CountlyMetricModel.Metrics));
+            requestParams.Add("metrics", JsonConvert.SerializeObject(CountlyMetricModel.Metrics, Formatting.Indented,
+                                            new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }));
             _requestString = CountlyHelper.BuildRequest(requestParams);
             var response = CountlyHelper.GetResponse(_requestString);
 
@@ -256,7 +263,8 @@ namespace Assets.Plugin.Scripts
                         { "session_duration", 60 },
                         { "ignore_cooldown", IgnoreSessionCooldown.ToString().ToLower() }
                 };
-            requestParams.Add("metrics", JsonUtility.ToJson(CountlyMetricModel.Metrics));
+            requestParams.Add("metrics", JsonConvert.SerializeObject(CountlyMetricModel.Metrics, Formatting.Indented,
+                                            new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }));
             _requestString = CountlyHelper.BuildRequest(requestParams);
             return CountlyHelper.GetResponse(_requestString);
             //}
@@ -266,24 +274,144 @@ namespace Assets.Plugin.Scripts
 
         #region Events
 
+        /// <summary>
+        /// Adds an event with the specified key. Doesn't send the request to the Countly API
+        /// </summary>
+        /// <param name="key"></param>
         public void StartEvent(string key)
         {
             _countlyEventModel = new CountlyEventModel(key);
         }
 
+        /// <summary>
+        /// Ends an event with the specified key. Sends events details to the Counlty API 
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
         public bool EndEvent(string key)
         {
-            _countlyEventModel.key = key;
+            if (_countlyEventModel == null)
+                throw new NullReferenceException("Please start an event first.");
+
+            _countlyEventModel.Key = key;
             return _countlyEventModel.End();
         }
 
+        /// <summary>
+        /// Ends and event with the specified key and data. Sends events details to the Counlty API 
+        /// </summary>
+        /// <param name="key">Key is required</param>
+        /// <param name="segmentation">Custom </param>
+        /// <param name="count"></param>
+        /// <param name="sum"></param>
+        /// <returns></returns>
         public bool EndEvent(string key, string segmentation, int? count = 1, double? sum = 0)
         {
-            _countlyEventModel.key = key;
-            _countlyEventModel.segmentation = segmentation;
-            _countlyEventModel.count = count;
-            _countlyEventModel.sum = sum;
+            if (_countlyEventModel == null)
+                throw new NullReferenceException("Please start an event first.");
+
+            _countlyEventModel.Key = key;
+            _countlyEventModel.Segmentation = new JRaw(segmentation);
+            _countlyEventModel.Count = count;
+            _countlyEventModel.Sum = sum;
             return _countlyEventModel.End();
+        }
+
+        #endregion
+
+        #region Views
+
+        /// <summary>
+        /// Reports a view with the specified name and a last visited view if it existed
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="hasSessionBegunWithView"></param>
+        public void ReportView(string name, bool hasSessionBegunWithView = false)
+        {
+            if (string.IsNullOrEmpty(name))
+                throw new ArgumentNullException("Parameter name is required.");
+
+            var events = new List<CountlyEventModel>();
+            var lastView = ReportViewDuration();
+            if (lastView != null)
+                events.Add(lastView);
+
+            var currentViewSegment =
+                new ViewSegment
+                {
+                    Name = name,
+                    Segment = CountlyHelper.OperationSystem,
+                    Visit = 1,
+                    HasSessionBegunWithView = hasSessionBegunWithView
+                };
+
+            var currentView = new CountlyEventModel(CountlyEventModel.ViewEvent,
+                                                        (JsonConvert.SerializeObject(currentViewSegment, Formatting.Indented,
+                                                            new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore, })),
+                                                        null
+                                                    );
+            events.Add(currentView);
+
+            CountlyEventModel.StartMultipleEvents(events);
+
+            _lastView = name;
+            _lastViewStartTime = DateTime.Now;
+        }
+
+        private CountlyEventModel ReportViewDuration(bool hasSessionBegunWithView = false)
+        {
+            if (string.IsNullOrEmpty(_lastView) && string.IsNullOrWhiteSpace(_lastView))
+                return null;
+
+            var viewSegment =
+                new ViewSegment
+                {
+                    Name = _lastView,
+                    Segment = CountlyHelper.OperationSystem,
+                    HasSessionBegunWithView = hasSessionBegunWithView
+                };
+
+            var customEvent = new CountlyEventModel(CountlyEventModel.ViewEvent,
+                                                        (JsonConvert.SerializeObject(viewSegment, Formatting.Indented,
+                                                            new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore,  })),
+                                                        (DateTime.Now - _lastViewStartTime).TotalMilliseconds
+                                                    );
+
+            return customEvent;
+        }
+
+        #endregion
+
+        #region View Action
+
+        /// <summary>
+        /// Reports a particular action with the specified details
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        /// <returns></returns>
+        public bool ReportAction(string type, int x, int y, int width, int height)
+        {
+            var segment =
+                new ActionSegment
+                {
+                    Type = type,
+                    PositionX = x,
+                    PositionY = y,
+                    Width = width,
+                    Height = height
+                };
+
+            var action = new CountlyEventModel(CountlyEventModel.ViewActionEvent,
+                                                        (JsonConvert.SerializeObject(segment, Formatting.Indented,
+                                                            new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore, })),
+                                                        null
+                                                    );
+            action.ReportCustomEvent();
+            return true;
         }
 
         #endregion
