@@ -9,23 +9,22 @@
 using Assets.Plugin.Models;
 using CountlyModels;
 using Helpers;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Timers;
 using UnityEngine;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 #endregion
 
-namespace Assets.Plugin.Scripts
+namespace Assets.Plugin.Scripts.Development
 {
     public class Countly
     {
         #region Fields
 
-        private static string _requestString = string.Empty;
-        private const int _extenSessionInterval = 60;
+        private const int _extenSessionInterval = 30;
         private static Timer _timer;
         private static DateTime _lastSessionRequestTime;
         private static string _lastView;
@@ -83,7 +82,7 @@ namespace Assets.Plugin.Scripts
         {
             ServerUrl = serverUrl;
             AppKey = appKey;
-            DeviceId = deviceId ?? CountlyHelper.GenerateUniqueDeviceID();
+            DeviceId = DeviceId ?? deviceId ?? CountlyHelper.GenerateUniqueDeviceID();
 
             if (string.IsNullOrEmpty(ServerUrl))
                 throw new ArgumentNullException(serverUrl, "ServerURL is required.");
@@ -119,24 +118,104 @@ namespace Assets.Plugin.Scripts
 
         #region Optional Parameters
 
+        /// <summary>
+        /// Sets Country Code to be used for future requests.
+        /// </summary>
+        /// <param name="country_code"></param>
         public void SetCountryCode(string country_code)
         {
             CountryCode = country_code;
         }
 
+        /// <summary>
+        /// Sets City to be used for future requests.
+        /// </summary>
+        /// <param name="city"></param>
         public void SetCity(string city)
         {
             City = city;
         }
 
+        /// <summary>
+        /// Sets Location to be used for future requests.
+        /// </summary>
+        /// <param name="latitude"></param>
+        /// <param name="longitude"></param>
         public void SetLocation(double latitude, double longitude)
         {
             Location = latitude + "," + longitude;
         }
 
+        /// <summary>
+        /// Sets IP address to be used for future requests.
+        /// </summary>
+        /// <param name="ip_address"></param>
         public void SetIPAddress(string ip_address)
         {
             IPAddress = ip_address;
+        }
+
+        #endregion
+
+        #region Changing Device Id
+
+        /// <summary>
+        /// Changes Device Id.
+        /// Adds currently recorded but not queued events to request queue.
+        /// Clears all started timed-events
+        /// Ends cuurent session with old Device Id.
+        /// Begins a new session with new Device Id
+        /// </summary>
+        /// <param name="deviceId"></param>
+        public void ChangeDeviceAndEndCurrentSession(string deviceId)
+        {
+            //Ignore call if new and old device id are same
+            if (DeviceId == deviceId)
+                return;
+
+            //Add currently recorded but not queued events to request queue-----------------------------------
+            //------------------------------------------------------------------------------------------------
+
+            //Ends current session
+            EndSession();
+
+            //Clear all started timed-events------------------------------------------------------------------
+            //------------------------------------------------------------------------------------------------
+
+            //Update the device id
+            DeviceId = deviceId;
+
+            //Begin new session with new device id
+            BeginSession();
+        }
+
+        /// <summary>
+        /// Changes DeviceId. 
+        /// Continues with the current session.
+        /// Merges data for old and new Device Id. 
+        /// </summary>
+        /// <param name="deviceId"></param>
+        public bool ChangeDevicAndMergeSessionData(string deviceId)
+        {
+            //Ignore call if new and old device id are same
+            if (DeviceId == deviceId)
+                return true;
+
+            //Keep old device id
+            var old_device_id = DeviceId;
+
+            //Change device id
+            DeviceId = deviceId;
+
+            //Merge user data for old and new device
+            var requestParams =
+               new Dictionary<string, object>
+               {
+                        { "old_device_id", old_device_id }
+               };
+
+            CountlyHelper.GetResponse(requestParams);
+            return true;
         }
 
         #endregion
@@ -154,17 +233,20 @@ namespace Assets.Plugin.Scripts
             if (type == LogType.Error
                 || type == LogType.Exception)
             {
-                SendCrashReport(message, stackTrace, type, null, true);
+                SendCrashReport(message, stackTrace, type);
             }
         }
 
         /// <summary>
-        /// Sends details regarding crash
+        /// Sends crash details to the server. Set param "nonfatal" to true for Custom Logged errors
         /// </summary>
         /// <param name="message"></param>
         /// <param name="stackTrace"></param>
         /// <param name="type"></param>
-        public string SendCrashReport(string message, string stackTrace, LogType type, string customParams, bool nonfatal = false)
+        /// <param name="customParams"></param>
+        /// <param name="nonfatal"></param>
+        /// <returns></returns>
+        public string SendCrashReport(string message, string stackTrace, LogType type, string segments = null, bool nonfatal = true)
         {
             //if (ConsentModel.CheckConsent(FeaturesEnum.Crashes.ToString()))
             //{
@@ -172,7 +254,7 @@ namespace Assets.Plugin.Scripts
             model.Error = stackTrace;
             model.Name = message;
             model.Nonfatal = nonfatal;
-            model.Custom = customParams;
+            model.Custom = segments;
 #if UNITY_IOS
             model._manufacture = iPhone.generation.ToString(),
 #endif
@@ -184,8 +266,7 @@ namespace Assets.Plugin.Scripts
                 { "crash", JsonConvert.SerializeObject(model, Formatting.Indented,
                                     new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }) }
             };
-            _requestString = CountlyHelper.BuildRequest(requestParams);
-            return CountlyHelper.GetResponse(_requestString);
+            return CountlyHelper.GetResponse(requestParams);
             //}
         }
 
@@ -213,8 +294,7 @@ namespace Assets.Plugin.Scripts
             if (!string.IsNullOrEmpty(IPAddress))
                 requestParams.Add("ip_address", IPAddress);
 
-            _requestString = CountlyHelper.BuildRequest(requestParams);
-            var response = CountlyHelper.GetResponse(_requestString);
+            var response = CountlyHelper.GetResponse(requestParams);
 
             //Extend session only after session has begun
             _timer.Start();
@@ -238,8 +318,7 @@ namespace Assets.Plugin.Scripts
                 };
             requestParams.Add("metrics", JsonConvert.SerializeObject(CountlyMetricModel.Metrics, Formatting.Indented,
                                             new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }));
-            _requestString = CountlyHelper.BuildRequest(requestParams);
-            var response = CountlyHelper.GetResponse(_requestString);
+            var response = CountlyHelper.GetResponse(requestParams);
 
             //Do not extend session after session ends
             _timer.Stop();
@@ -265,8 +344,7 @@ namespace Assets.Plugin.Scripts
                 };
             requestParams.Add("metrics", JsonConvert.SerializeObject(CountlyMetricModel.Metrics, Formatting.Indented,
                                             new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }));
-            _requestString = CountlyHelper.BuildRequest(requestParams);
-            return CountlyHelper.GetResponse(_requestString);
+            return CountlyHelper.GetResponse(requestParams);
             //}
         }
 
@@ -416,6 +494,71 @@ namespace Assets.Plugin.Scripts
 
         #endregion
 
+        #region Star Rating
+
+        /// <summary>
+        /// Sends app rating to the server.
+        /// </summary>
+        /// <param name="platform"></param>
+        /// <param name="app_version"></param>
+        /// <param name="rating">Rating should be from 1 to 5</param>
+        /// <returns></returns>
+        public bool ReportStarRating(string platform, string app_version, int rating)
+        {
+            if (rating < 1 || rating > 5)
+                throw new ArgumentException("Please provide rating from 1 to 5");
+
+            var segment =
+                new StarRatingSegment
+                {
+                    Platform = platform,
+                    AppVersion = app_version,
+                    Rating = rating,
+                };
+
+            var action = new CountlyEventModel(CountlyEventModel.StarRatingEvent,
+                                                        (JsonConvert.SerializeObject(segment, Formatting.Indented,
+                                                            new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore, })),
+                                                        null
+                                                    );
+            action.ReportCustomEvent();
+            return true;
+        }
+
+        #endregion
+
+        #region User Details
+
+        /// <summary>
+        /// Modifies all user data. Custom data should be json string.
+        /// Deletes a property if it is not supplied
+        /// </summary>
+        /// <param name="userDetails"></param>
+        /// <returns></returns>
+        public bool UserDetails(CountlyUserDetailsModel userDetails)
+        {
+            if (userDetails == null)
+                throw new ArgumentNullException("Please provide user details.");
+
+            return userDetails.SetUserDetails();
+        }
+
+        /// <summary>
+        /// Modifies custom user data only. Custom data should be json string.
+        /// Deletes a property if it is not supplied
+        /// </summary>
+        /// <param name="userDetails"></param>
+        /// <returns></returns>
+        public bool UserCustomDetails(CountlyUserDetailsModel userDetails)
+        {
+            if (userDetails == null)
+                throw new ArgumentNullException("Please provide user details.");
+
+            return userDetails.SetCustomUserDetails();
+        }
+
+        #endregion
+
         #region Consents
 
         /// <summary>
@@ -442,7 +585,7 @@ namespace Assets.Plugin.Scripts
 
         #endregion
 
-        #region Private Methods
+        #region Timer
 
         /// <summary>
         /// Intializes the timer for extending session with sepcified interval
@@ -465,6 +608,7 @@ namespace Assets.Plugin.Scripts
         {
             ExtendSession();
         }
+
         #endregion
     }
 }

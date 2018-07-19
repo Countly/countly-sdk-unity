@@ -1,4 +1,4 @@
-﻿using Assets.Plugin.Scripts;
+﻿using Assets.Plugin.Scripts.Development;
 using Helpers;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -8,34 +8,54 @@ using System.Linq;
 
 namespace Assets.Plugin.Models
 {
+    /// <summary>
+    /// Custom Segmentation for Views related events.
+    /// </summary>
     [Serializable]
     struct ViewSegment
     {
         [JsonProperty("name")]
-        public string Name { get; set; }
+        internal string Name { get; set; }
         [JsonProperty("segment")]
-        public string Segment { get; set; }
+        internal string Segment { get; set; }
         [JsonProperty("visit")]
-        public int? Visit { get; set; }
+        internal int? Visit { get; set; }
         [JsonIgnore]
-        public bool HasSessionBegunWithView { get; set; }
+        internal bool HasSessionBegunWithView { get; set; }
         [JsonProperty("start")]
-        public string Start => HasSessionBegunWithView ? "true" : null;
+        internal string Start => HasSessionBegunWithView ? "true" : null;
     }
 
+    /// <summary>
+    /// Custom Segmentation for Action related events.
+    /// </summary>
     [Serializable]
     struct ActionSegment
     {
         [JsonProperty("type")]
-        public string Type { get; set; }
+        internal string Type { get; set; }
         [JsonProperty("x")]
-        public int PositionX { get; set; }
+        internal int PositionX { get; set; }
         [JsonProperty("y")]
-        public int PositionY { get; set; }
+        internal int PositionY { get; set; }
         [JsonProperty("width")]
-        public int Width { get; set; }
+        internal int Width { get; set; }
         [JsonProperty("height")]
-        public int Height { get; set; }
+        internal int Height { get; set; }
+    }
+
+    /// <summary>
+    /// Custom Segmentation for Star Rating event.
+    /// </summary>
+    [Serializable]
+    struct StarRatingSegment
+    {
+        [JsonProperty("platform ")]
+        internal string Platform { get; set; }
+        [JsonProperty("app_version")]
+        internal string AppVersion { get; set; }
+        [JsonProperty("rating")]
+        internal int Rating { get; set; }
     }
 
     [Serializable]
@@ -44,24 +64,24 @@ namespace Assets.Plugin.Models
         #region Reserved Event Names
 
         [JsonIgnore]
-        public const string ViewEvent = "[CLY]_view";
+        internal const string ViewEvent = "[CLY]_view";
         [JsonIgnore]
-        public const string ViewActionEvent = "[CLY]_action";
+        internal const string ViewActionEvent = "[CLY]_action";
         [JsonIgnore]
-        public const string StarRatingEvent = "[CLY]_star_rating";
+        internal const string StarRatingEvent = "[CLY]_star_rating";
 
         #endregion
 
         [JsonProperty("key")]
-        public string Key { get; set; }
+        internal string Key { get; set; }
         [JsonProperty("count")]
-        public int? Count { get; set; }
+        internal int? Count { get; set; }
         [JsonProperty("sum")]
-        public double? Sum { get; set; }
+        internal double? Sum { get; set; }
         [JsonProperty("dur")]
-        public double? Duration { get; set; }
+        internal double? Duration { get; set; }
         [JsonProperty("segmentation")]
-        public JRaw Segmentation { get; set; }
+        internal JRaw Segmentation { get; set; }
 
         /// <summary>
         /// Initializes an instance of event model. It doesn't mark the event as started instead it reports them.
@@ -86,7 +106,7 @@ namespace Assets.Plugin.Models
         /// <param name="sum"></param>
         /// <param name="count"></param>
         /// <param name="dur"></param>
-        public CountlyEventModel(string key, string segmentation = null, double? sum = null, int? count = 1, double? dur = null)
+        internal CountlyEventModel(string key, string segmentation = null, double? sum = null, int? count = 1, double? dur = null)
         {
             Key = key;
             Count = count;
@@ -96,7 +116,6 @@ namespace Assets.Plugin.Models
 
             Start();
         }
-
 
         private void Start()
         {
@@ -113,7 +132,7 @@ namespace Assets.Plugin.Models
         /// Ends a particular event
         /// </summary>
         /// <returns></returns>
-        public bool End()
+        internal bool End()
         {
             if (string.IsNullOrEmpty(Key))
                 throw new ArgumentNullException(Key, "Key is required.");
@@ -131,8 +150,7 @@ namespace Assets.Plugin.Models
                     { "events", JsonConvert.SerializeObject(this, Formatting.Indented,
                                     new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }) },
                };
-            var requestString = CountlyHelper.BuildRequest(requestParams);
-            CountlyHelper.GetResponse(requestString);
+            CountlyHelper.GetResponse(requestParams);
 
             //Removing the event
             Countly.TotalEvents.Remove(Key);
@@ -140,6 +158,11 @@ namespace Assets.Plugin.Models
             return true;
         }
 
+        /// <summary>
+        /// Sends mulitple events to the countly server. It expects a set of events as input in the form of a serialized json string.
+        /// </summary>
+        /// <param name="events"></param>
+        /// <returns></returns>
         internal static bool StartMultipleEvents(string events)
         {
             var requestParams =
@@ -147,12 +170,16 @@ namespace Assets.Plugin.Models
                {
                     { "events", events },
                };
-            var requestString = CountlyHelper.BuildRequest(requestParams);
-            CountlyHelper.GetResponse(requestString);
+            CountlyHelper.GetResponse(requestParams);
 
             return true;
         }
 
+        /// <summary>
+        /// Sends multiple events to the countly server. It expects a list of events as input.
+        /// </summary>
+        /// <param name="events"></param>
+        /// <returns></returns>
         internal static bool StartMultipleEvents(List<CountlyEventModel> events)
         {
             var requestParams =
@@ -161,12 +188,15 @@ namespace Assets.Plugin.Models
                     { "events", JsonConvert.SerializeObject(events, Formatting.Indented,
                                     new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }) },
                };
-            var requestString = CountlyHelper.BuildRequest(requestParams);
-            CountlyHelper.GetResponse(requestString);
+            CountlyHelper.GetResponse(requestParams);
 
             return true;
         }
 
+        /// <summary>
+        /// Sends custom events to the Counlty server.
+        /// </summary>
+        /// <returns></returns>
         internal bool ReportCustomEvent()
         {
             if (string.IsNullOrEmpty(Key))
@@ -175,11 +205,10 @@ namespace Assets.Plugin.Models
             var requestParams =
                new Dictionary<string, object>
                {
-                    { "events", JsonConvert.SerializeObject(this, Formatting.Indented,
+                    { "events", JsonConvert.SerializeObject(new List<CountlyEventModel>{ this }, Formatting.Indented,
                                     new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }) },
                };
-            var requestString = CountlyHelper.BuildRequest(requestParams);
-            CountlyHelper.GetResponse(requestString);
+            CountlyHelper.GetResponse(requestParams);
 
             return true;
         }

@@ -1,5 +1,6 @@
 ﻿using Assets.Plugin.Models;
-using Assets.Plugin.Scripts;
+using Assets.Plugin.Scripts.Development;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -20,28 +21,57 @@ namespace Helpers
 
         #region Methods
 
-        public static string GenerateUniqueDeviceID() => Guid.NewGuid().ToString();
+        internal static string GenerateUniqueDeviceID() => Guid.NewGuid().ToString();
 
         /// <summary>
-        /// Build request URL using ServerUrl, AppKey, DeviceID and supplied queryParams parameters
+        /// Gets the base url to make requests to the Countly server.
+        /// </summary>
+        /// <returns></returns>
+        internal static string GetBaseUrl()
+        {
+            return string.Format(Countly.ServerUrl[Countly.ServerUrl.Length - 1] == '/' ? "{0}i?" : "{0}/i?", Countly.ServerUrl);
+        }
+
+        /// <summary>
+        /// Gets the least set of paramas required to be sent along with each request.
+        /// </summary>
+        /// <returns></returns>
+        internal static Dictionary<string, object> GetBaseParams()
+        {
+            var baseParams = new Dictionary<string, object>();
+
+            baseParams.Add("app_key", Countly.AppKey);
+            baseParams.Add("device_id", Countly.DeviceId);
+
+            foreach (var item in TimeMetricModel.GetTimeMetricModel())
+                baseParams.Add(item.Key, item.Value);
+
+            if (!string.IsNullOrEmpty(Countly.CountryCode))
+                baseParams.Add("country_code", Countly.CountryCode);
+            if (!string.IsNullOrEmpty(Countly.City))
+                baseParams.Add("city", Countly.City);
+            if (!string.IsNullOrEmpty(Countly.Location))
+                baseParams.Add("location", Countly.Location);
+
+            return baseParams;
+        }
+
+        /// <summary>
+        /// Build request URL using ServerUrl, AppKey, DeviceID and supplied queryParams parameters. 
+        /// The data is appended in the URL.
         /// </summary>
         /// <param name="queryParams"></param>
         /// <returns></returns>
-        public static string BuildRequest(Dictionary<string, object> queryParams)
+        internal static string BuildGetRequest(Dictionary<string, object> queryParams)
         {
             StringBuilder request = new StringBuilder();
 
-            //"i" added to the countly server url
-            request.AppendFormat(Countly.ServerUrl[Countly.ServerUrl.Length - 1] == '/' ? "{0}i?" : "{0}/i?", Countly.ServerUrl);
-
-            //Required information
-            request.AppendFormat("app_key={0}", Countly.AppKey);
-            request.AppendFormat("&device_id={0}", Countly.DeviceId);
+            request.Append(GetBaseUrl());
 
             //Metrics added to each request
-            foreach (var item in TimeMetricModel.GetTimeMetricModel())
+            foreach (var item in GetBaseParams())
             {
-                request.AppendFormat("&{0}={1}", item.Key, item.Value);
+                request.AppendFormat((item.Key != "app_key" ? "&" : string.Empty) + "{0}={1}", item.Key, item.Value);
             }
 
             //Query params supplied for creating request
@@ -51,47 +81,71 @@ namespace Helpers
                     request.AppendFormat("&{0}={1}", item.Key, item.Value);
             }
 
-            //location information
-            if (!string.IsNullOrEmpty(Countly.CountryCode))
-                request.AppendFormat("&country_code={0}", Countly.CountryCode);
-            if (!string.IsNullOrEmpty(Countly.City))
-                request.AppendFormat("&city={0}", Countly.City);
-            if (!string.IsNullOrEmpty(Countly.Location))
-                request.AppendFormat("&location={0}", Countly.Location);
-
             return request.ToString();
         }
 
-        public static string GetResponse(string uri, string postData = null)
+        /// <summary>
+        /// Serializes the post data (base params required for a request, and the supplied queryParams) in a string.
+        /// </summary>
+        /// <param name="queryParams"></param>
+        /// <returns></returns>
+        internal static string BuildPostRequest(Dictionary<string, object> queryParams)
         {
-            if (Countly.PostRequestEnabled || uri.Length > 2000)
+            var baseParams = GetBaseParams();
+            foreach (var item in queryParams)
+                baseParams.Add(item.Key, item.Value);
+            return JsonConvert.SerializeObject(baseParams);
+        }
+
+        /// <summary>
+        /// Uses Get/Post method to make request to the Countly server and returns the response.
+        /// </summary>
+        /// <param name="queryParams"></param>
+        /// <param name="usePost"></param>
+        /// <returns></returns>
+        internal static string GetResponse(Dictionary<string, object> queryParams, bool usePost = false)
+        {
+            if (Countly.PostRequestEnabled || usePost)
             {
-                return Post(uri, postData);
+                return Post(GetBaseUrl(), BuildPostRequest(queryParams));
             }
             else
             {
-                return Get(uri);
+                return Get(BuildGetRequest(queryParams));
             }
         }
 
-        public static async Task<string> GetResponseAsync(string uri, string postData = null)
+        /// <summary>
+        /// Uses GetAsync/PostAsync method to make request to the Countly server and returns the response.
+        /// </summary>
+        /// <param name="url"></param>
+        /// <param name="postData"></param>
+        /// <param name="usePost"></param>
+        /// <returns></returns>
+        internal static async Task<string> GetResponseAsync(string url, string postData = null, bool usePost = false)
         {
-            if (Countly.PostRequestEnabled || uri.Length > 2000)
+            if (Countly.PostRequestEnabled || url.Length > 2000 || usePost)
             {
-                return await PostAsync(uri, postData);
+                return await PostAsync(url, postData);
             }
             else
             {
-                return await GetAsync(uri);
+                return await GetAsync(url);
             }
         }
 
-        public static string Get(string uri)
+        /// <summary>
+        /// Makes a GET request to the Counlty server.
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
+        internal static string Get(string url)
         {
+            url = WWW.EscapeURL(url);
             string responseString = string.Empty;
             try
             {
-                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(uri);
+                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
 
                 //Allow untrusted connection
                 ServicePointManager.ServerCertificateValidationCallback = (a, b, c, d) => true;
@@ -120,12 +174,18 @@ namespace Helpers
             return responseString;
         }
 
-        public static async Task<string> GetAsync(string uri)
+        /// <summary>
+        /// Makes an Asynchronous GET request to the Countly server.
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
+        internal static async Task<string> GetAsync(string url)
         {
+            url = WWW.EscapeURL(url);
             string responseString = string.Empty;
             try
             {
-                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(uri);
+                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
 
                 //Allow untrusted connection
                 ServicePointManager.ServerCertificateValidationCallback = (a, b, c, d) => true;
@@ -154,8 +214,17 @@ namespace Helpers
             return responseString;
         }
 
-        public static string Post(string uri, string data, string contentType = "application/json", string method = "POST")
+        /// <summary>
+        /// Makes a POST request to the Countly server.
+        /// </summary>
+        /// <param name="uri"></param>
+        /// <param name="data"></param>
+        /// <param name="contentType"></param>
+        /// <returns></returns>
+        internal static string Post(string uri, string data, string contentType = "application/json")
         {
+            uri = WWW.EscapeURL(uri);
+            data = WWW.EscapeURL(data);
             string responseString = string.Empty;
             try
             {
@@ -165,7 +234,10 @@ namespace Helpers
                 request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
                 request.ContentLength = dataBytes.Length;
                 request.ContentType = contentType;
-                request.Method = method;
+                request.Method = "POST";
+
+                //Allow untrusted connection
+                ServicePointManager.ServerCertificateValidationCallback = (a, b, c, d) => true;
 
                 using (Stream requestBody = request.GetRequestStream())
                 {
@@ -196,8 +268,17 @@ namespace Helpers
             return responseString;
         }
 
-        public static async Task<string> PostAsync(string uri, string data, string contentType = "application/json", string method = "POST")
+        /// <summary>
+        /// Makes an Asynchronous POST request to the Countly server.
+        /// </summary>
+        /// <param name="uri"></param>
+        /// <param name="data"></param>
+        /// <param name="contentType"></param>
+        /// <returns></returns>
+        internal static async Task<string> PostAsync(string uri, string data, string contentType = "application/json")
         {
+            uri = WWW.EscapeURL(uri);
+            data = WWW.EscapeURL(data);
             string responseString = string.Empty;
             try
             {
@@ -207,7 +288,10 @@ namespace Helpers
                 request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
                 request.ContentLength = dataBytes.Length;
                 request.ContentType = contentType;
-                request.Method = method;
+                request.Method = "POST";
+
+                //Allow untrusted connection
+                ServicePointManager.ServerCertificateValidationCallback = (a, b, c, d) => true;
 
                 using (Stream requestBody = request.GetRequestStream())
                 {
@@ -236,6 +320,20 @@ namespace Helpers
                 Debug.Log(responseString);
             }
             return responseString;
+        }
+
+        /// <summary>
+        /// Validates the picture format. The Countly server supports a specific set of formats only.
+        /// </summary>
+        /// <param name="pictureUrl"></param>
+        /// <returns></returns>
+        internal static bool IsPictureValid(string pictureUrl)
+        {
+            return string.IsNullOrEmpty(pictureUrl)
+                || pictureUrl.EndsWith(".png")
+                || pictureUrl.EndsWith(".jpg")
+                || pictureUrl.EndsWith(".jpeg")
+                || pictureUrl.EndsWith(".gif");
         }
 
         #region Unused Code
