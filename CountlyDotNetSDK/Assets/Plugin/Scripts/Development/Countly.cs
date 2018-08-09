@@ -22,10 +22,10 @@ namespace Assets.Plugin.Scripts.Development
 {
     public class Countly
     {
-        #region Fields
+        #region Fields and Properties
 
-        private const int _extenSessionInterval = 30;
-        private static Timer _timer;
+        private static int _extendSessionInterval = 240;
+        private static Timer _sessionTimer;
         private static DateTime _lastSessionRequestTime;
         private static string _lastView;
         private static DateTime _lastViewStartTime;
@@ -34,10 +34,12 @@ namespace Assets.Plugin.Scripts.Development
         public static string AppKey { get; private set; }
         public static string DeviceId { get; private set; }
 
-        public static string CountryCode;
-        public static string City;
-        public static string Location;
-        public static string IPAddress;
+        internal static string CountryCode;
+        internal static string City;
+        internal static string Location;
+        internal static string IPAddress;
+        internal static int EventSendThreshold;
+        internal static int StoredRequestLimit;
 
         public static string Salt;
         public static bool PostRequestEnabled;
@@ -45,8 +47,9 @@ namespace Assets.Plugin.Scripts.Development
         public static bool PreventRequestTanmpering;
         public static bool EnableConsoleErrorLogging;
         public static bool IgnoreSessionCooldown;
-        public static Dictionary<string, DateTime> TotalEvents = new Dictionary<string, DateTime>();
+        internal static Dictionary<string, DateTime> TotalEvents = new Dictionary<string, DateTime>();
         private static CountlyEventModel _countlyEventModel;
+        internal static Queue<CountlyRequestModel> TotalRequests = new Queue<CountlyRequestModel>();
 
         //#region Consents
         //public static bool ConsentGranted;
@@ -111,7 +114,8 @@ namespace Assets.Plugin.Scripts.Development
             EnableConsoleErrorLogging = enableConsoleErrorLogging;
             IgnoreSessionCooldown = ignoreSessionCooldown;
 
-            InitTimer(_extenSessionInterval);
+            InitSessionTimer();
+            SetStoredRequestLimit(10);
         }
 
         #endregion
@@ -153,6 +157,37 @@ namespace Assets.Plugin.Scripts.Development
         public void SetIPAddress(string ip_address)
         {
             IPAddress = ip_address;
+        }
+
+        #endregion
+
+        #region Internal Configuration
+
+        /// <summary>
+        /// Sets a threshold value that limits the number of events that can be stored internally.
+        /// </summary>
+        /// <param name="eventThreshold"></param>
+        public void SetEventSendThreshold(int eventThreshold)
+        {
+            EventSendThreshold = eventThreshold;
+        }
+
+        /// <summary>
+        /// Sets the session duration. Session will be extended each time this interval elapses. The interval value must be in seconds.
+        /// </summary>
+        /// <param name="interval"></param>
+        public void SetSessionDuration(int interval)
+        {
+            _extendSessionInterval = interval/10;
+        }
+
+        /// <summary>
+        /// Sets a threshold value that limits the number of requests that can be stored internally 
+        /// </summary>
+        /// <param name="limit"></param>
+        public void SetStoredRequestLimit(int limit)
+        {
+            StoredRequestLimit = limit;
         }
 
         #endregion
@@ -297,7 +332,7 @@ namespace Assets.Plugin.Scripts.Development
             var response = CountlyHelper.GetResponse(requestParams);
 
             //Extend session only after session has begun
-            _timer.Start();
+            _sessionTimer.Start();
             //}
             return response;
         }
@@ -321,9 +356,9 @@ namespace Assets.Plugin.Scripts.Development
             var response = CountlyHelper.GetResponse(requestParams);
 
             //Do not extend session after session ends
-            _timer.Stop();
-            _timer.Dispose();
-            _timer.Close();
+            _sessionTimer.Stop();
+            _sessionTimer.Dispose();
+            _sessionTimer.Close();
             //}
             return response;
         }
@@ -591,12 +626,13 @@ namespace Assets.Plugin.Scripts.Development
         /// Intializes the timer for extending session with sepcified interval
         /// </summary>
         /// <param name="sessionInterval">In milliseconds</param>
-        private void InitTimer(int sessionInterval)
+        private void InitSessionTimer()
         {
-            _timer = new Timer();
-            _timer.Interval = sessionInterval * 1000;
-            _timer.Elapsed += TimerOnElapsed;
-            _timer.AutoReset = true;
+            _sessionTimer = new Timer();
+            // Fires every 10 seconds
+            _sessionTimer.Interval = _extendSessionInterval * 1000;
+            _sessionTimer.Elapsed += SessionTimerOnElapsed;
+            _sessionTimer.AutoReset = true;
         }
 
         /// <summary>
@@ -604,9 +640,10 @@ namespace Assets.Plugin.Scripts.Development
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="elapsedEventArgs"></param>
-        private void TimerOnElapsed(object sender, ElapsedEventArgs elapsedEventArgs)
+        private void SessionTimerOnElapsed(object sender, ElapsedEventArgs elapsedEventArgs)
         {
             ExtendSession();
+            CountlyRequestModel.ProcessQueue();
         }
 
         #endregion

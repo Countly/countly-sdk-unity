@@ -83,6 +83,15 @@ namespace Assets.Plugin.Models
         [JsonProperty("segmentation")]
         internal JRaw Segmentation { get; set; }
 
+        [JsonProperty("timestamp")]
+        public string Timestamp { get; set; }
+        [JsonProperty("hour")]
+        public int Hour { get; set; }
+        [JsonProperty("dow")]
+        public int DayOfWeek { get; set; }
+        [JsonProperty("tz")]
+        public string Timezone { get; set; }
+
         /// <summary>
         /// Initializes an instance of event model. It doesn't mark the event as started instead it reports them.
         /// It is used for internal custom events like reporting views, actions, etc.
@@ -90,7 +99,7 @@ namespace Assets.Plugin.Models
         /// <param name="key"></param>
         /// <param name="segmentation"></param>
         /// <param name="duration"></param>
-        internal CountlyEventModel(string key, string segmentation, double? duration)
+        public CountlyEventModel(string key, string segmentation, double? duration)
         {
             Key = key;
             Count = 1;
@@ -125,6 +134,9 @@ namespace Assets.Plugin.Models
             if (Countly.TotalEvents.Any(evnt => Key.Equals(evnt.Key, StringComparison.OrdinalIgnoreCase)))
                 throw new Exception($"Event {Key} already started. Please end this event first.");
 
+            if (Countly.TotalEvents.Count >= Countly.EventSendThreshold)
+                throw new Exception($"Event count reached threshold value of {Countly.EventSendThreshold}");
+
             Countly.TotalEvents.Add(Key, DateTime.Now);
         }
 
@@ -144,6 +156,8 @@ namespace Assets.Plugin.Models
 
             Duration = Duration ?? (DateTime.Now - addedEvent.Value).TotalMilliseconds;
 
+            SetTimeZoneInfo(addedEvent.Value);
+
             var requestParams =
                new Dictionary<string, object>
                {
@@ -159,29 +173,21 @@ namespace Assets.Plugin.Models
         }
 
         /// <summary>
-        /// Sends mulitple events to the countly server. It expects a set of events as input in the form of a serialized json string.
-        /// </summary>
-        /// <param name="events"></param>
-        /// <returns></returns>
-        internal static bool StartMultipleEvents(string events)
-        {
-            var requestParams =
-               new Dictionary<string, object>
-               {
-                    { "events", events },
-               };
-            CountlyHelper.GetResponse(requestParams);
-
-            return true;
-        }
-
-        /// <summary>
         /// Sends multiple events to the countly server. It expects a list of events as input.
         /// </summary>
         /// <param name="events"></param>
         /// <returns></returns>
-        internal static bool StartMultipleEvents(List<CountlyEventModel> events)
+        public static bool StartMultipleEvents(List<CountlyEventModel> events)
         {
+            if (events == null || events.Count == 0)
+                throw new ArgumentException("No events found to record.");
+
+            var currentTime = DateTime.UtcNow;
+            foreach (var evnt in events)
+            {
+                evnt.SetTimeZoneInfo(currentTime);
+            }
+
             var requestParams =
                new Dictionary<string, object>
                {
@@ -194,10 +200,10 @@ namespace Assets.Plugin.Models
         }
 
         /// <summary>
-        /// Sends custom events to the Counlty server.
+        /// Sends custom event to the Counlty server.
         /// </summary>
         /// <returns></returns>
-        internal bool ReportCustomEvent()
+        public bool ReportCustomEvent()
         {
             if (string.IsNullOrEmpty(Key))
                 throw new ArgumentNullException(Key, "Key is required.");
@@ -211,6 +217,15 @@ namespace Assets.Plugin.Models
             CountlyHelper.GetResponse(requestParams);
 
             return true;
+        }
+
+        private void SetTimeZoneInfo(DateTime requestDatetime)
+        {
+            var timezoneInfo = TimeMetricModel.GetTimeZoneInfoForRequest(requestDatetime);
+            Timestamp = timezoneInfo.Timestamp;
+            DayOfWeek = timezoneInfo.DayOfWeek;
+            Hour = timezoneInfo.Hour;
+            Timezone = timezoneInfo.Timezone;
         }
     }
 }

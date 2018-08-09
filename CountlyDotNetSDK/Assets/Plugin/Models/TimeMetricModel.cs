@@ -13,7 +13,7 @@ namespace Assets.Plugin.Models
         [JsonProperty("dow")]
         public int DayOfWeek { get; set; }
         [JsonProperty("tz")]
-        public string TZ { get; set; }
+        public string Timezone { get; set; }
 
         //variable to hold last used timestamp
         private DateTimeOffset _lastMilliSecTimeStamp = DateTimeOffset.UtcNow;
@@ -31,7 +31,6 @@ namespace Assets.Plugin.Models
                     DayOfWeek = (int)currentDateTime.DayOfWeek,
                 };
             model.Timestamp = model.GetUniqueMilliSecTimeStamp();
-
             return new Dictionary<string, object>
             {
                 {"timestamp", model.Timestamp },
@@ -40,16 +39,39 @@ namespace Assets.Plugin.Models
             };
         }
 
-        private string GetUniqueMilliSecTimeStamp()
+        private string GetUniqueMilliSecTimeStamp(DateTime? requestedDatetime = null)
         {
             //get current timestamp in miliseconds
-            var currentMilliSecTimeSatmp = DateTimeOffset.UtcNow;
+            var currentMilliSecTimeStamp = DateTimeOffset.UtcNow;
 
-            _lastMilliSecTimeStamp = _lastMilliSecTimeStamp >= currentMilliSecTimeSatmp
-                                    ? _lastMilliSecTimeStamp.AddMilliseconds(1)
-                                    : _lastMilliSecTimeStamp = currentMilliSecTimeSatmp;
+            if (requestedDatetime.HasValue)
+            {
+                currentMilliSecTimeStamp = requestedDatetime.Value;
+
+                _lastMilliSecTimeStamp = _lastMilliSecTimeStamp >= currentMilliSecTimeStamp
+                                        ? _lastMilliSecTimeStamp.AddMilliseconds(1)
+                                        : _lastMilliSecTimeStamp = currentMilliSecTimeStamp;
+            }
+            else
+            {
+                _lastMilliSecTimeStamp = currentMilliSecTimeStamp;
+            }
 
             return _lastMilliSecTimeStamp.ToUnixTimeMilliseconds().ToString();
+        }
+
+        internal static TimeMetricModel GetTimeZoneInfoForRequest(DateTime requestedDatetime)
+        {
+            var currentDateTime = DateTime.Now;
+            var model =
+                new TimeMetricModel
+                {
+                    Hour = currentDateTime.TimeOfDay.Hours,
+                    DayOfWeek = (int)currentDateTime.DayOfWeek,
+                    Timezone = TimeZone.CurrentTimeZone.GetUtcOffset(new DateTime()).TotalMinutes.ToString()
+                };
+            model.Timestamp = model.GetUniqueMilliSecTimeStamp(requestedDatetime);
+            return model;
         }
     }
 }

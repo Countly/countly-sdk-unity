@@ -8,6 +8,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using System.Security.Cryptography;
 
 namespace Helpers
 {
@@ -57,7 +58,7 @@ namespace Helpers
         }
 
         /// <summary>
-        /// Build request URL using ServerUrl, AppKey, DeviceID and supplied queryParams parameters. 
+        /// Builds request URL using ServerUrl, AppKey, DeviceID and supplied queryParams parameters. 
         /// The data is appended in the URL.
         /// </summary>
         /// <param name="queryParams"></param>
@@ -65,23 +66,34 @@ namespace Helpers
         internal static string BuildGetRequest(Dictionary<string, object> queryParams)
         {
             StringBuilder request = new StringBuilder();
-
-            request.Append(GetBaseUrl());
-
             //Metrics added to each request
             foreach (var item in GetBaseParams())
             {
-                request.AppendFormat((item.Key != "app_key" ? "&" : string.Empty) + "{0}={1}", item.Key, item.Value);
+                request.AppendFormat((item.Key != "app_key" ? "&" : string.Empty) + "{0}={1}", WWW.EscapeURL(item.Key), WWW.EscapeURL(Convert.ToString(item.Value)));
             }
 
             //Query params supplied for creating request
             foreach (var item in queryParams)
             {
                 if (!string.IsNullOrEmpty(item.Key) && item.Value != null)
-                    request.AppendFormat("&{0}={1}", item.Key, item.Value);
+                    request.AppendFormat("&{0}={1}", WWW.EscapeURL(item.Key), WWW.EscapeURL(Convert.ToString(item.Value)));
             }
 
-            return request.ToString();
+            if (!string.IsNullOrEmpty(Countly.Salt))
+            {
+                // Create a SHA256   
+                using (SHA256 sha256Hash = SHA256.Create())
+                {
+                    var data = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(request.ToString() + Countly.Salt));
+                    request.Insert(0, GetBaseUrl());
+                    return request.AppendFormat("&checksum256={0}", GetStringFromBytes(data)).ToString();
+                }
+            }
+            else
+            {
+                request.Insert(0, GetBaseUrl());
+                return request.ToString();
+            }
         }
 
         /// <summary>
@@ -93,8 +105,23 @@ namespace Helpers
         {
             var baseParams = GetBaseParams();
             foreach (var item in queryParams)
-                baseParams.Add(item.Key, item.Value);
-            return JsonConvert.SerializeObject(baseParams);
+                baseParams.Add(WWW.EscapeURL(item.Key), Convert.ToString(item.Value));
+
+            var data = JsonConvert.SerializeObject(baseParams);
+            if (!string.IsNullOrEmpty(Countly.Salt))
+            {
+                // Create a SHA256   
+                using (SHA256 sha256Hash = SHA256.Create())
+                {
+                    var bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(data + Countly.Salt));
+                    baseParams.Add("checksum256", bytes);
+                    return JsonConvert.SerializeObject(baseParams);
+                }
+            }
+            else
+            {
+                return data;
+            }
         }
 
         /// <summary>
@@ -105,9 +132,10 @@ namespace Helpers
         /// <returns></returns>
         internal static string GetResponse(Dictionary<string, object> queryParams, bool usePost = false)
         {
-            if (Countly.PostRequestEnabled || usePost)
+            var data = BuildPostRequest(queryParams);
+            if (Countly.PostRequestEnabled || usePost || data.Length > 1800)
             {
-                return Post(GetBaseUrl(), BuildPostRequest(queryParams));
+                return Post(GetBaseUrl(), data);
             }
             else
             {
@@ -122,15 +150,16 @@ namespace Helpers
         /// <param name="postData"></param>
         /// <param name="usePost"></param>
         /// <returns></returns>
-        internal static async Task<string> GetResponseAsync(string url, string postData = null, bool usePost = false)
+        internal static async Task<string> GetResponseAsync(Dictionary<string, object> queryParams, bool usePost = false)
         {
-            if (Countly.PostRequestEnabled || url.Length > 2000 || usePost)
+            var data = BuildPostRequest(queryParams);
+            if (Countly.PostRequestEnabled || usePost || data.Length > 1800)
             {
-                return await PostAsync(url, postData);
+                return await PostAsync(GetBaseUrl(), data);
             }
             else
             {
-                return await GetAsync(url);
+                return await GetAsync(BuildGetRequest(queryParams));
             }
         }
 
@@ -141,7 +170,6 @@ namespace Helpers
         /// <returns></returns>
         internal static string Get(string url)
         {
-            url = WWW.EscapeURL(url);
             string responseString = string.Empty;
             try
             {
@@ -157,12 +185,16 @@ namespace Helpers
                     responseString = reader.ReadToEnd();
                 }
             }
-            catch (WebException webex)
-            {
-                responseString = webex.Message;
-            }
+            //catch (WebException webex)
+            //{
+            //    responseString = webex.Message;
+            //}
             catch (Exception ex)
             {
+                var requestModel = new CountlyRequestModel(true, url, null, DateTime.UtcNow);
+                if (!Countly.TotalRequests.Contains(requestModel))
+                    requestModel.AddRequestToQueue();
+
                 responseString = ex.Message;
             }
 
@@ -181,7 +213,6 @@ namespace Helpers
         /// <returns></returns>
         internal static async Task<string> GetAsync(string url)
         {
-            url = WWW.EscapeURL(url);
             string responseString = string.Empty;
             try
             {
@@ -197,10 +228,10 @@ namespace Helpers
                     responseString = await reader.ReadToEndAsync();
                 }
             }
-            catch (WebException webex)
-            {
-                responseString = webex.Message;
-            }
+            //catch (WebException webex)
+            //{
+            //    responseString = webex.Message;
+            //}
             catch (Exception ex)
             {
                 responseString = ex.Message;
@@ -223,8 +254,6 @@ namespace Helpers
         /// <returns></returns>
         internal static string Post(string uri, string data, string contentType = "application/json")
         {
-            uri = WWW.EscapeURL(uri);
-            data = WWW.EscapeURL(data);
             string responseString = string.Empty;
             try
             {
@@ -251,12 +280,16 @@ namespace Helpers
                     responseString = reader.ReadToEnd();
                 }
             }
-            catch (WebException webex)
-            {
-                responseString = webex.Message;
-            }
+            //catch (WebException webex)
+            //{
+            //    responseString = webex.Message;
+            //}
             catch (Exception ex)
             {
+                var requestModel = new CountlyRequestModel(false, uri, data, DateTime.UtcNow);
+                if(!Countly.TotalRequests.Contains(requestModel))
+                    requestModel.AddRequestToQueue();
+
                 responseString = ex.Message;
             }
 
@@ -277,8 +310,6 @@ namespace Helpers
         /// <returns></returns>
         internal static async Task<string> PostAsync(string uri, string data, string contentType = "application/json")
         {
-            uri = WWW.EscapeURL(uri);
-            data = WWW.EscapeURL(data);
             string responseString = string.Empty;
             try
             {
@@ -305,10 +336,10 @@ namespace Helpers
                     responseString = await reader.ReadToEndAsync();
                 }
             }
-            catch (WebException webex)
-            {
-                responseString = webex.Message;
-            }
+            //catch (WebException webex)
+            //{
+            //    responseString = webex.Message;
+            //}
             catch (Exception ex)
             {
                 responseString = ex.Message;
@@ -334,6 +365,16 @@ namespace Helpers
                 || pictureUrl.EndsWith(".jpg")
                 || pictureUrl.EndsWith(".jpeg")
                 || pictureUrl.EndsWith(".gif");
+        }
+
+        internal static string GetStringFromBytes(byte[] bytes)
+        {
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < bytes.Length; i++)
+            {
+                builder.Append(bytes[i].ToString("x2"));
+            }
+            return builder.ToString();
         }
 
         #region Unused Code

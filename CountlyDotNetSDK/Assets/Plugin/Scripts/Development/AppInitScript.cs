@@ -14,8 +14,8 @@ namespace Assets.Plugin.Scripts.Development
         public static Countly Instance => _instance ??
             (_instance = new Countly(
                                 "https://us-try.count.ly/",
-                                "73a6570ef97d4cf9174a6aeb97a38e1c3f88d6d9",
-                                "b019e1b8-584b-413c-81f6-5b801519c9f1"));
+                                "YOUR_APP_KEY",
+                                "YOUR_DEVICE_ID"));
 
         #endregion
 
@@ -24,9 +24,8 @@ namespace Assets.Plugin.Scripts.Development
         // Use Start for initialization
         void Start()
         {
-            Instance.Initialize(null, false, true);
+            Instance.Initialize("1234567890", true, true);
             Instance.BeginSession();
-            Instance.ChangeDevicAndMergeSessionData(CountlyHelper.GenerateUniqueDeviceID());
         }
 
         void OnApplicationQuit()
