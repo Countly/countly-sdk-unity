@@ -1,6 +1,8 @@
 ﻿using Assets.Scripts.Models;
 using Assets.Scripts.Main.Development;
 using UnityEngine;
+using Assets.Scripts.Helpers;
+using UnityEngine.UI;
 
 namespace Assets.Scripts.Main.Testing
 {
@@ -10,12 +12,15 @@ namespace Assets.Scripts.Main.Testing
         public static Countly Instance => _instance ??
             (_instance = new Countly(
                                 "https://us-try.count.ly/",
-                                "[APP_KEY]",
-                                "[DEVICE_ID]"));
+                                Constants.AppKey,
+                                Constants.DeviceID));
 
         private static int x = 0;
+
         public void Set()
         {
+            Instance.EnablePush();
+
             //Countly.AllowSendingRequests = true;
             //CountlyUserDetailsModel.Set("Eyes", "Blue");
             //int x = 0;
@@ -44,17 +49,22 @@ namespace Assets.Scripts.Main.Testing
             //}
         }
 
-        public async void SetOnce()
+        public void SetOnce()
         {
+            var inp = GameObject.Find("InputField");
+            var tt = inp.GetComponent<InputField>();
+            tt.text = Countly.Message;
+
             //Instance.ReportView("TestView");
-            CountlyUserDetailsModel.SetOnce("BP", "120/80");
-            Save();
-            await Instance.ChangeDeviceAndEndCurrentSession("[NEW_DEVICE_ID]");
+            //CountlyUserDetailsModel.SetOnce("BP", "120/80");
+            //Save();
+            //await Instance.ChangeDeviceAndEndCurrentSession("d4937c60-04fc-478f-87f6-efd7331b6de8");
         }
 
         public void Increment()
         {
-            CountlyUserDetailsModel.Increment("Weight");
+            //Instance.EnablePush();
+            //CountlyUserDetailsModel.Increment("Weight");
         }
 
         public void IncrementBy()
@@ -79,7 +89,7 @@ namespace Assets.Scripts.Main.Testing
 
         public void Push()
         {
-            CountlyUserDetailsModel.Push("Mole", new string[] { "Left Cheek", "Back", "Toe", "Back of the Neck", "Back"});
+            CountlyUserDetailsModel.Push("Mole", new string[] { "Left Cheek", "Back", "Toe", "Back of the Neck", "Back" });
         }
 
         public void PushUnique()
@@ -111,7 +121,7 @@ namespace Assets.Scripts.Main.Testing
 
             #region Device ID
 
-            
+
 
             #endregion
 

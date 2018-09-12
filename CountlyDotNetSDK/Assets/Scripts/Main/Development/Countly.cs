@@ -17,6 +17,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Timers;
 using UnityEngine;
+using Firebase;
 
 #endregion
 
@@ -26,7 +27,7 @@ namespace Assets.Scripts.Main.Development
     {
         #region Fields and Properties
 
-        private static int _extendSessionInterval = 10;
+        private static int _extendSessionInterval = 60;
         private static Timer _sessionTimer;
         private static DateTime _lastSessionRequestTime;
         private static string _lastView;
@@ -53,6 +54,11 @@ namespace Assets.Scripts.Main.Development
         private static CountlyEventModel _countlyEventModel;
         internal static Queue<CountlyRequestModel> TotalRequests = new Queue<CountlyRequestModel>();
 
+        internal static bool IsFirebaseReady { get; set; }
+        internal static FirebaseApp FirebaseAppInstance { get; set; }
+
+        internal static string Message { get; set; }
+
         //#region Consents
         //public static bool ConsentGranted;
 
@@ -70,6 +76,7 @@ namespace Assets.Scripts.Main.Development
         //private static bool Consent_StarRating;
         //private static bool Consent_AccessoryDevices;
 
+
         //#endregion
 
         #endregion
@@ -85,6 +92,7 @@ namespace Assets.Scripts.Main.Development
         /// <param name="deviceId"></param>
         public Countly(string serverUrl, string appKey, string deviceId = null)
         {
+            Debug.Log("Hi");
             ServerUrl = serverUrl;
             AppKey = appKey;
             DeviceId = DeviceId ?? deviceId ?? CountlyHelper.GenerateUniqueDeviceID();
@@ -475,7 +483,6 @@ namespace Assets.Scripts.Main.Development
 
         #endregion
 
-
         #region Views
 
         /// <summary>
@@ -662,6 +669,19 @@ namespace Assets.Scripts.Main.Development
 
         #endregion
 
+        #region Push Notifications
+
+        /// <summary>
+        /// Enables Push Notification feature for the device
+        /// </summary>
+        public void EnablePush()
+        {
+            CountlyPushNotificationModel.CountlyPNInstance.EnablePushNotifications();
+        }
+
+
+        #endregion
+
         #endregion
 
         #region Timer
@@ -673,7 +693,6 @@ namespace Assets.Scripts.Main.Development
         private void InitSessionTimer()
         {
             _sessionTimer = new Timer();
-            // Fires every 10 seconds
             _sessionTimer.Interval = _extendSessionInterval * 1000;
             _sessionTimer.Elapsed += SessionTimerOnElapsed;
             _sessionTimer.AutoReset = true;

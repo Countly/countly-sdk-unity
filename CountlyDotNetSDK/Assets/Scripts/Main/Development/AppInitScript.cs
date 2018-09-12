@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using Assets.Scripts.Helpers;
 
 namespace Assets.Scripts.Main.Development
 {
@@ -11,10 +12,12 @@ namespace Assets.Scripts.Main.Development
 
         private static Countly _instance { get; set; }
         public static Countly Instance => _instance ??
-            (_instance = new Countly(
+            (_instance = 
+            new Countly(
                                 "https://us-try.count.ly/",
-                                "[APP_KEY]",
-                                "[DEVICE_ID]"));
+                                Constants.AppKey,
+                                Constants.DeviceID)
+            );
 
         #endregion
 
@@ -23,7 +26,8 @@ namespace Assets.Scripts.Main.Development
         // Use Start for initialization
         async void Start()
         {
-            Instance.Initialize("[SALT]", false, true);
+            Debug.Log("Start Called");
+            Instance.Initialize("1234567890", false, true);
             await Instance.BeginSession();
         }
 
@@ -47,13 +51,13 @@ namespace Assets.Scripts.Main.Development
         // Whenever app is enabled
         void OnEnable()
         {
-            Application.logMessageReceived += LogCallback;
+            //Application.logMessageReceived += LogCallback;
         }
 
         // Whenever app is disabled
         void OnDisable()
         {
-            Application.logMessageReceived -= LogCallback;
+            //Application.logMessageReceived -= LogCallback;
         }
 
         #endregion
