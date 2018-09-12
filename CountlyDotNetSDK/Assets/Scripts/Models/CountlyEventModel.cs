@@ -1,12 +1,13 @@
-﻿using Assets.Plugin.Scripts.Development;
-using Helpers;
+﻿using Assets.Scripts.Helpers;
+using Assets.Scripts.Main.Development;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
-namespace Assets.Plugin.Models
+namespace Assets.Scripts.Models
 {
     /// <summary>
     /// Custom Segmentation for Views related events.
@@ -103,7 +104,8 @@ namespace Assets.Plugin.Models
         {
             Key = key;
             Count = 1;
-            Segmentation = new JRaw(segmentation);
+            if (segmentation != null)
+                Segmentation = new JRaw(segmentation);
             Duration = duration;
         }
 
@@ -119,7 +121,8 @@ namespace Assets.Plugin.Models
         {
             Key = key;
             Count = count;
-            Segmentation = new JRaw(segmentation);
+            if (segmentation != null)
+                Segmentation = new JRaw(segmentation);
             Duration = dur;
             Sum = sum;
 
@@ -144,7 +147,7 @@ namespace Assets.Plugin.Models
         /// Ends a particular event
         /// </summary>
         /// <returns></returns>
-        internal bool End()
+        internal async Task<CountlyResponse> End(bool addToRequestQueue = false)
         {
             if (string.IsNullOrEmpty(Key))
                 throw new ArgumentNullException(Key, "Key is required.");
@@ -164,12 +167,13 @@ namespace Assets.Plugin.Models
                     { "events", JsonConvert.SerializeObject(this, Formatting.Indented,
                                     new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }) },
                };
-            CountlyHelper.GetResponse(requestParams);
+            var res = await CountlyHelper.GetResponseAsync(requestParams, addToRequestQueue);
 
             //Removing the event
-            Countly.TotalEvents.Remove(Key);
+            if(res.IsSuccess)
+                Countly.TotalEvents.Remove(Key);
 
-            return true;
+            return res;
         }
 
         /// <summary>
@@ -177,7 +181,7 @@ namespace Assets.Plugin.Models
         /// </summary>
         /// <param name="events"></param>
         /// <returns></returns>
-        public static bool StartMultipleEvents(List<CountlyEventModel> events)
+        public static async Task<CountlyResponse> StartMultipleEvents(List<CountlyEventModel> events)
         {
             if (events == null || events.Count == 0)
                 throw new ArgumentException("No events found to record.");
@@ -194,16 +198,14 @@ namespace Assets.Plugin.Models
                     { "events", JsonConvert.SerializeObject(events, Formatting.Indented,
                                     new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }) },
                };
-            CountlyHelper.GetResponse(requestParams);
-
-            return true;
+            return await CountlyHelper.GetResponseAsync(requestParams);
         }
 
         /// <summary>
         /// Sends custom event to the Counlty server.
         /// </summary>
         /// <returns></returns>
-        public bool ReportCustomEvent()
+        public async Task<CountlyResponse> ReportCustomEvent()
         {
             if (string.IsNullOrEmpty(Key))
                 throw new ArgumentNullException(Key, "Key is required.");
@@ -214,9 +216,7 @@ namespace Assets.Plugin.Models
                     { "events", JsonConvert.SerializeObject(new List<CountlyEventModel>{ this }, Formatting.Indented,
                                     new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }) },
                };
-            CountlyHelper.GetResponse(requestParams);
-
-            return true;
+            return await CountlyHelper.GetResponseAsync(requestParams);
         }
 
         private void SetTimeZoneInfo(DateTime requestDatetime)

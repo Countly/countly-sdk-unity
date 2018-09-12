@@ -1,8 +1,8 @@
-﻿using Assets.Plugin.Enums;
+﻿using Assets.Scripts.Enums;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Assets.Plugin.Models
+namespace Assets.Scripts.Models
 {
     class ConsentModel
     {

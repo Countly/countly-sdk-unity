@@ -1,12 +1,12 @@
-﻿using Assets.Plugin.Helpers;
-using Helpers;
+﻿using Assets.Scripts.Helpers;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
-namespace Assets.Plugin.Models
+namespace Assets.Scripts.Models
 {
     public class CountlyUserDetailsModel
     {
@@ -61,14 +61,15 @@ namespace Assets.Plugin.Models
             PictureUrl = pictureUrl;
             Gender = gender;
             BirthYear = birthYear;
-            Custom = new JRaw(customData);
+            if (customData != null)
+                Custom = new JRaw(customData);
         }
 
         /// <summary>
         /// Uploads all user details
         /// </summary>
         /// <returns></returns>
-        internal bool SetUserDetails()
+        internal async Task<CountlyResponse> SetUserDetails()
         {
             if (!CountlyHelper.IsPictureValid(PictureUrl))
                 throw new Exception("Accepted picture formats are .png, .gif and .jpeg");
@@ -76,28 +77,26 @@ namespace Assets.Plugin.Models
             var requestParams =
                new Dictionary<string, object>
                {
-                    { "user_details", JsonConvert.SerializeObject(this, Formatting.Indented) },
+                    { "user_details", JsonConvert.SerializeObject(this, Formatting.Indented, 
+                                        new JsonSerializerSettings{ NullValueHandling = NullValueHandling.Ignore }) },
                };
 
-            CountlyHelper.GetResponse(requestParams);
-
-            return true;
+            return await CountlyHelper.GetResponseAsync(requestParams);
         }
 
         /// <summary>
         /// Uploads only custom data
         /// </summary>
         /// <returns></returns>
-        internal bool SetCustomUserDetails()
+        internal Task<CountlyResponse> SetCustomUserDetails()
         {
             var requestParams =
                new Dictionary<string, object>
                {
-                    { "user_details", JsonConvert.SerializeObject(this, Formatting.Indented) }
+                    { "user_details", JsonConvert.SerializeObject(this, Formatting.Indented,
+                                        new JsonSerializerSettings{ NullValueHandling = NullValueHandling.Ignore }) },
                };
-            CountlyHelper.GetResponse(requestParams);
-
-            return true;
+            return CountlyHelper.GetResponseAsync(requestParams);
         }
 
         /// <summary>
@@ -213,7 +212,7 @@ namespace Assets.Plugin.Models
         /// Saves all custom user data updates done since the last save request.
         /// </summary>
         /// <returns></returns>
-        public static bool Save()
+        public static async Task<CountlyResponse> Save()
         {
             if (!CustomDataProperties.Any())
                 throw new Exception("No data to save.");
@@ -221,10 +220,8 @@ namespace Assets.Plugin.Models
             var model = new CountlyUserDetailsModel(null, null, null, null, null, null, null, null,
                             JsonConvert.SerializeObject(CustomDataProperties, Formatting.Indented));
 
-            var result = model.SetCustomUserDetails();
-            if (result)
-                CustomDataProperties = new Dictionary<string, object> { };
-            return result;
+            CustomDataProperties = new Dictionary<string, object> { };
+            return await model.SetCustomUserDetails();
         }
 
         #region Private Methods

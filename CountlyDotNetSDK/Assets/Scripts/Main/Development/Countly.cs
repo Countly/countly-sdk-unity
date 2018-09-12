@@ -6,25 +6,27 @@
 
 #region Usings
 
-using Assets.Plugin.Models;
+using Assets.Scripts.Helpers;
+using Assets.Scripts.Models;
 using CountlyModels;
-using Helpers;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Timers;
 using UnityEngine;
 
 #endregion
 
-namespace Assets.Plugin.Scripts.Development
+namespace Assets.Scripts.Main.Development
 {
     public class Countly
     {
         #region Fields and Properties
 
-        private static int _extendSessionInterval = 240;
+        private static int _extendSessionInterval = 10;
         private static Timer _sessionTimer;
         private static DateTime _lastSessionRequestTime;
         private static string _lastView;
@@ -105,7 +107,7 @@ namespace Assets.Plugin.Scripts.Development
         /// <param name="enableRequestQueuing"></param>
         /// <param name="isDevelopmentMode"></param>
         /// <param name="sessionUpdateInterval"></param>
-        public void Initialize(string salt = null, bool enablePost = false, bool enableConsoleErrorLogging = false,
+        public CountlyResponse Initialize(string salt = null, bool enablePost = false, bool enableConsoleErrorLogging = false,
             bool ignoreSessionCooldown = false)
         {
             Salt = salt;
@@ -115,7 +117,12 @@ namespace Assets.Plugin.Scripts.Development
             IgnoreSessionCooldown = ignoreSessionCooldown;
 
             InitSessionTimer();
-            SetStoredRequestLimit(10);
+            SetStoredRequestLimit(1000);
+
+            return new CountlyResponse
+            {
+                IsSuccess = true
+            };
         }
 
         #endregion
@@ -202,17 +209,18 @@ namespace Assets.Plugin.Scripts.Development
         /// Begins a new session with new Device Id
         /// </summary>
         /// <param name="deviceId"></param>
-        public void ChangeDeviceAndEndCurrentSession(string deviceId)
+        public async Task<CountlyResponse> ChangeDeviceAndEndCurrentSession(string deviceId)
         {
             //Ignore call if new and old device id are same
             if (DeviceId == deviceId)
-                return;
+                return new CountlyResponse { IsSuccess = true };
 
             //Add currently recorded but not queued events to request queue-----------------------------------
-            //------------------------------------------------------------------------------------------------
+            EndAllRecordedEvents();
 
             //Ends current session
-            EndSession();
+            //Do not dispose timer object
+            await ExecuteEndSession(false);
 
             //Clear all started timed-events------------------------------------------------------------------
             //------------------------------------------------------------------------------------------------
@@ -221,7 +229,10 @@ namespace Assets.Plugin.Scripts.Development
             DeviceId = deviceId;
 
             //Begin new session with new device id
-            BeginSession();
+            //Do not initiate timer again, it is already initiated
+            await ExecuteBeginSession(false);
+
+            return new CountlyResponse { IsSuccess = true };
         }
 
         /// <summary>
@@ -230,11 +241,11 @@ namespace Assets.Plugin.Scripts.Development
         /// Merges data for old and new Device Id. 
         /// </summary>
         /// <param name="deviceId"></param>
-        public bool ChangeDevicAndMergeSessionData(string deviceId)
+        public async Task<CountlyResponse> ChangeDevicAndMergeSessionData(string deviceId)
         {
             //Ignore call if new and old device id are same
             if (DeviceId == deviceId)
-                return true;
+                return new CountlyResponse { IsSuccess = true };
 
             //Keep old device id
             var old_device_id = DeviceId;
@@ -249,8 +260,8 @@ namespace Assets.Plugin.Scripts.Development
                         { "old_device_id", old_device_id }
                };
 
-            CountlyHelper.GetResponse(requestParams);
-            return true;
+            await CountlyHelper.GetResponseAsync(requestParams);
+            return new CountlyResponse { IsSuccess = true };
         }
 
         #endregion
@@ -281,7 +292,7 @@ namespace Assets.Plugin.Scripts.Development
         /// <param name="customParams"></param>
         /// <param name="nonfatal"></param>
         /// <returns></returns>
-        public string SendCrashReport(string message, string stackTrace, LogType type, string segments = null, bool nonfatal = true)
+        public async Task<CountlyResponse> SendCrashReport(string message, string stackTrace, LogType type, string segments = null, bool nonfatal = true)
         {
             //if (ConsentModel.CheckConsent(FeaturesEnum.Crashes.ToString()))
             //{
@@ -301,7 +312,8 @@ namespace Assets.Plugin.Scripts.Development
                 { "crash", JsonConvert.SerializeObject(model, Formatting.Indented,
                                     new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }) }
             };
-            return CountlyHelper.GetResponse(requestParams);
+
+            return await CountlyHelper.GetResponseAsync(requestParams);
             //}
         }
 
@@ -312,7 +324,20 @@ namespace Assets.Plugin.Scripts.Development
         /// <summary>
         /// Initiates a session by setting begin_session
         /// </summary>
-        public string BeginSession()
+        public async Task<CountlyResponse> BeginSession()
+        {
+            return await ExecuteBeginSession();
+        }
+
+        /// <summary>
+        /// Ends a session by setting end_session
+        /// </summary>
+        public async Task<CountlyResponse> EndSession()
+        {
+            return await ExecuteEndSession();
+        }
+
+        private async Task<CountlyResponse> ExecuteBeginSession(bool initiateTimer = true)
         {
             _lastSessionRequestTime = DateTime.Now;
             //if (ConsentModel.CheckConsent(FeaturesEnum.Sessions.ToString()))
@@ -329,10 +354,11 @@ namespace Assets.Plugin.Scripts.Development
             if (!string.IsNullOrEmpty(IPAddress))
                 requestParams.Add("ip_address", IPAddress);
 
-            var response = CountlyHelper.GetResponse(requestParams);
+            var response = await CountlyHelper.GetResponseAsync(requestParams);
 
             //Extend session only after session has begun
-            _sessionTimer.Start();
+            if (initiateTimer)
+                _sessionTimer.Start();
             //}
             return response;
         }
@@ -340,7 +366,7 @@ namespace Assets.Plugin.Scripts.Development
         /// <summary>
         /// Ends a session by setting end_session
         /// </summary>
-        public string EndSession()
+        private async Task<CountlyResponse> ExecuteEndSession(bool disposeTimer = true)
         {
             //if (ConsentModel.CheckConsent(FeaturesEnum.Sessions.ToString()))
             //{
@@ -353,12 +379,15 @@ namespace Assets.Plugin.Scripts.Development
                 };
             requestParams.Add("metrics", JsonConvert.SerializeObject(CountlyMetricModel.Metrics, Formatting.Indented,
                                             new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }));
-            var response = CountlyHelper.GetResponse(requestParams);
+            var response = await CountlyHelper.GetResponseAsync(requestParams);
 
             //Do not extend session after session ends
-            _sessionTimer.Stop();
-            _sessionTimer.Dispose();
-            _sessionTimer.Close();
+            if (disposeTimer)
+            {
+                _sessionTimer.Stop();
+                _sessionTimer.Dispose();
+                _sessionTimer.Close();
+            }
             //}
             return response;
         }
@@ -366,7 +395,7 @@ namespace Assets.Plugin.Scripts.Development
         /// <summary>
         /// Extends a session by another 60 seconds
         /// </summary>
-        public string ExtendSession()
+        public async Task<CountlyResponse> ExtendSession()
         {
             _lastSessionRequestTime = DateTime.Now;
             //if (ConsentModel.CheckConsent(FeaturesEnum.Sessions.ToString()))
@@ -379,7 +408,8 @@ namespace Assets.Plugin.Scripts.Development
                 };
             requestParams.Add("metrics", JsonConvert.SerializeObject(CountlyMetricModel.Metrics, Formatting.Indented,
                                             new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }));
-            return CountlyHelper.GetResponse(requestParams);
+
+            return await CountlyHelper.GetResponseAsync(requestParams);
             //}
         }
 
@@ -401,24 +431,24 @@ namespace Assets.Plugin.Scripts.Development
         /// </summary>
         /// <param name="key"></param>
         /// <returns></returns>
-        public bool EndEvent(string key)
+        public async Task<CountlyResponse> EndEvent(string key)
         {
             if (_countlyEventModel == null)
                 throw new NullReferenceException("Please start an event first.");
 
             _countlyEventModel.Key = key;
-            return _countlyEventModel.End();
+            return await _countlyEventModel.End();
         }
 
         /// <summary>
-        /// Ends and event with the specified key and data. Sends events details to the Counlty API 
+        /// Ends an event with the specified key and data. Sends events details to the Counlty API 
         /// </summary>
         /// <param name="key">Key is required</param>
         /// <param name="segmentation">Custom </param>
         /// <param name="count"></param>
         /// <param name="sum"></param>
         /// <returns></returns>
-        public bool EndEvent(string key, string segmentation, int? count = 1, double? sum = 0)
+        public async Task<CountlyResponse> EndEvent(string key, string segmentation, int? count = 1, double? sum = 0)
         {
             if (_countlyEventModel == null)
                 throw new NullReferenceException("Please start an event first.");
@@ -427,10 +457,24 @@ namespace Assets.Plugin.Scripts.Development
             _countlyEventModel.Segmentation = new JRaw(segmentation);
             _countlyEventModel.Count = count;
             _countlyEventModel.Sum = sum;
-            return _countlyEventModel.End();
+            return await _countlyEventModel.End();
+        }
+
+        /// <summary>
+        /// Adds all recorded but not queued events to Request Queue
+        /// </summary>
+        private async void EndAllRecordedEvents()
+        {
+            var events = TotalEvents.Select(x => x.Key).ToList();
+            foreach (var evnt in events)
+            {
+                _countlyEventModel.Key = evnt;
+                await _countlyEventModel.End(true);
+            }
         }
 
         #endregion
+
 
         #region Views
 
@@ -439,7 +483,7 @@ namespace Assets.Plugin.Scripts.Development
         /// </summary>
         /// <param name="name"></param>
         /// <param name="hasSessionBegunWithView"></param>
-        public void ReportView(string name, bool hasSessionBegunWithView = false)
+        public async Task<CountlyResponse> ReportView(string name, bool hasSessionBegunWithView = false)
         {
             if (string.IsNullOrEmpty(name))
                 throw new ArgumentNullException("Parameter name is required.");
@@ -465,10 +509,12 @@ namespace Assets.Plugin.Scripts.Development
                                                     );
             events.Add(currentView);
 
-            CountlyEventModel.StartMultipleEvents(events);
+            var res = await CountlyEventModel.StartMultipleEvents(events);
 
             _lastView = name;
             _lastViewStartTime = DateTime.Now;
+
+            return res;
         }
 
         private CountlyEventModel ReportViewDuration(bool hasSessionBegunWithView = false)
@@ -506,7 +552,7 @@ namespace Assets.Plugin.Scripts.Development
         /// <param name="width"></param>
         /// <param name="height"></param>
         /// <returns></returns>
-        public bool ReportAction(string type, int x, int y, int width, int height)
+        public async Task<CountlyResponse> ReportAction(string type, int x, int y, int width, int height)
         {
             var segment =
                 new ActionSegment
@@ -523,8 +569,7 @@ namespace Assets.Plugin.Scripts.Development
                                                             new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore, })),
                                                         null
                                                     );
-            action.ReportCustomEvent();
-            return true;
+            return await action.ReportCustomEvent();
         }
 
         #endregion
@@ -538,7 +583,7 @@ namespace Assets.Plugin.Scripts.Development
         /// <param name="app_version"></param>
         /// <param name="rating">Rating should be from 1 to 5</param>
         /// <returns></returns>
-        public bool ReportStarRating(string platform, string app_version, int rating)
+        public async Task<CountlyResponse> ReportStarRating(string platform, string app_version, int rating)
         {
             if (rating < 1 || rating > 5)
                 throw new ArgumentException("Please provide rating from 1 to 5");
@@ -556,8 +601,7 @@ namespace Assets.Plugin.Scripts.Development
                                                             new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore, })),
                                                         null
                                                     );
-            action.ReportCustomEvent();
-            return true;
+            return await action.ReportCustomEvent();
         }
 
         #endregion
@@ -570,12 +614,12 @@ namespace Assets.Plugin.Scripts.Development
         /// </summary>
         /// <param name="userDetails"></param>
         /// <returns></returns>
-        public bool UserDetails(CountlyUserDetailsModel userDetails)
+        public async Task<CountlyResponse> UserDetails(CountlyUserDetailsModel userDetails)
         {
             if (userDetails == null)
                 throw new ArgumentNullException("Please provide user details.");
 
-            return userDetails.SetUserDetails();
+            return await userDetails.SetUserDetails();
         }
 
         /// <summary>
@@ -584,12 +628,12 @@ namespace Assets.Plugin.Scripts.Development
         /// </summary>
         /// <param name="userDetails"></param>
         /// <returns></returns>
-        public bool UserCustomDetails(CountlyUserDetailsModel userDetails)
+        public async Task<CountlyResponse> UserCustomDetails(CountlyUserDetailsModel userDetails)
         {
             if (userDetails == null)
                 throw new ArgumentNullException("Please provide user details.");
 
-            return userDetails.SetCustomUserDetails();
+            return await userDetails.SetCustomUserDetails();
         }
 
         #endregion
@@ -640,9 +684,9 @@ namespace Assets.Plugin.Scripts.Development
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="elapsedEventArgs"></param>
-        private void SessionTimerOnElapsed(object sender, ElapsedEventArgs elapsedEventArgs)
+        private async void SessionTimerOnElapsed(object sender, ElapsedEventArgs elapsedEventArgs)
         {
-            ExtendSession();
+            await ExtendSession();
             CountlyRequestModel.ProcessQueue();
         }
 

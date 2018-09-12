@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Assets.Plugin.Models
+namespace Assets.Scripts.Models
 {
     class TimeMetricModel
     {

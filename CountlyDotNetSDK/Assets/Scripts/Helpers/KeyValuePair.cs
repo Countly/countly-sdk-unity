@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Assets.Plugin.Helpers
+namespace Assets.Scripts.Helpers
 {
     [Serializable]
     public struct KeyValuePair<K, V>

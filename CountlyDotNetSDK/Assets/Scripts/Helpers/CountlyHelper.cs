@@ -1,16 +1,16 @@
-﻿using Assets.Plugin.Models;
-using Assets.Plugin.Scripts.Development;
+﻿using Assets.Scripts.Main.Development;
+using Assets.Scripts.Models;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
-using System.Security.Cryptography;
 
-namespace Helpers
+namespace Assets.Scripts.Helpers
 {
     class CountlyHelper
     {
@@ -105,7 +105,7 @@ namespace Helpers
         {
             var baseParams = GetBaseParams();
             foreach (var item in queryParams)
-                baseParams.Add(WWW.EscapeURL(item.Key), Convert.ToString(item.Value));
+                baseParams.Add(WWW.EscapeURL(item.Key), item.Value);
 
             var data = JsonConvert.SerializeObject(baseParams);
             if (!string.IsNullOrEmpty(Countly.Salt))
@@ -128,18 +128,17 @@ namespace Helpers
         /// Uses Get/Post method to make request to the Countly server and returns the response.
         /// </summary>
         /// <param name="queryParams"></param>
-        /// <param name="usePost"></param>
         /// <returns></returns>
-        internal static string GetResponse(Dictionary<string, object> queryParams, bool usePost = false)
+        internal static CountlyResponse GetResponse(Dictionary<string, object> queryParams, bool addToRequestQueue = false)
         {
             var data = BuildPostRequest(queryParams);
-            if (Countly.PostRequestEnabled || usePost || data.Length > 1800)
+            if (Countly.PostRequestEnabled || data.Length > 1800)
             {
-                return Post(GetBaseUrl(), data);
+                return Post(GetBaseUrl(), data, addToRequestQueue);
             }
             else
             {
-                return Get(BuildGetRequest(queryParams));
+                return Get(BuildGetRequest(queryParams), addToRequestQueue);
             }
         }
 
@@ -148,18 +147,18 @@ namespace Helpers
         /// </summary>
         /// <param name="url"></param>
         /// <param name="postData"></param>
-        /// <param name="usePost"></param>
         /// <returns></returns>
-        internal static async Task<string> GetResponseAsync(Dictionary<string, object> queryParams, bool usePost = false)
+        internal static Task<CountlyResponse> GetResponseAsync(Dictionary<string, object> queryParams,
+                                                                bool addToRequestQueue = false)
         {
             var data = BuildPostRequest(queryParams);
-            if (Countly.PostRequestEnabled || usePost || data.Length > 1800)
+            if (Countly.PostRequestEnabled || data.Length > 1800)
             {
-                return await PostAsync(GetBaseUrl(), data);
+                return Task.Run(() => PostAsync(GetBaseUrl(), data, addToRequestQueue));
             }
             else
             {
-                return await GetAsync(BuildGetRequest(queryParams));
+                return Task.Run(() => GetAsync(BuildGetRequest(queryParams), addToRequestQueue));
             }
         }
 
@@ -168,11 +167,16 @@ namespace Helpers
         /// </summary>
         /// <param name="url"></param>
         /// <returns></returns>
-        internal static string Get(string url)
+        internal static CountlyResponse Get(string url, bool addToRequestQueue = false)
         {
-            string responseString = string.Empty;
+            var countlyResponse = new CountlyResponse();
             try
             {
+                if (addToRequestQueue)
+                {
+                    throw new Exception("Request added to queue.");
+                }
+
                 HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
 
                 //Allow untrusted connection
@@ -182,28 +186,29 @@ namespace Helpers
                 using (Stream stream = response.GetResponseStream())
                 using (StreamReader reader = new StreamReader(stream))
                 {
-                    responseString = reader.ReadToEnd();
+                    var res = JsonConvert.DeserializeObject<CountlyApiResponseModel>(reader.ReadToEnd());
+                    countlyResponse.IsSuccess = res != null && res.Result == "Success";
                 }
             }
-            //catch (WebException webex)
-            //{
-            //    responseString = webex.Message;
-            //}
             catch (Exception ex)
+            {
+                addToRequestQueue = true;
+                countlyResponse.ErrorMessage = ex.Message;
+            }
+
+            if (addToRequestQueue)
             {
                 var requestModel = new CountlyRequestModel(true, url, null, DateTime.UtcNow);
                 if (!Countly.TotalRequests.Contains(requestModel))
                     requestModel.AddRequestToQueue();
-
-                responseString = ex.Message;
             }
 
             //Log to Unity Console
             if (Countly.EnableConsoleErrorLogging)
             {
-                Debug.Log(responseString);
+                Debug.Log(countlyResponse.IsSuccess);
             }
-            return responseString;
+            return countlyResponse;
         }
 
         /// <summary>
@@ -211,11 +216,16 @@ namespace Helpers
         /// </summary>
         /// <param name="url"></param>
         /// <returns></returns>
-        internal static async Task<string> GetAsync(string url)
+        internal static async Task<CountlyResponse> GetAsync(string url, bool addToRequestQueue = false)
         {
-            string responseString = string.Empty;
+            var countlyResponse = new CountlyResponse();
             try
             {
+                if (addToRequestQueue)
+                {
+                    throw new Exception("Request added to queue.");
+                }
+
                 HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
 
                 //Allow untrusted connection
@@ -225,24 +235,31 @@ namespace Helpers
                 using (Stream stream = response.GetResponseStream())
                 using (StreamReader reader = new StreamReader(stream))
                 {
-                    responseString = await reader.ReadToEndAsync();
+                    var res = JsonConvert.DeserializeObject<CountlyApiResponseModel>(await reader.ReadToEndAsync());
+                    countlyResponse.IsSuccess = res != null && res.Result == "Success";
+                    //Log to Unity Console
+                    if (Countly.EnableConsoleErrorLogging)
+                    {
+                        Debug.Log(countlyResponse.IsSuccess);
+                    }
+
+                    return countlyResponse;
                 }
             }
-            //catch (WebException webex)
-            //{
-            //    responseString = webex.Message;
-            //}
             catch (Exception ex)
             {
-                responseString = ex.Message;
+                addToRequestQueue = true;
+                countlyResponse.ErrorMessage = ex.Message;
             }
 
-            //Log to Unity Console
-            if (Countly.EnableConsoleErrorLogging)
+            if (addToRequestQueue)
             {
-                Debug.Log(responseString);
+                var requestModel = new CountlyRequestModel(true, url, null, DateTime.UtcNow);
+                if (!Countly.TotalRequests.Contains(requestModel))
+                    requestModel.AddRequestToQueue();
             }
-            return responseString;
+
+            return countlyResponse;
         }
 
         /// <summary>
@@ -252,17 +269,22 @@ namespace Helpers
         /// <param name="data"></param>
         /// <param name="contentType"></param>
         /// <returns></returns>
-        internal static string Post(string uri, string data, string contentType = "application/json")
+        internal static CountlyResponse Post(string uri, string data, bool addToRequestQueue = false)
         {
-            string responseString = string.Empty;
+            var countlyResponse = new CountlyResponse();
             try
             {
+                if (addToRequestQueue)
+                {
+                    throw new Exception("Request added to queue.");
+                }
+
                 byte[] dataBytes = Encoding.UTF8.GetBytes(data);
 
                 HttpWebRequest request = (HttpWebRequest)WebRequest.Create(uri);
                 request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
                 request.ContentLength = dataBytes.Length;
-                request.ContentType = contentType;
+                request.ContentType = "application/json";
                 request.Method = "POST";
 
                 //Allow untrusted connection
@@ -277,28 +299,29 @@ namespace Helpers
                 using (Stream stream = response.GetResponseStream())
                 using (StreamReader reader = new StreamReader(stream))
                 {
-                    responseString = reader.ReadToEnd();
+                    var res = JsonConvert.DeserializeObject<CountlyApiResponseModel>(reader.ReadToEnd());
+                    countlyResponse.IsSuccess = res != null && res.Result == "Success";
+
+                    //Log to Unity Console
+                    if (Countly.EnableConsoleErrorLogging)
+                    {
+                        Debug.Log(countlyResponse.IsSuccess);
+                    }
                 }
             }
-            //catch (WebException webex)
-            //{
-            //    responseString = webex.Message;
-            //}
             catch (Exception ex)
             {
-                var requestModel = new CountlyRequestModel(false, uri, data, DateTime.UtcNow);
-                if(!Countly.TotalRequests.Contains(requestModel))
-                    requestModel.AddRequestToQueue();
-
-                responseString = ex.Message;
+                addToRequestQueue = true;
+                countlyResponse.ErrorMessage = ex.Message;
             }
 
-            //Log to Unity Console
-            if (Countly.EnableConsoleErrorLogging)
+            if (addToRequestQueue)
             {
-                Debug.Log(responseString);
+                var requestModel = new CountlyRequestModel(false, uri, data, DateTime.UtcNow);
+                if (!Countly.TotalRequests.Contains(requestModel))
+                    requestModel.AddRequestToQueue();
             }
-            return responseString;
+            return countlyResponse;
         }
 
         /// <summary>
@@ -308,17 +331,22 @@ namespace Helpers
         /// <param name="data"></param>
         /// <param name="contentType"></param>
         /// <returns></returns>
-        internal static async Task<string> PostAsync(string uri, string data, string contentType = "application/json")
+        internal static async Task<CountlyResponse> PostAsync(string uri, string data, bool addToRequestQueue = false)
         {
-            string responseString = string.Empty;
+            var countlyResponse = new CountlyResponse();
             try
             {
+                if (addToRequestQueue)
+                {
+                    throw new Exception("Request added to queue.");
+                }
+
                 byte[] dataBytes = Encoding.UTF8.GetBytes(data);
 
                 HttpWebRequest request = (HttpWebRequest)WebRequest.Create(uri);
                 request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
                 request.ContentLength = dataBytes.Length;
-                request.ContentType = contentType;
+                request.ContentType = "application/json";
                 request.Method = "POST";
 
                 //Allow untrusted connection
@@ -333,24 +361,31 @@ namespace Helpers
                 using (Stream stream = response.GetResponseStream())
                 using (StreamReader reader = new StreamReader(stream))
                 {
-                    responseString = await reader.ReadToEndAsync();
+                    var res = JsonConvert.DeserializeObject<CountlyApiResponseModel>(await reader.ReadToEndAsync());
+                    countlyResponse.IsSuccess = res != null && res.Result == "Success";
+
+                    //Log to Unity Console
+                    if (Countly.EnableConsoleErrorLogging)
+                    {
+                        Debug.Log(countlyResponse.IsSuccess);
+                    }
+                    return countlyResponse;
                 }
             }
-            //catch (WebException webex)
-            //{
-            //    responseString = webex.Message;
-            //}
             catch (Exception ex)
             {
-                responseString = ex.Message;
+                addToRequestQueue = true;
+                countlyResponse.ErrorMessage = ex.Message;
             }
 
-            //Log to Unity Console
-            if (Countly.EnableConsoleErrorLogging)
+            if (addToRequestQueue)
             {
-                Debug.Log(responseString);
+                var requestModel = new CountlyRequestModel(false, uri, data, DateTime.UtcNow);
+                if (!Countly.TotalRequests.Contains(requestModel))
+                    requestModel.AddRequestToQueue();
             }
-            return responseString;
+
+            return countlyResponse;
         }
 
         /// <summary>
@@ -360,6 +395,9 @@ namespace Helpers
         /// <returns></returns>
         internal static bool IsPictureValid(string pictureUrl)
         {
+            if (!string.IsNullOrEmpty(pictureUrl) && pictureUrl.Contains("?"))
+                pictureUrl = pictureUrl.Split(new char[] { '?' }, StringSplitOptions.RemoveEmptyEntries)[0];
+
             return string.IsNullOrEmpty(pictureUrl)
                 || pictureUrl.EndsWith(".png")
                 || pictureUrl.EndsWith(".jpg")

@@ -1,4 +1,4 @@
-﻿namespace Assets.Plugin.Enums
+﻿namespace Assets.Scripts.Enums
 {
     enum FeaturesEnum
     {

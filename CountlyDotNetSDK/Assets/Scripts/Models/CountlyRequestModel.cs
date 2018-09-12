@@ -1,12 +1,12 @@
-﻿using Assets.Plugin.Scripts.Development;
-using Helpers;
+﻿using Assets.Scripts.Helpers;
+using Assets.Scripts.Main.Development;
 using System;
-using UnityEngine;
+using System.Threading.Tasks;
 
-namespace Assets.Plugin.Models
+namespace Assets.Scripts.Models
 {
     [Serializable]
-    class CountlyResponseModel
+    class CountlyApiResponseModel
     {
         public string Result { get; set; }
     }
@@ -55,11 +55,10 @@ namespace Assets.Plugin.Models
                 {
                     try
                     {
-                        Debug.Log(reqModel.RequestUrl);
                         ProcessRequest(reqModel);
                         isProcessed = true;
                     }
-                    catch (Exception ex)
+                    catch
                     {
                         retryCount++;
                         isProcessed = false;
@@ -75,15 +74,15 @@ namespace Assets.Plugin.Models
             }
         }
 
-        static string ProcessRequest(CountlyRequestModel model)
+        static void ProcessRequest(CountlyRequestModel model)
         {
             if (model.IsRequestGetType)
             {
-                return CountlyHelper.Get(model.RequestUrl);
+                Task.Run(() => CountlyHelper.GetAsync(model.RequestUrl));
             }
             else
             {
-                return CountlyHelper.Post(model.RequestUrl, model.RequestData);
+                Task.Run(() => CountlyHelper.PostAsync(model.RequestUrl, model.RequestData));
             }
         }
     }

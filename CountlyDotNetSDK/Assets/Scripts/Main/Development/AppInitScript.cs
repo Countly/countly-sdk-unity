@@ -1,7 +1,6 @@
-﻿using Helpers;
-using UnityEngine;
+﻿using UnityEngine;
 
-namespace Assets.Plugin.Scripts.Development
+namespace Assets.Scripts.Main.Development
 {
     public class AppInitScript : MonoBehaviour
     {
@@ -14,23 +13,23 @@ namespace Assets.Plugin.Scripts.Development
         public static Countly Instance => _instance ??
             (_instance = new Countly(
                                 "https://us-try.count.ly/",
-                                "YOUR_APP_KEY",
-                                "YOUR_DEVICE_ID"));
+                                "[APP_KEY]",
+                                "[DEVICE_ID]"));
 
         #endregion
 
         #region Event Methods
 
         // Use Start for initialization
-        void Start()
+        async void Start()
         {
-            Instance.Initialize("1234567890", true, true);
-            Instance.BeginSession();
+            Instance.Initialize("[SALT]", false, true);
+            await Instance.BeginSession();
         }
 
-        void OnApplicationQuit()
+        async void OnApplicationQuit()
         {
-            Instance.EndSession();
+            await Instance.EndSession();
         }
 
         void OnApplicationPause(bool pause)
