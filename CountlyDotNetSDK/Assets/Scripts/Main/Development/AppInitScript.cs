@@ -26,7 +26,6 @@ namespace Assets.Scripts.Main.Development
         // Use Start for initialization
         async void Start()
         {
-            Debug.Log("Start Called");
             Instance.Initialize("1234567890", false, true);
             await Instance.BeginSession();
         }

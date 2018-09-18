@@ -17,9 +17,24 @@ namespace Assets.Scripts.Main.Testing
 
         private static int x = 0;
 
+        private void Start()
+        {
+        }
+
+        void Ok_Clicked(string data)
+        {
+            Countly.Message = data;
+        }
+
+        void Cancel_Clicked(string data)
+        {
+            Countly.Message = Countly.Message + data;
+        }
+
         public void Set()
         {
-            Instance.EnablePush();
+            LocalNotification.SendNotification(1, 5000, "Title", "Long message text", new Color32(0xff, 0x44, 0x44, 255));
+            //Instance.EnablePush();
 
             //Countly.AllowSendingRequests = true;
             //CountlyUserDetailsModel.Set("Eyes", "Blue");
@@ -53,7 +68,7 @@ namespace Assets.Scripts.Main.Testing
         {
             var inp = GameObject.Find("InputField");
             var tt = inp.GetComponent<InputField>();
-            tt.text = Countly.Message;
+            tt.text = Countly.Message + "Hhiii";
 
             //Instance.ReportView("TestView");
             //CountlyUserDetailsModel.SetOnce("BP", "120/80");
@@ -63,6 +78,14 @@ namespace Assets.Scripts.Main.Testing
 
         public void Increment()
         {
+            
+            //LocalNotification.SendNotification(1, 5, "Hey!!", "I'm with Buttons.", new Color32(0x44, 0x44, 0x44, 0x44),
+            //true, true, true, null, null, "default",
+            //new LocalNotification.Action[]
+            //{
+            //    new LocalNotification.Action("btn_OK", "OK", this),
+            //    new LocalNotification.Action("btn_Cancel", "Cancel", this)
+            //});
             //Instance.EnablePush();
             //CountlyUserDetailsModel.Increment("Weight");
         }

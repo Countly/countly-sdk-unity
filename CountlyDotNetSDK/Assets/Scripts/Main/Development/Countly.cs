@@ -310,7 +310,7 @@ namespace Assets.Scripts.Main.Development
             model.Nonfatal = nonfatal;
             model.Custom = segments;
 #if UNITY_IOS
-            model._manufacture = iPhone.generation.ToString(),
+            model.Manufacture = Unity.iOSDevice.generation.ToString(),
 #endif
 #if UNITY_ANDROID
             model.Manufacture = SystemInfo.deviceModel;

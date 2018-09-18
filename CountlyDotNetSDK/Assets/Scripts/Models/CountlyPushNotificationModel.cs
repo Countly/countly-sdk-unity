@@ -63,11 +63,34 @@ namespace Assets.Scripts.Models
             await PostToCountly(2);
         }
 
-        private void OnMessageReceived(object sender, MessageReceivedEventArgs e)
+        private async void OnMessageReceived(object sender, MessageReceivedEventArgs e)
         {
-            Countly.Message = string.Join(",", e.Message.Data.Select(x => $"{x.Key} {x.Value}"));
-            //Post to Countly
-            Debug.Log("Received a new message from: " + e.Message.Data);
+            Countly.Message = e.Message.RawData;
+                //string.Join(",", e.Message.Data.Select(x => $"{x.Key} {x.Value}"));
+            if (e.Message != null && e.Message.Data != null && e.Message.Data.Count > 0)
+            {
+                int messageId;
+                bool isSound;
+                var data = e.Message.Data;
+                int.TryParse(data.First(x => x.Key == Constants.MessageIDKey).Value, out messageId);
+                var model = new
+                {
+                    MessageID = messageId > 0 ? messageId : new System.Random().Next(),
+                    ImageUrl = data.First(x => x.Key == Constants.ImageUrlKey).Value,
+                    Title = data.First(x => x.Key == Constants.TitleDataKey).Value,
+                    Message = data.First(x => x.Key == Constants.MessageDataKey).Value,
+                    Sound = bool.TryParse(data.First(x => x.Key == Constants.SoundDataKey).Value, out isSound)
+                                ? isSound : false
+                };
+
+                //Push local notification
+                //await Task.Run(() => NotificationHelper.SendNotification(model.MessageID, 0, model.Title, model.Message, model.Sound,
+                //                    model.Sound, true, null, null, null, model.ImageUrl, new NotificationHelper.Action[] { }));
+                //Debugging
+                Countly.Message = "Notification Sent";
+
+                //Notify to the Countly server
+            }
         }
 
         internal async void EnablePushNotifications()
@@ -92,7 +115,7 @@ namespace Assets.Scripts.Models
         /// Notifies Countly that the device is capable of receiving Push Notifications
         /// </summary>
         /// <returns></returns>
-        private Task<CountlyResponse> PostToCountly(int mode)
+        private async Task<CountlyResponse> PostToCountly(int mode)
         {
             var requestParams =
                new Dictionary<string, object>
@@ -101,7 +124,7 @@ namespace Assets.Scripts.Models
                     { "test_mode", mode },
                     { $"{Application.platform.ToString().ToLower()}_token", Token },
                };
-            return CountlyHelper.GetResponseAsync(requestParams);
+            return await CountlyHelper.GetResponseAsync(requestParams);
         }
     }
 }
