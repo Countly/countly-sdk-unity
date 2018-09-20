@@ -69,7 +69,7 @@ namespace Assets.Scripts.Models
         /// Uploads all user details
         /// </summary>
         /// <returns></returns>
-        internal async Task<CountlyResponse> SetUserDetails()
+        internal async Task<CountlyResponse> SetUserDetailsAsync()
         {
             if (!CountlyHelper.IsPictureValid(PictureUrl))
                 throw new Exception("Accepted picture formats are .png, .gif and .jpeg");
@@ -88,7 +88,7 @@ namespace Assets.Scripts.Models
         /// Uploads only custom data
         /// </summary>
         /// <returns></returns>
-        internal Task<CountlyResponse> SetCustomUserDetails()
+        internal Task<CountlyResponse> SetCustomUserDetailsAsync()
         {
             var requestParams =
                new Dictionary<string, object>
@@ -212,7 +212,7 @@ namespace Assets.Scripts.Models
         /// Saves all custom user data updates done since the last save request.
         /// </summary>
         /// <returns></returns>
-        public static async Task<CountlyResponse> Save()
+        public static async Task<CountlyResponse> SaveAsync()
         {
             if (!CustomDataProperties.Any())
                 throw new Exception("No data to save.");
@@ -221,7 +221,7 @@ namespace Assets.Scripts.Models
                             JsonConvert.SerializeObject(CustomDataProperties, Formatting.Indented));
 
             CustomDataProperties = new Dictionary<string, object> { };
-            return await model.SetCustomUserDetails();
+            return await model.SetCustomUserDetailsAsync();
         }
 
         #region Private Methods

@@ -5,26 +5,25 @@
 		android:icon="@drawable/app_icon"
         android:label="@string/app_name"
         android:debuggable="true">
+	
+	<activity android:name="com.unity3d.player.UnityPlayerActivity" android:launchMode="singleTask"
+                  android:label="@string/app_name">
+		<intent-filter>
+			<action android:name="android.intent.action.MAIN" />
+			<category android:name="android.intent.category.LAUNCHER" />
+		</intent-filter>
+		<meta-data android:name="unityplayer.UnityActivity" android:value="true" />
+    </activity>
+		
     <!-- The MessagingUnityPlayerActivity is a class that extends
          UnityPlayerActivity to work around a known issue when receiving
          notification data payloads in the background. -->
     <activity android:name="com.google.firebase.MessagingUnityPlayerActivity" android:configChanges="fontScale|keyboard|keyboardHidden|locale|mnc|mcc|navigation|orientation|screenLayout|screenSize|smallestScreenSize|uiMode|touchscreen">
-      <intent-filter>
-        <action android:name="android.intent.action.MAIN" />
-        <category android:name="android.intent.category.LAUNCHER" />
-      </intent-filter>
       <meta-data android:name="unityplayer.UnityActivity" android:value="true" />
     </activity>
     <service android:name="com.google.firebase.messaging.MessageForwardingService" android:exported="false" />
 	
-	<activity android:name="com.unity3d.player.UnityPlayerActivity" android:launchMode="singleTask"
-                  android:label="@string/app_name">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-            <meta-data android:name="unityplayer.UnityActivity" android:value="true" />
-    </activity>
+	
 	
 	<receiver android:name="net.agasper.unitynotification.UnityNotificationManager"></receiver>
     <receiver android:name="net.agasper.unitynotification.UnityNotificationActionHandler"></receiver>

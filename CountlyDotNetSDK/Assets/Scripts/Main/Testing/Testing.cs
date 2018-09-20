@@ -1,7 +1,9 @@
-﻿using Assets.Scripts.Models;
+﻿using Assets.Scripts.Helpers;
 using Assets.Scripts.Main.Development;
+using Assets.Scripts.Models;
+using System;
+using System.Threading.Tasks;
 using UnityEngine;
-using Assets.Scripts.Helpers;
 using UnityEngine.UI;
 
 namespace Assets.Scripts.Main.Testing
@@ -17,24 +19,28 @@ namespace Assets.Scripts.Main.Testing
 
         private static int x = 0;
 
-        private void Start()
+        void Start()
         {
         }
 
-        void Ok_Clicked(string data)
+        public void OnAction(object[] data)
         {
-            Countly.Message = data;
         }
 
-        void Cancel_Clicked(string data)
+        public async void Set()
         {
-            Countly.Message = Countly.Message + data;
-        }
+            //var methods = typeof(Testing).GetMembers();
+            //CountlyHelper.InvokeMethod(typeof(Testing), $"Ok_Click", new object[] { 0 });
 
-        public void Set()
-        {
-            LocalNotification.SendNotification(1, 5000, "Title", "Long message text", new Color32(0xff, 0x44, 0x44, 255));
-            //Instance.EnablePush();
+            //await NotificationHelper.SendNotification(1, 0, "Hey!!", "I'm with Buttons.",
+            //true, true, true, null, null, "default",
+            //"",
+            //new NotificationHelper.Action[]
+            //{
+            //    //new NotificationHelper.Action("btn_OK", "OK", "Payload data", "Ok_Clicked", this),
+            //    new NotificationHelper.Action("btn_Cancel", "Cancel", 1, this)
+            //});
+            //Instance.EnablePush(Enums.TestMode.TestToken);
 
             //Countly.AllowSendingRequests = true;
             //CountlyUserDetailsModel.Set("Eyes", "Blue");
@@ -66,9 +72,9 @@ namespace Assets.Scripts.Main.Testing
 
         public void SetOnce()
         {
-            var inp = GameObject.Find("InputField");
-            var tt = inp.GetComponent<InputField>();
-            tt.text = Countly.Message + "Hhiii";
+            //var inp = GameObject.Find("InputField");
+            //var tt = inp.GetComponent<InputField>();
+            //tt.text = Countly.Message;
 
             //Instance.ReportView("TestView");
             //CountlyUserDetailsModel.SetOnce("BP", "120/80");
@@ -78,15 +84,6 @@ namespace Assets.Scripts.Main.Testing
 
         public void Increment()
         {
-            
-            //LocalNotification.SendNotification(1, 5, "Hey!!", "I'm with Buttons.", new Color32(0x44, 0x44, 0x44, 0x44),
-            //true, true, true, null, null, "default",
-            //new LocalNotification.Action[]
-            //{
-            //    new LocalNotification.Action("btn_OK", "OK", this),
-            //    new LocalNotification.Action("btn_Cancel", "Cancel", this)
-            //});
-            //Instance.EnablePush();
             //CountlyUserDetailsModel.Increment("Weight");
         }
 
@@ -127,7 +124,7 @@ namespace Assets.Scripts.Main.Testing
 
         public async void Save()
         {
-            await CountlyUserDetailsModel.Save();
+            await CountlyUserDetailsModel.SaveAsync();
         }
 
         public void Test()

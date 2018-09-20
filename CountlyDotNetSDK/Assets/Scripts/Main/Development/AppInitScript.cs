@@ -13,10 +13,9 @@ namespace Assets.Scripts.Main.Development
         private static Countly _instance { get; set; }
         public static Countly Instance => _instance ??
             (_instance = 
-            new Countly(
-                                "https://us-try.count.ly/",
-                                Constants.AppKey,
-                                Constants.DeviceID)
+            new Countly("https://us-try.count.ly/",
+                            Constants.AppKey,
+                            Constants.DeviceID)
             );
 
         #endregion
@@ -27,12 +26,15 @@ namespace Assets.Scripts.Main.Development
         async void Start()
         {
             Instance.Initialize("1234567890", false, true);
-            await Instance.BeginSession();
+            await Instance.BeginSessionAsync();
+
+            //Testing Purpose
+            Instance.EnablePush(Enums.TestMode.TestToken);
         }
 
         async void OnApplicationQuit()
         {
-            await Instance.EndSession();
+            await Instance.EndSessionAsync();
         }
 
         void OnApplicationPause(bool pause)

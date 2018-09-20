@@ -9,6 +9,15 @@ using System.Threading.Tasks;
 
 namespace Assets.Scripts.Models
 {
+    [Serializable]
+    struct PushActionSegment
+    {
+        [JsonProperty("b")]
+        internal string Identifier { get; set; }
+        [JsonProperty("i")]
+        internal string MessageID { get; set; }
+    }
+
     /// <summary>
     /// Custom Segmentation for Views related events.
     /// </summary>
@@ -70,6 +79,8 @@ namespace Assets.Scripts.Models
         internal const string ViewActionEvent = "[CLY]_action";
         [JsonIgnore]
         internal const string StarRatingEvent = "[CLY]_star_rating";
+        [JsonIgnore]
+        internal const string PushActionEvent = "[CLY]_push_action";
 
         #endregion
 
@@ -147,7 +158,7 @@ namespace Assets.Scripts.Models
         /// Ends a particular event
         /// </summary>
         /// <returns></returns>
-        internal async Task<CountlyResponse> End(bool addToRequestQueue = false)
+        internal async Task<CountlyResponse> EndAsync(bool addToRequestQueue = false)
         {
             if (string.IsNullOrEmpty(Key))
                 throw new ArgumentNullException(Key, "Key is required.");
@@ -181,7 +192,7 @@ namespace Assets.Scripts.Models
         /// </summary>
         /// <param name="events"></param>
         /// <returns></returns>
-        public static async Task<CountlyResponse> StartMultipleEvents(List<CountlyEventModel> events)
+        public static async Task<CountlyResponse> StartMultipleEventsAsync(List<CountlyEventModel> events)
         {
             if (events == null || events.Count == 0)
                 throw new ArgumentException("No events found to record.");
@@ -205,7 +216,7 @@ namespace Assets.Scripts.Models
         /// Sends custom event to the Counlty server.
         /// </summary>
         /// <returns></returns>
-        public async Task<CountlyResponse> ReportCustomEvent()
+        public async Task<CountlyResponse> ReportCustomEventAsync()
         {
             if (string.IsNullOrEmpty(Key))
                 throw new ArgumentNullException(Key, "Key is required.");

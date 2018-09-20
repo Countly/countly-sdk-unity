@@ -1,10 +1,12 @@
 ﻿using Assets.Scripts.Main.Development;
+using Assets.Scripts.Main.Testing;
 using Assets.Scripts.Models;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -413,6 +415,18 @@ namespace Assets.Scripts.Helpers
                 builder.Append(bytes[i].ToString("x2"));
             }
             return builder.ToString();
+        }
+
+        internal static void InvokeMethod(Type type, string methodName, object[] payLoadData)
+        {
+            Testing tt = new Testing();
+            MethodInfo info = type.GetMethod(methodName);
+            info.Invoke(tt, new object[] { payLoadData });
+        }
+
+        internal static bool IsNullEmptyOrWhitespace(string input)
+        {
+            return string.IsNullOrEmpty(input) || string.IsNullOrWhiteSpace(input);
         }
 
         #region Unused Code
