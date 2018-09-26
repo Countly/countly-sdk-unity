@@ -3,12 +3,10 @@ using Assets.Scripts.Helpers;
 using Assets.Scripts.Main.Development;
 using Firebase;
 using Firebase.Messaging;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
-using System.Linq;
 
 namespace Assets.Scripts.Models
 {

@@ -2,9 +2,7 @@
 {
     internal class Constants
     {
-        //Sample Data
-        public const string DeviceID = "YOUR_DEVICE_ID";
-        public const string AppKey = "YOUR_APP_KEY";
+        public static readonly string CountlyServerUrl = "https://us-try.count.ly/";
 
         #region Notification Keys
 

@@ -35,20 +35,17 @@ namespace CountlyModels
         public static readonly CountlyMetricModel Metrics =
             new CountlyMetricModel
             {
-                OS = CountlyHelper.OperationSystem,
+                OS = Application.platform.ToString(),
                 OSVersion = CountlyHelper.OperationSystem,
                 Device = SystemInfo.deviceModel,
                 Resolution = Screen.currentResolution.ToString(),
-                //??
-                Carrier = null,
-                //??
                 AppVersion = Application.version,
                 Density = Screen.dpi.ToString(),
-                //??
+
+                //Not found metrics data
+                Carrier = null,
                 Store = null,
-                //??
                 Browser = null,
-                //??
                 BrowserVersion = null,
             };
     }

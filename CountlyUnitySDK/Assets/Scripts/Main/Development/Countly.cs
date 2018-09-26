@@ -56,9 +56,14 @@ namespace Assets.Scripts.Main.Development
         internal static Queue<CountlyRequestModel> TotalRequests = new Queue<CountlyRequestModel>();
 
         internal static bool IsFirebaseReady { get; set; }
+
+        //Not used anywhere for now
         internal static FirebaseApp FirebaseAppInstance { get; set; }
 
+        internal static List<string> CrashBreadcrumbs { get; set; } 
+
         internal static string Message { get; set; }
+        internal static bool IsInitialized { get; set; }
 
         //#region Consents
         //public static bool ConsentGranted;
@@ -86,12 +91,12 @@ namespace Assets.Scripts.Main.Development
 
         #region Initialization
         /// <summary>
-        /// Initializes the countly 
+        /// Initializes countly instance
         /// </summary>
         /// <param name="serverUrl"></param>
         /// <param name="appKey"></param>
         /// <param name="deviceId"></param>
-        public Countly(string serverUrl, string appKey, string deviceId = null)
+        public static void Begin(string serverUrl, string appKey, string deviceId = null)
         {
             ServerUrl = serverUrl;
             AppKey = appKey;
@@ -118,22 +123,23 @@ namespace Assets.Scripts.Main.Development
             if (CountlyHelper.IsNullEmptyOrWhitespace(storedDeviceId))
                 PlayerPrefs.SetString("DeviceID", DeviceId);
 
+            //Initialzing log breadcrumbs on app start
+            CrashBreadcrumbs = new List<string>();
+
             //ConsentGranted = consentGranted;
         }
 
         /// <summary>
         /// Initializes the Countly SDK with default values
         /// </summary>
-        /// <param name="countryCode"></param>
-        /// <param name="city"></param>
-        /// <param name="location"></param>
         /// <param name="salt"></param>
         /// <param name="enablePost"></param>
-        /// <param name="enableRequestQueuing"></param>
-        /// <param name="isDevelopmentMode"></param>
-        /// <param name="sessionUpdateInterval"></param>
-        public CountlyResponse Initialize(string salt = null, bool enablePost = false, bool enableConsoleErrorLogging = false,
-            bool ignoreSessionCooldown = false)
+        /// <param name="enableConsoleErrorLogging"></param>
+        /// <param name="ignoreSessionCooldown"></param>
+        /// <returns></returns>
+        public static async Task<CountlyResponse> SetDefaults(string salt = null, bool enablePost = false, 
+            bool enableConsoleErrorLogging = false, bool ignoreSessionCooldown = false,
+            TestMode? notificationMode = null)
         {
             Salt = salt;
             PostRequestEnabled = enablePost;
@@ -141,8 +147,19 @@ namespace Assets.Scripts.Main.Development
             EnableConsoleErrorLogging = enableConsoleErrorLogging;
             IgnoreSessionCooldown = ignoreSessionCooldown;
 
-            InitSessionTimer();
+            //Start Session
+            await BeginSessionAsync();
+            
             SetStoredRequestLimit(1000);
+
+            //Enables push notification on start
+            if (notificationMode.HasValue)
+            {
+                EnablePush(notificationMode.Value);
+            }
+
+            //SDK has been initialized now
+            IsInitialized = true;
 
             return new CountlyResponse
             {
@@ -158,7 +175,7 @@ namespace Assets.Scripts.Main.Development
         /// Sets Country Code to be used for future requests.
         /// </summary>
         /// <param name="country_code"></param>
-        public void SetCountryCode(string country_code)
+        public static void SetCountryCode(string country_code)
         {
             CountryCode = country_code;
         }
@@ -167,7 +184,7 @@ namespace Assets.Scripts.Main.Development
         /// Sets City to be used for future requests.
         /// </summary>
         /// <param name="city"></param>
-        public void SetCity(string city)
+        public static void SetCity(string city)
         {
             City = city;
         }
@@ -177,7 +194,7 @@ namespace Assets.Scripts.Main.Development
         /// </summary>
         /// <param name="latitude"></param>
         /// <param name="longitude"></param>
-        public void SetLocation(double latitude, double longitude)
+        public static void SetLocation(double latitude, double longitude)
         {
             Location = latitude + "," + longitude;
         }
@@ -186,7 +203,7 @@ namespace Assets.Scripts.Main.Development
         /// Sets IP address to be used for future requests.
         /// </summary>
         /// <param name="ip_address"></param>
-        public void SetIPAddress(string ip_address)
+        public static void SetIPAddress(string ip_address)
         {
             IPAddress = ip_address;
         }
@@ -199,25 +216,16 @@ namespace Assets.Scripts.Main.Development
         /// Sets a threshold value that limits the number of events that can be stored internally.
         /// </summary>
         /// <param name="eventThreshold"></param>
-        public void SetEventSendThreshold(int eventThreshold)
+        public static void SetEventSendThreshold(int eventThreshold)
         {
             EventSendThreshold = eventThreshold;
-        }
-
-        /// <summary>
-        /// Sets the session duration. Session will be extended each time this interval elapses. The interval value must be in seconds.
-        /// </summary>
-        /// <param name="interval"></param>
-        public void SetSessionDuration(int interval)
-        {
-            _extendSessionInterval = interval / 10;
         }
 
         /// <summary>
         /// Sets a threshold value that limits the number of requests that can be stored internally 
         /// </summary>
         /// <param name="limit"></param>
-        public void SetStoredRequestLimit(int limit)
+        public static void SetStoredRequestLimit(int limit)
         {
             StoredRequestLimit = limit;
         }
@@ -234,7 +242,7 @@ namespace Assets.Scripts.Main.Development
         /// Begins a new session with new Device Id
         /// </summary>
         /// <param name="deviceId"></param>
-        public async Task<CountlyResponse> ChangeDeviceAndEndCurrentSessionAsync(string deviceId)
+        public static async Task<CountlyResponse> ChangeDeviceAndEndCurrentSessionAsync(string deviceId)
         {
             //Ignore call if new and old device id are same
             if (DeviceId == deviceId)
@@ -255,7 +263,7 @@ namespace Assets.Scripts.Main.Development
 
             //Begin new session with new device id
             //Do not initiate timer again, it is already initiated
-            await ExecuteBeginSessionAsync(false);
+            await ExecuteBeginSessionAsync();
 
             return new CountlyResponse { IsSuccess = true };
         }
@@ -266,7 +274,7 @@ namespace Assets.Scripts.Main.Development
         /// Merges data for old and new Device Id. 
         /// </summary>
         /// <param name="deviceId"></param>
-        public async Task<CountlyResponse> ChangeDevicAndMergeSessionDataAsync(string deviceId)
+        public static async Task<CountlyResponse> ChangeDevicAndMergeSessionDataAsync(string deviceId)
         {
             //Ignore call if new and old device id are same
             if (DeviceId == deviceId)
@@ -293,7 +301,7 @@ namespace Assets.Scripts.Main.Development
         /// Updates Device ID both in app and in cache
         /// </summary>
         /// <param name="newDeviceID"></param>
-        private void UpdateDeviceID(string newDeviceID)
+        private static void UpdateDeviceID(string newDeviceID)
         {
             //Change device id
             DeviceId = newDeviceID;
@@ -312,12 +320,12 @@ namespace Assets.Scripts.Main.Development
         /// <param name="message">Exception Class</param>
         /// <param name="stackTrace">Stack Trace</param>
         /// <param name="type">Excpetion type like error, warning, etc</param>
-        internal void LogCallback(string message, string stackTrace, LogType type)
+        internal static async void LogCallback(string message, string stackTrace, LogType type)
         {
             if (type == LogType.Error
                 || type == LogType.Exception)
             {
-                SendCrashReportAsync(message, stackTrace, type);
+                await SendCrashReportAsync(message, stackTrace, type, null, false);
             }
         }
 
@@ -330,15 +338,16 @@ namespace Assets.Scripts.Main.Development
         /// <param name="customParams"></param>
         /// <param name="nonfatal"></param>
         /// <returns></returns>
-        public async Task<CountlyResponse> SendCrashReportAsync(string message, string stackTrace, LogType type, string segments = null, bool nonfatal = true)
+        public static async Task<CountlyResponse> SendCrashReportAsync(string message, string stackTrace, LogType type, string segments = null, bool nonfatal = true)
         {
             //if (ConsentModel.CheckConsent(FeaturesEnum.Crashes.ToString()))
             //{
             var model = CountlyExceptionDetailModel.ExceptionDetailModel;
-            model.Error = stackTrace;
+            model.Error = message;
             model.Name = message;
             model.Nonfatal = nonfatal;
             model.Custom = segments;
+            model.Logs = string.Join("\n", CrashBreadcrumbs);
 #if UNITY_IOS
             model.Manufacture = Unity.iOSDevice.generation.ToString(),
 #endif
@@ -355,6 +364,15 @@ namespace Assets.Scripts.Main.Development
             //}
         }
 
+        /// <summary>
+        /// Adds string value to a list which is later sent over as logs whenever a cash is reported by system
+        /// </summary>
+        /// <param name="value"></param>
+        public static void AddBreadcrumbs(string value)
+        {
+            CrashBreadcrumbs.Add(value);
+        }
+
         #endregion
 
         #region Sessions
@@ -362,7 +380,7 @@ namespace Assets.Scripts.Main.Development
         /// <summary>
         /// Initiates a session by setting begin_session
         /// </summary>
-        public async Task<CountlyResponse> BeginSessionAsync()
+        public static async Task<CountlyResponse> BeginSessionAsync()
         {
             return await ExecuteBeginSessionAsync();
         }
@@ -370,12 +388,22 @@ namespace Assets.Scripts.Main.Development
         /// <summary>
         /// Ends a session by setting end_session
         /// </summary>
-        public async Task<CountlyResponse> EndSessionAsync()
+        public static async Task<CountlyResponse> EndSessionAsync()
         {
             return await ExecuteEndSessionAsync();
         }
 
-        private async Task<CountlyResponse> ExecuteBeginSessionAsync(bool initiateTimer = true)
+        /// <summary>
+        /// Sets the session duration. Session will be extended each time this interval elapses. The interval value must be in seconds.
+        /// </summary>
+        /// <param name="interval"></param>
+        public static void SetSessionDuration(int interval)
+        {
+            _extendSessionInterval = interval;
+            _sessionTimer.Interval = _extendSessionInterval * 1000;
+        }
+
+        private static async Task<CountlyResponse> ExecuteBeginSessionAsync()
         {
             _lastSessionRequestTime = DateTime.Now;
             //if (ConsentModel.CheckConsent(FeaturesEnum.Sessions.ToString()))
@@ -395,8 +423,13 @@ namespace Assets.Scripts.Main.Development
             var response = await CountlyHelper.GetResponseAsync(requestParams);
 
             //Extend session only after session has begun
-            if (initiateTimer)
+            if (response.IsSuccess)
+            {
+                //Start session timer
+                InitSessionTimer();
                 _sessionTimer.Start();
+            }
+            
             //}
             return response;
         }
@@ -404,7 +437,7 @@ namespace Assets.Scripts.Main.Development
         /// <summary>
         /// Ends a session by setting end_session
         /// </summary>
-        private async Task<CountlyResponse> ExecuteEndSessionAsync(bool disposeTimer = true)
+        private static async Task<CountlyResponse> ExecuteEndSessionAsync(bool disposeTimer = true)
         {
             //if (ConsentModel.CheckConsent(FeaturesEnum.Sessions.ToString()))
             //{
@@ -433,7 +466,7 @@ namespace Assets.Scripts.Main.Development
         /// <summary>
         /// Extends a session by another 60 seconds
         /// </summary>
-        public async Task<CountlyResponse> ExtendSessionAsync()
+        public static async Task<CountlyResponse> ExtendSessionAsync()
         {
             _lastSessionRequestTime = DateTime.Now;
             //if (ConsentModel.CheckConsent(FeaturesEnum.Sessions.ToString()))
@@ -441,7 +474,7 @@ namespace Assets.Scripts.Main.Development
             var requestParams =
                 new Dictionary<string, object>
                 {
-                        { "session_duration", 60 },
+                        { "session_duration", _extendSessionInterval },
                         { "ignore_cooldown", IgnoreSessionCooldown.ToString().ToLower() }
                 };
             requestParams.Add("metrics", JsonConvert.SerializeObject(CountlyMetricModel.Metrics, Formatting.Indented,
@@ -459,7 +492,7 @@ namespace Assets.Scripts.Main.Development
         /// Adds an event with the specified key. Doesn't send the request to the Countly API
         /// </summary>
         /// <param name="key"></param>
-        public void StartEvent(string key)
+        public static void StartEvent(string key)
         {
             _countlyEventModel = new CountlyEventModel(key);
         }
@@ -469,7 +502,7 @@ namespace Assets.Scripts.Main.Development
         /// </summary>
         /// <param name="key"></param>
         /// <returns></returns>
-        public async Task<CountlyResponse> EndEventAsync(string key)
+        public static async Task<CountlyResponse> EndEventAsync(string key)
         {
             if (_countlyEventModel == null)
                 throw new NullReferenceException("Please start an event first.");
@@ -486,7 +519,7 @@ namespace Assets.Scripts.Main.Development
         /// <param name="count"></param>
         /// <param name="sum"></param>
         /// <returns></returns>
-        public async Task<CountlyResponse> EndEventAsync(string key, string segmentation, int? count = 1, double? sum = 0)
+        public static async Task<CountlyResponse> EndEventAsync(string key, string segmentation, int? count = 1, double? sum = 0)
         {
             if (_countlyEventModel == null)
                 throw new NullReferenceException("Please start an event first.");
@@ -501,7 +534,7 @@ namespace Assets.Scripts.Main.Development
         /// <summary>
         /// Adds all recorded but not queued events to Request Queue
         /// </summary>
-        private async void EndAllRecordedEventsAsync()
+        private static async void EndAllRecordedEventsAsync()
         {
             var events = TotalEvents.Select(x => x.Key).ToList();
             foreach (var evnt in events)
@@ -520,7 +553,7 @@ namespace Assets.Scripts.Main.Development
         /// </summary>
         /// <param name="name"></param>
         /// <param name="hasSessionBegunWithView"></param>
-        public async Task<CountlyResponse> ReportViewAsync(string name, bool hasSessionBegunWithView = false)
+        public static async Task<CountlyResponse> ReportViewAsync(string name, bool hasSessionBegunWithView = false)
         {
             if (string.IsNullOrEmpty(name))
                 throw new ArgumentNullException("Parameter name is required.");
@@ -554,7 +587,7 @@ namespace Assets.Scripts.Main.Development
             return res;
         }
 
-        private CountlyEventModel ReportViewDurationAsync(bool hasSessionBegunWithView = false)
+        private static CountlyEventModel ReportViewDurationAsync(bool hasSessionBegunWithView = false)
         {
             if (string.IsNullOrEmpty(_lastView) && string.IsNullOrWhiteSpace(_lastView))
                 return null;
@@ -589,7 +622,7 @@ namespace Assets.Scripts.Main.Development
         /// <param name="width"></param>
         /// <param name="height"></param>
         /// <returns></returns>
-        public async Task<CountlyResponse> ReportActionAsync(string type, int x, int y, int width, int height)
+        public static async Task<CountlyResponse> ReportActionAsync(string type, int x, int y, int width, int height)
         {
             var segment =
                 new ActionSegment
@@ -620,7 +653,7 @@ namespace Assets.Scripts.Main.Development
         /// <param name="app_version"></param>
         /// <param name="rating">Rating should be from 1 to 5</param>
         /// <returns></returns>
-        public async Task<CountlyResponse> ReportStarRatingAsync(string platform, string app_version, int rating)
+        public static async Task<CountlyResponse> ReportStarRatingAsync(string platform, string app_version, int rating)
         {
             if (rating < 1 || rating > 5)
                 throw new ArgumentException("Please provide rating from 1 to 5");
@@ -651,7 +684,7 @@ namespace Assets.Scripts.Main.Development
         /// </summary>
         /// <param name="userDetails"></param>
         /// <returns></returns>
-        public async Task<CountlyResponse> UserDetailsAsync(CountlyUserDetailsModel userDetails)
+        public static async Task<CountlyResponse> UserDetailsAsync(CountlyUserDetailsModel userDetails)
         {
             if (userDetails == null)
                 throw new ArgumentNullException("Please provide user details.");
@@ -665,7 +698,7 @@ namespace Assets.Scripts.Main.Development
         /// </summary>
         /// <param name="userDetails"></param>
         /// <returns></returns>
-        public async Task<CountlyResponse> UserCustomDetailsAsync(CountlyUserDetailsModel userDetails)
+        public static async Task<CountlyResponse> UserCustomDetailsAsync(CountlyUserDetailsModel userDetails)
         {
             if (userDetails == null)
                 throw new ArgumentNullException("Please provide user details.");
@@ -704,7 +737,7 @@ namespace Assets.Scripts.Main.Development
         /// <summary>
         /// Enables Push Notification feature for the device
         /// </summary>
-        public void EnablePush(TestMode mode)
+        public static void EnablePush(TestMode mode)
         {
             CountlyPushNotificationModel.CountlyPNInstance.EnablePushNotificationAsync(mode);
         }
@@ -719,7 +752,7 @@ namespace Assets.Scripts.Main.Development
         /// Intializes the timer for extending session with sepcified interval
         /// </summary>
         /// <param name="sessionInterval">In milliseconds</param>
-        private void InitSessionTimer()
+        private static void InitSessionTimer()
         {
             _sessionTimer = new Timer();
             _sessionTimer.Interval = _extendSessionInterval * 1000;
@@ -732,10 +765,10 @@ namespace Assets.Scripts.Main.Development
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="elapsedEventArgs"></param>
-        private async void SessionTimerOnElapsedAsync(object sender, ElapsedEventArgs elapsedEventArgs)
+        private static async void SessionTimerOnElapsedAsync(object sender, ElapsedEventArgs elapsedEventArgs)
         {
             await ExtendSessionAsync();
-            CountlyRequestModel.ProcessQueue();
+            //CountlyRequestModel.ProcessQueue();
         }
 
         #endregion

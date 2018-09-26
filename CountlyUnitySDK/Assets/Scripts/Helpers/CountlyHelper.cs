@@ -205,11 +205,13 @@ namespace Assets.Scripts.Helpers
                     requestModel.AddRequestToQueue();
             }
 
+#if UNITY_EDITOR
             //Log to Unity Console
             if (Countly.EnableConsoleErrorLogging)
             {
                 Debug.Log(countlyResponse.IsSuccess);
             }
+#endif
             return countlyResponse;
         }
 
@@ -239,11 +241,13 @@ namespace Assets.Scripts.Helpers
                 {
                     var res = JsonConvert.DeserializeObject<CountlyApiResponseModel>(await reader.ReadToEndAsync());
                     countlyResponse.IsSuccess = res != null && res.Result == "Success";
+#if UNITY_EDITOR                    
                     //Log to Unity Console
                     if (Countly.EnableConsoleErrorLogging)
                     {
                         Debug.Log(countlyResponse.IsSuccess);
                     }
+#endif
 
                     return countlyResponse;
                 }
@@ -304,11 +308,13 @@ namespace Assets.Scripts.Helpers
                     var res = JsonConvert.DeserializeObject<CountlyApiResponseModel>(reader.ReadToEnd());
                     countlyResponse.IsSuccess = res != null && res.Result == "Success";
 
+#if UNITY_EDITOR
                     //Log to Unity Console
                     if (Countly.EnableConsoleErrorLogging)
                     {
                         Debug.Log(countlyResponse.IsSuccess);
                     }
+#endif
                 }
             }
             catch (Exception ex)
@@ -366,11 +372,13 @@ namespace Assets.Scripts.Helpers
                     var res = JsonConvert.DeserializeObject<CountlyApiResponseModel>(await reader.ReadToEndAsync());
                     countlyResponse.IsSuccess = res != null && res.Result == "Success";
 
+#if UNITY_EDITOR
                     //Log to Unity Console
                     if (Countly.EnableConsoleErrorLogging)
                     {
                         Debug.Log(countlyResponse.IsSuccess);
                     }
+#endif
                     return countlyResponse;
                 }
             }
@@ -428,64 +436,6 @@ namespace Assets.Scripts.Helpers
         {
             return string.IsNullOrEmpty(input) || string.IsNullOrWhiteSpace(input);
         }
-
-        #region Unused Code
-
-        //public static void GetRequest(string uri)
-        //{
-        //    using (UnityWebRequest uwr = UnityWebRequest.Get(uri))
-        //    {
-        //        uwr.SendWebRequest();
-        //        var progress = uwr.downloadProgress;
-        //        while (progress < 1)
-        //        {
-        //            progress = uwr.downloadProgress;
-        //        }
-        //        if (uwr.isNetworkError)
-        //        {
-        //            Debug.Log("Error While Sending: " + uwr.error);
-        //        }
-        //        else
-        //        {
-        //            Debug.Log("Received: " + uwr.downloadHandler.text);
-        //        }
-        //    }
-        //}
-
-        //public static void PostRequest(string uri, string postData)
-        //{
-        //    //if (!Countly.ConsentGranted)
-        //    //{
-        //    //    //return;
-        //    //    //What do we do here?
-        //    //}
-        //    using (UnityWebRequest uwr = new UnityWebRequest(uri, "POST"))
-        //    {
-        //        byte[] jsonToSend = new UTF8Encoding().GetBytes(postData);
-        //        uwr.uploadHandler = (UploadHandler)new UploadHandlerRaw(jsonToSend);
-        //        uwr.downloadHandler = (DownloadHandler)new DownloadHandlerBuffer();
-        //        uwr.SetRequestHeader("Content-Type", "application/json");
-
-        //        //Send the request then wait here until it returns
-        //        uwr.SendWebRequest();
-        //        var progress = uwr.downloadProgress;
-        //        while (progress < 1)
-        //        {
-        //            progress = uwr.downloadProgress;
-        //        }
-
-        //        if (uwr.isNetworkError)
-        //        {
-        //            Debug.Log("Error While Sending: " + uwr.error);
-        //        }
-        //        else
-        //        {
-        //            Debug.Log("Received: " + uwr.downloadHandler.text);
-        //        }
-        //    }
-        //}
-
-        #endregion
 
         #endregion
     }

@@ -1,8 +1,5 @@
-﻿using Assets.Scripts.Helpers;
-using Assets.Scripts.Main.Development;
+﻿using Assets.Scripts.Main.Development;
 using Assets.Scripts.Models;
-using System;
-using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -10,25 +7,46 @@ namespace Assets.Scripts.Main.Testing
 {
     public class Testing : MonoBehaviour
     {
-        private static Countly _instance { get; set; }
-        public static Countly Instance => _instance ??
-            (_instance = new Countly(
-                                "https://us-try.count.ly/",
-                                Constants.AppKey,
-                                Constants.DeviceID));
-
-        private static int x = 0;
-
-        void Start()
+        #region Initialization
+        async void Start()
         {
+            //Countly.Begin("https://us-try.count.ly/",
+            //                "YOUR_APP_KEY",
+            //                "YOUR_DEVICE_ID");
+            //await Countly.SetDefaults();
         }
 
-        public void OnAction(object[] data)
+        #endregion
+
+        #region Manual Session Handling
+
+        public void StartSession()
         {
+            Countly.BeginSessionAsync().ConfigureAwait(false);
         }
 
-        public async void Set()
+        public void ExtendSession()
         {
+            Countly.ExtendSessionAsync().ConfigureAwait(false);
+        }
+
+        public void EndSession()
+        {
+            Countly.EndSessionAsync().ConfigureAwait(false);
+        }
+
+        public void SetSessionDuration()
+        {
+            Countly.SetSessionDuration(30);
+        }
+
+        #endregion
+
+        public void Set()
+        {
+            StartSession();
+            //x++;
+            //Instance.AddBreadcrumbs($"Value{x}");
             //var methods = typeof(Testing).GetMembers();
             //CountlyHelper.InvokeMethod(typeof(Testing), $"Ok_Click", new object[] { 0 });
 
@@ -72,10 +90,7 @@ namespace Assets.Scripts.Main.Testing
 
         public void SetOnce()
         {
-            //var inp = GameObject.Find("InputField");
-            //var tt = inp.GetComponent<InputField>();
-            //tt.text = Countly.Message;
-
+            ExtendSession();
             //Instance.ReportView("TestView");
             //CountlyUserDetailsModel.SetOnce("BP", "120/80");
             //Save();
@@ -84,17 +99,23 @@ namespace Assets.Scripts.Main.Testing
 
         public void Increment()
         {
+            SetSessionDuration();
+            //var inp = GameObject.Find("InputField");
+            //var tt = inp.GetComponent<InputField>();
             //CountlyUserDetailsModel.Increment("Weight");
         }
 
         public void IncrementBy()
         {
-            CountlyUserDetailsModel.IncrementBy("Height", 1);
+            EndSession();
+            //CountlyUserDetailsModel.IncrementBy("Height", 1);
         }
 
         public void Mulitply()
         {
-            CountlyUserDetailsModel.Multiply("Weight", 2);
+            var inp = GameObject.Find("InputField");
+            var tt = inp.GetComponent<InputField>();
+            //CountlyUserDetailsModel.Multiply("Weight", 2);
         }
 
         public void Max()
@@ -131,11 +152,11 @@ namespace Assets.Scripts.Main.Testing
         {
             #region Events
             Countly.EventSendThreshold = 1000;
-            while (x < 5)
-            {
-                Instance.StartEvent("Events_" + x);
-                x++;
-            }
+            //while (x < 5)
+            //{
+            //    //Instance.StartEvent("Events_" + x);
+            //    x++;
+            //}
 
             #endregion
 
