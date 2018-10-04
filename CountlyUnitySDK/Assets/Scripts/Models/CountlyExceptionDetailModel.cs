@@ -69,31 +69,26 @@ namespace CountlyModels
         public static readonly CountlyExceptionDetailModel ExceptionDetailModel
             = new CountlyExceptionDetailModel
             {
-                OS = CountlyHelper.OperationSystem,
+                OS = Application.platform.ToString(),
                 OSVersion = CountlyHelper.OperationSystem,
                 Device = SystemInfo.deviceName,
                 Resolution = Screen.currentResolution.ToString(),
                 AppVersion = Application.version,
                 Cpu = SystemInfo.processorType,
                 Opengl = SystemInfo.graphicsDeviceVersion,
-                RamCurrent = SystemInfo.systemMemorySize.ToString(),
                 RamTotal = SystemInfo.systemMemorySize.ToString(),
-                //??
-                DiskCurrent = null,
-                //??
-                DiskTotal = null,
                 Battery = SystemInfo.batteryLevel.ToString(),
                 Orientation = Screen.orientation.ToString(),
                 Online = (Application.internetReachability > 0).ToString(),
-                //??
+
+                //Not found
+                RamCurrent = null,
+                DiskCurrent = null,
+                DiskTotal = null,
                 Muted = null,
-                //??
                 Background = null,
-                //??
                 Root = null,
-                //??
                 Logs = null,
-                //??
                 Run = null,
             };
     }

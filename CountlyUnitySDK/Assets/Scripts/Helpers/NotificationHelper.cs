@@ -22,25 +22,29 @@ namespace Assets.Scripts.Helpers
     private static string bundleIdentifier { get { return Application.bundleIdentifier; } }
 #endif
 
-        public static async Task<int> SendNotificationAsync(TimeSpan delay, string title, string message, bool sound = true, bool vibrate = true, bool lights = true, string bigIcon = "", String soundName = null, string channel = "default", string imageUrl = null, params Action[] actions)
+        private static async Task<int> SendNotificationAsync(TimeSpan delay, string title, string message, bool sound = true, bool vibrate = true, bool lights = true, string bigIcon = "", String soundName = null, string channel = "default", string imageUrl = null, params Action[] actions)
         {
             int id = new System.Random().Next();
             return await Task.Run(() => SendNotificationAsync(id, (long)delay.TotalSeconds * 1000, title, message, sound, vibrate, lights, bigIcon, soundName, channel, imageUrl, actions)).ConfigureAwait(false);
         }
 
-        public static async Task<int> SendNotificationAsync(int id, TimeSpan delay, string title, string message, bool sound = true, bool vibrate = true, bool lights = true, string bigIcon = "", String soundName = null, string channel = "default", string imageUrl = null, params Action[] actions)
+        public static async Task<int> SendNotificationAsync(int id, TimeSpan delay, string title, string message, bool sound = true, bool vibrate = true, string imageUrl = null, params Action[] actions)
         {
+            bool lights = true;
+            string bigIcon = "";
+            string soundName = null;
+            string channel = "default";
             return await SendNotificationAsync(id, (long)delay.TotalSeconds * 1000, title, message, sound, vibrate, lights, bigIcon, soundName, channel, imageUrl, actions);
         }
 
-        public static async Task<int> SendNotificationAsync(int id, long delayMs, string title, string message, bool sound = true, bool vibrate = true, bool lights = true, string bigIcon = "", String soundName = null, string channel = "default", string imageUrl = null, params Action[] actions)
+        private static async Task<int> SendNotificationAsync(int id, long delayMs, string title, string message, bool sound = true, bool vibrate = true, bool lights = true, string bigIcon = "", String soundName = null, string channel = "default", string imageUrl = null, params Action[] actions)
         {
 #if UNITY_ANDROID && !UNITY_EDITOR
         AndroidJavaClass pluginClass = new AndroidJavaClass(fullClassName);
         if (pluginClass != null)
         {
             pluginClass.CallStatic("SetNotification", id, delayMs, title, message, message,
-                sound ? 1 : 0, soundName, vibrate ? 1 : 0, lights ? 1 : 0, bigIcon, "notify_icon_small",
+                sound ? 1 : 0, soundName, vibrate ? 1 : 0, lights ? 1 : 0, bigIcon, null,
                 bundleIdentifier, channel, PopulateActions(actions), imageUrl);
         }
         return id;
@@ -61,18 +65,18 @@ namespace Assets.Scripts.Helpers
 #endif
         }
 
-        public static int SendRepeatingNotification(TimeSpan delay, TimeSpan timeout, string title, string message, bool sound = true, bool vibrate = true, bool lights = true, string bigIcon = "", String soundName = null, string channel = "default", string imageUrl = null, params Action[] actions)
+        private static int SendRepeatingNotification(TimeSpan delay, TimeSpan timeout, string title, string message, bool sound = true, bool vibrate = true, bool lights = true, string bigIcon = "", String soundName = null, string channel = "default", string imageUrl = null, params Action[] actions)
         {
             int id = new System.Random().Next();
             return SendRepeatingNotification(id, (long)delay.TotalSeconds * 1000, (int)timeout.TotalSeconds * 1000, title, message, sound, vibrate, lights, bigIcon, soundName, channel, imageUrl, actions);
         }
 
-        public static int SendRepeatingNotification(int id, TimeSpan delay, TimeSpan timeout, string title, string message, bool sound = true, bool vibrate = true, bool lights = true, string bigIcon = "", String soundName = null, string channel = "default", string imageUrl = null, params Action[] actions)
+        private static int SendRepeatingNotification(int id, TimeSpan delay, TimeSpan timeout, string title, string message, bool sound = true, bool vibrate = true, bool lights = true, string bigIcon = "", String soundName = null, string channel = "default", string imageUrl = null, params Action[] actions)
         {
             return SendRepeatingNotification(id, (long)delay.TotalSeconds * 1000, (int)timeout.TotalSeconds * 1000, title, message, sound, vibrate, lights, bigIcon, soundName, channel, imageUrl, actions);
         }
 
-        public static int SendRepeatingNotification(int id, long delayMs, long timeoutMs, string title, string message, bool sound = true, bool vibrate = true, bool lights = true, string bigIcon = "", String soundName = null, string channel = "default", string imageUrl = null, params Action[] actions)
+        private static int SendRepeatingNotification(int id, long delayMs, long timeoutMs, string title, string message, bool sound = true, bool vibrate = true, bool lights = true, string bigIcon = "", String soundName = null, string channel = "default", string imageUrl = null, params Action[] actions)
         {
 #if UNITY_ANDROID && !UNITY_EDITOR
         AndroidJavaClass pluginClass = new AndroidJavaClass(fullClassName);

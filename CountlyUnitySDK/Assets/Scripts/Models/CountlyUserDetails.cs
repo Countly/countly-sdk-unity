@@ -69,7 +69,7 @@ namespace Assets.Scripts.Models
         /// Uploads all user details
         /// </summary>
         /// <returns></returns>
-        internal async Task<CountlyResponse> SetUserDetailsAsync()
+        public async Task<CountlyResponse> SetUserDetailsAsync()
         {
             if (!CountlyHelper.IsPictureValid(PictureUrl))
                 throw new Exception("Accepted picture formats are .png, .gif and .jpeg");
@@ -85,18 +85,23 @@ namespace Assets.Scripts.Models
         }
 
         /// <summary>
-        /// Uploads only custom data
+        /// Uploads only custom data. Doesn't update any other property except Custom Data.
         /// </summary>
         /// <returns></returns>
-        internal Task<CountlyResponse> SetCustomUserDetailsAsync()
+        public async Task<CountlyResponse> SetCustomUserDetailsAsync()
         {
             var requestParams =
                new Dictionary<string, object>
                {
-                    { "user_details", JsonConvert.SerializeObject(this, Formatting.Indented,
-                                        new JsonSerializerSettings{ NullValueHandling = NullValueHandling.Ignore }) },
+                    { "user_details",
+                        JsonConvert.SerializeObject(
+                           new Dictionary<string, object>
+                           {
+                              { "custom", Custom }
+                           })
+                    }
                };
-            return CountlyHelper.GetResponseAsync(requestParams);
+            return await CountlyHelper.GetResponseAsync(requestParams);
         }
 
         /// <summary>

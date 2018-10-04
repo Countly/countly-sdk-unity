@@ -1,38 +1,46 @@
-﻿using Assets.Scripts.Main.Development;
+﻿using Assets.Scripts.Enums;
+using Assets.Scripts.Helpers;
+using Assets.Scripts.Main.Development;
 using Assets.Scripts.Models;
+using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace Assets.Scripts.Main.Testing
 {
+    /// <summary>
+    /// This class contains samples to invoke SDK Features and involves sample data only.
+    /// </summary>
     public class Testing : MonoBehaviour
     {
         #region Initialization
-        async void Start()
+        public async void InitializeCountlySDk()
         {
-            //Countly.Begin("https://us-try.count.ly/",
-            //                "YOUR_APP_KEY",
-            //                "YOUR_DEVICE_ID");
-            //await Countly.SetDefaults();
+            Countly.Begin("https://us-try.count.ly/",
+                            "YOUR_APP_KEY",
+                            "YOUR_DEVICE_ID");
+            await Countly.SetDefaults(null, false, false, false, TestMode.TestToken);
         }
 
         #endregion
 
         #region Manual Session Handling
 
-        public void StartSession()
+        public async void StartSession()
         {
-            Countly.BeginSessionAsync().ConfigureAwait(false);
+            await Countly.BeginSessionAsync();
         }
 
-        public void ExtendSession()
+        public async void ExtendSession()
         {
-            Countly.ExtendSessionAsync().ConfigureAwait(false);
+            await Countly.ExtendSessionAsync();
         }
 
-        public void EndSession()
+        public async void EndSession()
         {
-            Countly.EndSessionAsync().ConfigureAwait(false);
+            await Countly.EndSessionAsync();
         }
 
         public void SetSessionDuration()
@@ -42,159 +50,236 @@ namespace Assets.Scripts.Main.Testing
 
         #endregion
 
-        public void Set()
+        #region Optional Parameters
+
+        public void SetLocationParameters()
         {
-            StartSession();
-            //x++;
-            //Instance.AddBreadcrumbs($"Value{x}");
-            //var methods = typeof(Testing).GetMembers();
-            //CountlyHelper.InvokeMethod(typeof(Testing), $"Ok_Click", new object[] { 0 });
-
-            //await NotificationHelper.SendNotification(1, 0, "Hey!!", "I'm with Buttons.",
-            //true, true, true, null, null, "default",
-            //"",
-            //new NotificationHelper.Action[]
-            //{
-            //    //new NotificationHelper.Action("btn_OK", "OK", "Payload data", "Ok_Clicked", this),
-            //    new NotificationHelper.Action("btn_Cancel", "Cancel", 1, this)
-            //});
-            //Instance.EnablePush(Enums.TestMode.TestToken);
-
-            //Countly.AllowSendingRequests = true;
-            //CountlyUserDetailsModel.Set("Eyes", "Blue");
-            //int x = 0;
-            //while(x < 100)
-            //{
-            //    SetOnce();
-            //    Save();
-            //    Increment();
-            //    Save();
-            //    IncrementBy();
-            //    Save();
-            //    Mulitply();
-            //    Save();
-            //    Max();
-            //    Save();
-            //    Min();
-            //    Save();
-            //    Push();
-            //    Save();
-            //    PushUnique();
-            //    Save();
-            //    Pull();
-            //    Save();
-
-            //    x++;
-            //}
+            Countly.SetLocation(34.9285, 138.6007);
+            Countly.SetCity("Adelaide");
+            Countly.SetCountryCode("AU");
         }
 
-        public void SetOnce()
+        #endregion
+
+        #region Crash Reporting
+
+        public void AddBreadcrumb()
         {
-            ExtendSession();
-            //Instance.ReportView("TestView");
-            //CountlyUserDetailsModel.SetOnce("BP", "120/80");
-            //Save();
-            //await Instance.ChangeDeviceAndEndCurrentSession("d4937c60-04fc-478f-87f6-efd7331b6de8");
+            Countly.AddBreadcrumbs("SomeValueToBeSentWithCrashReport");
         }
 
-        public void Increment()
+        public void SendAutoCrashReport()
         {
-            SetSessionDuration();
-            //var inp = GameObject.Find("InputField");
-            //var tt = inp.GetComponent<InputField>();
-            //CountlyUserDetailsModel.Increment("Weight");
+            Countly.AddBreadcrumbs("Value1");
+            Countly.AddBreadcrumbs("Value2");
+            int x = 0, y = 0, z;
+            z = x / y;
         }
 
-        public void IncrementBy()
+        public async void SendManualCrashReport()
         {
-            EndSession();
-            //CountlyUserDetailsModel.IncrementBy("Height", 1);
+            var segments = new Dictionary<string, object>
+            {
+                { "Key1", "Value1" },
+                { "Key2", "Value2" }
+            };
+            Countly.AddBreadcrumbs("Value1");
+            Countly.AddBreadcrumbs("Value2");
+            try
+            {
+                int x = 0, y = 0, z;
+                z = x / y;
+            }
+            catch (Exception ex)
+            {
+                await Countly.SendCrashReportAsync(ex.Message, ex.StackTrace, LogType.Exception,
+                JsonConvert.SerializeObject(segments));
+            }
         }
 
-        public void Mulitply()
+        // Whenever app is enabled
+        void OnEnable()
         {
-            var inp = GameObject.Find("InputField");
-            var tt = inp.GetComponent<InputField>();
-            //CountlyUserDetailsModel.Multiply("Weight", 2);
+            Application.logMessageReceived += LogCallback;
         }
 
-        public void Max()
+        //Whenever app is disabled
+        void OnDisable()
         {
-            CountlyUserDetailsModel.Max("Weight", 85);
+            Application.logMessageReceived -= LogCallback;
         }
 
-        public void Min()
+        public void LogCallback(string condition, string stackTrace, LogType type)
         {
+            Countly.LogCallback(condition, stackTrace, type);
+        }
+
+        #endregion
+
+        #region Events
+
+        public async void ReportCustomEvent()
+        {
+            var segment = new Dictionary<string, object>
+            {
+                { "Key1", "Value1" },
+                { "Key2", "Value2" }
+            };
+            await Countly.ReportCustomEventAsync("Click");
+        }
+
+        public void SetEventSendThreshold(int threshold)
+        {
+            Countly.SetEventSendThreshold(threshold);
+        }
+
+        public async void StartEvent()
+        {
+            for (int count = 1; count <= 10; count++)
+            {
+                Countly.StartEvent($"Event{count}");
+                await Task.Delay(count * 1000);
+            }
+        }
+
+        public async void EndEvent()
+        {
+            for (int count = 1; count <= 10; count++)
+            {
+                await Countly.EndEventAsync($"Event{count}",
+                    JsonConvert.SerializeObject(
+                            new Dictionary<string, object>
+                            { { $"Key{count}", $"Value{count}"} }), 1, 10);
+            }
+        }
+
+        public async void EndEvent(string key, string segment, int count, double sum)
+        {
+            await Countly.EndEventAsync(key, segment, count, sum);
+        }
+
+        public async void ReportMultipleEvents()
+        {
+            var events = new List<CountlyEventModel>
+            {
+                new CountlyEventModel("Click",
+                        JsonConvert.SerializeObject(
+                            new Dictionary<string, object>
+                            { { "Key1", "Value1"} } )),
+                new CountlyEventModel("Hover",
+                        JsonConvert.SerializeObject(
+                            new Dictionary<string, object>
+                            { { "Key2", "Value2"} } )),
+            };
+            await Countly.ReportMultipleEventsAsync(events);
+        }
+        #endregion
+
+        #region Views
+
+        public async void ReportView()
+        {
+            await Countly.ReportViewAsync("LoginScreen", true);
+            await Countly.ReportViewAsync("MainDashboard");
+        }
+
+        #endregion
+
+        #region View Actions
+
+        public async void ReportViewAction()
+        {
+            await Countly.ReportActionAsync("Touch", 0, 0, 50, 50);
+        }
+
+        #endregion
+
+        #region Star Rating
+
+        public async void ReportStarRating()
+        {
+            await Countly.ReportStarRatingAsync("android", "0.1", 3);
+        }
+
+        #endregion
+
+        #region User Details
+
+        public async void SetUserDetails()
+        {
+            var userDetails = new CountlyUserDetailsModel(
+                                "Full Name", "username", "test@email.com", "Organization",
+                                "222-222-222", "https://www.teacherspocketbooks.co.uk/wp-content/uploads/sites/2/2015/04/tp-computer-icon.png", "M", "1986",
+                                JsonConvert.SerializeObject(new Dictionary<string, object>
+                                {
+                                    { "Hair", "Black" },
+                                    { "Race", "Asian" },
+                                }));
+            await userDetails.SetUserDetailsAsync();
+        }
+
+        public async void SetCustomUserDetails()
+        {
+            var userDetails = new CountlyUserDetailsModel(
+                                null, null, null, null,
+                                null, null, null, null,
+                                JsonConvert.SerializeObject(new Dictionary<string, object>
+                                {
+                                    { "Nationality", "Indian" },
+                                    { "Height", "5.10" },
+                                    { "Mole", "Lower Left Cheek" },
+                                }));
+            await userDetails.SetCustomUserDetailsAsync();
+        }
+
+        public void SetCustomUserData()
+        {
+            //Following are various examples
+            //In a request, there cannot be more than one update request for a single key.
+            //Ex: SetOnce and Increment cannot be clubbed together in one request because both are updating property "weight".
+            //However, SetOnce and IncrementBy can be clubbed together.
+            CountlyUserDetailsModel.SetOnce("Weight", "80");
+            CountlyUserDetailsModel.Increment("Weight");
+            CountlyUserDetailsModel.IncrementBy("Height", 1);
+            CountlyUserDetailsModel.Multiply("Weight", 2);
+            CountlyUserDetailsModel.Max("Weight", 190);
             CountlyUserDetailsModel.Min("Height", 5.5);
-        }
-
-        public void Push()
-        {
             CountlyUserDetailsModel.Push("Mole", new string[] { "Left Cheek", "Back", "Toe", "Back of the Neck", "Back" });
-        }
-
-        public void PushUnique()
-        {
             CountlyUserDetailsModel.PushUnique("Mole", new string[] { "Right & Leg", "Right Leg", "Right Leg" });
-        }
-
-        public void Pull()
-        {
             CountlyUserDetailsModel.Pull("Mole", new string[] { "Right & Leg", "Back" });
         }
 
-        public async void Save()
+        public async void SaveCustomUserData()
         {
             await CountlyUserDetailsModel.SaveAsync();
         }
 
-        public void Test()
+        #endregion
+
+        #region Push Notifications
+
+        public async void SendLocalNotification()
         {
-            #region Events
-            Countly.EventSendThreshold = 1000;
-            //while (x < 5)
-            //{
-            //    //Instance.StartEvent("Events_" + x);
-            //    x++;
-            //}
-
-            #endregion
-
-            #region Device ID
-
-
-
-            #endregion
-
-            #region User Details
-
-            //CountlyUserDetailsModel userDetails = null;
-            //switch (x)
-            //{
-            //    case 1:
-            //        userDetails = new CountlyUserDetailsModel(null, null, null, null, null, null, null, "https://pbs.twimg.com/profile_images/1442562237/012_n_400x400.jpg", null);
-            //        break;
-            //    case 2:
-            //        userDetails = new CountlyUserDetailsModel(null, null, null, null, null, "https://images.pexels.com/photos/349758/hummingbird-bird-birds-349758.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260", null, null, null);
-            //        break;
-            //    case 3:
-            //        userDetails = new CountlyUserDetailsModel(null, null, null, null, null, "https://images.pexels.com/photos/97533/pexels-photo-97533.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260", null, null, null);
-            //        break;
-            //    case 4:
-            //        userDetails = new CountlyUserDetailsModel(null, null, null, null, null, "http://animals.sandiegozoo.org/sites/default/files/2016-08/category-thumbnail-mammals_0.jpg", null, null, null);
-            //        break;
-            //    case 5:
-            //        userDetails = new CountlyUserDetailsModel(null, null, null, null, null, "https://images.pexels.com/photos/75973/pexels-photo-75973.jpeg?auto=compress&cs=tinysrgb&h=350", null, null, null);
-            //        break;
-            //    case 6:
-            //        userDetails = new CountlyUserDetailsModel(null, null, null, null, null, "https://images.pexels.com/photos/459198/pexels-photo-459198.jpeg?auto=compress&cs=tinysrgb&h=350", null, null, null);
-            //        break;
-
-            //}
-            //if (userDetails != null)
-            //    userDetails.SetUserDetails();
-
-            #endregion
+            await NotificationHelper.SendNotificationAsync(1, new TimeSpan(0, 0, 5), "Hey!", "How are you doing?",
+                    true, true,
+                    "https://images.pexels.com/photos/257840/pexels-photo-257840.jpeg?auto=compress&cs=tinysrgb&h=350",
+                    new NotificationHelper.Action[] { });
         }
+
+        #endregion
+
+        #region Device ID
+
+        public async void ChangeDeviceIDAndEndCurrentSessionAsync()
+        {
+            await Countly.ChangeDeviceIDAndEndCurrentSessionAsync("YOUR_NEW_DEVICE_ID");
+        }
+
+        public async void ChangeDeviceIDAndMergeSessionDataAsync()
+        {
+            await Countly.ChangeDeviceIDAndMergeSessionDataAsync("YOUR_NEW_DEVICE_ID");
+        }
+
+        #endregion
     }
 }

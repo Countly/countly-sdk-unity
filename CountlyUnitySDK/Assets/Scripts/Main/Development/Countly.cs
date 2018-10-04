@@ -1,7 +1,6 @@
 ﻿/* 
-    Countly Dot Net SDK
-    Under Development
-    Since: 06/12/2018
+    Countly Unity SDK
+    Release Version: v1
 */
 
 #region Usings
@@ -42,8 +41,8 @@ namespace Assets.Scripts.Main.Development
         internal static string City;
         internal static string Location;
         internal static string IPAddress;
-        internal static int EventSendThreshold;
-        internal static int StoredRequestLimit;
+        internal static int EventSendThreshold = 0;
+        internal static int StoredRequestLimit = 1000;
 
         public static string Salt;
         public static bool PostRequestEnabled;
@@ -52,7 +51,6 @@ namespace Assets.Scripts.Main.Development
         public static bool EnableConsoleErrorLogging;
         public static bool IgnoreSessionCooldown;
         internal static Dictionary<string, DateTime> TotalEvents = new Dictionary<string, DateTime>();
-        private static CountlyEventModel _countlyEventModel;
         internal static Queue<CountlyRequestModel> TotalRequests = new Queue<CountlyRequestModel>();
 
         internal static bool IsFirebaseReady { get; set; }
@@ -62,7 +60,6 @@ namespace Assets.Scripts.Main.Development
 
         internal static List<string> CrashBreadcrumbs { get; set; } 
 
-        internal static string Message { get; set; }
         internal static bool IsInitialized { get; set; }
 
         //#region Consents
@@ -121,7 +118,7 @@ namespace Assets.Scripts.Main.Development
 
             //Set DeviceID in Cache if it doesn't already exists in Cache
             if (CountlyHelper.IsNullEmptyOrWhitespace(storedDeviceId))
-                PlayerPrefs.SetString("DeviceID", DeviceId);
+                PlayerPrefs.SetString(Constants.DeviceIDKey, DeviceId);
 
             //Initialzing log breadcrumbs on app start
             CrashBreadcrumbs = new List<string>();
@@ -172,7 +169,7 @@ namespace Assets.Scripts.Main.Development
         #region Optional Parameters
 
         /// <summary>
-        /// Sets Country Code to be used for future requests.
+        /// Sets Country Code to be used for future requests. Takes ISO Country code as input parameter
         /// </summary>
         /// <param name="country_code"></param>
         public static void SetCountryCode(string country_code)
@@ -214,6 +211,7 @@ namespace Assets.Scripts.Main.Development
 
         /// <summary>
         /// Sets a threshold value that limits the number of events that can be stored internally.
+        /// Default is 1000 number of events.
         /// </summary>
         /// <param name="eventThreshold"></param>
         public static void SetEventSendThreshold(int eventThreshold)
@@ -242,7 +240,7 @@ namespace Assets.Scripts.Main.Development
         /// Begins a new session with new Device Id
         /// </summary>
         /// <param name="deviceId"></param>
-        public static async Task<CountlyResponse> ChangeDeviceAndEndCurrentSessionAsync(string deviceId)
+        public static async Task<CountlyResponse> ChangeDeviceIDAndEndCurrentSessionAsync(string deviceId)
         {
             //Ignore call if new and old device id are same
             if (DeviceId == deviceId)
@@ -274,7 +272,7 @@ namespace Assets.Scripts.Main.Development
         /// Merges data for old and new Device Id. 
         /// </summary>
         /// <param name="deviceId"></param>
-        public static async Task<CountlyResponse> ChangeDevicAndMergeSessionDataAsync(string deviceId)
+        public static async Task<CountlyResponse> ChangeDeviceIDAndMergeSessionDataAsync(string deviceId)
         {
             //Ignore call if new and old device id are same
             if (DeviceId == deviceId)
@@ -307,7 +305,7 @@ namespace Assets.Scripts.Main.Development
             DeviceId = newDeviceID;
 
             //Updating Cache
-            PlayerPrefs.SetString("DeviceID", DeviceId);
+            PlayerPrefs.SetString(Constants.DeviceIDKey, DeviceId);
         }
 
         #endregion
@@ -330,7 +328,7 @@ namespace Assets.Scripts.Main.Development
         }
 
         /// <summary>
-        /// Sends crash details to the server. Set param "nonfatal" to true for Custom Logged errors
+        /// Private method that sends crash details to the server. Set param "nonfatal" to true for Custom Logged errors
         /// </summary>
         /// <param name="message"></param>
         /// <param name="stackTrace"></param>
@@ -338,18 +336,18 @@ namespace Assets.Scripts.Main.Development
         /// <param name="customParams"></param>
         /// <param name="nonfatal"></param>
         /// <returns></returns>
-        public static async Task<CountlyResponse> SendCrashReportAsync(string message, string stackTrace, LogType type, string segments = null, bool nonfatal = true)
+        private static async Task<CountlyResponse> SendCrashReportAsync(string message, string stackTrace, LogType type, string segments = null, bool nonfatal = true)
         {
             //if (ConsentModel.CheckConsent(FeaturesEnum.Crashes.ToString()))
             //{
             var model = CountlyExceptionDetailModel.ExceptionDetailModel;
-            model.Error = message;
+            model.Error = stackTrace;
             model.Name = message;
             model.Nonfatal = nonfatal;
             model.Custom = segments;
             model.Logs = string.Join("\n", CrashBreadcrumbs);
 #if UNITY_IOS
-            model.Manufacture = Unity.iOSDevice.generation.ToString(),
+            model.Manufacture = UnityEngine.iOS.Device.generation.ToString();
 #endif
 #if UNITY_ANDROID
             model.Manufacture = SystemInfo.deviceModel;
@@ -362,6 +360,19 @@ namespace Assets.Scripts.Main.Development
 
             return await CountlyHelper.GetResponseAsync(requestParams);
             //}
+        }
+
+        /// <summary>
+        /// Sends custom logged errors to the server.
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="stackTrace"></param>
+        /// <param name="type"></param>
+        /// <param name="segments"></param>
+        /// <returns></returns>
+        public static async Task<CountlyResponse> SendCrashReportAsync(string message, string stackTrace, LogType type, string segments = null)
+        {
+            return await SendCrashReportAsync(message, stackTrace, type, segments, true);
         }
 
         /// <summary>
@@ -417,8 +428,7 @@ namespace Assets.Scripts.Main.Development
             requestParams.Add("metrics", JsonConvert.SerializeObject(CountlyMetricModel.Metrics, Formatting.Indented,
                                             new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }));
 
-            if (!string.IsNullOrEmpty(IPAddress))
-                requestParams.Add("ip_address", IPAddress);
+            requestParams.Add("ip_address", IPAddress);
 
             var response = await CountlyHelper.GetResponseAsync(requestParams);
 
@@ -434,9 +444,6 @@ namespace Assets.Scripts.Main.Development
             return response;
         }
 
-        /// <summary>
-        /// Ends a session by setting end_session
-        /// </summary>
         private static async Task<CountlyResponse> ExecuteEndSessionAsync(bool disposeTimer = true)
         {
             //if (ConsentModel.CheckConsent(FeaturesEnum.Sessions.ToString()))
@@ -489,12 +496,33 @@ namespace Assets.Scripts.Main.Development
         #region Events
 
         /// <summary>
+        /// Reports a custom event to the Counlty server.
+        /// </summary>
+        /// <returns></returns>
+        public static async Task<CountlyResponse> ReportCustomEventAsync(string key, string segmentation = null, int? count = 1,
+                                                    double? sum = null, double? duration = null)
+        {
+            if (string.IsNullOrEmpty(key))
+                throw new ArgumentNullException(key, "Key is required.");
+
+            var evnt = new CountlyEventModel(key, segmentation, count, sum, duration);
+
+            var requestParams =
+               new Dictionary<string, object>
+               {
+                    { "events", JsonConvert.SerializeObject(new List<CountlyEventModel>{ evnt }, Formatting.Indented,
+                                    new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }) },
+               };
+            return await CountlyHelper.GetResponseAsync(requestParams);
+        }
+
+        /// <summary>
         /// Adds an event with the specified key. Doesn't send the request to the Countly API
         /// </summary>
         /// <param name="key"></param>
         public static void StartEvent(string key)
         {
-            _countlyEventModel = new CountlyEventModel(key);
+            CountlyEventModel.StartEvent(key);
         }
 
         /// <summary>
@@ -504,11 +532,7 @@ namespace Assets.Scripts.Main.Development
         /// <returns></returns>
         public static async Task<CountlyResponse> EndEventAsync(string key)
         {
-            if (_countlyEventModel == null)
-                throw new NullReferenceException("Please start an event first.");
-
-            _countlyEventModel.Key = key;
-            return await _countlyEventModel.EndAsync();
+            return await CountlyEventModel.EndAsync(key);
         }
 
         /// <summary>
@@ -521,14 +545,7 @@ namespace Assets.Scripts.Main.Development
         /// <returns></returns>
         public static async Task<CountlyResponse> EndEventAsync(string key, string segmentation, int? count = 1, double? sum = 0)
         {
-            if (_countlyEventModel == null)
-                throw new NullReferenceException("Please start an event first.");
-
-            _countlyEventModel.Key = key;
-            _countlyEventModel.Segmentation = new JRaw(segmentation);
-            _countlyEventModel.Count = count;
-            _countlyEventModel.Sum = sum;
-            return await _countlyEventModel.EndAsync();
+            return await CountlyEventModel.EndAsync(key, segmentation, count, sum);
         }
 
         /// <summary>
@@ -539,9 +556,33 @@ namespace Assets.Scripts.Main.Development
             var events = TotalEvents.Select(x => x.Key).ToList();
             foreach (var evnt in events)
             {
-                _countlyEventModel.Key = evnt;
-                await _countlyEventModel.EndAsync(true);
+                await CountlyEventModel.EndAsync(evnt, null, null, null, true);
             }
+        }
+
+        /// <summary>
+        /// Sends multiple events to the countly server. It expects a list of events as input.
+        /// </summary>
+        /// <param name="events"></param>
+        /// <returns></returns>
+        public static async Task<CountlyResponse> ReportMultipleEventsAsync(List<CountlyEventModel> events)
+        {
+            if (events == null || events.Count == 0)
+                throw new ArgumentException("No events found to record.");
+
+            var currentTime = DateTime.UtcNow;
+            foreach (var evnt in events)
+            {
+                CountlyEventModel.SetTimeZoneInfo(evnt, currentTime);
+            }
+
+            var requestParams =
+               new Dictionary<string, object>
+               {
+                    { "events", JsonConvert.SerializeObject(events, Formatting.Indented,
+                                    new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }) },
+               };
+            return await CountlyHelper.GetResponseAsync(requestParams);
         }
 
         #endregion
@@ -559,7 +600,7 @@ namespace Assets.Scripts.Main.Development
                 throw new ArgumentNullException("Parameter name is required.");
 
             var events = new List<CountlyEventModel>();
-            var lastView = ReportViewDurationAsync();
+            var lastView = GetLastView();
             if (lastView != null)
                 events.Add(lastView);
 
@@ -567,19 +608,18 @@ namespace Assets.Scripts.Main.Development
                 new ViewSegment
                 {
                     Name = name,
-                    Segment = CountlyHelper.OperationSystem,
+                    Segment = Application.platform.ToString(),
                     Visit = 1,
                     HasSessionBegunWithView = hasSessionBegunWithView
                 };
 
-            var currentView = new CountlyEventModel(CountlyEventModel.ViewEvent,
-                                                        (JsonConvert.SerializeObject(currentViewSegment, Formatting.Indented,
-                                                            new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore, })),
-                                                        null
-                                                    );
+            var currentView = new CountlyEventModel(
+                                    CountlyEventModel.ViewEvent,
+                                    JsonConvert.SerializeObject(currentViewSegment, Formatting.Indented,
+                                        new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore, }));
             events.Add(currentView);
 
-            var res = await CountlyEventModel.StartMultipleEventsAsync(events);
+            var res = await ReportMultipleEventsAsync(events);
 
             _lastView = name;
             _lastViewStartTime = DateTime.Now;
@@ -587,7 +627,7 @@ namespace Assets.Scripts.Main.Development
             return res;
         }
 
-        private static CountlyEventModel ReportViewDurationAsync(bool hasSessionBegunWithView = false)
+        private static CountlyEventModel GetLastView(bool hasSessionBegunWithView = false)
         {
             if (string.IsNullOrEmpty(_lastView) && string.IsNullOrWhiteSpace(_lastView))
                 return null;
@@ -596,15 +636,15 @@ namespace Assets.Scripts.Main.Development
                 new ViewSegment
                 {
                     Name = _lastView,
-                    Segment = CountlyHelper.OperationSystem,
+                    Segment = Application.platform.ToString(),
                     HasSessionBegunWithView = hasSessionBegunWithView
                 };
 
-            var customEvent = new CountlyEventModel(CountlyEventModel.ViewEvent,
-                                                        (JsonConvert.SerializeObject(viewSegment, Formatting.Indented,
-                                                            new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore, })),
-                                                        (DateTime.Now - _lastViewStartTime).TotalMilliseconds
-                                                    );
+            var customEvent = new CountlyEventModel(
+                                    CountlyEventModel.ViewEvent,
+                                    JsonConvert.SerializeObject(viewSegment, Formatting.Indented,
+                                        new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore, }),
+                                    null, (DateTime.Now - _lastViewStartTime).TotalMilliseconds);
 
             return customEvent;
         }
@@ -634,12 +674,11 @@ namespace Assets.Scripts.Main.Development
                     Height = height
                 };
 
-            var action = new CountlyEventModel(CountlyEventModel.ViewActionEvent,
-                                                        (JsonConvert.SerializeObject(segment, Formatting.Indented,
-                                                            new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore, })),
-                                                        null
-                                                    );
-            return await action.ReportCustomEventAsync();
+            return await ReportCustomEventAsync(
+                           CountlyEventModel.ViewActionEvent,
+                           JsonConvert.SerializeObject(segment, Formatting.Indented,
+                               new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore, }),
+                           null, null, null);
         }
 
         #endregion
@@ -666,12 +705,11 @@ namespace Assets.Scripts.Main.Development
                     Rating = rating,
                 };
 
-            var action = new CountlyEventModel(CountlyEventModel.StarRatingEvent,
-                                                        (JsonConvert.SerializeObject(segment, Formatting.Indented,
-                                                            new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore, })),
-                                                        null
-                                                    );
-            return await action.ReportCustomEventAsync();
+            return await ReportCustomEventAsync(
+                            CountlyEventModel.StarRatingEvent,
+                            JsonConvert.SerializeObject(segment, Formatting.Indented,
+                                new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore, }),
+                            null, null, null);
         }
 
         #endregion
@@ -680,7 +718,7 @@ namespace Assets.Scripts.Main.Development
 
         /// <summary>
         /// Modifies all user data. Custom data should be json string.
-        /// Deletes a property if it is not supplied
+        /// Deletes an already defined custom property from the Countly server, if it is supplied with a NULL value
         /// </summary>
         /// <param name="userDetails"></param>
         /// <returns></returns>
@@ -694,7 +732,7 @@ namespace Assets.Scripts.Main.Development
 
         /// <summary>
         /// Modifies custom user data only. Custom data should be json string.
-        /// Deletes a property if it is not supplied
+        /// Deletes an already defined custom property from the Countly server, if it is supplied with a NULL value
         /// </summary>
         /// <param name="userDetails"></param>
         /// <returns></returns>
@@ -768,7 +806,7 @@ namespace Assets.Scripts.Main.Development
         private static async void SessionTimerOnElapsedAsync(object sender, ElapsedEventArgs elapsedEventArgs)
         {
             await ExtendSessionAsync();
-            //CountlyRequestModel.ProcessQueue();
+            CountlyRequestModel.ProcessQueue();
         }
 
         #endregion

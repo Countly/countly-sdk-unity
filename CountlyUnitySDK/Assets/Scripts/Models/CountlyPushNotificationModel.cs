@@ -127,12 +127,13 @@ namespace Assets.Scripts.Models
                 };
 
                 //Push local notification
-                await NotificationHelper.SendNotificationAsync(model.MessageID, new TimeSpan(0, 0, 5), model.Title, model.Message, model.Sound,
-                                    model.Sound, true, null, null, null, model.ImageUrl,
-                                    new NotificationHelper.Action[]
-                                    {
-                                        //Bind Notification actions here
-                                    });
+                await NotificationHelper.SendNotificationAsync(model.MessageID, new TimeSpan(0, 0, 5), model.Title, model.Message,
+                    model.Sound, model.Sound, model.ImageUrl,
+                    new NotificationHelper.Action[]
+                    {
+                        //Bind Notification actions here
+                        //Not supported in release version 1
+                    });
             }
         }
 
