@@ -35,7 +35,7 @@ namespace CountlyModels
         public static readonly CountlyMetricModel Metrics =
             new CountlyMetricModel
             {
-                OS = Application.platform.ToString(),
+                OS = Constants.UnityPlatform,
                 OSVersion = CountlyHelper.OperationSystem,
                 Device = SystemInfo.deviceModel,
                 Resolution = Screen.currentResolution.ToString(),

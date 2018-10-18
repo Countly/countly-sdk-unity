@@ -69,7 +69,7 @@ namespace CountlyModels
         public static readonly CountlyExceptionDetailModel ExceptionDetailModel
             = new CountlyExceptionDetailModel
             {
-                OS = Application.platform.ToString(),
+                OS = Constants.UnityPlatform,
                 OSVersion = CountlyHelper.OperationSystem,
                 Device = SystemInfo.deviceName,
                 Resolution = Screen.currentResolution.ToString(),

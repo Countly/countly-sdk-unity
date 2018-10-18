@@ -21,7 +21,8 @@ namespace Assets.Scripts.Main.Testing
             Countly.Begin("https://us-try.count.ly/",
                             "YOUR_APP_KEY",
                             "YOUR_DEVICE_ID");
-            await Countly.SetDefaults(null, false, false, false, TestMode.TestToken);
+            var configObj = new CountlyConfigModel(null, false, false, false, TestMode.TestToken);
+            await Countly.SetDefaults(configObj);
         }
 
         #endregion

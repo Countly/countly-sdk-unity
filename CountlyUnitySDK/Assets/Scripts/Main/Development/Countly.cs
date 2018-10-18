@@ -53,8 +53,6 @@ namespace Assets.Scripts.Main.Development
         internal static Dictionary<string, DateTime> TotalEvents = new Dictionary<string, DateTime>();
         internal static Queue<CountlyRequestModel> TotalRequests = new Queue<CountlyRequestModel>();
 
-        internal static bool IsFirebaseReady { get; set; }
-
         //Not used anywhere for now
         internal static FirebaseApp FirebaseAppInstance { get; set; }
 
@@ -134,25 +132,23 @@ namespace Assets.Scripts.Main.Development
         /// <param name="enableConsoleErrorLogging"></param>
         /// <param name="ignoreSessionCooldown"></param>
         /// <returns></returns>
-        public static async Task<CountlyResponse> SetDefaults(string salt = null, bool enablePost = false, 
-            bool enableConsoleErrorLogging = false, bool ignoreSessionCooldown = false,
-            TestMode? notificationMode = null)
+        public static async Task<CountlyResponse> SetDefaults(CountlyConfigModel configModel)
         {
-            Salt = salt;
-            PostRequestEnabled = enablePost;
-            PreventRequestTanmpering = !string.IsNullOrEmpty(salt);
-            EnableConsoleErrorLogging = enableConsoleErrorLogging;
-            IgnoreSessionCooldown = ignoreSessionCooldown;
+            Salt = configModel.Salt;
+            PostRequestEnabled = configModel.EnablePost;
+            PreventRequestTanmpering = !string.IsNullOrEmpty(Salt);
+            EnableConsoleErrorLogging = configModel.EnableConsoleErrorLogging;
+            IgnoreSessionCooldown = configModel.IgnoreSessionCooldown;
 
             //Start Session
             await BeginSessionAsync();
-            
+
             SetStoredRequestLimit(1000);
 
             //Enables push notification on start
-            if (notificationMode.HasValue)
+            if (configModel.NotificationMode.HasValue)
             {
-                EnablePush(notificationMode.Value);
+                EnablePush(configModel.NotificationMode.Value);
             }
 
             //SDK has been initialized now
@@ -608,7 +604,7 @@ namespace Assets.Scripts.Main.Development
                 new ViewSegment
                 {
                     Name = name,
-                    Segment = Application.platform.ToString(),
+                    Segment = Constants.UnityPlatform,
                     Visit = 1,
                     HasSessionBegunWithView = hasSessionBegunWithView
                 };
@@ -636,7 +632,7 @@ namespace Assets.Scripts.Main.Development
                 new ViewSegment
                 {
                     Name = _lastView,
-                    Segment = Application.platform.ToString(),
+                    Segment = Constants.UnityPlatform,
                     HasSessionBegunWithView = hasSessionBegunWithView
                 };
 

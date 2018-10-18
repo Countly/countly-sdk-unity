@@ -1,4 +1,5 @@
-﻿namespace Assets.Scripts.Helpers
+﻿
+namespace Assets.Scripts.Helpers
 {
     internal class Constants
     {
@@ -13,6 +14,15 @@
         public const string ImageUrlKey = "c.m";
         public const string ActionButtonKey = "c.b";
         public const string SoundDataKey = "sound";
+
+        #endregion
+
+        #region Unity System
+
+        public static string UnityPlatform =>
+            UnityEngine.Application.platform.ToString().ToLower() == "iphoneplayer"
+            ? "ios"
+            : UnityEngine.Application.platform.ToString().ToLower();
 
         #endregion
     }

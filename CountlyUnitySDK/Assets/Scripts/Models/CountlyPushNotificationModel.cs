@@ -7,6 +7,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
+using NotificationServices = UnityEngine.iOS.NotificationServices;
+using NotificationType = UnityEngine.iOS.NotificationType;
 
 namespace Assets.Scripts.Models
 {
@@ -15,7 +17,9 @@ namespace Assets.Scripts.Models
     {
         internal static CountlyPushNotificationModel CountlyPNInstance;
         internal static string Token = null;
-        private static TestMode _mode;
+        internal static TestMode Mode;
+        internal static bool IsPushServiceReady = false;
+        internal static bool IsFirebaseReady { get; set; }
 
         static CountlyPushNotificationModel()
         {
@@ -42,7 +46,7 @@ namespace Assets.Scripts.Models
                     Countly.FirebaseAppInstance = FirebaseApp.DefaultInstance;
 
                     // Set a flag here indicating that Firebase is ready to use by your application.
-                    Countly.IsFirebaseReady = true;
+                    IsFirebaseReady = true;
                     return dependencyStatus;
                 }
                 else
@@ -58,9 +62,8 @@ namespace Assets.Scripts.Models
         /// Registers Firebase messaging events
         /// </summary>
         /// <param name="mode"></param>
-        internal void RegisterEvents(TestMode mode)
+        internal void RegisterEvents()
         {
-            _mode = mode;
             //Attaching events
             FirebaseMessaging.TokenReceived += OnTokenReceived;
             FirebaseMessaging.MessageReceived += OnMessageReceived;
@@ -72,20 +75,33 @@ namespace Assets.Scripts.Models
         /// <param name="mode">Application mode</param>
         internal async void EnablePushNotificationAsync(TestMode mode)
         {
-            if (Countly.IsFirebaseReady)
+#if UNITY_ANDROID && !UNITY_EDITOR
+            if (IsFirebaseReady)
                 return;
 
             //Initialize Firebase
             var dependencyStatus = await CountlyPNInstance.InitializeFirebaseAsync();
-            if (Countly.IsFirebaseReady)
+            if (IsFirebaseReady)
             {
+                Mode = mode;
+
                 //Register events
-                CountlyPNInstance.RegisterEvents(mode);
+                CountlyPNInstance.RegisterEvents();
             }
             else
             {
                 throw new Exception($"Could not resolve all Firebase dependencies: {dependencyStatus}");
             }
+#endif
+#if UNITY_IOS && !UNITY_EDITOR
+            NotificationServices.RegisterForNotifications(
+                NotificationType.Alert
+                | NotificationType.Badge
+                | NotificationType.Sound);
+
+            Mode = mode;
+#endif
+            IsPushServiceReady = true;
         }
 
         /// <summary>
@@ -95,10 +111,11 @@ namespace Assets.Scripts.Models
         /// <param name="token"></param>
         public async void OnTokenReceived(object sender, TokenReceivedEventArgs token)
         {
+
             //Save token for further use
+#if UNITY_ANDROID && !UNITY_EDITOR
             Token = token.Token;
-            //Post to Countly
-            await PostToCountlyAsync((int)_mode);
+#endif
         }
 
         /// <summary>
@@ -150,14 +167,14 @@ namespace Assets.Scripts.Models
         /// Notifies Countly that the device is capable of receiving Push Notifications
         /// </summary>
         /// <returns></returns>
-        private async Task<CountlyResponse> PostToCountlyAsync(int mode)
+        internal async Task<CountlyResponse> PostToCountlyAsync(int mode)
         {
             var requestParams =
                new Dictionary<string, object>
                {
                     { "token_session", 1 },
                     { "test_mode", mode },
-                    { $"{Application.platform.ToString().ToLower()}_token", Token },
+                    { $"{ Constants.UnityPlatform }_token", Token },
                };
             return await CountlyHelper.GetResponseAsync(requestParams);
         }
