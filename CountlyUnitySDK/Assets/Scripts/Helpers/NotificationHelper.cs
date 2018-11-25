@@ -41,10 +41,10 @@ namespace Assets.Scripts.Helpers
         {
 #if UNITY_ANDROID && !UNITY_EDITOR
         AndroidJavaClass pluginClass = new AndroidJavaClass(fullClassName);
-        if (pluginClass != null)
+        if (pluginClass != null)    
         {
             pluginClass.CallStatic("SetNotification", id, delayMs, title, message, message,
-                sound ? 1 : 0, soundName, vibrate ? 1 : 0, lights ? 1 : 0, bigIcon, null,
+                sound ? 1 : 0, soundName, vibrate ? 1 : 0, lights ? 1 : 0, bigIcon, "notification_icon",
                 bundleIdentifier, channel, PopulateActions(actions), imageUrl);
         }
         return id;

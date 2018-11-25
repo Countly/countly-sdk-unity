@@ -2,6 +2,7 @@
 using Assets.Scripts.Main.Development;
 using System;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace Assets.Scripts.Models
 {
@@ -11,12 +12,14 @@ namespace Assets.Scripts.Models
         public string Result { get; set; }
     }
 
-    class CountlyRequestModel
+    public class CountlyRequestModel
     {
         bool IsRequestGetType { get; set; }
         string RequestUrl { get; set; }
         string RequestData { get; set; }
         DateTime RequestDateTime { get; set; }
+
+        internal static Queue<CountlyRequestModel> TotalRequests { get; private set; }
 
         internal CountlyRequestModel(bool isRequestGetType, string requestUrl, string requestData, DateTime requestDateTime)
         {
@@ -26,27 +29,32 @@ namespace Assets.Scripts.Models
             RequestDateTime = requestDateTime;
         }
 
+        internal static void InitializeRequestCollection()
+        {
+            TotalRequests = new Queue<CountlyRequestModel>();
+        }
+
         internal void AddRequestToQueue()
         {
-            if (Countly.TotalRequests.Count == Countly.StoredRequestLimit)
+            if (TotalRequests.Count == Countly.StoredRequestLimit)
                 RemoveRequestFromQueue();
 
-            Countly.TotalRequests.Enqueue(this);
+            TotalRequests.Enqueue(this);
         }
 
         CountlyRequestModel RemoveRequestFromQueue()
         {
-            return Countly.TotalRequests.Dequeue();
+            return TotalRequests.Dequeue();
         }
 
         CountlyRequestModel GetRequestFromQueue()
         {
-            return Countly.TotalRequests.Peek();
+            return TotalRequests.Peek();
         }
 
         internal static void ProcessQueue()
         {
-            var requests = Countly.TotalRequests.ToArray();
+            var requests = TotalRequests.ToArray();
             foreach (var reqModel in requests)
             {
                 var isProcessed = false;

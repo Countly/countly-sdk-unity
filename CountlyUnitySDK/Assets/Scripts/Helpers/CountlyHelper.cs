@@ -24,7 +24,7 @@ namespace Assets.Scripts.Helpers
 
         #region Methods
 
-        internal static string GenerateUniqueDeviceID() => Guid.NewGuid().ToString();
+        internal static string GetUniqueDeviceID() => SystemInfo.deviceUniqueIdentifier;
 
         /// <summary>
         /// Gets the base url to make requests to the Countly server.
@@ -41,10 +41,11 @@ namespace Assets.Scripts.Helpers
         /// <returns></returns>
         internal static Dictionary<string, object> GetBaseParams()
         {
-            var baseParams = new Dictionary<string, object>();
-
-            baseParams.Add("app_key", Countly.AppKey);
-            baseParams.Add("device_id", Countly.DeviceId);
+            var baseParams = new Dictionary<string, object>
+            {
+                { "app_key", Countly.AppKey },
+                { "device_id", Countly.DeviceId }
+            };
 
             foreach (var item in TimeMetricModel.GetTimeMetricModel())
                 baseParams.Add(item.Key, item.Value);
@@ -53,7 +54,7 @@ namespace Assets.Scripts.Helpers
                 baseParams.Add("country_code", Countly.CountryCode);
             if (!string.IsNullOrEmpty(Countly.City))
                 baseParams.Add("city", Countly.City);
-            if (!string.IsNullOrEmpty(Countly.Location))
+            if (Countly.Location != null)
                 baseParams.Add("location", Countly.Location);
 
             return baseParams;
@@ -181,9 +182,6 @@ namespace Assets.Scripts.Helpers
 
                 HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
 
-                //Allow untrusted connection
-                ServicePointManager.ServerCertificateValidationCallback = (a, b, c, d) => true;
-
                 using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
                 using (Stream stream = response.GetResponseStream())
                 using (StreamReader reader = new StreamReader(stream))
@@ -201,7 +199,7 @@ namespace Assets.Scripts.Helpers
             if (addToRequestQueue)
             {
                 var requestModel = new CountlyRequestModel(true, url, null, DateTime.UtcNow);
-                if (!Countly.TotalRequests.Contains(requestModel))
+                if (!CountlyRequestModel.TotalRequests.Contains(requestModel))
                     requestModel.AddRequestToQueue();
             }
 
@@ -232,9 +230,6 @@ namespace Assets.Scripts.Helpers
 
                 HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
 
-                //Allow untrusted connection
-                ServicePointManager.ServerCertificateValidationCallback = (a, b, c, d) => true;
-
                 using (HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync())
                 using (Stream stream = response.GetResponseStream())
                 using (StreamReader reader = new StreamReader(stream))
@@ -261,7 +256,7 @@ namespace Assets.Scripts.Helpers
             if (addToRequestQueue)
             {
                 var requestModel = new CountlyRequestModel(true, url, null, DateTime.UtcNow);
-                if (!Countly.TotalRequests.Contains(requestModel))
+                if (!CountlyRequestModel.TotalRequests.Contains(requestModel))
                     requestModel.AddRequestToQueue();
             }
 
@@ -288,13 +283,9 @@ namespace Assets.Scripts.Helpers
                 byte[] dataBytes = Encoding.UTF8.GetBytes(data);
 
                 HttpWebRequest request = (HttpWebRequest)WebRequest.Create(uri);
-                request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
                 request.ContentLength = dataBytes.Length;
                 request.ContentType = "application/json";
                 request.Method = "POST";
-
-                //Allow untrusted connection
-                ServicePointManager.ServerCertificateValidationCallback = (a, b, c, d) => true;
 
                 using (Stream requestBody = request.GetRequestStream())
                 {
@@ -326,7 +317,7 @@ namespace Assets.Scripts.Helpers
             if (addToRequestQueue)
             {
                 var requestModel = new CountlyRequestModel(false, uri, data, DateTime.UtcNow);
-                if (!Countly.TotalRequests.Contains(requestModel))
+                if (!CountlyRequestModel.TotalRequests.Contains(requestModel))
                     requestModel.AddRequestToQueue();
             }
             return countlyResponse;
@@ -352,13 +343,10 @@ namespace Assets.Scripts.Helpers
                 byte[] dataBytes = Encoding.UTF8.GetBytes(data);
 
                 HttpWebRequest request = (HttpWebRequest)WebRequest.Create(uri);
-                request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
                 request.ContentLength = dataBytes.Length;
                 request.ContentType = "application/json";
                 request.Method = "POST";
 
-                //Allow untrusted connection
-                ServicePointManager.ServerCertificateValidationCallback = (a, b, c, d) => true;
 
                 using (Stream requestBody = request.GetRequestStream())
                 {
@@ -371,7 +359,6 @@ namespace Assets.Scripts.Helpers
                 {
                     var res = JsonConvert.DeserializeObject<CountlyApiResponseModel>(await reader.ReadToEndAsync());
                     countlyResponse.IsSuccess = res != null && res.Result == "Success";
-
 #if UNITY_EDITOR
                     //Log to Unity Console
                     if (Countly.EnableConsoleErrorLogging)
@@ -391,7 +378,7 @@ namespace Assets.Scripts.Helpers
             if (addToRequestQueue)
             {
                 var requestModel = new CountlyRequestModel(false, uri, data, DateTime.UtcNow);
-                if (!Countly.TotalRequests.Contains(requestModel))
+                if (!CountlyRequestModel.TotalRequests.Contains(requestModel))
                     requestModel.AddRequestToQueue();
             }
 

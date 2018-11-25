@@ -6,14 +6,11 @@ using Firebase.Messaging;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using UnityEngine;
-using NotificationServices = UnityEngine.iOS.NotificationServices;
-using NotificationType = UnityEngine.iOS.NotificationType;
 
 namespace Assets.Scripts.Models
 {
     [Serializable]
-    internal class CountlyPushNotificationModel : MonoBehaviour
+    internal class CountlyPushNotificationModel
     {
         internal static CountlyPushNotificationModel CountlyPNInstance;
         internal static string Token = null;
@@ -43,7 +40,7 @@ namespace Assets.Scripts.Models
                     // Create and hold a reference to your FirebaseApp, i.e.
                     //  app = Firebase.FirebaseApp.DefaultInstance;
                     // where app is a Firebase.FirebaseApp property of your application class.
-                    Countly.FirebaseAppInstance = FirebaseApp.DefaultInstance;
+                    //FirebaseAppInstance = FirebaseApp.DefaultInstance;
 
                     // Set a flag here indicating that Firebase is ready to use by your application.
                     IsFirebaseReady = true;
@@ -100,8 +97,9 @@ namespace Assets.Scripts.Models
                 | NotificationType.Sound);
 
             Mode = mode;
-#endif
             IsPushServiceReady = true;
+#endif
+
         }
 
         /// <summary>
@@ -109,17 +107,18 @@ namespace Assets.Scripts.Models
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="token"></param>
-        public async void OnTokenReceived(object sender, TokenReceivedEventArgs token)
+        public void OnTokenReceived(object sender, TokenReceivedEventArgs token)
         {
-
             //Save token for further use
-#if UNITY_ANDROID && !UNITY_EDITOR
+#if UNITY_ANDROID
             Token = token.Token;
+            IsPushServiceReady = true;
 #endif
         }
 
         /// <summary>
-        /// Fired when app receives a message (Push Notification) from Countly
+        /// Fired when app receives a message (Push Notification) from Countly.
+        /// Returns notification id
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -133,7 +132,7 @@ namespace Assets.Scripts.Models
                 var model = new
                 {
                     MessageID = int.TryParse(GetValue(data, Constants.MessageIDKey), out messageId)
-                                ? messageId : new System.Random().Next(),
+                                ? messageId : new Random().Next(),
                     ImageUrl = GetValue(data, Constants.ImageUrlKey),
                     Title = GetValue(data, Constants.TitleDataKey),
                     Message = GetValue(data, Constants.MessageDataKey),
@@ -145,7 +144,7 @@ namespace Assets.Scripts.Models
 
                 //Push local notification
                 await NotificationHelper.SendNotificationAsync(model.MessageID, new TimeSpan(0, 0, 5), model.Title, model.Message,
-                    model.Sound, model.Sound, model.ImageUrl,
+                    true, true, model.ImageUrl,
                     new NotificationHelper.Action[]
                     {
                         //Bind Notification actions here
@@ -174,10 +173,18 @@ namespace Assets.Scripts.Models
                {
                     { "token_session", 1 },
                     { "test_mode", mode },
-                    { $"{ Constants.UnityPlatform }_token", Token },
+                    { $"{Constants.UnityPlatform}_token", Token },
                };
             return await CountlyHelper.GetResponseAsync(requestParams);
         }
+
+        private string GetValue(IDictionary<string, string> source, string key)
+        {
+            string value;
+            return source.TryGetValue(key, out value) ? value : null;
+        }
+
+        #region Unused Code
 
         /// <summary>
         /// Reports user action on Push Notification to the Countly Server
@@ -200,10 +207,14 @@ namespace Assets.Scripts.Models
         //    return await action.ReportCustomEvent();
         //}
 
-        private string GetValue(IDictionary<string, string> source, string key)
-        {
-            string value;
-            return source.TryGetValue(key, out value) ? value : null;
-        }
+        //public async Task<int> SendLocalNotification()
+        //{
+        //    return await NotificationHelper.SendNotificationAsync(1, new TimeSpan(0, 0, 5), "Hey!", "How are you doing?",
+        //            true, true,
+        //            "https://images.pexels.com/photos/257840/pexels-photo-257840.jpeg?auto=compress&cs=tinysrgb&h=350",
+        //            new NotificationHelper.Action[] { });
+        //}
+
+        #endregion
     }
 }

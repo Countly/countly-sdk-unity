@@ -1,7 +1,6 @@
 ﻿using Assets.Scripts.Helpers;
 using Assets.Scripts.Main.Development;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,13 +24,13 @@ namespace Assets.Scripts.Models
     struct ViewSegment
     {
         [JsonProperty("name")]
-        internal string Name { get; set; }
+        public string Name { get; set; }
         [JsonProperty("segment")]
-        internal string Segment { get; set; }
+        public string Segment { get; set; }
         [JsonProperty("visit")]
-        internal int? Visit { get; set; }
+        public int? Visit { get; set; }
         [JsonIgnore]
-        internal bool HasSessionBegunWithView { get; set; }
+        public bool HasSessionBegunWithView { get; set; }
         [JsonProperty("start")]
         internal string Start => HasSessionBegunWithView ? "true" : null;
     }
@@ -43,15 +42,15 @@ namespace Assets.Scripts.Models
     struct ActionSegment
     {
         [JsonProperty("type")]
-        internal string Type { get; set; }
+        public string Type { get; set; }
         [JsonProperty("x")]
-        internal int PositionX { get; set; }
+        public int PositionX { get; set; }
         [JsonProperty("y")]
-        internal int PositionY { get; set; }
+        public int PositionY { get; set; }
         [JsonProperty("width")]
-        internal int Width { get; set; }
+        public int Width { get; set; }
         [JsonProperty("height")]
-        internal int Height { get; set; }
+        public int Height { get; set; }
     }
 
     /// <summary>
@@ -61,11 +60,11 @@ namespace Assets.Scripts.Models
     struct StarRatingSegment
     {
         [JsonProperty("platform ")]
-        internal string Platform { get; set; }
+        public string Platform { get; set; }
         [JsonProperty("app_version")]
-        internal string AppVersion { get; set; }
+        public string AppVersion { get; set; }
         [JsonProperty("rating")]
-        internal int Rating { get; set; }
+        public int Rating { get; set; }
     }
 
     [Serializable]
@@ -93,7 +92,7 @@ namespace Assets.Scripts.Models
         [JsonProperty("dur")]
         internal double? Duration { get; set; }
         [JsonProperty("segmentation")]
-        internal JRaw Segmentation { get; set; }
+        internal Dictionary<string, object> Segmentation { get; set; }
 
         [JsonProperty("timestamp")]
         public string Timestamp { get; set; }
@@ -104,6 +103,12 @@ namespace Assets.Scripts.Models
         [JsonProperty("tz")]
         public string Timezone { get; set; }
 
+        [JsonIgnore]
+        public DateTime TimeRecorded { get; private set; }
+
+        internal static Dictionary<string, CountlyEventModel> TotalEvents { get; private set; }
+                                                        = new Dictionary<string, CountlyEventModel>();
+
         /// <summary>
         /// Initializes a new instance of event model. 
         /// </summary>
@@ -112,65 +117,162 @@ namespace Assets.Scripts.Models
         /// <param name="count"></param>
         /// <param name="sum"></param>
         /// <param name="duration"></param>
-        public CountlyEventModel(string key, string segmentation = null, int? count = 1, double? sum = null, 
+        public CountlyEventModel(string key, IDictionary<string, object> segmentation = null, int? count = 1, double? sum = null,
                                 double? duration = null)
         {
             Key = key;
             Count = count ?? 1;
             if (segmentation != null)
-                Segmentation = new JRaw(segmentation);
+                Segmentation = segmentation as Dictionary<string, object>;
             Duration = duration;
             Sum = sum;
+
+            //Records the time the time the event was recorded
+            TimeRecorded = DateTime.Now;
         }
 
-        internal static void StartEvent(string key)
+        internal static async Task<CountlyResponse> RecordEventAsync(string key)
         {
             if (string.IsNullOrEmpty(key) && string.IsNullOrWhiteSpace(key))
-                throw new ArgumentNullException(key, "Key is required.");
+            {
+                return new CountlyResponse
+                {
+                    IsSuccess = false,
+                    ErrorMessage = "Key is required."
+                };
+            }
 
-            if (Countly.TotalEvents.Any(evnt => key.Equals(evnt.Key, StringComparison.OrdinalIgnoreCase)))
-                throw new Exception($"Event {key} already started. Please end this event first.");
+            var existingEvent = TotalEvents.Select(c => c.Key).FirstOrDefault(x => key.Equals(x, StringComparison.OrdinalIgnoreCase));
+            if (existingEvent != null)
+            {
+                TotalEvents.Remove(existingEvent);
+            }
 
-            if (Countly.TotalEvents.Count >= Countly.EventSendThreshold)
-                throw new Exception($"Event count reached threshold value of {Countly.EventSendThreshold}");
+            if (TotalEvents.Count >= Countly.EventSendThreshold)
+                await ReportAllRecordedEventsAsync();
 
-            Countly.TotalEvents.Add(key, DateTime.Now);
+            TotalEvents.Add(key, new CountlyEventModel(key));
+
+            return new CountlyResponse
+            {
+                IsSuccess = true,
+            };
+        }
+
+        internal static async Task<CountlyResponse> RecordEventAsync(string key, IDictionary<string, object> segmentation,
+                                        int? count = 1, double? sum = 0, double? duration = null)
+        {
+            if (string.IsNullOrEmpty(key) && string.IsNullOrWhiteSpace(key))
+            {
+                return new CountlyResponse
+                {
+                    IsSuccess = false,
+                    ErrorMessage = "Key is required."
+                };
+            }
+
+            var existingEvent = TotalEvents.Select(c => c.Key).FirstOrDefault(x => key.Equals(x, StringComparison.OrdinalIgnoreCase));
+            if (existingEvent != null)
+            {
+                TotalEvents.Remove(existingEvent);
+            }
+
+            if (TotalEvents.Count >= Countly.EventSendThreshold)
+                await ReportAllRecordedEventsAsync();
+
+            TotalEvents.Add(key, new CountlyEventModel(key, segmentation, count, sum, duration));
+
+            return new CountlyResponse
+            {
+                IsSuccess = true,
+            };
         }
 
         /// <summary>
-        /// Ends a particular event
+        /// Reports all recorded events to the server
         /// </summary>
-        /// <returns></returns>
-        internal static async Task<CountlyResponse> EndAsync(string key, string segmentation = null, int? count = 1, double? sum = 0,
-            bool addToRequestQueue = false)
+        internal static async Task<CountlyResponse> ReportAllRecordedEventsAsync(bool addToRequestQueue = false)
         {
-            if (string.IsNullOrEmpty(key))
-                throw new ArgumentNullException(key, "Key is required.");
+            foreach (var evntObj in TotalEvents)
+            {
+                var evnt = evntObj.Value;
+                evnt.Duration = evnt.Duration ?? (DateTime.Now - evnt.TimeRecorded).TotalMilliseconds;
+                SetTimeZoneInfo(evnt, evnt.TimeRecorded);
+            }
 
-            var addedEvent = Countly.TotalEvents.Where(e => key.Equals(e.Key, StringComparison.OrdinalIgnoreCase))
-                                        .FirstOrDefault();
-            if (string.IsNullOrEmpty(addedEvent.Key))
-                throw new Exception($"Event {key} doesn't exists. Please start an event first.");
-
-            var evnt = new CountlyEventModel(key, segmentation, count, sum);
-            evnt.Duration = evnt.Duration ?? (DateTime.Now - addedEvent.Value).TotalMilliseconds;
-
-            SetTimeZoneInfo(evnt, addedEvent.Value);
-
+            //Send all at once
             var requestParams =
-               new Dictionary<string, object>
-               {
-                    { "events", JsonConvert.SerializeObject(evnt, Formatting.Indented,
-                                    new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }) },
-               };
+                   new Dictionary<string, object>
+                   {
+                        { "events", JsonConvert.SerializeObject(TotalEvents.Select(x=>x.Value), Formatting.Indented,
+                                        new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }) },
+                   };
 
             var res = await CountlyHelper.GetResponseAsync(requestParams, addToRequestQueue);
 
             //Removing the event
-            if (res.IsSuccess)
-                Countly.TotalEvents.Remove(key);
+            TotalEvents = new Dictionary<string, CountlyEventModel>();
 
             return res;
+        }
+
+        /// <summary>
+        /// Sends multiple events to the countly server. It expects a list of events as input.
+        /// </summary>
+        /// <param name="events"></param>
+        /// <returns></returns>
+        internal static async Task<CountlyResponse> ReportMultipleEventsAsync(List<CountlyEventModel> events)
+        {
+            if (events == null || events.Count == 0)
+            {
+                return new CountlyResponse
+                {
+                    IsSuccess = false,
+                    ErrorMessage = "No events found."
+                };
+            }
+
+            var currentTime = DateTime.UtcNow;
+            foreach (var evnt in events)
+            {
+                SetTimeZoneInfo(evnt, currentTime);
+            }
+
+            var requestParams =
+               new Dictionary<string, object>
+               {
+                    { "events", JsonConvert.SerializeObject(events, Formatting.Indented,
+                                    new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }) },
+               };
+            return await CountlyHelper.GetResponseAsync(requestParams);
+        }
+
+        /// <summary>
+        /// Reports a custom event to the Counlty server.
+        /// </summary>
+        /// <returns></returns>
+        internal static async Task<CountlyResponse> ReportCustomEventAsync(string key, IDictionary<string, object> segmentation = null,
+                                                    int? count = 1, double? sum = null, double? duration = null)
+        {
+            if (string.IsNullOrEmpty(key) && string.IsNullOrWhiteSpace(key))
+            {
+                return new CountlyResponse
+                {
+                    IsSuccess = false,
+                    ErrorMessage = "Key is required."
+                };
+            }
+
+            var evnt = new CountlyEventModel(key, segmentation, count, sum, duration);
+            SetTimeZoneInfo(evnt, DateTime.UtcNow);
+
+            var requestParams =
+               new Dictionary<string, object>
+               {
+                    { "events", JsonConvert.SerializeObject(new List<CountlyEventModel>{ evnt }, Formatting.Indented,
+                                    new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }) },
+               };
+            return await CountlyHelper.GetResponseAsync(requestParams);
         }
 
         internal static void SetTimeZoneInfo(CountlyEventModel evnt, DateTime requestDatetime)
@@ -181,5 +283,45 @@ namespace Assets.Scripts.Models
             evnt.Hour = timezoneInfo.Hour;
             evnt.Timezone = timezoneInfo.Timezone;
         }
+
+        #region Unused Code
+
+        ///// <summary>
+        ///// Ends a particular event
+        ///// </summary>
+        ///// <returns></returns>
+        //internal static async Task<CountlyResponse> EndAsync(string key, IDictionary<string, object> segmentation = null, int? count = 1, double? sum = 0,
+        //    bool addToRequestQueue = false)
+        //{
+        //    if (string.IsNullOrEmpty(key))
+        //        throw new ArgumentNullException(key, "Key is required.");
+
+        //    var addedEvent = TotalEvents.Where(e => key.Equals(e.Key, StringComparison.OrdinalIgnoreCase))
+        //                                .FirstOrDefault();
+        //    if (string.IsNullOrEmpty(addedEvent.Key))
+        //        throw new Exception($"Event {key} doesn't exists. Please start an event first.");
+
+        //    var evnt = new CountlyEventModel(key, segmentation, count, sum);
+        //    evnt.Duration = evnt.Duration ?? (DateTime.Now - addedEvent.Value).TotalMilliseconds;
+
+        //    SetTimeZoneInfo(evnt, addedEvent.Value);
+
+        //    var requestParams =
+        //       new Dictionary<string, object>
+        //       {
+        //            { "events", JsonConvert.SerializeObject(evnt, Formatting.Indented,
+        //                            new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }) },
+        //       };
+
+        //    var res = await CountlyHelper.GetResponseAsync(requestParams, addToRequestQueue);
+
+        //    //Removing the event
+        //    if (res.IsSuccess)
+        //        TotalEvents.Remove(key);
+
+        //    return res;
+        //}
+
+        #endregion
     }
 }

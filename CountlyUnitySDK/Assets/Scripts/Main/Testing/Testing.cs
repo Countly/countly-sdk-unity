@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Assets.Scripts.Main.Testing
 {
@@ -18,10 +19,10 @@ namespace Assets.Scripts.Main.Testing
         #region Initialization
         public async void InitializeCountlySDk()
         {
-            Countly.Begin("https://us-try.count.ly/",
+            Countly.Begin("Server_URL",
                             "YOUR_APP_KEY",
                             "YOUR_DEVICE_ID");
-            var configObj = new CountlyConfigModel(null, false, false, false, TestMode.TestToken);
+            var configObj = new CountlyConfigModel(null, false, false, false, false, 60, 100, 1000, 100, TestMode.AndroidTestToken);
             await Countly.SetDefaults(configObj);
         }
 
@@ -44,11 +45,6 @@ namespace Assets.Scripts.Main.Testing
             await Countly.EndSessionAsync();
         }
 
-        public void SetSessionDuration()
-        {
-            Countly.SetSessionDuration(30);
-        }
-
         #endregion
 
         #region Optional Parameters
@@ -60,13 +56,18 @@ namespace Assets.Scripts.Main.Testing
             Countly.SetCountryCode("AU");
         }
 
+        public void DisableLocation()
+        {
+            Countly.DisableLocation();
+        }
+
         #endregion
 
         #region Crash Reporting
 
-        public void AddBreadcrumb()
+        public void AddBreadcrumb(string value)
         {
-            Countly.AddBreadcrumbs("SomeValueToBeSentWithCrashReport");
+            Countly.AddBreadcrumbs(value);
         }
 
         public void SendAutoCrashReport()
@@ -93,8 +94,7 @@ namespace Assets.Scripts.Main.Testing
             }
             catch (Exception ex)
             {
-                await Countly.SendCrashReportAsync(ex.Message, ex.StackTrace, LogType.Exception,
-                JsonConvert.SerializeObject(segments));
+                await Countly.SendCrashReportAsync(ex.Message, ex.StackTrace, LogType.Exception, segments);
             }
         }
 
@@ -119,61 +119,21 @@ namespace Assets.Scripts.Main.Testing
 
         #region Events
 
-        public async void ReportCustomEvent()
-        {
-            var segment = new Dictionary<string, object>
-            {
-                { "Key1", "Value1" },
-                { "Key2", "Value2" }
-            };
-            await Countly.ReportCustomEventAsync("Click");
-        }
-
-        public void SetEventSendThreshold(int threshold)
-        {
-            Countly.SetEventSendThreshold(threshold);
-        }
-
-        public async void StartEvent()
+        public async void RecordEvents()
         {
             for (int count = 1; count <= 10; count++)
             {
-                Countly.StartEvent($"Event{count}");
+                await Countly.RecordEventAsync($"Event{count}");
                 await Task.Delay(count * 1000);
             }
+            await Countly.RecordEventAsync("Game_Level_X_Started",
+                new Dictionary<string, object>
+                {
+                    { "Time Spent", "1234455"},
+                    { "Retry Attempts", "10"}
+                });
         }
 
-        public async void EndEvent()
-        {
-            for (int count = 1; count <= 10; count++)
-            {
-                await Countly.EndEventAsync($"Event{count}",
-                    JsonConvert.SerializeObject(
-                            new Dictionary<string, object>
-                            { { $"Key{count}", $"Value{count}"} }), 1, 10);
-            }
-        }
-
-        public async void EndEvent(string key, string segment, int count, double sum)
-        {
-            await Countly.EndEventAsync(key, segment, count, sum);
-        }
-
-        public async void ReportMultipleEvents()
-        {
-            var events = new List<CountlyEventModel>
-            {
-                new CountlyEventModel("Click",
-                        JsonConvert.SerializeObject(
-                            new Dictionary<string, object>
-                            { { "Key1", "Value1"} } )),
-                new CountlyEventModel("Hover",
-                        JsonConvert.SerializeObject(
-                            new Dictionary<string, object>
-                            { { "Key2", "Value2"} } )),
-            };
-            await Countly.ReportMultipleEventsAsync(events);
-        }
         #endregion
 
         #region Views
@@ -211,32 +171,30 @@ namespace Assets.Scripts.Main.Testing
             var userDetails = new CountlyUserDetailsModel(
                                 "Full Name", "username", "test@email.com", "Organization",
                                 "222-222-222", "https://www.teacherspocketbooks.co.uk/wp-content/uploads/sites/2/2015/04/tp-computer-icon.png", "M", "1986",
-                                JsonConvert.SerializeObject(new Dictionary<string, object>
+                                new Dictionary<string, object>
                                 {
                                     { "Hair", "Black" },
                                     { "Race", "Asian" },
-                                }));
+                                });
             await userDetails.SetUserDetailsAsync();
         }
 
         public async void SetCustomUserDetails()
         {
             var userDetails = new CountlyUserDetailsModel(
-                                null, null, null, null,
-                                null, null, null, null,
-                                JsonConvert.SerializeObject(new Dictionary<string, object>
+                                new Dictionary<string, object>
                                 {
                                     { "Nationality", "Indian" },
                                     { "Height", "5.10" },
                                     { "Mole", "Lower Left Cheek" },
-                                }));
+                                });
             await userDetails.SetCustomUserDetailsAsync();
         }
 
         public void SetCustomUserData()
         {
             //Following are various examples
-            //In a request, there cannot be more than one update request for a single key.
+            //In a request, in case a single property is updated twice or more in a single request, the latest one overrides the preceeding ones.
             //Ex: SetOnce and Increment cannot be clubbed together in one request because both are updating property "weight".
             //However, SetOnce and IncrementBy can be clubbed together.
             CountlyUserDetailsModel.SetOnce("Weight", "80");
@@ -253,18 +211,6 @@ namespace Assets.Scripts.Main.Testing
         public async void SaveCustomUserData()
         {
             await CountlyUserDetailsModel.SaveAsync();
-        }
-
-        #endregion
-
-        #region Push Notifications
-
-        public async void SendLocalNotification()
-        {
-            await NotificationHelper.SendNotificationAsync(1, new TimeSpan(0, 0, 5), "Hey!", "How are you doing?",
-                    true, true,
-                    "https://images.pexels.com/photos/257840/pexels-photo-257840.jpeg?auto=compress&cs=tinysrgb&h=350",
-                    new NotificationHelper.Action[] { });
         }
 
         #endregion

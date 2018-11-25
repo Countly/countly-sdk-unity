@@ -1,6 +1,5 @@
 ﻿/* 
     Countly Unity SDK
-    Release Version: v1
 */
 
 #region Usings
@@ -18,6 +17,7 @@ using System.Timers;
 using UnityEngine;
 using Firebase;
 using Assets.Scripts.Enums;
+using System.ComponentModel;
 
 #endregion
 
@@ -27,7 +27,7 @@ namespace Assets.Scripts.Main.Development
     {
         #region Fields and Properties
 
-        private static int _extendSessionInterval = 60;
+        private static int _extendSessionInterval;
         private static Timer _sessionTimer;
         private static DateTime _lastSessionRequestTime;
         private static string _lastView;
@@ -36,29 +36,28 @@ namespace Assets.Scripts.Main.Development
         public static string ServerUrl { get; private set; }
         public static string AppKey { get; private set; }
         public static string DeviceId { get; private set; }
+        public static bool IsManualSessionHandlingEnabled { get; private set; }
 
-        internal static string CountryCode;
-        internal static string City;
-        internal static string Location;
-        internal static string IPAddress;
-        internal static int EventSendThreshold = 0;
-        internal static int StoredRequestLimit = 1000;
+        public static string CountryCode { get; private set; }
+        public static string City { get; private set; }
+        public static string Location { get; private set; }
+        public static string IPAddress { get; private set; }
+        
+        public static string Salt { get; private set; }
+        public static bool PostRequestEnabled { get; private set; }
+        public static bool EnableConsoleErrorLogging { get; private set; }
+        public static bool IgnoreSessionCooldown { get; private set; }
+        public static TestMode? NotificationMode { get; private set; }
 
-        public static string Salt;
-        public static bool PostRequestEnabled;
+        internal static int EventSendThreshold { get; private set; }
+        internal static int StoredRequestLimit { get; private set; }
+
         public static bool RequestQueuingEnabled;
-        public static bool PreventRequestTanmpering;
-        public static bool EnableConsoleErrorLogging;
-        public static bool IgnoreSessionCooldown;
-        internal static Dictionary<string, DateTime> TotalEvents = new Dictionary<string, DateTime>();
-        internal static Queue<CountlyRequestModel> TotalRequests = new Queue<CountlyRequestModel>();
 
-        //Not used anywhere for now
-        internal static FirebaseApp FirebaseAppInstance { get; set; }
+        public static Queue<string> CrashBreadcrumbs { get; private set; } 
+        public static int TotalBreadcrumbsAllowed { get; private set; }
 
-        internal static List<string> CrashBreadcrumbs { get; set; } 
-
-        internal static bool IsInitialized { get; set; }
+        public static bool IsSessionInitiated { get; private set; }
 
         //#region Consents
         //public static bool ConsentGranted;
@@ -82,9 +81,12 @@ namespace Assets.Scripts.Main.Development
 
         #endregion
 
-        #region Public Methods
+        #region Methods
 
         #region Initialization
+
+        #region Public methods
+
         /// <summary>
         /// Initializes countly instance
         /// </summary>
@@ -107,19 +109,20 @@ namespace Assets.Scripts.Main.Development
                         : !CountlyHelper.IsNullEmptyOrWhitespace(DeviceId)
                         ? DeviceId
                         : !CountlyHelper.IsNullEmptyOrWhitespace(deviceId)
-                        ? deviceId : CountlyHelper.GenerateUniqueDeviceID();
+                        ? deviceId : CountlyHelper.GetUniqueDeviceID();
 
             if (string.IsNullOrEmpty(ServerUrl))
-                throw new ArgumentNullException(serverUrl, "ServerURL is required.");
+                throw new ArgumentNullException(serverUrl, "Server URL is required.");
             if (string.IsNullOrEmpty(AppKey))
-                throw new ArgumentNullException(appKey, "AppKey is required.");
+                throw new ArgumentNullException(appKey, "App Key is required.");
 
             //Set DeviceID in Cache if it doesn't already exists in Cache
             if (CountlyHelper.IsNullEmptyOrWhitespace(storedDeviceId))
                 PlayerPrefs.SetString(Constants.DeviceIDKey, DeviceId);
 
-            //Initialzing log breadcrumbs on app start
-            CrashBreadcrumbs = new List<string>();
+            //Initialzing collections on app start
+            CrashBreadcrumbs = new Queue<string>();
+            CountlyRequestModel.InitializeRequestCollection();
 
             //ConsentGranted = consentGranted;
         }
@@ -136,23 +139,20 @@ namespace Assets.Scripts.Main.Development
         {
             Salt = configModel.Salt;
             PostRequestEnabled = configModel.EnablePost;
-            PreventRequestTanmpering = !string.IsNullOrEmpty(Salt);
             EnableConsoleErrorLogging = configModel.EnableConsoleErrorLogging;
             IgnoreSessionCooldown = configModel.IgnoreSessionCooldown;
+            IsManualSessionHandlingEnabled = configModel.EnableManualSessionHandling;
+            NotificationMode = configModel.NotificationMode;
+            _extendSessionInterval = configModel.SessionDuration;
+            StoredRequestLimit = configModel.StoredRequestLimit;
+            EventSendThreshold = configModel.EventSendThreshold;
+            TotalBreadcrumbsAllowed = configModel.TotalBreadcrumbsAllowed;
 
-            //Start Session
-            await BeginSessionAsync();
-
-            SetStoredRequestLimit(1000);
-
-            //Enables push notification on start
-            if (configModel.NotificationMode.HasValue)
+            if (!IsManualSessionHandlingEnabled)
             {
-                EnablePush(configModel.NotificationMode.Value);
+                //Start Session and enable push notification
+                await BeginSessionAsync();
             }
-
-            //SDK has been initialized now
-            IsInitialized = true;
 
             return new CountlyResponse
             {
@@ -162,7 +162,11 @@ namespace Assets.Scripts.Main.Development
 
         #endregion
 
+        #endregion
+
         #region Optional Parameters
+
+        #region Public methods
 
         /// <summary>
         /// Sets Country Code to be used for future requests. Takes ISO Country code as input parameter
@@ -201,32 +205,21 @@ namespace Assets.Scripts.Main.Development
             IPAddress = ip_address;
         }
 
+        /// <summary>
+        /// Disabled the location tracking on the Countly server
+        /// </summary>
+        public static void DisableLocation()
+        {
+            Location = string.Empty;
+        }
+
         #endregion
-
-        #region Internal Configuration
-
-        /// <summary>
-        /// Sets a threshold value that limits the number of events that can be stored internally.
-        /// Default is 1000 number of events.
-        /// </summary>
-        /// <param name="eventThreshold"></param>
-        public static void SetEventSendThreshold(int eventThreshold)
-        {
-            EventSendThreshold = eventThreshold;
-        }
-
-        /// <summary>
-        /// Sets a threshold value that limits the number of requests that can be stored internally 
-        /// </summary>
-        /// <param name="limit"></param>
-        public static void SetStoredRequestLimit(int limit)
-        {
-            StoredRequestLimit = limit;
-        }
 
         #endregion
 
         #region Changing Device Id
+
+        #region Public methods
 
         /// <summary>
         /// Changes Device Id.
@@ -243,14 +236,11 @@ namespace Assets.Scripts.Main.Development
                 return new CountlyResponse { IsSuccess = true };
 
             //Add currently recorded but not queued events to request queue-----------------------------------
-            EndAllRecordedEventsAsync();
+            await CountlyEventModel.ReportAllRecordedEventsAsync(true);
 
             //Ends current session
             //Do not dispose timer object
             await ExecuteEndSessionAsync(false);
-
-            //Clear all started timed-events------------------------------------------------------------------
-            //------------------------------------------------------------------------------------------------
 
             //Update device id
             UpdateDeviceID(deviceId);
@@ -291,6 +281,10 @@ namespace Assets.Scripts.Main.Development
             return new CountlyResponse { IsSuccess = true };
         }
 
+        #endregion
+
+        #region System methods
+
         /// <summary>
         /// Updates Device ID both in app and in cache
         /// </summary>
@@ -306,7 +300,11 @@ namespace Assets.Scripts.Main.Development
 
         #endregion
 
+        #endregion
+
         #region Crash Reporting
+
+        #region System methods
 
         /// <summary>
         /// Called when there is an exception 
@@ -332,7 +330,8 @@ namespace Assets.Scripts.Main.Development
         /// <param name="customParams"></param>
         /// <param name="nonfatal"></param>
         /// <returns></returns>
-        private static async Task<CountlyResponse> SendCrashReportAsync(string message, string stackTrace, LogType type, string segments = null, bool nonfatal = true)
+        private static async Task<CountlyResponse> SendCrashReportAsync(string message, string stackTrace, LogType type, 
+            IDictionary<string, object> segments = null, bool nonfatal = true)
         {
             //if (ConsentModel.CheckConsent(FeaturesEnum.Crashes.ToString()))
             //{
@@ -340,7 +339,7 @@ namespace Assets.Scripts.Main.Development
             model.Error = stackTrace;
             model.Name = message;
             model.Nonfatal = nonfatal;
-            model.Custom = segments;
+            model.Custom = segments as Dictionary<string, object>;
             model.Logs = string.Join("\n", CrashBreadcrumbs);
 #if UNITY_IOS
             model.Manufacture = UnityEngine.iOS.Device.generation.ToString();
@@ -358,6 +357,10 @@ namespace Assets.Scripts.Main.Development
             //}
         }
 
+        #endregion
+
+        #region Public methods
+
         /// <summary>
         /// Sends custom logged errors to the server.
         /// </summary>
@@ -366,49 +369,53 @@ namespace Assets.Scripts.Main.Development
         /// <param name="type"></param>
         /// <param name="segments"></param>
         /// <returns></returns>
-        public static async Task<CountlyResponse> SendCrashReportAsync(string message, string stackTrace, LogType type, string segments = null)
+        public static async Task<CountlyResponse> SendCrashReportAsync(string message, string stackTrace, LogType type, 
+            IDictionary<string, object> segments = null)
         {
             return await SendCrashReportAsync(message, stackTrace, type, segments, true);
         }
 
         /// <summary>
-        /// Adds string value to a list which is later sent over as logs whenever a cash is reported by system
+        /// Adds string value to a list which is later sent over as logs whenever a cash is reported by system.
+        /// The length of a breadcrumb is limited to 1000 characters. Only first 1000 characters will be accepted in case the length is more 
+        /// than 1000 characters.
         /// </summary>
         /// <param name="value"></param>
         public static void AddBreadcrumbs(string value)
         {
-            CrashBreadcrumbs.Add(value);
+            string validBreadcrumb = value.Length > 1000 ? value.Substring(0, 1000) : value;
+
+            if (CrashBreadcrumbs.Count == TotalBreadcrumbsAllowed)
+                CrashBreadcrumbs.Dequeue();
+
+            CrashBreadcrumbs.Enqueue(value);
         }
+
+        #endregion
 
         #endregion
 
         #region Sessions
 
-        /// <summary>
-        /// Initiates a session by setting begin_session
-        /// </summary>
-        public static async Task<CountlyResponse> BeginSessionAsync()
-        {
-            return await ExecuteBeginSessionAsync();
-        }
+        #region System methods
 
-        /// <summary>
-        /// Ends a session by setting end_session
-        /// </summary>
-        public static async Task<CountlyResponse> EndSessionAsync()
-        {
-            return await ExecuteEndSessionAsync();
-        }
+        #region Unused Code
 
-        /// <summary>
-        /// Sets the session duration. Session will be extended each time this interval elapses. The interval value must be in seconds.
-        /// </summary>
-        /// <param name="interval"></param>
-        public static void SetSessionDuration(int interval)
-        {
-            _extendSessionInterval = interval;
-            _sessionTimer.Interval = _extendSessionInterval * 1000;
-        }
+        ///// <summary>
+        ///// The method must be used only when Manual Session Handling is disabled.
+        ///// Sets the session duration. Session will be extended each time this interval elapses. The interval value must be in seconds.
+        ///// </summary>
+        ///// <param name="interval"></param>
+        //private static void SetSessionDuration(int interval)
+        //{
+        //    if (!IsManualSessionHandlingEnabled)
+        //    {
+        //        _extendSessionInterval = interval;
+        //        _sessionTimer.Interval = _extendSessionInterval * 1000;
+        //    }
+        //}
+
+        #endregion
 
         private static async Task<CountlyResponse> ExecuteBeginSessionAsync()
         {
@@ -431,11 +438,16 @@ namespace Assets.Scripts.Main.Development
             //Extend session only after session has begun
             if (response.IsSuccess)
             {
+                //Session initiated
+                IsSessionInitiated = true;
                 //Start session timer
-                InitSessionTimer();
-                _sessionTimer.Start();
+                if (!IsManualSessionHandlingEnabled)
+                {
+                    InitSessionTimer();
+                    _sessionTimer.Start();
+                }
             }
-            
+
             //}
             return response;
         }
@@ -455,15 +467,46 @@ namespace Assets.Scripts.Main.Development
                                             new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }));
             var response = await CountlyHelper.GetResponseAsync(requestParams);
 
-            //Do not extend session after session ends
-            if (disposeTimer)
+            if (!IsManualSessionHandlingEnabled)
             {
-                _sessionTimer.Stop();
-                _sessionTimer.Dispose();
-                _sessionTimer.Close();
+                //Do not extend session after session ends
+                if (disposeTimer)
+                {
+                    _sessionTimer.Stop();
+                    _sessionTimer.Dispose();
+                    _sessionTimer.Close();
+                }
             }
             //}
             return response;
+        }
+
+        #endregion
+
+        #region Public methods
+
+        /// <summary>
+        /// Initiates a session by setting begin_session
+        /// </summary>
+        public static async Task<CountlyResponse> BeginSessionAsync()
+        {
+            var result = await ExecuteBeginSessionAsync();
+
+            //Enables push notification on start
+            if (NotificationMode.HasValue)
+            {
+                EnablePush(NotificationMode.Value);
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Ends a session by setting end_session
+        /// </summary>
+        public static async Task<CountlyResponse> EndSessionAsync()
+        {
+            return await ExecuteEndSessionAsync();
         }
 
         /// <summary>
@@ -489,101 +532,70 @@ namespace Assets.Scripts.Main.Development
 
         #endregion
 
+        #endregion
+
         #region Events
 
-        /// <summary>
-        /// Reports a custom event to the Counlty server.
-        /// </summary>
-        /// <returns></returns>
-        public static async Task<CountlyResponse> ReportCustomEventAsync(string key, string segmentation = null, int? count = 1,
-                                                    double? sum = null, double? duration = null)
-        {
-            if (string.IsNullOrEmpty(key))
-                throw new ArgumentNullException(key, "Key is required.");
-
-            var evnt = new CountlyEventModel(key, segmentation, count, sum, duration);
-
-            var requestParams =
-               new Dictionary<string, object>
-               {
-                    { "events", JsonConvert.SerializeObject(new List<CountlyEventModel>{ evnt }, Formatting.Indented,
-                                    new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }) },
-               };
-            return await CountlyHelper.GetResponseAsync(requestParams);
-        }
+        #region Public methods
 
         /// <summary>
-        /// Adds an event with the specified key. Doesn't send the request to the Countly API
+        /// Records an event with the specified key in the system.
         /// </summary>
         /// <param name="key"></param>
-        public static void StartEvent(string key)
+        public static async Task<CountlyResponse> RecordEventAsync(string key)
         {
-            CountlyEventModel.StartEvent(key);
+            return await CountlyEventModel.RecordEventAsync(key);
         }
 
         /// <summary>
-        /// Ends an event with the specified key. Sends events details to the Counlty API 
+        /// Records an event with the specified data in the system.
         /// </summary>
         /// <param name="key"></param>
-        /// <returns></returns>
-        public static async Task<CountlyResponse> EndEventAsync(string key)
-        {
-            return await CountlyEventModel.EndAsync(key);
-        }
-
-        /// <summary>
-        /// Ends an event with the specified key and data. Sends events details to the Counlty API 
-        /// </summary>
-        /// <param name="key">Key is required</param>
-        /// <param name="segmentation">Custom </param>
+        /// <param name="segmentation"></param>
         /// <param name="count"></param>
         /// <param name="sum"></param>
         /// <returns></returns>
-        public static async Task<CountlyResponse> EndEventAsync(string key, string segmentation, int? count = 1, double? sum = 0)
+        public static async Task<CountlyResponse> RecordEventAsync(string key, IDictionary<string, object> segmentation,
+                                                                int? count = 1, double? sum = 0, double? duration = null)
         {
-            return await CountlyEventModel.EndAsync(key, segmentation, count, sum);
+            return await CountlyEventModel.RecordEventAsync(key, segmentation, count, sum, duration);
         }
 
-        /// <summary>
-        /// Adds all recorded but not queued events to Request Queue
-        /// </summary>
-        private static async void EndAllRecordedEventsAsync()
-        {
-            var events = TotalEvents.Select(x => x.Key).ToList();
-            foreach (var evnt in events)
-            {
-                await CountlyEventModel.EndAsync(evnt, null, null, null, true);
-            }
-        }
+        #region Unused Code
 
-        /// <summary>
-        /// Sends multiple events to the countly server. It expects a list of events as input.
-        /// </summary>
-        /// <param name="events"></param>
-        /// <returns></returns>
-        public static async Task<CountlyResponse> ReportMultipleEventsAsync(List<CountlyEventModel> events)
-        {
-            if (events == null || events.Count == 0)
-                throw new ArgumentException("No events found to record.");
+        ///// <summary>
+        ///// Ends an event with the specified key. Sends events details to the Counlty API 
+        ///// </summary>
+        ///// <param name="key"></param>
+        ///// <returns></returns>
+        //public static async Task<CountlyResponse> EndEventAsync(string key)
+        //{
+        //    return await CountlyEventModel.EndAsync(key);
+        //}
 
-            var currentTime = DateTime.UtcNow;
-            foreach (var evnt in events)
-            {
-                CountlyEventModel.SetTimeZoneInfo(evnt, currentTime);
-            }
+        ///// <summary>
+        ///// Ends an event with the specified key and data. Sends events details to the Counlty API 
+        ///// </summary>
+        ///// <param name="key">Key is required</param>
+        ///// <param name="segmentation">Custom </param>
+        ///// <param name="count"></param>
+        ///// <param name="sum"></param>
+        ///// <returns></returns>
+        //public static async Task<CountlyResponse> EndEventAsync(string key, IDictionary<string, object> segmentation, 
+        //                                                        int? count = 1, double? sum = 0)
+        //{
+        //    return await CountlyEventModel.EndAsync(key, segmentation, count, sum);
+        //}
 
-            var requestParams =
-               new Dictionary<string, object>
-               {
-                    { "events", JsonConvert.SerializeObject(events, Formatting.Indented,
-                                    new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }) },
-               };
-            return await CountlyHelper.GetResponseAsync(requestParams);
-        }
+        #endregion
+
+        #endregion
 
         #endregion
 
         #region Views
+
+        #region Public methods
 
         /// <summary>
         /// Reports a view with the specified name and a last visited view if it existed
@@ -593,7 +605,13 @@ namespace Assets.Scripts.Main.Development
         public static async Task<CountlyResponse> ReportViewAsync(string name, bool hasSessionBegunWithView = false)
         {
             if (string.IsNullOrEmpty(name))
-                throw new ArgumentNullException("Parameter name is required.");
+            {
+                return new CountlyResponse
+                {
+                    IsSuccess = false,
+                    ErrorMessage = "View name is required."
+                };
+            }
 
             var events = new List<CountlyEventModel>();
             var lastView = GetLastView();
@@ -609,19 +627,20 @@ namespace Assets.Scripts.Main.Development
                     HasSessionBegunWithView = hasSessionBegunWithView
                 };
 
-            var currentView = new CountlyEventModel(
-                                    CountlyEventModel.ViewEvent,
-                                    JsonConvert.SerializeObject(currentViewSegment, Formatting.Indented,
-                                        new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore, }));
+            var currentView = new CountlyEventModel(CountlyEventModel.ViewEvent, currentViewSegment.ToDictionary());
             events.Add(currentView);
 
-            var res = await ReportMultipleEventsAsync(events);
+            var res = await CountlyEventModel.ReportMultipleEventsAsync(events);
 
             _lastView = name;
             _lastViewStartTime = DateTime.Now;
 
             return res;
         }
+
+        #endregion
+
+        #region System methods
 
         private static CountlyEventModel GetLastView(bool hasSessionBegunWithView = false)
         {
@@ -637,9 +656,7 @@ namespace Assets.Scripts.Main.Development
                 };
 
             var customEvent = new CountlyEventModel(
-                                    CountlyEventModel.ViewEvent,
-                                    JsonConvert.SerializeObject(viewSegment, Formatting.Indented,
-                                        new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore, }),
+                                    CountlyEventModel.ViewEvent, viewSegment.ToDictionary(),
                                     null, (DateTime.Now - _lastViewStartTime).TotalMilliseconds);
 
             return customEvent;
@@ -647,7 +664,11 @@ namespace Assets.Scripts.Main.Development
 
         #endregion
 
+        #endregion
+
         #region View Action
+
+        #region Public methods
 
         /// <summary>
         /// Reports a particular action with the specified details
@@ -670,16 +691,16 @@ namespace Assets.Scripts.Main.Development
                     Height = height
                 };
 
-            return await ReportCustomEventAsync(
-                           CountlyEventModel.ViewActionEvent,
-                           JsonConvert.SerializeObject(segment, Formatting.Indented,
-                               new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore, }),
-                           null, null, null);
+            return await CountlyEventModel.ReportCustomEventAsync(CountlyEventModel.ViewActionEvent, segment.ToDictionary());
         }
 
         #endregion
 
+        #endregion
+
         #region Star Rating
+
+        #region Public methods
 
         /// <summary>
         /// Sends app rating to the server.
@@ -691,7 +712,13 @@ namespace Assets.Scripts.Main.Development
         public static async Task<CountlyResponse> ReportStarRatingAsync(string platform, string app_version, int rating)
         {
             if (rating < 1 || rating > 5)
-                throw new ArgumentException("Please provide rating from 1 to 5");
+            {
+                return new CountlyResponse
+                {
+                    IsSuccess = false,
+                    ErrorMessage = "Please provide rating from 1 to 5"
+                };
+            }
 
             var segment =
                 new StarRatingSegment
@@ -701,16 +728,18 @@ namespace Assets.Scripts.Main.Development
                     Rating = rating,
                 };
 
-            return await ReportCustomEventAsync(
-                            CountlyEventModel.StarRatingEvent,
-                            JsonConvert.SerializeObject(segment, Formatting.Indented,
-                                new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore, }),
+            return await CountlyEventModel.ReportCustomEventAsync(
+                            CountlyEventModel.StarRatingEvent, segment.ToDictionary(),
                             null, null, null);
         }
 
         #endregion
 
+        #endregion
+
         #region User Details
+
+        #region Public methods
 
         /// <summary>
         /// Modifies all user data. Custom data should be json string.
@@ -721,7 +750,13 @@ namespace Assets.Scripts.Main.Development
         public static async Task<CountlyResponse> UserDetailsAsync(CountlyUserDetailsModel userDetails)
         {
             if (userDetails == null)
-                throw new ArgumentNullException("Please provide user details.");
+            {
+                return new CountlyResponse
+                {
+                    IsSuccess = false,
+                    ErrorMessage = "No data found."
+                };
+            }
 
             return await userDetails.SetUserDetailsAsync();
         }
@@ -735,14 +770,24 @@ namespace Assets.Scripts.Main.Development
         public static async Task<CountlyResponse> UserCustomDetailsAsync(CountlyUserDetailsModel userDetails)
         {
             if (userDetails == null)
-                throw new ArgumentNullException("Please provide user details.");
+            {
+                return new CountlyResponse
+                {
+                    IsSuccess = false,
+                    ErrorMessage = "No data found."
+                };
+            }
 
             return await userDetails.SetCustomUserDetailsAsync();
         }
 
         #endregion
 
+        #endregion
+
         #region Consents
+
+        #region Unused Code
 
         /// <summary>
         /// Checks consent for a particular feature
@@ -766,7 +811,11 @@ namespace Assets.Scripts.Main.Development
 
         #endregion
 
+        #endregion
+
         #region Push Notifications
+
+        #region Public methods
 
         /// <summary>
         /// Enables Push Notification feature for the device
@@ -782,16 +831,21 @@ namespace Assets.Scripts.Main.Development
 
         #region Timer
 
+        #region System methods
+
         /// <summary>
         /// Intializes the timer for extending session with sepcified interval
         /// </summary>
         /// <param name="sessionInterval">In milliseconds</param>
         private static void InitSessionTimer()
         {
-            _sessionTimer = new Timer();
-            _sessionTimer.Interval = _extendSessionInterval * 1000;
-            _sessionTimer.Elapsed += SessionTimerOnElapsedAsync;
-            _sessionTimer.AutoReset = true;
+            if (!IsManualSessionHandlingEnabled)
+            {
+                _sessionTimer = new Timer();
+                _sessionTimer.Interval = _extendSessionInterval * 1000;
+                _sessionTimer.Elapsed += SessionTimerOnElapsedAsync;
+                _sessionTimer.AutoReset = true;
+            }
         }
 
         /// <summary>
@@ -801,9 +855,16 @@ namespace Assets.Scripts.Main.Development
         /// <param name="elapsedEventArgs"></param>
         private static async void SessionTimerOnElapsedAsync(object sender, ElapsedEventArgs elapsedEventArgs)
         {
-            await ExtendSessionAsync();
+            if (!IsManualSessionHandlingEnabled)
+            {
+                await ExtendSessionAsync();
+            }
             CountlyRequestModel.ProcessQueue();
         }
+
+        #endregion
+
+        #endregion
 
         #endregion
     }

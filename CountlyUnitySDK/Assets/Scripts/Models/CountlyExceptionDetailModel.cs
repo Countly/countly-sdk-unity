@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using System;
 using UnityEngine;
+using System.Collections.Generic;
 
 namespace CountlyModels
 {
@@ -61,7 +62,7 @@ namespace CountlyModels
         [JsonProperty("_run")]
         public string Run { get; set; }
         [JsonProperty("_custom")]
-        public string Custom { get; set; }
+        public Dictionary<string, object> Custom { get; set; }
 
         static CountlyExceptionDetailModel() { }
         private CountlyExceptionDetailModel() { }

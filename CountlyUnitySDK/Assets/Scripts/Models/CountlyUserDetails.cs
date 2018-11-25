@@ -33,7 +33,7 @@ namespace Assets.Scripts.Models
 
         [JsonProperty("custom")]
         //dots (.) and dollar signs ($) in key names will be stripped out.
-        internal JRaw Custom { get; set; }
+        internal Dictionary<string, object> Custom { get; set; }
 
         [JsonIgnore]
         internal static Dictionary<string, object> CustomDataProperties = new Dictionary<string, object> { };
@@ -51,7 +51,7 @@ namespace Assets.Scripts.Models
         /// <param name="birthYear"></param>
         /// <param name="customData"></param>
         public CountlyUserDetailsModel(string name, string username, string email, string organization, string phone,
-                                    string pictureUrl, string gender, string birthYear, string customData)
+                                    string pictureUrl, string gender, string birthYear, IDictionary<string, object> customData)
         {
             Name = name;
             Username = username;
@@ -62,7 +62,16 @@ namespace Assets.Scripts.Models
             Gender = gender;
             BirthYear = birthYear;
             if (customData != null)
-                Custom = new JRaw(customData);
+                Custom = customData as Dictionary<string, object>;
+        }
+
+        /// <summary>
+        /// This constructor is used to initialize custom user details only.
+        /// </summary>
+        /// <param name="customData"></param>
+        public CountlyUserDetailsModel(IDictionary<string, object> customData)
+        {
+            Custom = customData as Dictionary<string, object>;
         }
 
         /// <summary>
@@ -220,10 +229,15 @@ namespace Assets.Scripts.Models
         public static async Task<CountlyResponse> SaveAsync()
         {
             if (!CustomDataProperties.Any())
-                throw new Exception("No data to save.");
+            {
+                return new CountlyResponse
+                {
+                    IsSuccess = false,
+                    ErrorMessage = "No data to save."
+                };
+            }
 
-            var model = new CountlyUserDetailsModel(null, null, null, null, null, null, null, null,
-                            JsonConvert.SerializeObject(CustomDataProperties, Formatting.Indented));
+            var model = new CountlyUserDetailsModel(CustomDataProperties);
 
             CustomDataProperties = new Dictionary<string, object> { };
             return await model.SetCustomUserDetailsAsync();
@@ -234,7 +248,13 @@ namespace Assets.Scripts.Models
         private static void AddToCustomData(string key, object value)
         {
             if (CustomDataProperties.ContainsKey(key))
-                throw new ArgumentException($"A field with the name \"{key}\" already exists. Updates to a field more than once in a single request is not allowed.");
+            {
+                var item = CustomDataProperties.Select(x => x.Key).FirstOrDefault(x => x.Equals(key, StringComparison.OrdinalIgnoreCase));
+                if (item != null)
+                {
+                    CustomDataProperties.Remove(item);
+                }
+            }
 
             CustomDataProperties.Add(key, value);
         }

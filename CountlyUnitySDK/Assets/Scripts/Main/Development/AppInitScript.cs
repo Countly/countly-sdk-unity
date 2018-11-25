@@ -9,20 +9,26 @@ namespace Assets.Scripts.Main.Development
         #region App Event Methods
 
         /// <summary>
-        /// Initialize SDK at the start of you app
+        /// Initialize SDK at the start of your app
         /// </summary>
-        //async void Start()
-        //{
-            //Countly.Begin("https://us-try.count.ly/",
+        async void Start()
+        {
+            //Countly.Begin("Server_URL",
             //                "YOUR_APP_KEY",
             //                "YOUR_DEVICE_ID");
-            //var config = new CountlyConfigModel(null, false, false, false, TestMode.TestToken);
+            //var config = new CountlyConfigModel(....parameters);
             //await Countly.SetDefaults(config);
-        //}
+        }
 
         async void Update()
         {
-            if (CountlyPushNotificationModel.IsPushServiceReady || CountlyPushNotificationModel.IsFirebaseReady)
+            /*
+             * When the push notification service gets enabled successfully for the device, 
+             * we send a request to the Countly server that the user is ready to receive push notifications.
+             * Update method is called multiple times during a particular scene,
+             * therefore we send this request to the Countly server only once
+             */
+            if (CountlyPushNotificationModel.IsPushServiceReady)
             {
 #if UNITY_IOS
                 byte[] apnToken = NotificationServices.deviceToken;
@@ -33,7 +39,7 @@ namespace Assets.Scripts.Main.Development
 #endif
                 CountlyPushNotificationModel.IsPushServiceReady = false;
 
-                //Post to Countly
+                //Enabling the User to receive Push Notifications
                 await CountlyPushNotificationModel.CountlyPNInstance.PostToCountlyAsync((int)CountlyPushNotificationModel.Mode);
             }
         }
@@ -43,7 +49,7 @@ namespace Assets.Scripts.Main.Development
         /// </summary>
         async void OnApplicationQuit()
         {
-            if (Countly.IsInitialized)
+            if (Countly.IsSessionInitiated && !Countly.IsManualSessionHandlingEnabled)
             {
                 await Countly.EndSessionAsync();
             }
@@ -52,14 +58,14 @@ namespace Assets.Scripts.Main.Development
         // Whenever app is enabled
         void OnEnable()
         {
-            if (Countly.IsInitialized)
+            if (Countly.IsSessionInitiated)
                 Application.logMessageReceived += LogCallback;
         }
 
         // Whenever app is disabled
         void OnDisable()
         {
-            if (Countly.IsInitialized)
+            if (Countly.IsSessionInitiated)
                 Application.logMessageReceived -= LogCallback;
         }
 
