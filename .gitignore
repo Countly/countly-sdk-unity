@@ -18,8 +18,6 @@
 # Unity
 /unity/Library
 /unity/Assembly-*
-/unity/*.csproj
-/unity/*.sln
 /unity/*.pidb
 /unity/*.userprefs
 /unity/Temp
