@@ -1,6 +1,11 @@
-﻿using Assets.Scripts.Enums;
+﻿#region Usings
+
+using Assets.Scripts.Enums;
 using Assets.Scripts.Models;
 using UnityEngine;
+using NotificationServices = UnityEngine.iOS.NotificationServices;
+
+#endregion
 
 namespace Assets.Scripts.Main.Development
 {

@@ -1,4 +1,6 @@
-﻿using Assets.Scripts.Enums;
+﻿#region Usings
+
+using Assets.Scripts.Enums;
 using Assets.Scripts.Helpers;
 using Assets.Scripts.Main.Development;
 using Firebase;
@@ -6,6 +8,10 @@ using Firebase.Messaging;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using NotificationServices = UnityEngine.iOS.NotificationServices;
+using NotificationType = UnityEngine.iOS.NotificationType;
+
+#endregion
 
 namespace Assets.Scripts.Models
 {
