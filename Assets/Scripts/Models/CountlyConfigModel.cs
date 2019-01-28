@@ -14,6 +14,7 @@ namespace Assets.Scripts.Models
         public int EventSendThreshold { get; private set; }
         public int StoredRequestLimit { get; private set; }
         public int TotalBreadcrumbsAllowed { get; private set; }
+        public bool EnableAutomaticCrashReporting { get; private set; }
 
         /// <summary>
         /// Initializes the SDK configurations
@@ -30,7 +31,8 @@ namespace Assets.Scripts.Models
                                     bool ignoreSessionCooldown = false, bool enableManualSessionHandling = false,
                                     int sessionDuration = 60, int eventThreshold = 100,
                                     int storedRequestLimit = 1000, int totalBreadcrumbsAllowed = 100,
-                                    TestMode? notificationMode = null)
+                                    TestMode? notificationMode = null, bool enableAutomaticCrashReporting = true)
+
         {
             Salt = salt;
             EnablePost = enablePost;
@@ -42,6 +44,7 @@ namespace Assets.Scripts.Models
             EventSendThreshold = eventThreshold;
             StoredRequestLimit = storedRequestLimit;
             TotalBreadcrumbsAllowed = totalBreadcrumbsAllowed;
+            EnableAutomaticCrashReporting = enableAutomaticCrashReporting;
         }
     }
 }

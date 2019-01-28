@@ -8,8 +8,11 @@ using Firebase.Messaging;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+
+#if UNITY_IOS
 using NotificationServices = UnityEngine.iOS.NotificationServices;
 using NotificationType = UnityEngine.iOS.NotificationType;
+#endif
 
 #endregion
 
