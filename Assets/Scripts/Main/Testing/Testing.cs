@@ -22,7 +22,7 @@ namespace Assets.Scripts.Main.Testing
             Countly.Begin("Server_URL",
                             "YOUR_APP_KEY",
                             "YOUR_DEVICE_ID");
-            var configObj = new CountlyConfigModel(null, false, false, false, false, 60, 100, 1000, 100, TestMode.AndroidTestToken);
+            var configObj = new CountlyConfigModel(null, false, false, false, false, 60, 100, 1000, 100, TestMode.AndroidTestToken, false);
             await Countly.SetDefaults(configObj);
         }
 

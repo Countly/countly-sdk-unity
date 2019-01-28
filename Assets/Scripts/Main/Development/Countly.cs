@@ -58,6 +58,8 @@ namespace Assets.Scripts.Main.Development
         public static int TotalBreadcrumbsAllowed { get; private set; }
 
         public static bool IsSessionInitiated { get; private set; }
+        public static bool EnableAutomaticCrashReporting { get; private set; }
+
 
         //#region Consents
         //public static bool ConsentGranted;
@@ -147,6 +149,7 @@ namespace Assets.Scripts.Main.Development
             StoredRequestLimit = configModel.StoredRequestLimit;
             EventSendThreshold = configModel.EventSendThreshold;
             TotalBreadcrumbsAllowed = configModel.TotalBreadcrumbsAllowed;
+            EnableAutomaticCrashReporting = configModel.EnableAutomaticCrashReporting;
 
             if (!IsManualSessionHandlingEnabled)
             {
@@ -314,8 +317,8 @@ namespace Assets.Scripts.Main.Development
         /// <param name="type">Excpetion type like error, warning, etc</param>
         internal static async void LogCallback(string message, string stackTrace, LogType type)
         {
-            if (type == LogType.Error
-                || type == LogType.Exception)
+            if (EnableAutomaticCrashReporting
+                && (type == LogType.Error || type == LogType.Exception))
             {
                 await SendCrashReportAsync(message, stackTrace, type, null, false);
             }

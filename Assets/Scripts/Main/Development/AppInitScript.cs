@@ -3,7 +3,10 @@
 using Assets.Scripts.Enums;
 using Assets.Scripts.Models;
 using UnityEngine;
+
+#if UNITY_IOS
 using NotificationServices = UnityEngine.iOS.NotificationServices;
+#endif 
 
 #endregion
 
