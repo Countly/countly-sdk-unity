@@ -12,7 +12,7 @@ Feature list (probably, I forget something:) ):
 5. Refactoring: Split Countly.cs into separate services.
 6. Add COUNTLY_ACTIVATED tag in case if testing in Editor is required.
 7. Fix event time. In original version events store time when request is sent. But the point is, we send request *after* event is occured (we send many events in one request). So, we changed it, and now event is stored the time when it occurs.
-8. Now all events are sent when OnApplicationQuit, OnApplicationFocus(focus=false), OnApplicationPause(pause=true) occur.
+8. Now all events are sent to Countly when OnApplicationQuit, OnApplicationFocus(focus=false), OnApplicationPause(pause=true) occur.
 9. RemoteConfigCountlyService is added. It allows to retrieve all Remote Configs from countly in one request. All retrieved configs are stored in local database. If due to some reasons impossible to retrieve Configs then the service loads configs from local database.
  
 ## About
