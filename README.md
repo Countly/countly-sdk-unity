@@ -28,11 +28,16 @@ There are two types of messages:
 * Data messages, which are handled by the client app.
 
 #### Notification messages from countly
+
 Countly sends **ONLY** data messages. 
-<img src="https://api.monosnap.com/file/download?id=kzLK5q7A6K6mKYyF6AKDqtVxIeT0QC" width="50%" height="50%">
+
+<img src="https://api.monosnap.com/file/download?id=kzLK5q7A6K6mKYyF6AKDqtVxIeT0QC" width="70%" height="70%">
+
 
 There are two ways to send data messages via countly:
-<img src="https://api.monosnap.com/file/download?id=1bxCfiYlfzD87D6hEJTbYPWqkmWVYh" width="50%" height="50%">
+
+<img src="https://api.monosnap.com/file/download?id=1bxCfiYlfzD87D6hEJTbYPWqkmWVYh" width="70%" height="70%">
+
 Json received on device:
 ```json
 {
@@ -52,6 +57,7 @@ Json received on device:
 ```
 
 <img src="https://api.monosnap.com/file/download?id=crwFY13K6AZnsyO4txIFiOCay02cdQ" width="50%" height="50%">
+
 Json received on device:
 
 ```json
@@ -73,23 +79,6 @@ Json received on device:
 ```
 
 
-#### Notification messages from firebase
-
-{
-  "message":{
-    "token":"bk3RNwTe3H0:CI2k_HHwgIpoDKCIZvvDMExUdFQ3P1...",
-    "notification":{
-      "title":"Portugal vs. Denmark",
-      "body":"great match!"
-    }
-  }
-}
-
-|  Message types             | Countly       | Firebase  |
-| -------------              |:-------------:| -----:|
-| Notification messages      | right-aligned | $1600 |
-| Data messages              | centered      |   $12 |
- 
 ## About
 
 This repository includes the Unity SDK. 
