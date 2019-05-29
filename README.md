@@ -56,7 +56,7 @@ Json received on device:
 }
 ```
 
-<img src="https://api.monosnap.com/file/download?id=crwFY13K6AZnsyO4txIFiOCay02cdQ" width="50%" height="50%">
+<img src="https://api.monosnap.com/file/download?id=crwFY13K6AZnsyO4txIFiOCay02cdQ" width="70%" height="70%">
 
 Json received on device:
 
