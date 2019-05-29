@@ -6,14 +6,19 @@ Original Countly Unity3d SDK does not have sufficient code. Also it incliudes so
 This version of coutly SDK contains refactoring, some improtant additional features and fixes.
 Feature list (probably, I forget something:) ):
 1. Local storage. Extremely important feature especially on mobile platforms because users play offline very often. Every event and request is stored locally before then are sent to Countly. We use [iBoxDb](http://iboxdb.com) as local database.
-2. Firebase plugins were replace entirely with custom plugin. This allows us to reduce build size dramatically on mobile devices (up to 10 mb reducing). 
-3. Add Locale parameter to CountlyMetricModel so we can track users locale via Language panel in Countly.
+2. Firebase plugins were replace entirely with custom plugin. This allows us to reduce build size dramatically on mobile devices (up to 10 mb reducing). You can find plugin source code in Notifications folder.
+3. Add Locale parameter (_locale) to CountlyMetricModel so we can track users locale via Language panel in Countly.
 4. All view events ([CLY]_view) are sent in one request so only one data point is tracked by Countly. This works only for view events. Vies are sent separately from other events.
 5. Refactoring: Split Countly.cs into separate services.
-6. Add COUNTLY_ACTIVATED tag in case if testing in Editor is required.
+6. Add Wrapper for Editor. By default, countly events does not send to the server in editor
 7. Fix event time. In original version events store time when request is sent. But the point is, we send request *after* event is occured (we send many events in one request). So, we changed it, and now event is stored the time when it occurs.
 8. Now all events are sent to Countly when OnApplicationQuit, OnApplicationFocus(focus=false), OnApplicationPause(pause=true) occur.
 9. RemoteConfigCountlyService is added. It allows to retrieve all Remote Configs from countly in one request. All retrieved configs are stored in local database. If due to some reasons impossible to retrieve Configs then the service loads configs from local database.
+ 
+# Roadmap
+1. Handle local notifications.
+2. Improve code.
+3. Bugfixes (self-hosted countly is requered).
  
 ## About
 
