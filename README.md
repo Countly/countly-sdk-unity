@@ -16,6 +16,7 @@ Feature list (probably, I forget something:) ):
 9. RemoteConfigCountlyService is added. It allows to retrieve all Remote Configs from countly in one request. All retrieved configs are stored in local database. If due to some reasons impossible to retrieve Configs then the service loads configs from local database.
  
 YOU HAVE TO SET SETTINGS **Write Permission** to 'External (SDCard)'.
+
 <img src="https://api.monosnap.com/file/download?id=Y1S7nuBAvZrdc0po5BROBzFoaxkRoY" width="30%" height="30%">
 
  
