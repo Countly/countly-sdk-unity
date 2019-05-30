@@ -21,7 +21,7 @@ Feature list (probably, I forget something:) ):
 <img src="https://api.monosnap.com/file/download?id=Un5qt0s49orTp3qA0zPEJ6FVyxnNdN" width="30%" height="30%">
 
 2. Change notification icons if necessary. All icons are placed in folder /Plugins/Android/Notifications/res. You can find more information in official Android documentation.
-3. Register in Firebase and create google-services.xm from google-services.json. You can use online converter [here](https://dandar3.github.io/android/google-services-json-to-xml.html).
+3. Register in Firebase and create google-services.xml from google-services.json. You can use online converter [here](https://dandar3.github.io/android/google-services-json-to-xml.html). Put your file google-services.xml in /Plugins/Android/Notifications/res/values (replace if necessary).
 4. Put your applicationId in mainTemplate.gradle. Read more about mainTemplate [here](https://docs.unity3d.com/Manual/android-gradle-overview.html)
 5. Set **Write Permission** to 'External (SDCard)'. Sometimes it is required for iBoxDb.
 
