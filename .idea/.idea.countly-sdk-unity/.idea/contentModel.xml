@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ContentModelStore">
+    <e p="$PROJECT_DIR$" t="IncludeRecursive">
+      <e p="Assembly-CSharp-Editor-firstpass.csproj" t="IncludeRecursive" />
+      <e p="Assembly-CSharp-firstpass.csproj" t="IncludeRecursive" />
+      <e p="Assembly-CSharp.csproj" t="IncludeRecursive" />
+      <e p="Assets" t="Include">
+        <e p="License.txt.txt" t="Include" />
+        <e p="Plugins" t="Include">
+          <e p="Android" t="Include">
+            <e p="Notifications" t="Include">
+              <e p="AndroidManifest.xml" t="Include" />
+              <e p="res" t="Include">
+                <e p="values" t="Include">
+                  <e p="colors.xml" t="Include" />
+                  <e p="google-services.xml" t="Include" />
+                  <e p="strings.xml" t="Include" />
+                </e>
+              </e>
+            </e>
+          </e>
+          <e p="Countly" t="Include">
+            <e p="Editor" t="Include">
+              <e p="PersistanceTests.cs" t="Include" />
+            </e>
+            <e p="Enums" t="Include">
+              <e p="FeaturesEnum.cs" t="Include" />
+              <e p="TestMode.cs" t="Include" />
+            </e>
+            <e p="Helpers" t="Include">
+              <e p="Constants.cs" t="Include" />
+              <e p="Converter.cs" t="Include" />
+              <e p="CountlyBoxDbHelper.cs" t="Include" />
+              <e p="CountlyResponse.cs" t="Include" />
+              <e p="CustomJsonConverter.cs" t="Include" />
+              <e p="NotificationHelper.cs" t="Include" />
+              <e p="RequestCountlyHelper.cs" t="Include" />
+            </e>
+            <e p="ICountly.cs" t="Include" />
+            <e p="ICountlyUtils.cs" t="Include" />
+            <e p="Impl" t="Include">
+              <e p="Countly.cs" t="Include" />
+              <e p="CountlyUtils.cs" t="Include" />
+              <e p="CountlyWrapper.cs" t="Include" />
+            </e>
+            <e p="Models" t="Include">
+              <e p="ConsentModel.cs" t="Include" />
+              <e p="CountlyAuthModel.cs" t="Include" />
+              <e p="CountlyConfigModel.cs" t="Include" />
+              <e p="CountlyEventModel.cs" t="Include" />
+              <e p="CountlyExceptionDetailModel.cs" t="Include" />
+              <e p="CountlyMetricModel.cs" t="Include" />
+              <e p="CountlyRequestModel.cs" t="Include" />
+              <e p="CountlyUserDetailsModel.cs" t="Include" />
+              <e p="SegmentModel.cs" t="Include" />
+              <e p="TimeMetricModel.cs" t="Include" />
+            </e>
+            <e p="Persistance" t="Include">
+              <e p="Dao" t="Include">
+                <e p="SegmentDao.cs" t="Include" />
+              </e>
+              <e p="Entities" t="Include">
+                <e p="ConfigEntity.cs" t="Include" />
+                <e p="EventEntity.cs" t="Include" />
+                <e p="IEntity.cs" t="Include" />
+                <e p="RequestEntity.cs" t="Include" />
+                <e p="SegmentEntity.cs" t="Include" />
+              </e>
+              <e p="EntityType.cs" t="Include" />
+              <e p="IModel.cs" t="Include" />
+              <e p="Repositories" t="Include">
+                <e p="AbstractEventRepository.cs" t="Include" />
+                <e p="Impls" t="Include">
+                  <e p="NonViewEventRepository.cs" t="Include" />
+                  <e p="ViewEventRepository.cs" t="Include" />
+                </e>
+                <e p="Repository.cs" t="Include" />
+                <e p="RequestRepository.cs" t="Include" />
+              </e>
+            </e>
+            <e p="Services" t="Include">
+              <e p="IConsentCountlyService.cs" t="Include" />
+              <e p="ICrushReportsCountlyService.cs" t="Include" />
+              <e p="IDeviceIdCountlyService.cs" t="Include" />
+              <e p="IEventCountlyService.cs" t="Include" />
+              <e p="IInitializationCountlyService .cs" t="Include" />
+              <e p="Impls" t="Include">
+                <e p="Actual" t="Include">
+                  <e p="ConsentCountlyService.cs" t="Include" />
+                  <e p="CrushReportsCountlyService.cs" t="Include" />
+                  <e p="DeviceIdCountlyService.cs" t="Include" />
+                  <e p="EventCountlyService.cs" t="Include" />
+                  <e p="InitializationCountlyService.cs" t="Include" />
+                  <e p="OptionalParametersCountlyService.cs" t="Include" />
+                  <e p="PushCountlyService.cs" t="Include" />
+                  <e p="RemoteConfigCountlyService.cs" t="Include" />
+                  <e p="SessionCountlyService.cs" t="Include" />
+                  <e p="StarRatingCountlyService.cs" t="Include" />
+                  <e p="UserDetailsCountlyService.cs" t="Include" />
+                  <e p="ViewCountlyService.cs" t="Include" />
+                </e>
+                <e p="Wrapper" t="Include">
+                  <e p="ConsentCountlyServiceWrapper.cs" t="Include" />
+                  <e p="CrushReportsCountlyServiceWrapper.cs" t="Include" />
+                  <e p="DeviceIdCountlyServiceWrapper.cs" t="Include" />
+                  <e p="EventCountlyServiceWrapper.cs" t="Include" />
+                  <e p="InitializationCountlyServiceWrapper.cs" t="Include" />
+                  <e p="OptionalParametersCountlyServiceWrapper.cs" t="Include" />
+                  <e p="RemoteConfigCountlyServiceWrapper.cs" t="Include" />
+                  <e p="StarRatingCountlyServiceWrapper.cs" t="Include" />
+                  <e p="UserDetailsCountlyServiceWrapper.cs" t="Include" />
+                  <e p="ViewCountlyServiceWrapper.cs" t="Include" />
+                </e>
+              </e>
+              <e p="IOptionalParametersCountlyService.cs" t="Include" />
+              <e p="IRemoteConfigCountlyService.cs" t="Include" />
+              <e p="IStarRatingCountlyService .cs" t="Include" />
+              <e p="IUserDetailsCountlyService.cs" t="Include" />
+              <e p="IViewCountlyService.cs" t="Include" />
+            </e>
+          </e>
+          <e p="iBoxDB" t="Include">
+            <e p="BoxDbUtils.cs" t="Include" />
+            <e p="Dao.cs" t="Include" />
+            <e p="UnityDBCS.cs" t="Include" />
+          </e>
+          <e p="Notifications" t="Include">
+            <e p="Impls" t="Include">
+              <e p="Android" t="Include">
+                <e p="AndroidBridge.cs" t="Include" />
+                <e p="AndroidNotificationsService.cs" t="Include" />
+              </e>
+              <e p="EditorNotificationsService.cs" t="Include" />
+              <e p="ProxyNotificationsService.cs" t="Include" />
+            </e>
+            <e p="INotificationsService.cs" t="Include" />
+          </e>
+        </e>
+        <e p="Scripts" t="Include">
+          <e p="CountlyEntryPoint.cs" t="Include" />
+        </e>
+      </e>
+      <e p="countly-sdk-unity.sln" t="IncludeFlat" />
+      <e p="obj" t="ExcludeRecursive" />
+      <e p="packages" t="ExcludeRecursive" />
+      <e p="Temp/bin" t="ExcludeRecursive" />
+    </e>
+    <e p="$USER_HOME$/Library/Caches/Rider2019.1/extResources" t="IncludeRecursive" />
+    <e p="$USER_HOME$/Library/Caches/Rider2019.1/resharper-host/local/Transient/ReSharperHost/v191/SolutionCaches/_countly-sdk-unity.165772474.00" t="ExcludeRecursive" />
+    <e p="$APPLICATION_CONFIG_DIR$/scratches" t="IncludeRecursive" />
+  </component>
+</project>
