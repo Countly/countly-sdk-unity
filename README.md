@@ -19,12 +19,16 @@ YOU HAVE TO SET SETTINGS **Write Permission** to 'External (SDCard)'.
 
 <img src="https://api.monosnap.com/file/download?id=Y1S7nuBAvZrdc0po5BROBzFoaxkRoY" width="30%" height="30%">
 
- 
-# Roadmap
-1. Handle local notifications.
-2. Improve code.
-3. Bugfixes (self-hosted countly is requered).
- 
+## How to set up the project
+1. Fill Countly prefab with ServerUrl and AppKey. Also you can set up other countly parameters.
+
+<img src="https://api.monosnap.com/file/download?id=Un5qt0s49orTp3qA0zPEJ6FVyxnNdN" width="30%" height="30%">
+
+2. Change notification icons if necessary. All icons are placed in folder /Plugins/Android/Notifications/res. You can find more information in official Android documentation.
+3. Register in Firebase and create google-services.xm from google-services.json. You can use online converter [here](https://dandar3.github.io/android/google-services-json-to-xml.html).
+4. Put your applicationId in mainTemplate.gradle. Read more about mainTemplate [here](https://docs.unity3d.com/Manual/android-gradle-overview.html)
+
+
 ## Messages (Notifications)
 On android all notifications are called messages.
 Countly works with FCS to send messages.
@@ -83,10 +87,16 @@ Json received on device:
 }
 ```
 
+ 
+# Roadmap
+1. Handle local notifications.
+2. Improve code.
+3. Bugfixes (self-hosted countly is requered).
+
 
 ## About
 
-This repository includes the Unity SDK. 
+This repository includes the Unity SDK. Unity version: 2018.3.14
 
 Need help? See [Countly SDK for Unity](http://resources.count.ly/v1.0/docs/) documentation at [Countly Resources](http://resources.count.ly), or ask us on our [Countly Analytics Community Slack channel](http://slack.count.ly) or [Playdarium email](playdarium@gmail.com).
 
