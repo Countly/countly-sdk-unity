@@ -6,7 +6,7 @@ Original Countly Unity3d SDK does not have sufficient code. Also it incliudes so
 This version of coutly SDK contains refactoring, some improtant additional features and fixes.
 Feature list (probably, I forget something:) ):
 1. Local storage. Extremely important feature especially on mobile platforms because users play offline very often. Every event and request is stored locally before then are sent to Countly. We use [iBoxDb](http://iboxdb.com) as local database.
-2. Firebase plugins were replace entirely with custom plugin. This allows us to reduce build size dramatically on mobile devices (up to 10 mb reducing). You can find plugin source code in Notifications folder.
+2. Firebase plugins were replace entirely with custom plugin. This allows us to reduce build size dramatically on mobile devices (up to 10 mb reducing). You can find plugin in Plugin/Android/Notifications folder. Plugin source code is in Services folder in root directory.
 3. Add Locale parameter (_locale) to CountlyMetricModel so we can track users locale via Language panel in Countly.
 4. All view events ([CLY]_view) are sent in one request so only one data point is tracked by Countly. This works only for view events. Vies are sent separately from other events.
 5. Refactoring: Split Countly.cs into separate services.
