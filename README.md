@@ -14,10 +14,6 @@ Feature list (probably, I forget something:) ):
 7. Fix event time. In original version events store time when request is sent. But the point is, we send request *after* event is occured (we send many events in one request). So, we changed it, and now event is stored the time when it occurs.
 8. Now all events are sent to Countly when OnApplicationQuit, OnApplicationFocus(focus=false), OnApplicationPause(pause=true) occur.
 9. RemoteConfigCountlyService is added. It allows to retrieve all Remote Configs from countly in one request. All retrieved configs are stored in local database. If due to some reasons impossible to retrieve Configs then the service loads configs from local database.
- 
-YOU HAVE TO SET SETTINGS **Write Permission** to 'External (SDCard)'.
-
-<img src="https://api.monosnap.com/file/download?id=Y1S7nuBAvZrdc0po5BROBzFoaxkRoY" width="30%" height="30%">
 
 ## How to set up the project
 1. Fill Countly prefab with ServerUrl and AppKey. Also you can set up other countly parameters.
@@ -27,6 +23,9 @@ YOU HAVE TO SET SETTINGS **Write Permission** to 'External (SDCard)'.
 2. Change notification icons if necessary. All icons are placed in folder /Plugins/Android/Notifications/res. You can find more information in official Android documentation.
 3. Register in Firebase and create google-services.xm from google-services.json. You can use online converter [here](https://dandar3.github.io/android/google-services-json-to-xml.html).
 4. Put your applicationId in mainTemplate.gradle. Read more about mainTemplate [here](https://docs.unity3d.com/Manual/android-gradle-overview.html)
+5. Set **Write Permission** to 'External (SDCard)'. Sometimes it is required for iBoxDb.
+
+<img src="https://api.monosnap.com/file/download?id=Y1S7nuBAvZrdc0po5BROBzFoaxkRoY" width="30%" height="30%">
 
 
 ## Messages (Notifications)
