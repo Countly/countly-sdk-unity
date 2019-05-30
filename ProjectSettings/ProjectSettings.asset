@@ -152,7 +152,7 @@ PlayerSettings:
   androidSupportedAspectRatio: 1
   androidMaxAspectRatio: 2.1
   applicationIdentifier:
-    Android: com.Playdarium.DefaultCompany
+    Android: com.playdarium.DefaultCompany
     Standalone: com.Company.ProductName
   buildNumber: {}
   AndroidBundleVersionCode: 0

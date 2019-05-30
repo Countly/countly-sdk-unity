@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="default_web_client_id"          translatable="false">1023543927679-h78clj7uigb6b6hpg6na2s7rhrv8c2n7.apps.googleusercontent.com</string>
+    <string name="firebase_database_url"          translatable="false">https://zombie-wars-test.firebaseio.com</string>
+    <string name="gcm_defaultSenderId"            translatable="false">1023543927679</string>
+    <string name="google_api_key"                 translatable="false">AIzaSyA2axxcQQwgyyi3nLXVwUT9haZ2lkmTDho</string>
+    <string name="google_app_id"                  translatable="false">1:1023543927679:android:1236a4264c85a11b</string>
+    <string name="google_crash_reporting_api_key" translatable="false">AIzaSyA2axxcQQwgyyi3nLXVwUT9haZ2lkmTDho</string>
+    <string name="google_storage_bucket"          translatable="false">zombie-wars-test.appspot.com</string>
+    <string name="project_id"                     translatable="false">zombie-wars-test</string>
+</resources>
