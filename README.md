@@ -6,7 +6,7 @@ Original Countly Unity3d SDK does not have sufficient code. Also it incliudes so
 This version of coutly SDK contains refactoring, some improtant additional features and fixes.
 Feature list (probably, I forget something:) ):
 1. Local storage. Extremely important feature especially on mobile platforms because users play offline very often. Every event and request is stored locally before then are sent to Countly. We use [iBoxDb](http://iboxdb.com) as local database.
-2. Firebase plugins were replace entirely with custom plugin. This allows us to reduce build size dramatically on mobile devices (up to 10 mb reducing). You can find plugin source code in Notifications folder.
+2. Firebase plugins were replace entirely with custom plugin. This allows us to reduce build size dramatically on mobile devices (up to 10 mb reducing). You can find plugin in Plugin/Android/Notifications folder. Plugin source code is in Services folder in root directory.
 3. Add Locale parameter (_locale) to CountlyMetricModel so we can track users locale via Language panel in Countly.
 4. All view events ([CLY]_view) are sent in one request so only one data point is tracked by Countly. This works only for view events. Vies are sent separately from other events.
 5. Refactoring: Split Countly.cs into separate services.
@@ -14,12 +14,20 @@ Feature list (probably, I forget something:) ):
 7. Fix event time. In original version events store time when request is sent. But the point is, we send request *after* event is occured (we send many events in one request). So, we changed it, and now event is stored the time when it occurs.
 8. Now all events are sent to Countly when OnApplicationQuit, OnApplicationFocus(focus=false), OnApplicationPause(pause=true) occur.
 9. RemoteConfigCountlyService is added. It allows to retrieve all Remote Configs from countly in one request. All retrieved configs are stored in local database. If due to some reasons impossible to retrieve Configs then the service loads configs from local database.
- 
-# Roadmap
-1. Handle local notifications.
-2. Improve code.
-3. Bugfixes (self-hosted countly is requered).
- 
+
+## How to set up the project
+1. Fill Countly prefab with ServerUrl and AppKey. Also you can set up other countly parameters.
+
+<img src="https://api.monosnap.com/file/download?id=Un5qt0s49orTp3qA0zPEJ6FVyxnNdN" width="30%" height="30%">
+
+2. Change notification icons if necessary. All icons are placed in folder /Plugins/Android/Notifications/res. You can find more information in official Android documentation.
+3. Register in Firebase and create google-services.xml from google-services.json. You can use online converter [here](https://dandar3.github.io/android/google-services-json-to-xml.html). Put your file google-services.xml in /Plugins/Android/Notifications/res/values (replace if necessary).
+4. Put your applicationId in mainTemplate.gradle. Read more about mainTemplate [here](https://docs.unity3d.com/Manual/android-gradle-overview.html)
+5. Set **Write Permission** to 'External (SDCard)'. Sometimes it is required for iBoxDb.
+
+<img src="https://api.monosnap.com/file/download?id=Y1S7nuBAvZrdc0po5BROBzFoaxkRoY" width="30%" height="30%">
+
+
 ## Messages (Notifications)
 On android all notifications are called messages.
 Countly works with FCS to send messages.
@@ -78,10 +86,16 @@ Json received on device:
 }
 ```
 
+ 
+# Roadmap
+1. Handle local notifications.
+2. Improve code.
+3. Bugfixes (self-hosted countly is requered).
+
 
 ## About
 
-This repository includes the Unity SDK. 
+This repository includes the Unity SDK. Unity version: 2018.3.14
 
 Need help? See [Countly SDK for Unity](http://resources.count.ly/v1.0/docs/) documentation at [Countly Resources](http://resources.count.ly), or ask us on our [Countly Analytics Community Slack channel](http://slack.count.ly) or [Playdarium email](playdarium@gmail.com).
 

@@ -7,6 +7,9 @@
 # packages
 /packages
 
+.idea
+/Logs
+
 # Android
 /android/bin/*
 /android/libs/*
