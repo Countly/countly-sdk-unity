@@ -2,7 +2,7 @@
 [Countly](http://count.ly) is an innovative, real-time, open source mobile analytics application. It collects data from mobile devices, and visualizes this information to analyze mobile application usage and end-user behavior. There are two parts of Countly: the server that collects and analyzes data, and mobile SDK that sends this data. Both parts are open source with different licensing terms.
 
 # Playdarium countly Unity SDK
-This repository includes the Unity SDK. Unity version: 2018.3.14
+This repository includes the Unity SDK. Unity version: 2018.3.14f1
 Scripting version is based on .NET 4.x Equivalent
 
 Original Countly Unity3d SDK does not have sufficient code. Also it incliudes some deprecated rest api methods.
@@ -34,6 +34,29 @@ Feature list (probably, I forget something:) ):
 
 <img src="https://api.monosnap.com/file/download?id=Y1S7nuBAvZrdc0po5BROBzFoaxkRoY" width="30%" height="30%">
 
+## How to use this SDK
+In order to start using countly you need to attach script CountlyEntryPoint to any gameobject on your scene and assign Countly and CountlyWrapper prefabs to proper fields. All prefabs are stored in Prefabs folder.
+CountlyWrapper is used only in Editor mode, it emulates and logs all events.
+Countly is used in production. It contains all settings. Just do not forget put ServerUrl and AppKey into Countly prefab :)
+Example scene: EntryPoint in folder Scenes.
+
+The core class of an entire SDK is Countly.cs. you can use any handler from that class.
+For example:
+```csharp
+Plugins.Countly.Impl.Countly.Instance.Events.RecordEventAsync("Test event");
+```
+
+List of handlers:
+1. Consents
+2. CrushReports
+3. Device
+4. Events - use this handler to publish any custom events.
+5. Initialization
+6. OptionalParameters
+7. RemoteConfigs - use this handler to retrieve remote configs.
+8. StarRating
+9. UserDetails - use this handler to publish any user parameters including custom attributes.
+10. Views - use this handler to publish any custom events. 
 
 ## Messages (Notifications)
 On android all notifications are called messages.
@@ -94,7 +117,7 @@ Json received on device:
 ```
 
  
-# Roadmap
+## Roadmap
 1. Handle local notifications.
 2. Improve code.
 3. Bugfixes (self-hosted countly is requered).
