@@ -5,7 +5,6 @@
 This repository includes the Unity SDK. Unity version: 2018.3.14
 Scripting version is based on .NET 4.x Equivalent
 
-
 Original Countly Unity3d SDK does not have sufficient code. Also it incliudes some deprecated rest api methods.
 This version of coutly SDK contains refactoring, some improtant additional features and fixes.
 Feature list (probably, I forget something:) ):
@@ -22,9 +21,6 @@ Feature list (probably, I forget something:) ):
 11. Add useNumberInSameSession parameter in IEventCountlyService.RecordEventAsync method. When useNumberInSameSession = true a segment 'numberInSameSession' will be added to the event. This will allow us to analyse how much events occured in same session.
 12. Add setting EnableFirstAppLaunchSegment to CountlyConfigModel and Countly prefab. Allows to add a segment 'firstAppLaunch' to any event in first user session. Important: If user removes app or all app data from device the 'firstAppLaunch' will be applied because PlayerPrefs is used (take a look at class FirstLaunchAppHelper).
 
-
-## Bugfixes
-1. [Mobile] If user just  
 
 ## How to set up the project
 1. Fill Countly prefab with ServerUrl and AppKey. Also you can set up other countly parameters.
