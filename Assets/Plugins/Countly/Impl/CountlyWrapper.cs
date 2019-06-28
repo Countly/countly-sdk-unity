@@ -1,3 +1,5 @@
+using System;
+using Countly.Input;
 using Plugins.Countly.Services;
 using Plugins.Countly.Services.Impls.Actual;
 using Plugins.Countly.Services.Impls.Wrapper;
@@ -27,7 +29,14 @@ namespace Plugins.Countly.Impl
 
         public IViewCountlyService Views { get; private set; }
 
+        private IInputObserver _inputObserver;
+
         private void Awake()
+        {
+            DontDestroyOnLoad(gameObject);
+        }
+
+        private void Start()
         {
             Consents = new ConsentCountlyServiceWrapper();
             CrushReports = new CrushReportsCountlyServiceWrapper();
@@ -39,7 +48,19 @@ namespace Plugins.Countly.Impl
             StarRating = new StarRatingCountlyServiceWrapper();
             UserDetails = new UserDetailsCountlyServiceWrapper();
             Views = new ViewCountlyServiceWrapper();
+            _inputObserver = InputObserverResolver.Resolve();
         }
-        
+
+        private void Update()
+        {
+            CheckLastInput();
+        }
+
+        private void CheckLastInput()
+        {
+            if(!_inputObserver.HasInput)
+                return;
+            Debug.Log($"[CountlyWrapper] Last touch date: " + DateTime.Now);
+        }
     }
 }

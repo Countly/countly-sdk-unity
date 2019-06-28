@@ -6,6 +6,7 @@ using Plugins.Countly.Helpers;
 using Plugins.Countly.Persistance.Entities;
 using Plugins.iBoxDB;
 using UnityEngine;
+using UnityEngine.Networking;
 
 namespace Plugins.Countly.Services.Impls.Actual
 {
@@ -55,10 +56,9 @@ namespace Plugins.Countly.Services.Impls.Actual
                 if (allConfigs != null && allConfigs.Count > 0)
                 {
                     Configs = Converter.ConvertJsonToDictionary(allConfigs[0].Json);
+                    Debug.Log("Configs: " + Configs.Count);
                 }
             }
-            
-            Debug.Log("Configs: " + Configs.Count);
 
             return response;
         }
@@ -76,7 +76,7 @@ namespace Plugins.Countly.Services.Impls.Actual
             foreach (var item in _countlyUtils.GetAppKeyAndDeviceIdParams())
             {
                 _requestStringBuilder.AppendFormat((item.Key != "app_key" ? "&" : string.Empty) + "{0}={1}",
-                    WWW.EscapeURL(item.Key), WWW.EscapeURL(Convert.ToString(item.Value))); 
+                    UnityWebRequest.EscapeURL(item.Key), UnityWebRequest.EscapeURL(Convert.ToString(item.Value))); 
             }
 
 
@@ -85,8 +85,8 @@ namespace Plugins.Countly.Services.Impls.Actual
             {
                 if (!string.IsNullOrEmpty(item.Key) && item.Value != null)
                 {
-                    _requestStringBuilder.AppendFormat("&{0}={1}", WWW.EscapeURL(item.Key),
-                        WWW.EscapeURL(Convert.ToString(item.Value)));
+                    _requestStringBuilder.AppendFormat("&{0}={1}", UnityWebRequest.EscapeURL(item.Key),
+                        UnityWebRequest.EscapeURL(Convert.ToString(item.Value)));
                 }
             }
 

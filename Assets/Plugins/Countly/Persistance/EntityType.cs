@@ -2,6 +2,6 @@ namespace Plugins.Countly.Persistance
 {
     public enum EntityType
     {
-        ViewEvents, NonViewEvents, Requests, ViewEventSegments, NonViewEventSegments, Configs
+        ViewEvents, NonViewEvents, Requests, ViewEventSegments, NonViewEventSegments, Configs, EventNumberInSameSessions
     }
 }
