@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class CountlyEntryPoint : MonoBehaviour
 {
-	public Countly countly;
+	public Plugins.Countly.Impl.Countly countly;
 	public CountlyWrapper countlyWrapper;
 
 	private ICountly _countly;
@@ -22,6 +22,6 @@ public class CountlyEntryPoint : MonoBehaviour
 
 	private void SendEvents()
 	{
-		_countly.Events.RecordEventAsync("Test event");
+		Plugins.Countly.Impl.Countly.Instance.Events.RecordEventAsync("Test event");
 	}
 }
