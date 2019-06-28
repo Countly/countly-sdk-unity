@@ -20,6 +20,11 @@ namespace Plugins.iBoxDB
             return Auto.Insert(Table, entity);
         }
 
+        public bool Update(TEntity entity)
+        {
+            return Auto.Update(Table, entity);
+        }
+
         public List<TEntity> LoadAll()
         {
             return Auto.Select<TEntity>("from " + Table);
