@@ -13,19 +13,26 @@ namespace Plugins.Countly.Services.Impls.Actual
         private readonly RequestCountlyHelper _requestCountlyHelper;
         private readonly ViewEventRepository _viewEventRepo;
         private readonly NonViewEventRepository _nonViewEventRepo;
+        private readonly EventNumberInSameSessionHelper _eventNumberInSameSessionHelper;
 
         internal EventCountlyService(CountlyConfigModel countlyConfigModel, RequestCountlyHelper requestCountlyHelper, 
-            ViewEventRepository viewEventRepo, NonViewEventRepository nonViewEventRepo)
+            ViewEventRepository viewEventRepo, NonViewEventRepository nonViewEventRepo, EventNumberInSameSessionHelper eventNumberInSameSessionHelper)
         {
             _countlyConfigModel = countlyConfigModel;
             _requestCountlyHelper = requestCountlyHelper;
             _viewEventRepo = viewEventRepo;
             _nonViewEventRepo = nonViewEventRepo;
+            _eventNumberInSameSessionHelper = eventNumberInSameSessionHelper;
         }
 
-        
-        public async Task<CountlyResponse> RecordEventAsync(CountlyEventModel @event)
+        public async Task<CountlyResponse> RecordEventAsync(CountlyEventModel @event, bool useNumberInSameSession = false)
         {
+            if (_countlyConfigModel.EnableFirstAppLaunchSegment && FirstLaunchAppHelper.IsFirstLaunchApp)
+            {
+                AddFirstAppSegment(@event);
+            }
+
+            
             if (@event.Key.Equals(CountlyEventModel.ViewEvent))
             {
                 _viewEventRepo.Enqueue(@event);
@@ -35,6 +42,11 @@ namespace Plugins.Countly.Services.Impls.Actual
                 _nonViewEventRepo.Enqueue(@event);
             }
 
+            if (useNumberInSameSession)
+            {
+                _eventNumberInSameSessionHelper.IncreaseNumberInSameSession(@event);
+            }
+            
             if (_viewEventRepo.Count >= _countlyConfigModel.EventViewSendThreshold)
                 await ReportAllRecordedViewEventsAsync();
 
@@ -48,7 +60,7 @@ namespace Plugins.Countly.Services.Impls.Actual
         }
         
         
-        public async Task<CountlyResponse> RecordEventAsync(string key)
+        public async Task<CountlyResponse> RecordEventAsync(string key, bool useNumberInSameSession = false)
         {
             if (string.IsNullOrEmpty(key) && string.IsNullOrWhiteSpace(key))
             {
@@ -57,14 +69,19 @@ namespace Plugins.Countly.Services.Impls.Actual
                     IsSuccess = false,
                     ErrorMessage = "Key is required."
                 };
-            
             }
 
             var @event = new CountlyEventModel(key);
+            
+            if (useNumberInSameSession)
+            {
+                _eventNumberInSameSessionHelper.IncreaseNumberInSameSession(@event);
+            }
+            
             return await RecordEventAsync(@event);
         }
 
-        public async Task<CountlyResponse> RecordEventAsync(string key, IDictionary<string, object> segmentation,
+        public async Task<CountlyResponse> RecordEventAsync(string key, IDictionary<string, object> segmentation, bool useNumberInSameSession = false,
             int? count = 1, double? sum = 0, double? duration = null)
         {
             if (string.IsNullOrEmpty(key) && string.IsNullOrWhiteSpace(key))
@@ -77,6 +94,12 @@ namespace Plugins.Countly.Services.Impls.Actual
             }
             
             var @event = new CountlyEventModel(key, segmentation, count, sum, duration);
+            
+            if (useNumberInSameSession)
+            {
+                _eventNumberInSameSessionHelper.IncreaseNumberInSameSession(@event);
+            }
+            
             return await RecordEventAsync(@event);
         }
         
@@ -164,6 +187,14 @@ namespace Plugins.Countly.Services.Impls.Actual
                     ErrorMessage = "No events found."
                 };
 
+            if (_countlyConfigModel.EnableFirstAppLaunchSegment && FirstLaunchAppHelper.IsFirstLaunchApp)
+            {
+                foreach (var evt in events)
+                {
+                    AddFirstAppSegment(evt);
+                }
+            }
+            
 //            var currentTime = DateTime.UtcNow;
 //            foreach (var evt in events)
 //            {
@@ -197,6 +228,11 @@ namespace Plugins.Countly.Services.Impls.Actual
                 };
 
             var evt = new CountlyEventModel(key, segmentation, count, sum, duration);
+            
+            if (_countlyConfigModel.EnableFirstAppLaunchSegment && FirstLaunchAppHelper.IsFirstLaunchApp)
+            {
+                AddFirstAppSegment(evt);
+            }
 //            SetTimeZoneInfo(evt, DateTime.UtcNow);
 
             var requestParams =
@@ -218,5 +254,14 @@ namespace Plugins.Countly.Services.Impls.Actual
 //            evt.Hour = timezoneInfo.Hour;
 //            evt.Timezone = timezoneInfo.Timezone;
 //        }
+
+        private void AddFirstAppSegment(CountlyEventModel @event)
+        {
+            if (@event.Segmentation == null)
+            {
+                @event.Segmentation = new SegmentModel();
+            }
+            @event.Segmentation.Add(Constants.FirstAppLaunchSegment, true);
+        }
     }
 }

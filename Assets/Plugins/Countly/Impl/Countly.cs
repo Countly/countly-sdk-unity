@@ -1,3 +1,4 @@
+using Countly.Input;
 using iBoxDB.LocalServer;
 using Notifications.Impls;
 using Plugins.Countly.Helpers;
@@ -40,7 +41,8 @@ namespace Plugins.Countly.Impl
         public IUserDetailsCountlyService UserDetails { get; private set; }
 
         public IViewCountlyService Views { get; private set; }
-        
+
+        private IInputObserver _inputObserver;
 
         private DB _db;    
 
@@ -54,7 +56,7 @@ namespace Plugins.Countly.Impl
         /// <summary>
         ///     Initialize SDK at the start of your app
         /// </summary>
-        private async void Awake()
+        private async void Start()
         {
             DontDestroyOnLoad(gameObject);
             Instance = this;
@@ -73,12 +75,15 @@ namespace Plugins.Countly.Impl
             var requestRepo = new RequestRepository(requestDao);
             var eventViewRepo = new ViewEventRepository(viewEventDao, viewSegmentDao);
             var eventNonViewRepo = new NonViewEventRepository(nonViewEventDao, nonViewSegmentDao);
-            
+            var eventNrInSameSessionDao = new EventNumberInSameSessionDao(auto, EntityType.EventNumberInSameSessions.ToString());
+
             requestRepo.Initialize();
             eventViewRepo.Initialize();
             eventNonViewRepo.Initialize();
 
-            Init(requestRepo, eventViewRepo, eventNonViewRepo, configDao);
+            var eventNumberInSameSessionHelper = new EventNumberInSameSessionHelper(eventNrInSameSessionDao);
+            
+            Init(requestRepo, eventViewRepo, eventNonViewRepo, configDao, eventNumberInSameSessionHelper);
 
             Initialization.Begin(Auth.ServerUrl, Auth.AppKey);
             Device.InitDeviceId(Auth.DeviceId);
@@ -86,7 +91,8 @@ namespace Plugins.Countly.Impl
             await Initialization.SetDefaults(Config);
         }
 
-        private void Init(RequestRepository requestRepo, ViewEventRepository viewEventRepo, NonViewEventRepository nonViewEventRepo, Dao<ConfigEntity> configDao)
+        private void Init(RequestRepository requestRepo, ViewEventRepository viewEventRepo, 
+            NonViewEventRepository nonViewEventRepo, Dao<ConfigEntity> configDao, EventNumberInSameSessionHelper eventNumberInSameSessionHelper)
         {
             var countlyUtils = new CountlyUtils(this);
             var requests = new RequestCountlyHelper(Config, countlyUtils, requestRepo);
@@ -96,10 +102,10 @@ namespace Plugins.Countly.Impl
             
             
             OptionalParameters = new OptionalParametersCountlyService();
-            _sessions = new SessionCountlyService(Config, _push, requests, OptionalParameters);
+            _sessions = new SessionCountlyService(Config, _push, requests, OptionalParameters, eventNumberInSameSessionHelper);
             Consents = new ConsentCountlyService();
             CrushReports = new CrushReportsCountlyService(Config, requests);
-            Events = new EventCountlyService(Config, requests, viewEventRepo, nonViewEventRepo);
+            Events = new EventCountlyService(Config, requests, viewEventRepo, nonViewEventRepo, eventNumberInSameSessionHelper);
             Device = new DeviceIdCountlyService(_sessions, requests, Events, countlyUtils);
             Initialization = new InitializationCountlyService(_sessions);
             
@@ -109,6 +115,7 @@ namespace Plugins.Countly.Impl
             StarRating = new StarRatingCountlyService(Events);
             UserDetails = new UserDetailsCountlyService(requests, countlyUtils);
             Views = new ViewCountlyService(Events);
+            _inputObserver = InputObserverResolver.Resolve();
         }
 
         
@@ -131,17 +138,13 @@ namespace Plugins.Countly.Impl
         {
             Debug.Log("[Countly] OnApplicationFocus: " + hasFocus);
             if (hasFocus)
+            {
                 SubscribeAppLog();
+            }
             else
             {
-                UnsubscribeAppLog();
-                if (_sessions != null && _sessions.IsSessionInitiated)
-                {
-                    await Events.ReportAllRecordedViewEventsAsync();
-                    await Events.ReportAllRecordedNonViewEventsAsync(); 
-                }
+                HandleAppPauseOrFocus();
             }
-            
         }
 
         private async void OnApplicationPause(bool pauseStatus)
@@ -149,16 +152,21 @@ namespace Plugins.Countly.Impl
             Debug.Log("[Countly] OnApplicationPause: " + pauseStatus);
             if (pauseStatus)
             {
-                UnsubscribeAppLog();
-                if (_sessions != null && _sessions.IsSessionInitiated)
-                {
-                    await Events.ReportAllRecordedViewEventsAsync();
-                    await Events.ReportAllRecordedNonViewEventsAsync(); 
-                }
+                HandleAppPauseOrFocus();   
             }
             else
             {
                 SubscribeAppLog();   
+            }
+        }
+
+        private async void HandleAppPauseOrFocus()
+        {
+            UnsubscribeAppLog();
+            if (_sessions != null && _sessions.IsSessionInitiated)
+            {
+                await Events.ReportAllRecordedViewEventsAsync();
+                await Events.ReportAllRecordedNonViewEventsAsync(); 
             }
         }
 
@@ -198,7 +206,14 @@ namespace Plugins.Countly.Impl
         private void Update()
         {
             _push?.Update();
+            CheckInputEvent();
         }
-        
+
+        private void CheckInputEvent()
+        {
+            if(!_inputObserver.HasInput)
+                return;
+            _sessions?.UpdateInputTime();
+        }
     }
 }

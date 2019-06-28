@@ -18,8 +18,7 @@ namespace Plugins.Countly.Models
 
         public override string ToString()
         {
-            var str = string.Join(";", this.Select(x => x.Key + "=" + x.Value).ToArray());
-            return $"{nameof(Id)}: {Id}, \n" + str;
+            return string.Join(";", this.Select(x => x.Key + "=" + x.Value).ToArray());
         }
     }
 }

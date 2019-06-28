@@ -9,6 +9,7 @@ using Newtonsoft.Json;
 using Plugins.Countly.Models;
 using Plugins.Countly.Persistance.Repositories;
 using UnityEngine;
+using UnityEngine.Networking;
 
 namespace Plugins.Countly.Helpers
 {
@@ -17,8 +18,6 @@ namespace Plugins.Countly.Helpers
         private readonly CountlyConfigModel _config;
         private readonly ICountlyUtils _countlyUtils;
         private readonly RequestRepository _requestRepo;
-
-        private readonly StringBuilder _requestStringBuilder = new StringBuilder();
 
         internal RequestCountlyHelper(CountlyConfigModel config, ICountlyUtils countlyUtils, RequestRepository requestRepo)
         {
@@ -29,6 +28,9 @@ namespace Plugins.Countly.Helpers
 
         private void AddRequestToQueue(CountlyRequestModel request)
         {
+            if (_requestRepo.Count == _config.StoredRequestLimit)
+                _requestRepo.Dequeue();
+
             _requestRepo.Enqueue(request);
         }
 
@@ -86,12 +88,12 @@ namespace Plugins.Countly.Helpers
         /// <returns></returns>
         private string BuildGetRequest(Dictionary<string, object> queryParams)
         {
-            _requestStringBuilder.Clear();
+            var requestStringBuilder = new StringBuilder();
             //Metrics added to each request
             foreach (var item in _countlyUtils.GetBaseParams())
             {
-                _requestStringBuilder.AppendFormat((item.Key != "app_key" ? "&" : string.Empty) + "{0}={1}",
-                    WWW.EscapeURL(item.Key), WWW.EscapeURL(Convert.ToString(item.Value))); 
+                requestStringBuilder.AppendFormat((item.Key != "app_key" ? "&" : string.Empty) + "{0}={1}",
+                    UnityWebRequest.EscapeURL(item.Key), UnityWebRequest.EscapeURL(Convert.ToString(item.Value))); 
             }
 
 
@@ -100,8 +102,8 @@ namespace Plugins.Countly.Helpers
             {
                 if (!string.IsNullOrEmpty(item.Key) && item.Value != null)
                 {
-                    _requestStringBuilder.AppendFormat("&{0}={1}", WWW.EscapeURL(item.Key),
-                        WWW.EscapeURL(Convert.ToString(item.Value)));
+                    requestStringBuilder.AppendFormat("&{0}={1}", UnityWebRequest.EscapeURL(item.Key),
+                        UnityWebRequest.EscapeURL(Convert.ToString(item.Value)));
                 }
             }
 
@@ -111,14 +113,14 @@ namespace Plugins.Countly.Helpers
                 // Create a SHA256   
                 using (var sha256Hash = SHA256.Create())
                 {
-                    var data = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(_requestStringBuilder + _config.Salt));
-                    _requestStringBuilder.Insert(0, _countlyUtils.GetBaseInputUrl());
-                    return _requestStringBuilder.AppendFormat("&checksum256={0}", _countlyUtils.GetStringFromBytes(data)).ToString();
+                    var data = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(requestStringBuilder + _config.Salt));
+                    requestStringBuilder.Insert(0, _countlyUtils.GetBaseInputUrl());
+                    return requestStringBuilder.AppendFormat("&checksum256={0}", _countlyUtils.GetStringFromBytes(data)).ToString();
                 }
             }
             
-            _requestStringBuilder.Insert(0, _countlyUtils.GetBaseInputUrl());
-            return _requestStringBuilder.ToString();
+            requestStringBuilder.Insert(0, _countlyUtils.GetBaseInputUrl());
+            return requestStringBuilder.ToString();
         }
 
         /// <summary>
@@ -131,7 +133,7 @@ namespace Plugins.Countly.Helpers
             var baseParams = _countlyUtils.GetBaseParams();
             foreach (var item in queryParams)
             {
-                baseParams.Add(WWW.EscapeURL(item.Key), item.Value);
+                baseParams.Add(UnityWebRequest.EscapeURL(item.Key), item.Value);
             }
                 
 

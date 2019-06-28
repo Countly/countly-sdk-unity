@@ -5,7 +5,10 @@ namespace Plugins.Countly.Helpers
     {
         public const string CountlyServerUrl = "https://us-try.count.ly/";
         public const string DeviceIDKey = "DeviceID";
-
+        
+        public const string FirstAppLaunch = "Countly.FirstAppLaunch";
+        public const string FirstAppLaunchSegment = "firstAppLaunch";
+        
         #region Notification Keys
 
         public const string MessageIDKey = "c.i";

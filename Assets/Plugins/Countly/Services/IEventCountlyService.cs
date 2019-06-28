@@ -2,15 +2,16 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Plugins.Countly.Helpers;
 using Plugins.Countly.Models;
+using UnityEngine.Networking.NetworkSystem;
 
 namespace Plugins.Countly.Services
 {
     public interface IEventCountlyService
     {
-        Task<CountlyResponse> RecordEventAsync(CountlyEventModel @event);
-        Task<CountlyResponse> RecordEventAsync(string key);
+        Task<CountlyResponse> RecordEventAsync(CountlyEventModel @event, bool useNumberInSameSession = false);
+        Task<CountlyResponse> RecordEventAsync(string key, bool useNumberInSameSession = false);
 
-        Task<CountlyResponse> RecordEventAsync(string key, IDictionary<string, object> segmentation,
+        Task<CountlyResponse> RecordEventAsync(string key, IDictionary<string, object> segmentation, bool useNumberInSameSession = false,
             int? count = 1, double? sum = 0, double? duration = null);
 
         /// <summary>
