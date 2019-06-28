@@ -2,6 +2,10 @@
 [Countly](http://count.ly) is an innovative, real-time, open source mobile analytics application. It collects data from mobile devices, and visualizes this information to analyze mobile application usage and end-user behavior. There are two parts of Countly: the server that collects and analyzes data, and mobile SDK that sends this data. Both parts are open source with different licensing terms.
 
 # Playdarium countly Unity SDK
+This repository includes the Unity SDK. Unity version: 2018.3.14
+Scripting version is based on .NET 4.x Equivalent
+
+
 Original Countly Unity3d SDK does not have sufficient code. Also it incliudes some deprecated rest api methods.
 This version of coutly SDK contains refactoring, some improtant additional features and fixes.
 Feature list (probably, I forget something:) ):
@@ -10,10 +14,17 @@ Feature list (probably, I forget something:) ):
 3. Add Locale parameter (_locale) to CountlyMetricModel so we can track users locale via Language panel in Countly.
 4. All view events ([CLY]_view) are sent in one request so only one data point is tracked by Countly. This works only for view events. Vies are sent separately from other events.
 5. Refactoring: Split Countly.cs into separate services.
-6. Add Wrapper for Editor. By default, countly events does not send to the server in editor
+6. Add Wrapper for Editor. By default, countly events do not send to the server from editor.
 7. Fix event time. In original version events store time when request is sent. But the point is, we send request *after* event is occured (we send many events in one request). So, we changed it, and now event is stored the time when it occurs.
 8. Now all events are sent to Countly when OnApplicationQuit, OnApplicationFocus(focus=false), OnApplicationPause(pause=true) occur.
 9. RemoteConfigCountlyService is added. It allows to retrieve all Remote Configs from countly in one request. All retrieved configs are stored in local database. If due to some reasons impossible to retrieve Configs then the service loads configs from local database.
+10. Rewrite session handling. Now session extends only if any input from user is received. That prevents session extending in case if mobile device goes to sleep mode when user does not press home button. End session when user does not press any input keys. Fix session_duration: Use TotalSeconds, not Seconds. Fix end session when user press home button, 
+11. Add useNumberInSameSession parameter in IEventCountlyService.RecordEventAsync method. When useNumberInSameSession = true a segment 'numberInSameSession' will be added to the event. This will allow us to analyse how much events occured in same session.
+12. Add setting EnableFirstAppLaunchSegment to CountlyConfigModel and Countly prefab. Allows to add a segment 'firstAppLaunch' to any event in first user session. Important: If user removes app or all app data from device the 'firstAppLaunch' will be applied because PlayerPrefs is used (take a look at class FirstLaunchAppHelper).
+
+
+## Bugfixes
+1. [Mobile] If user just  
 
 ## How to set up the project
 1. Fill Countly prefab with ServerUrl and AppKey. Also you can set up other countly parameters.
@@ -95,8 +106,6 @@ Json received on device:
 
 ## About
 
-This repository includes the Unity SDK. Unity version: 2018.3.14
-
 Need help? See [Countly SDK for Unity](http://resources.count.ly/v1.0/docs/) documentation at [Countly Resources](http://resources.count.ly), or ask us on our [Countly Analytics Community Slack channel](http://slack.count.ly) or [Playdarium email](playdarium@gmail.com).
 
 ## Security
@@ -109,7 +118,7 @@ This SDK needs one of the following Countly Editions to work:
 
 * Countly Community Edition, [downloadable from Github](https://github.com/Countly/countly-server)
 * [Countly Enterprise Edition](http://count.ly/product)
-* [Official COuntky Unity SDK](https://github.com/Countly/countly-sdk-unity)
+* [Official Countly Unity SDK](https://github.com/Countly/countly-sdk-unity)
 
 For more information about Countly Enterprise Edition, see [comparison of different Countly editions](https://count.ly/compare/)
 
