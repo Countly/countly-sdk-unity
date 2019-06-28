@@ -40,11 +40,7 @@ CountlyWrapper is used only in Editor mode, it emulates and logs all events.
 Countly is used in production. It contains all settings. Just do not forget put ServerUrl and AppKey into Countly prefab :)
 Example scene: EntryPoint in folder Scenes.
 
-The core class of an entire SDK is Countly.cs. you can use any handler from that class.
-For example:
-```csharp
-Plugins.Countly.Impl.Countly.Instance.Events.RecordEventAsync("Test event");
-```
+The core class of an entire SDK is Countly.cs. You can use any handler from that class.
 
 List of handlers:
 1. Consents
@@ -57,6 +53,26 @@ List of handlers:
 8. StarRating
 9. UserDetails - use this handler to publish any user parameters including custom attributes.
 10. Views - use this handler to publish any custom events. 
+
+Examples:
+```csharp
+//Record event
+await Plugins.Countly.Impl.Countly.Instance.Events.RecordEventAsync("Test event");
+
+//Record event and add segment 'useNumberInSameSession'
+await Plugins.Countly.Impl.Countly.Instance.Events.RecordEventAsync("Test event", true);
+
+//Report view event
+await Plugins.Countly.Impl.Countly.Instance.Views.ReportOpenViewAsync("Menu");
+await Plugins.Countly.Impl.Countly.Instance.Views.ReportCloseViewAsync("Menu");
+
+//Init remote configs
+await Plugins.Countly.Impl.Countly.Instance.RemoteConfigs.InitConfig(); //you should wait a bit after calling this method till configs is loaded.
+
+//Get configs
+var configs = Plugins.Countly.Impl.Countly.Instance.Configs;
+
+```
 
 ## Messages (Notifications)
 On android all notifications are called messages.
