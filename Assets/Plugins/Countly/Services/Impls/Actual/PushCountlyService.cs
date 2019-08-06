@@ -5,6 +5,9 @@ using Newtonsoft.Json;
 using Notifications;
 using Plugins.Countly.Enums;
 using Plugins.Countly.Helpers;
+#if UNITY_IOS && !UNITY_EDITOR
+using UnityEngine.iOS;
+#endif
 
 namespace Plugins.Countly.Services.Impls.Actual
 {
@@ -56,7 +59,7 @@ namespace Plugins.Countly.Services.Impls.Actual
             if(string.IsNullOrEmpty(_token)) return;
             
             if(_tokenSent) return;
-#if UNITY_IOS
+#if UNITY_IOS && !UNITY_EDITOR
             byte[] apnToken = NotificationServices.deviceToken;
             if (apnToken != null)
             { 
