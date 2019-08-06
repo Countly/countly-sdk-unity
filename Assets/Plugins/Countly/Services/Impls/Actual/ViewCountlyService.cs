@@ -9,9 +9,8 @@ namespace Plugins.Countly.Services.Impls.Actual
 {
 
     public class ViewCountlyService : IViewCountlyService
-    {        
-        private string _lastView;
-        private DateTime? _lastViewStartTime;
+    {
+        private readonly Dictionary<string, DateTime> _viewToLastViewStartTime = new Dictionary<string, DateTime>();
 
         private readonly IEventCountlyService _eventService;
 
@@ -20,7 +19,7 @@ namespace Plugins.Countly.Services.Impls.Actual
             _eventService = eventService;
         }
 
-        public async Task<CountlyResponse> ReportOpenViewAsync(string name, bool hasSessionBegunWithView = false)
+        public async Task<CountlyResponse> RecordOpenViewAsync(string name, bool hasSessionBegunWithView = false)
         {
             if (string.IsNullOrEmpty(name))
             {
@@ -37,17 +36,23 @@ namespace Plugins.Countly.Services.Impls.Actual
                     Name = name,
                     Segment = Constants.UnityPlatform,
                     Visit = 1,
+                    Exit = 0,
+                    Bounce = 0,
                     HasSessionBegunWithView = hasSessionBegunWithView
                 };
 
-            
-            _lastViewStartTime = DateTime.UtcNow;
+            if (!_viewToLastViewStartTime.ContainsKey(name))
+            {
+                _viewToLastViewStartTime.Add(name, DateTime.UtcNow);   
+            }
 
+            Debug.Log("[ViewCountlyService] RecordOpenViewAsync: " + name);
+            
             var currentView = new CountlyEventModel(CountlyEventModel.ViewEvent, currentViewSegment.ToDictionary());
             return await _eventService.RecordEventAsync(currentView);
         }
         
-        public async Task<CountlyResponse> ReportCloseViewAsync(string name, bool hasSessionBegunWithView = false)
+        public async Task<CountlyResponse> RecordCloseViewAsync(string name, bool hasSessionBegunWithView = false)
         {
             if (string.IsNullOrEmpty(name))
             {
@@ -65,16 +70,20 @@ namespace Plugins.Countly.Services.Impls.Actual
                     Segment = Constants.UnityPlatform,
                     Visit = 0,
                     Exit =  1,
+                    Bounce = 0,
                     HasSessionBegunWithView = hasSessionBegunWithView
                 };
 
-
-            double? duration;
-            duration = _lastViewStartTime != null ? (DateTime.UtcNow - _lastViewStartTime.Value).TotalSeconds : (double?) null;
-            if (duration.HasValue)
+            double? duration = null;
+            if (_viewToLastViewStartTime.ContainsKey(name))
             {
-                duration = Math.Round(duration.Value);
+                var lastViewStartTime = _viewToLastViewStartTime[name];
+                duration = (DateTime.UtcNow - lastViewStartTime).TotalSeconds;
+
+                _viewToLastViewStartTime.Remove(name);
             }
+            
+            Debug.Log("[ViewCountlyService] RecordCloseViewAsync: " + name + ", duration: " + duration);
 
             var currentView = new CountlyEventModel(CountlyEventModel.ViewEvent, currentViewSegment.ToDictionary(), 1, null, duration);
             return await _eventService.RecordEventAsync(currentView);
@@ -82,67 +91,7 @@ namespace Plugins.Countly.Services.Impls.Actual
         
         
         
-        
-        /// <summary>
-        /// Reports a view with the specified name and a last visited view if it existed
-        /// </summary>
-        /// <param name="name"></param>
-        /// <param name="hasSessionBegunWithView"></param>
-        public async Task<CountlyResponse> ReportViewAsync(string name, bool hasSessionBegunWithView = false)
-        {
-            if (string.IsNullOrEmpty(name))
-            {
-                return new CountlyResponse
-                {
-                    IsSuccess = false,
-                    ErrorMessage = "View name is required."
-                };
-            }
-
-            var events = new List<CountlyEventModel>();
-            var lastView = GetLastView();
-            Debug.Log("[ReportViewAsync] get last view: " + lastView);
-            if (lastView != null)
-                events.Add(lastView);
-
-            var currentViewSegment =
-                new ViewSegment
-                {
-                    Name = name,
-                    Segment = Constants.UnityPlatform,
-                    Visit = 1,
-                    HasSessionBegunWithView = hasSessionBegunWithView
-                };
-
-            var currentView = new CountlyEventModel(CountlyEventModel.ViewEvent, currentViewSegment.ToDictionary());
-            events.Add(currentView);
-            
-            _lastView = name;
-            _lastViewStartTime = DateTime.Now;
-            
-            return await _eventService.ReportMultipleEventsAsync(events);
-        }
-
-        private CountlyEventModel GetLastView(bool hasSessionBegunWithView = false)
-        {
-            if (string.IsNullOrEmpty(_lastView) && string.IsNullOrWhiteSpace(_lastView))
-                return null;
-
-            var viewSegment =
-                new ViewSegment
-                {
-                    Name = _lastView,
-                    Segment = Constants.UnityPlatform,
-                    HasSessionBegunWithView = hasSessionBegunWithView
-                };
-
-            var customEvent = new CountlyEventModel(
-                                    CountlyEventModel.ViewEvent, viewSegment.ToDictionary(),
-                                    null, null, (DateTime.Now - _lastViewStartTime.Value).TotalSeconds);
-
-            return customEvent;
-        }
-        
+       
 
         /// <summary>
         /// Reports a particular action with the specified details
