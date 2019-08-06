@@ -2,7 +2,7 @@ using System.Threading.Tasks;
 using Plugins.Countly.Helpers;
 using Plugins.Countly.Models;
 
-namespace Plugins.Countly.Services.Impls.Actual
+namespace Plugins.Countly.Services
 {
     public interface IUserDetailsCountlyService
     {

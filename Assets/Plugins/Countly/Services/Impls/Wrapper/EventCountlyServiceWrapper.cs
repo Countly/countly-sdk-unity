@@ -21,10 +21,10 @@ namespace Plugins.Countly.Services.Impls.Wrapper
             return Task.FromResult(new CountlyResponse());
         }
 
-        public Task<CountlyResponse> RecordEventAsync(string key, IDictionary<string, object> segmentModel, bool useNumberInSameSession = false, int? count = 1, double? sum = 0, double? duration = null)
+        public Task<CountlyResponse> RecordEventAsync(string key, SegmentModel segmentModel, bool useNumberInSameSession = false, int? count = 1, double? sum = 0, double? duration = null)
         {
             
-            Debug.Log("[EventCountlyServiceWrapper] RecordEventAsync, key: " + key + ", segments: " + segmentModel + ", int: " + count + ", sum: " + sum + ", dur: " + duration);
+            Debug.Log("[EventCountlyServiceWrapper] RecordEventAsync, key: " + key + ", segments: " + segmentModel + ", count: " + count + ", sum: " + sum + ", dur: " + duration);
             return Task.FromResult(new CountlyResponse());
         }
 

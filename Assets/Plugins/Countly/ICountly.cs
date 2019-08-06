@@ -15,5 +15,7 @@ namespace Plugins.Countly
         IStarRatingCountlyService StarRating { get; }
         IUserDetailsCountlyService UserDetails { get; }
         IViewCountlyService Views { get; }
+
+        void ReportAll();
     }
 }
