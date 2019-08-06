@@ -26,5 +26,8 @@ public class CountlyEntryPoint : MonoBehaviour
 	{
 		yield return new WaitForSeconds(1);
 		_countly.Events.RecordEventAsync("Test event");
+		_countly.Views.RecordOpenViewAsync("Menu", true);
+		yield return new WaitForSeconds(4);
+		_countly.Views.RecordCloseViewAsync("Menu", true);
 	}
 }
