@@ -11,8 +11,8 @@ PlayerSettings:
   defaultScreenOrientation: 4
   targetDevice: 2
   useOnDemandResources: 0
-  accelerometerFrequency: 60
-  companyName: DefaultCompany
+  accelerometerFrequency: 0
+  companyName: Countly
   productName: CountlyDotNetSDK
   defaultCursor: {fileID: 0}
   cursorHotspot: {x: 0, y: 0}
@@ -70,7 +70,7 @@ PlayerSettings:
   macRetinaSupport: 1
   runInBackground: 1
   captureSingleScreen: 0
-  muteOtherAudioSources: 0
+  muteOtherAudioSources: 1
   Prepare IOS For Recording: 0
   Force IOS Speakers When Recording: 0
   deferSystemGesturesMode: 0
@@ -155,6 +155,7 @@ PlayerSettings:
   applicationIdentifier:
     Android: com.playdarium.DefaultCompany
     Standalone: com.Company.ProductName
+    iOS: com.playdarium.zombie.popular.io.crowd.city.war
   buildNumber: {}
   AndroidBundleVersionCode: 0
   AndroidMinSdkVersion: 16
@@ -715,4 +716,4 @@ PlayerSettings:
   cloudEnabled: 0
   enableNativePlatformBackendsForNewInputSystem: 0
   disableOldInputManagerSupport: 0
-  legacyClampBlendShapeWeights: 1
+  legacyClampBlendShapeWeights: 0

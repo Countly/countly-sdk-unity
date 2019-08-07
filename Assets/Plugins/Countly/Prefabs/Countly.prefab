@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &1125525197796010
+--- !u!1 &1270423401348912
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,8 +8,8 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 4115519304081796}
-  - component: {fileID: 114348681661370856}
+  - component: {fileID: 4847215846838172}
+  - component: {fileID: 114679878964049358}
   m_Layer: 0
   m_Name: Countly
   m_TagString: Untagged
@@ -17,13 +17,13 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &4115519304081796
+--- !u!4 &4847215846838172
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1125525197796010}
+  m_GameObject: {fileID: 1270423401348912}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
@@ -31,33 +31,33 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &114348681661370856
+--- !u!114 &114679878964049358
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1125525197796010}
+  m_GameObject: {fileID: 1270423401348912}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3830ecbe0f874710af3c6377b4540a81, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   Auth:
-    ServerUrl: https://try.count.ly/
-    AppKey: be591e70ff9aa4dd0857ff47e31a93b997379934
+    ServerUrl: http://localhost:32768/
+    AppKey: 5fb12311a62e72d86795af25a0abc07c99c42415
     DeviceId: 
   Config:
     Salt: 
-    EnableFirstAppLaunchSegment: 1
+    EnableFirstAppLaunchSegment: 0
     EnablePost: 0
     EnableConsoleErrorLogging: 0
     IgnoreSessionCooldown: 0
-    NotificationMode: 0
+    NotificationMode: 1
     EnableManualSessionHandling: 0
     SessionDuration: 60
-    EventViewSendThreshold: 10
-    EventNonViewSendThreshold: 3
-    StoredRequestLimit: 1000
+    EventViewSendThreshold: 1
+    EventNonViewSendThreshold: 1
+    StoredRequestLimit: 5
     TotalBreadcrumbsAllowed: 100
     EnableAutomaticCrashReporting: 1
