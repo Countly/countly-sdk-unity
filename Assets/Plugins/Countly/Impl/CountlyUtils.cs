@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Plugins.Countly.Models;
-using UnityEngine;
 
 namespace Plugins.Countly.Impl
 {
@@ -19,7 +18,11 @@ namespace Plugins.Countly.Impl
 
         public string GetUniqueDeviceId()
         {
-            return SystemInfo.deviceUniqueIdentifier;
+#if UNITY_IOS
+            return UnityEngine.iOS.Device.advertisingIdentifier;
+#else
+            return UnityEngine.SystemInfo.deviceUniqueIdentifier;
+#endif
         }
 
         /// <summary>

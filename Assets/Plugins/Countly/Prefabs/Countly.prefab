@@ -53,11 +53,11 @@ MonoBehaviour:
     EnablePost: 0
     EnableConsoleErrorLogging: 0
     IgnoreSessionCooldown: 0
-    NotificationMode: -1
+    NotificationMode: 1
     EnableManualSessionHandling: 0
     SessionDuration: 60
     EventViewSendThreshold: 1
     EventNonViewSendThreshold: 1
-    StoredRequestLimit: 0
+    StoredRequestLimit: 5
     TotalBreadcrumbsAllowed: 100
     EnableAutomaticCrashReporting: 1

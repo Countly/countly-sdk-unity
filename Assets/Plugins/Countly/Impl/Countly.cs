@@ -1,3 +1,4 @@
+using System.Collections;
 using Countly.Input;
 using iBoxDB.LocalServer;
 using Notifications.Impls;
@@ -104,7 +105,7 @@ namespace Plugins.Countly.Impl
             var countlyUtils = new CountlyUtils(this);
             var requests = new RequestCountlyHelper(Config, countlyUtils, requestRepo);
 
-            var notificationsService = new ProxyNotificationsService(); 
+            var notificationsService = new ProxyNotificationsService(InternalStartCoroutine); 
             _push = new PushCountlyService(requests, notificationsService);
             
             
@@ -220,5 +221,11 @@ namespace Plugins.Countly.Impl
                 return;
             _sessions?.UpdateInputTime();
         }
+
+        private void InternalStartCoroutine(IEnumerator enumerator)
+        {
+            StartCoroutine(enumerator);
+        }
+        
     }
 }

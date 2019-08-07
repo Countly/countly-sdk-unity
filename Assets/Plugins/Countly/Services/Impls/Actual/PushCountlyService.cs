@@ -5,9 +5,7 @@ using Newtonsoft.Json;
 using Notifications;
 using Plugins.Countly.Enums;
 using Plugins.Countly.Helpers;
-#if UNITY_IOS && !UNITY_EDITOR
-using UnityEngine.iOS;
-#endif
+using UnityEngine;
 
 namespace Plugins.Countly.Services.Impls.Actual
 {
@@ -33,21 +31,14 @@ namespace Plugins.Countly.Services.Impls.Actual
         internal void EnablePushNotificationAsync(TestMode mode)
         {
             _mode = mode;
-#if UNITY_ANDROID && !UNITY_EDITOR
             _notificationsService.GetToken(result =>
             {
                 _token = result;
+                Debug.Log("[PushCountlyService], token: " + _token);
             });
-#endif
-#if UNITY_IOS && !UNITY_EDITOR
-            NotificationServices.RegisterForNotifications(
-                NotificationType.Alert
-                | NotificationType.Badge
-                | NotificationType.Sound);
-#endif
+            
         }
-
-
+        
         internal async void Update()
         {
             /*
@@ -57,16 +48,9 @@ namespace Plugins.Countly.Services.Impls.Actual
              * therefore we send this request to the Countly server only once
              */
             if(string.IsNullOrEmpty(_token)) return;
-            
-            if(_tokenSent) return;
-#if UNITY_IOS && !UNITY_EDITOR
-            byte[] apnToken = NotificationServices.deviceToken;
-            if (apnToken != null)
-            { 
-                _token = BitConverter.ToString(apnToken).Replace("-", "");
-            }
-#endif
 
+            if(_tokenSent) return;
+            
             //Enabling the User to receive Push Notifications
             _tokenSent = true;
             await PostToCountlyAsync(_mode, _token);
@@ -97,8 +81,7 @@ namespace Plugins.Countly.Services.Impls.Actual
                 };
             return await _requestCountlyHelper.GetResponseAsync(requestParams);
         }
-        
-        
+
         [Serializable]
         struct PushActionSegment
         {
