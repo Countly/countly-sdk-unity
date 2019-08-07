@@ -2,14 +2,14 @@
 [Countly](http://count.ly) is an innovative, real-time, open source mobile analytics application. It collects data from mobile devices, and visualizes this information to analyze mobile application usage and end-user behavior. There are two parts of Countly: the server that collects and analyzes data, and mobile SDK that sends this data. Both parts are open source with different licensing terms.
 
 # Playdarium countly Unity SDK
-This repository includes the Unity SDK. Unity version: 2018.3.14f1
+This repository includes the Unity SDK. **Unity version: 2018.4.5f1**
 Scripting version is based on .NET 4.x Equivalent
 
 Original Countly Unity3d SDK does not have sufficient code. Also it incliudes some deprecated rest api methods.
 This version of coutly SDK contains refactoring, some improtant additional features and fixes.
 Feature list (probably, I forget something:) ):
 1. Local storage. Extremely important feature especially on mobile platforms because users play offline very often. Every event and request is stored locally before then are sent to Countly. We use [iBoxDb](http://iboxdb.com) as local database.
-2. Firebase plugins were replace entirely with custom plugin. This allows us to reduce build size dramatically on mobile devices (up to 10 mb reducing). You can find plugin in Plugin/Android/Notifications folder. Plugin source code is in Services folder in root directory.
+2. [Android] Firebase plugins were replace entirely with custom plugin. This allows us to reduce build size dramatically on mobile devices (up to 10 mb reducing). You can find plugin in Plugin/Android/Notifications folder. Plugin source code is in Services folder in root directory.
 3. Add Locale parameter (_locale) to CountlyMetricModel so we can track users locale via Language panel in Countly.
 4. All view events ([CLY]_view) are sent in one request so only one data point is tracked by Countly. This works only for view events. Vies are sent separately from other events.
 5. Refactoring: Split Countly.cs into separate services.
@@ -20,6 +20,8 @@ Feature list (probably, I forget something:) ):
 10. Rewrite session handling. Now session extends only if any input from user is received. That prevents session extending in case if mobile device goes to sleep mode when user does not press home button. End session when user does not press any input keys. Fix session_duration: Use TotalSeconds, not Seconds. Fix end session when user press home button, 
 11. Add useNumberInSameSession parameter in IEventCountlyService.RecordEventAsync method. When useNumberInSameSession = true a segment 'numberInSameSession' will be added to the event. This will allow us to analyse how much events occured in same session.
 12. Add setting EnableFirstAppLaunchSegment to CountlyConfigModel and Countly prefab. Allows to add a segment 'firstAppLaunch' to any event in first user session. Important: If user removes app or all app data from device the 'firstAppLaunch' will be applied because PlayerPrefs is used (take a look at class FirstLaunchAppHelper).
+13. [iOs] Fix build for ios platforms. Replace deprecated UnityEngine.Ios.NotificationServices with Unity.Notifications.iOS. Integrate Unity Mobile Notifications Package.
+14. [iOs] Use UnityEngine.iOS.Device.advertisingIdentifier as device id. It is not possible to use SystemInfo.deviceUniqueIdentifier on iOs platform because it will be changed when player installs a new version of the build. Parameter advertisingIdentifier is always constant.
 
 
 ## How to set up the project
@@ -63,8 +65,8 @@ await Plugins.Countly.Impl.Countly.Instance.Events.RecordEventAsync("Test event"
 await Plugins.Countly.Impl.Countly.Instance.Events.RecordEventAsync("Test event", true);
 
 //Report view event
-await Plugins.Countly.Impl.Countly.Instance.Views.ReportOpenViewAsync("Menu");
-await Plugins.Countly.Impl.Countly.Instance.Views.ReportCloseViewAsync("Menu");
+await Plugins.Countly.Impl.Countly.Instance.Views.RecordOpenViewAsync("Menu");
+await Plugins.Countly.Impl.Countly.Instance.Views.RecordCloseViewAsync("Menu");
 
 //Init remote configs
 await Plugins.Countly.Impl.Countly.Instance.RemoteConfigs.InitConfig(); //you should wait a bit after calling this method till configs is loaded.
@@ -74,14 +76,27 @@ var configs = Plugins.Countly.Impl.Countly.Instance.Configs;
 
 ```
 
-## Messages (Notifications)
+## iOs. Messages (Push notifications)
+iOs has native support for remote notifications.
+In Unity we removed deprecated UnityEngine.Ios.NotificationServices and replaced it with Unity Mobile Notifications Package, 
+documentation [here](https://docs.unity3d.com/Packages/com.unity.mobile.notifications@1.0/manual/index.html).
+This prevent compilation errors during a build process in Xcode.
+
+<img src="https://api.monosnap.com/file/download?id=mHci5I31WCXHkM1CloF3ykCSP8Di0T" width="70%" height="70%">
+Also notification settings can be configured via file NotificationSettings in Assets/Editor/com.unity.mobile.notifications.
+**IMPORTANT!!** When Unity recompiles code a checkbox 'Enable Push notifications' get disabled. You need to enable it manually before making a build. 
+
+In Countly prefab switch Notification Mode to anything but none None.
+<img src="https://api.monosnap.com/file/download?id=udE3qa26avJJiVMr6TFHYmiBU8y18N" width="70%" height="70%">
+
+## ANDROID. Messages (Push notifications)
 On android all notifications are called messages.
 Countly works with FCS to send messages.
 There are two types of messages:
 * Notification messages, sometimes thought of as "display messages." These are handled by the FCM SDK automatically.
 * Data messages, which are handled by the client app.
 
-#### Notification messages from countly
+#### ANDROID. Push notification messages from countly
 
 Countly sends **ONLY** data messages. 
 
