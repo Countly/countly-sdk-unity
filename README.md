@@ -49,8 +49,8 @@ await Plugins.Countly.Impl.Countly.Instance.Events.RecordEventAsync("Test event"
 await Plugins.Countly.Impl.Countly.Instance.Events.RecordEventAsync("Test event", true);
 
 //Report view event
-await Plugins.Countly.Impl.Countly.Instance.Views.ReportOpenViewAsync("Menu");
-await Plugins.Countly.Impl.Countly.Instance.Views.ReportCloseViewAsync("Menu");
+await Plugins.Countly.Impl.Countly.Instance.Views.RecordOpenViewAsync("Menu");
+await Plugins.Countly.Impl.Countly.Instance.Views.RecordCloseViewAsync("Menu");
 
 //Init remote configs
 await Plugins.Countly.Impl.Countly.Instance.RemoteConfigs.InitConfig(); //you should wait a bit after calling this method till configs is loaded.
@@ -60,14 +60,27 @@ var configs = Plugins.Countly.Impl.Countly.Instance.Configs;
 
 ```
 
-## Messages (Notifications)
+## iOs. Messages (Push notifications)
+iOs has native support for remote notifications.
+In Unity we removed deprecated UnityEngine.Ios.NotificationServices and replaced it with Unity Mobile Notifications Package, 
+documentation [here](https://docs.unity3d.com/Packages/com.unity.mobile.notifications@1.0/manual/index.html).
+This prevent compilation errors during a build process in Xcode.
+
+<img src="https://api.monosnap.com/file/download?id=mHci5I31WCXHkM1CloF3ykCSP8Di0T" width="70%" height="70%">
+Also notification settings can be configured via file NotificationSettings in Assets/Editor/com.unity.mobile.notifications.
+**IMPORTANT!!** When Unity recompiles code a checkbox 'Enable Push notifications' get disabled. You need to enable it manually before making a build. 
+
+In Countly prefab switch Notification Mode to anything but none None.
+<img src="https://api.monosnap.com/file/download?id=udE3qa26avJJiVMr6TFHYmiBU8y18N" width="70%" height="70%">
+
+## ANDROID. Messages (Push notifications)
 On android all notifications are called messages.
 Countly works with FCS to send messages.
 There are two types of messages:
 * Notification messages, sometimes thought of as "display messages." These are handled by the FCM SDK automatically.
 * Data messages, which are handled by the client app.
 
-#### Notification messages from countly
+#### ANDROID. Push notification messages from countly
 
 Countly sends **ONLY** data messages. 
 
@@ -119,8 +132,6 @@ Json received on device:
 ```
 
 ## About
-
-This repository includes the Unity SDK. Unity version: 2018.3.14
 
 Need help? See [Countly SDK for Unity](http://resources.count.ly/v1.0/docs/) documentation at [Countly Resources](http://resources.count.ly), or ask us on our [Countly Analytics Community Slack channel](http://slack.count.ly).
 

@@ -28,6 +28,15 @@ namespace Plugins.Countly.Impl
         public IUserDetailsCountlyService UserDetails { get; private set; }
 
         public IViewCountlyService Views { get; private set; }
+        
+        public async void ReportAll()
+        {
+            await Events.ReportAllRecordedViewEventsAsync();
+            await Events.ReportAllRecordedNonViewEventsAsync();
+            await UserDetails.SaveAsync();    
+        }
+
+        private IInputObserver _inputObserver;
 
         private IInputObserver _inputObserver;
 

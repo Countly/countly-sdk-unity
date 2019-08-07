@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Plugins.Countly.Helpers;
@@ -27,12 +29,11 @@ namespace Plugins.Countly.Services.Impls.Actual
 
         public async Task<CountlyResponse> RecordEventAsync(CountlyEventModel @event, bool useNumberInSameSession = false)
         {
-            if (_countlyConfigModel.EnableFirstAppLaunchSegment && FirstLaunchAppHelper.IsFirstLaunchApp)
+            if (_countlyConfigModel.EnableFirstAppLaunchSegment)
             {
-                AddFirstAppSegment(@event);
+                AddFirstAppSegment(@event);   
             }
 
-            
             if (@event.Key.Equals(CountlyEventModel.ViewEvent))
             {
                 _viewEventRepo.Enqueue(@event);
@@ -81,7 +82,7 @@ namespace Plugins.Countly.Services.Impls.Actual
             return await RecordEventAsync(@event);
         }
 
-        public async Task<CountlyResponse> RecordEventAsync(string key, IDictionary<string, object> segmentation, bool useNumberInSameSession = false,
+        public async Task<CountlyResponse> RecordEventAsync(string key, SegmentModel segmentation, bool useNumberInSameSession = false,
             int? count = 1, double? sum = 0, double? duration = null)
         {
             if (string.IsNullOrEmpty(key) && string.IsNullOrWhiteSpace(key))
@@ -187,14 +188,14 @@ namespace Plugins.Countly.Services.Impls.Actual
                     ErrorMessage = "No events found."
                 };
 
-            if (_countlyConfigModel.EnableFirstAppLaunchSegment && FirstLaunchAppHelper.IsFirstLaunchApp)
+            if (_countlyConfigModel.EnableFirstAppLaunchSegment)
             {
                 foreach (var evt in events)
                 {
                     AddFirstAppSegment(evt);
-                }
+                }       
             }
-            
+
 //            var currentTime = DateTime.UtcNow;
 //            foreach (var evt in events)
 //            {
@@ -228,10 +229,10 @@ namespace Plugins.Countly.Services.Impls.Actual
                 };
 
             var evt = new CountlyEventModel(key, segmentation, count, sum, duration);
-            
-            if (_countlyConfigModel.EnableFirstAppLaunchSegment && FirstLaunchAppHelper.IsFirstLaunchApp)
+
+            if (_countlyConfigModel.EnableFirstAppLaunchSegment)
             {
-                AddFirstAppSegment(evt);
+                AddFirstAppSegment(evt);   
             }
 //            SetTimeZoneInfo(evt, DateTime.UtcNow);
 
@@ -261,7 +262,7 @@ namespace Plugins.Countly.Services.Impls.Actual
             {
                 @event.Segmentation = new SegmentModel();
             }
-            @event.Segmentation.Add(Constants.FirstAppLaunchSegment, true);
+            @event.Segmentation.Add(Constants.FirstAppLaunchSegment, FirstLaunchAppHelper.IsFirstLaunchApp);
         }
     }
 }

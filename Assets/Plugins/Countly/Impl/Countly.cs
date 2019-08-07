@@ -1,3 +1,4 @@
+using System.Collections;
 using Countly.Input;
 using iBoxDB.LocalServer;
 using Notifications.Impls;
@@ -41,6 +42,13 @@ namespace Plugins.Countly.Impl
         public IUserDetailsCountlyService UserDetails { get; private set; }
 
         public IViewCountlyService Views { get; private set; }
+        
+        public async void ReportAll()
+        {
+            await Events.ReportAllRecordedViewEventsAsync();
+            await Events.ReportAllRecordedNonViewEventsAsync();
+            await UserDetails.SaveAsync();
+        }
 
         private IInputObserver _inputObserver;
 
@@ -97,7 +105,7 @@ namespace Plugins.Countly.Impl
             var countlyUtils = new CountlyUtils(this);
             var requests = new RequestCountlyHelper(Config, countlyUtils, requestRepo);
 
-            var notificationsService = new ProxyNotificationsService(); 
+            var notificationsService = new ProxyNotificationsService(InternalStartCoroutine); 
             _push = new PushCountlyService(requests, notificationsService);
             
             
@@ -127,8 +135,7 @@ namespace Plugins.Countly.Impl
             Debug.Log("[Countly] OnApplicationQuit");
             if (_sessions != null && _sessions.IsSessionInitiated && !Config.EnableManualSessionHandling)
             {
-                await Events.ReportAllRecordedViewEventsAsync();
-                await Events.ReportAllRecordedNonViewEventsAsync(); 
+                ReportAll();
                 await _sessions.EndSessionAsync();   
             }
             _db.Close();
@@ -165,8 +172,7 @@ namespace Plugins.Countly.Impl
             UnsubscribeAppLog();
             if (_sessions != null && _sessions.IsSessionInitiated)
             {
-                await Events.ReportAllRecordedViewEventsAsync();
-                await Events.ReportAllRecordedNonViewEventsAsync(); 
+                ReportAll();
             }
         }
 
@@ -215,5 +221,11 @@ namespace Plugins.Countly.Impl
                 return;
             _sessions?.UpdateInputTime();
         }
+
+        private void InternalStartCoroutine(IEnumerator enumerator)
+        {
+            StartCoroutine(enumerator);
+        }
+        
     }
 }
