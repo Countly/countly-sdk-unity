@@ -38,8 +38,6 @@ namespace Plugins.Countly.Impl
 
         private IInputObserver _inputObserver;
 
-        private IInputObserver _inputObserver;
-
         private void Awake()
         {
             DontDestroyOnLoad(gameObject);

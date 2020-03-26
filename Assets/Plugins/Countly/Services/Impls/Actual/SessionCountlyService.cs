@@ -19,17 +19,14 @@ namespace Plugins.Countly.Services.Impls.Actual
 
 		
         private readonly CountlyConfigModel _configModel;
-        private readonly PushCountlyService _pushCountlyService;
         private readonly RequestCountlyHelper _requestCountlyHelper;
         private readonly IOptionalParametersCountlyService _optionalParametersCountlyService;
         private readonly EventNumberInSameSessionHelper _eventNumberInSameSessionHelper;
 
-        public SessionCountlyService(CountlyConfigModel configModel, PushCountlyService pushCountlyService, 
-            RequestCountlyHelper requestCountlyHelper, IOptionalParametersCountlyService optionalParametersCountlyService,
+        public SessionCountlyService(CountlyConfigModel configModel, RequestCountlyHelper requestCountlyHelper, IOptionalParametersCountlyService optionalParametersCountlyService,
             EventNumberInSameSessionHelper eventNumberInSameSessionHelper)
         {
             _configModel = configModel;
-            _pushCountlyService = pushCountlyService;
             _requestCountlyHelper = requestCountlyHelper;
             _optionalParametersCountlyService = optionalParametersCountlyService;
             _eventNumberInSameSessionHelper = eventNumberInSameSessionHelper;
@@ -160,12 +157,6 @@ namespace Plugins.Countly.Services.Impls.Actual
 		public async Task<CountlyResponse> BeginSessionAsync()
 		{
 			var result = await ExecuteBeginSessionAsync();
-
-			//Enables push notification on start
-			if (_configModel.NotificationMode != TestMode.None)
-			{
-				_pushCountlyService.EnablePushNotificationAsync(_configModel.NotificationMode);
-			}
 
 			return result;
 		}

@@ -1,7 +1,6 @@
 using System.Collections;
 using Countly.Input;
 using iBoxDB.LocalServer;
-using Notifications.Impls;
 using Plugins.Countly.Helpers;
 using Plugins.Countly.Models;
 using Plugins.Countly.Persistance;
@@ -57,7 +56,6 @@ namespace Plugins.Countly.Impl
         private bool _logSubscribed;
 
         private SessionCountlyService _sessions;
-        private PushCountlyService _push;
     
         private const long DbNumber = 3;
 
@@ -104,13 +102,10 @@ namespace Plugins.Countly.Impl
         {
             var countlyUtils = new CountlyUtils(this);
             var requests = new RequestCountlyHelper(Config, countlyUtils, requestRepo);
-
-            var notificationsService = new ProxyNotificationsService(InternalStartCoroutine); 
-            _push = new PushCountlyService(requests, notificationsService);
-            
+                        
             
             OptionalParameters = new OptionalParametersCountlyService();
-            _sessions = new SessionCountlyService(Config, _push, requests, OptionalParameters, eventNumberInSameSessionHelper);
+            _sessions = new SessionCountlyService(Config, requests, OptionalParameters, eventNumberInSameSessionHelper);
             Consents = new ConsentCountlyService();
             CrushReports = new CrushReportsCountlyService(Config, requests);
             Events = new EventCountlyService(Config, requests, viewEventRepo, nonViewEventRepo, eventNumberInSameSessionHelper);
@@ -211,7 +206,6 @@ namespace Plugins.Countly.Impl
 
         private void Update()
         {
-            _push?.Update();
             CheckInputEvent();
         }
 
