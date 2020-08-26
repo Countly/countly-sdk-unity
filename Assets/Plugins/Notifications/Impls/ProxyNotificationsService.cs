@@ -9,15 +9,16 @@ namespace Notifications.Impls
 
 		public ProxyNotificationsService(Action<IEnumerator> startCoroutine)
 		{
-#if UNITY_EDITOR
-			_service = new EditorNotificationsService();
-#elif UNITY_ANDROID
+
+#if UNITY_ANDROID
 			_service = new Notifications.Impls.Android.AndroidNotificationsService();
 #elif UNITY_IOS
 			_service = new Notifications.Impls.iOs.IOsNotificationsService(startCoroutine);
+#else
+			_service = new EditorNotificationsService();
 #endif
-		}
+        }
 
-		public void GetToken(Action<string> result) => _service.GetToken(result);
+        public void GetToken(Action<string> result) => _service.GetToken(result);
 	}
 }
