@@ -42,6 +42,7 @@ namespace Notifications.Impls.iOs
                 result.Invoke(req.DeviceToken);
             }
 #else
+            Debug.Log("[Countly] IOsNotificationsService, RequestAuthorization, execution will be skipped, Unity.Notification.iOS exists only on IOS platform");
             yield return null;
 #endif
         }

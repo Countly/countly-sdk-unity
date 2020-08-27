@@ -10,12 +10,13 @@ namespace Notifications.Impls
 		public ProxyNotificationsService(Action<IEnumerator> startCoroutine)
 		{
 
-#if UNITY_ANDROID
-			_service = new Notifications.Impls.Android.AndroidNotificationsService();
+#if UNITY_EDITOR
+            _service = new EditorNotificationsService();
+#elif UNITY_ANDROID
+            _service = new Notifications.Impls.Android.AndroidNotificationsService();
 #elif UNITY_IOS
 			_service = new Notifications.Impls.iOs.IOsNotificationsService(startCoroutine);
-#else
-			_service = new EditorNotificationsService();
+
 #endif
         }
 
