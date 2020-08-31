@@ -15,17 +15,23 @@ public class CountlyEntryPoint : MonoBehaviour
 	
 	private void Awake ()
 	{
-#if  !UNITY_EDITOR
-		_countly = Instantiate(countly);      
-#else
-		_countly = Instantiate(countlyWrapper);
-#endif
-		
-		//StartCoroutine(SendEvents());
-	}
-	
 
-	private IEnumerator SendEvents()
+        _countly = Instantiate(countly);
+
+        /* You can use 'countlyWrapper' to call Countly functions without them sending any events to your server.
+         * This might be useful while testing in the Unity Editor. */
+
+        //#if  !UNITY_EDITOR
+        //		_countly = Instantiate(countly);      
+        //#else
+        //		_countly = Instantiate(countlyWrapper);
+        //#endif
+
+        //StartCoroutine(SendEvents());
+    }
+
+
+    private IEnumerator SendEvents()
 	{
 		yield return new WaitForSeconds(1);
 		_countly.Events.RecordEventAsync("Test event");
