@@ -15,7 +15,6 @@ public class CountlyEntryPoint : MonoBehaviour
 	
 	private void Awake ()
 	{
-
         _countly = Instantiate(countly);
 
         /* You can use 'countlyWrapper' to call Countly functions without them sending any events to your server.
