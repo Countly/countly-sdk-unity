@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Plugins.Countly.Services.Impls.Wrapper
 {
-    public class CrushReportsCountlyServiceWrapper : ICrushReportsCountlyService
+    public class CrashReportsCountlyServiceWrapper : ICrashReportsCountlyService
     {
         public void LogCallback(string message, string stackTrace, LogType type)
         {
@@ -15,21 +15,21 @@ namespace Plugins.Countly.Services.Impls.Wrapper
         public Task<CountlyResponse> SendCrashReportAsync(string message, string stackTrace, LogType type, IDictionary<string, object> segments = null,
             bool nonfatal = true)
         {
-            Debug.Log("[CrushReportsCountlyServiceWrapper] Send crush report async, message: \n" + message + "\n" +
+            Debug.Log("[CrashReportsCountlyServiceWrapper] Send crash report async, message: \n" + message + "\n" +
                       stackTrace + "\n " + type);
             return Task.FromResult(new CountlyResponse());
         }
 
         public Task<CountlyResponse> SendCrashReportAsync(string message, string stackTrace, LogType type, IDictionary<string, object> segments = null)
         {
-            Debug.Log("[CrushReportsCountlyServiceWrapper] Send crush report async, message: \n" + message + "\n" +
+            Debug.Log("[CrashReportsCountlyServiceWrapper] Send crash report async, message: \n" + message + "\n" +
                       stackTrace + "\n " + type);
             return Task.FromResult(new CountlyResponse());
         }
 
         public void AddBreadcrumbs(string value)
         {
-            Debug.Log("[CrushReportsCountlyServiceWrapper] Add breadcrumbs, value: " + value);
+            Debug.Log("[CrashReportsCountlyServiceWrapper] Add breadcrumbs, value: " + value);
         }
     }
 }

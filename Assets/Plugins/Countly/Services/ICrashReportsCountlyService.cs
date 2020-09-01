@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Plugins.Countly.Services
 {
-    public interface ICrushReportsCountlyService
+    public interface ICrashReportsCountlyService
     {
         /// <summary>
         /// Called when there is an exception 

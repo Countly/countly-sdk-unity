@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Plugins.Countly.Helpers;
 using Plugins.Countly.Models;
 
 namespace Plugins.Countly.Impl
@@ -73,7 +74,9 @@ namespace Plugins.Countly.Impl
             var baseParams = new Dictionary<string, object>
             {
                 {"app_key", _countly.Initialization.AppKey},
-                {"device_id", _countly.Device.DeviceId}
+                {"device_id", _countly.Device.DeviceId},
+                {"sdk_name", Constants.SdkName},
+                {"sdk_version", Constants.SdkVersion}
             };
 
             foreach (var item in TimeMetricModel.GetTimeMetricModel())

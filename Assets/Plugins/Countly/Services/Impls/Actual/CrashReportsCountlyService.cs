@@ -7,13 +7,13 @@ using UnityEngine;
 
 namespace Plugins.Countly.Services.Impls.Actual
 {
-    public class CrushReportsCountlyService : ICrushReportsCountlyService
+    public class CrashReportsCountlyService : ICrashReportsCountlyService
     {
         private readonly Queue<string> _crashBreadcrumbs = new Queue<string>();
         private readonly CountlyConfigModel _configModel;
         private readonly RequestCountlyHelper _requestCountlyHelper;
 
-        public CrushReportsCountlyService(CountlyConfigModel configModel, RequestCountlyHelper requestCountlyHelper)
+        public CrashReportsCountlyService(CountlyConfigModel configModel, RequestCountlyHelper requestCountlyHelper)
         {
             _configModel = configModel;
             _requestCountlyHelper = requestCountlyHelper;
