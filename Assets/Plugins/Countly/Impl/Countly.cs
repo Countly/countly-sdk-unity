@@ -26,7 +26,7 @@ namespace Plugins.Countly.Impl
 
         public IConsentCountlyService Consents { get; private set; }
 
-        public ICrashReportsCountlyService CrushReports { get; private set; }
+        public ICrashReportsCountlyService CrushReports { get { return CrashReports; } }
 
         public ICrashReportsCountlyService CrashReports { get; private set; }
 
@@ -116,7 +116,6 @@ namespace Plugins.Countly.Impl
             _sessions = new SessionCountlyService(Config, _push, requests, OptionalParameters, eventNumberInSameSessionHelper);
             Consents = new ConsentCountlyService();
             CrashReports = new CrashReportsCountlyService(Config, requests);
-            CrushReports = CrashReports;
             Events = new EventCountlyService(Config, requests, viewEventRepo, nonViewEventRepo, eventNumberInSameSessionHelper);
             Device = new DeviceIdCountlyService(_sessions, requests, Events, countlyUtils);
             Initialization = new InitializationCountlyService(_sessions);

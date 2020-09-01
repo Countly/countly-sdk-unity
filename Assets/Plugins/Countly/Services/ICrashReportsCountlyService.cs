@@ -28,17 +28,6 @@ namespace Plugins.Countly.Services
             IDictionary<string, object> segments = null, bool nonfatal = true);
 
         /// <summary>
-        /// Sends custom logged errors to the server.
-        /// </summary>
-        /// <param name="message"></param>
-        /// <param name="stackTrace"></param>
-        /// <param name="type"></param>
-        /// <param name="segments"></param>
-        /// <returns></returns>
-        Task<CountlyResponse> SendCrashReportAsync(string message, string stackTrace, LogType type,
-            IDictionary<string, object> segments = null);
-
-        /// <summary>
         /// Adds string value to a list which is later sent over as logs whenever a cash is reported by system.
         /// The length of a breadcrumb is limited to 1000 characters. Only first 1000 characters will be accepted in case the length is more 
         /// than 1000 characters.

@@ -19,8 +19,16 @@ namespace Plugins.Countly.Helpers
          public const string SdkName = "csharp-unity-linux";
 #elif UNITY_WEBGL
          public const string SdkName = "csharp-unity-webgl";
+#elif UNITY_TVOS
+         public const string SdkName = "csharp-unity-tvos";
+#elif UNITY_WSA_10_0
+         public const string SdkName = "csharp-unity-uwp";
+#elif UNITY_PS4
+         public const string SdkName = "csharp-unity-ps4"
+#elif UNITY_XBOXONE
+         public const string SdkName = "csharp-unity-xboxone"
 #else
-        public const string SdkName = "generic";
+         public const string SdkName = "generic";
 #endif
 
         public const string CountlyServerUrl = "https://us-try.count.ly/";

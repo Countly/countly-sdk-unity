@@ -73,21 +73,6 @@ namespace Plugins.Countly.Services.Impls.Actual
             //}
         }
 
-
-        /// <summary>
-        /// Sends custom logged errors to the server.
-        /// </summary>
-        /// <param name="message"></param>
-        /// <param name="stackTrace"></param>
-        /// <param name="type"></param>
-        /// <param name="segments"></param>
-        /// <returns></returns>
-        public async Task<CountlyResponse> SendCrashReportAsync(string message, string stackTrace, LogType type,
-            IDictionary<string, object> segments = null)
-        {
-            return await SendCrashReportAsync(message, stackTrace, type, segments, true);
-        }
-
         /// <summary>
         /// Adds string value to a list which is later sent over as logs whenever a cash is reported by system.
         /// The length of a breadcrumb is limited to 1000 characters. Only first 1000 characters will be accepted in case the length is more 
