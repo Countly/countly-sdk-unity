@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Plugins.Countly.Services
 {
-    public interface ICrushReportsCountlyService
+    public interface ICrashReportsCountlyService
     {
         /// <summary>
         /// Called when there is an exception 
@@ -26,17 +26,6 @@ namespace Plugins.Countly.Services
         /// <returns></returns>
         Task<CountlyResponse> SendCrashReportAsync(string message, string stackTrace, LogType type,
             IDictionary<string, object> segments = null, bool nonfatal = true);
-
-        /// <summary>
-        /// Sends custom logged errors to the server.
-        /// </summary>
-        /// <param name="message"></param>
-        /// <param name="stackTrace"></param>
-        /// <param name="type"></param>
-        /// <param name="segments"></param>
-        /// <returns></returns>
-        Task<CountlyResponse> SendCrashReportAsync(string message, string stackTrace, LogType type,
-            IDictionary<string, object> segments = null);
 
         /// <summary>
         /// Adds string value to a list which is later sent over as logs whenever a cash is reported by system.

@@ -11,7 +11,9 @@ namespace Plugins.Countly.Impl
     {
         public IConsentCountlyService Consents { get; private set; }
 
-        public ICrushReportsCountlyService CrushReports { get; private set; }
+        public ICrashReportsCountlyService CrashReports { get; private set; }
+
+        public ICrashReportsCountlyService CrushReports { get; private set; }
 
         public IDeviceIdCountlyService Device { get; private set; }
 
@@ -46,7 +48,8 @@ namespace Plugins.Countly.Impl
         private void Start()
         {
             Consents = new ConsentCountlyServiceWrapper();
-            CrushReports = new CrushReportsCountlyServiceWrapper();
+            CrashReports = new CrashReportsCountlyServiceWrapper();
+            CrushReports = CrashReports;
             Device = new DeviceIdCountlyServiceWrapper();
             Events = new EventCountlyServiceWrapper();
             Initialization = new InitializationCountlyServiceWrapper();

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using Countly.Input;
 using iBoxDB.LocalServer;
@@ -25,7 +26,9 @@ namespace Plugins.Countly.Impl
 
         public IConsentCountlyService Consents { get; private set; }
 
-        public ICrushReportsCountlyService CrushReports { get; private set; }
+        public ICrashReportsCountlyService CrushReports { get { return CrashReports; } }
+
+        public ICrashReportsCountlyService CrashReports { get; private set; }
 
         public IDeviceIdCountlyService Device { get; private set; }
 
@@ -112,7 +115,7 @@ namespace Plugins.Countly.Impl
             OptionalParameters = new OptionalParametersCountlyService();
             _sessions = new SessionCountlyService(Config, _push, requests, OptionalParameters, eventNumberInSameSessionHelper);
             Consents = new ConsentCountlyService();
-            CrushReports = new CrushReportsCountlyService(Config, requests);
+            CrashReports = new CrashReportsCountlyService(Config, requests);
             Events = new EventCountlyService(Config, requests, viewEventRepo, nonViewEventRepo, eventNumberInSameSessionHelper);
             Device = new DeviceIdCountlyService(_sessions, requests, Events, countlyUtils);
             Initialization = new InitializationCountlyService(_sessions);
@@ -191,7 +194,7 @@ namespace Plugins.Countly.Impl
         private void LogCallback(string condition, string stackTrace, LogType type)
         {
 //            Debug.Log("[Countly] " + type + "," + condition + "\n " + stackTrace);
-            CrushReports?.LogCallback(condition, stackTrace, type);
+            CrashReports?.LogCallback(condition, stackTrace, type);
         }
 
 

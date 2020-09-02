@@ -25,18 +25,15 @@ namespace Plugins.Countly.Models
         internal static Dictionary<string, object> GetTimeMetricModel()
         {
             var currentDateTime = DateTime.Now;
-            var model =
-                new TimeMetricModel
-                {
-                    Hour = currentDateTime.TimeOfDay.Hours,
-                    DayOfWeek = (int)currentDateTime.DayOfWeek,
-                };
+            var model = TimeMetricModel.GetTimeZoneInfoForRequest(currentDateTime);
+
             model.Timestamp = model.GetUniqueMilliSecTimeStamp();
             return new Dictionary<string, object>
             {
                 {"timestamp", model.Timestamp },
                 {"hour", model.Hour },
                 {"dow", model.DayOfWeek },
+                {"tz", model.Timezone },
             };
         }
 

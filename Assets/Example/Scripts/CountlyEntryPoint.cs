@@ -104,7 +104,7 @@ public class CountlyEntryPoint : MonoBehaviour
             throw new DivideByZeroException();
         }
         catch (Exception ex) {
-           await _countly.CrushReports.SendCrashReportAsync(ex.Message, ex.StackTrace, LogType.Exception, null, true); 
+           await _countly.CrashReports.SendCrashReportAsync(ex.Message, ex.StackTrace, LogType.Exception); 
         }
        
     }

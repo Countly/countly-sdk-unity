@@ -7,13 +7,13 @@ using UnityEngine;
 
 namespace Plugins.Countly.Services.Impls.Actual
 {
-    public class CrushReportsCountlyService : ICrushReportsCountlyService
+    public class CrashReportsCountlyService : ICrashReportsCountlyService
     {
         private readonly Queue<string> _crashBreadcrumbs = new Queue<string>();
         private readonly CountlyConfigModel _configModel;
         private readonly RequestCountlyHelper _requestCountlyHelper;
 
-        public CrushReportsCountlyService(CountlyConfigModel configModel, RequestCountlyHelper requestCountlyHelper)
+        public CrashReportsCountlyService(CountlyConfigModel configModel, RequestCountlyHelper requestCountlyHelper)
         {
             _configModel = configModel;
             _requestCountlyHelper = requestCountlyHelper;
@@ -71,21 +71,6 @@ namespace Plugins.Countly.Services.Impls.Actual
 
             return await _requestCountlyHelper.GetResponseAsync(requestParams);
             //}
-        }
-
-
-        /// <summary>
-        /// Sends custom logged errors to the server.
-        /// </summary>
-        /// <param name="message"></param>
-        /// <param name="stackTrace"></param>
-        /// <param name="type"></param>
-        /// <param name="segments"></param>
-        /// <returns></returns>
-        public async Task<CountlyResponse> SendCrashReportAsync(string message, string stackTrace, LogType type,
-            IDictionary<string, object> segments = null)
-        {
-            return await SendCrashReportAsync(message, stackTrace, type, segments, true);
         }
 
         /// <summary>
