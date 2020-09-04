@@ -52,5 +52,13 @@ namespace Plugins.Countly.Services.Impls.Actual
             Location = string.Empty;
         }
 
+        public void SetLocation(string countryCode, string city, string gpsCoordinates, string ipAddress)
+        {
+            City = city;
+            IPAddress = ipAddress;
+            CountryCode = countryCode;
+            Location = gpsCoordinates;
+            
+        }
     }
 }

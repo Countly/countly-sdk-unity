@@ -45,6 +45,10 @@ namespace Plugins.Countly.Impl
         public IUserDetailsCountlyService UserDetails { get; private set; }
 
         public IViewCountlyService Views { get; private set; }
+
+        public SessionCountlyService Session { get; private set; }
+
+
         
         public async void ReportAll()
         {
@@ -59,7 +63,6 @@ namespace Plugins.Countly.Impl
 
         private bool _logSubscribed;
 
-        private SessionCountlyService _sessions;
         private PushCountlyService _push;
     
         private const long DbNumber = 3;
@@ -113,12 +116,12 @@ namespace Plugins.Countly.Impl
             
             
             OptionalParameters = new OptionalParametersCountlyService();
-            _sessions = new SessionCountlyService(Config, _push, requests, OptionalParameters, eventNumberInSameSessionHelper);
+            Session = new SessionCountlyService(Config, _push, requests, OptionalParameters, eventNumberInSameSessionHelper);
             Consents = new ConsentCountlyService();
             CrashReports = new CrashReportsCountlyService(Config, requests);
             Events = new EventCountlyService(Config, requests, viewEventRepo, nonViewEventRepo, eventNumberInSameSessionHelper);
-            Device = new DeviceIdCountlyService(_sessions, requests, Events, countlyUtils);
-            Initialization = new InitializationCountlyService(_sessions);
+            Device = new DeviceIdCountlyService(Session, requests, Events, countlyUtils);
+            Initialization = new InitializationCountlyService(Session);
             
             RemoteConfigs = new RemoteConfigCountlyService(requests, countlyUtils, configDao);
             
@@ -136,15 +139,15 @@ namespace Plugins.Countly.Impl
         private async void OnApplicationQuit()
         {
             Debug.Log("[Countly] OnApplicationQuit");
-            if (_sessions != null && _sessions.IsSessionInitiated && !Config.EnableManualSessionHandling)
+            if (Session != null && Session.IsSessionInitiated && !Config.EnableManualSessionHandling)
             {
                 ReportAll();
-                await _sessions.EndSessionAsync();   
+                await Session.EndSessionAsync();   
             }
             _db.Close();
         }
 
-        private async void OnApplicationFocus(bool hasFocus)
+        private void OnApplicationFocus(bool hasFocus)
         {
             Debug.Log("[Countly] OnApplicationFocus: " + hasFocus);
             if (hasFocus)
@@ -157,7 +160,7 @@ namespace Plugins.Countly.Impl
             }
         }
 
-        private async void OnApplicationPause(bool pauseStatus)
+        private void OnApplicationPause(bool pauseStatus)
         {
             Debug.Log("[Countly] OnApplicationPause: " + pauseStatus);
             if (pauseStatus)
@@ -170,10 +173,10 @@ namespace Plugins.Countly.Impl
             }
         }
 
-        private async void HandleAppPauseOrFocus()
+        private void HandleAppPauseOrFocus()
         {
             UnsubscribeAppLog();
-            if (_sessions != null && _sessions.IsSessionInitiated)
+            if (Session != null && Session.IsSessionInitiated)
             {
                 ReportAll();
             }
@@ -200,14 +203,22 @@ namespace Plugins.Countly.Impl
 
         private void SubscribeAppLog()
         {
-            if (_logSubscribed) return;
+            if (_logSubscribed)
+            {
+                return;
+            }
+
             Application.logMessageReceived += LogCallback;
             _logSubscribed = true;
         }
 
         private void UnsubscribeAppLog()
         {
-            if (!_logSubscribed) return;
+            if (!_logSubscribed)
+            {
+                return;
+            }
+
             Application.logMessageReceived -= LogCallback;
             _logSubscribed = false;
         }
@@ -221,8 +232,11 @@ namespace Plugins.Countly.Impl
         private void CheckInputEvent()
         {
             if(!_inputObserver.HasInput)
+            {
                 return;
-            _sessions?.UpdateInputTime();
+            }
+
+            Session?.UpdateInputTime();
         }
 
         private void InternalStartCoroutine(IEnumerator enumerator)

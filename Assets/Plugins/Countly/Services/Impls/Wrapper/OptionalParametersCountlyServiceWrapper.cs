@@ -33,5 +33,14 @@ namespace Plugins.Countly.Services.Impls.Wrapper
         {
             Debug.Log("[OptionalParametersCountlyServiceWrapper] DisableLocation");
         }
+
+        public void SetLocation(string countryCode, string city, string gpsCoordinates, string ipAddress)
+        {
+            City = city;
+            IPAddress = ipAddress;
+            CountryCode = countryCode;
+            Location = gpsCoordinates;
+
+        }
     }
 }

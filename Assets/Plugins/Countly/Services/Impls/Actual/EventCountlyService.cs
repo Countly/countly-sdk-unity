@@ -60,29 +60,7 @@ namespace Plugins.Countly.Services.Impls.Actual
             };
         }
         
-        
-        public async Task<CountlyResponse> RecordEventAsync(string key, bool useNumberInSameSession = false)
-        {
-            if (string.IsNullOrEmpty(key) && string.IsNullOrWhiteSpace(key))
-            {
-                return new CountlyResponse
-                {
-                    IsSuccess = false,
-                    ErrorMessage = "Key is required."
-                };
-            }
-
-            var @event = new CountlyEventModel(key);
-            
-            if (useNumberInSameSession)
-            {
-                _eventNumberInSameSessionHelper.IncreaseNumberInSameSession(@event);
-            }
-            
-            return await RecordEventAsync(@event);
-        }
-
-        public async Task<CountlyResponse> RecordEventAsync(string key, SegmentModel segmentation, bool useNumberInSameSession = false,
+        public async Task<CountlyResponse> RecordEventAsync(string key, SegmentModel segmentation = null, bool useNumberInSameSession = false,
             int? count = 1, double? sum = 0, double? duration = null)
         {
             if (string.IsNullOrEmpty(key) && string.IsNullOrWhiteSpace(key))
