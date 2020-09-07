@@ -12,7 +12,7 @@ namespace Plugins.Countly.Models
         public bool EnableConsoleErrorLogging;
         public bool IgnoreSessionCooldown;
         public TestMode NotificationMode;
-        public bool EnableManualSessionHandling;
+        public readonly bool EnableManualSessionHandling;
         public int SessionDuration;
         public int EventViewSendThreshold;
         public int EventNonViewSendThreshold;
@@ -44,7 +44,8 @@ namespace Plugins.Countly.Models
             IgnoreSessionCooldown = ignoreSessionCooldown;
             NotificationMode = notificationMode;
             SessionDuration = sessionDuration;
-            EnableManualSessionHandling = enableManualSessionHandling;
+            //EnableManualSessionHandling = enableManualSessionHandling;
+            EnableManualSessionHandling = false;
             EventViewSendThreshold = eventViewThreshold;
             StoredRequestLimit = storedRequestLimit;
             TotalBreadcrumbsAllowed = totalBreadcrumbsAllowed;

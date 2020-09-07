@@ -59,27 +59,10 @@ namespace Plugins.Countly.Services.Impls.Actual
                 IsSuccess = true
             };
         }
-        
-        
+
         public async Task<CountlyResponse> RecordEventAsync(string key, bool useNumberInSameSession = false)
         {
-            if (string.IsNullOrEmpty(key) && string.IsNullOrWhiteSpace(key))
-            {
-                return new CountlyResponse
-                {
-                    IsSuccess = false,
-                    ErrorMessage = "Key is required."
-                };
-            }
-
-            var @event = new CountlyEventModel(key);
-            
-            if (useNumberInSameSession)
-            {
-                _eventNumberInSameSessionHelper.IncreaseNumberInSameSession(@event);
-            }
-            
-            return await RecordEventAsync(@event);
+           return await RecordEventAsync(key, null, useNumberInSameSession);
         }
 
         public async Task<CountlyResponse> RecordEventAsync(string key, SegmentModel segmentation, bool useNumberInSameSession = false,
@@ -264,5 +247,7 @@ namespace Plugins.Countly.Services.Impls.Actual
             }
             @event.Segmentation.Add(Constants.FirstAppLaunchSegment, FirstLaunchAppHelper.IsFirstLaunchApp);
         }
+
+       
     }
 }
