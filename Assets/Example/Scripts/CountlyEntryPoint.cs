@@ -107,7 +107,7 @@ public class CountlyEntryPoint : MonoBehaviour
 
     public async void SetRating()
     {
-           await countly.StarRating.ReportStarRatingAsync("unity_android", "0.1", 3);
+           await countly.StarRating.ReportStarRatingAsync("unity", "0.1", 3);
     }
 
     public async void SetUserDetail()
