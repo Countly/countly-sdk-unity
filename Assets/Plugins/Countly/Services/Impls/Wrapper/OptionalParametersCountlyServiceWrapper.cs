@@ -11,22 +11,24 @@ namespace Plugins.Countly.Services.Impls.Wrapper
         
         public void SetCountryCode(string country_code)
         {
-            CountryCode = country_code;
+            SetLocation(country_code, City, Location, IPAddress);
         }
 
         public void SetCity(string city)
         {
-            City = city;
+            SetLocation(CountryCode, city, Location, IPAddress);
         }
 
         public void SetLocation(double latitude, double longitude)
         {
-            Location = "latitude: " + latitude + ", longitude: " + longitude;
+            string location = "latitude: " + latitude + ", longitude: " + longitude;
+
+            SetLocation(CountryCode, City, location, IPAddress);
         }
 
         public void SetIPAddress(string ip_address)
         {
-            IPAddress = ip_address;
+            SetLocation(CountryCode, City, Location, ip_address);
         }
 
         public void DisableLocation()

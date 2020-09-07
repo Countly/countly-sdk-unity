@@ -46,7 +46,7 @@ namespace Plugins.Countly.Impl
 
         public IViewCountlyService Views { get; private set; }
 
-        public SessionCountlyService Session { get; private set; }
+        private SessionCountlyService Session { get;  set; }
 
 
         

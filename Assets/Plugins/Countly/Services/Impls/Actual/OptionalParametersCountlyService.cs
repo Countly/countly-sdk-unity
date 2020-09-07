@@ -13,7 +13,7 @@ namespace Plugins.Countly.Services.Impls.Actual
         /// <param name="country_code"></param>
         public void SetCountryCode(string country_code)
         {
-            CountryCode = country_code;
+            SetLocation(country_code, City, Location, IPAddress);
         }
 
         /// <summary>
@@ -22,7 +22,7 @@ namespace Plugins.Countly.Services.Impls.Actual
         /// <param name="city"></param>
         public void SetCity(string city)
         {
-            City = city;
+            SetLocation(CountryCode, city, Location, IPAddress);
         }
 
         /// <summary>
@@ -32,7 +32,8 @@ namespace Plugins.Countly.Services.Impls.Actual
         /// <param name="longitude"></param>
         public void SetLocation(double latitude, double longitude)
         {
-            Location = latitude + "," + longitude;
+            string location = latitude + "," + longitude;
+            SetLocation(CountryCode, City, location, IPAddress);
         }
 
         /// <summary>
@@ -41,7 +42,7 @@ namespace Plugins.Countly.Services.Impls.Actual
         /// <param name="ip_address"></param>
         public void SetIPAddress(string ip_address)
         {
-            IPAddress = ip_address;
+            SetLocation(CountryCode, City, Location, ip_address);
         }
 
         /// <summary>

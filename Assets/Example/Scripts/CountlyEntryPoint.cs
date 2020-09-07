@@ -34,14 +34,14 @@ public class CountlyEntryPoint : MonoBehaviour
 
     public async void EventWithSum()
     {
-        await countly.Events.RecordEventAsync("Event With Sum", sum: 23);
+        await countly.Events.RecordEventAsync("Event With Sum", segmentation: null, sum: 23);
     }
 
     public async void EventWithSegmentation()
     {
 
         SegmentModel segment = new SegmentModel(new Dictionary<string, object>
-        {
+{
             { "Time Spent", "60"},
             { "Retry Attempts", "10"}
         });

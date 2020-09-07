@@ -59,8 +59,13 @@ namespace Plugins.Countly.Services.Impls.Actual
                 IsSuccess = true
             };
         }
-        
-        public async Task<CountlyResponse> RecordEventAsync(string key, SegmentModel segmentation = null, bool useNumberInSameSession = false,
+
+        public async Task<CountlyResponse> RecordEventAsync(string key, bool useNumberInSameSession = false)
+        {
+           return await RecordEventAsync(key, null, useNumberInSameSession);
+        }
+
+        public async Task<CountlyResponse> RecordEventAsync(string key, SegmentModel segmentation, bool useNumberInSameSession = false,
             int? count = 1, double? sum = 0, double? duration = null)
         {
             if (string.IsNullOrEmpty(key) && string.IsNullOrWhiteSpace(key))
@@ -242,5 +247,7 @@ namespace Plugins.Countly.Services.Impls.Actual
             }
             @event.Segmentation.Add(Constants.FirstAppLaunchSegment, FirstLaunchAppHelper.IsFirstLaunchApp);
         }
+
+       
     }
 }
