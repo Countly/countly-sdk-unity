@@ -32,9 +32,7 @@ public class RemoteNotificationsService extends FirebaseMessagingService {
 
     private final String TAG = "RNS";
     private final String UNITY_ANDROID_BRIDGE = "[Android] Bridge";
-    private static final String CHANNEL_ID = "ly.count.android.sdk.CountlyPush.CHANNEL_ID";
-    private static final String COUNTLY_CHANNEL_NAME = "General Notifications";
-    private static final String COUNTLY_CHANNEL_DESCRIPTION = "ly.count.android.sdk.CountlyPush.CHANNEL_ID";
+    private final String CHANNEL_ID = "ly.count.unity.sdk.CountlyPush.CHANNEL_ID";
 
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -44,8 +42,8 @@ public class RemoteNotificationsService extends FirebaseMessagingService {
             if (notificationManager != null) {
                 // Create the NotificationChannel
                 NotificationChannel channel =
-                        new NotificationChannel(CHANNEL_ID, COUNTLY_CHANNEL_NAME, NotificationManager.IMPORTANCE_DEFAULT);
-                channel.setDescription(COUNTLY_CHANNEL_DESCRIPTION);
+                        new NotificationChannel(CHANNEL_ID, getString(R.string.countly_hannel_name), NotificationManager.IMPORTANCE_DEFAULT);
+                channel.setDescription(getString(R.string.countly_channel_description));
 
                 channel.setLightColor(Color.GREEN);
                 notificationManager.createNotificationChannel(channel);
