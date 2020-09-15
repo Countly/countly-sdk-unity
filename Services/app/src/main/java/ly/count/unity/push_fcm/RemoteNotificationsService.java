@@ -30,7 +30,7 @@ import java.util.Map;
 
 public class RemoteNotificationsService extends FirebaseMessagingService {
 
-    private final String TAG = "RNS";
+    private final String TAG = "CountlyPluginPush";
     private final String UNITY_ANDROID_BRIDGE = "[Android] Bridge";
     private final String CHANNEL_ID = "ly.count.unity.sdk.CountlyPush.CHANNEL_ID";
 
