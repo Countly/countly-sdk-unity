@@ -51,7 +51,6 @@ public class RemoteNotificationsService extends FirebaseMessagingService {
                 Log.d(TAG, "NotificationChannel Created");
             }
         }
-
     }
 
     public void getToken() {
@@ -67,12 +66,8 @@ public class RemoteNotificationsService extends FirebaseMessagingService {
                 String token = task.getResult().getToken();
                 Log.d(TAG, "Firebase token: " + token);
                 UnityPlayer.UnitySendMessage(UNITY_ANDROID_BRIDGE, "OnTokenResult", token);
-
-
             }
         });
-
-        Log.d(TAG, "getToken");
     }
 
     @Override
