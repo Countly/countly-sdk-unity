@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.playdarium.services">
+    package="ly.count.unity">
 
     <application
         android:allowBackup="true"
@@ -7,7 +7,7 @@
         android:supportsRtl="true">
 
         <!--Set remote notification handler-->
-        <service android:name="com.playdarium.services.notifications.RemoteNotificationsService">
+        <service android:name="ly.count.unity.push_fcm.RemoteNotificationsService">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT"/>
             </intent-filter>

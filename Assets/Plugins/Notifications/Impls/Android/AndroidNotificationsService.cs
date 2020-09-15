@@ -5,7 +5,7 @@ namespace Notifications.Impls.Android
 {
 	public class AndroidNotificationsService : INotificationsService
 	{
-		private const string PackageName = "com.playdarium.services.notifications.RemoteNotificationsService";
+		private const string PackageName = "ly.count.unity.push_fcm.RemoteNotificationsService";
 		private const string BridgeName = "[Android] Bridge";
 
 		private readonly AndroidBridge _bridge;

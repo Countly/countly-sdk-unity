@@ -1,4 +1,4 @@
-package com.playdarium.services.notifications;
+package ly.count.unity.push_fcm;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -71,6 +71,8 @@ public class RemoteNotificationsService extends FirebaseMessagingService {
 
             }
         });
+
+        Log.d(TAG, "getToken");
     }
 
     @Override
