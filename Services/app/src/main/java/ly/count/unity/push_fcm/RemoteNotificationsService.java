@@ -127,22 +127,18 @@ public class RemoteNotificationsService extends FirebaseMessagingService {
 
         BitmapDrawable largeIconBitmap = (BitmapDrawable) ContextCompat.getDrawable(this, R.drawable.ic_stat);
 
+        Intent notificationIntent = new Intent(this.getApplicationContext(), UnityPlayerActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this.getApplicationContext(), 0, notificationIntent, 0);
         notificationBuilder
-                .setSmallIcon(R.drawable.ic_stat)
-                .setLargeIcon(largeIconBitmap.getBitmap())
+                .setAutoCancel(true)
                 .setContentTitle(title)
                 .setContentText(message)
-                .setAutoCancel(true)
                 .setSound(notificationSound)
+                .setContentIntent(pendingIntent)
+                .setSmallIcon(R.drawable.ic_stat)
+                .setLargeIcon(largeIconBitmap.getBitmap())
                 .setColor(ContextCompat.getColor(this, R.color.color_notification));
 
-        Notification notification = notificationBuilder.build();
-        notification.flags = Notification.FLAG_AUTO_CANCEL;
-
-        //Open Unity Activity
-        Intent notificationIntent = new Intent(this.getApplicationContext(), UnityPlayerActivity.class);
-        notification.contentIntent = PendingIntent.getActivity(this.getApplicationContext(), 0, notificationIntent, 0);
-
-        notificationManager.notify(tag,0, notification);
+        notificationManager.notify(tag,0, notificationBuilder.build());
     }
 }
