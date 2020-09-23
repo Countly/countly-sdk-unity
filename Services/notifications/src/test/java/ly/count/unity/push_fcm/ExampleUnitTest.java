@@ -1,4 +1,4 @@
-package com.playdarium.services.notifications;
+package ly.count.unity.push_fcm;
 
 import org.junit.Test;
 

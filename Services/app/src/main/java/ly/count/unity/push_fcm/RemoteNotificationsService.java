@@ -1,11 +1,16 @@
-package com.playdarium.services.notifications;
+package ly.count.unity.push_fcm;
 
+import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.Build;
 import android.support.v4.app.NotificationCompat.Builder;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
@@ -17,6 +22,7 @@ import com.google.firebase.iid.InstanceIdResult;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.unity3d.player.UnityPlayer;
+import com.unity3d.player.UnityPlayerActivity;
 
 import org.json.JSONObject;
 
@@ -24,8 +30,28 @@ import java.util.Map;
 
 public class RemoteNotificationsService extends FirebaseMessagingService {
 
-    private final String TAG = "RNS";
+    private final String TAG = "CountlyPluginPush";
     private final String UNITY_ANDROID_BRIDGE = "[Android] Bridge";
+    private final String CHANNEL_ID = "ly.count.unity.sdk.CountlyPush.CHANNEL_ID";
+
+    private void createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            // Register the channel with the system; you can't change the importance
+            // or other notification behaviors after this
+            NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            if (notificationManager != null) {
+                // Create the NotificationChannel
+                NotificationChannel channel =
+                        new NotificationChannel(CHANNEL_ID, getString(R.string.countly_hannel_name), NotificationManager.IMPORTANCE_DEFAULT);
+                channel.setDescription(getString(R.string.countly_channel_description));
+
+                channel.setLightColor(Color.GREEN);
+                notificationManager.createNotificationChannel(channel);
+
+                Log.d(TAG, "NotificationChannel Created");
+            }
+        }
+    }
 
     public void getToken() {
         FirebaseInstanceId.getInstance().getInstanceId().addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
@@ -69,41 +95,50 @@ public class RemoteNotificationsService extends FirebaseMessagingService {
     }
 
     private void ProcessNotification(RemoteMessage.Notification notification) {
+        String tag = notification.getTag();
         String title = notification.getTitle();
         String message = notification.getBody();
-        sendNotification(title, message);
+
+        sendNotification(tag, title, message);
     }
 
     private void ProcessData(Map<String, String> data) {
+        String tag = data.get("c.i");
         String title = data.get("title");
         String message = data.get("message");
-        sendNotification(title, message);
+
+        sendNotification(tag, title, message);
     }
 
-    private void sendNotification(String title, String message) {
+    private void sendNotification(String tag, String title, String message) {
         Uri notificationSound = RingtoneManager.getDefaultUri(R.raw.boing);
-
+        NotificationManager notificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         Builder notificationBuilder;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            notificationBuilder = new Builder(this, NotificationChannel.DEFAULT_CHANNEL_ID);
+            NotificationChannel channel = notificationManager.getNotificationChannel(CHANNEL_ID);
+            if(channel == null) {
+                createNotificationChannel();
+            }
+            notificationBuilder = new Builder(this, CHANNEL_ID);
         } else {
             notificationBuilder = new Builder(this);
         }
 
         BitmapDrawable largeIconBitmap = (BitmapDrawable) ContextCompat.getDrawable(this, R.drawable.ic_stat);
 
+        Intent notificationIntent = new Intent(this.getApplicationContext(), UnityPlayerActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this.getApplicationContext(), 0, notificationIntent, 0);
         notificationBuilder
-                .setSmallIcon(R.drawable.ic_stat)
-                .setLargeIcon(largeIconBitmap.getBitmap())
+                .setAutoCancel(true)
                 .setContentTitle(title)
                 .setContentText(message)
-                .setAutoCancel(true)
                 .setSound(notificationSound)
+                .setContentIntent(pendingIntent)
+                .setSmallIcon(R.drawable.ic_stat)
+                .setLargeIcon(largeIconBitmap.getBitmap())
                 .setColor(ContextCompat.getColor(this, R.color.color_notification));
 
-        NotificationManager notificationManager =
-                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-
-        notificationManager.notify(0, notificationBuilder.build());
+        notificationManager.notify(tag,0, notificationBuilder.build());
     }
 }
