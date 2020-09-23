@@ -103,6 +103,7 @@ namespace Plugins.Countly.Impl
             Device.InitDeviceId(Auth.DeviceId);
 
             await Initialization.SetDefaults(Config);
+            ReportPushAction();
         }
 
         private void Init(RequestRepository requestRepo, ViewEventRepository viewEventRepo, 
@@ -111,21 +112,19 @@ namespace Plugins.Countly.Impl
             var countlyUtils = new CountlyUtils(this);
             var requests = new RequestCountlyHelper(Config, countlyUtils, requestRepo);
 
-            var notificationsService = new ProxyNotificationsService(InternalStartCoroutine); 
-            _push = new PushCountlyService(requests, notificationsService);
-            
-            
+            Events = new EventCountlyService(Config, requests, viewEventRepo, nonViewEventRepo, eventNumberInSameSessionHelper);
             OptionalParameters = new OptionalParametersCountlyService();
+            var notificationsService = new ProxyNotificationsService(InternalStartCoroutine);
+            _push = new PushCountlyService(Events, requests, notificationsService);
             Session = new SessionCountlyService(Config, _push, requests, OptionalParameters, eventNumberInSameSessionHelper);
             Consents = new ConsentCountlyService();
             CrashReports = new CrashReportsCountlyService(Config, requests);
-            Events = new EventCountlyService(Config, requests, viewEventRepo, nonViewEventRepo, eventNumberInSameSessionHelper);
+           
             Device = new DeviceIdCountlyService(Session, requests, Events, countlyUtils);
             Initialization = new InitializationCountlyService(Session);
             
             RemoteConfigs = new RemoteConfigCountlyService(requests, countlyUtils, configDao);
-            
-            
+                        
             StarRating = new StarRatingCountlyService(Events);
             UserDetails = new UserDetailsCountlyService(requests, countlyUtils);
             Views = new ViewCountlyService(Events);
@@ -164,11 +163,12 @@ namespace Plugins.Countly.Impl
         {
             Debug.Log("[Countly] OnApplicationPause: " + pauseStatus);
             if (pauseStatus)
-            {
-                HandleAppPauseOrFocus();   
+            {              
+                HandleAppPauseOrFocus();          
             }
             else
             {
+                ReportPushAction();
                 SubscribeAppLog();   
             }
         }
@@ -198,6 +198,23 @@ namespace Plugins.Countly.Impl
         {
 //            Debug.Log("[Countly] " + type + "," + condition + "\n " + stackTrace);
             CrashReports?.LogCallback(condition, stackTrace, type);
+        }
+
+        private async void ReportPushAction()
+        {
+            const string EXTRA_MESSAGE_ID = "c.i";
+            AndroidJavaClass UnityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
+            AndroidJavaObject currentActivity = UnityPlayer.GetStatic<AndroidJavaObject>("currentActivity");
+            AndroidJavaObject intent = currentActivity.Call<AndroidJavaObject>("getIntent");
+
+            string messageId = intent.Call<string>("getStringExtra", EXTRA_MESSAGE_ID);
+            Debug.Log("[Countly] messageId: " + messageId);
+         
+            if (!string.IsNullOrEmpty(messageId) && Session != null && Session.IsSessionInitiated)
+            {
+                await _push.ReportPushActionAsync(messageId, "0");
+                intent.Call("removeExtra", EXTRA_MESSAGE_ID);
+            }
         }
 
 

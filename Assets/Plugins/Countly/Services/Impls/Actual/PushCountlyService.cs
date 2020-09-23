@@ -5,21 +5,24 @@ using Newtonsoft.Json;
 using Notifications;
 using Plugins.Countly.Enums;
 using Plugins.Countly.Helpers;
+using Plugins.Countly.Models;
 using UnityEngine;
 
 namespace Plugins.Countly.Services.Impls.Actual
 {
     public class PushCountlyService
     {
+        private readonly IEventCountlyService _eventCountlyService;
         private readonly RequestCountlyHelper _requestCountlyHelper;
         private readonly INotificationsService _notificationsService;
-        private TestMode? _mode;
-        private string _token;
 
+        private string _token;
+        private TestMode? _mode;
         private static bool _tokenSent;
 
-        public PushCountlyService(RequestCountlyHelper requestCountlyHelper, INotificationsService notificationsService)
+        public PushCountlyService(IEventCountlyService eventCountlyService, RequestCountlyHelper requestCountlyHelper, INotificationsService notificationsService)
         {
+            _eventCountlyService = eventCountlyService;
             _requestCountlyHelper = requestCountlyHelper;
             _notificationsService = notificationsService;
         }
@@ -82,13 +85,34 @@ namespace Plugins.Countly.Services.Impls.Actual
             return await _requestCountlyHelper.GetResponseAsync(requestParams);
         }
 
+        public async Task<CountlyResponse> ReportPushActionAsync(string mesageId, string identifier = "0")
+        {
+            Debug.Log("[Countly] ReportPushActionAsync, mesageId: " + mesageId);
+            var segment =
+                new PushActionSegment
+                {
+                    MessageID = mesageId,
+                    Identifier = identifier
+                };
+
+            return await _eventCountlyService.ReportCustomEventAsync(
+                CountlyEventModel.PushActionEvent, segment.ToDictionary());
+        }
+
         [Serializable]
         struct PushActionSegment
         {
-            [JsonProperty("b")]
-            internal string Identifier { get; set; }
-            [JsonProperty("i")]
-            internal string MessageID { get; set; }
+            public string Identifier { get; set; }
+            public string MessageID { get; set; }
+
+            public IDictionary<string, object> ToDictionary()
+            {
+                return new Dictionary<string, object>()
+                {
+                    {"b", Identifier},
+                    {"i", MessageID}
+                };
+            }
         }
 
     }

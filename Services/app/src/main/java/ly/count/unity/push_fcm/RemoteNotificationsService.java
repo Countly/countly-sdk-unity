@@ -128,6 +128,7 @@ public class RemoteNotificationsService extends FirebaseMessagingService {
         BitmapDrawable largeIconBitmap = (BitmapDrawable) ContextCompat.getDrawable(this, R.drawable.ic_stat);
 
         Intent notificationIntent = new Intent(this.getApplicationContext(), UnityPlayerActivity.class);
+        notificationIntent.putExtra("c.i", tag);
         PendingIntent pendingIntent = PendingIntent.getActivity(this.getApplicationContext(), 0, notificationIntent, 0);
         notificationBuilder
                 .setAutoCancel(true)
