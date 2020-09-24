@@ -103,7 +103,7 @@ namespace Plugins.Countly.Impl
             Device.InitDeviceId(Auth.DeviceId);
 
             await Initialization.SetDefaults(Config);
-            ReportPushAction();
+           // ReportPushAction();
         }
 
         private void Init(RequestRepository requestRepo, ViewEventRepository viewEventRepo, 
@@ -168,7 +168,7 @@ namespace Plugins.Countly.Impl
             }
             else
             {
-                ReportPushAction();
+                //ReportPushAction();
                 SubscribeAppLog();   
             }
         }
@@ -200,22 +200,7 @@ namespace Plugins.Countly.Impl
             CrashReports?.LogCallback(condition, stackTrace, type);
         }
 
-        private async void ReportPushAction()
-        {
-            const string EXTRA_MESSAGE_ID = "c.i";
-            AndroidJavaClass UnityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
-            AndroidJavaObject currentActivity = UnityPlayer.GetStatic<AndroidJavaObject>("currentActivity");
-            AndroidJavaObject intent = currentActivity.Call<AndroidJavaObject>("getIntent");
-
-            string messageId = intent.Call<string>("getStringExtra", EXTRA_MESSAGE_ID);
-            Debug.Log("[Countly] messageId: " + messageId);
-         
-            if (!string.IsNullOrEmpty(messageId) && Session != null && Session.IsSessionInitiated)
-            {
-                await _push.ReportPushActionAsync(messageId, "0");
-                intent.Call("removeExtra", EXTRA_MESSAGE_ID);
-            }
-        }
+        
 
 
         private void SubscribeAppLog()
@@ -242,7 +227,6 @@ namespace Plugins.Countly.Impl
 
         private void Update()
         {
-            _push?.Update();
             CheckInputEvent();
         }
 

@@ -18,5 +18,7 @@
             android:name="com.google.firebase.messaging.default_notification_color"
             android:resource="@color/color_notification" />
 
+            <receiver android:name="ly.count.unity.push_fcm.NotificationBroadcastReceiver" />
+
     </application>
 </manifest>

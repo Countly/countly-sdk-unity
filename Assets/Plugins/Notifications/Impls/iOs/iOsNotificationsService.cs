@@ -16,6 +16,12 @@ namespace Notifications.Impls.iOs
             _startCoroutine = startCoroutine;
         }
 
+        public void GetMessage(Action result)
+        {
+            result.Invoke();
+                
+        }
+
         public void GetToken(Action<string> result)
         {
             _startCoroutine.Invoke(RequestAuthorization(result));

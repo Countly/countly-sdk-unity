@@ -20,6 +20,8 @@ namespace Notifications.Impls
 #endif
         }
 
+        public void GetMessage(Action result) => _service.GetMessage(result);
+
         public void GetToken(Action<string> result) => _service.GetToken(result);
 	}
 }

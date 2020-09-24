@@ -4,6 +4,9 @@ namespace Notifications
 {
 	public interface INotificationsService
 	{
-		void GetToken(Action<string> result);
+        void GetMessage(Action result);
+        void GetToken(Action<string> result);
+		
+
 	}
 }

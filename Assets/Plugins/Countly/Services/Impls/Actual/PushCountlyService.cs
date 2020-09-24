@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Notifications;
 using Plugins.Countly.Enums;
 using Plugins.Countly.Helpers;
@@ -12,13 +13,11 @@ namespace Plugins.Countly.Services.Impls.Actual
 {
     public class PushCountlyService
     {
+        private string _token;
+        private TestMode? _mode;
         private readonly IEventCountlyService _eventCountlyService;
         private readonly RequestCountlyHelper _requestCountlyHelper;
         private readonly INotificationsService _notificationsService;
-
-        private string _token;
-        private TestMode? _mode;
-        private static bool _tokenSent;
 
         public PushCountlyService(IEventCountlyService eventCountlyService, RequestCountlyHelper requestCountlyHelper, INotificationsService notificationsService)
         {
@@ -34,31 +33,24 @@ namespace Plugins.Countly.Services.Impls.Actual
         internal void EnablePushNotificationAsync(TestMode mode)
         {
             _mode = mode;
-            _notificationsService.GetToken(result =>
+            _notificationsService.GetToken(async result =>
             {
                 _token = result;
-                Debug.Log("[PushCountlyService], token: " + _token);
+                /*
+                 * When the push notification service gets enabled successfully for the device, 
+                 * we send a request to the Countly server that the user is ready to receive push notifications.
+               */
+                await PostToCountlyAsync(_mode, _token);
+                await ReportPushActionAsync();
             });
-            
-        }
-        
-        internal async void Update()
-        {
-            /*
-             * When the push notification service gets enabled successfully for the device, 
-             * we send a request to the Countly server that the user is ready to receive push notifications.
-             * Update method is called multiple times during a particular scene,
-             * therefore we send this request to the Countly server only once
-             */
-            if(string.IsNullOrEmpty(_token)) return;
 
-            if(_tokenSent) return;
-            
-            //Enabling the User to receive Push Notifications
-            _tokenSent = true;
-            await PostToCountlyAsync(_mode, _token);
+            _notificationsService.GetMessage(async () =>
+            {
+                await ReportPushActionAsync();
+            });
+
         }
-        
+
         /// <summary>
         /// Notifies Countly that the device is capable of receiving Push Notifications
         /// </summary>
@@ -85,18 +77,61 @@ namespace Plugins.Countly.Services.Impls.Actual
             return await _requestCountlyHelper.GetResponseAsync(requestParams);
         }
 
-        public async Task<CountlyResponse> ReportPushActionAsync(string mesageId, string identifier = "0")
+        /// <summary>
+        /// Report Push Actions stored in local cache to Countly server.,
+        /// </summary>
+        public async Task<CountlyResponse> ReportPushActionAsync()
         {
-            Debug.Log("[Countly] ReportPushActionAsync, mesageId: " + mesageId);
-            var segment =
-                new PushActionSegment
-                {
-                    MessageID = mesageId,
-                    Identifier = identifier
-                };
+            const string StorePackageName = "ly.count.unity.push_fcm.MessageStore";
+            AndroidJavaClass store = new AndroidJavaClass(StorePackageName);
 
-            return await _eventCountlyService.ReportCustomEventAsync(
-                CountlyEventModel.PushActionEvent, segment.ToDictionary());
+            bool isInitialized = store.CallStatic<bool>("isInitialized");
+            if (!isInitialized)
+            {
+                AndroidJavaClass unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
+                AndroidJavaObject activity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity");
+                AndroidJavaObject applicationContext = activity.Call<AndroidJavaObject>("getApplicationContext");
+
+                store.CallStatic("init", applicationContext);
+            }
+
+            string data = store.CallStatic<string>("getMessagesData");
+            if (string.IsNullOrEmpty(data))
+            {
+                return new CountlyResponse
+                {
+                    IsSuccess = false,
+                    ErrorMessage = "Key is required."
+                };
+            }
+
+            JArray jArray = JArray.Parse(data);
+
+            if (jArray != null)
+            {
+                foreach (JObject item in jArray)
+                {
+                    string mesageId = item.GetValue("messageId").ToString();
+                    string identifier = item.GetValue("action_index").ToString();
+
+                    var segment =
+                    new PushActionSegment
+                    {
+                        MessageID = mesageId,
+                        Identifier = identifier
+                    };
+
+                    await _eventCountlyService.ReportCustomEventAsync(
+                        CountlyEventModel.PushActionEvent, segment.ToDictionary());
+                }
+
+                store.CallStatic("clearMessagesData");
+            }
+
+            return new CountlyResponse
+            {
+                IsSuccess = true,
+            };
         }
 
         [Serializable]

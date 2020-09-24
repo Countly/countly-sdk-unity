@@ -1,6 +1,5 @@
 package ly.count.unity.push_fcm;
 
-import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -22,17 +21,12 @@ import com.google.firebase.iid.InstanceIdResult;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.unity3d.player.UnityPlayer;
-import com.unity3d.player.UnityPlayerActivity;
 
 import org.json.JSONObject;
 
 import java.util.Map;
 
 public class RemoteNotificationsService extends FirebaseMessagingService {
-
-    private final String TAG = "CountlyPluginPush";
-    private final String UNITY_ANDROID_BRIDGE = "[Android] Bridge";
-    private final String CHANNEL_ID = "ly.count.unity.sdk.CountlyPush.CHANNEL_ID";
 
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -42,13 +36,13 @@ public class RemoteNotificationsService extends FirebaseMessagingService {
             if (notificationManager != null) {
                 // Create the NotificationChannel
                 NotificationChannel channel =
-                        new NotificationChannel(CHANNEL_ID, getString(R.string.countly_hannel_name), NotificationManager.IMPORTANCE_DEFAULT);
+                        new NotificationChannel(CountlyPushPlugin.CHANNEL_ID, getString(R.string.countly_hannel_name), NotificationManager.IMPORTANCE_DEFAULT);
                 channel.setDescription(getString(R.string.countly_channel_description));
 
                 channel.setLightColor(Color.GREEN);
                 notificationManager.createNotificationChannel(channel);
 
-                Log.d(TAG, "NotificationChannel Created");
+                Log.d(CountlyPushPlugin.TAG, "NotificationChannel Created");
             }
         }
     }
@@ -58,14 +52,14 @@ public class RemoteNotificationsService extends FirebaseMessagingService {
             @Override
             public void onComplete(Task<InstanceIdResult> task) {
                 if (!task.isSuccessful()) {
-                    Log.w(TAG, "getInstanceId failed", task.getException());
+                    Log.w(CountlyPushPlugin.TAG, "getInstanceId failed", task.getException());
                     return;
                 }
 
                 // Get new Instance ID token
                 String token = task.getResult().getToken();
-                Log.d(TAG, "Firebase token: " + token);
-                UnityPlayer.UnitySendMessage(UNITY_ANDROID_BRIDGE, "OnTokenResult", token);
+                Log.d(CountlyPushPlugin.TAG, "Firebase token: " + token);
+                UnityPlayer.UnitySendMessage(CountlyPushPlugin.UNITY_ANDROID_BRIDGE, "OnTokenResult", token);
             }
         });
     }
@@ -75,17 +69,17 @@ public class RemoteNotificationsService extends FirebaseMessagingService {
         RemoteMessage.Notification notification = remoteMessage.getNotification();
         Map<String, String> data = remoteMessage.getData();
 
-        Log.d(TAG, "Message id: " + remoteMessage.getMessageId());
-        Log.d(TAG, "Message type: " + remoteMessage.getMessageType());
-        Log.d(TAG, "Message from: " + remoteMessage.getFrom());
+        Log.d(CountlyPushPlugin.TAG, "Message id: " + remoteMessage.getMessageId());
+        Log.d(CountlyPushPlugin.TAG, "Message type: " + remoteMessage.getMessageType());
+        Log.d(CountlyPushPlugin.TAG, "Message from: " + remoteMessage.getFrom());
         if (!data.isEmpty()) {
             JSONObject jsonObject = new JSONObject(remoteMessage.getData());
-            Log.d(TAG, "Message data: " + jsonObject.toString());
+            Log.d(CountlyPushPlugin.TAG, "Message data: " + jsonObject.toString());
         }
         if (notification != null) {
-            Log.d(TAG, "Message notification: " + notification);
-            Log.d(TAG, "Message body: " + notification.getBody());
-            Log.d(TAG, "Message body: " + notification.getTitle());
+            Log.d(CountlyPushPlugin.TAG, "Message notification: " + notification);
+            Log.d(CountlyPushPlugin.TAG, "Message body: " + notification.getBody());
+            Log.d(CountlyPushPlugin.TAG, "Message body: " + notification.getTitle());
         }
 
         if (notification != null)
@@ -107,6 +101,8 @@ public class RemoteNotificationsService extends FirebaseMessagingService {
         String title = data.get("title");
         String message = data.get("message");
 
+        Log.d(CountlyPushPlugin.TAG, "ProcessData");
+
         sendNotification(tag, title, message);
     }
 
@@ -116,20 +112,22 @@ public class RemoteNotificationsService extends FirebaseMessagingService {
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         Builder notificationBuilder;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            NotificationChannel channel = notificationManager.getNotificationChannel(CHANNEL_ID);
-            if(channel == null) {
+            NotificationChannel channel = notificationManager.getNotificationChannel(CountlyPushPlugin.CHANNEL_ID);
+            if (channel == null) {
                 createNotificationChannel();
             }
-            notificationBuilder = new Builder(this, CHANNEL_ID);
+            notificationBuilder = new Builder(this, CountlyPushPlugin.CHANNEL_ID);
         } else {
             notificationBuilder = new Builder(this);
         }
 
         BitmapDrawable largeIconBitmap = (BitmapDrawable) ContextCompat.getDrawable(this, R.drawable.ic_stat);
 
-        Intent notificationIntent = new Intent(this.getApplicationContext(), UnityPlayerActivity.class);
+        Intent notificationIntent = new Intent(this.getApplicationContext(), NotificationBroadcastReceiver.class);
+        notificationIntent.removeExtra("c.i");
         notificationIntent.putExtra("c.i", tag);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this.getApplicationContext(), 0, notificationIntent, 0);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this.getApplicationContext(), 0, notificationIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+
         notificationBuilder
                 .setAutoCancel(true)
                 .setContentTitle(title)
@@ -140,6 +138,6 @@ public class RemoteNotificationsService extends FirebaseMessagingService {
                 .setLargeIcon(largeIconBitmap.getBitmap())
                 .setColor(ContextCompat.getColor(this, R.color.color_notification));
 
-        notificationManager.notify(tag,0, notificationBuilder.build());
+        notificationManager.notify(tag, 0, notificationBuilder.build());
     }
 }

@@ -16,12 +16,20 @@ namespace Notifications.Impls.Android
 			_bridge = gameObject.AddComponent<AndroidBridge>();
 		}
 
-		public void GetToken(Action<string> result)
+        public void GetMessage(Action result)
+        {
+            _bridge.ListenMessageResult(result);
+        }
+
+        public void GetToken(Action<string> result)
 		{
 			_bridge.ListenTokenResult(result);
+			
 
 			using (var jc = new AndroidJavaObject(PackageName))
-				jc.Call("getToken");
-		}
+            {
+                jc.Call("getToken");
+            }
+        }
 	}
 }
