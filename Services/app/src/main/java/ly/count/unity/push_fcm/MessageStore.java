@@ -25,6 +25,10 @@ public class MessageStore {
     }
 
     public static boolean storeMessageData(String messageId, String index) {
+        if (!isInitialized()) {
+            return false;
+        }
+
         String messagesData = getMessagesData();
         try {
             JSONArray jsonArray = null;
@@ -53,11 +57,17 @@ public class MessageStore {
     }
 
     public static void clearMessagesData() {
-        messagePreferences.edit().remove(MESSAGE_DATA).apply();
+        if (isInitialized()) {
+            messagePreferences.edit().remove(MESSAGE_DATA).apply();
+        }
     }
 
     public static String getMessagesData() {
-        return messagePreferences.getString(MESSAGE_DATA, null);
+        if (isInitialized()) {
+            return messagePreferences.getString(MESSAGE_DATA, null);
+        }
+
+        return null;
     }
 
     public static boolean isInitialized() {

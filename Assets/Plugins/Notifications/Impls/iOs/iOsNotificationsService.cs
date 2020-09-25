@@ -18,8 +18,7 @@ namespace Notifications.Impls.iOs
 
         public void GetMessage(Action result)
         {
-            result.Invoke();
-                
+            result.Invoke();    
         }
 
         public void GetToken(Action<string> result)

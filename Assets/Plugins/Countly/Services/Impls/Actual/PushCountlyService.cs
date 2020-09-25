@@ -64,7 +64,6 @@ namespace Plugins.Countly.Services.Impls.Actual
                     IsSuccess = false,
                     ErrorMessage = "Pushes are disabled."
                 };
-
             }
 
             var requestParams =
@@ -74,7 +73,8 @@ namespace Plugins.Countly.Services.Impls.Actual
                     { "test_mode", (int)mode.Value },
                     { $"{Constants.UnityPlatform}_token", token },
                 };
-            return await _requestCountlyHelper.GetResponseAsync(requestParams);
+
+            return await _requestCountlyHelper.GetResponseAsync(requestParams, true);
         }
 
         /// <summary>

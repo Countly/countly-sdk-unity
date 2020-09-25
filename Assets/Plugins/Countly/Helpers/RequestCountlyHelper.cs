@@ -193,25 +193,26 @@ namespace Plugins.Countly.Helpers
         private CountlyResponse Get(string url, bool addToRequestQueue = false)
         {
             var countlyResponse = new CountlyResponse();
-            try
+            if (!addToRequestQueue)
             {
-                if (addToRequestQueue) throw new Exception("Request added to queue.");
-
-                var request = (HttpWebRequest) WebRequest.Create(url);
-
-                using (var response = (HttpWebResponse) request.GetResponse())
-                using (var stream = response.GetResponseStream())
-                using (var reader = new StreamReader(stream))
+                try
                 {
-                    var res = reader.ReadToEnd();
-                    countlyResponse.IsSuccess = !string.IsNullOrEmpty(res);
-                    countlyResponse.Data = res;
+                    var request = (HttpWebRequest)WebRequest.Create(url);
+
+                    using (var response = (HttpWebResponse)request.GetResponse())
+                    using (var stream = response.GetResponseStream())
+                    using (var reader = new StreamReader(stream))
+                    {
+                        var res = reader.ReadToEnd();
+                        countlyResponse.IsSuccess = !string.IsNullOrEmpty(res);
+                        countlyResponse.Data = res;
+                    }
                 }
-            }
-            catch (Exception ex)
-            {
-                addToRequestQueue = true;
-                countlyResponse.ErrorMessage = ex.Message;
+                catch (Exception ex)
+                {
+                    addToRequestQueue = true;
+                    countlyResponse.ErrorMessage = ex.Message;
+                }
             }
 
             if (addToRequestQueue)
@@ -222,7 +223,10 @@ namespace Plugins.Countly.Helpers
 
 #if UNITY_EDITOR
             //Log to Unity Console
-            if (_config.EnableConsoleErrorLogging) Debug.Log(countlyResponse.IsSuccess);
+            if (_config.EnableConsoleErrorLogging)
+            {
+                Debug.Log(countlyResponse.IsSuccess);
+            }
 #endif
             return countlyResponse;
         }
@@ -236,38 +240,41 @@ namespace Plugins.Countly.Helpers
         internal async Task<CountlyResponse> GetAsync(string url, bool addToRequestQueue = false)
         {
             var countlyResponse = new CountlyResponse();
-            try
-            {
-                if (addToRequestQueue) throw new Exception("Request added to queue.");
 
-                var request = (HttpWebRequest) WebRequest.Create(url);
-                using (var response = (HttpWebResponse) await request.GetResponseAsync())
-                using (var stream = response.GetResponseStream())
-                using (var reader = new StreamReader(stream))
+            if (!addToRequestQueue)
+            {
+                try
                 {
-                    var res = await reader.ReadToEndAsync();
-                    countlyResponse.IsSuccess = !string.IsNullOrEmpty(res);
-                    countlyResponse.Data = res;
-#if UNITY_EDITOR
-                    //Log to Unity Console
-                    if (_config.EnableConsoleErrorLogging) Debug.Log(countlyResponse.IsSuccess);
-#endif
-
-                    return countlyResponse;
+                    var request = (HttpWebRequest)WebRequest.Create(url);
+                    using (var response = (HttpWebResponse)await request.GetResponseAsync())
+                    using (var stream = response.GetResponseStream())
+                    using (var reader = new StreamReader(stream))
+                    {
+                        var res = await reader.ReadToEndAsync();
+                        countlyResponse.IsSuccess = !string.IsNullOrEmpty(res);
+                        countlyResponse.Data = res;
+                    }
                 }
-            }
-            catch (Exception ex)
-            {
-                addToRequestQueue = true;
-                countlyResponse.ErrorMessage = ex.Message;
+                catch (Exception ex)
+                {
+                    addToRequestQueue = true;
+                    countlyResponse.ErrorMessage = ex.Message;
+                }
             }
 
             if (addToRequestQueue)
             {
                 var requestModel = new CountlyRequestModel(true, url, null, DateTime.UtcNow);
-                AddRequestToQueue(requestModel);              
+                AddRequestToQueue(requestModel);
             }
 
+#if UNITY_EDITOR
+            //Log to Unity Console
+            if (_config.EnableConsoleErrorLogging)
+            {
+                Debug.Log(countlyResponse.IsSuccess);
+            }
+#endif
 
             return countlyResponse;
         }
@@ -282,47 +289,51 @@ namespace Plugins.Countly.Helpers
         private CountlyResponse Post(string uri, string data, bool addToRequestQueue = false)
         {
             var countlyResponse = new CountlyResponse();
-            try
+            if (!addToRequestQueue)
             {
-                if (addToRequestQueue) throw new Exception("Request added to queue.");
-
-                var dataBytes = Encoding.UTF8.GetBytes(data);
-
-                var request = (HttpWebRequest) WebRequest.Create(uri);
-                request.ContentLength = dataBytes.Length;
-                request.ContentType = "application/json";
-                request.Method = "POST";
-
-                using (var requestBody = request.GetRequestStream())
+                try
                 {
-                    requestBody.Write(dataBytes, 0, dataBytes.Length);
+                    var dataBytes = Encoding.UTF8.GetBytes(data);
+
+                    var request = (HttpWebRequest)WebRequest.Create(uri);
+                    request.ContentLength = dataBytes.Length;
+                    request.ContentType = "application/json";
+                    request.Method = "POST";
+
+                    using (var requestBody = request.GetRequestStream())
+                    {
+                        requestBody.Write(dataBytes, 0, dataBytes.Length);
+                    }
+
+                    using (var response = (HttpWebResponse)request.GetResponse())
+                    using (var stream = response.GetResponseStream())
+                    using (var reader = new StreamReader(stream))
+                    {
+                        var res = reader.ReadToEnd();
+                        countlyResponse.IsSuccess = !string.IsNullOrEmpty(res);
+                        countlyResponse.Data = res;
+                    }
                 }
-
-                using (var response = (HttpWebResponse) request.GetResponse())
-                using (var stream = response.GetResponseStream())
-                using (var reader = new StreamReader(stream))
+                catch (Exception ex)
                 {
-                    var res = reader.ReadToEnd();
-                    countlyResponse.IsSuccess = !string.IsNullOrEmpty(res);
-                    countlyResponse.Data = res;
-
-#if UNITY_EDITOR
-                    //Log to Unity Console
-                    if (_config.EnableConsoleErrorLogging) Debug.Log(countlyResponse.IsSuccess);
-#endif
+                    addToRequestQueue = true;
+                    countlyResponse.ErrorMessage = ex.Message;
                 }
             }
-            catch (Exception ex)
-            {
-                addToRequestQueue = true;
-                countlyResponse.ErrorMessage = ex.Message;
-            }
-
+                
             if (addToRequestQueue)
             {
                 var requestModel = new CountlyRequestModel(false, uri, data, DateTime.UtcNow);
                 AddRequestToQueue(requestModel);
             }
+
+#if UNITY_EDITOR
+            //Log to Unity Console
+            if (_config.EnableConsoleErrorLogging)
+            {
+                Debug.Log(countlyResponse.IsSuccess);
+            }
+#endif
 
             return countlyResponse;
         }
@@ -338,50 +349,53 @@ namespace Plugins.Countly.Helpers
         private async Task<CountlyResponse> PostAsync(string uri, string data, bool addToRequestQueue = false)
         {
             var countlyResponse = new CountlyResponse();
-            try
+
+            if (!addToRequestQueue)
             {
-                if (addToRequestQueue) throw new Exception("Request added to queue.");
-
-                var dataBytes = Encoding.UTF8.GetBytes(data);
-
-                var request = (HttpWebRequest) WebRequest.Create(uri);
-                request.ContentLength = dataBytes.Length;
-                request.ContentType = "application/json";
-                request.Method = "POST";
-
-
-                using (var requestBody = request.GetRequestStream())
+                try
                 {
-                    await requestBody.WriteAsync(dataBytes, 0, dataBytes.Length);
+                    var dataBytes = Encoding.UTF8.GetBytes(data);
+
+                    var request = (HttpWebRequest)WebRequest.Create(uri);
+                    request.ContentLength = dataBytes.Length;
+                    request.ContentType = "application/json";
+                    request.Method = "POST";
+
+
+                    using (var requestBody = request.GetRequestStream())
+                    {
+                        await requestBody.WriteAsync(dataBytes, 0, dataBytes.Length);
+                    }
+
+                    using (var response = (HttpWebResponse)await request.GetResponseAsync())
+                    using (var stream = response.GetResponseStream())
+                    using (var reader = new StreamReader(stream))
+                    {
+                        var res = await reader.ReadToEndAsync();
+                        countlyResponse.IsSuccess = !string.IsNullOrEmpty(res);
+                        countlyResponse.Data = res;
+                    }
                 }
-
-                using (var response = (HttpWebResponse) await request.GetResponseAsync())
-                using (var stream = response.GetResponseStream())
-                using (var reader = new StreamReader(stream))
+                catch (Exception ex)
                 {
-                    var res = await reader.ReadToEndAsync();
-                    countlyResponse.IsSuccess = !string.IsNullOrEmpty(res);
-                    countlyResponse.Data = res;
-#if UNITY_EDITOR
-                    //Log to Unity Console
-                    if (_config.EnableConsoleErrorLogging) Debug.Log(countlyResponse.IsSuccess);
-#endif
-                    return countlyResponse;
+                    addToRequestQueue = true;
+                    countlyResponse.ErrorMessage = ex.Message;
                 }
             }
-            catch (Exception ex)
-            {
-                addToRequestQueue = true;
-                countlyResponse.ErrorMessage = ex.Message;
-            }
-
+            
             if (addToRequestQueue)
             {
                 var requestModel = new CountlyRequestModel(false, uri, data, DateTime.UtcNow);
                 AddRequestToQueue(requestModel);              
             }
 
-
+#if UNITY_EDITOR
+            //Log to Unity Console
+            if (_config.EnableConsoleErrorLogging)
+            {
+                Debug.Log(countlyResponse.IsSuccess);
+            }
+#endif
             return countlyResponse;
         }
 
