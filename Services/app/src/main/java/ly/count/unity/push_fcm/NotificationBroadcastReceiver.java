@@ -11,6 +11,7 @@ import com.unity3d.player.UnityPlayerActivity;
 
 import android.content.BroadcastReceiver;
 import static ly.count.unity.push_fcm.CountlyPushPlugin.EXTRA_ACTION_INDEX;
+import static ly.count.unity.push_fcm.CountlyPushPlugin.EXTRA_MESSAGE;
 
 public class NotificationBroadcastReceiver extends BroadcastReceiver {
     @Override
@@ -25,7 +26,7 @@ public class NotificationBroadcastReceiver extends BroadcastReceiver {
         }
 
         int index = bundle.getInt(CountlyPushPlugin.EXTRA_ACTION_INDEX, 0);
-        CountlyPushPlugin.Message message = bundle.getParcelable(CountlyPushPlugin.EXTRA_MESSAGE);
+        CountlyPushPlugin.Message message = bundle.getParcelable(EXTRA_MESSAGE);
 
         String messageId = message.id();
         Log.d(CountlyPushPlugin.TAG, "Message ID: " + messageId);
@@ -44,15 +45,17 @@ public class NotificationBroadcastReceiver extends BroadcastReceiver {
 
         Uri uri = index == 0 ? message.link() : message.buttons().get(index -1).link();
         if (uri != null) {
-            notificationIntent.setData(uri);
-            notificationIntent.setAction(Intent.ACTION_VIEW);
-            notificationIntent.putExtra(EXTRA_ACTION_INDEX, index);
+            Intent i = new Intent(Intent.ACTION_VIEW, uri);
+            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            i.putExtra(EXTRA_ACTION_INDEX, index);
+            context.startActivity(i);
             Log.d(CountlyPushPlugin.TAG, "URI: " + uri.toString());
+        }
+        else {
+            context.startActivity(notificationIntent);
         }
 
         Log.d(CountlyPushPlugin.TAG, "Index: " + index);
-
-        context.startActivity(notificationIntent);
         UnityPlayer.UnitySendMessage(CountlyPushPlugin.UNITY_ANDROID_BRIDGE, "onMessageReceived", messageId);
     }
 }
