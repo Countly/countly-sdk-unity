@@ -106,7 +106,7 @@ namespace Plugins.Countly.Impl
 
             Events = new EventCountlyService(Config, requests, viewEventRepo, nonViewEventRepo, eventNumberInSameSessionHelper);
             OptionalParameters = new OptionalParametersCountlyService();
-            var notificationsService = new ProxyNotificationsService(InternalStartCoroutine);
+            var notificationsService = new ProxyNotificationsService(InternalStartCoroutine, Events);
             _push = new PushCountlyService(Events, requests, notificationsService);
             Session = new SessionCountlyService(Config, _push, requests, OptionalParameters, eventNumberInSameSessionHelper);
             Consents = new ConsentCountlyService();

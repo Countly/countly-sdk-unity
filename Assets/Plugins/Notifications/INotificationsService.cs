@@ -1,4 +1,6 @@
+using Plugins.Countly.Helpers;
 using System;
+using System.Threading.Tasks;
 
 namespace Notifications
 {
@@ -6,7 +8,6 @@ namespace Notifications
 	{
         void GetMessage(Action result);
         void GetToken(Action<string> result);
-		
-
-	}
+        Task<CountlyResponse> ReportPushActionAsync();
+    }
 }

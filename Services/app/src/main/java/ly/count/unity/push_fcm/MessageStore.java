@@ -26,6 +26,7 @@ public class MessageStore {
 
     public static boolean storeMessageData(String messageId, String index) {
         if (!isInitialized()) {
+            Log.e(CountlyPushPlugin.TAG, "MessageStore isn't initialized");
             return false;
         }
 
@@ -59,6 +60,8 @@ public class MessageStore {
     public static void clearMessagesData() {
         if (isInitialized()) {
             messagePreferences.edit().remove(MESSAGE_DATA).apply();
+        } else {
+            Log.e(CountlyPushPlugin.TAG, "MessageStore isn't initialized");
         }
     }
 
@@ -67,6 +70,7 @@ public class MessageStore {
             return messagePreferences.getString(MESSAGE_DATA, null);
         }
 
+        Log.e(CountlyPushPlugin.TAG, "MessageStore isn't initialized");
         return null;
     }
 

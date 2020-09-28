@@ -82,60 +82,11 @@ namespace Plugins.Countly.Services.Impls.Actual
         /// </summary>
         public async Task<CountlyResponse> ReportPushActionAsync()
         {
-            const string StorePackageName = "ly.count.unity.push_fcm.MessageStore";
-            AndroidJavaClass store = new AndroidJavaClass(StorePackageName);
-
-            bool isInitialized = store.CallStatic<bool>("isInitialized");
-            if (!isInitialized)
-            {
-                AndroidJavaClass unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
-                AndroidJavaObject activity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity");
-                AndroidJavaObject applicationContext = activity.Call<AndroidJavaObject>("getApplicationContext");
-
-                store.CallStatic("init", applicationContext);
-            }
-
-            string data = store.CallStatic<string>("getMessagesData");
-            if (string.IsNullOrEmpty(data))
-            {
-                return new CountlyResponse
-                {
-                    IsSuccess = false,
-                    ErrorMessage = "Key is required."
-                };
-            }
-
-            JArray jArray = JArray.Parse(data);
-
-            if (jArray != null)
-            {
-                foreach (JObject item in jArray)
-                {
-                    string mesageId = item.GetValue("messageId").ToString();
-                    string identifier = item.GetValue("action_index").ToString();
-
-                    var segment =
-                    new PushActionSegment
-                    {
-                        MessageID = mesageId,
-                        Identifier = identifier
-                    };
-
-                    await _eventCountlyService.ReportCustomEventAsync(
-                        CountlyEventModel.PushActionEvent, segment.ToDictionary());
-                }
-
-                store.CallStatic("clearMessagesData");
-            }
-
-            return new CountlyResponse
-            {
-                IsSuccess = true,
-            };
+            return await _notificationsService.ReportPushActionAsync();
         }
 
         [Serializable]
-        struct PushActionSegment
+        public struct PushActionSegment
         {
             public string Identifier { get; set; }
             public string MessageID { get; set; }

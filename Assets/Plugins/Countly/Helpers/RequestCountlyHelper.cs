@@ -219,6 +219,7 @@ namespace Plugins.Countly.Helpers
             {
                 var requestModel = new CountlyRequestModel(true, url, null, DateTime.UtcNow);
                 AddRequestToQueue(requestModel);
+                countlyResponse.ErrorMessage = "Added to Requst Queue";
             }
 
 #if UNITY_EDITOR
@@ -266,6 +267,7 @@ namespace Plugins.Countly.Helpers
             {
                 var requestModel = new CountlyRequestModel(true, url, null, DateTime.UtcNow);
                 AddRequestToQueue(requestModel);
+                countlyResponse.ErrorMessage = "Added to Requst Queue";
             }
 
 #if UNITY_EDITOR
@@ -325,6 +327,7 @@ namespace Plugins.Countly.Helpers
             {
                 var requestModel = new CountlyRequestModel(false, uri, data, DateTime.UtcNow);
                 AddRequestToQueue(requestModel);
+                countlyResponse.ErrorMessage = "Added to Requst Queue";
             }
 
 #if UNITY_EDITOR
@@ -386,7 +389,8 @@ namespace Plugins.Countly.Helpers
             if (addToRequestQueue)
             {
                 var requestModel = new CountlyRequestModel(false, uri, data, DateTime.UtcNow);
-                AddRequestToQueue(requestModel);              
+                AddRequestToQueue(requestModel);
+                countlyResponse.ErrorMessage = "Added to Requst Queue";
             }
 
 #if UNITY_EDITOR

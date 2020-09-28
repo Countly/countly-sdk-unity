@@ -1,13 +1,16 @@
 package ly.count.unity.push_fcm;
 
+import android.net.Uri;
 import android.util.Log;
 import android.os.Bundle;
 import android.content.Intent;
 import android.content.Context;
 
 import com.unity3d.player.UnityPlayer;
+import com.unity3d.player.UnityPlayerActivity;
 
 import android.content.BroadcastReceiver;
+import static ly.count.unity.push_fcm.CountlyPushPlugin.EXTRA_ACTION_INDEX;
 
 public class NotificationBroadcastReceiver extends BroadcastReceiver {
     @Override
@@ -15,11 +18,16 @@ public class NotificationBroadcastReceiver extends BroadcastReceiver {
         Log.d(CountlyPushPlugin.TAG, "onReceive");
 
         Bundle bundle = intent.getExtras();
-        String index = bundle.getString("index", "0");
-        String messageId = bundle.getString("c.i", "");
 
-        intent.removeExtra("c.i");
+        if(bundle == null) {
+            Log.e(CountlyPushPlugin.TAG, "bundle is null");
+            return;
+        }
 
+        int index = bundle.getInt(CountlyPushPlugin.EXTRA_ACTION_INDEX, 0);
+        CountlyPushPlugin.Message message = bundle.getParcelable(CountlyPushPlugin.EXTRA_MESSAGE);
+
+        String messageId = message.id();
         Log.d(CountlyPushPlugin.TAG, "Message ID: " + messageId);
 
         if (!MessageStore.isInitialized()) {
@@ -27,10 +35,24 @@ public class NotificationBroadcastReceiver extends BroadcastReceiver {
         }
 
         if (!messageId.isEmpty()) {
-            boolean flag = MessageStore.storeMessageData(messageId, index);
+            boolean flag = MessageStore.storeMessageData(messageId, Integer.toString(index));
             Log.d(CountlyPushPlugin.TAG, "StoreMessageData: " + flag);
         }
 
+        Intent notificationIntent = new Intent(context, UnityPlayerActivity.class);
+        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+        Uri uri = index == 0 ? message.link() : message.buttons().get(index -1).link();
+        if (uri != null) {
+            notificationIntent.setData(uri);
+            notificationIntent.setAction(Intent.ACTION_VIEW);
+            notificationIntent.putExtra(EXTRA_ACTION_INDEX, index);
+            Log.d(CountlyPushPlugin.TAG, "URI: " + uri.toString());
+        }
+
+        Log.d(CountlyPushPlugin.TAG, "Index: " + index);
+
+        context.startActivity(notificationIntent);
         UnityPlayer.UnitySendMessage(CountlyPushPlugin.UNITY_ANDROID_BRIDGE, "onMessageReceived", messageId);
     }
 }
