@@ -61,7 +61,6 @@ namespace Notifications.Impls.iOs
         public async Task<CountlyResponse> ReportPushActionAsync()
         {
             return await Task.FromResult(new CountlyResponse());
-           // throw new NotImplementedException();
         }
     }
 }
