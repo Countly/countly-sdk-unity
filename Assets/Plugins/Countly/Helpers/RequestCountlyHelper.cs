@@ -190,7 +190,7 @@ namespace Plugins.Countly.Helpers
         /// </summary>
         /// <param name="url"></param>
         /// <returns></returns>
-        private CountlyResponse Get(string url, bool addToRequestQueue = false)
+        private CountlyResponse Get(string url, bool addToRequestQueue = true)
         {
             var countlyResponse = new CountlyResponse();
             if (!addToRequestQueue)
@@ -219,7 +219,7 @@ namespace Plugins.Countly.Helpers
             {
                 var requestModel = new CountlyRequestModel(true, url, null, DateTime.UtcNow);
                 AddRequestToQueue(requestModel);
-                countlyResponse.ErrorMessage = "Added to Requst Queue";
+                countlyResponse.ErrorMessage = "Added to Request Queue";
             }
 
 #if UNITY_EDITOR
@@ -238,7 +238,7 @@ namespace Plugins.Countly.Helpers
         /// <param name="url"></param>
         /// <param name="addToRequestQueue"></param>
         /// <returns></returns>
-        internal async Task<CountlyResponse> GetAsync(string url, bool addToRequestQueue = false)
+        internal async Task<CountlyResponse> GetAsync(string url, bool addToRequestQueue = true)
         {
             var countlyResponse = new CountlyResponse();
 
@@ -267,7 +267,7 @@ namespace Plugins.Countly.Helpers
             {
                 var requestModel = new CountlyRequestModel(true, url, null, DateTime.UtcNow);
                 AddRequestToQueue(requestModel);
-                countlyResponse.ErrorMessage = "Added to Requst Queue";
+                countlyResponse.ErrorMessage = "Added to Request Queue";
             }
 
 #if UNITY_EDITOR
@@ -288,7 +288,7 @@ namespace Plugins.Countly.Helpers
         /// <param name="data"></param>
         /// <param name="contentType"></param>
         /// <returns></returns>
-        private CountlyResponse Post(string uri, string data, bool addToRequestQueue = false)
+        private CountlyResponse Post(string uri, string data, bool addToRequestQueue = true)
         {
             var countlyResponse = new CountlyResponse();
             if (!addToRequestQueue)
@@ -327,7 +327,7 @@ namespace Plugins.Countly.Helpers
             {
                 var requestModel = new CountlyRequestModel(false, uri, data, DateTime.UtcNow);
                 AddRequestToQueue(requestModel);
-                countlyResponse.ErrorMessage = "Added to Requst Queue";
+                countlyResponse.ErrorMessage = "Added to Request Queue";
             }
 
 #if UNITY_EDITOR
@@ -349,7 +349,7 @@ namespace Plugins.Countly.Helpers
         /// <param name="contentType"></param>
         /// <param name="addToRequestQueue"></param>
         /// <returns></returns>
-        private async Task<CountlyResponse> PostAsync(string uri, string data, bool addToRequestQueue = false)
+        private async Task<CountlyResponse> PostAsync(string uri, string data, bool addToRequestQueue = true)
         {
             var countlyResponse = new CountlyResponse();
 
@@ -390,7 +390,7 @@ namespace Plugins.Countly.Helpers
             {
                 var requestModel = new CountlyRequestModel(false, uri, data, DateTime.UtcNow);
                 AddRequestToQueue(requestModel);
-                countlyResponse.ErrorMessage = "Added to Requst Queue";
+                countlyResponse.ErrorMessage = "Added to Request Queue";
             }
 
 #if UNITY_EDITOR

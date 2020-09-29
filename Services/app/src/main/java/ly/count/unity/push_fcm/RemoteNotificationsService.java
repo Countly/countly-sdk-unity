@@ -10,7 +10,6 @@ import android.graphics.drawable.BitmapDrawable;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Bundle;
 import android.support.v4.app.NotificationCompat.Builder;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
@@ -99,12 +98,12 @@ public class RemoteNotificationsService extends FirebaseMessagingService {
 
     private void ProcessData(Map<String, String> data) {
 
-        CountlyPushPlugin.Message message = CountlyPushPlugin.decodeMessage(data);
+        ModulePush.Message message = CountlyPushPlugin.decodeMessage(data);
         Log.d(CountlyPushPlugin.TAG, "Message Impl " + message.toString());
         sendNotification(message);
     }
 
-    private void sendNotification(CountlyPushPlugin.Message message) {
+    private void sendNotification(ModulePush.Message message) {
         Uri notificationSound = RingtoneManager.getDefaultUri(R.raw.boing);
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
@@ -123,7 +122,7 @@ public class RemoteNotificationsService extends FirebaseMessagingService {
 
         Intent notificationIntent = new Intent(this.getApplicationContext(), NotificationBroadcastReceiver.class);
 
-        String messageId = message.id();
+        String messageId = message.getId();
         notificationIntent.putExtra(ModulePush.KEY_ID, messageId);
         notificationIntent.putExtra(CountlyPushPlugin.EXTRA_MESSAGE, message);
         notificationIntent.putExtra(CountlyPushPlugin.EXTRA_ACTION_INDEX, 0);
@@ -135,18 +134,18 @@ public class RemoteNotificationsService extends FirebaseMessagingService {
                 .setSound(notificationSound)
                 .setContentIntent(pendingIntent)
                 .setSmallIcon(R.drawable.ic_stat)
-                .setContentTitle(message.title())
-                .setContentText(message.message())
+                .setContentTitle(message.getTitle())
+                .setContentText(message.getMessage())
                 .setLargeIcon(largeIconBitmap.getBitmap())
                 .setColor(ContextCompat.getColor(this, R.color.color_notification));
 
-        for (int i = 0; i < message.buttons().size(); i++) {
-            CountlyPushPlugin.Button button = message.buttons().get(i);
+        for (int i = 0; i < message.getButtons().size(); i++) {
+            ModulePush.Message.Button button = message.getButtons().get(i);
             Intent buttonIntent = (Intent) notificationIntent.clone();
             buttonIntent.putExtra(CountlyPushPlugin.EXTRA_ACTION_INDEX, i + 1);
 
             if (android.os.Build.VERSION.SDK_INT > 16) {
-                notificationBuilder.addAction(button.icon(), button.title(), PendingIntent.getBroadcast(this.getApplicationContext(), message.hashCode() + i + 1, buttonIntent, PendingIntent.FLAG_CANCEL_CURRENT));
+                notificationBuilder.addAction(button.getIcon(), button.getTitle(), PendingIntent.getBroadcast(this.getApplicationContext(), message.hashCode() + i + 1, buttonIntent, PendingIntent.FLAG_CANCEL_CURRENT));
             }
         }
 

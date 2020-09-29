@@ -34,68 +34,16 @@ public class ModulePush {
     static final String KEY_TITLE = "title";
     static final String KEY_MESSAGE = "message";
 
-    static class MessageImpl implements CountlyPushPlugin.Message {
+    static class Message implements Parcelable {
         final String id;
         private final String title, message, sound;
         private final Integer badge;
         private final Uri link;
         private final URL media;
-        private final List<CountlyPushPlugin.Button> buttons;
+        private final List<Button> buttons;
         private final Map<String, String> data;
 
-        static class ButtonImpl implements CountlyPushPlugin.Button {
-            private final CountlyPushPlugin.Message message;
-            private final int index, icon;
-            private final String title;
-            private final Uri link;
-
-            ButtonImpl(CountlyPushPlugin.Message message, int index, String title, Uri link) {
-                this.message = message;
-                this.index = index;
-                this.title = title;
-                this.link = link;
-                this.icon = 0;
-            }
-
-            ButtonImpl(CountlyPushPlugin.Message message, int index, String title, Uri link, int icon) {
-                this.message = message;
-                this.index = index;
-                this.title = title;
-                this.link = link;
-                this.icon = icon;
-            }
-
-            @Override
-            public int index() {
-                return index;
-            }
-
-            @Override
-            public String title() {
-                return title;
-            }
-
-            @Override
-            public Uri link() {
-                return link;
-            }
-
-            @Override
-            public int icon() {
-                return icon;
-            }
-
-            @Override
-            public boolean equals(Object obj) {
-                if (obj == null || !(obj instanceof ButtonImpl)) {
-                    return false;
-                }
-                ButtonImpl b = (ButtonImpl) obj;
-                return b.index == index && (b.title == null ? title == null : b.title.equals(title)) && (b.link == null ? link == null : b.link.equals(link) && b.icon == icon);
-            }
-        }
-
-        MessageImpl(Map<String, String> data) {
+        Message(Map<String, String> data) {
             this.data = data;
             this.id = data.get(KEY_ID);
             this.title = data.get(KEY_TITLE);
@@ -147,7 +95,7 @@ public class ModulePush {
                                 }
                             }
 
-                            this.buttons.add(new ButtonImpl(this, i + 1, btn.getString(KEY_BUTTONS_TITLE), uri));
+                            this.buttons.add(new Button(this, i + 1, btn.getString(KEY_BUTTONS_TITLE), uri));
                         }
                     }
                 } catch (Throwable e) {
@@ -156,62 +104,50 @@ public class ModulePush {
             }
         }
 
-        @Override
-        public String id() {
+        public String getId() {
             return id;
         }
 
-        @Override
-        public String title() {
+        public String getTitle() {
             return title;
         }
 
-        @Override
-        public String message() {
+        public String getMessage() {
             return message;
         }
 
-        @Override
-        public String sound() {
+        public String getSound() {
             return sound;
         }
 
-        @Override
-        public Integer badge() {
+        public Integer getBadge() {
             return badge;
         }
 
-        @Override
-        public Uri link() {
+        public Uri getLink() {
             return link;
         }
 
-        @Override
-        public URL media() {
+        public URL getMedia() {
             return media;
         }
 
-        @Override
-        public List<CountlyPushPlugin.Button> buttons() {
+        public List<Button> getButtons() {
             return buttons;
         }
 
-        @Override
-        public Set<String> dataKeys() {
+        public Set<String> getDataKeys() {
             return data.keySet();
         }
 
-        @Override
         public boolean has(String key) {
             return data.containsKey(key);
         }
 
-        @Override
-        public String data(String key) {
+        public String getData(String key) {
             return data.get(key);
         }
 
-        @Override
         public int hashCode() {
             return id.hashCode();
         }
@@ -227,18 +163,66 @@ public class ModulePush {
             Log.d("Countly", "written: " + data.get(KEY_ID));
         }
 
-        public static final Parcelable.Creator<MessageImpl> CREATOR = new Parcelable.Creator<MessageImpl>() {
+        public static final Parcelable.Creator<Message> CREATOR = new Parcelable.Creator<Message>() {
 
-            public MessageImpl createFromParcel(Parcel in) {
+            public Message createFromParcel(Parcel in) {
                 Map<String, String> map = new HashMap<>();
                 in.readMap(map, ClassLoader.getSystemClassLoader());
                 Log.d("Countly", "read: " + map.get(KEY_ID));
-                return new MessageImpl(map);
+                return new Message(map);
             }
 
-            public MessageImpl[] newArray(int size) {
-                return new MessageImpl[size];
+            public Message[] newArray(int size) {
+                return new Message[size];
             }
         };
+
+        static class Button {
+            private final Message message;
+            private final int index, icon;
+            private final String title;
+            private final Uri link;
+
+            Button(Message message, int index, String title, Uri link) {
+                this.message = message;
+                this.index = index;
+                this.title = title;
+                this.link = link;
+                this.icon = 0;
+            }
+
+            Button(Message message, int index, String title, Uri link, int icon) {
+                this.message = message;
+                this.index = index;
+                this.title = title;
+                this.link = link;
+                this.icon = icon;
+            }
+
+            public int getIndex() {
+                return index;
+            }
+
+            public String getTitle() {
+                return title;
+            }
+
+            public Uri getLink() {
+                return link;
+            }
+
+            public int getIcon() {
+                return icon;
+            }
+
+            @Override
+            public boolean equals(Object obj) {
+                if (obj == null || !(obj instanceof Button)) {
+                    return false;
+                }
+                Button b = (Button) obj;
+                return b.index == index && (b.title == null ? title == null : b.title.equals(title)) && (b.link == null ? link == null : b.link.equals(link) && b.icon == icon);
+            }
+        }
     }
 }

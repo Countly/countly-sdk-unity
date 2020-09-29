@@ -26,9 +26,9 @@ public class NotificationBroadcastReceiver extends BroadcastReceiver {
         }
 
         int index = bundle.getInt(CountlyPushPlugin.EXTRA_ACTION_INDEX, 0);
-        CountlyPushPlugin.Message message = bundle.getParcelable(EXTRA_MESSAGE);
+        ModulePush.Message message = bundle.getParcelable(EXTRA_MESSAGE);
 
-        String messageId = message.id();
+        String messageId = message.getId();
         Log.d(CountlyPushPlugin.TAG, "Message ID: " + messageId);
 
         if (!MessageStore.isInitialized()) {
@@ -43,7 +43,7 @@ public class NotificationBroadcastReceiver extends BroadcastReceiver {
         Intent notificationIntent = new Intent(context, UnityPlayerActivity.class);
         notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
-        Uri uri = index == 0 ? message.link() : message.buttons().get(index -1).link();
+        Uri uri = index == 0 ? message.getLink() : message.getButtons().get(index -1).getLink();
         if (uri != null) {
             Intent i = new Intent(Intent.ACTION_VIEW, uri);
             i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
