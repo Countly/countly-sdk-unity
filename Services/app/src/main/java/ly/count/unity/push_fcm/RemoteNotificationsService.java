@@ -1,17 +1,17 @@
 package ly.count.unity.push_fcm;
 
+import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.drawable.BitmapDrawable;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
-import android.support.v4.app.NotificationCompat.Builder;
-import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -107,18 +107,19 @@ public class RemoteNotificationsService extends FirebaseMessagingService {
         Uri notificationSound = RingtoneManager.getDefaultUri(R.raw.boing);
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        Builder notificationBuilder;
+        Notification.Builder notificationBuilder;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             NotificationChannel channel = notificationManager.getNotificationChannel(CountlyPushPlugin.CHANNEL_ID);
             if (channel == null) {
                 createNotificationChannel();
             }
-            notificationBuilder = new Builder(this, CountlyPushPlugin.CHANNEL_ID);
+            notificationBuilder = new Notification.Builder(this, CountlyPushPlugin.CHANNEL_ID);
         } else {
-            notificationBuilder = new Builder(this);
+            notificationBuilder = new Notification.Builder(this);
         }
 
-        BitmapDrawable largeIconBitmap = (BitmapDrawable) ContextCompat.getDrawable(this, R.drawable.ic_stat);
+        Bitmap largeIconBitmap = BitmapFactory.decodeResource(getResources(),
+                R.drawable.ic_stat);
 
         Intent notificationIntent = new Intent(this.getApplicationContext(), NotificationBroadcastReceiver.class);
 
@@ -132,12 +133,15 @@ public class RemoteNotificationsService extends FirebaseMessagingService {
         notificationBuilder
                 .setAutoCancel(true)
                 .setSound(notificationSound)
+                .setLargeIcon(largeIconBitmap)
                 .setContentIntent(pendingIntent)
                 .setSmallIcon(R.drawable.ic_stat)
                 .setContentTitle(message.getTitle())
-                .setContentText(message.getMessage())
-                .setLargeIcon(largeIconBitmap.getBitmap())
-                .setColor(ContextCompat.getColor(this, R.color.color_notification));
+                .setContentText(message.getMessage());
+
+        if (android.os.Build.VERSION.SDK_INT > 21) {
+            notificationBuilder.setColor(getResources().getColor(R.color.color_notification));
+        }
 
         for (int i = 0; i < message.getButtons().size(); i++) {
             ModulePush.Message.Button button = message.getButtons().get(i);
