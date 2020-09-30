@@ -31,7 +31,7 @@ dependencies {
 
 //task to delete old jar
 task deleteOldJar(type: Delete){
-    delete 'release/notifications.jar'
+    delete '../../Assets/Plugins/Android/Notifications/libs/countly_notifications.jar'
 }
 
 //export jar
@@ -41,7 +41,7 @@ task exportJar(type: Copy){
     into('../../Assets/Plugins/Android/Notifications/libs/')
     include('classes.jar')
     //the name
-    rename('classes.jar','notifications.jar')
+    rename('classes.jar','countly_notifications.jar')
 }
 
 exportJar.dependsOn(deleteOldJar,build)

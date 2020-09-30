@@ -1,21 +1,21 @@
 package ly.count.unity.push_fcm;
 
-import android.content.Context;
 import android.net.Uri;
 import android.os.Parcel;
-import android.os.Parcelable;
 import android.util.Log;
+import android.os.Parcelable;
+import android.app.Notification;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.List;
+import java.util.HashMap;
+import java.util.ArrayList;
+import java.net.MalformedURLException;
 
 /**
  * Messaging support module.
@@ -34,6 +34,9 @@ public class ModulePush {
     static final String KEY_TITLE = "title";
     static final String KEY_MESSAGE = "message";
 
+    /**
+     * Message object encapsulating data in {@code RemoteMessage} sent from Countly server.
+     */
     static class Message implements Parcelable {
         final String id;
         private final String title, message, sound;
@@ -50,12 +53,12 @@ public class ModulePush {
             this.message = data.get(KEY_MESSAGE);
             this.sound = data.get(KEY_SOUND);
 
-            Log.d("Countly", "constructed: " + id);
+            Log.d(CountlyPushPlugin.TAG, "constructed: " + id);
             Integer b = null;
             try {
                 b = data.containsKey(KEY_BADGE) ? Integer.parseInt(data.get(KEY_BADGE)) : null;
             } catch (NumberFormatException e) {
-                Log.w("Countly", "Bad badge value received, ignoring");
+                Log.w(CountlyPushPlugin.TAG, "Bad badge value received, ignoring");
             }
             this.badge = b;
 
@@ -64,7 +67,7 @@ public class ModulePush {
                 try {
                     uri = Uri.parse(data.get(KEY_LINK));
                 } catch (Throwable e) {
-                    Log.w("Countly", "Cannot parse message link", e);
+                    Log.w(CountlyPushPlugin.TAG, "Cannot parse message link", e);
                 }
             }
             this.link = uri;
@@ -73,7 +76,7 @@ public class ModulePush {
             try {
                 u = data.containsKey(KEY_MEDIA) ? new URL(data.get(KEY_MEDIA)) : null;
             } catch (MalformedURLException e) {
-                Log.w("Countly", "Bad media value received, ignoring");
+                Log.w(CountlyPushPlugin.TAG, "Bad media value received, ignoring");
             }
             this.media = u;
 
@@ -91,7 +94,7 @@ public class ModulePush {
                                 try {
                                     uri = Uri.parse(btn.getString(KEY_BUTTONS_LINK));
                                 } catch (Throwable e) {
-                                    Log.w("Countly", "Cannot parse message link", e);
+                                    Log.w(CountlyPushPlugin.TAG, "Cannot parse message link", e);
                                 }
                             }
 
@@ -99,51 +102,109 @@ public class ModulePush {
                         }
                     }
                 } catch (Throwable e) {
-                    Log.w("Countly", "Failed to parse buttons JSON", e);
+                    Log.w(CountlyPushPlugin.TAG, "Failed to parse buttons JSON", e);
                 }
             }
         }
 
+        /**
+         * Countly internal message ID
+         *
+         * @return id string or {@code null} if no id in the message
+         */
         public String getId() {
             return id;
         }
 
+        /**
+         * Title of message
+         *
+         * @return title string or {@code null} if no title in the message
+         */
         public String getTitle() {
             return title;
         }
 
+        /**
+         * Message text itself
+         *
+         * @return message string or {@code null} if no message specified
+         */
         public String getMessage() {
             return message;
         }
 
+        /**
+         * Message sound. Default message is sent as "default" string, other sounds are
+         * supposed to be sent as URI of sound from app resources.
+         *
+         * @return sound string or {@code null} if no sound specified
+         */
         public String getSound() {
             return sound;
         }
 
+        /**
+         * Message badge if any
+         *
+         * @return message badge number or {@code null} if no badge specified
+         */
         public Integer getBadge() {
             return badge;
         }
 
+        /**
+         * Default message link to open
+         *
+         * @return message link Uri or {@code null} if no link specified
+         */
         public Uri getLink() {
             return link;
         }
 
+        /**
+         * Message media URL to jpeg or png image
+         *
+         * @return message media URL or {@code null} if no media specified
+         */
         public URL getMedia() {
             return media;
         }
 
+        /**
+         * List of buttons to display along this message if any
+         *
+         * @return message buttons list or empty list if no buttons specified
+         */
         public List<Button> getButtons() {
             return buttons;
         }
 
+        /**
+         * Set of data keys sent in this message, includes all standard keys like "title" or "message"
+         *
+         * @return message data keys set
+         */
         public Set<String> getDataKeys() {
             return data.keySet();
         }
 
+        /**
+         * Check whether data contains the key specified
+         *
+         * @param key key String to look for
+         * @return {@code true} if key exists in the data, {@code false} otherwise
+         */
         public boolean has(String key) {
             return data.containsKey(key);
         }
 
+        /**
+         * Get data associated with the key specified
+         *
+         * @param key key String to look for
+         * @return value String for the key or {@code null} if no such key exists in the data
+         */
         public String getData(String key) {
             return data.get(key);
         }
@@ -160,7 +221,7 @@ public class ModulePush {
         @Override
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeMap(data);
-            Log.d("Countly", "written: " + data.get(KEY_ID));
+            Log.d(CountlyPushPlugin.TAG, "written: " + data.get(KEY_ID));
         }
 
         public static final Parcelable.Creator<Message> CREATOR = new Parcelable.Creator<Message>() {
@@ -168,7 +229,7 @@ public class ModulePush {
             public Message createFromParcel(Parcel in) {
                 Map<String, String> map = new HashMap<>();
                 in.readMap(map, ClassLoader.getSystemClassLoader());
-                Log.d("Countly", "read: " + map.get(KEY_ID));
+                Log.d(CountlyPushPlugin.TAG, "read: " + map.get(KEY_ID));
                 return new Message(map);
             }
 
@@ -199,18 +260,38 @@ public class ModulePush {
                 this.icon = icon;
             }
 
+            /**
+             * Button index, starts from 1
+             *
+             * @return index of this button
+             */
             public int getIndex() {
                 return index;
             }
 
+            /**
+             * Button title
+             *
+             * @return title of this button
+             */
             public String getTitle() {
                 return title;
             }
 
+            /**
+             * Button link
+             *
+             * @return link of this button
+             */
             public Uri getLink() {
                 return link;
             }
 
+            /**
+             * Optional method to return icon code
+             *
+             * @return int resource code for {@link Notification.Action#getSmallIcon()}
+             */
             public int getIcon() {
                 return icon;
             }
