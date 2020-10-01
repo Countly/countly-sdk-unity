@@ -26,7 +26,7 @@ public class NotificationBroadcastReceiver extends BroadcastReceiver {
         }
 
         int index = bundle.getInt(CountlyPushPlugin.EXTRA_ACTION_INDEX, 0);
-        ModulePush.Message message = bundle.getParcelable(EXTRA_MESSAGE);
+        CountlyPushPlugin.Message message = bundle.getParcelable(EXTRA_MESSAGE);
 
         String messageId = message.getId();
         Log.d(CountlyPushPlugin.TAG, "Message ID: " + messageId);

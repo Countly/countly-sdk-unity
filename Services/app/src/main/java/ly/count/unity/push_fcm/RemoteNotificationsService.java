@@ -98,12 +98,12 @@ public class RemoteNotificationsService extends FirebaseMessagingService {
 
     private void ProcessData(Map<String, String> data) {
 
-        ModulePush.Message message = CountlyPushPlugin.decodeMessage(data);
+        CountlyPushPlugin.Message message = CountlyPushPlugin.decodeMessage(data);
         Log.d(CountlyPushPlugin.TAG, "Message Impl " + message.toString());
         sendNotification(message);
     }
 
-    private void sendNotification(ModulePush.Message message) {
+    private void sendNotification(CountlyPushPlugin.Message message) {
         Uri notificationSound = RingtoneManager.getDefaultUri(R.raw.boing);
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
@@ -124,7 +124,7 @@ public class RemoteNotificationsService extends FirebaseMessagingService {
         Intent notificationIntent = new Intent(this.getApplicationContext(), NotificationBroadcastReceiver.class);
 
         String messageId = message.getId();
-        notificationIntent.putExtra(ModulePush.KEY_ID, messageId);
+        notificationIntent.putExtra(CountlyPushPlugin.KEY_ID, messageId);
         notificationIntent.putExtra(CountlyPushPlugin.EXTRA_MESSAGE, message);
         notificationIntent.putExtra(CountlyPushPlugin.EXTRA_ACTION_INDEX, 0);
 
@@ -144,7 +144,7 @@ public class RemoteNotificationsService extends FirebaseMessagingService {
         }
 
         for (int i = 0; i < message.getButtons().size(); i++) {
-            ModulePush.Message.Button button = message.getButtons().get(i);
+            CountlyPushPlugin.Message.Button button = message.getButtons().get(i);
             Intent buttonIntent = (Intent) notificationIntent.clone();
             buttonIntent.putExtra(CountlyPushPlugin.EXTRA_ACTION_INDEX, i + 1);
 
