@@ -1,5 +1,9 @@
+using Newtonsoft.Json.Linq;
+using Plugins.Countly.Helpers;
+using Plugins.Countly.Services;
 using System;
 using System.Collections;
+using System.Threading.Tasks;
 #if UNITY_IOS
 using Unity.Notifications.iOS;
 #endif
@@ -10,10 +14,17 @@ namespace Notifications.Impls.iOs
     public class IOsNotificationsService : INotificationsService
     {
         private readonly Action<IEnumerator> _startCoroutine;
+        private readonly IEventCountlyService _eventCountlyService;
 
-        public IOsNotificationsService(Action<IEnumerator> startCoroutine)
+        public IOsNotificationsService(Action<IEnumerator> startCoroutine, IEventCountlyService eventCountlyService)
         {
             _startCoroutine = startCoroutine;
+            _eventCountlyService = eventCountlyService;
+        }
+
+        public void GetMessage(Action result)
+        {
+            result.Invoke();    
         }
 
         public void GetToken(Action<string> result)
@@ -45,6 +56,11 @@ namespace Notifications.Impls.iOs
             Debug.Log("[Countly] IOsNotificationsService, RequestAuthorization, execution will be skipped, Unity.Notification.iOS exists only on IOS platform");
             yield return null;
 #endif
+        }
+
+        public async Task<CountlyResponse> ReportPushActionAsync()
+        {
+            return await Task.FromResult(new CountlyResponse());
         }
     }
 }

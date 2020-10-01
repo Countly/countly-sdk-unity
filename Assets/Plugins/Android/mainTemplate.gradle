@@ -45,7 +45,7 @@ dependencies {
     implementation group: 'com.android.support', name: 'support-v4', version: '27.1.1'
     implementation group: 'com.android.support', name: 'support-vector-drawable', version: '27.1.1'
 
-    implementation group: 'com.google.firebase', name: 'firebase-messaging', version: '17.6.0'
+    implementation group: 'com.google.firebase', name: 'firebase-messaging', version: '20.2.4'
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project('Notifications')

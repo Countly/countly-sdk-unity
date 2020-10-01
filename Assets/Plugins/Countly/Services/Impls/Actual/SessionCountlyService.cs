@@ -54,20 +54,23 @@ namespace Plugins.Countly.Services.Impls.Actual
 		/// <param name="elapsedEventArgs"></param>
 		private async void SessionTimerOnElapsedAsync(object sender, ElapsedEventArgs elapsedEventArgs)
 		{
-			var sessionOver = (DateTime.Now - _lastInputTime).TotalSeconds >= _configModel.SessionDuration;
-			if (IsSessionInitiated && sessionOver)
-			{
-				_requestCountlyHelper.ProcessQueue();
-				await ExecuteEndSessionAsync();
-			}
-			else if(IsSessionInitiated)
-			{
-				if (!_configModel.EnableManualSessionHandling)
-				{
-					await ExtendSessionAsync();
-				}
-			}
-		}
+            if (!IsSessionInitiated)
+            {
+                return;
+            }
+
+            _requestCountlyHelper.ProcessQueue();
+            var sessionOver = (DateTime.Now - _lastInputTime).TotalSeconds >= _configModel.SessionDuration;
+
+            if (sessionOver)
+            {
+                await ExecuteEndSessionAsync();
+            }
+            else if (!_configModel.EnableManualSessionHandling)
+            {
+                await ExtendSessionAsync();
+            }
+        }
 
 		public async void UpdateInputTime()
 		{

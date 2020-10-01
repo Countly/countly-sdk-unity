@@ -2,24 +2,26 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Notifications;
 using Plugins.Countly.Enums;
 using Plugins.Countly.Helpers;
+using Plugins.Countly.Models;
 using UnityEngine;
 
 namespace Plugins.Countly.Services.Impls.Actual
 {
     public class PushCountlyService
     {
+        private string _token;
+        private TestMode? _mode;
+        private readonly IEventCountlyService _eventCountlyService;
         private readonly RequestCountlyHelper _requestCountlyHelper;
         private readonly INotificationsService _notificationsService;
-        private TestMode? _mode;
-        private string _token;
 
-        private static bool _tokenSent;
-
-        public PushCountlyService(RequestCountlyHelper requestCountlyHelper, INotificationsService notificationsService)
+        public PushCountlyService(IEventCountlyService eventCountlyService, RequestCountlyHelper requestCountlyHelper, INotificationsService notificationsService)
         {
+            _eventCountlyService = eventCountlyService;
             _requestCountlyHelper = requestCountlyHelper;
             _notificationsService = notificationsService;
         }
@@ -31,31 +33,24 @@ namespace Plugins.Countly.Services.Impls.Actual
         internal void EnablePushNotificationAsync(TestMode mode)
         {
             _mode = mode;
-            _notificationsService.GetToken(result =>
+            _notificationsService.GetToken(async result =>
             {
                 _token = result;
-                Debug.Log("[PushCountlyService], token: " + _token);
+                /*
+                 * When the push notification service gets enabled successfully for the device, 
+                 * we send a request to the Countly server that the user is ready to receive push notifications.
+               */
+                await PostToCountlyAsync(_mode, _token);
+                await ReportPushActionAsync();
             });
-            
-        }
-        
-        internal async void Update()
-        {
-            /*
-             * When the push notification service gets enabled successfully for the device, 
-             * we send a request to the Countly server that the user is ready to receive push notifications.
-             * Update method is called multiple times during a particular scene,
-             * therefore we send this request to the Countly server only once
-             */
-            if(string.IsNullOrEmpty(_token)) return;
 
-            if(_tokenSent) return;
-            
-            //Enabling the User to receive Push Notifications
-            _tokenSent = true;
-            await PostToCountlyAsync(_mode, _token);
+            _notificationsService.GetMessage(async () =>
+            {
+                await ReportPushActionAsync();
+            });
+
         }
-        
+
         /// <summary>
         /// Notifies Countly that the device is capable of receiving Push Notifications
         /// </summary>
@@ -69,7 +64,6 @@ namespace Plugins.Countly.Services.Impls.Actual
                     IsSuccess = false,
                     ErrorMessage = "Pushes are disabled."
                 };
-
             }
 
             var requestParams =
@@ -79,16 +73,32 @@ namespace Plugins.Countly.Services.Impls.Actual
                     { "test_mode", (int)mode.Value },
                     { $"{Constants.UnityPlatform}_token", token },
                 };
-            return await _requestCountlyHelper.GetResponseAsync(requestParams);
+
+            return await _requestCountlyHelper.GetResponseAsync(requestParams, true);
+        }
+
+        /// <summary>
+        /// Report Push Actions stored in local cache to Countly server.,
+        /// </summary>
+        public async Task<CountlyResponse> ReportPushActionAsync()
+        {
+            return await _notificationsService.ReportPushActionAsync();
         }
 
         [Serializable]
-        struct PushActionSegment
+        public struct PushActionSegment
         {
-            [JsonProperty("b")]
-            internal string Identifier { get; set; }
-            [JsonProperty("i")]
-            internal string MessageID { get; set; }
+            public string Identifier { get; set; }
+            public string MessageID { get; set; }
+
+            public IDictionary<string, object> ToDictionary()
+            {
+                return new Dictionary<string, object>()
+                {
+                    {"b", Identifier},
+                    {"i", MessageID}
+                };
+            }
         }
 
     }
