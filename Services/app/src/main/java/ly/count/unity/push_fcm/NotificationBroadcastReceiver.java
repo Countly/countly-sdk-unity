@@ -1,5 +1,6 @@
 package ly.count.unity.push_fcm;
 
+import android.app.NotificationManager;
 import android.net.Uri;
 import android.util.Log;
 import android.os.Bundle;
@@ -54,6 +55,10 @@ public class NotificationBroadcastReceiver extends BroadcastReceiver {
         else {
             context.startActivity(notificationIntent);
         }
+
+        NotificationManager notificationManager =
+                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.cancel(messageId, 0);
 
         Log.d(CountlyPushPlugin.TAG, "Index: " + index);
         UnityPlayer.UnitySendMessage(CountlyPushPlugin.UNITY_ANDROID_BRIDGE, "onMessageReceived", messageId);

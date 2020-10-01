@@ -79,6 +79,8 @@ namespace Notifications.Impls.Android
                         Identifier = identifier
                     };
 
+                    Debug.Log("[Countly] ReportPushActionAsync key: " + CountlyEventModel.PushActionEvent + ", segments: " + segment);
+
                     await _eventCountlyService.ReportCustomEventAsync(
                         CountlyEventModel.PushActionEvent, segment.ToDictionary());
                 }
