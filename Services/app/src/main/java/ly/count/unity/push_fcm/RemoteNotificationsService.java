@@ -66,7 +66,6 @@ public class RemoteNotificationsService extends FirebaseMessagingService {
 
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
-        RemoteMessage.Notification notification = remoteMessage.getNotification();
         Map<String, String> data = remoteMessage.getData();
 
         Log.d(CountlyPushPlugin.TAG, "Message id: " + remoteMessage.getMessageId());
@@ -76,24 +75,9 @@ public class RemoteNotificationsService extends FirebaseMessagingService {
             JSONObject jsonObject = new JSONObject(remoteMessage.getData());
             Log.d(CountlyPushPlugin.TAG, "Message data: " + jsonObject.toString());
         }
-        if (notification != null) {
-            Log.d(CountlyPushPlugin.TAG, "Message notification: " + notification);
-            Log.d(CountlyPushPlugin.TAG, "Message body: " + notification.getBody());
-            Log.d(CountlyPushPlugin.TAG, "Message body: " + notification.getTitle());
-        }
 
-        if (notification != null)
-            ProcessNotification(notification);
         if (!data.isEmpty())
             ProcessData(data);
-    }
-
-    private void ProcessNotification(RemoteMessage.Notification notification) {
-        String tag = notification.getTag();
-        String title = notification.getTitle();
-        String message = notification.getBody();
-
-        // sendNotification(tag, title, message);
     }
 
     private void ProcessData(Map<String, String> data) {

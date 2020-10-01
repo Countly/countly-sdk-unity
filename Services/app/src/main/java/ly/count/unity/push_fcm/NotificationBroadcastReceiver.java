@@ -17,7 +17,7 @@ import static ly.count.unity.push_fcm.CountlyPushPlugin.EXTRA_MESSAGE;
 public class NotificationBroadcastReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.d(CountlyPushPlugin.TAG, "onReceive");
+        Log.d(CountlyPushPlugin.TAG, "NotificationBroadcastReceiver::onReceive");
 
         Bundle bundle = intent.getExtras();
 
