@@ -15,9 +15,9 @@ namespace Notifications.Impls.iOs
     {
         private readonly Action<IEnumerator> _startCoroutine;
         private readonly IEventCountlyService _eventCountlyService;
-        private readonly INotificationsCallbackServcie _notificationsCallbackServcie;
+        private readonly NotificationsCallbackService _notificationsCallbackServcie;
 
-        public IOsNotificationsService(Action<IEnumerator> startCoroutine, IEventCountlyService eventCountlyService, INotificationsCallbackServcie notificationsCallbackServcie)
+        public IOsNotificationsService(Action<IEnumerator> startCoroutine, IEventCountlyService eventCountlyService, NotificationsCallbackService notificationsCallbackServcie)
         {
             _startCoroutine = startCoroutine;
             _eventCountlyService = eventCountlyService;

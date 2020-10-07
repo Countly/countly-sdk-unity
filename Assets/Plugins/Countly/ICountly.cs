@@ -1,3 +1,4 @@
+using Notifications;
 using Plugins.Countly.Services;
 using Plugins.Countly.Services.Impls.Actual;
 using System;
@@ -20,7 +21,7 @@ namespace Plugins.Countly
         IStarRatingCountlyService StarRating { get; }
         IUserDetailsCountlyService UserDetails { get; }
         IViewCountlyService Views { get; }
-        INotificationsCallbackServcie Notifications { get;}
+        NotificationsCallbackService Notifications { get;}
 
         void ReportAll();
     }

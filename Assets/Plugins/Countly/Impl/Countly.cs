@@ -49,7 +49,7 @@ namespace Plugins.Countly.Impl
 
         private SessionCountlyService Session { get; set; }
 
-        public INotificationsCallbackServcie Notifications { get; set; }
+        public NotificationsCallbackService Notifications { get; set; }
         
 
         public async void ReportAll()
@@ -110,7 +110,7 @@ namespace Plugins.Countly.Impl
 
             Events = new EventCountlyService(Config, requests, viewEventRepo, nonViewEventRepo, eventNumberInSameSessionHelper);
             OptionalParameters = new OptionalParametersCountlyService();
-            Notifications = new NotificationsCallbackServcie(Config);
+            Notifications = new NotificationsCallbackService(Config);
             var notificationsService = new ProxyNotificationsService(InternalStartCoroutine, Events, Notifications);
             _push = new PushCountlyService(Events, requests, notificationsService);
             Session = new SessionCountlyService(Config, _push, requests, OptionalParameters, eventNumberInSameSessionHelper);

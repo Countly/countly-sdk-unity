@@ -16,9 +16,9 @@ namespace Notifications.Impls.Android
 
 		private readonly AndroidBridge _bridge;
         private readonly IEventCountlyService _eventCountlyService;
-        private readonly INotificationsCallbackServcie _notificationsCallbackServcie;
+        private readonly NotificationsCallbackService _notificationsCallbackServcie;
 
-        public AndroidNotificationsService(IEventCountlyService eventCountlyService, INotificationsCallbackServcie notificationsCallbackServcie)
+        public AndroidNotificationsService(IEventCountlyService eventCountlyService, NotificationsCallbackService notificationsCallbackServcie)
 		{
             _eventCountlyService = eventCountlyService;
             _notificationsCallbackServcie = notificationsCallbackServcie;

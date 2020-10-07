@@ -1,61 +1,56 @@
 using System.Collections.Generic;
-using Plugins.Countly.Enums;
 using Plugins.Countly.Models;
-using Plugins.Countly.Services;
 using UnityEngine;
 
 namespace Notifications
 {
-    public class NotificationsCallbackServcie : INotificationsCallbackServcie
+    public class NotificationsCallbackService 
     {
         CountlyConfigModel _config;
-        private Dictionary<int, INotificationListener> _listners;
-        internal NotificationsCallbackServcie(CountlyConfigModel config)
+        private List<INotificationListener> _listners;
+        internal NotificationsCallbackService(CountlyConfigModel config)
         {
             _config = config;
-            _listners = new Dictionary<int, INotificationListener>();
-
-            CheckNotificationMode();
-
+            _listners = new List<INotificationListener>();
         }
 
-        public void AddListener(int instanceId, INotificationListener listener)
+        public void AddListener(INotificationListener listener)
         {
-            if (_listners.ContainsKey(instanceId)) {
+            if (_listners.Contains(listener)) {
                 return;
             }
 
-            CheckNotificationMode();
-            _listners.Add(instanceId, listener);
-            Debug.Log("[Countly NotificationsCallbackServcie] AddListener: " + instanceId);
+            _listners.Add(listener);
+
+            if (_config.EnableConsoleErrorLogging)
+            {
+                Debug.Log("[Countly NotificationsCallbackServcie] AddListener: " + listener);
+            }
         }
 
-        public void RemoveListener(int instanceId)
+        public void RemoveListener(INotificationListener listener)
         {
-            CheckNotificationMode();
-            _listners.Remove(instanceId);
-            Debug.Log("[Countly NotificationsCallbackServcie] RemoveListener: " + instanceId);
+            _listners.Remove(listener);
+
+            if (_config.EnableConsoleErrorLogging)
+            {
+                Debug.Log("[Countly NotificationsCallbackServcie] RemoveListener: " + listener);
+            }
         }
 
         public void SendMessageToListeners(string data)
         {
-            foreach (INotificationListener listener in _listners.Values)
+            foreach (INotificationListener listener in _listners)
             {
-
                 if (listener != null)
                 {
                     listener.OnReceive(data);
                 }
             }
 
-            Debug.Log("[Countly NotificationsCallbackServcie] SendMessageToListeners: " + data);
-        }
-
-        private void CheckNotificationMode()
-        {
-            if (_config.NotificationMode == TestMode.None)
+            if (_config.EnableConsoleErrorLogging)
             {
-                Debug.Log("[Countly] NotificationsCallbackServcie: Notifiations are disabled");
+                Debug.Log("[Countly NotificationsCallbackServcie] SendMessageToListeners: " + data);
             }
         }
     }

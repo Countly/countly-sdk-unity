@@ -29,12 +29,12 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
 
     private void Start() {
         // k GetHashCode or GetInstanceId?
-       countly.Notifications.AddListener(GetInstanceID(), this);
+       countly.Notifications.AddListener(this);
     }
 
     private void Stop() {
         // k GetHashCode or GetInstanceId?
-        countly.Notifications.RemoveListener(GetInstanceID());
+        countly.Notifications.RemoveListener(this);
     }
 
     public async void BasicEvent()

@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Plugins.Countly.Services.Impls.Wrapper
 {
-    public class NotificationsCallbackServiceWrapper : INotificationsCallbackServcie
+    public class NotificationsCallbackServiceWrapper
     {
      
         internal NotificationsCallbackServiceWrapper()

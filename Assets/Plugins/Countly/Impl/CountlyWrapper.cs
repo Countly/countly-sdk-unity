@@ -1,5 +1,7 @@
 using System;
 using Countly.Input;
+using Notifications;
+using Plugins.Countly.Models;
 using Plugins.Countly.Services;
 using Plugins.Countly.Services.Impls.Wrapper;
 using UnityEngine;
@@ -30,7 +32,7 @@ namespace Plugins.Countly.Impl
 
         public IViewCountlyService Views { get; private set; }
 
-        public INotificationsCallbackServcie Notifications { get; set; }
+        public NotificationsCallbackService Notifications { get; set; }
 
         public async void ReportAll()
         {
@@ -60,7 +62,7 @@ namespace Plugins.Countly.Impl
             UserDetails = new UserDetailsCountlyServiceWrapper();
             Views = new ViewCountlyServiceWrapper();
             _inputObserver = InputObserverResolver.Resolve();
-            Notifications = new NotificationsCallbackServiceWrapper();
+            Notifications = new NotificationsCallbackService(new CountlyConfigModel(""));
         }
 
         private void Update()

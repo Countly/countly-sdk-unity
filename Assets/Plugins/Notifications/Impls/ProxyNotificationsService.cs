@@ -11,7 +11,7 @@ namespace Notifications.Impls
 		private readonly INotificationsService _service;
         private readonly IEventCountlyService _eventCountlyService;
 
-        public ProxyNotificationsService(Action<IEnumerator> startCoroutine, IEventCountlyService eventCountlyService, INotificationsCallbackServcie notificationsCallbackServcie)
+        public ProxyNotificationsService(Action<IEnumerator> startCoroutine, IEventCountlyService eventCountlyService, NotificationsCallbackService notificationsCallbackServcie)
 		{
 
 #if UNITY_EDITOR
