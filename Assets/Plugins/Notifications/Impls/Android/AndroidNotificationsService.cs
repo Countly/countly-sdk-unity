@@ -16,10 +16,13 @@ namespace Notifications.Impls.Android
 
 		private readonly AndroidBridge _bridge;
         private readonly IEventCountlyService _eventCountlyService;
+        private readonly INotificationsCallbackServcie _notificationsCallbackServcie;
 
-        public AndroidNotificationsService(IEventCountlyService eventCountlyService)
+        public AndroidNotificationsService(IEventCountlyService eventCountlyService, INotificationsCallbackServcie notificationsCallbackServcie)
 		{
             _eventCountlyService = eventCountlyService;
+            _notificationsCallbackServcie = notificationsCallbackServcie;
+
             var gameObject = new GameObject(BridgeName);
 			_bridge = gameObject.AddComponent<AndroidBridge>();
 		}
@@ -86,7 +89,10 @@ namespace Notifications.Impls.Android
                 }
 
                 store.CallStatic("clearMessagesData");
+                
             }
+
+            _notificationsCallbackServcie.SendMessageToListeners(data);
 
             return new CountlyResponse
             {

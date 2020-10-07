@@ -1,12 +1,12 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using Notifications;
 using Plugins.Countly;
 using Plugins.Countly.Impl;
 using Plugins.Countly.Models;
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 
-public class CountlyEntryPoint : MonoBehaviour
+public class CountlyEntryPoint : MonoBehaviour, INotificationListener
 {
 	public Plugins.Countly.Impl.Countly countlyPrefab;
 	public CountlyWrapper countlyWrapper;
@@ -25,6 +25,16 @@ public class CountlyEntryPoint : MonoBehaviour
         //#else
         //		countly = Instantiate(countlyWrapper);
         //#endif
+    }
+
+    private void Start() {
+        // k GetHashCode or GetInstanceId?
+       countly.Notifications.AddListener(GetInstanceID(), this);
+    }
+
+    private void Stop() {
+        // k GetHashCode or GetInstanceId?
+        countly.Notifications.RemoveListener(GetInstanceID());
     }
 
     public async void BasicEvent()
@@ -212,5 +222,10 @@ public class CountlyEntryPoint : MonoBehaviour
         countly.UserDetails.Push("Mole", new string[] { "Left Cheek", "Back", "Toe" }); ;
         await countly.UserDetails.SaveAsync();
 
+    }
+
+    public void OnReceive(string message)
+    {
+        Debug.Log("[Countly Example] OnReceive: " + message);
     }
 }

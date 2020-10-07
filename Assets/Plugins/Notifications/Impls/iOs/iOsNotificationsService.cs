@@ -15,11 +15,13 @@ namespace Notifications.Impls.iOs
     {
         private readonly Action<IEnumerator> _startCoroutine;
         private readonly IEventCountlyService _eventCountlyService;
+        private readonly INotificationsCallbackServcie _notificationsCallbackServcie;
 
-        public IOsNotificationsService(Action<IEnumerator> startCoroutine, IEventCountlyService eventCountlyService)
+        public IOsNotificationsService(Action<IEnumerator> startCoroutine, IEventCountlyService eventCountlyService, INotificationsCallbackServcie notificationsCallbackServcie)
         {
             _startCoroutine = startCoroutine;
             _eventCountlyService = eventCountlyService;
+            _notificationsCallbackServcie = notificationsCallbackServcie;
         }
 
         public void GetMessage(Action result)

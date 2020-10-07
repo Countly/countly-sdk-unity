@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using Countly.Input;
 using iBoxDB.LocalServer;
+using Notifications;
 using Notifications.Impls;
 using Plugins.Countly.Helpers;
 using Plugins.Countly.Models;
@@ -48,6 +49,9 @@ namespace Plugins.Countly.Impl
 
         private SessionCountlyService Session { get; set; }
 
+        public INotificationsCallbackServcie Notifications { get; set; }
+        
+
         public async void ReportAll()
         {
             await Events.ReportAllRecordedViewEventsAsync();
@@ -64,7 +68,7 @@ namespace Plugins.Countly.Impl
         /// <summary>
         ///     Initialize SDK at the start of your app
         /// </summary>
-        private async void Start()
+        private async void Awake()
         {
             DontDestroyOnLoad(gameObject);
             Instance = this;
@@ -106,9 +110,11 @@ namespace Plugins.Countly.Impl
 
             Events = new EventCountlyService(Config, requests, viewEventRepo, nonViewEventRepo, eventNumberInSameSessionHelper);
             OptionalParameters = new OptionalParametersCountlyService();
-            var notificationsService = new ProxyNotificationsService(InternalStartCoroutine, Events);
+            Notifications = new NotificationsCallbackServcie(Config);
+            var notificationsService = new ProxyNotificationsService(InternalStartCoroutine, Events, Notifications);
             _push = new PushCountlyService(Events, requests, notificationsService);
             Session = new SessionCountlyService(Config, _push, requests, OptionalParameters, eventNumberInSameSessionHelper);
+            
             Consents = new ConsentCountlyService();
             CrashReports = new CrashReportsCountlyService(Config, requests);
 
