@@ -21,12 +21,12 @@ public class MessageStore {
         if (messagePreferences == null) {
             messagePreferences = context.getSharedPreferences(MESSAGE_PREFERENCES, Context.MODE_PRIVATE);
         }
-        Log.d(CountlyPushPlugin.TAG, "MessageStore init");
+        CountlyPushPlugin.Log("MessageStore init");
     }
 
     public static boolean storeMessageData(String messageId, String index) {
         if (!isInitialized()) {
-            Log.e(CountlyPushPlugin.TAG, "MessageStore isn't initialized");
+            CountlyPushPlugin.Log("MessageStore isn't initialized");
             return false;
         }
 
@@ -61,7 +61,7 @@ public class MessageStore {
         if (isInitialized()) {
             messagePreferences.edit().remove(MESSAGE_DATA).apply();
         } else {
-            Log.e(CountlyPushPlugin.TAG, "MessageStore isn't initialized");
+            CountlyPushPlugin.Log("MessageStore isn't initialized");
         }
     }
 
@@ -70,7 +70,7 @@ public class MessageStore {
             return messagePreferences.getString(MESSAGE_DATA, null);
         }
 
-        Log.e(CountlyPushPlugin.TAG, "MessageStore isn't initialized");
+        CountlyPushPlugin.Log("MessageStore isn't initialized");
         return null;
     }
 

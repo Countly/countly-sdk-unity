@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Plugins.Countly.Models;
 using Plugins.Countly.Persistance.Entities;
 using Plugins.iBoxDB;
 using UnityEngine;
@@ -8,10 +9,12 @@ namespace Plugins.Countly.Persistance.Repositories
     public abstract class Repository<TEntity, TModel> where TEntity : class, IEntity, new() where TModel : IModel
     {
         private readonly Dao<TEntity> _dao;
+        private readonly CountlyConfigModel _config;
 
-        protected Repository(Dao<TEntity> dao)
+        protected Repository(Dao<TEntity> dao, CountlyConfigModel config)
         {
             _dao = dao;
+            _config = config;
         }
         
         internal Queue<TModel> Models { get; } = new Queue<TModel>();
@@ -24,12 +27,19 @@ namespace Plugins.Countly.Persistance.Repositories
             foreach (var entity in entities)
             {
                 var model = ConvertEntityToModel(entity);
-                if(!ValidateModelBeforeEnqueue(model)) continue;
-                Debug.Log("Loaded model: " + model);
+                if (!ValidateModelBeforeEnqueue(model)) continue;
+
+                if (_config.EnableConsoleErrorLogging)
+                {
+                    Debug.Log("Loaded model: " + model);
+                }
+
                 Models.Enqueue(model);
             }
-
-            Debug.Log("Loaded entities of type " + typeof(TEntity).Name + " from db:" + Count);
+            if (_config.EnableConsoleErrorLogging)
+            {
+                Debug.Log("Loaded entities of type " + typeof(TEntity).Name + " from db:" + Count);
+            }
         }
 
         public virtual bool Enqueue(TModel model)
@@ -39,7 +49,11 @@ namespace Plugins.Countly.Persistance.Repositories
             Models.Enqueue(model);
             var entity = ConvertModelToEntity(model);
             var res = _dao.Save(entity);
-            if(!res) Debug.LogError("Request entity save failed, entity: " + entity);
+            if (!res && _config.EnableConsoleErrorLogging)
+            {
+                Debug.LogError("Request entity save failed, entity: " + entity);
+            }
+
             return res;
         }
 

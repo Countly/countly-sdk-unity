@@ -31,7 +31,7 @@ namespace Plugins.Countly.Models
         /// <param name="sessionDuration">Session is updated after each interval passed.
         /// This interval is also used to process request queue. The interval must be in seconds</param>
         /// <param name="notificationMode"></param>
-        public CountlyConfigModel(string salt, bool enablePost = false, bool enableConsoleErrorLogging = false,
+        public CountlyConfigModel(string salt = null, bool enablePost = false, bool enableConsoleErrorLogging = false,
                                     bool ignoreSessionCooldown = false, bool enableManualSessionHandling = false,
                                     int sessionDuration = 60, int eventViewThreshold = 100,
                                     int storedRequestLimit = 1000, int totalBreadcrumbsAllowed = 100,

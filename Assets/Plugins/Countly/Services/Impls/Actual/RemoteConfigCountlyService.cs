@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using Plugins.Countly.Helpers;
+using Plugins.Countly.Models;
 using Plugins.Countly.Persistance.Entities;
 using Plugins.iBoxDB;
 using UnityEngine;
@@ -12,19 +13,21 @@ namespace Plugins.Countly.Services.Impls.Actual
 {
     public class RemoteConfigCountlyService : IRemoteConfigCountlyService
     {
-        private readonly RequestCountlyHelper _requestCountlyHelper;
+        private readonly CountlyConfigModel _config;
         private readonly ICountlyUtils _countlyUtils;
         private readonly Dao<ConfigEntity> _configDao;
+        private readonly RequestCountlyHelper _requestCountlyHelper;
 
         public  Dictionary<string, object> Configs { private set; get; } 
 
         private readonly StringBuilder _requestStringBuilder = new StringBuilder();
         
-        public RemoteConfigCountlyService(RequestCountlyHelper requestCountlyHelper, ICountlyUtils countlyUtils, Dao<ConfigEntity> configDao)
+        public RemoteConfigCountlyService(CountlyConfigModel config, RequestCountlyHelper requestCountlyHelper, ICountlyUtils countlyUtils, Dao<ConfigEntity> configDao)
         {
-            _requestCountlyHelper = requestCountlyHelper;
-            _countlyUtils = countlyUtils;
+            _config = config;
             _configDao = configDao;
+            _countlyUtils = countlyUtils;
+            _requestCountlyHelper = requestCountlyHelper;
         }
 
         public async Task<CountlyResponse> InitConfig()
@@ -38,7 +41,7 @@ namespace Plugins.Countly.Services.Impls.Actual
             var url = BuildGetRequest(requestParams);
             
             
-            var response =  await Task.Run(() => _requestCountlyHelper.GetAsync(url));
+            var response =  await Task.Run(() => _requestCountlyHelper.GetAsync(url, false));
             if (response.IsSuccess)
             {
                 _configDao.RemoveAll();
@@ -56,7 +59,12 @@ namespace Plugins.Countly.Services.Impls.Actual
                 if (allConfigs != null && allConfigs.Count > 0)
                 {
                     Configs = Converter.ConvertJsonToDictionary(allConfigs[0].Json);
-                    Debug.Log("Configs: " + Configs.Count);
+
+                    if (_config.EnableConsoleErrorLogging)
+                    {
+                        Debug.Log("Configs: " + Configs.Count);
+                    }
+                   
                 }
             }
 

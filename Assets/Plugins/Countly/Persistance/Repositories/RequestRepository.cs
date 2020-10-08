@@ -7,7 +7,7 @@ namespace Plugins.Countly.Persistance.Repositories
 {
     internal class RequestRepository : Repository<RequestEntity, CountlyRequestModel>
     {
-        public RequestRepository(Dao<RequestEntity> dao) : base(dao)
+        public RequestRepository(Dao<RequestEntity> dao, CountlyConfigModel config) : base(dao, config)
         {
         }
 

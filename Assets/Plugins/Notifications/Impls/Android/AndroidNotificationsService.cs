@@ -10,22 +10,31 @@ namespace Notifications.Impls.Android
 {
 	public class AndroidNotificationsService : INotificationsService
 	{
+        
         private const string BridgeName = "[Android] Bridge";
         private const string StorePackageName = "ly.count.unity.push_fcm.MessageStore";
-        private const string PackageName = "ly.count.unity.push_fcm.RemoteNotificationsService";
+        private const string CountlyPushPluginPackageName = "ly.count.unity.push_fcm.CountlyPushPlugin";
+        private const string NotficationServicePackageName = "ly.count.unity.push_fcm.RemoteNotificationsService";
 
 		private readonly AndroidBridge _bridge;
+        private readonly CountlyConfigModel _config;
         private readonly IEventCountlyService _eventCountlyService;
         private readonly NotificationsCallbackService _notificationsCallbackServcie;
 
-        public AndroidNotificationsService(IEventCountlyService eventCountlyService, NotificationsCallbackService notificationsCallbackServcie)
+        public AndroidNotificationsService(CountlyConfigModel config, IEventCountlyService eventCountlyService, NotificationsCallbackService notificationsCallbackServcie)
 		{
+            _config = config;
             _eventCountlyService = eventCountlyService;
             _notificationsCallbackServcie = notificationsCallbackServcie;
 
             var gameObject = new GameObject(BridgeName);
 			_bridge = gameObject.AddComponent<AndroidBridge>();
-		}
+            _bridge.Config = _config;
+
+            var countlyPushPlugin = new AndroidJavaClass(CountlyPushPluginPackageName);
+            countlyPushPlugin.CallStatic("setEnableLog", config.EnableConsoleErrorLogging);
+
+        }
 
         public void GetMessage(Action result)
         {
@@ -36,7 +45,7 @@ namespace Notifications.Impls.Android
 		{
 			_bridge.ListenTokenResult(result);
 			
-			using (var jc = new AndroidJavaObject(PackageName))
+			using (var jc = new AndroidJavaObject(NotficationServicePackageName))
             {
                 jc.Call("getToken");
             }
@@ -82,7 +91,8 @@ namespace Notifications.Impls.Android
                         Identifier = identifier
                     };
 
-                    Debug.Log("[Countly] ReportPushActionAsync key: " + CountlyEventModel.PushActionEvent + ", segments: " + segment);
+                    if(_config.EnableConsoleErrorLogging)
+                        Debug.Log("[Countly] ReportPushActionAsync key: " + CountlyEventModel.PushActionEvent + ", segments: " + segment);
 
                     await _eventCountlyService.ReportCustomEventAsync(
                         CountlyEventModel.PushActionEvent, segment.ToDictionary());

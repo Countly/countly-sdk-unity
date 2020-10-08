@@ -1,5 +1,6 @@
 using Newtonsoft.Json.Linq;
 using Plugins.Countly.Helpers;
+using Plugins.Countly.Models;
 using Plugins.Countly.Services;
 using System;
 using System.Collections;
@@ -13,12 +14,14 @@ namespace Notifications.Impls.iOs
 {
     public class IOsNotificationsService : INotificationsService
     {
+        private readonly CountlyConfigModel _config;
         private readonly Action<IEnumerator> _startCoroutine;
         private readonly IEventCountlyService _eventCountlyService;
         private readonly NotificationsCallbackService _notificationsCallbackServcie;
 
-        public IOsNotificationsService(Action<IEnumerator> startCoroutine, IEventCountlyService eventCountlyService, NotificationsCallbackService notificationsCallbackServcie)
+        public IOsNotificationsService(CountlyConfigModel config, Action<IEnumerator> startCoroutine, IEventCountlyService eventCountlyService, NotificationsCallbackService notificationsCallbackServcie)
         {
+            _config = config;
             _startCoroutine = startCoroutine;
             _eventCountlyService = eventCountlyService;
             _notificationsCallbackServcie = notificationsCallbackServcie;
@@ -36,7 +39,8 @@ namespace Notifications.Impls.iOs
 
         private IEnumerator RequestAuthorization(Action<string> result)
         {
-            Debug.Log("[IOsNotificationsService] RequestAuthorization");
+            if(_config.EnableConsoleErrorLogging)
+                Debug.Log("[IOsNotificationsService] RequestAuthorization");
 #if UNITY_IOS
             using (var req = new AuthorizationRequest(AuthorizationOption.Alert | AuthorizationOption.Badge, true))
             {
@@ -55,7 +59,8 @@ namespace Notifications.Impls.iOs
                 result.Invoke(req.DeviceToken);
             }
 #else
-            Debug.Log("[Countly] IOsNotificationsService, RequestAuthorization, execution will be skipped, Unity.Notification.iOS exists only on IOS platform");
+            if (_config.EnableConsoleErrorLogging)
+                Debug.Log("[Countly] IOsNotificationsService, RequestAuthorization, execution will be skipped, Unity.Notification.iOS exists only on IOS platform");
             yield return null;
 #endif
         }

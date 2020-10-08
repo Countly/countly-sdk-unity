@@ -1,4 +1,5 @@
 package ly.count.unity.push_fcm;
+
 import android.app.Notification;
 import android.net.Uri;
 import android.os.Parcel;
@@ -17,7 +18,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class CountlyPushPlugin {
-    public static final String TAG = "[CountlyPluginPush]";
+    private static final String TAG = "[CountlyPluginPush]";
     public static final String UNITY_ANDROID_BRIDGE = "[Android] Bridge";
     public static final String CHANNEL_ID = "ly.count.unity.sdk.CountlyPush.CHANNEL_ID";
     public static final String EXTRA_MESSAGE = "ly.count.android.sdk.CountlyPush.message";
@@ -34,6 +35,43 @@ public class CountlyPushPlugin {
     public static final String KEY_BADGE = "badge";
     public static final String KEY_TITLE = "title";
     public static final String KEY_MESSAGE = "message";
+
+    private static boolean enableLog = true;
+
+    public static void setEnableLog(boolean flag) {
+        enableLog = flag;
+        Log.d(CountlyPushPlugin.TAG, "setEnableLog: " + flag);
+    }
+
+    public static void Log(String message) {
+        if (enableLog) {
+            Log.d(CountlyPushPlugin.TAG, message);
+        }
+    }
+
+    public static void ErrorLog(String message) {
+        if (enableLog) {
+            Log.e(CountlyPushPlugin.TAG, message);
+        }
+    }
+
+    public static void ErrorLog(String message, Throwable tr) {
+        if (enableLog) {
+            Log.e(CountlyPushPlugin.TAG, message, tr);
+        }
+    }
+
+    public static void WarningLog(String message) {
+        if (enableLog) {
+            Log.w(CountlyPushPlugin.TAG, message);
+        }
+    }
+
+    public static void WarningLog(String message, Throwable tr) {
+        if (enableLog) {
+            Log.w(CountlyPushPlugin.TAG, message, tr);
+        }
+    }
 
     /**
      * Decode message from {@code RemoteMessage#getData()} map into {@link Message}.

@@ -10,12 +10,14 @@ namespace Plugins.Countly.Services.Impls.Actual
 
     public class ViewCountlyService : IViewCountlyService
     {
+        private readonly CountlyConfigModel _config;
         private readonly Dictionary<string, DateTime> _viewToLastViewStartTime = new Dictionary<string, DateTime>();
 
         private readonly IEventCountlyService _eventService;
 
-        public ViewCountlyService(IEventCountlyService eventService)
+        public ViewCountlyService(CountlyConfigModel config, IEventCountlyService eventService)
         {
+            _config = config;
             _eventService = eventService;
         }
 
@@ -46,7 +48,10 @@ namespace Plugins.Countly.Services.Impls.Actual
                 _viewToLastViewStartTime.Add(name, DateTime.UtcNow);   
             }
 
-            Debug.Log("[ViewCountlyService] RecordOpenViewAsync: " + name);
+            if (_config.EnableConsoleErrorLogging)
+            {
+                Debug.Log("[ViewCountlyService] RecordOpenViewAsync: " + name);
+            }
             
             var currentView = new CountlyEventModel(CountlyEventModel.ViewEvent, currentViewSegment.ToDictionary());
             return await _eventService.RecordEventAsync(currentView);
@@ -82,8 +87,11 @@ namespace Plugins.Countly.Services.Impls.Actual
 
                 _viewToLastViewStartTime.Remove(name);
             }
-            
-            Debug.Log("[ViewCountlyService] RecordCloseViewAsync: " + name + ", duration: " + duration);
+
+            if (_config.EnableConsoleErrorLogging)
+            {
+                Debug.Log("[ViewCountlyService] RecordCloseViewAsync: " + name + ", duration: " + duration);
+            }
 
             var currentView = new CountlyEventModel(CountlyEventModel.ViewEvent, currentViewSegment.ToDictionary(), 1, null, duration);
             return await _eventService.RecordEventAsync(currentView);

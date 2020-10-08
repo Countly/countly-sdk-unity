@@ -7,20 +7,20 @@ namespace Notifications
     public class NotificationsCallbackService 
     {
         CountlyConfigModel _config;
-        private List<INotificationListener> _listners;
+        private List<INotificationListener> _listeners;
         internal NotificationsCallbackService(CountlyConfigModel config)
         {
             _config = config;
-            _listners = new List<INotificationListener>();
+            _listeners = new List<INotificationListener>();
         }
 
         public void AddListener(INotificationListener listener)
         {
-            if (_listners.Contains(listener)) {
+            if (_listeners.Contains(listener)) {
                 return;
             }
 
-            _listners.Add(listener);
+            _listeners.Add(listener);
 
             if (_config.EnableConsoleErrorLogging)
             {
@@ -30,7 +30,7 @@ namespace Notifications
 
         public void RemoveListener(INotificationListener listener)
         {
-            _listners.Remove(listener);
+            _listeners.Remove(listener);
 
             if (_config.EnableConsoleErrorLogging)
             {
@@ -40,7 +40,7 @@ namespace Notifications
 
         public void SendMessageToListeners(string data)
         {
-            foreach (INotificationListener listener in _listners)
+            foreach (INotificationListener listener in _listeners)
             {
                 if (listener != null)
                 {

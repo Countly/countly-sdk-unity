@@ -7,7 +7,7 @@ namespace Plugins.Countly.Persistance.Repositories.Impls
 {
     public class NonViewEventRepository : AbstractEventRepository
     {
-        public NonViewEventRepository(Dao<EventEntity> dao, SegmentDao segmentDao) : base(dao, segmentDao)
+        public NonViewEventRepository(Dao<EventEntity> dao, SegmentDao segmentDao, CountlyConfigModel config) : base(dao, segmentDao, config)
         {
         }
 

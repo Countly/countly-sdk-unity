@@ -62,7 +62,7 @@ namespace Plugins.Countly.Impl
             UserDetails = new UserDetailsCountlyServiceWrapper();
             Views = new ViewCountlyServiceWrapper();
             _inputObserver = InputObserverResolver.Resolve();
-            Notifications = new NotificationsCallbackService(new CountlyConfigModel(""));
+            Notifications = new NotificationsCallbackService(new CountlyConfigModel());
         }
 
         private void Update()

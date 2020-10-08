@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Threading.Tasks;
 using Plugins.Countly.Helpers;
+using Plugins.Countly.Models;
 using Plugins.Countly.Services;
 
 namespace Notifications.Impls
@@ -11,15 +12,15 @@ namespace Notifications.Impls
 		private readonly INotificationsService _service;
         private readonly IEventCountlyService _eventCountlyService;
 
-        public ProxyNotificationsService(Action<IEnumerator> startCoroutine, IEventCountlyService eventCountlyService, NotificationsCallbackService notificationsCallbackServcie)
+        public ProxyNotificationsService(CountlyConfigModel config, Action<IEnumerator> startCoroutine, IEventCountlyService eventCountlyService, NotificationsCallbackService notificationsCallbackServcie)
 		{
 
 #if UNITY_EDITOR
             _service = new EditorNotificationsService();
 #elif UNITY_ANDROID
-            _service = new Notifications.Impls.Android.AndroidNotificationsService(eventCountlyService, notificationsCallbackServcie);
+            _service = new Notifications.Impls.Android.AndroidNotificationsService(config, eventCountlyService, notificationsCallbackServcie);
 #elif UNITY_IOS
-			_service = new Notifications.Impls.iOs.IOsNotificationsService(startCoroutine, eventCountlyService, notificationsCallbackServcie);
+			_service = new Notifications.Impls.iOs.IOsNotificationsService(config, startCoroutine, eventCountlyService, notificationsCallbackServcie);
 
 #endif
         }
