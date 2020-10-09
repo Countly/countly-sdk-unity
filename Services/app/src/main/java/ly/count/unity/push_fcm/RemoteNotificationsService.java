@@ -12,7 +12,6 @@ import android.graphics.Color;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
-import android.util.Log;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -42,7 +41,7 @@ public class RemoteNotificationsService extends FirebaseMessagingService {
                 channel.setLightColor(Color.GREEN);
                 notificationManager.createNotificationChannel(channel);
 
-                CountlyPushPlugin.Log("NotificationChannel Created");
+                CountlyPushPlugin.log("NotificationChannel Created", CountlyPushPlugin.LogLevel.DEBUG);
             }
         }
     }
@@ -52,13 +51,13 @@ public class RemoteNotificationsService extends FirebaseMessagingService {
             @Override
             public void onComplete(Task<InstanceIdResult> task) {
                 if (!task.isSuccessful()) {
-                    CountlyPushPlugin.WarningLog("getInstanceId failed", task.getException());
+                    CountlyPushPlugin.log("getInstanceId failed", task.getException(), CountlyPushPlugin.LogLevel.DEBUG);
                     return;
                 }
 
                 // Get new Instance ID token
                 String token = task.getResult().getToken();
-                CountlyPushPlugin.Log("Firebase token: " + token);
+                CountlyPushPlugin.log("Firebase token: " + token, CountlyPushPlugin.LogLevel.DEBUG);
                 UnityPlayer.UnitySendMessage(CountlyPushPlugin.UNITY_ANDROID_BRIDGE, "OnTokenResult", token);
             }
         });
@@ -68,12 +67,12 @@ public class RemoteNotificationsService extends FirebaseMessagingService {
     public void onMessageReceived(RemoteMessage remoteMessage) {
         Map<String, String> data = remoteMessage.getData();
 
-        CountlyPushPlugin.Log("Message id: " + remoteMessage.getMessageId());
-        CountlyPushPlugin.Log("Message type: " + remoteMessage.getMessageType());
-        CountlyPushPlugin.Log("Message from: " + remoteMessage.getFrom());
+        CountlyPushPlugin.log("Message id: " + remoteMessage.getMessageId(), CountlyPushPlugin.LogLevel.DEBUG);
+        CountlyPushPlugin.log("Message type: " + remoteMessage.getMessageType(), CountlyPushPlugin.LogLevel.DEBUG);
+        CountlyPushPlugin.log("Message from: " + remoteMessage.getFrom(), CountlyPushPlugin.LogLevel.DEBUG);
         if (!data.isEmpty()) {
             JSONObject jsonObject = new JSONObject(remoteMessage.getData());
-            CountlyPushPlugin.Log("Message data: " + jsonObject.toString());
+            CountlyPushPlugin.log("Message data: " + jsonObject.toString(), CountlyPushPlugin.LogLevel.DEBUG);
         }
 
         if (!data.isEmpty())
@@ -83,7 +82,7 @@ public class RemoteNotificationsService extends FirebaseMessagingService {
     private void ProcessData(Map<String, String> data) {
 
         CountlyPushPlugin.Message message = CountlyPushPlugin.decodeMessage(data);
-        CountlyPushPlugin.Log("Message Impl " + message.toString());
+        CountlyPushPlugin.log("Message Impl " + message.toString(), CountlyPushPlugin.LogLevel.DEBUG);
         sendNotification(message);
     }
 

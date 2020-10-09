@@ -18,12 +18,12 @@ import static ly.count.unity.push_fcm.CountlyPushPlugin.EXTRA_MESSAGE;
 public class NotificationBroadcastReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        CountlyPushPlugin.Log("NotificationBroadcastReceiver::onReceive");
+        CountlyPushPlugin.log("NotificationBroadcastReceiver::onReceive", CountlyPushPlugin.LogLevel.DEBUG);
 
         Bundle bundle = intent.getExtras();
 
         if (bundle == null) {
-            CountlyPushPlugin.Log("bundle is null");
+            CountlyPushPlugin.log("bundle is null", CountlyPushPlugin.LogLevel.DEBUG);
             return;
         }
 
@@ -32,7 +32,7 @@ public class NotificationBroadcastReceiver extends BroadcastReceiver {
 
         String messageId = message.getId();
 
-        CountlyPushPlugin.Log("Message ID: " + messageId);
+        CountlyPushPlugin.log("Message ID: " + messageId, CountlyPushPlugin.LogLevel.DEBUG);
 
         if (!MessageStore.isInitialized()) {
             MessageStore.init(context);
@@ -40,7 +40,7 @@ public class NotificationBroadcastReceiver extends BroadcastReceiver {
 
         if (!messageId.isEmpty()) {
             boolean flag = MessageStore.storeMessageData(messageId, Integer.toString(index));
-            CountlyPushPlugin.Log("StoreMessageData: " + flag);
+            CountlyPushPlugin.log("StoreMessageData: " + flag, CountlyPushPlugin.LogLevel.DEBUG);
         }
 
         Intent notificationIntent = new Intent(context, UnityPlayerActivity.class);
@@ -52,7 +52,7 @@ public class NotificationBroadcastReceiver extends BroadcastReceiver {
             i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             i.putExtra(EXTRA_ACTION_INDEX, index);
             context.startActivity(i);
-            CountlyPushPlugin.Log("URI: " + uri.toString());
+            CountlyPushPlugin.log("URI: " + uri.toString(), CountlyPushPlugin.LogLevel.DEBUG);
         } else {
             context.startActivity(notificationIntent);
         }
@@ -61,7 +61,7 @@ public class NotificationBroadcastReceiver extends BroadcastReceiver {
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.cancel(messageId, 0);
 
-        CountlyPushPlugin.Log("Index: " + index);
+        CountlyPushPlugin.log("Index: " + index, CountlyPushPlugin.LogLevel.DEBUG);
         UnityPlayer.UnitySendMessage(CountlyPushPlugin.UNITY_ANDROID_BRIDGE, "onMessageReceived", messageId);
     }
 }

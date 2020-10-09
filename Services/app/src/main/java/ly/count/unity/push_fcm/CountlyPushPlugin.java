@@ -43,33 +43,32 @@ public class CountlyPushPlugin {
         Log.d(CountlyPushPlugin.TAG, "setEnableLog: " + flag);
     }
 
-    public static void Log(String message) {
-        if (enableLog) {
-            Log.d(CountlyPushPlugin.TAG, message);
-        }
+    enum LogLevel {INFO, DEBUG, VERBOSE, WARNING, ERROR}
+
+    static void log(String message, LogLevel logLevel) {
+        log(message, null, logLevel);
     }
 
-    public static void ErrorLog(String message) {
-        if (enableLog) {
-            Log.e(CountlyPushPlugin.TAG, message);
+    static void log(String message, Throwable tr, LogLevel logLevel) {
+        if (!enableLog) {
+            return;
         }
-    }
-
-    public static void ErrorLog(String message, Throwable tr) {
-        if (enableLog) {
-            Log.e(CountlyPushPlugin.TAG, message, tr);
-        }
-    }
-
-    public static void WarningLog(String message) {
-        if (enableLog) {
-            Log.w(CountlyPushPlugin.TAG, message);
-        }
-    }
-
-    public static void WarningLog(String message, Throwable tr) {
-        if (enableLog) {
-            Log.w(CountlyPushPlugin.TAG, message, tr);
+        switch (logLevel) {
+            case INFO:
+                Log.i(TAG, message, tr);
+                break;
+            case DEBUG:
+                Log.d(TAG, message, tr);
+                break;
+            case WARNING:
+                Log.w(TAG, message, tr);
+                break;
+            case ERROR:
+                Log.e(TAG, message, tr);
+                break;
+            case VERBOSE:
+                Log.v(TAG, message, tr);
+                break;
         }
     }
 
