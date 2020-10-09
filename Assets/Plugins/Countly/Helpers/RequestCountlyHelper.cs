@@ -157,7 +157,7 @@ namespace Plugins.Countly.Helpers
         /// </summary>
         /// <param name="queryParams"></param>
         /// <returns></returns>
-        internal CountlyResponse GetResponse(Dictionary<string, object> queryParams, bool addToRequestQueue = false)
+        internal CountlyResponse GetResponse(Dictionary<string, object> queryParams, bool addToRequestQueue = true)
         {
             var data = BuildPostRequest(queryParams);
             if (_config.EnablePost || data.Length > 1800)
@@ -174,7 +174,7 @@ namespace Plugins.Countly.Helpers
         /// <param name="postData"></param>
         /// <returns></returns>
         internal Task<CountlyResponse> GetResponseAsync(Dictionary<string, object> queryParams,
-            bool addToRequestQueue = false)
+            bool addToRequestQueue = true)
         {
             var data = BuildPostRequest(queryParams);
             if (_config.EnablePost || data.Length > 1800)

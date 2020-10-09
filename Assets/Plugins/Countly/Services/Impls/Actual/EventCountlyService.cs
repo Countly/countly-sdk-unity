@@ -92,7 +92,7 @@ namespace Plugins.Countly.Services.Impls.Actual
         /// <summary>
         ///     Reports all recorded view events to the server
         /// </summary>
-        public async Task<CountlyResponse> ReportAllRecordedViewEventsAsync(bool addToRequestQueue = false)
+        public async Task<CountlyResponse> ReportAllRecordedViewEventsAsync(bool addToRequestQueue = true)
         {
             if (_viewEventRepo.Models.Count == 0)
             {
@@ -127,7 +127,7 @@ namespace Plugins.Countly.Services.Impls.Actual
         /// <summary>
         ///     Reports all recorded events to the server
         /// </summary>
-        public async Task<CountlyResponse> ReportAllRecordedNonViewEventsAsync(bool addToRequestQueue = false)
+        public async Task<CountlyResponse> ReportAllRecordedNonViewEventsAsync(bool addToRequestQueue = true)
         {
             if (_nonViewEventRepo.Models.Count == 0)
             {
