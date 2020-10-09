@@ -1,9 +1,11 @@
 ﻿using Notifications;
 using Plugins.Countly;
+using Plugins.Countly.Helpers;
 using Plugins.Countly.Impl;
 using Plugins.Countly.Models;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public class CountlyEntryPoint : MonoBehaviour, INotificationListener
@@ -27,13 +29,12 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
         //#endif
     }
 
-    private void Start() {
-        // k GetHashCode or GetInstanceId?
-       countly.Notifications.AddListener(this);
+    private void Start()
+    {
+        countly.Notifications.AddListener(this);
     }
 
     private void Stop() {
-        // k GetHashCode or GetInstanceId?
         countly.Notifications.RemoveListener(this);
     }
 
@@ -228,4 +229,10 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
     {
         Debug.Log("[Countly Example] OnReceive: " + message);
     }
+
+    public  void RemoteConfig()
+    {
+        Debug.Log("RemoteConfig: " + countly.RemoteConfigs.Configs);
+    }
+
 }

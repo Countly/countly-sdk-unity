@@ -32,6 +32,28 @@ namespace Plugins.Countly.Services.Impls.Actual
 
         public async Task<CountlyResponse> InitConfig()
         {
+            Configs = FetchConfigFromDB();
+            return await UpdateConfig();
+        }
+
+        private Dictionary<string, object> FetchConfigFromDB() {
+            Dictionary<string, object> config = null;
+            var allConfigs = _configDao.LoadAll();
+            if (allConfigs != null && allConfigs.Count > 0)
+            {
+                config = Converter.ConvertJsonToDictionary(allConfigs[0].Json);
+
+                if (_config.EnableConsoleErrorLogging)
+                {
+                    Debug.Log("Configs: " + config.ToString());
+                }
+            }
+
+            return config;
+        }
+
+        private async Task<CountlyResponse> UpdateConfig()
+        {
             var requestParams =
                 new Dictionary<string, object>
                 {
@@ -52,19 +74,10 @@ namespace Plugins.Countly.Services.Impls.Actual
                 };
                 _configDao.Save(configEntity);
                 Configs = Converter.ConvertJsonToDictionary(response.Data);
-            }
-            else
-            {
-                var allConfigs = _configDao.LoadAll();
-                if (allConfigs != null && allConfigs.Count > 0)
-                {
-                    Configs = Converter.ConvertJsonToDictionary(allConfigs[0].Json);
 
-                    if (_config.EnableConsoleErrorLogging)
-                    {
-                        Debug.Log("Configs: " + Configs.Count);
-                    }
-                   
+                if (_config.EnableConsoleErrorLogging)
+                {
+                    Debug.Log("[Countly] RemoteConfigCountlyService UpdateConfig: " + response.ToString());
                 }
             }
 

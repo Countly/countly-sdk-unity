@@ -96,9 +96,11 @@ namespace Plugins.Countly.Impl
 
             Init(requestRepo, eventViewRepo, eventNonViewRepo, configDao, eventNumberInSameSessionHelper);
 
+            
             Initialization.Begin(Auth.ServerUrl, Auth.AppKey);
             Device.InitDeviceId(Auth.DeviceId);
 
+            await RemoteConfigs.InitConfig();
             await Initialization.SetDefaults(Config);
         }
 
