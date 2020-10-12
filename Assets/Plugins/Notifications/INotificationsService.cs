@@ -6,8 +6,9 @@ namespace Notifications
 {
 	public interface INotificationsService
 	{
-        void GetMessage(Action result);
         void GetToken(Action<string> result);
+        void OnNotificationClicked(Action<string, int> result);
+        void OnNotificationReceived(Action<string> result);
         Task<CountlyResponse> ReportPushActionAsync();
     }
 }

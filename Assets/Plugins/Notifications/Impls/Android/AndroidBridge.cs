@@ -1,3 +1,5 @@
+using Newtonsoft.Json.Linq;
+using Plugins.Countly.Models;
 using System;
 using UnityEngine;
 
@@ -5,21 +7,49 @@ namespace Notifications.Impls.Android
 {
 	public class AndroidBridge : MonoBehaviour
 	{
-        private Action _onMessageResult;
+        private Action<string> _OnNotificationReceiveResult;
+        private Action<string, int> _OnNotificationClickResult;
         private Action<string> _onTokenResult;
+        public CountlyConfigModel Config { get; set; }
 
-        public void ListenMessageResult(Action result) => _onMessageResult = result;
+
+        public void ListenReceiveResult(Action<string> result) => _OnNotificationReceiveResult = result;
+        public void ListenClickResult(Action<string, int> result) => _OnNotificationClickResult = result;
         public void ListenTokenResult(Action<string> result) => _onTokenResult = result;
 
 		public void OnTokenResult(string token)
 		{
 			_onTokenResult?.Invoke(token);
-			UnityEngine.Debug.Log("[AndroidBridge] Firebase token: " + token);
+            if(Config.EnableConsoleErrorLogging)
+            {
+                Debug.Log("[Countly] AndroidBridge Firebase token: " + token);
+            }
+			
 		}
 
-        public void onMessageReceived(string messageId) {
-            _onMessageResult?.Invoke();
-            UnityEngine.Debug.Log("[CountlyAndroidBridge] onMessageReceived");
+        public void OnNotificationReceived(string data) {
+            _OnNotificationReceiveResult?.Invoke(data);
+            if (Config.EnableConsoleErrorLogging)
+            {
+                Debug.Log("[CountlyAndroidBridge] onMessageReceived");
+            }
         }
-	}
+
+        public void OnNotificationClicked(string data)
+        {
+            int index = 0;
+
+            JObject jObject = JObject.Parse(data);
+
+            if (jObject != null)
+            {
+                index = (int)jObject.GetValue("click_index");
+            }
+                _OnNotificationClickResult?.Invoke(data, index);
+            if (Config.EnableConsoleErrorLogging)
+            {
+                Debug.Log("[CountlyAndroidBridge] OnNotificationClicked");
+            }
+        }
+    }
 }

@@ -18,12 +18,14 @@ namespace Plugins.Countly.Services.Impls.Actual
         private readonly IEventCountlyService _eventCountlyService;
         private readonly RequestCountlyHelper _requestCountlyHelper;
         private readonly INotificationsService _notificationsService;
+        private readonly NotificationsCallbackService _notificationsCallbackService;
 
-        public PushCountlyService(IEventCountlyService eventCountlyService, RequestCountlyHelper requestCountlyHelper, INotificationsService notificationsService)
+        public PushCountlyService(IEventCountlyService eventCountlyService, RequestCountlyHelper requestCountlyHelper, INotificationsService notificationsService, NotificationsCallbackService notificationsCallbackService)
         {
             _eventCountlyService = eventCountlyService;
             _requestCountlyHelper = requestCountlyHelper;
             _notificationsService = notificationsService;
+            _notificationsCallbackService = notificationsCallbackService;
         }
 
         /// <summary>
@@ -44,9 +46,15 @@ namespace Plugins.Countly.Services.Impls.Actual
                 await ReportPushActionAsync();
             });
 
-            _notificationsService.GetMessage(async () =>
+            _notificationsService.OnNotificationClicked(async (data, index) =>
             {
+                _notificationsCallbackService.NotifyOnNotificationClicked(data, index);
                 await ReportPushActionAsync();
+            });
+
+            _notificationsService.OnNotificationReceived(data =>
+            {
+                _notificationsCallbackService.NotifyOnNotificationReceived(data);
             });
 
         }

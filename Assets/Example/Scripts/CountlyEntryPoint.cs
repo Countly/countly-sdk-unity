@@ -1,12 +1,14 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using Notifications;
 using Plugins.Countly;
+using Plugins.Countly.Helpers;
 using Plugins.Countly.Impl;
 using Plugins.Countly.Models;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
-public class CountlyEntryPoint : MonoBehaviour
+public class CountlyEntryPoint : MonoBehaviour, INotificationListener
 {
 	public Plugins.Countly.Impl.Countly countlyPrefab;
 	public CountlyWrapper countlyWrapper;
@@ -25,6 +27,15 @@ public class CountlyEntryPoint : MonoBehaviour
         //#else
         //		countly = Instantiate(countlyWrapper);
         //#endif
+    }
+
+    private void Start()
+    {
+        countly.Notifications.AddListener(this);
+    }
+
+    private void Stop() {
+        countly.Notifications.RemoveListener(this);
     }
 
     public async void BasicEvent()
@@ -212,5 +223,23 @@ public class CountlyEntryPoint : MonoBehaviour
         countly.UserDetails.Push("Mole", new string[] { "Left Cheek", "Back", "Toe" }); ;
         await countly.UserDetails.SaveAsync();
 
+    }
+
+    public async Task RemoteConfigAsync()
+    {
+        await countly.RemoteConfigs.Update();
+
+        Dictionary<string, object> config = countly.RemoteConfigs.Configs;
+        Debug.Log("RemoteConfig: " + config.ToString());
+    }
+
+    public void OnNotificationReceived(string message)
+    {
+        Debug.Log("[Countly Example] OnNotificationReceived: " + message);
+    }
+
+    public void OnNotificationClicked(string message, int index)
+    {
+        Debug.Log("[Countly Example] OnNoticicationClicked: " + message + ", index: " + index);
     }
 }

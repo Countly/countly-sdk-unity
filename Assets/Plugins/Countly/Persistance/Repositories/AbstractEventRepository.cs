@@ -10,10 +10,13 @@ namespace Plugins.Countly.Persistance.Repositories
     public abstract class AbstractEventRepository : Repository<EventEntity, CountlyEventModel>
     {
         private readonly SegmentDao _segmentDao;
+        protected readonly CountlyConfigModel _config;
 
-        protected AbstractEventRepository(Dao<EventEntity> dao, SegmentDao segmentDao) : base(dao)
+        protected AbstractEventRepository(Dao<EventEntity> dao, SegmentDao segmentDao, CountlyConfigModel config) : base(dao, config)
         {
+            _config = config;
             _segmentDao = segmentDao;
+            
         }
 
         public override void Initialize()
@@ -50,7 +53,11 @@ namespace Plugins.Countly.Persistance.Repositories
                 segmentEntity.EventId = model.Id;
                 _segmentDao.Save(segmentEntity);
             }
-            Debug.Log("[" + GetType().Name + "] Event repo enqueue: \n" + model + ", segment: " + segmentModel);
+
+            if (_config.EnableConsoleErrorLogging)
+            {
+                Debug.Log("[" + GetType().Name + "] Event repo enqueue: \n" + model + ", segment: " + segmentModel);
+            }
             return true;
         }
 

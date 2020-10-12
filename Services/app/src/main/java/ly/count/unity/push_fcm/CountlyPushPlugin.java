@@ -1,4 +1,5 @@
 package ly.count.unity.push_fcm;
+
 import android.app.Notification;
 import android.net.Uri;
 import android.os.Parcel;
@@ -17,7 +18,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class CountlyPushPlugin {
-    public static final String TAG = "[CountlyPluginPush]";
+    private static final String TAG = "[CountlyPluginPush]";
     public static final String UNITY_ANDROID_BRIDGE = "[Android] Bridge";
     public static final String CHANNEL_ID = "ly.count.unity.sdk.CountlyPush.CHANNEL_ID";
     public static final String EXTRA_MESSAGE = "ly.count.android.sdk.CountlyPush.message";
@@ -34,6 +35,42 @@ public class CountlyPushPlugin {
     public static final String KEY_BADGE = "badge";
     public static final String KEY_TITLE = "title";
     public static final String KEY_MESSAGE = "message";
+
+    private static boolean enableLog = true;
+
+    public static void setEnableLog(boolean flag) {
+        enableLog = flag;
+        Log.d(CountlyPushPlugin.TAG, "setEnableLog: " + flag);
+    }
+
+    enum LogLevel {INFO, DEBUG, VERBOSE, WARNING, ERROR}
+
+    static void log(String message, LogLevel logLevel) {
+        log(message, null, logLevel);
+    }
+
+    static void log(String message, Throwable tr, LogLevel logLevel) {
+        if (!enableLog) {
+            return;
+        }
+        switch (logLevel) {
+            case INFO:
+                Log.i(TAG, message, tr);
+                break;
+            case DEBUG:
+                Log.d(TAG, message, tr);
+                break;
+            case WARNING:
+                Log.w(TAG, message, tr);
+                break;
+            case ERROR:
+                Log.e(TAG, message, tr);
+                break;
+            case VERBOSE:
+                Log.v(TAG, message, tr);
+                break;
+        }
+    }
 
     /**
      * Decode message from {@code RemoteMessage#getData()} map into {@link Message}.
@@ -223,6 +260,10 @@ public class CountlyPushPlugin {
 
         public int hashCode() {
             return id.hashCode();
+        }
+
+        public Map<String, String> getData() {
+            return data;
         }
 
         @Override

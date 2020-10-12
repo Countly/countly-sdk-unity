@@ -1,7 +1,8 @@
 using System;
 using Countly.Input;
+using Notifications;
+using Plugins.Countly.Models;
 using Plugins.Countly.Services;
-using Plugins.Countly.Services.Impls.Actual;
 using Plugins.Countly.Services.Impls.Wrapper;
 using UnityEngine;
 
@@ -30,7 +31,9 @@ namespace Plugins.Countly.Impl
         public IUserDetailsCountlyService UserDetails { get; private set; }
 
         public IViewCountlyService Views { get; private set; }
-        
+
+        public NotificationsCallbackService Notifications { get; set; }
+
         public async void ReportAll()
         {
             await Events.ReportAllRecordedViewEventsAsync();
@@ -59,6 +62,7 @@ namespace Plugins.Countly.Impl
             UserDetails = new UserDetailsCountlyServiceWrapper();
             Views = new ViewCountlyServiceWrapper();
             _inputObserver = InputObserverResolver.Resolve();
+            Notifications = new NotificationsCallbackService(new CountlyConfigModel());
         }
 
         private void Update()

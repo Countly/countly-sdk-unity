@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using Countly.Input;
 using iBoxDB.LocalServer;
+using Notifications;
 using Notifications.Impls;
 using Plugins.Countly.Helpers;
 using Plugins.Countly.Models;
@@ -48,6 +49,9 @@ namespace Plugins.Countly.Impl
 
         private SessionCountlyService Session { get; set; }
 
+        public NotificationsCallbackService Notifications { get; set; }
+        
+
         public async void ReportAll()
         {
             await Events.ReportAllRecordedViewEventsAsync();
@@ -64,7 +68,7 @@ namespace Plugins.Countly.Impl
         /// <summary>
         ///     Initialize SDK at the start of your app
         /// </summary>
-        private async void Start()
+        private async void Awake()
         {
             DontDestroyOnLoad(gameObject);
             Instance = this;
@@ -79,9 +83,9 @@ namespace Plugins.Countly.Impl
             var nonViewEventDao = new Dao<EventEntity>(auto, EntityType.NonViewEvents.ToString());  
             var nonViewSegmentDao = new SegmentDao(auto, EntityType.NonViewEventSegments.ToString());
 
-            var requestRepo = new RequestRepository(requestDao);
-            var eventViewRepo = new ViewEventRepository(viewEventDao, viewSegmentDao);
-            var eventNonViewRepo = new NonViewEventRepository(nonViewEventDao, nonViewSegmentDao);
+            var requestRepo = new RequestRepository(requestDao, Config);
+            var eventViewRepo = new ViewEventRepository(viewEventDao, viewSegmentDao, Config);
+            var eventNonViewRepo = new NonViewEventRepository(nonViewEventDao, nonViewSegmentDao, Config);
             var eventNrInSameSessionDao = new EventNumberInSameSessionDao(auto, EntityType.EventNumberInSameSessions.ToString());
 
             requestRepo.Initialize();
@@ -92,6 +96,7 @@ namespace Plugins.Countly.Impl
 
             Init(requestRepo, eventViewRepo, eventNonViewRepo, configDao, eventNumberInSameSessionHelper);
 
+            
             Initialization.Begin(Auth.ServerUrl, Auth.AppKey);
             Device.InitDeviceId(Auth.DeviceId);
 
@@ -106,20 +111,22 @@ namespace Plugins.Countly.Impl
 
             Events = new EventCountlyService(Config, requests, viewEventRepo, nonViewEventRepo, eventNumberInSameSessionHelper);
             OptionalParameters = new OptionalParametersCountlyService();
-            var notificationsService = new ProxyNotificationsService(InternalStartCoroutine, Events);
-            _push = new PushCountlyService(Events, requests, notificationsService);
+            Notifications = new NotificationsCallbackService(Config);
+            var notificationsService = new ProxyNotificationsService(Config, InternalStartCoroutine, Events);
+            _push = new PushCountlyService(Events, requests, notificationsService, Notifications);
             Session = new SessionCountlyService(Config, _push, requests, OptionalParameters, eventNumberInSameSessionHelper);
+            
             Consents = new ConsentCountlyService();
             CrashReports = new CrashReportsCountlyService(Config, requests);
 
             Device = new DeviceIdCountlyService(Session, requests, Events, countlyUtils);
             Initialization = new InitializationCountlyService(Session);
 
-            RemoteConfigs = new RemoteConfigCountlyService(requests, countlyUtils, configDao);
+            RemoteConfigs = new RemoteConfigCountlyService(Config, requests, countlyUtils, configDao);
 
             StarRating = new StarRatingCountlyService(Events);
             UserDetails = new UserDetailsCountlyService(requests, countlyUtils);
-            Views = new ViewCountlyService(Events);
+            Views = new ViewCountlyService(Config, Events);
             _inputObserver = InputObserverResolver.Resolve();
         }
 
@@ -129,7 +136,11 @@ namespace Plugins.Countly.Impl
         /// </summary>
         private async void OnApplicationQuit()
         {
-            Debug.Log("[Countly] OnApplicationQuit");
+            if (Config.EnableConsoleErrorLogging)
+            {
+                Debug.Log("[Countly] OnApplicationQuit");
+            }
+
             if (Session != null && Session.IsSessionInitiated && !Config.EnableManualSessionHandling)
             {
                 ReportAll();
@@ -140,7 +151,11 @@ namespace Plugins.Countly.Impl
 
         private void OnApplicationFocus(bool hasFocus)
         {
-            Debug.Log("[Countly] OnApplicationFocus: " + hasFocus);
+            if (Config.EnableConsoleErrorLogging)
+            {
+                Debug.Log("[Countly] OnApplicationFocus: " + hasFocus);
+            }
+
             if (hasFocus)
             {
                 SubscribeAppLog();
@@ -153,7 +168,11 @@ namespace Plugins.Countly.Impl
 
         private void OnApplicationPause(bool pauseStatus)
         {
-            Debug.Log("[Countly] OnApplicationPause: " + pauseStatus);
+            if (Config.EnableConsoleErrorLogging)
+            {
+                Debug.Log("[Countly] OnApplicationPause: " + pauseStatus);
+            }
+
             if (pauseStatus)
             {
                 HandleAppPauseOrFocus();

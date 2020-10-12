@@ -11,18 +11,24 @@ import com.unity3d.player.UnityPlayer;
 import com.unity3d.player.UnityPlayerActivity;
 
 import android.content.BroadcastReceiver;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.Map;
+
 import static ly.count.unity.push_fcm.CountlyPushPlugin.EXTRA_ACTION_INDEX;
 import static ly.count.unity.push_fcm.CountlyPushPlugin.EXTRA_MESSAGE;
 
 public class NotificationBroadcastReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.d(CountlyPushPlugin.TAG, "NotificationBroadcastReceiver::onReceive");
+        CountlyPushPlugin.log("NotificationBroadcastReceiver::onReceive", CountlyPushPlugin.LogLevel.DEBUG);
 
         Bundle bundle = intent.getExtras();
 
-        if(bundle == null) {
-            Log.e(CountlyPushPlugin.TAG, "bundle is null");
+        if (bundle == null) {
+            CountlyPushPlugin.log("bundle is null", CountlyPushPlugin.LogLevel.DEBUG);
             return;
         }
 
@@ -30,7 +36,8 @@ public class NotificationBroadcastReceiver extends BroadcastReceiver {
         CountlyPushPlugin.Message message = bundle.getParcelable(EXTRA_MESSAGE);
 
         String messageId = message.getId();
-        Log.d(CountlyPushPlugin.TAG, "Message ID: " + messageId);
+
+        CountlyPushPlugin.log("Message ID: " + messageId, CountlyPushPlugin.LogLevel.DEBUG);
 
         if (!MessageStore.isInitialized()) {
             MessageStore.init(context);
@@ -38,21 +45,20 @@ public class NotificationBroadcastReceiver extends BroadcastReceiver {
 
         if (!messageId.isEmpty()) {
             boolean flag = MessageStore.storeMessageData(messageId, Integer.toString(index));
-            Log.d(CountlyPushPlugin.TAG, "StoreMessageData: " + flag);
+            CountlyPushPlugin.log("StoreMessageData: " + flag, CountlyPushPlugin.LogLevel.DEBUG);
         }
 
         Intent notificationIntent = new Intent(context, UnityPlayerActivity.class);
         notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
-        Uri uri = index == 0 ? message.getLink() : message.getButtons().get(index -1).getLink();
+        Uri uri = index == 0 ? message.getLink() : message.getButtons().get(index - 1).getLink();
         if (uri != null) {
             Intent i = new Intent(Intent.ACTION_VIEW, uri);
             i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             i.putExtra(EXTRA_ACTION_INDEX, index);
             context.startActivity(i);
-            Log.d(CountlyPushPlugin.TAG, "URI: " + uri.toString());
-        }
-        else {
+            CountlyPushPlugin.log("URI: " + uri.toString(), CountlyPushPlugin.LogLevel.DEBUG);
+        } else {
             context.startActivity(notificationIntent);
         }
 
@@ -60,7 +66,14 @@ public class NotificationBroadcastReceiver extends BroadcastReceiver {
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.cancel(messageId, 0);
 
-        Log.d(CountlyPushPlugin.TAG, "Index: " + index);
-        UnityPlayer.UnitySendMessage(CountlyPushPlugin.UNITY_ANDROID_BRIDGE, "onMessageReceived", messageId);
+        CountlyPushPlugin.log("Index: " + index, CountlyPushPlugin.LogLevel.DEBUG);
+
+        try {
+            JSONObject jsonObject = new JSONObject(message.getData());
+            jsonObject.put("click_index", index);
+            UnityPlayer.UnitySendMessage(CountlyPushPlugin.UNITY_ANDROID_BRIDGE, "OnNotificationClicked", jsonObject.toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 }

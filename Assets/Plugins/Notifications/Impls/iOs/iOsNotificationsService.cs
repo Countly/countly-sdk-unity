@@ -1,5 +1,6 @@
 using Newtonsoft.Json.Linq;
 using Plugins.Countly.Helpers;
+using Plugins.Countly.Models;
 using Plugins.Countly.Services;
 using System;
 using System.Collections;
@@ -13,18 +14,15 @@ namespace Notifications.Impls.iOs
 {
     public class IOsNotificationsService : INotificationsService
     {
+        private readonly CountlyConfigModel _config;
         private readonly Action<IEnumerator> _startCoroutine;
         private readonly IEventCountlyService _eventCountlyService;
 
-        public IOsNotificationsService(Action<IEnumerator> startCoroutine, IEventCountlyService eventCountlyService)
+        public IOsNotificationsService(CountlyConfigModel config, Action<IEnumerator> startCoroutine, IEventCountlyService eventCountlyService)
         {
+            _config = config;
             _startCoroutine = startCoroutine;
             _eventCountlyService = eventCountlyService;
-        }
-
-        public void GetMessage(Action result)
-        {
-            result.Invoke();    
         }
 
         public void GetToken(Action<string> result)
@@ -34,7 +32,8 @@ namespace Notifications.Impls.iOs
 
         private IEnumerator RequestAuthorization(Action<string> result)
         {
-            Debug.Log("[IOsNotificationsService] RequestAuthorization");
+            if(_config.EnableConsoleErrorLogging)
+                Debug.Log("[IOsNotificationsService] RequestAuthorization");
 #if UNITY_IOS
             using (var req = new AuthorizationRequest(AuthorizationOption.Alert | AuthorizationOption.Badge, true))
             {
@@ -53,7 +52,8 @@ namespace Notifications.Impls.iOs
                 result.Invoke(req.DeviceToken);
             }
 #else
-            Debug.Log("[Countly] IOsNotificationsService, RequestAuthorization, execution will be skipped, Unity.Notification.iOS exists only on IOS platform");
+            if (_config.EnableConsoleErrorLogging)
+                Debug.Log("[Countly] IOsNotificationsService, RequestAuthorization, execution will be skipped, Unity.Notification.iOS exists only on IOS platform");
             yield return null;
 #endif
         }
@@ -61,6 +61,19 @@ namespace Notifications.Impls.iOs
         public async Task<CountlyResponse> ReportPushActionAsync()
         {
             return await Task.FromResult(new CountlyResponse());
+        }
+
+        public void OnNotificationClicked(Action<string, int> result)
+        {
+            int index = 0;
+            string data = "";
+            result.Invoke(data, index);
+        }
+
+        public void OnNotificationReceived(Action<string> result)
+        {
+            string data = "";
+            result.Invoke(data);
         }
     }
 }
