@@ -238,7 +238,7 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
         Debug.Log("[Countly Example] OnNotificationReceived: " + message);
     }
 
-    public void OnNoticicationClicked(string message, int index)
+    public void OnNotificationClicked(string message, int index)
     {
         Debug.Log("[Countly Example] OnNoticicationClicked: " + message + ", index: " + index);
     }

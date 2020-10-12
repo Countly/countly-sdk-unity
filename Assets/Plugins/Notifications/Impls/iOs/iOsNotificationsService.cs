@@ -63,7 +63,7 @@ namespace Notifications.Impls.iOs
             return await Task.FromResult(new CountlyResponse());
         }
 
-        public void OnNoticicationClicked(Action<string, int> result)
+        public void OnNotificationClicked(Action<string, int> result)
         {
             int index = 0;
             string data = "";

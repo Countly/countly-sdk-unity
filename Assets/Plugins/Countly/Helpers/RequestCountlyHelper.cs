@@ -42,7 +42,12 @@ namespace Plugins.Countly.Helpers
         internal void ProcessQueue()
         {
             var requests = _requestRepo.Models.ToArray();
-            Debug.Log("[Countly RequestCountlyHelper] Process queue, requests: " + requests.Length);
+
+            if (_config.EnableConsoleErrorLogging)
+            {
+                Debug.Log("[Countly RequestCountlyHelper] Process queue, requests: " + requests.Length);
+            }
+
             foreach (var reqModel in requests)
             {
                 var isProcessed = false;

@@ -54,13 +54,13 @@ namespace Notifications
             }
         }
 
-        public void NotifyOnNoticicationClicked(string data, int index)
+        public void NotifyOnNotificationClicked(string data, int index)
         {
             foreach (INotificationListener listener in _listeners)
             {
                 if (listener != null)
                 {
-                    listener.OnNoticicationClicked(data, index);
+                    listener.OnNotificationClicked(data, index);
                 }
             }
 
@@ -74,6 +74,6 @@ namespace Notifications
     public interface INotificationListener
     {
         void OnNotificationReceived(string message);
-        void OnNoticicationClicked(string message, int index);
+        void OnNotificationClicked(string message, int index);
     }
 }

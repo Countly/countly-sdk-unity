@@ -44,7 +44,7 @@ namespace Notifications.Impls.Android
             }
         }
 
-        public void OnNoticicationClicked(Action<string, int> result)
+        public void OnNotificationClicked(Action<string, int> result)
         {
             _bridge.ListenClickResult(result);
         }
@@ -94,8 +94,10 @@ namespace Notifications.Impls.Android
                         Identifier = identifier
                     };
 
-                    if(_config.EnableConsoleErrorLogging)
+                    if (_config.EnableConsoleErrorLogging)
+                    {
                         Debug.Log("[Countly] ReportPushActionAsync key: " + CountlyEventModel.PushActionEvent + ", segments: " + segment);
+                    }
 
                     await _eventCountlyService.ReportCustomEventAsync(
                         CountlyEventModel.PushActionEvent, segment.ToDictionary());
