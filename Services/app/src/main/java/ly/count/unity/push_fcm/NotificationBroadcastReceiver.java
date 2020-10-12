@@ -12,6 +12,11 @@ import com.unity3d.player.UnityPlayerActivity;
 
 import android.content.BroadcastReceiver;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.Map;
+
 import static ly.count.unity.push_fcm.CountlyPushPlugin.EXTRA_ACTION_INDEX;
 import static ly.count.unity.push_fcm.CountlyPushPlugin.EXTRA_MESSAGE;
 
@@ -62,6 +67,13 @@ public class NotificationBroadcastReceiver extends BroadcastReceiver {
         notificationManager.cancel(messageId, 0);
 
         CountlyPushPlugin.log("Index: " + index, CountlyPushPlugin.LogLevel.DEBUG);
-        UnityPlayer.UnitySendMessage(CountlyPushPlugin.UNITY_ANDROID_BRIDGE, "onMessageReceived", messageId);
+
+        try {
+            JSONObject jsonObject = new JSONObject(message.getData());
+            jsonObject.put("click_index", index);
+            UnityPlayer.UnitySendMessage(CountlyPushPlugin.UNITY_ANDROID_BRIDGE, "OnNotificationClicked", jsonObject.toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 }

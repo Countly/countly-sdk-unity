@@ -19,13 +19,11 @@ namespace Notifications.Impls.Android
 		private readonly AndroidBridge _bridge;
         private readonly CountlyConfigModel _config;
         private readonly IEventCountlyService _eventCountlyService;
-        private readonly NotificationsCallbackService _notificationsCallbackServcie;
 
-        public AndroidNotificationsService(CountlyConfigModel config, IEventCountlyService eventCountlyService, NotificationsCallbackService notificationsCallbackServcie)
+        public AndroidNotificationsService(CountlyConfigModel config, IEventCountlyService eventCountlyService)
 		{
             _config = config;
             _eventCountlyService = eventCountlyService;
-            _notificationsCallbackServcie = notificationsCallbackServcie;
 
             var gameObject = new GameObject(BridgeName);
 			_bridge = gameObject.AddComponent<AndroidBridge>();
@@ -36,11 +34,6 @@ namespace Notifications.Impls.Android
 
         }
 
-        public void GetMessage(Action result)
-        {
-            _bridge.ListenMessageResult(result);
-        }
-
         public void GetToken(Action<string> result)
 		{
 			_bridge.ListenTokenResult(result);
@@ -49,6 +42,16 @@ namespace Notifications.Impls.Android
             {
                 jc.Call("getToken");
             }
+        }
+
+        public void OnNoticicationClicked(Action<string, int> result)
+        {
+            _bridge.ListenClickResult(result);
+        }
+
+        public void OnNotificationReceived(Action<string> result)
+        {
+            _bridge.ListenReceiveResult(result);
         }
 
         public async Task<CountlyResponse> ReportPushActionAsync()
@@ -101,8 +104,6 @@ namespace Notifications.Impls.Android
                 store.CallStatic("clearMessagesData");
                 
             }
-
-            _notificationsCallbackServcie.SendMessageToListeners(data);
 
             return new CountlyResponse
             {

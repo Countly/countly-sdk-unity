@@ -7,13 +7,20 @@ namespace Notifications.Impls
 {
 	public class EditorNotificationsService : INotificationsService
 	{
-        public void GetMessage(Action result)
+      
+        public void GetToken(Action<string> result) => result.Invoke("FakeToken");
+
+        public void OnNoticicationClicked(Action<string, int> result)
         {
-            Debug.Log("[EditorNotificationsService] GetMessage");
-            result.Invoke();
+            Debug.Log("[EditorNotificationsService] OnNoticicationClicked");
+            result.Invoke("Fake OnNoticicationClicked", 0);
         }
 
-        public void GetToken(Action<string> result) => result.Invoke("FakeToken");
+        public void OnNotificationReceived(Action<string> result)
+        {
+            Debug.Log("[EditorNotificationsService] OnNotificationReceived");
+            result.Invoke("Fake OnNotificationReceived");
+        }
 
         public Task<CountlyResponse> ReportPushActionAsync()
         {

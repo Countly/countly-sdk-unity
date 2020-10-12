@@ -38,13 +38,29 @@ namespace Notifications
             }
         }
 
-        public void SendMessageToListeners(string data)
+        public void NotifyOnNotificationReceived(string data)
         {
             foreach (INotificationListener listener in _listeners)
             {
                 if (listener != null)
                 {
-                    listener.OnReceive(data);
+                    listener.OnNotificationReceived(data);
+                }
+            }
+
+            if (_config.EnableConsoleErrorLogging)
+            {
+                Debug.Log("[Countly NotificationsCallbackServcie] SendMessageToListeners: " + data);
+            }
+        }
+
+        public void NotifyOnNoticicationClicked(string data, int index)
+        {
+            foreach (INotificationListener listener in _listeners)
+            {
+                if (listener != null)
+                {
+                    listener.OnNoticicationClicked(data, index);
                 }
             }
 
@@ -57,6 +73,7 @@ namespace Notifications
 
     public interface INotificationListener
     {
-        void OnReceive(string message);
+        void OnNotificationReceived(string message);
+        void OnNoticicationClicked(string message, int index);
     }
 }

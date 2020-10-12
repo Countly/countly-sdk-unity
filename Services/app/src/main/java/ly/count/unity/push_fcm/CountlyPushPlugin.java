@@ -262,6 +262,10 @@ public class CountlyPushPlugin {
             return id.hashCode();
         }
 
+        public Map<String, String> getData() {
+            return data;
+        }
+
         @Override
         public int describeContents() {
             return id.hashCode();

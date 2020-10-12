@@ -72,6 +72,7 @@ public class RemoteNotificationsService extends FirebaseMessagingService {
         CountlyPushPlugin.log("Message from: " + remoteMessage.getFrom(), CountlyPushPlugin.LogLevel.DEBUG);
         if (!data.isEmpty()) {
             JSONObject jsonObject = new JSONObject(remoteMessage.getData());
+            UnityPlayer.UnitySendMessage(CountlyPushPlugin.UNITY_ANDROID_BRIDGE, "OnNotificationReceived", jsonObject.toString());
             CountlyPushPlugin.log("Message data: " + jsonObject.toString(), CountlyPushPlugin.LogLevel.DEBUG);
         }
 

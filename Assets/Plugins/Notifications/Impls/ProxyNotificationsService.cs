@@ -12,22 +12,24 @@ namespace Notifications.Impls
 		private readonly INotificationsService _service;
         private readonly IEventCountlyService _eventCountlyService;
 
-        public ProxyNotificationsService(CountlyConfigModel config, Action<IEnumerator> startCoroutine, IEventCountlyService eventCountlyService, NotificationsCallbackService notificationsCallbackServcie)
+        public ProxyNotificationsService(CountlyConfigModel config, Action<IEnumerator> startCoroutine, IEventCountlyService eventCountlyService)
 		{
 
 #if UNITY_EDITOR
             _service = new EditorNotificationsService();
 #elif UNITY_ANDROID
-            _service = new Notifications.Impls.Android.AndroidNotificationsService(config, eventCountlyService, notificationsCallbackServcie);
+            _service = new Notifications.Impls.Android.AndroidNotificationsService(config, eventCountlyService);
 #elif UNITY_IOS
-			_service = new Notifications.Impls.iOs.IOsNotificationsService(config, startCoroutine, eventCountlyService, notificationsCallbackServcie);
-
+			_service = new Notifications.Impls.iOs.IOsNotificationsService(config, startCoroutine, eventCountlyService);
 #endif
         }
 
-        public void GetMessage(Action result) => _service.GetMessage(result);
 
         public void GetToken(Action<string> result) => _service.GetToken(result);
+
+        public void OnNoticicationClicked(Action<string, int> result) => _service.OnNoticicationClicked(result);
+
+        public void OnNotificationReceived(Action<string> result) =>_service.OnNotificationReceived(result);
 
         public async Task<CountlyResponse> ReportPushActionAsync()
         {

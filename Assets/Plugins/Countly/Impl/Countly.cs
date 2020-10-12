@@ -100,7 +100,6 @@ namespace Plugins.Countly.Impl
             Initialization.Begin(Auth.ServerUrl, Auth.AppKey);
             Device.InitDeviceId(Auth.DeviceId);
 
-            await RemoteConfigs.Update();
             await Initialization.SetDefaults(Config);
         }
 
@@ -113,8 +112,8 @@ namespace Plugins.Countly.Impl
             Events = new EventCountlyService(Config, requests, viewEventRepo, nonViewEventRepo, eventNumberInSameSessionHelper);
             OptionalParameters = new OptionalParametersCountlyService();
             Notifications = new NotificationsCallbackService(Config);
-            var notificationsService = new ProxyNotificationsService(Config, InternalStartCoroutine, Events, Notifications);
-            _push = new PushCountlyService(Events, requests, notificationsService);
+            var notificationsService = new ProxyNotificationsService(Config, InternalStartCoroutine, Events);
+            _push = new PushCountlyService(Events, requests, notificationsService, Notifications);
             Session = new SessionCountlyService(Config, _push, requests, OptionalParameters, eventNumberInSameSessionHelper);
             
             Consents = new ConsentCountlyService();

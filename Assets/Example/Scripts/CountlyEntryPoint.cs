@@ -225,15 +225,21 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
 
     }
 
-    public void OnReceive(string message)
+    public async Task RemoteConfigAsync()
     {
-        Debug.Log("[Countly Example] OnReceive: " + message);
-    }
+        await countly.RemoteConfigs.Update();
 
-    public  void RemoteConfig()
-    {
         Dictionary<string, object> config = countly.RemoteConfigs.Configs;
         Debug.Log("RemoteConfig: " + config.ToString());
     }
 
+    public void OnNotificationReceived(string message)
+    {
+        Debug.Log("[Countly Example] OnNotificationReceived: " + message);
+    }
+
+    public void OnNoticicationClicked(string message, int index)
+    {
+        Debug.Log("[Countly Example] OnNoticicationClicked: " + message + ", index: " + index);
+    }
 }

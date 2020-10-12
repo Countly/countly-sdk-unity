@@ -17,19 +17,12 @@ namespace Notifications.Impls.iOs
         private readonly CountlyConfigModel _config;
         private readonly Action<IEnumerator> _startCoroutine;
         private readonly IEventCountlyService _eventCountlyService;
-        private readonly NotificationsCallbackService _notificationsCallbackServcie;
 
-        public IOsNotificationsService(CountlyConfigModel config, Action<IEnumerator> startCoroutine, IEventCountlyService eventCountlyService, NotificationsCallbackService notificationsCallbackServcie)
+        public IOsNotificationsService(CountlyConfigModel config, Action<IEnumerator> startCoroutine, IEventCountlyService eventCountlyService)
         {
             _config = config;
             _startCoroutine = startCoroutine;
             _eventCountlyService = eventCountlyService;
-            _notificationsCallbackServcie = notificationsCallbackServcie;
-        }
-
-        public void GetMessage(Action result)
-        {
-            result.Invoke();    
         }
 
         public void GetToken(Action<string> result)
@@ -68,6 +61,19 @@ namespace Notifications.Impls.iOs
         public async Task<CountlyResponse> ReportPushActionAsync()
         {
             return await Task.FromResult(new CountlyResponse());
+        }
+
+        public void OnNoticicationClicked(Action<string, int> result)
+        {
+            int index = 0;
+            string data = "";
+            result.Invoke(data, index);
+        }
+
+        public void OnNotificationReceived(Action<string> result)
+        {
+            string data = "";
+            result.Invoke(data);
         }
     }
 }
