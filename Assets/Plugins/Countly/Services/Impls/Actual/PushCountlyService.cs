@@ -20,12 +20,12 @@ namespace Plugins.Countly.Services.Impls.Actual
         private readonly INotificationsService _notificationsService;
         private readonly NotificationsCallbackService _notificationsCallbackService;
 
-        public PushCountlyService(IEventCountlyService eventCountlyService, RequestCountlyHelper requestCountlyHelper, INotificationsService notificationsService, NotificationsCallbackService notificationsCallbackServcie)
+        public PushCountlyService(IEventCountlyService eventCountlyService, RequestCountlyHelper requestCountlyHelper, INotificationsService notificationsService, NotificationsCallbackService notificationsCallbackService)
         {
             _eventCountlyService = eventCountlyService;
             _requestCountlyHelper = requestCountlyHelper;
             _notificationsService = notificationsService;
-            _notificationsCallbackService = notificationsCallbackServcie;
+            _notificationsCallbackService = notificationsCallbackService;
         }
 
         /// <summary>
