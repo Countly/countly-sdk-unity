@@ -28,6 +28,8 @@ namespace Plugins.Countly.Services.Impls.Actual
             _configDao = configDao;
             _countlyUtils = countlyUtils;
             _requestCountlyHelper = requestCountlyHelper;
+
+            Configs = FetchConfigFromDB();
         }
 
         public async Task<CountlyResponse> InitConfig()
@@ -53,7 +55,6 @@ namespace Plugins.Countly.Services.Impls.Actual
 
         public async Task<CountlyResponse> Update()
         {
-            Configs = FetchConfigFromDB();
             var requestParams =
                 new Dictionary<string, object>
                 {
