@@ -232,7 +232,8 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
 
     public  void RemoteConfig()
     {
-        Debug.Log("RemoteConfig: " + countly.RemoteConfigs.Configs);
+        Dictionary<string, object> config = countly.RemoteConfigs.Configs;
+        Debug.Log("RemoteConfig: " + config.ToString());
     }
 
 }

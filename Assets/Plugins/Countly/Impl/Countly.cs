@@ -100,7 +100,7 @@ namespace Plugins.Countly.Impl
             Initialization.Begin(Auth.ServerUrl, Auth.AppKey);
             Device.InitDeviceId(Auth.DeviceId);
 
-            await RemoteConfigs.InitConfig();
+            await RemoteConfigs.Update();
             await Initialization.SetDefaults(Config);
         }
 

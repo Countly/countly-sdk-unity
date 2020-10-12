@@ -14,5 +14,11 @@ namespace Plugins.Countly.Services.Impls.Wrapper
             Debug.Log("[RemoteConfigCountlyServiceWrapper] InitConfig");
             return Task.FromResult(new CountlyResponse());
         }
+
+        public Task<CountlyResponse> Update()
+        {
+            Debug.Log("[RemoteConfigCountlyServiceWrapper] Update");
+            return Task.FromResult(new CountlyResponse());
+        }
     }
 }

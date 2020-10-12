@@ -32,8 +32,7 @@ namespace Plugins.Countly.Services.Impls.Actual
 
         public async Task<CountlyResponse> InitConfig()
         {
-            Configs = FetchConfigFromDB();
-            return await UpdateConfig();
+            return await Update();
         }
 
         private Dictionary<string, object> FetchConfigFromDB() {
@@ -52,8 +51,9 @@ namespace Plugins.Countly.Services.Impls.Actual
             return config;
         }
 
-        private async Task<CountlyResponse> UpdateConfig()
+        public async Task<CountlyResponse> Update()
         {
+            Configs = FetchConfigFromDB();
             var requestParams =
                 new Dictionary<string, object>
                 {
