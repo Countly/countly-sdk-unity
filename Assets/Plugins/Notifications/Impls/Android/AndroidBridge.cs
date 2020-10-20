@@ -7,15 +7,16 @@ namespace Notifications.Impls.Android
 {
 	public class AndroidBridge : MonoBehaviour
 	{
+        private Action<string> _onTokenResult;
         private Action<string> _OnNotificationReceiveResult;
         private Action<string, int> _OnNotificationClickResult;
-        private Action<string> _onTokenResult;
+
         public CountlyConfigModel Config { get; set; }
 
-
+        public void ListenTokenResult(Action<string> result) => _onTokenResult = result;
         public void ListenReceiveResult(Action<string> result) => _OnNotificationReceiveResult = result;
         public void ListenClickResult(Action<string, int> result) => _OnNotificationClickResult = result;
-        public void ListenTokenResult(Action<string> result) => _onTokenResult = result;
+        
 
 		public void OnTokenResult(string token)
 		{
