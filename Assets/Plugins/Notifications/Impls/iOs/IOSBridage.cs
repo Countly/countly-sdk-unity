@@ -13,8 +13,8 @@ public class IOSBridage : MonoBehaviour
     [System.Runtime.InteropServices.DllImport("__Internal")]
     extern static public void registerForRemoteNotifications();
 
-    [System.Runtime.InteropServices.DllImport("__Internal")]
-    extern static public void setListenerGameObject(string listenerName);
+    //[System.Runtime.InteropServices.DllImport("__Internal")]
+    //extern static public void setListenerGameObject(string listenerName);
 
     private Action<string> _onTokenResult;
     private Action<string> _OnNotificationReceiveResult;
@@ -23,13 +23,6 @@ public class IOSBridage : MonoBehaviour
     public void ListenTokenResult(Action<string> result) => _onTokenResult = result;
     public void ListenReceiveResult(Action<string> result) => _OnNotificationReceiveResult = result;
     public void ListenClickResult(Action<string, int> result) => _OnNotificationClickResult = result;
-
-    // Use this for initialization
-    void Start()
-    {
-        setListenerGameObject(this.gameObject.name);
-        
-    }
 
     public void GetToken()
     {
@@ -79,9 +72,9 @@ public class IOSBridage : MonoBehaviour
         }
 
         JObject item = JObject.Parse(pushData);
-         
-        MessageId = item.GetValue("i").ToString();
-        ButtonIndex = item.GetValue("action_index").ToString();
+
+        MessageId = (string)item["c"]["i"];
+        ButtonIndex = (string)item["action_index"];
 
         _OnNotificationClickResult?.Invoke(pushData, int.Parse(ButtonIndex));
 

@@ -19,15 +19,7 @@ NSString* const kCountlyCategoryIdentifier      = @"CountlyCategoryIdentifier";
 
 @end
 
-char * listenerGameObject = 0;
-void setListenerGameObject(char * listenerName)
-{
-    free(listenerGameObject);
-    listenerGameObject = 0;
-    unsigned long len = strlen(listenerName);
-    listenerGameObject = malloc(len+1);
-    strcpy(listenerGameObject, listenerName);
-}
+char * listenerGameObject = "[iOS] Bridge";
 
 void registerForRemoteNotifications()
 {
@@ -151,8 +143,6 @@ void countlyRunTimeDidReceiveRemoteNotification(id self, SEL _cmd, id applicatio
     {
 		[self application:application countlydidReceiveRemoteNotification:userInfo];
 	}
-    
-    //NSString* notificationID = countlyPayload[kCountlyPNKeyNotificationID];
    
     NSDictionary * notification = userInfo;
 
@@ -183,30 +173,12 @@ void countlyRunTimeDidReceiveRemoteNotification(id self, SEL _cmd, id applicatio
             UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:title message:message delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
             [alertView show];
         
-//        UIAlertController* alert = [UIAlertController alertControllerWithTitle:title
-//                                   message:message
-//                                   preferredStyle:UIAlertControllerStyleAlert];
-//
-//        UIAlertAction* defaultAction = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault
-//                                       handler:^(UIAlertAction * action) {
-//            NSString* defaultURL = countlyPayload[kCountlyPNKeyDefaultURL];
-//            if (defaultURL)
-//            {
-//                [self openURL:[NSURL URLWithString:defaultURL] completionHandler:nil];
-//            }
-//        }];
-//
-//        [alert addAction:defaultAction];
     }
-//    NSString* defaultURL = countlyPayload[kCountlyPNKeyDefaultURL];
-//
-//
-//    NSArray* buttons = countlyPayload[kCountlyPNKeyButtons];
     
     NSError *error;
     NSDictionary* countlyPayload = userInfo[kCountlyPNKeyCountlyPayload];
     NSData *jsonData = [NSJSONSerialization dataWithJSONObject:countlyPayload
-                                                       options:NSJSONWritingPrettyPrinted // Pass 0 if you don't care about the readability of the generated string
+                                                       options:NSJSONWritingPrettyPrinted
                                                          error:&error];
     NSString *jsonString = nil;
     if (! jsonData)
@@ -308,12 +280,20 @@ static void exchangeMethodImplementations(Class class, SEL oldMethod, SEL newMet
     UnitySendMessage(listenerGameObject, "OnPushNotificationsClicked", str);
 }
 
+- (void)openUrl:(NSString *)URLString
+{
+    if (!URLString)
+        return;
+
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.01 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^
+    {
+        [self openURL:[NSURL URLWithString:URLString]];
+    });
+}
+
 - (void)userNotificationCenter:(UNUserNotificationCenter *)center willPresentNotification:(UNNotification *)notification withCompletionHandler:(void (^)(UNNotificationPresentationOptions options))completionHandler API_AVAILABLE(ios(10.0), macos(10.14))
 {
-    
-
-    NSLog(@"userNotificationCenter");
-    
+    NSDictionary* userInfo = notification.request.content.userInfo;
     NSDictionary* countlyPayload = notification.request.content.userInfo[kCountlyPNKeyCountlyPayload];
     NSString* notificationID = countlyPayload[kCountlyPNKeyNotificationID];
 
@@ -327,14 +307,13 @@ static void exchangeMethodImplementations(Class class, SEL oldMethod, SEL newMet
     else
         completionHandler(UNNotificationPresentationOptionNone);
     
-    [self onNotificationReceived:countlyPayload];
+    [self onNotificationReceived:userInfo];
 }
 
 - (void)userNotificationCenter:(UNUserNotificationCenter *)center didReceiveNotificationResponse:(UNNotificationResponse *)response withCompletionHandler:(void (^)(void))completionHandler API_AVAILABLE(ios(10.0), macos(10.14))
 {
-    NSLog(@"userNotificationCenter:didReceiveNotificationResponse:withCompletionHandler:");
-    
-    NSDictionary* countlyPayload = response.notification.request.content.userInfo[kCountlyPNKeyCountlyPayload];
+    NSDictionary* userInfo = response.notification.request.content.userInfo;
+    NSDictionary* countlyPayload = userInfo[kCountlyPNKeyCountlyPayload];
     NSString* notificationID = countlyPayload[kCountlyPNKeyNotificationID];
 
     if (notificationID)
@@ -352,12 +331,12 @@ static void exchangeMethodImplementations(Class class, SEL oldMethod, SEL newMet
             URL = countlyPayload[kCountlyPNKeyButtons][buttonIndex - 1][kCountlyPNKeyActionButtonURL];
         }
         
-        NSMutableDictionary *mutablePayload = [countlyPayload mutableCopy];
+        NSMutableDictionary *mutablePayload = [userInfo mutableCopy];
 
         [mutablePayload setObject:[NSNumber numberWithInt:buttonIndex] forKey:@"action_index"];
+        
         [self onNotificationClick:mutablePayload];
-
-       // [self openURL:URL];
+        [self openUrl:URL];
     }
     
     id<UNUserNotificationCenterDelegate> appDelegate = (id<UNUserNotificationCenterDelegate>)UIApplication.sharedApplication.delegate;
