@@ -1,9 +1,5 @@
 using UnityEngine;
-using System.Collections;
-//using com.shephertz.app42.paas.sdk.csharp;
-//using com.shephertz.app42.paas.sdk.csharp.pushNotification;
 using System;
-using System.Runtime.InteropServices;
 using Plugins.Countly.Models;
 using Newtonsoft.Json.Linq;
 
@@ -51,7 +47,6 @@ public class IOSBridage : MonoBehaviour
                 Debug.Log("[Countly] OnDidRegisterForRemoteNotificationsWithDeviceToken Token: " + deviceToken);
             }
             
-
             _onTokenResult?.Invoke(deviceToken);
         }
     }
@@ -63,8 +58,6 @@ public class IOSBridage : MonoBehaviour
         {
             Debug.Log("[Countly] OnDidFailToRegisterForRemoteNotificcallBackationsWithError error: " + error);
         }
-
-        //_onTokenResult?.Invoke(null);
     }
 
     
@@ -75,8 +68,6 @@ public class IOSBridage : MonoBehaviour
             Debug.Log("[Countly] OnPushNotificationsReceived: " + pushData);
         }
         _OnNotificationReceiveResult?.Invoke(pushData);
-
-        OnPushNotificationsClicked(pushData);
 
     }
 
@@ -90,7 +81,7 @@ public class IOSBridage : MonoBehaviour
         JObject item = JObject.Parse(pushData);
          
         MessageId = item.GetValue("i").ToString();
-        ButtonIndex = "0";// item.GetValue("action_index").ToString();
+        ButtonIndex = item.GetValue("action_index").ToString();
 
         _OnNotificationClickResult?.Invoke(pushData, int.Parse(ButtonIndex));
 

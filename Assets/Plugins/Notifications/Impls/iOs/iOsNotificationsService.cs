@@ -1,13 +1,9 @@
-using Newtonsoft.Json.Linq;
 using Plugins.Countly.Helpers;
 using Plugins.Countly.Models;
 using Plugins.Countly.Services;
 using System;
 using System.Collections;
 using System.Threading.Tasks;
-#if UNITY_IOS
-//using Unity.Notifications.iOS;
-#endif
 using UnityEngine;
 
 namespace Notifications.Impls.iOs
