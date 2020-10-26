@@ -13,9 +13,6 @@ public class IOSBridage : MonoBehaviour
     [System.Runtime.InteropServices.DllImport("__Internal")]
     extern static public void registerForRemoteNotifications();
 
-    //[System.Runtime.InteropServices.DllImport("__Internal")]
-    //extern static public void setListenerGameObject(string listenerName);
-
     private Action<string> _onTokenResult;
     private Action<string> _OnNotificationReceiveResult;
     private Action<string, int> _OnNotificationClickResult;

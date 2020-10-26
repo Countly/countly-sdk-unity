@@ -168,10 +168,9 @@ void countlyRunTimeDidReceiveRemoteNotification(id self, SEL _cmd, id applicatio
     
     if (((UIApplication *)application).applicationState == UIApplicationStateActive)
     {
-            // Nothing to do if applicationState is Inactive, the iOS already displayed an alert view.
-        
-            UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:title message:message delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
-            [alertView show];
+        // Nothing to do if applicationState is Inactive, the iOS already displayed an alert view.
+        UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:title message:message delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil];
+        [alertView show];
         
     }
     
