@@ -10,9 +10,6 @@ public class IOSBridage : MonoBehaviour
 
     public CountlyConfigModel Config { get; set; }
 
-    [System.Runtime.InteropServices.DllImport("__Internal")]
-    extern static public void registerForRemoteNotifications();
-
     private Action<string> _onTokenResult;
     private Action<string> _OnNotificationReceiveResult;
     private Action<string, int> _OnNotificationClickResult;
@@ -21,9 +18,18 @@ public class IOSBridage : MonoBehaviour
     public void ListenReceiveResult(Action<string> result) => _OnNotificationReceiveResult = result;
     public void ListenClickResult(Action<string, int> result) => _OnNotificationClickResult = result;
 
+#if COUNTLY_ENABLE_IOS_PUSH
+    [System.Runtime.InteropServices.DllImport("__Internal")]
+    extern static public void registerForRemoteNotifications();
+#endif
+
     public void GetToken()
     {
+
+#if COUNTLY_ENABLE_IOS_PUSH
         registerForRemoteNotifications();
+#endif
+
     }
 
 
