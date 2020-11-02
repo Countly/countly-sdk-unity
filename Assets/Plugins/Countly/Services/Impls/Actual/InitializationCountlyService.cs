@@ -51,7 +51,6 @@ namespace Plugins.Countly.Services.Impls.Actual
             {
                 //Start Session and enable push notification
                 var result = await _sessionCountlyService.BeginSessionAsync();
-//                if (!result.IsSuccess) Debug.LogError("BeginSessionAsync error: " + result);
             }
 
             return new CountlyResponse
