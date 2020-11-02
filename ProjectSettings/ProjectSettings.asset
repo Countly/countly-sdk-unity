@@ -169,9 +169,11 @@ PlayerSettings:
   androidMaxAspectRatio: 2.1
   applicationIdentifier:
     Android: ly.count.demo
-    Standalone: com.Company.ProductName
-    iPhone: com.playdarium.zombie.popular.io.crowd.city.war
-  buildNumber: {}
+    Standalone: ly.count.demo
+    iPhone: ly.count.demo
+  buildNumber:
+    Standalone: 1
+    iPhone: 1
   AndroidBundleVersionCode: 1
   AndroidMinSdkVersion: 19
   AndroidTargetSdkVersion: 0
@@ -665,7 +667,8 @@ PlayerSettings:
   webGLLinkerTarget: 0
   webGLThreadsSupport: 0
   webGLWasmStreaming: 0
-  scriptingDefineSymbols: {}
+  scriptingDefineSymbols:
+    4: COUNTLY_ENABLE_IOS_PUSH
   platformArchitecture: {}
   scriptingBackend: {}
   il2cppCompilerConfiguration: {}
