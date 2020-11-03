@@ -11,7 +11,6 @@ using UnityEngine;
 public class CountlyEntryPoint : MonoBehaviour, INotificationListener
 {
 	public Plugins.Countly.Impl.Countly countlyPrefab;
-	public CountlyWrapper countlyWrapper;
 
 	private ICountly countly;
 	
