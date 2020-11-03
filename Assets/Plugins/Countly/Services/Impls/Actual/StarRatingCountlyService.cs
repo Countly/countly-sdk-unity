@@ -6,12 +6,12 @@ using Plugins.Countly.Models;
 
 namespace Plugins.Countly.Services.Impls.Actual
 {
-    public class StarRatingCountlyService : IStarRatingCountlyService
+    public class StarRatingCountlyService
     {
 
-        private readonly IEventCountlyService _eventCountlyService;
+        private readonly EventCountlyService _eventCountlyService;
 
-        public StarRatingCountlyService(IEventCountlyService eventCountlyService)
+        internal StarRatingCountlyService(EventCountlyService eventCountlyService)
         {
             _eventCountlyService = eventCountlyService;
         }

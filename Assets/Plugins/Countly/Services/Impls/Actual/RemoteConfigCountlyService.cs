@@ -11,7 +11,7 @@ using UnityEngine.Networking;
 
 namespace Plugins.Countly.Services.Impls.Actual
 {
-    public class RemoteConfigCountlyService : IRemoteConfigCountlyService
+    public class RemoteConfigCountlyService
     {
         private readonly CountlyConfigModel _config;
         private readonly ICountlyUtils _countlyUtils;
@@ -21,8 +21,8 @@ namespace Plugins.Countly.Services.Impls.Actual
         public  Dictionary<string, object> Configs { private set; get; } 
 
         private readonly StringBuilder _requestStringBuilder = new StringBuilder();
-        
-        public RemoteConfigCountlyService(CountlyConfigModel config, RequestCountlyHelper requestCountlyHelper, ICountlyUtils countlyUtils, Dao<ConfigEntity> configDao)
+
+        internal RemoteConfigCountlyService(CountlyConfigModel config, RequestCountlyHelper requestCountlyHelper, ICountlyUtils countlyUtils, Dao<ConfigEntity> configDao)
         {
             _config = config;
             _configDao = configDao;

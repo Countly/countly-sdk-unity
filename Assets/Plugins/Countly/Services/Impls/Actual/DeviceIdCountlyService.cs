@@ -5,16 +5,16 @@ using UnityEngine;
 
 namespace Plugins.Countly.Services.Impls.Actual
 {
-    public class DeviceIdCountlyService : IDeviceIdCountlyService
+    public class DeviceIdCountlyService
     {
 
         private readonly SessionCountlyService _sessionCountlyService;
         private readonly RequestCountlyHelper _requestCountlyHelper;
-        private readonly IEventCountlyService _eventCountlyService;
+        private readonly EventCountlyService _eventCountlyService;
         private readonly ICountlyUtils _countlyUtils;
 
-        public DeviceIdCountlyService(SessionCountlyService sessionCountlyService, 
-            RequestCountlyHelper requestCountlyHelper, IEventCountlyService eventCountlyService, ICountlyUtils countlyUtils)
+        internal DeviceIdCountlyService(SessionCountlyService sessionCountlyService, 
+            RequestCountlyHelper requestCountlyHelper, EventCountlyService eventCountlyService, ICountlyUtils countlyUtils)
         {
             _sessionCountlyService = sessionCountlyService;
             _requestCountlyHelper = requestCountlyHelper;

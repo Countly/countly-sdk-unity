@@ -2,9 +2,11 @@ using Plugins.Countly.Models;
 
 namespace Plugins.Countly.Services.Impls.Actual
 {
-    public class ConsentCountlyService : IConsentCountlyService
+    public class ConsentCountlyService
     {
-        
+
+        internal ConsentCountlyService()
+        { }
 
         #region Consents
 

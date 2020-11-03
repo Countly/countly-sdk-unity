@@ -25,27 +25,27 @@ namespace Plugins.Countly.Impl
         public CountlyConfigModel Config;
         public static Countly Instance { get; internal set; }
 
-        public IConsentCountlyService Consents { get; private set; }
+        public ConsentCountlyService Consents { get; private set; }
 
-        public ICrashReportsCountlyService CrushReports { get { return CrashReports; } }
+        public CrashReportsCountlyService CrushReports { get { return CrashReports; } }
 
-        public ICrashReportsCountlyService CrashReports { get; private set; }
+        public CrashReportsCountlyService CrashReports { get; private set; }
 
-        public IDeviceIdCountlyService Device { get; private set; }
+        public DeviceIdCountlyService Device { get; private set; }
 
-        public IEventCountlyService Events { get; private set; }
+        public EventCountlyService Events { get; private set; }
 
-        public IInitializationCountlyService Initialization { get; private set; }
+        public InitializationCountlyService Initialization { get; private set; }
 
-        public IOptionalParametersCountlyService OptionalParameters { get; private set; }
+        public OptionalParametersCountlyService OptionalParameters { get; private set; }
 
-        public IRemoteConfigCountlyService RemoteConfigs { get; private set; }
+        public RemoteConfigCountlyService RemoteConfigs { get; private set; }
 
-        public IStarRatingCountlyService StarRating { get; private set; }
+        public StarRatingCountlyService StarRating { get; private set; }
 
-        public IUserDetailsCountlyService UserDetails { get; private set; }
+        public UserDetailsCountlyService UserDetails { get; private set; }
 
-        public IViewCountlyService Views { get; private set; }
+        public ViewCountlyService Views { get; private set; }
 
         private SessionCountlyService Session { get; set; }
 

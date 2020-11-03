@@ -5,11 +5,11 @@ using Plugins.Countly.Models;
 
 namespace Plugins.Countly.Services.Impls.Actual
 {
-    public class InitializationCountlyService : IInitializationCountlyService
+    public class InitializationCountlyService
     {
         private readonly SessionCountlyService _sessionCountlyService;
 
-        public InitializationCountlyService(SessionCountlyService sessionCountlyService)
+        internal InitializationCountlyService(SessionCountlyService sessionCountlyService)
         {
             _sessionCountlyService = sessionCountlyService;
         }

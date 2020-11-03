@@ -10,7 +10,7 @@ using UnityEngine;
 
 namespace Plugins.Countly.Services.Impls.Actual
 {
-    public class EventCountlyService : IEventCountlyService
+    public class EventCountlyService
     {
         private readonly CountlyConfigModel _countlyConfigModel;
         private readonly RequestCountlyHelper _requestCountlyHelper;

@@ -1,5 +1,4 @@
 using Notifications;
-using Plugins.Countly.Services;
 using Plugins.Countly.Services.Impls.Actual;
 using System;
 
@@ -7,20 +6,20 @@ namespace Plugins.Countly
 {
     public interface ICountly
     {
-        IConsentCountlyService Consents { get; }
-        ICrashReportsCountlyService CrashReports { get; }
+        ConsentCountlyService Consents { get; }
+        CrashReportsCountlyService CrashReports { get; }
 
         [Obsolete("CrushReports is deprecated, please use CrashReports instead.")]
-        ICrashReportsCountlyService CrushReports { get; }
+        CrashReportsCountlyService CrushReports { get; }
 
-        IDeviceIdCountlyService Device { get; }
-        IEventCountlyService Events { get; }
-        IInitializationCountlyService Initialization { get; }
-        IOptionalParametersCountlyService OptionalParameters { get; }
-        IRemoteConfigCountlyService RemoteConfigs { get; }
-        IStarRatingCountlyService StarRating { get; }
-        IUserDetailsCountlyService UserDetails { get; }
-        IViewCountlyService Views { get; }
+        DeviceIdCountlyService Device { get; }
+        EventCountlyService Events { get; }
+        InitializationCountlyService Initialization { get; }
+        OptionalParametersCountlyService OptionalParameters { get; }
+        RemoteConfigCountlyService RemoteConfigs { get; }
+        StarRatingCountlyService StarRating { get; }
+        UserDetailsCountlyService UserDetails { get; }
+        ViewCountlyService Views { get; }
         NotificationsCallbackService Notifications { get;}
 
         void ReportAll();

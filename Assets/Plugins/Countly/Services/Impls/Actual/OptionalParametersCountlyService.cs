@@ -1,12 +1,15 @@
 namespace Plugins.Countly.Services.Impls.Actual
 {
-    public class OptionalParametersCountlyService : IOptionalParametersCountlyService
+    public class OptionalParametersCountlyService
     {
         public string CountryCode { get; private set; }
         public string City { get; private set; }
         public string Location { get; private set; }
         public string IPAddress { get; private set; }
-        
+
+        internal OptionalParametersCountlyService()
+        { }
+
         /// <summary>
         /// Sets Country Code to be used for future requests. Takes ISO Country code as input parameter
         /// </summary>

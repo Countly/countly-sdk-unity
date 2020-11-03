@@ -2,6 +2,7 @@ using Newtonsoft.Json.Linq;
 using Plugins.Countly.Helpers;
 using Plugins.Countly.Models;
 using Plugins.Countly.Services;
+using Plugins.Countly.Services.Impls.Actual;
 using System;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -18,9 +19,9 @@ namespace Notifications.Impls.Android
 
 		private readonly AndroidBridge _bridge;
         private readonly CountlyConfigModel _config;
-        private readonly IEventCountlyService _eventCountlyService;
+        private readonly EventCountlyService _eventCountlyService;
 
-        public AndroidNotificationsService(CountlyConfigModel config, IEventCountlyService eventCountlyService)
+        internal AndroidNotificationsService(CountlyConfigModel config, EventCountlyService eventCountlyService)
 		{
             _config = config;
             _eventCountlyService = eventCountlyService;

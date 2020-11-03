@@ -8,7 +8,7 @@ using Plugins.Countly.Models;
 
 namespace Plugins.Countly.Services.Impls.Actual
 {
-    public class UserDetailsCountlyService : IUserDetailsCountlyService
+    public class UserDetailsCountlyService
     {
         private Dictionary<string, object> _customDataProperties = new Dictionary<string, object>();
 
@@ -16,7 +16,7 @@ namespace Plugins.Countly.Services.Impls.Actual
         private readonly RequestCountlyHelper _requestCountlyHelper;
         private readonly ICountlyUtils _countlyUtils;
 
-        public UserDetailsCountlyService(RequestCountlyHelper requestCountlyHelper, ICountlyUtils countlyUtils)
+        internal UserDetailsCountlyService(RequestCountlyHelper requestCountlyHelper, ICountlyUtils countlyUtils)
         {
             _requestCountlyHelper = requestCountlyHelper;
             _countlyUtils = countlyUtils;

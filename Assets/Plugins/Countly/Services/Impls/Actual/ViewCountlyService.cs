@@ -8,14 +8,14 @@ using UnityEngine;
 namespace Plugins.Countly.Services.Impls.Actual
 {
 
-    public class ViewCountlyService : IViewCountlyService
+    public class ViewCountlyService
     {
         private readonly CountlyConfigModel _config;
         private readonly Dictionary<string, DateTime> _viewToLastViewStartTime = new Dictionary<string, DateTime>();
 
-        private readonly IEventCountlyService _eventService;
+        private readonly EventCountlyService _eventService;
 
-        public ViewCountlyService(CountlyConfigModel config, IEventCountlyService eventService)
+        internal ViewCountlyService(CountlyConfigModel config, EventCountlyService eventService)
         {
             _config = config;
             _eventService = eventService;

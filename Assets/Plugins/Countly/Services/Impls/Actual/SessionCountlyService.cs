@@ -21,11 +21,11 @@ namespace Plugins.Countly.Services.Impls.Actual
         private readonly CountlyConfigModel _configModel;
         private readonly PushCountlyService _pushCountlyService;
         private readonly RequestCountlyHelper _requestCountlyHelper;
-        private readonly IOptionalParametersCountlyService _optionalParametersCountlyService;
+        private readonly OptionalParametersCountlyService _optionalParametersCountlyService;
         private readonly EventNumberInSameSessionHelper _eventNumberInSameSessionHelper;
 
-        public SessionCountlyService(CountlyConfigModel configModel, PushCountlyService pushCountlyService, 
-            RequestCountlyHelper requestCountlyHelper, IOptionalParametersCountlyService optionalParametersCountlyService,
+        internal SessionCountlyService(CountlyConfigModel configModel, PushCountlyService pushCountlyService, 
+            RequestCountlyHelper requestCountlyHelper, OptionalParametersCountlyService optionalParametersCountlyService,
             EventNumberInSameSessionHelper eventNumberInSameSessionHelper)
         {
             _configModel = configModel;
