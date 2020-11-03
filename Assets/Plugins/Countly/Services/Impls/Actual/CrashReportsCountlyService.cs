@@ -81,14 +81,13 @@ namespace Plugins.Countly.Services.Impls.Actual
         /// <param name="value"></param>
         public void AddBreadcrumbs(string value)
         {
+            if (_configModel.EnableConsoleLogging)
+            {
+                Debug.Log("[Countly] AddBreadcrumbs : " + value);
+            }
 
             if (_configModel.EnableTestMode)
             {
-                if (_configModel.EnableConsoleLogging)
-                {
-                    Debug.Log("[Countly] AddBreadcrumbs : " + value);
-                }
-
                 return;
             }
 

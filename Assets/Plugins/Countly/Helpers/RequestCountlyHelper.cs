@@ -192,18 +192,20 @@ namespace Plugins.Countly.Helpers
         /// <returns></returns>
         private CountlyResponse Get(string url, bool addToRequestQueue = true)
         {
-            var countlyResponse = new CountlyResponse();
+            if (_config.EnableConsoleLogging)
+            {
+                Debug.Log("[Countly] RequestCountlyHelper Get: " + url);
+            }
 
             if (_config.EnableTestMode)
             {
-                if (_config.EnableConsoleLogging)
+                return new CountlyResponse
                 {
-                    Debug.Log("[Countly] RequestCountlyHelper Get: " + url);
-                }
-
-                countlyResponse.IsSuccess = true;
-                return countlyResponse;
+                    IsSuccess = true
+                };
             }
+
+            var countlyResponse = new CountlyResponse();
 
             if (!addToRequestQueue)
             {
@@ -254,18 +256,20 @@ namespace Plugins.Countly.Helpers
         /// <returns></returns>
         internal async Task<CountlyResponse> GetAsync(string url, bool addToRequestQueue = true)
         {
-            var countlyResponse = new CountlyResponse();
+            if (_config.EnableConsoleLogging)
+            {
+                Debug.Log("[Countly] RequestCountlyHelper GetAsync: " + url);
+            }
 
             if (_config.EnableTestMode)
             {
-                if (_config.EnableConsoleLogging)
+                return new CountlyResponse
                 {
-                    Debug.Log("[Countly] RequestCountlyHelper GetAsync: " + url);
-                }
-
-                countlyResponse.IsSuccess = true;
-                return countlyResponse;
+                    IsSuccess = true
+                };
             }
+
+            var countlyResponse = new CountlyResponse();
 
             if (!addToRequestQueue)
             {
@@ -316,18 +320,20 @@ namespace Plugins.Countly.Helpers
         /// <returns></returns>
         private CountlyResponse Post(string uri, string data, bool addToRequestQueue = true)
         {
-            var countlyResponse = new CountlyResponse();
+            if (_config.EnableConsoleLogging)
+            {
+                Debug.Log("[Countly] RequestCountlyHelper Post: " + uri + data);
+            }
 
             if (_config.EnableTestMode)
             {
-                if (_config.EnableConsoleLogging)
+                return new CountlyResponse
                 {
-                    Debug.Log("[Countly] RequestCountlyHelper Post: " + uri + data);
-                }
-
-                countlyResponse.IsSuccess = true;
-                return countlyResponse;
+                    IsSuccess = true
+                };
             }
+
+            var countlyResponse = new CountlyResponse();
 
             if (!addToRequestQueue)
             {
@@ -390,18 +396,21 @@ namespace Plugins.Countly.Helpers
         /// <returns></returns>
         private async Task<CountlyResponse> PostAsync(string uri, string data, bool addToRequestQueue = true)
         {
-            var countlyResponse = new CountlyResponse();
+            if (_config.EnableConsoleLogging)
+            {
+                Debug.Log("[Countly] RequestCountlyHelper Post: " + uri + data);
+            }
 
             if (_config.EnableTestMode)
             {
-                if (_config.EnableConsoleLogging)
+                return new CountlyResponse
                 {
-                    Debug.Log("[Countly] RequestCountlyHelper Post: " + uri + data);
-                }
-
-                countlyResponse.IsSuccess = true;
-                return countlyResponse;
+                    IsSuccess = true
+                };
             }
+
+
+            var countlyResponse = new CountlyResponse();
 
             if (!addToRequestQueue)
             {
