@@ -3,7 +3,7 @@ namespace Plugins.Countly.Helpers
 {
     internal class Constants
     {
-        public const string SdkVersion = "20.10.0";
+        public const string SdkVersion = "20.11.0";
 
 #if UNITY_EDITOR
         public const string SdkName = "csharp-unity-editor";
