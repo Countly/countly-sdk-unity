@@ -44,17 +44,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Auth:
-    ServerUrl: http://localhost:32768/
-    AppKey: 5fb12311a62e72d86795af25a0abc07c99c42415
+    ServerUrl: https://try.count.ly/
+    AppKey: YOUR_APP_KEY
     DeviceId: 
   Config:
     Salt: 
     EnableFirstAppLaunchSegment: 0
     EnablePost: 0
-    EnableConsoleErrorLogging: 0
+    EnableTestMode: 0
+    EnableConsoleLogging: 0
     IgnoreSessionCooldown: 0
-    NotificationMode: 1
-    EnableManualSessionHandling: 0
+    NotificationMode: -1
     SessionDuration: 60
     EventViewSendThreshold: 1
     EventNonViewSendThreshold: 1

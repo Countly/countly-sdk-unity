@@ -34,6 +34,11 @@ namespace Plugins.Countly.Services.Impls.Actual
 
         public async Task<CountlyResponse> InitConfig()
         {
+            if (_config.EnableTestMode)
+            {
+                return new CountlyResponse { IsSuccess = true };
+            }
+
             return await Update();
         }
 
@@ -44,7 +49,7 @@ namespace Plugins.Countly.Services.Impls.Actual
             {
                 config = Converter.ConvertJsonToDictionary(allConfigs[0].Json);
 
-                if (_config.EnableConsoleErrorLogging)
+                if (_config.EnableConsoleLogging)
                 {
                     Debug.Log("Configs: " + config.ToString());
                 }
@@ -76,7 +81,7 @@ namespace Plugins.Countly.Services.Impls.Actual
                 _configDao.Save(configEntity);
                 Configs = Converter.ConvertJsonToDictionary(response.Data);
 
-                if (_config.EnableConsoleErrorLogging)
+                if (_config.EnableConsoleLogging)
                 {
                     Debug.Log("[Countly] RemoteConfigCountlyService UpdateConfig: " + response.ToString());
                 }

@@ -9,7 +9,8 @@ namespace Plugins.Countly.Models
         public string Salt;
         public bool EnableFirstAppLaunchSegment;
         public bool EnablePost;
-        public bool EnableConsoleErrorLogging;
+        public bool EnableTestMode;
+        public bool EnableConsoleLogging;
         public bool IgnoreSessionCooldown;
         public TestMode NotificationMode;
         public readonly bool EnableManualSessionHandling;
@@ -31,7 +32,7 @@ namespace Plugins.Countly.Models
         /// <param name="sessionDuration">Session is updated after each interval passed.
         /// This interval is also used to process request queue. The interval must be in seconds</param>
         /// <param name="notificationMode"></param>
-        public CountlyConfigModel(string salt = null, bool enablePost = false, bool enableConsoleErrorLogging = false,
+        public CountlyConfigModel(string salt = null, bool enablePost = false, bool enableTestMode = false, bool enableConsoleErrorLogging = false,
                                     bool ignoreSessionCooldown = false, bool enableManualSessionHandling = false,
                                     int sessionDuration = 60, int eventViewThreshold = 100,
                                     int storedRequestLimit = 1000, int totalBreadcrumbsAllowed = 100,
@@ -40,7 +41,8 @@ namespace Plugins.Countly.Models
         {
             this.Salt = salt;
             EnablePost = enablePost;
-            EnableConsoleErrorLogging = enableConsoleErrorLogging;
+            EnableTestMode = enableTestMode;
+            EnableConsoleLogging = enableConsoleErrorLogging;
             IgnoreSessionCooldown = ignoreSessionCooldown;
             NotificationMode = notificationMode;
             SessionDuration = sessionDuration;
@@ -54,7 +56,7 @@ namespace Plugins.Countly.Models
 
         public override string ToString()
         {
-            return $"{nameof(Salt)}: {Salt}, {nameof(EnablePost)}: {EnablePost}, {nameof(EnableConsoleErrorLogging)}: {EnableConsoleErrorLogging}, {nameof(IgnoreSessionCooldown)}: {IgnoreSessionCooldown}, {nameof(NotificationMode)}: {NotificationMode}, {nameof(EnableManualSessionHandling)}: {EnableManualSessionHandling}, {nameof(SessionDuration)}: {SessionDuration}, {nameof(EventViewSendThreshold)}: {EventViewSendThreshold}, {nameof(EventNonViewSendThreshold)}: {EventNonViewSendThreshold}, {nameof(StoredRequestLimit)}: {StoredRequestLimit}, {nameof(TotalBreadcrumbsAllowed)}: {TotalBreadcrumbsAllowed}, {nameof(EnableAutomaticCrashReporting)}: {EnableAutomaticCrashReporting}";
+            return $"{nameof(Salt)}: {Salt}, {nameof(EnablePost)}: {EnablePost}, {nameof(EnableConsoleLogging)}: {EnableConsoleLogging}, {nameof(IgnoreSessionCooldown)}: {IgnoreSessionCooldown}, {nameof(NotificationMode)}: {NotificationMode}, {nameof(EnableManualSessionHandling)}: {EnableManualSessionHandling}, {nameof(SessionDuration)}: {SessionDuration}, {nameof(EventViewSendThreshold)}: {EventViewSendThreshold}, {nameof(EventNonViewSendThreshold)}: {EventNonViewSendThreshold}, {nameof(StoredRequestLimit)}: {StoredRequestLimit}, {nameof(TotalBreadcrumbsAllowed)}: {TotalBreadcrumbsAllowed}, {nameof(EnableAutomaticCrashReporting)}: {EnableAutomaticCrashReporting}";
         }
     }
 }

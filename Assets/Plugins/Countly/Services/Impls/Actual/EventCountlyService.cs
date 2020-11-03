@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using Plugins.Countly.Helpers;
 using Plugins.Countly.Models;
 using Plugins.Countly.Persistance.Repositories.Impls;
+using UnityEngine;
 
 namespace Plugins.Countly.Services.Impls.Actual
 {
@@ -29,6 +30,20 @@ namespace Plugins.Countly.Services.Impls.Actual
 
         public async Task<CountlyResponse> RecordEventAsync(CountlyEventModel @event, bool useNumberInSameSession = false)
         {
+
+            if (_countlyConfigModel.EnableConsoleLogging)
+            {
+                Debug.Log("[Countly] RecordEventAsync : " + @event.ToString());
+            }
+
+            if (_countlyConfigModel.EnableTestMode)
+            {
+                return new CountlyResponse
+                {
+                    IsSuccess = true
+                };
+            }
+
             if (_countlyConfigModel.EnableFirstAppLaunchSegment)
             {
                 AddFirstAppSegment(@event);   
@@ -62,12 +77,25 @@ namespace Plugins.Countly.Services.Impls.Actual
 
         public async Task<CountlyResponse> RecordEventAsync(string key, bool useNumberInSameSession = false)
         {
-           return await RecordEventAsync(key, null, useNumberInSameSession);
+            return await RecordEventAsync(key, null, useNumberInSameSession);
         }
 
         public async Task<CountlyResponse> RecordEventAsync(string key, SegmentModel segmentation, bool useNumberInSameSession = false,
             int? count = 1, double? sum = 0, double? duration = null)
         {
+            if (_countlyConfigModel.EnableConsoleLogging)
+            {
+                Debug.Log("[Countly] RecordEventAsync : key = " + key);
+            }
+
+            if (_countlyConfigModel.EnableTestMode)
+            {
+                return new CountlyResponse
+                {
+                    IsSuccess = true
+                };
+            }
+
             if (string.IsNullOrEmpty(key) && string.IsNullOrWhiteSpace(key))
             {
                 return new CountlyResponse
@@ -179,12 +207,6 @@ namespace Plugins.Countly.Services.Impls.Actual
                 }       
             }
 
-//            var currentTime = DateTime.UtcNow;
-//            foreach (var evt in events)
-//            {
-//                SetTimeZoneInfo(evt, currentTime);
-//            }
-
             var requestParams =
                 new Dictionary<string, object>
                 {
@@ -193,6 +215,7 @@ namespace Plugins.Countly.Services.Impls.Actual
                             new JsonSerializerSettings {NullValueHandling = NullValueHandling.Ignore})
                     }
                 };
+
             return await _requestCountlyHelper.GetResponseAsync(requestParams);
         }
 
@@ -247,7 +270,5 @@ namespace Plugins.Countly.Services.Impls.Actual
             }
             @event.Segmentation.Add(Constants.FirstAppLaunchSegment, FirstLaunchAppHelper.IsFirstLaunchApp);
         }
-
-       
     }
 }
