@@ -28,7 +28,7 @@ namespace Plugins.Countly.Services.Impls.Actual
             _eventNumberInSameSessionHelper = eventNumberInSameSessionHelper;
         }
 
-        public async Task<CountlyResponse> RecordEventAsync(CountlyEventModel @event, bool useNumberInSameSession = false)
+        internal async Task<CountlyResponse> RecordEventAsync(CountlyEventModel @event, bool useNumberInSameSession = false)
         {
 
             if (_countlyConfigModel.EnableConsoleLogging)

@@ -1,7 +1,6 @@
 using Newtonsoft.Json.Linq;
 using Plugins.Countly.Helpers;
 using Plugins.Countly.Models;
-using Plugins.Countly.Services;
 using Plugins.Countly.Services.Impls.Actual;
 using System;
 using System.Threading.Tasks;
@@ -11,7 +10,6 @@ namespace Notifications.Impls.Android
 {
 	public class AndroidNotificationsService : INotificationsService
 	{
-        
         private const string BridgeName = "[Android] Bridge";
         private const string StorePackageName = "ly.count.unity.push_fcm.MessageStore";
         private const string CountlyPushPluginPackageName = "ly.count.unity.push_fcm.CountlyPushPlugin";

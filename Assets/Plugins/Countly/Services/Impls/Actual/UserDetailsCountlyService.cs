@@ -28,7 +28,7 @@ namespace Plugins.Countly.Services.Impls.Actual
         /// </summary>
         /// <param name="userDetails"></param>
         /// <returns></returns>
-        public async Task<CountlyResponse> UserDetailsAsync(CountlyUserDetailsModel userDetails)
+        internal async Task<CountlyResponse> UserDetailsAsync(CountlyUserDetailsModel userDetails)
         {
             if (userDetails == null)
             {
@@ -48,7 +48,7 @@ namespace Plugins.Countly.Services.Impls.Actual
         /// </summary>
         /// <param name="userDetails"></param>
         /// <returCountlyUserDetailsModel.Pushns></returns>
-        public async Task<CountlyResponse> UserCustomDetailsAsync(CountlyUserDetailsModel userDetails)
+        internal async Task<CountlyResponse> UserCustomDetailsAsync(CountlyUserDetailsModel userDetails)
         {
             if (userDetails == null)
             {

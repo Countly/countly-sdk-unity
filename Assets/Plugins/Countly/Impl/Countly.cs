@@ -11,7 +11,6 @@ using Plugins.Countly.Persistance.Dao;
 using Plugins.Countly.Persistance.Entities;
 using Plugins.Countly.Persistance.Repositories;
 using Plugins.Countly.Persistance.Repositories.Impls;
-using Plugins.Countly.Services;
 using Plugins.Countly.Services.Impls.Actual;
 using Plugins.iBoxDB;
 using UnityEngine;

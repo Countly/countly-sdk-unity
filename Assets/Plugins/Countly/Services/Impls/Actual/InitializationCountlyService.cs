@@ -23,7 +23,7 @@ namespace Plugins.Countly.Services.Impls.Actual
         /// <param name="serverUrl"></param>
         /// <param name="appKey"></param>
         /// <param name="deviceId"></param>
-        public void Begin(string serverUrl, string appKey)
+        internal void Begin(string serverUrl, string appKey)
         {
             ServerUrl = serverUrl;
             AppKey = appKey;
@@ -45,7 +45,7 @@ namespace Plugins.Countly.Services.Impls.Actual
         /// <param name="enableConsoleErrorLogging"></param>
         /// <param name="ignoreSessionCooldown"></param>
         /// <returns></returns>
-        public async Task<CountlyResponse> SetDefaults(CountlyConfigModel configModel)
+        internal async Task<CountlyResponse> SetDefaults(CountlyConfigModel configModel)
         {
             if (!configModel.EnableManualSessionHandling)
             {
@@ -64,7 +64,7 @@ namespace Plugins.Countly.Services.Impls.Actual
         ///     Gets the base url to make requests to the Countly server.
         /// </summary>
         /// <returns></returns>
-        public string GetBaseUrl()
+        internal string GetBaseUrl()
         {
             return string.Format(ServerUrl[ServerUrl.Length - 1] == '/' ? "{0}i?" : "{0}/i?", ServerUrl);
         }

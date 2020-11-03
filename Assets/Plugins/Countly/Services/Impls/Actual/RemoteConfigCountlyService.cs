@@ -32,7 +32,7 @@ namespace Plugins.Countly.Services.Impls.Actual
             Configs = FetchConfigFromDB();
         }
 
-        public async Task<CountlyResponse> InitConfig()
+        internal async Task<CountlyResponse> InitConfig()
         {
             if (_config.EnableTestMode)
             {

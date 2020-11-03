@@ -24,7 +24,7 @@ namespace Plugins.Countly.Services.Impls.Actual
 
         public string DeviceId { get; private set; }
 
-        public void InitDeviceId(string deviceId = null)
+        internal void InitDeviceId(string deviceId = null)
         {
             //**Priority is**
             //Cached DeviceID (remains even after after app kill)
@@ -111,7 +111,7 @@ namespace Plugins.Countly.Services.Impls.Actual
         /// Updates Device ID both in app and in cache
         /// </summary>
         /// <param name="newDeviceId"></param>
-        public void UpdateDeviceId(string newDeviceId)
+        private void UpdateDeviceId(string newDeviceId)
         {
             //Change device id
             DeviceId = newDeviceId;
