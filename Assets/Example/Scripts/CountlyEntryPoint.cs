@@ -1,8 +1,6 @@
 ﻿using Notifications;
-using Plugins.Countly;
-using Plugins.Countly.Helpers;
-using Plugins.Countly.Impl;
-using Plugins.Countly.Models;
+using Plugins.CountlySDK;
+using Plugins.CountlySDK.Models;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -10,9 +8,9 @@ using UnityEngine;
 
 public class CountlyEntryPoint : MonoBehaviour, INotificationListener
 {
-	public Plugins.Countly.Impl.Countly countlyPrefab;
+	public Countly countlyPrefab;
 
-	private ICountly countly;
+	private Countly countly;
 	
 	private void Awake ()
 	{

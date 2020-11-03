@@ -1,4 +1,4 @@
-using Plugins.Countly.Helpers;
+using Plugins.CountlySDK.Helpers;
 using System;
 using System.Threading.Tasks;
 

@@ -1,9 +1,9 @@
 using System;
 using System.Collections;
 using System.Threading.Tasks;
-using Plugins.Countly.Helpers;
-using Plugins.Countly.Models;
-using Plugins.Countly.Services.Impls.Actual;
+using Plugins.CountlySDK.Helpers;
+using Plugins.CountlySDK.Models;
+using Plugins.CountlySDK.Services;
 
 namespace Notifications.Impls
 {

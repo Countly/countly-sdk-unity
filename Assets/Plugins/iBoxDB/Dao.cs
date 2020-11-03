@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using iBoxDB.LocalServer;
-using Plugins.Countly.Persistance.Entities;
+using Plugins.CountlySDK.Persistance.Entities;
 
 namespace Plugins.iBoxDB
 {

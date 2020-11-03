@@ -1,7 +1,7 @@
 using Newtonsoft.Json.Linq;
-using Plugins.Countly.Helpers;
-using Plugins.Countly.Models;
-using Plugins.Countly.Services.Impls.Actual;
+using Plugins.CountlySDK.Helpers;
+using Plugins.CountlySDK.Models;
+using Plugins.CountlySDK.Services;
 using System;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -87,7 +87,7 @@ namespace Notifications.Impls.Android
                     string identifier = item.GetValue("action_index").ToString();
 
                     var segment =
-                    new Plugins.Countly.Services.Impls.Actual.PushCountlyService.PushActionSegment
+                    new Plugins.CountlySDK.Services.PushCountlyService.PushActionSegment
                     {
                         MessageID = mesageId,
                         Identifier = identifier

@@ -1,5 +1,5 @@
 using Newtonsoft.Json.Linq;
-using Plugins.Countly.Models;
+using Plugins.CountlySDK.Models;
 using System;
 using UnityEngine;
 
