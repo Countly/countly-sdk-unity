@@ -34,9 +34,12 @@ namespace Plugins.Countly.Services.Impls.Actual
 
         public async Task<CountlyResponse> InitConfig()
         {
-            var countlyResponse = new CountlyResponse();
-            countlyResponse.IsSuccess = true;
-            return _config.EnableTestMode ? countlyResponse: await Update();
+            if (_config.EnableTestMode)
+            {
+                return new CountlyResponse { IsSuccess = true };
+            }
+
+            return await Update();
         }
 
         private Dictionary<string, object> FetchConfigFromDB() {
