@@ -136,7 +136,7 @@ namespace Plugins.Countly.Impl
         /// </summary>
         private async void OnApplicationQuit()
         {
-            if (Config.EnableConsoleErrorLogging)
+            if (Config.EnableConsoleLogging)
             {
                 Debug.Log("[Countly] OnApplicationQuit");
             }
@@ -151,7 +151,7 @@ namespace Plugins.Countly.Impl
 
         private void OnApplicationFocus(bool hasFocus)
         {
-            if (Config.EnableConsoleErrorLogging)
+            if (Config.EnableConsoleLogging)
             {
                 Debug.Log("[Countly] OnApplicationFocus: " + hasFocus);
             }
@@ -168,7 +168,7 @@ namespace Plugins.Countly.Impl
 
         private void OnApplicationPause(bool pauseStatus)
         {
-            if (Config.EnableConsoleErrorLogging)
+            if (Config.EnableConsoleLogging)
             {
                 Debug.Log("[Countly] OnApplicationPause: " + pauseStatus);
             }

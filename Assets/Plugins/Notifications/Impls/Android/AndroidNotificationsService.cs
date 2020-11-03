@@ -30,7 +30,7 @@ namespace Notifications.Impls.Android
             _bridge.Config = _config;
 
             var countlyPushPlugin = new AndroidJavaClass(CountlyPushPluginPackageName);
-            countlyPushPlugin.CallStatic("setEnableLog", config.EnableConsoleErrorLogging);
+            countlyPushPlugin.CallStatic("setEnableLog", config.EnableConsoleLogging);
 
         }
 
@@ -94,7 +94,7 @@ namespace Notifications.Impls.Android
                         Identifier = identifier
                     };
 
-                    if (_config.EnableConsoleErrorLogging)
+                    if (_config.EnableConsoleLogging)
                     {
                         Debug.Log("[Countly] ReportPushActionAsync key: " + CountlyEventModel.PushActionEvent + ", segments: " + segment);
                     }

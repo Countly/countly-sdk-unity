@@ -15,7 +15,7 @@ namespace Plugins.Countly.Persistance.Repositories.Impls
 
         protected override bool ValidateModelBeforeEnqueue(CountlyEventModel model)
         {
-            if (_config.EnableConsoleErrorLogging)
+            if (_config.EnableConsoleLogging)
             {
                 Debug.Log("[ViewEventRepository] Validate model: \n" + model);
             }

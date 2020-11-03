@@ -54,7 +54,7 @@ namespace Plugins.Countly.Persistance.Repositories
                 _segmentDao.Save(segmentEntity);
             }
 
-            if (_config.EnableConsoleErrorLogging)
+            if (_config.EnableConsoleLogging)
             {
                 Debug.Log("[" + GetType().Name + "] Event repo enqueue: \n" + model + ", segment: " + segmentModel);
             }

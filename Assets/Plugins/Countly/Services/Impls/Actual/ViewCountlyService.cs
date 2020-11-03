@@ -48,7 +48,7 @@ namespace Plugins.Countly.Services.Impls.Actual
                 _viewToLastViewStartTime.Add(name, DateTime.UtcNow);   
             }
 
-            if (_config.EnableConsoleErrorLogging)
+            if (_config.EnableConsoleLogging)
             {
                 Debug.Log("[ViewCountlyService] RecordOpenViewAsync: " + name);
             }
@@ -88,7 +88,7 @@ namespace Plugins.Countly.Services.Impls.Actual
                 _viewToLastViewStartTime.Remove(name);
             }
 
-            if (_config.EnableConsoleErrorLogging)
+            if (_config.EnableConsoleLogging)
             {
                 Debug.Log("[ViewCountlyService] RecordCloseViewAsync: " + name + ", duration: " + duration);
             }

@@ -54,7 +54,7 @@ namespace Notifications.Impls.iOs
                         Identifier = identifier
                     };
 
-                if (_config.EnableConsoleErrorLogging)
+                if (_config.EnableConsoleLogging)
                 {
                     Debug.Log("[Countly] ReportPushActionAsync key: " + CountlyEventModel.PushActionEvent + ", segments: " + segment);
                 }
@@ -74,7 +74,7 @@ namespace Notifications.Impls.iOs
 
         public void OnNotificationClicked(Action<string, int> result)
         {
-            if (_config.EnableConsoleErrorLogging)
+            if (_config.EnableConsoleLogging)
             {
                 Debug.Log("[Countly] OnNotificationClicked register");
             }
@@ -85,7 +85,7 @@ namespace Notifications.Impls.iOs
 
         public void OnNotificationReceived(Action<string> result)
         {
-            if (_config.EnableConsoleErrorLogging)
+            if (_config.EnableConsoleLogging)
             {
                 Debug.Log("[Countly] OnNotificationReceived register");
             }

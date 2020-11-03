@@ -29,14 +29,14 @@ namespace Plugins.Countly.Persistance.Repositories
                 var model = ConvertEntityToModel(entity);
                 if (!ValidateModelBeforeEnqueue(model)) continue;
 
-                if (_config.EnableConsoleErrorLogging)
+                if (_config.EnableConsoleLogging)
                 {
                     Debug.Log("Loaded model: " + model);
                 }
 
                 Models.Enqueue(model);
             }
-            if (_config.EnableConsoleErrorLogging)
+            if (_config.EnableConsoleLogging)
             {
                 Debug.Log("Loaded entities of type " + typeof(TEntity).Name + " from db:" + Count);
             }
@@ -49,7 +49,7 @@ namespace Plugins.Countly.Persistance.Repositories
             Models.Enqueue(model);
             var entity = ConvertModelToEntity(model);
             var res = _dao.Save(entity);
-            if (!res && _config.EnableConsoleErrorLogging)
+            if (!res && _config.EnableConsoleLogging)
             {
                 Debug.LogError("Request entity save failed, entity: " + entity);
             }

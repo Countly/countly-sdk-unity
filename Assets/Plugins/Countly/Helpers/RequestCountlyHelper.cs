@@ -34,16 +34,11 @@ namespace Plugins.Countly.Helpers
             _requestRepo.Enqueue(request);
         }
 
-//        private CountlyRequestModel GetRequestFromQueue()
-//        {
-//            return _totalRequests.Peek();
-//        }
-
         internal void ProcessQueue()
         {
             var requests = _requestRepo.Models.ToArray();
 
-            if (_config.EnableConsoleErrorLogging)
+            if (_config.EnableConsoleLogging)
             {
                 Debug.Log("[Countly RequestCountlyHelper] Process queue, requests: " + requests.Length);
             }
@@ -198,6 +193,18 @@ namespace Plugins.Countly.Helpers
         private CountlyResponse Get(string url, bool addToRequestQueue = true)
         {
             var countlyResponse = new CountlyResponse();
+
+            if (_config.EnableTestMode)
+            {
+                if (_config.EnableConsoleLogging)
+                {
+                    Debug.Log("[Countly] RequestCountlyHelper Get: " + url);
+                }
+
+                countlyResponse.IsSuccess = true;
+                return countlyResponse;
+            }
+
             if (!addToRequestQueue)
             {
                 try
@@ -225,13 +232,13 @@ namespace Plugins.Countly.Helpers
                 var requestModel = new CountlyRequestModel(true, url, null, DateTime.UtcNow);
                 AddRequestToQueue(requestModel);
 
-                if (_config.EnableConsoleErrorLogging)
+                if (_config.EnableConsoleLogging)
                 {
                     Debug.Log("[Countly] RequestCountlyHelper: Added to Request Queue");
                 }
             }
 
-            if (_config.EnableConsoleErrorLogging)
+            if (_config.EnableConsoleLogging)
             {
                 Debug.Log("[Countly] RequestCountlyHelper request: " + url + " response: " + countlyResponse.ToString());
             }
@@ -248,6 +255,17 @@ namespace Plugins.Countly.Helpers
         internal async Task<CountlyResponse> GetAsync(string url, bool addToRequestQueue = true)
         {
             var countlyResponse = new CountlyResponse();
+
+            if (_config.EnableTestMode)
+            {
+                if (_config.EnableConsoleLogging)
+                {
+                    Debug.Log("[Countly] RequestCountlyHelper GetAsync: " + url);
+                }
+
+                countlyResponse.IsSuccess = true;
+                return countlyResponse;
+            }
 
             if (!addToRequestQueue)
             {
@@ -275,13 +293,13 @@ namespace Plugins.Countly.Helpers
                 var requestModel = new CountlyRequestModel(true, url, null, DateTime.UtcNow);
                 AddRequestToQueue(requestModel);
 
-                if (_config.EnableConsoleErrorLogging)
+                if (_config.EnableConsoleLogging)
                 {
                     Debug.Log("[Countly] RequestCountlyHelper: Added to Request Queue");
                 }
             }
 
-            if (_config.EnableConsoleErrorLogging)
+            if (_config.EnableConsoleLogging)
             {
                 Debug.Log("[Countly] RequestCountlyHelper request: " + url + " response: " + countlyResponse.ToString());
             }
@@ -299,6 +317,18 @@ namespace Plugins.Countly.Helpers
         private CountlyResponse Post(string uri, string data, bool addToRequestQueue = true)
         {
             var countlyResponse = new CountlyResponse();
+
+            if (_config.EnableTestMode)
+            {
+                if (_config.EnableConsoleLogging)
+                {
+                    Debug.Log("[Countly] RequestCountlyHelper Post: " + uri + data);
+                }
+
+                countlyResponse.IsSuccess = true;
+                return countlyResponse;
+            }
+
             if (!addToRequestQueue)
             {
                 try
@@ -336,13 +366,13 @@ namespace Plugins.Countly.Helpers
                 var requestModel = new CountlyRequestModel(false, uri, data, DateTime.UtcNow);
                 AddRequestToQueue(requestModel);
 
-                if (_config.EnableConsoleErrorLogging)
+                if (_config.EnableConsoleLogging)
                 {
                     Debug.Log("[Countly] RequestCountlyHelper: Added to Request Queue");
                 }
             }
 
-            if (_config.EnableConsoleErrorLogging)
+            if (_config.EnableConsoleLogging)
             {
                 Debug.Log("[Countly] RequestCountlyHelper request: " + uri + " response: " + countlyResponse.ToString());
             }
@@ -361,6 +391,17 @@ namespace Plugins.Countly.Helpers
         private async Task<CountlyResponse> PostAsync(string uri, string data, bool addToRequestQueue = true)
         {
             var countlyResponse = new CountlyResponse();
+
+            if (_config.EnableTestMode)
+            {
+                if (_config.EnableConsoleLogging)
+                {
+                    Debug.Log("[Countly] RequestCountlyHelper Post: " + uri + data);
+                }
+
+                countlyResponse.IsSuccess = true;
+                return countlyResponse;
+            }
 
             if (!addToRequestQueue)
             {
@@ -400,13 +441,13 @@ namespace Plugins.Countly.Helpers
                 var requestModel = new CountlyRequestModel(false, uri, data, DateTime.UtcNow);
                 AddRequestToQueue(requestModel);
 
-                if (_config.EnableConsoleErrorLogging)
+                if (_config.EnableConsoleLogging)
                 {
                     Debug.Log("[Countly] RequestCountlyHelper: Added to Request Queue");
                 }
             }
 
-            if (_config.EnableConsoleErrorLogging)
+            if (_config.EnableConsoleLogging)
             {
                 Debug.Log("[Countly] RequestCountlyHelper request: " + uri + " response: " + countlyResponse.ToString());
             }

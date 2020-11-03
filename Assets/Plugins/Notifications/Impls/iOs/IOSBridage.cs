@@ -38,7 +38,7 @@ public class IOSBridage : MonoBehaviour
     {
         if (deviceToken != null && deviceToken.Length != 0)
         {
-            if (Config.EnableConsoleErrorLogging)
+            if (Config.EnableConsoleLogging)
             {
                 Debug.Log("[Countly] OnDidRegisterForRemoteNotificationsWithDeviceToken Token: " + deviceToken);
             }
@@ -50,7 +50,7 @@ public class IOSBridage : MonoBehaviour
     //Sent when the application failed to be registered with Apple Push Notification Service (APNS).
     void OnDidFailToRegisterForRemoteNotificcallBackationsWithError(string error)
     {
-        if (Config.EnableConsoleErrorLogging)
+        if (Config.EnableConsoleLogging)
         {
             Debug.Log("[Countly] OnDidFailToRegisterForRemoteNotificcallBackationsWithError error: " + error);
         }
@@ -59,7 +59,7 @@ public class IOSBridage : MonoBehaviour
     
     void OnPushNotificationsReceived(string pushData)
     {
-        if (Config.EnableConsoleErrorLogging)
+        if (Config.EnableConsoleLogging)
         {
             Debug.Log("[Countly] OnPushNotificationsReceived: " + pushData);
         }
@@ -69,7 +69,7 @@ public class IOSBridage : MonoBehaviour
 
     void OnPushNotificationsClicked(string pushData)
     {
-        if (Config.EnableConsoleErrorLogging)
+        if (Config.EnableConsoleLogging)
         {
             Debug.Log("[Countly] OnPushNotificationsClicked: " + pushData);
         }
@@ -86,7 +86,7 @@ public class IOSBridage : MonoBehaviour
 
     void OnDidRegisterUserNotificationSettings(string setting)
     {
-        if (Config.EnableConsoleErrorLogging)
+        if (Config.EnableConsoleLogging)
         {
             Debug.Log("[Countly] OnDidRegisterUserNotificationSettings error: " + setting);
         }

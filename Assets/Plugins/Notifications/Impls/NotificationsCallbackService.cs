@@ -22,7 +22,7 @@ namespace Notifications
 
             _listeners.Add(listener);
 
-            if (_config.EnableConsoleErrorLogging)
+            if (_config.EnableConsoleLogging)
             {
                 Debug.Log("[Countly NotificationsCallbackService] AddListener: " + listener);
             }
@@ -32,7 +32,7 @@ namespace Notifications
         {
             _listeners.Remove(listener);
 
-            if (_config.EnableConsoleErrorLogging)
+            if (_config.EnableConsoleLogging)
             {
                 Debug.Log("[Countly NotificationsCallbackService] RemoveListener: " + listener);
             }
@@ -48,7 +48,7 @@ namespace Notifications
                 }
             }
 
-            if (_config.EnableConsoleErrorLogging)
+            if (_config.EnableConsoleLogging)
             {
                 Debug.Log("[Countly NotificationsCallbackService] SendMessageToListeners: " + data);
             }
@@ -64,7 +64,7 @@ namespace Notifications
                 }
             }
 
-            if (_config.EnableConsoleErrorLogging)
+            if (_config.EnableConsoleLogging)
             {
                 Debug.Log("[Countly NotificationsCallbackService] SendMessageToListeners: " + data);
             }
