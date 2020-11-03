@@ -81,6 +81,17 @@ namespace Plugins.Countly.Services.Impls.Actual
         /// <param name="value"></param>
         public void AddBreadcrumbs(string value)
         {
+
+            if (_configModel.EnableTestMode)
+            {
+                if (_configModel.EnableConsoleLogging)
+                {
+                    Debug.Log("[Countly] AddBreadcrumbs : " + value);
+                }
+
+                return;
+            }
+
             var validBreadcrumb = value.Length > 1000 ? value.Substring(0, 1000) : value;
 
             if (_crashBreadcrumbs.Count == _configModel.TotalBreadcrumbsAllowed)
