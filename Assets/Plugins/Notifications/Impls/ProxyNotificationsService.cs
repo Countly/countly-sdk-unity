@@ -1,18 +1,18 @@
 using System;
 using System.Collections;
 using System.Threading.Tasks;
-using Plugins.Countly.Helpers;
-using Plugins.Countly.Models;
-using Plugins.Countly.Services;
+using Plugins.CountlySDK.Helpers;
+using Plugins.CountlySDK.Models;
+using Plugins.CountlySDK.Services;
 
 namespace Notifications.Impls
 {
 	public class ProxyNotificationsService : INotificationsService
 	{
 		private readonly INotificationsService _service;
-        private readonly IEventCountlyService _eventCountlyService;
+        private readonly EventCountlyService _eventCountlyService;
 
-        public ProxyNotificationsService(CountlyConfigModel config, Action<IEnumerator> startCoroutine, IEventCountlyService eventCountlyService)
+        internal ProxyNotificationsService(CountlyConfigModel config, Action<IEnumerator> startCoroutine, EventCountlyService eventCountlyService)
 		{
 
 #if UNITY_ANDROID

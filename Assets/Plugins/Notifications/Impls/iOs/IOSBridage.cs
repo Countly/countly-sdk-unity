@@ -1,6 +1,6 @@
 using UnityEngine;
 using System;
-using Plugins.Countly.Models;
+using Plugins.CountlySDK.Models;
 using Newtonsoft.Json.Linq;
 
 public class IOSBridage : MonoBehaviour

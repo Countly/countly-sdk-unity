@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using Plugins.Countly.Models;
+using Plugins.CountlySDK.Models;
 using UnityEngine;
 
 namespace Notifications

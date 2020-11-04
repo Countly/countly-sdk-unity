@@ -1,6 +1,6 @@
-using Plugins.Countly.Helpers;
-using Plugins.Countly.Models;
-using Plugins.Countly.Services;
+using Plugins.CountlySDK.Helpers;
+using Plugins.CountlySDK.Models;
+using Plugins.CountlySDK.Services;
 using System;
 using System.Collections;
 using System.Threading.Tasks;
@@ -12,7 +12,7 @@ namespace Notifications.Impls.iOs
     {
         private readonly CountlyConfigModel _config;
         private readonly Action<IEnumerator> _startCoroutine;
-        private readonly IEventCountlyService _eventCountlyService;
+        private readonly EventCountlyService _eventCountlyService;
 
         private readonly IOSBridage _bridge;
         private const string BridgeName = "[iOS] Bridge";
@@ -21,7 +21,7 @@ namespace Notifications.Impls.iOs
         private Action<string, int> _OnNotificationClickResult;
 
 
-        public IOsNotificationsService(CountlyConfigModel config, Action<IEnumerator> startCoroutine, IEventCountlyService eventCountlyService)
+        internal IOsNotificationsService(CountlyConfigModel config, Action<IEnumerator> startCoroutine, EventCountlyService eventCountlyService)
         {
             _config = config;
             _startCoroutine = startCoroutine;
@@ -48,7 +48,7 @@ namespace Notifications.Impls.iOs
             if (_bridge.MessageId != null)
             {
                 var segment =
-                    new Plugins.Countly.Services.Impls.Actual.PushCountlyService.PushActionSegment
+                    new Plugins.CountlySDK.Services.PushCountlyService.PushActionSegment
                     {
                         MessageID = mesageId,
                         Identifier = identifier

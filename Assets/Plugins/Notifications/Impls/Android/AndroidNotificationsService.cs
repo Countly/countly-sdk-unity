@@ -1,7 +1,7 @@
 using Newtonsoft.Json.Linq;
-using Plugins.Countly.Helpers;
-using Plugins.Countly.Models;
-using Plugins.Countly.Services;
+using Plugins.CountlySDK.Helpers;
+using Plugins.CountlySDK.Models;
+using Plugins.CountlySDK.Services;
 using System;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -10,7 +10,6 @@ namespace Notifications.Impls.Android
 {
 	public class AndroidNotificationsService : INotificationsService
 	{
-        
         private const string BridgeName = "[Android] Bridge";
         private const string StorePackageName = "ly.count.unity.push_fcm.MessageStore";
         private const string CountlyPushPluginPackageName = "ly.count.unity.push_fcm.CountlyPushPlugin";
@@ -18,9 +17,9 @@ namespace Notifications.Impls.Android
 
 		private readonly AndroidBridge _bridge;
         private readonly CountlyConfigModel _config;
-        private readonly IEventCountlyService _eventCountlyService;
+        private readonly EventCountlyService _eventCountlyService;
 
-        public AndroidNotificationsService(CountlyConfigModel config, IEventCountlyService eventCountlyService)
+        internal AndroidNotificationsService(CountlyConfigModel config, EventCountlyService eventCountlyService)
 		{
             _config = config;
             _eventCountlyService = eventCountlyService;
@@ -88,7 +87,7 @@ namespace Notifications.Impls.Android
                     string identifier = item.GetValue("action_index").ToString();
 
                     var segment =
-                    new Plugins.Countly.Services.Impls.Actual.PushCountlyService.PushActionSegment
+                    new Plugins.CountlySDK.Services.PushCountlyService.PushActionSegment
                     {
                         MessageID = mesageId,
                         Identifier = identifier
