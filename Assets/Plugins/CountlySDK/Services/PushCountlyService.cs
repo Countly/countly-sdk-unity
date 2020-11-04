@@ -88,7 +88,7 @@ namespace Plugins.CountlySDK.Services
         /// <summary>
         /// Report Push Actions stored in local cache to Countly server.,
         /// </summary>
-        public async Task<CountlyResponse> ReportPushActionAsync()
+        private async Task<CountlyResponse> ReportPushActionAsync()
         {
             return await _notificationsService.ReportPushActionAsync();
         }

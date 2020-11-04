@@ -164,6 +164,11 @@ namespace Plugins.CountlySDK.Services
 		{
 			var result = await ExecuteBeginSessionAsync();
 
+			if (_configModel.EnableTestMode)
+			{
+				return result;
+			}
+
 			//Enables push notification on start
 			if (_configModel.NotificationMode != TestMode.None)
 			{

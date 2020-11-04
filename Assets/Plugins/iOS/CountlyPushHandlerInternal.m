@@ -49,7 +49,7 @@ void registerForRemoteNotifications()
     if (savedPayload != nil) {
         [[NSUserDefaults standardUserDefaults] removeObjectForKey:kCountlySavedPayload];
         const char * payload = [savedPayload UTF8String];
-        UnitySendMessage(listenerGameObject, "OnPushNotificationsReceived", payload);
+        UnitySendMessage(listenerGameObject, "OnPushNotificationsClicked", payload);
     }
 }
 
