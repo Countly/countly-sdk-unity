@@ -52,7 +52,7 @@ MonoBehaviour:
     EnableFirstAppLaunchSegment: 0
     EnablePost: 0
     EnableTestMode: 0
-    EnableConsoleLogging: 0
+    EnableConsoleLogging: 1
     IgnoreSessionCooldown: 0
     NotificationMode: -1
     SessionDuration: 60
