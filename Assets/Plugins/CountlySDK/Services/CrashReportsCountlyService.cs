@@ -36,7 +36,7 @@ namespace Plugins.CountlySDK.Services
         }
 
         /// <summary>
-        /// Private method that sends crash details to the server. Set param "nonfatal" to true for Custom Logged errors
+        /// Public method that sends crash details to the server. Set param "nonfatal" to true for Custom Logged errors
         /// </summary>
         /// <param name="message"></param>
         /// <param name="stackTrace"></param>

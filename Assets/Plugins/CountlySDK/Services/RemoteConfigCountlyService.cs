@@ -58,6 +58,10 @@ namespace Plugins.CountlySDK.Services
             return config;
         }
 
+        /// <summary>
+        ///     Fetch freshg remote config from server and store locally.
+        /// </summary>
+        /// <returns></returns>
         public async Task<CountlyResponse> Update()
         {
             var requestParams =

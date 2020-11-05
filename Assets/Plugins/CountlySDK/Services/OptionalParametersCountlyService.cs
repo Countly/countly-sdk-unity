@@ -56,6 +56,13 @@ namespace Plugins.CountlySDK.Services
             Location = string.Empty;
         }
 
+        /// <summary>
+        /// Set Country code (ISO Country code), City, Location and IP address to be used for future requests.
+        /// </summary>
+        /// <param name="countryCode"></param>
+        /// <param name="city"></param>
+        /// <param name="gpsCoordinates"></param>
+        /// <param name="ipAddress"></param>
         public void SetLocation(string countryCode, string city, string gpsCoordinates, string ipAddress)
         {
             City = city;

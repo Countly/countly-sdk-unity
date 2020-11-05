@@ -75,11 +75,27 @@ namespace Plugins.CountlySDK.Services
             };
         }
 
+        /// <summary>
+        /// Public method to send an event to the server.
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="useNumberInSameSession"></param>
+        /// <returns></returns>
         public async Task<CountlyResponse> RecordEventAsync(string key, bool useNumberInSameSession = false)
         {
             return await RecordEventAsync(key, null, useNumberInSameSession);
         }
 
+        /// <summary>
+        /// Public method to send an event to the server with segmentation.
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="segmentation"></param>
+        /// <param name="useNumberInSameSession"></param>
+        /// <param name="count"></param>
+        /// <param name="sum"></param>
+        /// <param name="duration"></param>
+        /// <returns></returns>
         public async Task<CountlyResponse> RecordEventAsync(string key, SegmentModel segmentation, bool useNumberInSameSession = false,
             int? count = 1, double? sum = 0, double? duration = null)
         {
@@ -114,13 +130,12 @@ namespace Plugins.CountlySDK.Services
             
             return await RecordEventAsync(@event);
         }
-        
-        
 
         /// <summary>
         ///     Reports all recorded view events to the server
         /// </summary>
-        public async Task<CountlyResponse> ReportAllRecordedViewEventsAsync(bool addToRequestQueue = true)
+        /// <returns></returns>
+        internal async Task<CountlyResponse> ReportAllRecordedViewEventsAsync(bool addToRequestQueue = true)
         {
             if (_viewEventRepo.Models.Count == 0)
             {
@@ -155,7 +170,7 @@ namespace Plugins.CountlySDK.Services
         /// <summary>
         ///     Reports all recorded events to the server
         /// </summary>
-        public async Task<CountlyResponse> ReportAllRecordedNonViewEventsAsync(bool addToRequestQueue = true)
+        internal async Task<CountlyResponse> ReportAllRecordedNonViewEventsAsync(bool addToRequestQueue = true)
         {
             if (_nonViewEventRepo.Models.Count == 0)
             {
@@ -190,7 +205,7 @@ namespace Plugins.CountlySDK.Services
         /// </summary>
         /// <param name="events"></param>
         /// <returns></returns>
-        public async Task<CountlyResponse> ReportMultipleEventsAsync(List<CountlyEventModel> events)
+        internal async Task<CountlyResponse> ReportMultipleEventsAsync(List<CountlyEventModel> events)
         {
             if (events == null || events.Count == 0)
                 return new CountlyResponse
