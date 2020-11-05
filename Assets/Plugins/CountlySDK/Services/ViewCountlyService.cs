@@ -20,7 +20,12 @@ namespace Plugins.CountlySDK.Services
             _config = config;
             _eventService = eventService;
         }
-
+        /// <summary>
+        /// Start tracking a view
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="hasSessionBegunWithView"></param>
+        /// <returns></returns>
         public async Task<CountlyResponse> RecordOpenViewAsync(string name, bool hasSessionBegunWithView = false)
         {
             if (string.IsNullOrEmpty(name))
@@ -56,7 +61,13 @@ namespace Plugins.CountlySDK.Services
             var currentView = new CountlyEventModel(CountlyEventModel.ViewEvent, currentViewSegment.ToDictionary());
             return await _eventService.RecordEventAsync(currentView);
         }
-        
+
+        /// <summary>
+        /// Stop tracking a view
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="hasSessionBegunWithView"></param>
+        /// <returns></returns>
         public async Task<CountlyResponse> RecordCloseViewAsync(string name, bool hasSessionBegunWithView = false)
         {
             if (string.IsNullOrEmpty(name))

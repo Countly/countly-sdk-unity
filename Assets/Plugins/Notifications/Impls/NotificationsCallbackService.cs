@@ -14,6 +14,10 @@ namespace Notifications
             _listeners = new List<INotificationListener>();
         }
 
+        /// <summary>
+        /// Add Notification listener.
+        /// </summary>
+        /// <param name="listener"></param>
         public void AddListener(INotificationListener listener)
         {
             if (_listeners.Contains(listener)) {
@@ -27,7 +31,10 @@ namespace Notifications
                 Debug.Log("[Countly NotificationsCallbackService] AddListener: " + listener);
             }
         }
-
+        /// <summary>
+        /// Remove Notification listener.
+        /// </summary>
+        /// <param name="listener"></param>
         public void RemoveListener(INotificationListener listener)
         {
             _listeners.Remove(listener);
@@ -38,7 +45,11 @@ namespace Notifications
             }
         }
 
-        public void NotifyOnNotificationReceived(string data)
+        /// <summary>
+        /// Trigger listener's Notification Received event with payload of push notification.
+        /// </summary>
+        /// <param name="data"></param>
+        internal void NotifyOnNotificationReceived(string data)
         {
             foreach (INotificationListener listener in _listeners)
             {
@@ -54,7 +65,12 @@ namespace Notifications
             }
         }
 
-        public void NotifyOnNotificationClicked(string data, int index)
+        /// <summary>
+        /// Trigger listener's Notification Clicked event with payload of push notification and action index.
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="index"></param>
+        internal void NotifyOnNotificationClicked(string data, int index)
         {
             foreach (INotificationListener listener in _listeners)
             {
