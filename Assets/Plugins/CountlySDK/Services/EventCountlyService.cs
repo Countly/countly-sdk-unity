@@ -76,7 +76,7 @@ namespace Plugins.CountlySDK.Services
         }
 
         /// <summary>
-        /// Public method to send an event to the server.
+        /// Report an event to the server.
         /// </summary>
         /// <param name="key"></param>
         /// <param name="useNumberInSameSession"></param>
@@ -87,7 +87,7 @@ namespace Plugins.CountlySDK.Services
         }
 
         /// <summary>
-        /// Public method to send an event to the server with segmentation.
+        /// Report an event to the server with segmentation.
         /// </summary>
         /// <param name="key"></param>
         /// <param name="segmentation"></param>

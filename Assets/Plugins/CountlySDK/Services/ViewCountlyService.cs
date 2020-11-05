@@ -21,7 +21,7 @@ namespace Plugins.CountlySDK.Services
             _eventService = eventService;
         }
         /// <summary>
-        /// Reports a Open view with the name of view
+        /// Start tracking a view
         /// </summary>
         /// <param name="name"></param>
         /// <param name="hasSessionBegunWithView"></param>
@@ -63,7 +63,7 @@ namespace Plugins.CountlySDK.Services
         }
 
         /// <summary>
-        /// Reports a closed view with the name of view
+        /// Stop tracking a view
         /// </summary>
         /// <param name="name"></param>
         /// <param name="hasSessionBegunWithView"></param>

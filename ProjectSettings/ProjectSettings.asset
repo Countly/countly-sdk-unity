@@ -170,7 +170,7 @@ PlayerSettings:
   applicationIdentifier:
     Android: ly.count.demo
     Standalone: ly.count.demo
-    iPhone: ly.count.demo
+    iPhone: com.countly.push
   buildNumber:
     Standalone: 1
     iPhone: 1

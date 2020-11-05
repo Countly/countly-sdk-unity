@@ -15,7 +15,7 @@ namespace Notifications
         }
 
         /// <summary>
-        /// Add Notification listener into list.
+        /// Add Notification listener.
         /// </summary>
         /// <param name="listener"></param>
         public void AddListener(INotificationListener listener)
@@ -32,7 +32,7 @@ namespace Notifications
             }
         }
         /// <summary>
-        /// Remove Notification listener from list.
+        /// Remove Notification listener.
         /// </summary>
         /// <param name="listener"></param>
         public void RemoveListener(INotificationListener listener)
@@ -46,10 +46,10 @@ namespace Notifications
         }
 
         /// <summary>
-        /// Triger listener's Notification Received event with payload of push notification.
+        /// Trigger listener's Notification Received event with payload of push notification.
         /// </summary>
         /// <param name="data"></param>
-        public void NotifyOnNotificationReceived(string data)
+        internal void NotifyOnNotificationReceived(string data)
         {
             foreach (INotificationListener listener in _listeners)
             {
@@ -66,11 +66,11 @@ namespace Notifications
         }
 
         /// <summary>
-        /// Triger listener's Notification Clicked event with payload of push notification and action index.
+        /// Trigger listener's Notification Clicked event with payload of push notification and action index.
         /// </summary>
         /// <param name="data"></param>
         /// <param name="index"></param>
-        public void NotifyOnNotificationClicked(string data, int index)
+        internal void NotifyOnNotificationClicked(string data, int index)
         {
             foreach (INotificationListener listener in _listeners)
             {
