@@ -58,11 +58,8 @@ namespace Plugins.CountlySDK.Services
             if (DeviceId == deviceId)
                 return new CountlyResponse { IsSuccess = true };
 
-            //Add currently recorded but not queued view events to request queue-----------------------------------
-            await _eventCountlyService.ReportAllRecordedViewEventsAsync();
-
-            //Add currently recorded but not queued non view events to request queue-----------------------------------
-            await _eventCountlyService.ReportAllRecordedNonViewEventsAsync();
+            //Add currently recorded events to request queue-----------------------------------
+            await _eventCountlyService.AddEventsToRequestQueue();
             
             //Ends current session
             //Do not dispose timer object

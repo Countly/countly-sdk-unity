@@ -60,8 +60,7 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
 
-			await _eventService.ReportAllRecordedViewEventsAsync();
-			await _eventService.ReportAllRecordedNonViewEventsAsync();
+			await _eventService.AddEventsToRequestQueue();
 
 			_requestCountlyHelper.ProcessQueue();
             var sessionOver = (DateTime.Now - _lastInputTime).TotalSeconds >= _configModel.SessionDuration;

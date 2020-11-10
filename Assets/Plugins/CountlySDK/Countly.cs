@@ -54,8 +54,7 @@ namespace Plugins.CountlySDK
 
         public async void ReportAll()
         {
-            await Events.ReportAllRecordedViewEventsAsync();
-            await Events.ReportAllRecordedNonViewEventsAsync();
+            await Events.AddEventsToRequestQueue();
             await UserDetails.SaveAsync();
         }
 

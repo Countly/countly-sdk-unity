@@ -28,6 +28,16 @@ namespace Plugins.CountlySDK.Services
             _eventNumberInSameSessionHelper = eventNumberInSameSessionHelper;
         }
 
+        internal async Task<CountlyResponse> AddEventsToRequestQueue() {
+            await ReportAllRecordedViewEventsAsync();
+            await ReportAllRecordedNonViewEventsAsync();
+
+            return new CountlyResponse
+            {
+                IsSuccess = true
+            };
+        }
+
         internal async Task<CountlyResponse> RecordEventAsync(CountlyEventModel @event, bool useNumberInSameSession = false)
         {
 
@@ -62,13 +72,12 @@ namespace Plugins.CountlySDK.Services
             {
                 _eventNumberInSameSessionHelper.IncreaseNumberInSameSession(@event);
             }
-            
-            if (_viewEventRepo.Count >= _countlyConfigModel.EventViewSendThreshold)
-                await ReportAllRecordedViewEventsAsync();
 
-            if (_nonViewEventRepo.Count >= _countlyConfigModel.EventNonViewSendThreshold)
-                await ReportAllRecordedNonViewEventsAsync();
-
+            if ((_viewEventRepo.Count + _nonViewEventRepo.Count) >= _countlyConfigModel.EventQueueThreshold)
+            {
+                await AddEventsToRequestQueue();
+            }
+                
             return new CountlyResponse
             {
                 IsSuccess = true
@@ -135,7 +144,7 @@ namespace Plugins.CountlySDK.Services
         ///     Reports all recorded view events to the server
         /// </summary>
         /// <returns></returns>
-        internal async Task<CountlyResponse> ReportAllRecordedViewEventsAsync()
+        private async Task<CountlyResponse> ReportAllRecordedViewEventsAsync()
         {
             if (_viewEventRepo.Models.Count == 0)
             {
@@ -170,7 +179,7 @@ namespace Plugins.CountlySDK.Services
         /// <summary>
         ///     Reports all recorded events to the server
         /// </summary>
-        internal async Task<CountlyResponse> ReportAllRecordedNonViewEventsAsync()
+        private async Task<CountlyResponse> ReportAllRecordedNonViewEventsAsync()
         {
             if (_nonViewEventRepo.Models.Count == 0)
             {
