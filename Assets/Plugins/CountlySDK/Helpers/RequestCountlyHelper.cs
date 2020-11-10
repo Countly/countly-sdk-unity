@@ -56,22 +56,14 @@ namespace Plugins.CountlySDK.Helpers
 
             foreach (var reqModel in requests)
             {
-                var retryCount = 0;
-                while (retryCount++ < 3)
+                var response = await ProcessRequest(reqModel);
+
+                if (!response.IsSuccess)
                 {
-                    var response = await ProcessRequest(reqModel);
-
-                    if (response.IsSuccess)
-                    {
-                        _requestRepo.Dequeue();
-                        break;
-                    }
-
-                    if (_config.EnableConsoleLogging)
-                    {
-                        Debug.Log("[Countly RequestCountlyHelper] ProcessQueue retryCount: " +retryCount);
-                    }
+                    break;
                 }
+
+                _requestRepo.Dequeue();
             }
         }
 
