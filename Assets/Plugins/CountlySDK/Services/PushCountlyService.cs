@@ -82,7 +82,7 @@ namespace Plugins.CountlySDK.Services
                     { $"{Constants.UnityPlatform}_token", token },
                 };
 
-            return await _requestCountlyHelper.GetResponseAsync(requestParams, true);
+            return await _requestCountlyHelper.GetResponseAsync(requestParams);
         }
 
         /// <summary>

@@ -73,7 +73,7 @@ namespace Plugins.CountlySDK.Services
             var url = BuildGetRequest(requestParams);
             
             
-            var response =  await Task.Run(() => _requestCountlyHelper.GetAsync(url, false));
+            var response =  await Task.Run(() => _requestCountlyHelper.GetAsync(url));
             if (response.IsSuccess)
             {
                 _configDao.RemoveAll();

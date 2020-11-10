@@ -135,7 +135,7 @@ namespace Plugins.CountlySDK.Services
         ///     Reports all recorded view events to the server
         /// </summary>
         /// <returns></returns>
-        internal async Task<CountlyResponse> ReportAllRecordedViewEventsAsync(bool addToRequestQueue = true)
+        internal async Task<CountlyResponse> ReportAllRecordedViewEventsAsync()
         {
             if (_viewEventRepo.Models.Count == 0)
             {
@@ -160,7 +160,7 @@ namespace Plugins.CountlySDK.Services
             //Even if res = false all events should be removed because responses are stored locally.
             _viewEventRepo.Clear();    
             
-            var res = await _requestCountlyHelper.GetResponseAsync(requestParams, addToRequestQueue);
+            var res = await _requestCountlyHelper.GetResponseAsync(requestParams);
 
             return res;
         }
@@ -170,7 +170,7 @@ namespace Plugins.CountlySDK.Services
         /// <summary>
         ///     Reports all recorded events to the server
         /// </summary>
-        internal async Task<CountlyResponse> ReportAllRecordedNonViewEventsAsync(bool addToRequestQueue = true)
+        internal async Task<CountlyResponse> ReportAllRecordedNonViewEventsAsync()
         {
             if (_nonViewEventRepo.Models.Count == 0)
             {
@@ -195,7 +195,7 @@ namespace Plugins.CountlySDK.Services
             //Even if res = false all events should be removed because responses are stored locally.
             _nonViewEventRepo.Clear();    
             
-            var res = await _requestCountlyHelper.GetResponseAsync(requestParams, addToRequestQueue);
+            var res = await _requestCountlyHelper.GetResponseAsync(requestParams);
 
             return res;
         }

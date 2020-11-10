@@ -114,7 +114,7 @@ namespace Plugins.CountlySDK
             Notifications = new NotificationsCallbackService(Config);
             var notificationsService = new ProxyNotificationsService(Config, InternalStartCoroutine, Events);
             _push = new PushCountlyService(Events, requests, notificationsService, Notifications);
-            Session = new SessionCountlyService(Config, _push, requests, OptionalParameters, eventNumberInSameSessionHelper);
+            Session = new SessionCountlyService(Config, Events, _push, requests, OptionalParameters, eventNumberInSameSessionHelper);
             
             Consents = new ConsentCountlyService();
             CrashReports = new CrashReportsCountlyService(Config, requests);

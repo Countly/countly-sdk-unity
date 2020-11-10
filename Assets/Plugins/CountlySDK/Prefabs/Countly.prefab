@@ -44,8 +44,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Auth:
-    ServerUrl: https://try.count.ly/
-    AppKey: YOUR_APP_KEY
+    ServerUrl: https://master.count.ly/
+    AppKey: 8e2fe772c091355076ead703f987fee94490fff4
     DeviceId: 
   Config:
     Salt: 
@@ -55,7 +55,7 @@ MonoBehaviour:
     EnableConsoleLogging: 1
     IgnoreSessionCooldown: 0
     NotificationMode: -1
-    SessionDuration: 60
+    SessionDuration: 5
     EventViewSendThreshold: 1
     EventNonViewSendThreshold: 1
     StoredRequestLimit: 5

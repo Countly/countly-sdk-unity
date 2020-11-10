@@ -59,10 +59,10 @@ namespace Plugins.CountlySDK.Services
                 return new CountlyResponse { IsSuccess = true };
 
             //Add currently recorded but not queued view events to request queue-----------------------------------
-            await _eventCountlyService.ReportAllRecordedViewEventsAsync(true);
+            await _eventCountlyService.ReportAllRecordedViewEventsAsync();
 
             //Add currently recorded but not queued non view events to request queue-----------------------------------
-            await _eventCountlyService.ReportAllRecordedNonViewEventsAsync(true);
+            await _eventCountlyService.ReportAllRecordedNonViewEventsAsync();
             
             //Ends current session
             //Do not dispose timer object

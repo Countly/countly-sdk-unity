@@ -16,20 +16,21 @@ namespace Plugins.CountlySDK.Services
 		public bool IsSessionInitiated { get; private set; }
 
 		private DateTime _lastInputTime;
-
 		
-        private readonly CountlyConfigModel _configModel;
-        private readonly PushCountlyService _pushCountlyService;
+		private readonly CountlyConfigModel _configModel;
+		private readonly EventCountlyService _eventService;
+		private readonly PushCountlyService _pushCountlyService;
         private readonly RequestCountlyHelper _requestCountlyHelper;
         private readonly OptionalParametersCountlyService _optionalParametersCountlyService;
         private readonly EventNumberInSameSessionHelper _eventNumberInSameSessionHelper;
 
-        internal SessionCountlyService(CountlyConfigModel configModel, PushCountlyService pushCountlyService, 
+        internal SessionCountlyService(CountlyConfigModel configModel, EventCountlyService eventService, PushCountlyService pushCountlyService, 
             RequestCountlyHelper requestCountlyHelper, OptionalParametersCountlyService optionalParametersCountlyService,
             EventNumberInSameSessionHelper eventNumberInSameSessionHelper)
         {
             _configModel = configModel;
-            _pushCountlyService = pushCountlyService;
+			_eventService = eventService;
+			_pushCountlyService = pushCountlyService;
             _requestCountlyHelper = requestCountlyHelper;
             _optionalParametersCountlyService = optionalParametersCountlyService;
             _eventNumberInSameSessionHelper = eventNumberInSameSessionHelper;
@@ -59,7 +60,10 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
 
-            _requestCountlyHelper.ProcessQueue();
+			await _eventService.ReportAllRecordedViewEventsAsync();
+			await _eventService.ReportAllRecordedNonViewEventsAsync();
+
+			_requestCountlyHelper.ProcessQueue();
             var sessionOver = (DateTime.Now - _lastInputTime).TotalSeconds >= _configModel.SessionDuration;
 
             if (sessionOver)
