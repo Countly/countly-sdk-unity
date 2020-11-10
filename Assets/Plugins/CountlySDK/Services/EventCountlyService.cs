@@ -1,10 +1,12 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Plugins.CountlySDK.Helpers;
 using Plugins.CountlySDK.Models;
+using Plugins.CountlySDK.Persistance;
 using Plugins.CountlySDK.Persistance.Repositories.Impls;
 using UnityEngine;
 
@@ -28,14 +30,43 @@ namespace Plugins.CountlySDK.Services
             _eventNumberInSameSessionHelper = eventNumberInSameSessionHelper;
         }
 
-        internal async Task<CountlyResponse> AddEventsToRequestQueue() {
-            await ReportAllRecordedViewEventsAsync();
-            await ReportAllRecordedNonViewEventsAsync();
-
-            return new CountlyResponse
+        /// <summary>
+        ///     Send all recorded events to request queue
+        /// </summary>
+        internal async Task<CountlyResponse> AddEventsToRequestQueue()
+        {
+            if ((_viewEventRepo.Models.Count + _nonViewEventRepo.Models.Count) == 0)
             {
-                IsSuccess = true
-            };
+                return new CountlyResponse
+                {
+                    IsSuccess = false,
+                    ErrorMessage = "No events to send"
+                };
+            }
+
+            var result = new Queue(_viewEventRepo.Models);
+            foreach (var obj in _nonViewEventRepo.Models)
+            {
+                result.Enqueue(obj);
+            }
+
+            //Send all at once
+            var requestParams =
+                new Dictionary<string, object>
+                {
+                    {
+                        "events", JsonConvert.SerializeObject(result, Formatting.Indented,
+                            new JsonSerializerSettings {NullValueHandling = NullValueHandling.Ignore})
+                    }
+                };
+
+
+            //Even if res = false all events should be removed because responses are stored locally.
+            _viewEventRepo.Clear();
+            _nonViewEventRepo.Clear();
+
+            var res = await _requestCountlyHelper.GetResponseAsync(requestParams);
+            return res;
         }
 
         internal async Task<CountlyResponse> RecordEventAsync(CountlyEventModel @event, bool useNumberInSameSession = false)
@@ -141,75 +172,6 @@ namespace Plugins.CountlySDK.Services
         }
 
         /// <summary>
-        ///     Reports all recorded view events to the server
-        /// </summary>
-        /// <returns></returns>
-        private async Task<CountlyResponse> ReportAllRecordedViewEventsAsync()
-        {
-            if (_viewEventRepo.Models.Count == 0)
-            {
-                return new CountlyResponse
-                {
-                    IsSuccess = false,
-                    ErrorMessage = "No events to send"
-                };
-            }
-            
-            //Send all at once
-            var requestParams =
-                new Dictionary<string, object>
-                {
-                    {
-                        "events", JsonConvert.SerializeObject(_viewEventRepo.Models, Formatting.Indented,
-                            new JsonSerializerSettings {NullValueHandling = NullValueHandling.Ignore})
-                    }
-                };
-
-            
-            //Even if res = false all events should be removed because responses are stored locally.
-            _viewEventRepo.Clear();    
-            
-            var res = await _requestCountlyHelper.GetResponseAsync(requestParams);
-
-            return res;
-        }
-        
-        
-        
-        /// <summary>
-        ///     Reports all recorded events to the server
-        /// </summary>
-        private async Task<CountlyResponse> ReportAllRecordedNonViewEventsAsync()
-        {
-            if (_nonViewEventRepo.Models.Count == 0)
-            {
-                return new CountlyResponse
-                {
-                    IsSuccess = false,
-                    ErrorMessage = "No events to send"
-                };
-            }
-
-            //Send all at once
-            var requestParams =
-                new Dictionary<string, object>
-                {
-                    {
-                        "events", JsonConvert.SerializeObject(_nonViewEventRepo.Models, Formatting.Indented,
-                            new JsonSerializerSettings {NullValueHandling = NullValueHandling.Ignore})
-                    }
-                };
-
-            
-            //Even if res = false all events should be removed because responses are stored locally.
-            _nonViewEventRepo.Clear();    
-            
-            var res = await _requestCountlyHelper.GetResponseAsync(requestParams);
-
-            return res;
-        }
-
-        /// <summary>
         ///     Sends multiple events to the countly server. It expects a list of events as input.
         /// </summary>
         /// <param name="events"></param>
@@ -274,17 +236,9 @@ namespace Plugins.CountlySDK.Services
                             new JsonSerializerSettings {NullValueHandling = NullValueHandling.Ignore})
                     }
                 };
+
             return await _requestCountlyHelper.GetResponseAsync(requestParams);
         }
-
-//        private void SetTimeZoneInfo(CountlyEventModel evt, DateTime requestDatetime)
-//        {
-//            var timezoneInfo = TimeMetricModel.GetTimeZoneInfoForRequest(requestDatetime);
-//            evt.Timestamp = timezoneInfo.Timestamp;
-//            evt.DayOfWeek = timezoneInfo.DayOfWeek;
-//            evt.Hour = timezoneInfo.Hour;
-//            evt.Timezone = timezoneInfo.Timezone;
-//        }
 
         private void AddFirstAppSegment(CountlyEventModel @event)
         {
