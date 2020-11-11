@@ -33,15 +33,11 @@ namespace Plugins.CountlySDK.Services
         /// <summary>
         ///     Send all recorded events to request queue
         /// </summary>
-        internal async Task<CountlyResponse> AddEventsToRequestQueue()
+        internal async Task AddEventsToRequestQueue()
         {
             if ((_viewEventRepo.Models.Count + _nonViewEventRepo.Models.Count) == 0)
             {
-                return new CountlyResponse
-                {
-                    IsSuccess = false,
-                    ErrorMessage = "No events to send"
-                };
+                return;
             }
 
             var result = new Queue(_viewEventRepo.Models);
@@ -65,8 +61,8 @@ namespace Plugins.CountlySDK.Services
             _viewEventRepo.Clear();
             _nonViewEventRepo.Clear();
 
-            var res = await _requestCountlyHelper.GetResponseAsync(requestParams);
-            return res;
+            await _requestCountlyHelper.GetResponseAsync(requestParams);
+            
         }
 
         internal async Task<CountlyResponse> RecordEventAsync(CountlyEventModel @event, bool useNumberInSameSession = false)
