@@ -85,7 +85,7 @@ namespace Plugins.CountlySDK.Services
 			}
 		}
 
-		public async Task<CountlyResponse> ExecuteBeginSessionAsync()
+		public async Task ExecuteBeginSessionAsync()
 		{
 			FirstLaunchAppHelper.Process();
 			_lastSessionRequestTime = DateTime.Now;
@@ -106,25 +106,17 @@ namespace Plugins.CountlySDK.Services
 
 			requestParams.Add("ip_address", _optionalParametersCountlyService.IPAddress);
 
-			var response = await _requestCountlyHelper.GetResponseAsync(requestParams);
+			await _requestCountlyHelper.GetResponseAsync(requestParams);
 
-			//Extend session only after session has begun
-//            if (response.IsSuccess)
-//            {
-			
 			//Start session timer
 			if (!_configModel.EnableManualSessionHandling)
 			{
 				InitSessionTimer();
 				_sessionTimer.Start();
 			}
-//            }
-
-			//}
-			return response;
 		}
 
-		public async Task<CountlyResponse> ExecuteEndSessionAsync(bool disposeTimer = true)
+		public async Task ExecuteEndSessionAsync(bool disposeTimer = true)
 		{
 			//if (ConsentModel.CheckConsent(FeaturesEnum.Sessions.ToString()))
 			//{
@@ -141,7 +133,7 @@ namespace Plugins.CountlySDK.Services
 			requestParams.Add("metrics", JsonConvert.SerializeObject(CountlyMetricModel.Metrics, Formatting.Indented,
 				new JsonSerializerSettings {NullValueHandling = NullValueHandling.Ignore}));
 
-			var response = await _requestCountlyHelper.GetResponseAsync(requestParams);
+			await _requestCountlyHelper.GetResponseAsync(requestParams);
 
 			if (!_configModel.EnableManualSessionHandling)
 			{
@@ -154,22 +146,19 @@ namespace Plugins.CountlySDK.Services
 					_sessionTimer = null;
 				}
 			}
-
-			//}
-			return response;
 		}
 
 
 		/// <summary>
 		/// Initiates a session by setting begin_session
 		/// </summary>
-		public async Task<CountlyResponse> BeginSessionAsync()
+		public async Task BeginSessionAsync()
 		{
-			var result = await ExecuteBeginSessionAsync();
+			await ExecuteBeginSessionAsync();
 
 			if (_configModel.EnableTestMode)
 			{
-				return result;
+				return;
 			}
 
 			//Enables push notification on start
@@ -177,22 +166,20 @@ namespace Plugins.CountlySDK.Services
 			{
 				_pushCountlyService.EnablePushNotificationAsync(_configModel.NotificationMode);
 			}
-
-			return result;
 		}
 
 		/// <summary>
 		/// Ends a session by setting end_session
 		/// </summary>
-		public async Task<CountlyResponse> EndSessionAsync()
+		public async Task EndSessionAsync()
 		{
-			return await ExecuteEndSessionAsync();
+			await ExecuteEndSessionAsync();
 		}
 
 		/// <summary>
 		/// Extends a session by another 60 seconds
 		/// </summary>
-		public async Task<CountlyResponse> ExtendSessionAsync()
+		public async Task ExtendSessionAsync()
 		{
 			_lastSessionRequestTime = DateTime.Now;
 			//if (ConsentModel.CheckConsent(FeaturesEnum.Sessions.ToString()))
@@ -208,8 +195,8 @@ namespace Plugins.CountlySDK.Services
 			requestParams.Add("metrics", JsonConvert.SerializeObject(CountlyMetricModel.Metrics, Formatting.Indented,
 				new JsonSerializerSettings {NullValueHandling = NullValueHandling.Ignore}));
 
-			return await _requestCountlyHelper.GetResponseAsync(requestParams);
-			//}
+			await _requestCountlyHelper.GetResponseAsync(requestParams);
+			
 		}
 
 

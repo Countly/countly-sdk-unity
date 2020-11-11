@@ -180,17 +180,13 @@ namespace Plugins.CountlySDK.Helpers
         /// <param name="url"></param>
         /// <param name="postData"></param>
         /// <returns></returns>
-        internal async Task<CountlyResponse> GetResponseAsync(Dictionary<string, object> queryParams)
+        internal async Task GetResponseAsync(Dictionary<string, object> queryParams)
         {
             var data = BuildPostRequest(queryParams);
             if (_config.EnablePost || data.Length > 1800)
             {
-
                 var requestModel = new CountlyRequestModel(false, _countlyUtils.GetBaseInputUrl(), BuildPostRequest(queryParams), DateTime.UtcNow);
                 AddRequestToQueue(requestModel);
-
-                //return Task.Run(
-                //    () => PostAsync(_countlyUtils.GetBaseInputUrl(), BuildPostRequest(queryParams), addToRequestQueue));    
             }
             else {
                 var requestModel = new CountlyRequestModel(true, BuildGetRequest(queryParams), null, DateTime.UtcNow);
@@ -198,7 +194,6 @@ namespace Plugins.CountlySDK.Helpers
             }
 
             await Task.Delay(1);
-            return new CountlyResponse { IsSuccess = true };
         }
 
         /// <summary>
