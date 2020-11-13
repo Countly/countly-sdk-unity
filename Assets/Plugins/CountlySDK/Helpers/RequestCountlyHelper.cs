@@ -41,20 +41,29 @@ namespace Plugins.CountlySDK.Helpers
             }
 
             if (_requestRepo.Count == _config.StoredRequestLimit)
+            {
+
+                if (_config.EnableConsoleLogging)
+                {
+                    Debug.LogWarning("[Countly] RequestCountlyHelper Request Queue is full");
+                }
+
                 _requestRepo.Dequeue();
+            }
 
             _requestRepo.Enqueue(request);
 
-          await  ProcessQueue();
+            await ProcessQueue();
         }
 
         internal async Task ProcessQueue()
         {
-            if (isQueueBeingProcess) {
+            if (isQueueBeingProcess)
+            {
                 return;
             }
 
-            
+            isQueueBeingProcess = true;
             var requests = _requestRepo.Models.ToArray();
 
             if (_config.EnableConsoleLogging)
@@ -62,7 +71,6 @@ namespace Plugins.CountlySDK.Helpers
                 Debug.Log("[Countly RequestCountlyHelper] Process queue, requests: " + requests.Length);
             }
 
-            isQueueBeingProcess = true;
             foreach (var reqModel in requests)
             {
                 var response = await ProcessRequest(reqModel);
@@ -85,10 +93,9 @@ namespace Plugins.CountlySDK.Helpers
             }
             else
             {
-                return await Task.Run(() => PostAsync(model.RequestUrl, model.RequestData));   
+                return await Task.Run(() => PostAsync(model.RequestUrl, model.RequestData));
             }
         }
-
 
         /// <summary>
         ///     Builds request URL using ServerUrl, AppKey, DeviceID and supplied queryParams parameters.
@@ -103,7 +110,7 @@ namespace Plugins.CountlySDK.Helpers
             foreach (var item in _countlyUtils.GetBaseParams())
             {
                 requestStringBuilder.AppendFormat((item.Key != "app_key" ? "&" : string.Empty) + "{0}={1}",
-                    UnityWebRequest.EscapeURL(item.Key), UnityWebRequest.EscapeURL(Convert.ToString(item.Value))); 
+                    UnityWebRequest.EscapeURL(item.Key), UnityWebRequest.EscapeURL(Convert.ToString(item.Value)));
             }
 
 
@@ -128,7 +135,7 @@ namespace Plugins.CountlySDK.Helpers
                     return requestStringBuilder.AppendFormat("&checksum256={0}", _countlyUtils.GetStringFromBytes(data)).ToString();
                 }
             }
-            
+
             requestStringBuilder.Insert(0, _countlyUtils.GetBaseInputUrl());
             return requestStringBuilder.ToString();
         }
@@ -145,7 +152,7 @@ namespace Plugins.CountlySDK.Helpers
             {
                 baseParams.Add(UnityWebRequest.EscapeURL(item.Key), item.Value);
             }
-                
+
 
             var data = JsonConvert.SerializeObject(baseParams);
             if (!string.IsNullOrEmpty(_config.Salt))
@@ -176,7 +183,8 @@ namespace Plugins.CountlySDK.Helpers
             {
                 requestModel = new CountlyRequestModel(false, _countlyUtils.GetBaseInputUrl(), BuildPostRequest(queryParams), DateTime.UtcNow);
             }
-            else {
+            else
+            {
                 requestModel = new CountlyRequestModel(true, BuildGetRequest(queryParams), null, DateTime.UtcNow);
             }
 
@@ -255,7 +263,7 @@ namespace Plugins.CountlySDK.Helpers
                 }
             }
             catch (Exception ex)
-            { 
+            {
                 countlyResponse.ErrorMessage = ex.Message;
             }
 
