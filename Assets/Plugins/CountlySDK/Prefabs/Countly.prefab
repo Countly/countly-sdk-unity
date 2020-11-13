@@ -55,8 +55,8 @@ MonoBehaviour:
     EnableConsoleLogging: 1
     IgnoreSessionCooldown: 0
     NotificationMode: -1
-    SessionDuration: 5
+    SessionDuration: 60
     EventQueueThreshold: 10
-    StoredRequestLimit: 5
+    StoredRequestLimit: 1000
     TotalBreadcrumbsAllowed: 100
     EnableAutomaticCrashReporting: 1

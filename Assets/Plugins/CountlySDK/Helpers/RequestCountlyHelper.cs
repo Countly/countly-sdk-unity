@@ -45,7 +45,7 @@ namespace Plugins.CountlySDK.Helpers
 
                 if (_config.EnableConsoleLogging)
                 {
-                    Debug.LogWarning("[Countly] RequestCountlyHelper Request Queue is full");
+                    Debug.LogWarning("[Countly] RequestCountlyHelper Request Queue is full. Dropping the oldest request.");
                 }
 
                 _requestRepo.Dequeue();
