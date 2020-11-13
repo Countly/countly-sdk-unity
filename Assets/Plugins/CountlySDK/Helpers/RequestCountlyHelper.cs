@@ -15,6 +15,7 @@ namespace Plugins.CountlySDK.Helpers
 {
     public class RequestCountlyHelper
     {
+        private bool isQueueBeingProcess = false;
         private readonly CountlyConfigModel _config;
         private readonly CountlyUtils _countlyUtils;
         private readonly RequestRepository _requestRepo;
@@ -26,7 +27,7 @@ namespace Plugins.CountlySDK.Helpers
             _requestRepo = requestRepo;
         }
 
-        private void AddRequestToQueue(CountlyRequestModel request)
+        private async Task AddRequestToQueue(CountlyRequestModel request)
         {
 
             if (_config.EnableConsoleLogging)
@@ -43,10 +44,17 @@ namespace Plugins.CountlySDK.Helpers
                 _requestRepo.Dequeue();
 
             _requestRepo.Enqueue(request);
+
+          await  ProcessQueue();
         }
 
-        internal async void ProcessQueue()
+        internal async Task ProcessQueue()
         {
+            if (isQueueBeingProcess) {
+                return;
+            }
+
+            
             var requests = _requestRepo.Models.ToArray();
 
             if (_config.EnableConsoleLogging)
@@ -54,6 +62,7 @@ namespace Plugins.CountlySDK.Helpers
                 Debug.Log("[Countly RequestCountlyHelper] Process queue, requests: " + requests.Length);
             }
 
+            isQueueBeingProcess = true;
             foreach (var reqModel in requests)
             {
                 var response = await ProcessRequest(reqModel);
@@ -65,6 +74,7 @@ namespace Plugins.CountlySDK.Helpers
 
                 _requestRepo.Dequeue();
             }
+            isQueueBeingProcess = false;
         }
 
         private async Task<CountlyResponse> ProcessRequest(CountlyRequestModel model)
@@ -153,28 +163,6 @@ namespace Plugins.CountlySDK.Helpers
         }
 
         /// <summary>
-        ///     Uses Get/Post method to make request to the Countly server and returns the response.
-        /// </summary>
-        /// <param name="queryParams"></param>
-        /// <returns></returns>
-        internal CountlyResponse GetResponse(Dictionary<string, object> queryParams, bool addToRequestQueue = true)
-        {
-            var data = BuildPostRequest(queryParams);
-            if (_config.EnablePost || data.Length > 1800)
-            {
-                var requestModel = new CountlyRequestModel(false, _countlyUtils.GetBaseInputUrl(), data, DateTime.UtcNow);
-                AddRequestToQueue(requestModel);
-            }
-            else {
-                var requestModel = new CountlyRequestModel(true, BuildGetRequest(queryParams), null, DateTime.UtcNow);
-                AddRequestToQueue(requestModel);
-            }
-            
-
-            return new CountlyResponse{IsSuccess = true};
-        }
-
-        /// <summary>
         ///     Uses GetAsync/PostAsync method to make request to the Countly server and returns the response.
         /// </summary>
         /// <param name="url"></param>
@@ -182,53 +170,17 @@ namespace Plugins.CountlySDK.Helpers
         /// <returns></returns>
         internal async Task GetResponseAsync(Dictionary<string, object> queryParams)
         {
+            CountlyRequestModel requestModel;
             var data = BuildPostRequest(queryParams);
             if (_config.EnablePost || data.Length > 1800)
             {
-                var requestModel = new CountlyRequestModel(false, _countlyUtils.GetBaseInputUrl(), BuildPostRequest(queryParams), DateTime.UtcNow);
-                AddRequestToQueue(requestModel);
+                requestModel = new CountlyRequestModel(false, _countlyUtils.GetBaseInputUrl(), BuildPostRequest(queryParams), DateTime.UtcNow);
             }
             else {
-                var requestModel = new CountlyRequestModel(true, BuildGetRequest(queryParams), null, DateTime.UtcNow);
-                AddRequestToQueue(requestModel);
+                requestModel = new CountlyRequestModel(true, BuildGetRequest(queryParams), null, DateTime.UtcNow);
             }
 
-            await Task.Delay(1);
-        }
-
-        /// <summary>
-        ///     Makes a GET request to the Counlty server.
-        /// </summary>
-        /// <param name="url"></param>
-        /// <returns></returns>
-        private CountlyResponse Get(string url)
-        {
-            var countlyResponse = new CountlyResponse();
-
-            try
-            {
-                var request = (HttpWebRequest)WebRequest.Create(url);
-
-                using (var response = (HttpWebResponse)request.GetResponse())
-                using (var stream = response.GetResponseStream())
-                using (var reader = new StreamReader(stream))
-                {
-                    var res = reader.ReadToEnd();
-                    countlyResponse.IsSuccess = !string.IsNullOrEmpty(res);
-                    countlyResponse.Data = res;
-                }
-            }
-            catch (Exception ex)
-            {
-                countlyResponse.ErrorMessage = ex.Message;
-            }
-
-            if (_config.EnableConsoleLogging)
-            {
-                Debug.Log("[Countly] RequestCountlyHelper request: " + url + " response: " + countlyResponse.ToString());
-            }
-
-            return countlyResponse;
+            await AddRequestToQueue(requestModel);
         }
 
         /// <summary>
@@ -261,53 +213,6 @@ namespace Plugins.CountlySDK.Helpers
             if (_config.EnableConsoleLogging)
             {
                 Debug.Log("[Countly] RequestCountlyHelper request: " + url + " response: " + countlyResponse.ToString());
-            }
-
-            return countlyResponse;
-        }
-
-        /// <summary>
-        ///     Makes a POST request to the Countly server.
-        /// </summary>
-        /// <param name="uri"></param>
-        /// <param name="data"></param>
-        /// <param name="contentType"></param>
-        /// <returns></returns>
-        private CountlyResponse Post(string uri, string data)
-        {
-            var countlyResponse = new CountlyResponse();
-
-            try
-            {
-                var dataBytes = Encoding.UTF8.GetBytes(data);
-
-                var request = (HttpWebRequest)WebRequest.Create(uri);
-                request.ContentLength = dataBytes.Length;
-                request.ContentType = "application/json";
-                request.Method = "POST";
-
-                using (var requestBody = request.GetRequestStream())
-                {
-                    requestBody.Write(dataBytes, 0, dataBytes.Length);
-                }
-
-                using (var response = (HttpWebResponse)request.GetResponse())
-                using (var stream = response.GetResponseStream())
-                using (var reader = new StreamReader(stream))
-                {
-                    var res = reader.ReadToEnd();
-                    countlyResponse.IsSuccess = !string.IsNullOrEmpty(res);
-                    countlyResponse.Data = res;
-                }
-            }
-            catch (Exception ex)
-            {
-                countlyResponse.ErrorMessage = ex.Message;
-            }
-
-            if (_config.EnableConsoleLogging)
-            {
-                Debug.Log("[Countly] RequestCountlyHelper request: " + uri + " response: " + countlyResponse.ToString());
             }
 
             return countlyResponse;

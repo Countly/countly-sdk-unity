@@ -40,10 +40,16 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
 
-            var result = new Queue(_viewEventRepo.Models);
-            foreach (var obj in _nonViewEventRepo.Models)
+            var result = new Queue();
+            
+
+            while (_nonViewEventRepo.Count > 0)
             {
-                result.Enqueue(obj);
+                result.Enqueue(_nonViewEventRepo.Dequeue());
+            }
+            while (_viewEventRepo.Count > 0)
+            {
+                result.Enqueue(_viewEventRepo.Dequeue());
             }
 
             //Send all at once
@@ -55,11 +61,6 @@ namespace Plugins.CountlySDK.Services
                             new JsonSerializerSettings {NullValueHandling = NullValueHandling.Ignore})
                     }
                 };
-
-
-            //Even if res = false all events should be removed because responses are stored locally.
-            _viewEventRepo.Clear();
-            _nonViewEventRepo.Clear();
 
             await _requestCountlyHelper.GetResponseAsync(requestParams);
             
