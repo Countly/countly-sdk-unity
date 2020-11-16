@@ -205,12 +205,19 @@ namespace Plugins.CountlySDK.Helpers
             {
                 var request = (HttpWebRequest)WebRequest.Create(url);
                 using (var response = (HttpWebResponse)await request.GetResponseAsync())
-                using (var stream = response.GetResponseStream())
-                using (var reader = new StreamReader(stream))
                 {
-                    var res = await reader.ReadToEndAsync();
-                    countlyResponse.IsSuccess = !string.IsNullOrEmpty(res);
-                    countlyResponse.Data = res;
+                    int code = (int)response.StatusCode;
+                    if (code >= 200 && code < 300)
+                    {
+                        using (var stream = response.GetResponseStream())
+                        using (var reader = new StreamReader(stream))
+                        {
+                            var res = await reader.ReadToEndAsync();
+                            countlyResponse.IsSuccess = !string.IsNullOrEmpty(res) && res.Contains("result");
+                            countlyResponse.Data = res;
+                        }
+                    }
+                   
                 }
             }
             catch (Exception ex)
