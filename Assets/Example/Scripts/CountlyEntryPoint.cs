@@ -35,6 +35,85 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
         countly.Notifications.RemoveListener(this);
     }
 
+    public void Test1() {
+        BasicEvent();
+        EventWithSum();
+        EventWithSegmentation();
+        EventWithSumAndSegmentation();
+        ReportViewMainScene();
+        SendCrashReport();
+        RecordMultiple();
+        Pull();
+        Push();
+        PushUnique();
+        Min();
+        Max();
+        Multiply();
+        SetCustomeUserDetail();
+        SetUserDetail();
+    }
+
+    public async void Test2()
+    {
+        await countly.Events.RecordEventAsync("Basic Event");
+        await countly.Events.RecordEventAsync("Event With Sum", segmentation: null, sum: 23);
+        SegmentModel segment = new SegmentModel(new Dictionary<string, object>
+        {
+            { "Time Spent", "60"},
+            { "Retry Attempts", "10"}
+        });
+
+        await countly.Events.RecordEventAsync("Event With Segmentation", segmentation: segment);
+
+        await countly.Views.RecordOpenViewAsync("Main Scene");
+
+        await countly.CrashReports.SendCrashReportAsync("message", null, LogType.Exception);
+
+        countly.UserDetails.Max("Weight", 90);
+        countly.UserDetails.SetOnce("Distance", "10KM");
+        countly.UserDetails.Push("Mole", new string[] { "Left Cheek", "Back", "Toe" }); ;
+        await countly.UserDetails.SaveAsync();
+
+        countly.UserDetails.Push("Area", new string[] { "width", "height" });
+        await countly.UserDetails.SaveAsync();
+
+        countly.UserDetails.PushUnique("Mole", new string[] { "Left Cheek", "Left Cheek" });
+        await countly.UserDetails.SaveAsync();
+
+        countly.UserDetails.Max("Weight", 90);
+        await countly.UserDetails.SaveAsync();
+
+        countly.UserDetails.Min("Weight", 10);
+        await countly.UserDetails.SaveAsync();
+
+        countly.UserDetails.Multiply("Weight", 2);
+        await countly.UserDetails.SaveAsync();
+
+        var userDetails1 = new CountlyUserDetailsModel(
+                                  "Full Name", "username", "useremail@email.com", "Organization",
+                                  "222-222-222",
+                  "http://webresizer.com/images2/bird1_after.jpg",
+          "M", "1986",
+                                  new Dictionary<string, object>
+                                  {
+                                    { "Hair", "Black" },
+                                    { "Race", "Asian" },
+                                  });
+
+        await countly.UserDetails.SetUserDetailsAsync(userDetails1);
+
+
+        var userDetails = new CountlyUserDetailsModel(
+                                new Dictionary<string, object>
+                                {
+            { "Nationality", "Turkish" },
+                                    { "Height", "5.8" },
+                                    { "Mole", "Lower Left Cheek" }
+                 });
+
+        await countly.UserDetails.SetUserDetailsAsync(userDetails);
+    }
+
     public async void BasicEvent()
     {
         await countly.Events.RecordEventAsync("Basic Event");
@@ -49,12 +128,14 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
     {
 
         SegmentModel segment = new SegmentModel(new Dictionary<string, object>
-{
+        {
             { "Time Spent", "60"},
             { "Retry Attempts", "10"}
         });
 
         await countly.Events.RecordEventAsync("Event With Segmentation", segmentation: segment);
+
+        await countly.Views.RecordOpenViewAsync("Main Scene");
     }
 
     public async void EventWithSumAndSegmentation()
