@@ -1,10 +1,12 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Plugins.CountlySDK.Helpers;
 using Plugins.CountlySDK.Models;
+using Plugins.CountlySDK.Persistance;
 using Plugins.CountlySDK.Persistance.Repositories.Impls;
 using UnityEngine;
 
@@ -28,7 +30,43 @@ namespace Plugins.CountlySDK.Services
             _eventNumberInSameSessionHelper = eventNumberInSameSessionHelper;
         }
 
-        internal async Task<CountlyResponse> RecordEventAsync(CountlyEventModel @event, bool useNumberInSameSession = false)
+        /// <summary>
+        ///     Send all recorded events to request queue
+        /// </summary>
+        internal async Task AddEventsToRequestQueue()
+        {
+            if ((_viewEventRepo.Models.Count + _nonViewEventRepo.Models.Count) == 0)
+            {
+                return;
+            }
+
+            var result = new Queue();
+            
+
+            while (_nonViewEventRepo.Count > 0)
+            {
+                result.Enqueue(_nonViewEventRepo.Dequeue());
+            }
+            while (_viewEventRepo.Count > 0)
+            {
+                result.Enqueue(_viewEventRepo.Dequeue());
+            }
+
+            //Send all at once
+            var requestParams =
+                new Dictionary<string, object>
+                {
+                    {
+                        "events", JsonConvert.SerializeObject(result, Formatting.Indented,
+                            new JsonSerializerSettings {NullValueHandling = NullValueHandling.Ignore})
+                    }
+                };
+
+            await _requestCountlyHelper.GetResponseAsync(requestParams);
+            
+        }
+
+        internal async Task RecordEventAsync(CountlyEventModel @event, bool useNumberInSameSession = false)
         {
 
             if (_countlyConfigModel.EnableConsoleLogging)
@@ -38,10 +76,7 @@ namespace Plugins.CountlySDK.Services
 
             if (_countlyConfigModel.EnableTestMode)
             {
-                return new CountlyResponse
-                {
-                    IsSuccess = true
-                };
+                return;
             }
 
             if (_countlyConfigModel.EnableFirstAppLaunchSegment)
@@ -62,17 +97,11 @@ namespace Plugins.CountlySDK.Services
             {
                 _eventNumberInSameSessionHelper.IncreaseNumberInSameSession(@event);
             }
-            
-            if (_viewEventRepo.Count >= _countlyConfigModel.EventViewSendThreshold)
-                await ReportAllRecordedViewEventsAsync();
 
-            if (_nonViewEventRepo.Count >= _countlyConfigModel.EventNonViewSendThreshold)
-                await ReportAllRecordedNonViewEventsAsync();
-
-            return new CountlyResponse
+            if ((_viewEventRepo.Count + _nonViewEventRepo.Count) >= _countlyConfigModel.EventQueueThreshold)
             {
-                IsSuccess = true
-            };
+                await AddEventsToRequestQueue();
+            }
         }
 
         /// <summary>
@@ -81,9 +110,9 @@ namespace Plugins.CountlySDK.Services
         /// <param name="key"></param>
         /// <param name="useNumberInSameSession"></param>
         /// <returns></returns>
-        public async Task<CountlyResponse> RecordEventAsync(string key, bool useNumberInSameSession = false)
+        public async Task RecordEventAsync(string key, bool useNumberInSameSession = false)
         {
-            return await RecordEventAsync(key, null, useNumberInSameSession);
+            await RecordEventAsync(key, null, useNumberInSameSession);
         }
 
         /// <summary>
@@ -96,7 +125,7 @@ namespace Plugins.CountlySDK.Services
         /// <param name="sum"></param>
         /// <param name="duration"></param>
         /// <returns></returns>
-        public async Task<CountlyResponse> RecordEventAsync(string key, SegmentModel segmentation, bool useNumberInSameSession = false,
+        public async Task RecordEventAsync(string key, SegmentModel segmentation, bool useNumberInSameSession = false,
             int? count = 1, double? sum = 0, double? duration = null)
         {
             if (_countlyConfigModel.EnableConsoleLogging)
@@ -106,19 +135,12 @@ namespace Plugins.CountlySDK.Services
 
             if (_countlyConfigModel.EnableTestMode)
             {
-                return new CountlyResponse
-                {
-                    IsSuccess = true
-                };
+                return;
             }
 
             if (string.IsNullOrEmpty(key) && string.IsNullOrWhiteSpace(key))
             {
-                return new CountlyResponse
-                {
-                    IsSuccess = false,
-                    ErrorMessage = "Key is required."
-                };            
+                return;            
             }
             
             var @event = new CountlyEventModel(key, segmentation, count, sum, duration);
@@ -128,76 +150,7 @@ namespace Plugins.CountlySDK.Services
                 _eventNumberInSameSessionHelper.IncreaseNumberInSameSession(@event);
             }
             
-            return await RecordEventAsync(@event);
-        }
-
-        /// <summary>
-        ///     Reports all recorded view events to the server
-        /// </summary>
-        /// <returns></returns>
-        internal async Task<CountlyResponse> ReportAllRecordedViewEventsAsync(bool addToRequestQueue = true)
-        {
-            if (_viewEventRepo.Models.Count == 0)
-            {
-                return new CountlyResponse
-                {
-                    IsSuccess = false,
-                    ErrorMessage = "No events to send"
-                };
-            }
-            
-            //Send all at once
-            var requestParams =
-                new Dictionary<string, object>
-                {
-                    {
-                        "events", JsonConvert.SerializeObject(_viewEventRepo.Models, Formatting.Indented,
-                            new JsonSerializerSettings {NullValueHandling = NullValueHandling.Ignore})
-                    }
-                };
-
-            
-            //Even if res = false all events should be removed because responses are stored locally.
-            _viewEventRepo.Clear();    
-            
-            var res = await _requestCountlyHelper.GetResponseAsync(requestParams, addToRequestQueue);
-
-            return res;
-        }
-        
-        
-        
-        /// <summary>
-        ///     Reports all recorded events to the server
-        /// </summary>
-        internal async Task<CountlyResponse> ReportAllRecordedNonViewEventsAsync(bool addToRequestQueue = true)
-        {
-            if (_nonViewEventRepo.Models.Count == 0)
-            {
-                return new CountlyResponse
-                {
-                    IsSuccess = false,
-                    ErrorMessage = "No events to send"
-                };
-            }
-
-            //Send all at once
-            var requestParams =
-                new Dictionary<string, object>
-                {
-                    {
-                        "events", JsonConvert.SerializeObject(_nonViewEventRepo.Models, Formatting.Indented,
-                            new JsonSerializerSettings {NullValueHandling = NullValueHandling.Ignore})
-                    }
-                };
-
-            
-            //Even if res = false all events should be removed because responses are stored locally.
-            _nonViewEventRepo.Clear();    
-            
-            var res = await _requestCountlyHelper.GetResponseAsync(requestParams, addToRequestQueue);
-
-            return res;
+            await RecordEventAsync(@event);
         }
 
         /// <summary>
@@ -205,14 +158,10 @@ namespace Plugins.CountlySDK.Services
         /// </summary>
         /// <param name="events"></param>
         /// <returns></returns>
-        internal async Task<CountlyResponse> ReportMultipleEventsAsync(List<CountlyEventModel> events)
+        internal async Task ReportMultipleEventsAsync(List<CountlyEventModel> events)
         {
             if (events == null || events.Count == 0)
-                return new CountlyResponse
-                {
-                    IsSuccess = false,
-                    ErrorMessage = "No events found."
-                };
+                return;
 
             if (_countlyConfigModel.EnableFirstAppLaunchSegment)
             {
@@ -231,23 +180,19 @@ namespace Plugins.CountlySDK.Services
                     }
                 };
 
-            return await _requestCountlyHelper.GetResponseAsync(requestParams);
+            await _requestCountlyHelper.GetResponseAsync(requestParams);
         }
 
         /// <summary>
         ///     Reports a custom event to the Counlty server.
         /// </summary>
         /// <returns></returns>
-        public async Task<CountlyResponse> ReportCustomEventAsync(string key,
+        public async Task ReportCustomEventAsync(string key,
             IDictionary<string, object> segmentation = null,
             int? count = 1, double? sum = null, double? duration = null)
         {
             if (string.IsNullOrEmpty(key) && string.IsNullOrWhiteSpace(key))
-                return new CountlyResponse
-                {
-                    IsSuccess = false,
-                    ErrorMessage = "Key is required."
-                };
+                return;
 
             var evt = new CountlyEventModel(key, segmentation, count, sum, duration);
 
@@ -265,17 +210,9 @@ namespace Plugins.CountlySDK.Services
                             new JsonSerializerSettings {NullValueHandling = NullValueHandling.Ignore})
                     }
                 };
-            return await _requestCountlyHelper.GetResponseAsync(requestParams);
-        }
 
-//        private void SetTimeZoneInfo(CountlyEventModel evt, DateTime requestDatetime)
-//        {
-//            var timezoneInfo = TimeMetricModel.GetTimeZoneInfoForRequest(requestDatetime);
-//            evt.Timestamp = timezoneInfo.Timestamp;
-//            evt.DayOfWeek = timezoneInfo.DayOfWeek;
-//            evt.Hour = timezoneInfo.Hour;
-//            evt.Timezone = timezoneInfo.Timezone;
-//        }
+            await _requestCountlyHelper.GetResponseAsync(requestParams);
+        }
 
         private void AddFirstAppSegment(CountlyEventModel @event)
         {

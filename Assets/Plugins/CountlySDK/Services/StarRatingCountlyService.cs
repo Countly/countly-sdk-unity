@@ -24,15 +24,11 @@ namespace Plugins.CountlySDK.Services
         /// <param name="appVersion"></param>
         /// <param name="rating">Rating should be from 1 to 5</param>
         /// <returns></returns>
-        public async Task<CountlyResponse> ReportStarRatingAsync(string platform, string appVersion, int rating)
+        public async Task ReportStarRatingAsync(string platform, string appVersion, int rating)
         {
             if (rating < 1 || rating > 5)
             {
-                return new CountlyResponse
-                {
-                    IsSuccess = false,
-                    ErrorMessage = "Please provide rating from 1 to 5"
-                };
+                return;
             }
 
             var segment =
@@ -43,7 +39,7 @@ namespace Plugins.CountlySDK.Services
                     Rating = rating,
                 };
 
-            return await _eventCountlyService.ReportCustomEventAsync(
+            await _eventCountlyService.ReportCustomEventAsync(
                 CountlyEventModel.StarRatingEvent, segment.ToDictionary(),
                 null, null, null);
         }

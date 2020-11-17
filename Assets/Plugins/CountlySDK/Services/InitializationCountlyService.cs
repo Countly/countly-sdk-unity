@@ -45,18 +45,13 @@ namespace Plugins.CountlySDK.Services
         /// <param name="enableConsoleErrorLogging"></param>
         /// <param name="ignoreSessionCooldown"></param>
         /// <returns></returns>
-        internal async Task<CountlyResponse> SetDefaults(CountlyConfigModel configModel)
+        internal async Task SetDefaults(CountlyConfigModel configModel)
         {
             if (!configModel.EnableManualSessionHandling)
             {
                 //Start Session and enable push notification
-                var result = await _sessionCountlyService.BeginSessionAsync();
+                await _sessionCountlyService.BeginSessionAsync();
             }
-
-            return new CountlyResponse
-            {
-                IsSuccess = true
-            };
         }
 
 

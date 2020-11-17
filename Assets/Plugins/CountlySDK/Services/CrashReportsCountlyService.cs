@@ -44,7 +44,7 @@ namespace Plugins.CountlySDK.Services
         /// <param name="segments"></param>
         /// <param name="nonfatal"></param>
         /// <returns></returns>
-        public async Task<CountlyResponse> SendCrashReportAsync(string message, string stackTrace, LogType type,
+        public async Task SendCrashReportAsync(string message, string stackTrace, LogType type,
             IDictionary<string, object> segments = null, bool nonfatal = true)
         {
             //if (ConsentModel.CheckConsent(FeaturesEnum.Crashes.ToString()))
@@ -69,8 +69,8 @@ namespace Plugins.CountlySDK.Services
                 }
             };
 
-            return await _requestCountlyHelper.GetResponseAsync(requestParams);
-            //}
+            await _requestCountlyHelper.GetResponseAsync(requestParams);
+            
         }
 
         /// <summary>

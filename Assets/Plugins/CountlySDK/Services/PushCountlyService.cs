@@ -63,15 +63,11 @@ namespace Plugins.CountlySDK.Services
         /// Notifies Countly that the device is capable of receiving Push Notifications
         /// </summary>
         /// <returns></returns>
-        private async Task<CountlyResponse> PostToCountlyAsync(TestMode? mode, string token)
+        private async Task PostToCountlyAsync(TestMode? mode, string token)
         {
             if (!_mode.HasValue)
             {
-                return new CountlyResponse
-                {
-                    IsSuccess = false,
-                    ErrorMessage = "Pushes are disabled."
-                };
+                return;
             }
 
             var requestParams =
@@ -82,7 +78,7 @@ namespace Plugins.CountlySDK.Services
                     { $"{Constants.UnityPlatform}_token", token },
                 };
 
-            return await _requestCountlyHelper.GetResponseAsync(requestParams, true);
+            await _requestCountlyHelper.GetResponseAsync(requestParams);
         }
 
         /// <summary>

@@ -58,11 +58,8 @@ namespace Plugins.CountlySDK.Services
             if (DeviceId == deviceId)
                 return new CountlyResponse { IsSuccess = true };
 
-            //Add currently recorded but not queued view events to request queue-----------------------------------
-            await _eventCountlyService.ReportAllRecordedViewEventsAsync(true);
-
-            //Add currently recorded but not queued non view events to request queue-----------------------------------
-            await _eventCountlyService.ReportAllRecordedNonViewEventsAsync(true);
+            //Add currently recorded events to request queue-----------------------------------
+            await _eventCountlyService.AddEventsToRequestQueue();
             
             //Ends current session
             //Do not dispose timer object
@@ -84,11 +81,13 @@ namespace Plugins.CountlySDK.Services
         /// Merges data for old and new Device Id. 
         /// </summary>
         /// <param name="deviceId"></param>
-        public async Task<CountlyResponse> ChangeDeviceIdAndMergeSessionDataAsync(string deviceId)
+        public async Task ChangeDeviceIdAndMergeSessionDataAsync(string deviceId)
         {
             //Ignore call if new and old device id are same
             if (DeviceId == deviceId)
-                return new CountlyResponse { IsSuccess = true };
+            {
+                return;
+            }
 
             //Keep old device id
             var oldDeviceId = DeviceId;
@@ -104,7 +103,7 @@ namespace Plugins.CountlySDK.Services
                };
 
             await _requestCountlyHelper.GetResponseAsync(requestParams);
-            return new CountlyResponse { IsSuccess = true };
+            
         }
         
         /// <summary>

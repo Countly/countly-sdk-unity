@@ -3,27 +3,19 @@ using Plugins.CountlySDK;
 using Plugins.CountlySDK.Models;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 
 public class CountlyEntryPoint : MonoBehaviour, INotificationListener
 {
-	public Countly countlyPrefab;
+    public Countly countlyPrefab;
 
-	private Countly countly;
-	
-	private void Awake ()
-	{
+    private Countly countly;
+
+    private void Awake()
+    {
         countly = Instantiate(countlyPrefab);
-
-        /* You can use 'countlyWrapper' to call Countly functions without them sending any events to your server.
-         * This might be useful while testing in the Unity Editor. */
-
-        //#if  !UNITY_EDITOR
-        //		countly = Instantiate(countly);      
-        //#else
-        //		countly = Instantiate(countlyWrapper);
-        //#endif
     }
 
     private void Start()
@@ -35,7 +27,158 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
         countly.Notifications.RemoveListener(this);
     }
 
-    public async void BasicEvent()
+    public void EventsWithMultiThreads() {
+
+        int participants = 13;
+        Barrier barrier = new Barrier(participantCount: participants, (bar) =>
+        {
+            Debug.Log("All threads reached the barrierat: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+        });
+
+        Thread[] threads = new Thread[participants];
+        threads[0] = new Thread(delegate () {
+            {
+                Debug.Log("Thread[00] started, waiting at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+                barrier.SignalAndWait();
+                Debug.Log("Thread[00] executing at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+                EventWithSum();
+                Debug.Log("Thread[00] finished at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+            }
+        });
+
+
+        threads[1] = new Thread(delegate () {
+            {
+                Debug.Log("Thread[01] started, waiting at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+                barrier.SignalAndWait();
+                Debug.Log("Thread[01] executing at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+                EventWithSegmentation();
+                Debug.Log("Thread[01] finished at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+            }
+        });
+
+        threads[2] = new Thread(delegate () {
+            {
+                Debug.Log("Thread[02] started, waiting at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+                barrier.SignalAndWait();
+                Debug.Log("Thread[02] executing at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+                EventWithSumAndSegmentation();
+                Debug.Log("Thread[02] finished at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+            }
+        });
+
+        threads[3] = new Thread(delegate () {
+            {
+                Debug.Log("Thread[03] started, waiting at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+                barrier.SignalAndWait();
+                Debug.Log("Thread[03] executing at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+                ReportViewMainScene();
+                Debug.Log("Thread[03] finished at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+            }
+        });
+
+        threads[4] = new Thread(delegate () {
+            {
+                Debug.Log("Thread[04] started, waiting at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+                barrier.SignalAndWait();
+                Debug.Log("Thread[04] executing at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+                SendCrashReport();
+                Debug.Log("Thread[04] finished at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+            }
+        });
+        threads[5] = new Thread(delegate () {
+            {
+                Debug.Log("Thread[05] started, waiting at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+                barrier.SignalAndWait();
+                Debug.Log("Thread[05] executing at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+                RecordMultiple();
+                Debug.Log("Thread[05] finished at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+            }
+        });
+
+        threads[6] = new Thread(delegate () {
+            {
+                Debug.Log("Thread[06] started, waiting at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+                barrier.SignalAndWait();
+                Debug.Log("Thread[06] executing at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+                Pull();
+                Debug.Log("Thread[06] finished at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+            }
+        });
+
+        threads[7] = new Thread(delegate () {
+            {
+                Debug.Log("Thread[07] started, waiting at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+                barrier.SignalAndWait();
+                Debug.Log("Thread[07] executing at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+                Push();
+                Debug.Log("Thread[07] finished at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+            }
+        });
+
+        threads[8] = new Thread(delegate () {
+            {
+                Debug.Log("Thread[08] started, waiting at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+                barrier.SignalAndWait();
+                Debug.Log("Thread[08] executing at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+                PushUnique();
+                Debug.Log("Thread[08] finished at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+            }
+        });
+
+        threads[9] = new Thread(delegate () {
+            {
+                Debug.Log("Thread[09] started, waiting at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+                barrier.SignalAndWait();
+                Debug.Log("Thread[09] executing at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+                Min();
+                Debug.Log("Thread[09] finished at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+            }
+        });
+
+        threads[10] = new Thread(delegate () {
+            {
+                Debug.Log("Thread[10] started, waiting at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+                barrier.SignalAndWait();
+                Debug.Log("Thread[10] executing at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+                Multiply();
+                Debug.Log("Thread[10] finished at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+            }
+        });
+        threads[11] = new Thread(delegate () {
+            {
+                Debug.Log("Thread[11] started, waiting at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+                barrier.SignalAndWait();
+                Debug.Log("Thread[11] executing at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+                SetUserDetail();
+                Debug.Log("Thread[11] finished at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+            }
+        });
+        threads[12] = new Thread(delegate () {
+            {
+                Debug.Log("Thread[12] started, waiting at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+                barrier.SignalAndWait();
+                Debug.Log("Thread[12] executing at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+                SetCustomeUserDetail();
+                Debug.Log("Thread[12] finished at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+            }
+        });
+
+        for (int i = 0; i < participants; i++)
+        {
+            threads[i].Start();
+        }
+
+
+        for (int i = 0; i < participants; i++)
+        {
+            threads[i].Join();
+        }
+
+        Debug.Log("All threads completed at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+    }
+
+    public  async void BasicEvent()
     {
         await countly.Events.RecordEventAsync("Basic Event");
     }
@@ -49,7 +192,7 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
     {
 
         SegmentModel segment = new SegmentModel(new Dictionary<string, object>
-{
+        {
             { "Time Spent", "60"},
             { "Retry Attempts", "10"}
         });

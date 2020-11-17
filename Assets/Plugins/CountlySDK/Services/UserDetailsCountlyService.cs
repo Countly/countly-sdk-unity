@@ -28,18 +28,14 @@ namespace Plugins.CountlySDK.Services
         /// </summary>
         /// <param name="userDetails"></param>
         /// <returns></returns>
-        internal async Task<CountlyResponse> UserDetailsAsync(CountlyUserDetailsModel userDetails)
+        internal async Task UserDetailsAsync(CountlyUserDetailsModel userDetails)
         {
             if (userDetails == null)
             {
-                return new CountlyResponse
-                {
-                    IsSuccess = false,
-                    ErrorMessage = "No data found."
-                };
+                return;
             }
 
-            return await SetUserDetailsAsync(userDetails);
+            await SetUserDetailsAsync(userDetails);
         }
 
         /// <summary>
@@ -48,25 +44,21 @@ namespace Plugins.CountlySDK.Services
         /// </summary>
         /// <param name="userDetails"></param>
         /// <returCountlyUserDetailsModel.Pushns></returns>
-        internal async Task<CountlyResponse> UserCustomDetailsAsync(CountlyUserDetailsModel userDetails)
+        internal async Task UserCustomDetailsAsync(CountlyUserDetailsModel userDetails)
         {
             if (userDetails == null)
             {
-                return new CountlyResponse
-                {
-                    IsSuccess = false,
-                    ErrorMessage = "No data found."
-                };
+                return;
             }
 
-            return await SetCustomUserDetailsAsync(userDetails);
+            await SetCustomUserDetailsAsync(userDetails);
         }
         
         /// <summary>
         /// Uploads all user details
         /// </summary>
         /// <returns></returns>
-        public async Task<CountlyResponse> SetUserDetailsAsync(CountlyUserDetailsModel userDetailsModel)
+        public async Task SetUserDetailsAsync(CountlyUserDetailsModel userDetailsModel)
         {
             if (!_countlyUtils.IsPictureValid(userDetailsModel.PictureUrl))
                 throw new Exception("Accepted picture formats are .png, .gif and .jpeg");
@@ -78,14 +70,14 @@ namespace Plugins.CountlySDK.Services
                         new JsonSerializerSettings{ NullValueHandling = NullValueHandling.Ignore }) },
                 };
 
-            return await _requestCountlyHelper.GetResponseAsync(requestParams);
+            await _requestCountlyHelper.GetResponseAsync(requestParams);
         }
 
         /// <summary>
         /// Uploads only custom data. Doesn't update any other property except Custom Data.
         /// </summary>
         /// <returns></returns>
-        public async Task<CountlyResponse> SetCustomUserDetailsAsync(CountlyUserDetailsModel userDetailsModel)
+        public async Task SetCustomUserDetailsAsync(CountlyUserDetailsModel userDetailsModel)
         {
             var requestParams =
                 new Dictionary<string, object>
@@ -98,28 +90,24 @@ namespace Plugins.CountlySDK.Services
                             })
                     }
                 };
-            return await _requestCountlyHelper.GetResponseAsync(requestParams);
+            await _requestCountlyHelper.GetResponseAsync(requestParams);
         }
         
         /// <summary>
         /// Saves all custom user data updates done since the last save request.
         /// </summary>
         /// <returns></returns>
-        public async Task<CountlyResponse> SaveAsync()
+        public async Task SaveAsync()
         {
             if (!_customDataProperties.Any())
             {
-                return new CountlyResponse
-                {
-                    IsSuccess = false,
-                    ErrorMessage = "No data to save."
-                };
+                return;
             }
 
             var model = new CountlyUserDetailsModel(_customDataProperties);
 
             _customDataProperties = new Dictionary<string, object> { };
-            return await SetCustomUserDetailsAsync(model);
+            await SetCustomUserDetailsAsync(model);
         }
         
         

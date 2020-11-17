@@ -26,15 +26,11 @@ namespace Plugins.CountlySDK.Services
         /// <param name="name"></param>
         /// <param name="hasSessionBegunWithView"></param>
         /// <returns></returns>
-        public async Task<CountlyResponse> RecordOpenViewAsync(string name, bool hasSessionBegunWithView = false)
+        public async Task RecordOpenViewAsync(string name, bool hasSessionBegunWithView = false)
         {
             if (string.IsNullOrEmpty(name))
             {
-                return new CountlyResponse
-                {
-                    IsSuccess = false,
-                    ErrorMessage = "View name is required."
-                };
+                return;
             }
             
             var currentViewSegment =
@@ -59,7 +55,7 @@ namespace Plugins.CountlySDK.Services
             }
             
             var currentView = new CountlyEventModel(CountlyEventModel.ViewEvent, currentViewSegment.ToDictionary());
-            return await _eventService.RecordEventAsync(currentView);
+            await _eventService.RecordEventAsync(currentView);
         }
 
         /// <summary>
@@ -68,15 +64,11 @@ namespace Plugins.CountlySDK.Services
         /// <param name="name"></param>
         /// <param name="hasSessionBegunWithView"></param>
         /// <returns></returns>
-        public async Task<CountlyResponse> RecordCloseViewAsync(string name, bool hasSessionBegunWithView = false)
+        public async Task RecordCloseViewAsync(string name, bool hasSessionBegunWithView = false)
         {
             if (string.IsNullOrEmpty(name))
             {
-                return new CountlyResponse
-                {
-                    IsSuccess = false,
-                    ErrorMessage = "View name is required."
-                };
+                return;
             }
             
             var currentViewSegment =
@@ -105,7 +97,7 @@ namespace Plugins.CountlySDK.Services
             }
 
             var currentView = new CountlyEventModel(CountlyEventModel.ViewEvent, currentViewSegment.ToDictionary(), 1, null, duration);
-            return await _eventService.RecordEventAsync(currentView);
+            await _eventService.RecordEventAsync(currentView);
         }
         
         
@@ -121,7 +113,7 @@ namespace Plugins.CountlySDK.Services
         /// <param name="width"></param>
         /// <param name="height"></param>
         /// <returns></returns>
-        public async Task<CountlyResponse> ReportActionAsync(string type, int x, int y, int width, int height)
+        public async Task ReportActionAsync(string type, int x, int y, int width, int height)
         {
             var segment =
                 new ActionSegment
@@ -133,7 +125,7 @@ namespace Plugins.CountlySDK.Services
                     Height = height
                 };
 
-            return await _eventService.ReportCustomEventAsync(CountlyEventModel.ViewActionEvent, segment.ToDictionary());
+            await _eventService.ReportCustomEventAsync(CountlyEventModel.ViewActionEvent, segment.ToDictionary());
         }
         
         /// <summary>
