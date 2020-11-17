@@ -3,27 +3,20 @@ using Plugins.CountlySDK;
 using Plugins.CountlySDK.Models;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 
+
 public class CountlyEntryPoint : MonoBehaviour, INotificationListener
 {
-	public Countly countlyPrefab;
+    public Countly countlyPrefab;
 
-	private Countly countly;
-	
-	private void Awake ()
-	{
+    private Countly countly;
+
+    private void Awake()
+    {
         countly = Instantiate(countlyPrefab);
-
-        /* You can use 'countlyWrapper' to call Countly functions without them sending any events to your server.
-         * This might be useful while testing in the Unity Editor. */
-
-        //#if  !UNITY_EDITOR
-        //		countly = Instantiate(countly);      
-        //#else
-        //		countly = Instantiate(countlyWrapper);
-        //#endif
     }
 
     private void Start()
@@ -35,86 +28,114 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
         countly.Notifications.RemoveListener(this);
     }
 
-    public void Test1() {
-        BasicEvent();
-        EventWithSum();
-        EventWithSegmentation();
-        EventWithSumAndSegmentation();
-        ReportViewMainScene();
-        SendCrashReport();
-        RecordMultiple();
-        Pull();
-        Push();
-        PushUnique();
-        Min();
-        Max();
-        Multiply();
-        SetCustomeUserDetail();
-        SetUserDetail();
-    }
+    public void EventsWithMultiThreads() {
 
-    public async void Test2()
-    {
-        await countly.Events.RecordEventAsync("Basic Event");
-        await countly.Events.RecordEventAsync("Event With Sum", segmentation: null, sum: 23);
-        SegmentModel segment = new SegmentModel(new Dictionary<string, object>
-        {
-            { "Time Spent", "60"},
-            { "Retry Attempts", "10"}
+        int participants = 13;
+        Barrier barrier = new Barrier(participantCount: participants);
+
+        Thread[] threads = new Thread[participants];
+        threads[0] = new Thread(delegate () {
+            {
+                barrier.SignalAndWait();
+                EventWithSum();
+            }
         });
 
-        await countly.Events.RecordEventAsync("Event With Segmentation", segmentation: segment);
 
-        await countly.Views.RecordOpenViewAsync("Main Scene");
+        threads[1] = new Thread(delegate () {
+            {
+                barrier.SignalAndWait();
+                EventWithSegmentation();
+            }
+        });
 
-        await countly.CrashReports.SendCrashReportAsync("message", null, LogType.Exception);
+        threads[2] = new Thread(delegate () {
+            {
+                barrier.SignalAndWait();
+                EventWithSumAndSegmentation();
+            }
+        });
 
-        countly.UserDetails.Max("Weight", 90);
-        countly.UserDetails.SetOnce("Distance", "10KM");
-        countly.UserDetails.Push("Mole", new string[] { "Left Cheek", "Back", "Toe" }); ;
-        await countly.UserDetails.SaveAsync();
+        threads[3] = new Thread(delegate () {
+            {
+                barrier.SignalAndWait();
+                ReportViewMainScene();
+            }
+        });
 
-        countly.UserDetails.Push("Area", new string[] { "width", "height" });
-        await countly.UserDetails.SaveAsync();
+        threads[4] = new Thread(delegate () {
+            {
+                barrier.SignalAndWait();
+                SendCrashReport();
+            }
+        });
+        threads[5] = new Thread(delegate () {
+            {
+                barrier.SignalAndWait();
+                RecordMultiple();
+            }
+        });
 
-        countly.UserDetails.PushUnique("Mole", new string[] { "Left Cheek", "Left Cheek" });
-        await countly.UserDetails.SaveAsync();
+        threads[6] = new Thread(delegate () {
+            {
+                barrier.SignalAndWait();
+                Pull();
+            }
+        });
 
-        countly.UserDetails.Max("Weight", 90);
-        await countly.UserDetails.SaveAsync();
+        threads[7] = new Thread(delegate () {
+            {
+                barrier.SignalAndWait();
+                Push();
+            }
+        });
 
-        countly.UserDetails.Min("Weight", 10);
-        await countly.UserDetails.SaveAsync();
+        threads[8] = new Thread(delegate () {
+            {
+                barrier.SignalAndWait();
+                PushUnique();
+            }
+        });
 
-        countly.UserDetails.Multiply("Weight", 2);
-        await countly.UserDetails.SaveAsync();
+        threads[9] = new Thread(delegate () {
+            {
+                barrier.SignalAndWait();
+                Min();
+            }
+        });
 
-        var userDetails1 = new CountlyUserDetailsModel(
-                                  "Full Name", "username", "useremail@email.com", "Organization",
-                                  "222-222-222",
-                  "http://webresizer.com/images2/bird1_after.jpg",
-          "M", "1986",
-                                  new Dictionary<string, object>
-                                  {
-                                    { "Hair", "Black" },
-                                    { "Race", "Asian" },
-                                  });
+        threads[10] = new Thread(delegate () {
+            {
+                barrier.SignalAndWait();
+                Multiply();
+            }
+        });
+        threads[11] = new Thread(delegate () {
+            {
+                barrier.SignalAndWait();
+                SetUserDetail();
+            }
+        });
+        threads[12] = new Thread(delegate () {
+            {
+                barrier.SignalAndWait();
+                SetCustomeUserDetail();
+            }
+        });
 
-        await countly.UserDetails.SetUserDetailsAsync(userDetails1);
+        for (int i = 0; i < participants; i++)
+        {
+            threads[i].Start();
+        }
 
 
-        var userDetails = new CountlyUserDetailsModel(
-                                new Dictionary<string, object>
-                                {
-            { "Nationality", "Turkish" },
-                                    { "Height", "5.8" },
-                                    { "Mole", "Lower Left Cheek" }
-                 });
-
-        await countly.UserDetails.SetUserDetailsAsync(userDetails);
+        for (int i = 0; i < participants; i++)
+        {
+            threads[i].Join();
+        }
     }
 
-    public async void BasicEvent()
+    public  async void BasicEvent()
     {
         await countly.Events.RecordEventAsync("Basic Event");
     }
@@ -134,8 +155,6 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
         });
 
         await countly.Events.RecordEventAsync("Event With Segmentation", segmentation: segment);
-
-        await countly.Views.RecordOpenViewAsync("Main Scene");
     }
 
     public async void EventWithSumAndSegmentation()

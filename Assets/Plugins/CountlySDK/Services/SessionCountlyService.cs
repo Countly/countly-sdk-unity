@@ -62,7 +62,7 @@ namespace Plugins.CountlySDK.Services
 
 			await _eventService.AddEventsToRequestQueue();
 
-			_requestCountlyHelper.ProcessQueue();
+			await _requestCountlyHelper.ProcessQueue();
             var sessionOver = (DateTime.Now - _lastInputTime).TotalSeconds >= _configModel.SessionDuration;
 
             if (sessionOver)
