@@ -22,7 +22,27 @@ namespace Plugins.CountlySDK
 
         public CountlyAuthModel Auth;
         public CountlyConfigModel Config;
-        public static Countly Instance { get; internal set; }
+        public bool IsSDKInitialized { get; private set; }
+
+        private static Countly _instance = null;
+        public static Countly Instance {
+            get
+            {
+                if (_instance == null)
+                {
+
+                    var gameObject = new GameObject("_countly");
+                    _instance = gameObject.AddComponent<Countly>();
+                }
+
+                return _instance;
+
+            }
+            internal set
+            {
+                _instance = value;
+            }
+        }
 
         public ConsentCountlyService Consents { get; private set; }
 
@@ -67,10 +87,30 @@ namespace Plugins.CountlySDK
         /// <summary>
         ///     Initialize SDK at the start of your app
         /// </summary>
-        private async void Awake()
+        private void Awake()
         {
             DontDestroyOnLoad(gameObject);
             Instance = this;
+
+            //Auth and Config will not be null in case initializing through countly prefab
+            if (Auth != null && Config != null)
+            {
+                Init(Auth, Config);
+            }
+            
+        }
+
+        public async void Init(CountlyAuthModel auth, CountlyConfigModel config)
+        {
+            if (IsSDKInitialized)
+            {
+                return;
+            }
+
+            IsSDKInitialized = true;
+
+            Auth = auth;
+            Config = config;
 
             _db = CountlyBoxDbHelper.BuildDatabase(DbNumber);
 

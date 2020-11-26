@@ -18,6 +18,11 @@ public class IOSBridage : MonoBehaviour
     public void ListenReceiveResult(Action<string> result) => _OnNotificationReceiveResult = result;
     public void ListenClickResult(Action<string, int> result) => _OnNotificationClickResult = result;
 
+    private void Awake()
+    {
+        DontDestroyOnLoad(gameObject);
+    }
+
 #if COUNTLY_ENABLE_IOS_PUSH
     [System.Runtime.InteropServices.DllImport("__Internal")]
     extern static public void registerForRemoteNotifications();

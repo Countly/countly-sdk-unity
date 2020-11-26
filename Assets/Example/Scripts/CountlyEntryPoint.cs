@@ -1,5 +1,6 @@
 ﻿using Notifications;
 using Plugins.CountlySDK;
+using Plugins.CountlySDK.Enums;
 using Plugins.CountlySDK.Models;
 using System;
 using System.Collections.Generic;
@@ -15,7 +16,23 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
 
     private void Awake()
     {
-        countly = Instantiate(countlyPrefab);
+        CountlyAuthModel authModel = new CountlyAuthModel
+        {
+            ServerUrl = "https://master.count.ly/",
+            AppKey = "8e2fe772c091355076ead703f987fee94490fff4"
+        };
+
+        CountlyConfigModel configModel = new CountlyConfigModel
+        {
+            EnableConsoleLogging = true,
+            SessionDuration = 5,
+            EventQueueThreshold = 10,
+            StoredRequestLimit = 1000,
+            NotificationMode = TestMode.None
+        };
+
+        Countly.Instance.Init(authModel, configModel);
+        countly = Countly.Instance;
     }
 
     private void Start()
