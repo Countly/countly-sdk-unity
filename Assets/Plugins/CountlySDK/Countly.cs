@@ -94,7 +94,7 @@ namespace Plugins.CountlySDK
             Instance = this;
 
             //Auth and Config will not be null in case initializing through countly prefab
-            if (Auth != null && Configuration != null)
+            if (Auth != null && Config != null)
             {
                 Init(new CountlyConfiguration(Auth, Config));
             }
