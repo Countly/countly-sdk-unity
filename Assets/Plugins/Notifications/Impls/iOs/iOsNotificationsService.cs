@@ -1,4 +1,4 @@
-using Plugins.CountlySDK.Helpers;
+﻿using Plugins.CountlySDK.Helpers;
 using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK.Services;
 using System;
@@ -10,7 +10,7 @@ namespace Notifications.Impls.iOs
 {
     public class IOsNotificationsService : INotificationsService
     {
-        private readonly CountlyConfigModel _config;
+        private readonly CountlyConfiguration _config;
         private readonly Action<IEnumerator> _startCoroutine;
         private readonly EventCountlyService _eventCountlyService;
 
@@ -21,7 +21,7 @@ namespace Notifications.Impls.iOs
         private Action<string, int> _OnNotificationClickResult;
 
 
-        internal IOsNotificationsService(CountlyConfigModel config, Action<IEnumerator> startCoroutine, EventCountlyService eventCountlyService)
+        internal IOsNotificationsService(CountlyConfiguration config, Action<IEnumerator> startCoroutine, EventCountlyService eventCountlyService)
         {
             _config = config;
             _startCoroutine = startCoroutine;

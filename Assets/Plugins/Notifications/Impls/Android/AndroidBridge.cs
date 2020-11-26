@@ -11,7 +11,7 @@ namespace Notifications.Impls.Android
         private Action<string> _OnNotificationReceiveResult;
         private Action<string, int> _OnNotificationClickResult;
 
-        public CountlyConfigModel Config { get; set; }
+        public CountlyConfiguration Config { get; set; }
 
         public void ListenTokenResult(Action<string> result) => _onTokenResult = result;
         public void ListenReceiveResult(Action<string> result) => _OnNotificationReceiveResult = result;

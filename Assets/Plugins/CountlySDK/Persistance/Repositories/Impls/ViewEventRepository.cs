@@ -1,4 +1,4 @@
-using Plugins.CountlySDK.Models;
+﻿using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK.Persistance.Dao;
 using Plugins.CountlySDK.Persistance.Entities;
 using Plugins.iBoxDB;
@@ -9,7 +9,7 @@ namespace Plugins.CountlySDK.Persistance.Repositories.Impls
     public class ViewEventRepository : AbstractEventRepository
     {
         
-        public ViewEventRepository(Dao<EventEntity> dao, SegmentDao segmentDao, CountlyConfigModel config) : base(dao, segmentDao, config)
+        public ViewEventRepository(Dao<EventEntity> dao, SegmentDao segmentDao, CountlyConfiguration config) : base(dao, segmentDao, config)
         {
         }
 

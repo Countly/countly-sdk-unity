@@ -24,6 +24,29 @@ namespace Plugins.CountlySDK.Models
         public int TotalBreadcrumbsAllowed = 100;
         public bool EnableAutomaticCrashReporting = true;
 
+        public CountlyConfiguration() { }
+
+        internal CountlyConfiguration(CountlyAuthModel authModel, CountlyConfigModel config)
+        {
+            ServerUrl = authModel.ServerUrl;
+            AppKey = authModel.AppKey;
+            DeviceId = authModel.DeviceId;
+
+            Salt = config.Salt;
+            EnablePost = config.EnablePost;
+            EnableManualSessionHandling = config.EnableManualSessionHandling;
+            EnableFirstAppLaunchSegment = config.EnableFirstAppLaunchSegment;
+            EnableTestMode = config.EnableTestMode;
+            EnableConsoleLogging = config.EnableConsoleLogging;
+            IgnoreSessionCooldown = config.IgnoreSessionCooldown;
+            NotificationMode = config.NotificationMode;
+            SessionDuration = config.SessionDuration;
+            EventQueueThreshold = config.EventQueueThreshold;
+            StoredRequestLimit = config.StoredRequestLimit;
+            TotalBreadcrumbsAllowed = config.TotalBreadcrumbsAllowed;
+            EnableAutomaticCrashReporting = config.EnableAutomaticCrashReporting;
+
+        }
 
         public override string ToString()
         {

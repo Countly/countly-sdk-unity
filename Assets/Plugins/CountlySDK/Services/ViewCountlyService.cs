@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Plugins.CountlySDK.Helpers;
@@ -10,12 +10,12 @@ namespace Plugins.CountlySDK.Services
 
     public class ViewCountlyService
     {
-        private readonly CountlyConfigModel _config;
+        private readonly CountlyConfiguration _config;
         private readonly Dictionary<string, DateTime> _viewToLastViewStartTime = new Dictionary<string, DateTime>();
 
         private readonly EventCountlyService _eventService;
 
-        internal ViewCountlyService(CountlyConfigModel config, EventCountlyService eventService)
+        internal ViewCountlyService(CountlyConfiguration config, EventCountlyService eventService)
         {
             _config = config;
             _eventService = eventService;

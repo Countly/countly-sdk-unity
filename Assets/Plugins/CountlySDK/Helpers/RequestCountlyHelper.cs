@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
@@ -16,11 +16,11 @@ namespace Plugins.CountlySDK.Helpers
     public class RequestCountlyHelper
     {
         private bool isQueueBeingProcess = false;
-        private readonly CountlyConfigModel _config;
+        private readonly CountlyConfiguration _config;
         private readonly CountlyUtils _countlyUtils;
         private readonly RequestRepository _requestRepo;
 
-        internal RequestCountlyHelper(CountlyConfigModel config, CountlyUtils countlyUtils, RequestRepository requestRepo)
+        internal RequestCountlyHelper(CountlyConfiguration config, CountlyUtils countlyUtils, RequestRepository requestRepo)
         {
             _config = config;
             _countlyUtils = countlyUtils;

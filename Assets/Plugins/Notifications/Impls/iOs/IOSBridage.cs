@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System;
 using Plugins.CountlySDK.Models;
 using Newtonsoft.Json.Linq;
@@ -8,7 +8,7 @@ public class IOSBridage : MonoBehaviour
     public string MessageId { get; set; }
     public string ButtonIndex { get; set; }
 
-    public CountlyConfigModel Config { get; set; }
+    public CountlyConfiguration Config { get; set; }
 
     private Action<string> _onTokenResult;
     private Action<string> _OnNotificationReceiveResult;

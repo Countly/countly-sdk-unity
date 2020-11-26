@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Plugins.CountlySDK.Models;
 using UnityEngine;
 
@@ -6,9 +6,9 @@ namespace Notifications
 {
     public class NotificationsCallbackService 
     {
-        CountlyConfigModel _config;
+        CountlyConfiguration _config;
         private List<INotificationListener> _listeners;
-        internal NotificationsCallbackService(CountlyConfigModel config)
+        internal NotificationsCallbackService(CountlyConfiguration config)
         {
             _config = config;
             _listeners = new List<INotificationListener>();

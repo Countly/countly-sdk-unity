@@ -16,10 +16,10 @@ namespace Notifications.Impls.Android
         private const string NotficationServicePackageName = "ly.count.unity.push_fcm.RemoteNotificationsService";
 
 		private readonly AndroidBridge _bridge;
-        private readonly CountlyConfigModel _config;
+        private readonly CountlyConfiguration _config;
         private readonly EventCountlyService _eventCountlyService;
 
-        internal AndroidNotificationsService(CountlyConfigModel config, EventCountlyService eventCountlyService)
+        internal AndroidNotificationsService(CountlyConfiguration config, EventCountlyService eventCountlyService)
 		{
             _config = config;
             _eventCountlyService = eventCountlyService;

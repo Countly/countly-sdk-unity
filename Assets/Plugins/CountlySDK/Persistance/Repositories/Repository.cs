@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK.Persistance.Entities;
 using Plugins.iBoxDB;
@@ -9,9 +9,9 @@ namespace Plugins.CountlySDK.Persistance.Repositories
     public abstract class Repository<TEntity, TModel> where TEntity : class, IEntity, new() where TModel : IModel
     {
         private readonly Dao<TEntity> _dao;
-        private readonly CountlyConfigModel _config;
+        private readonly CountlyConfiguration _config;
 
-        protected Repository(Dao<TEntity> dao, CountlyConfigModel config)
+        protected Repository(Dao<TEntity> dao, CountlyConfiguration config)
         {
             _dao = dao;
             _config = config;

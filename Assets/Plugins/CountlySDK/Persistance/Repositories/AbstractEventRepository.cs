@@ -10,9 +10,9 @@ namespace Plugins.CountlySDK.Persistance.Repositories
     public abstract class AbstractEventRepository : Repository<EventEntity, CountlyEventModel>
     {
         private readonly SegmentDao _segmentDao;
-        protected readonly CountlyConfigModel _config;
+        protected readonly CountlyConfiguration _config;
 
-        protected AbstractEventRepository(Dao<EventEntity> dao, SegmentDao segmentDao, CountlyConfigModel config) : base(dao, config)
+        protected AbstractEventRepository(Dao<EventEntity> dao, SegmentDao segmentDao, CountlyConfiguration config) : base(dao, config)
         {
             _config = config;
             _segmentDao = segmentDao;

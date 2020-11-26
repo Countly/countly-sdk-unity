@@ -12,7 +12,7 @@ namespace Notifications.Impls
 		private readonly INotificationsService _service;
         private readonly EventCountlyService _eventCountlyService;
 
-        internal ProxyNotificationsService(CountlyConfigModel config, Action<IEnumerator> startCoroutine, EventCountlyService eventCountlyService)
+        internal ProxyNotificationsService(CountlyConfiguration config, Action<IEnumerator> startCoroutine, EventCountlyService eventCountlyService)
 		{
 
 #if UNITY_ANDROID

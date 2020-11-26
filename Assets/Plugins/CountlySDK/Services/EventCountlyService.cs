@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
@@ -14,16 +14,16 @@ namespace Plugins.CountlySDK.Services
 {
     public class EventCountlyService
     {
-        private readonly CountlyConfigModel _countlyConfigModel;
+        private readonly CountlyConfiguration _CountlyConfiguration;
         private readonly RequestCountlyHelper _requestCountlyHelper;
         private readonly ViewEventRepository _viewEventRepo;
         private readonly NonViewEventRepository _nonViewEventRepo;
         private readonly EventNumberInSameSessionHelper _eventNumberInSameSessionHelper;
 
-        internal EventCountlyService(CountlyConfigModel countlyConfigModel, RequestCountlyHelper requestCountlyHelper, 
+        internal EventCountlyService(CountlyConfiguration CountlyConfiguration, RequestCountlyHelper requestCountlyHelper, 
             ViewEventRepository viewEventRepo, NonViewEventRepository nonViewEventRepo, EventNumberInSameSessionHelper eventNumberInSameSessionHelper)
         {
-            _countlyConfigModel = countlyConfigModel;
+            _CountlyConfiguration = CountlyConfiguration;
             _requestCountlyHelper = requestCountlyHelper;
             _viewEventRepo = viewEventRepo;
             _nonViewEventRepo = nonViewEventRepo;
@@ -69,17 +69,17 @@ namespace Plugins.CountlySDK.Services
         internal async Task RecordEventAsync(CountlyEventModel @event, bool useNumberInSameSession = false)
         {
 
-            if (_countlyConfigModel.EnableConsoleLogging)
+            if (_CountlyConfiguration.EnableConsoleLogging)
             {
                 Debug.Log("[Countly] RecordEventAsync : " + @event.ToString());
             }
 
-            if (_countlyConfigModel.EnableTestMode)
+            if (_CountlyConfiguration.EnableTestMode)
             {
                 return;
             }
 
-            if (_countlyConfigModel.EnableFirstAppLaunchSegment)
+            if (_CountlyConfiguration.EnableFirstAppLaunchSegment)
             {
                 AddFirstAppSegment(@event);   
             }
@@ -98,7 +98,7 @@ namespace Plugins.CountlySDK.Services
                 _eventNumberInSameSessionHelper.IncreaseNumberInSameSession(@event);
             }
 
-            if ((_viewEventRepo.Count + _nonViewEventRepo.Count) >= _countlyConfigModel.EventQueueThreshold)
+            if ((_viewEventRepo.Count + _nonViewEventRepo.Count) >= _CountlyConfiguration.EventQueueThreshold)
             {
                 await AddEventsToRequestQueue();
             }
@@ -128,12 +128,12 @@ namespace Plugins.CountlySDK.Services
         public async Task RecordEventAsync(string key, SegmentModel segmentation, bool useNumberInSameSession = false,
             int? count = 1, double? sum = 0, double? duration = null)
         {
-            if (_countlyConfigModel.EnableConsoleLogging)
+            if (_CountlyConfiguration.EnableConsoleLogging)
             {
                 Debug.Log("[Countly] RecordEventAsync : key = " + key);
             }
 
-            if (_countlyConfigModel.EnableTestMode)
+            if (_CountlyConfiguration.EnableTestMode)
             {
                 return;
             }
@@ -163,7 +163,7 @@ namespace Plugins.CountlySDK.Services
             if (events == null || events.Count == 0)
                 return;
 
-            if (_countlyConfigModel.EnableFirstAppLaunchSegment)
+            if (_CountlyConfiguration.EnableFirstAppLaunchSegment)
             {
                 foreach (var evt in events)
                 {
@@ -196,7 +196,7 @@ namespace Plugins.CountlySDK.Services
 
             var evt = new CountlyEventModel(key, segmentation, count, sum, duration);
 
-            if (_countlyConfigModel.EnableFirstAppLaunchSegment)
+            if (_CountlyConfiguration.EnableFirstAppLaunchSegment)
             {
                 AddFirstAppSegment(evt);   
             }
