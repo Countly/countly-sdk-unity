@@ -95,12 +95,42 @@ namespace Plugins.CountlySDK
             //Auth and Config will not be null in case initializing through countly prefab
             if (Auth != null && Config != null)
             {
-                Init(Auth, Config);
+                InitPrv(Auth, Config);
             }
             
         }
 
-        public async void Init(CountlyAuthModel auth, CountlyConfigModel config)
+        public void Init(CountlyConfiguration configuration)
+        {
+
+            CountlyAuthModel auth = new CountlyAuthModel
+            {
+                ServerUrl = configuration.ServerUrl,
+                AppKey = configuration.AppKey,
+                DeviceId = configuration.DeviceId
+
+            };
+
+            CountlyConfigModel config = new CountlyConfigModel
+            {
+
+            Salt = configuration.Salt,
+            EnablePost = configuration.EnablePost,
+            EnableTestMode = configuration.EnableTestMode,
+            EnableConsoleLogging = configuration.EnableConsoleLogging,
+            IgnoreSessionCooldown = configuration.IgnoreSessionCooldown,
+            NotificationMode = configuration.NotificationMode,
+            SessionDuration = configuration.SessionDuration,
+            EventQueueThreshold = configuration.EventQueueThreshold,
+            StoredRequestLimit = configuration.StoredRequestLimit,
+            TotalBreadcrumbsAllowed = configuration.TotalBreadcrumbsAllowed,
+            EnableAutomaticCrashReporting = configuration.EnableAutomaticCrashReporting
+            };
+
+            InitPrv(auth, config);
+        }
+
+        private async void InitPrv(CountlyAuthModel auth, CountlyConfigModel config)
         {
             if (IsSDKInitialized)
             {

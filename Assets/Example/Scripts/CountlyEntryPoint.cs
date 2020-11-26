@@ -16,14 +16,10 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
 
     private void Awake()
     {
-        CountlyAuthModel authModel = new CountlyAuthModel
+        CountlyConfiguration configuration = new CountlyConfiguration
         {
             ServerUrl = "https://master.count.ly/",
-            AppKey = "8e2fe772c091355076ead703f987fee94490fff4"
-        };
-
-        CountlyConfigModel configModel = new CountlyConfigModel
-        {
+            AppKey = "8e2fe772c091355076ead703f987fee94490fff4",
             EnableConsoleLogging = true,
             SessionDuration = 5,
             EventQueueThreshold = 10,
@@ -31,7 +27,7 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
             NotificationMode = TestMode.None
         };
 
-        Countly.Instance.Init(authModel, configModel);
+        Countly.Instance.Init(configuration);
         countly = Countly.Instance;
     }
 
