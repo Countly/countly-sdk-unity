@@ -25,6 +25,9 @@ namespace Plugins.CountlySDK.Models
         public int TotalBreadcrumbsAllowed = 100;
         public bool EnableAutomaticCrashReporting = true;
 
+        /// <summary>
+        ///     Parent must be undestroyable
+        /// </summary>
         public GameObject Parent = null;
 
         public CountlyConfiguration() { }
