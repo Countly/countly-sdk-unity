@@ -7,18 +7,18 @@ namespace Plugins.CountlySDK.Models
     [Serializable]
     public class CountlyConfiguration
     {
-        public string ServerUrl;
-        public string AppKey;
-        public string DeviceId;
+        public string ServerUrl = null;
+        public string AppKey = null;
+        public string DeviceId = null;
 
-        public string Salt;
-        public bool EnableFirstAppLaunchSegment;
-        public bool EnablePost;
-        public bool EnableTestMode;
-        public bool EnableConsoleLogging;
-        public bool IgnoreSessionCooldown;
+        public string Salt = null;
+        public bool EnableFirstAppLaunchSegment = false;
+        public bool EnablePost = false;
+        public bool EnableTestMode = false;
+        public bool EnableConsoleLogging = false;
+        public bool IgnoreSessionCooldown = false;
         public TestMode NotificationMode = TestMode.None;
-        public readonly bool EnableManualSessionHandling;
+        public readonly bool EnableManualSessionHandling = false;
         public int SessionDuration = 60;
         public int EventQueueThreshold = 100;
         public int StoredRequestLimit = 1000;
