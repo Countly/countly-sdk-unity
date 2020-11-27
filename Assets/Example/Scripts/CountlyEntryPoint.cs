@@ -10,12 +10,14 @@ using UnityEngine;
 
 public class CountlyEntryPoint : MonoBehaviour, INotificationListener
 {
+    public GameObject parent;
     public Countly countlyPrefab;
 
     private Countly countly;
 
     private void Awake()
     {
+        DontDestroyOnLoad(parent);
         CountlyConfiguration configuration = new CountlyConfiguration
         {
             ServerUrl = "https://master.count.ly/",
@@ -24,11 +26,14 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
             SessionDuration = 5,
             EventQueueThreshold = 10,
             StoredRequestLimit = 1000,
-            NotificationMode = TestMode.None
+            NotificationMode = TestMode.AndroidTestToken,
+            Parent = parent
         };
 
         Countly.Instance.Init(configuration);
         countly = Countly.Instance;
+
+       // countly = Instantiate(countlyPrefab);
     }
 
     private void Start()

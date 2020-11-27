@@ -110,6 +110,11 @@ namespace Plugins.CountlySDK
 
             IsSDKInitialized = true;
 
+            if (configuration.Parent != null)
+            {
+                transform.parent = configuration.Parent.transform;
+            }
+            
             Configuration = configuration;
 
             _db = CountlyBoxDbHelper.BuildDatabase(DbNumber);
@@ -151,7 +156,7 @@ namespace Plugins.CountlySDK
             Events = new EventCountlyService(Configuration, requests, viewEventRepo, nonViewEventRepo, eventNumberInSameSessionHelper);
             OptionalParameters = new OptionalParametersCountlyService();
             Notifications = new NotificationsCallbackService(Configuration);
-            var notificationsService = new ProxyNotificationsService(Configuration, InternalStartCoroutine, Events);
+            var notificationsService = new ProxyNotificationsService(transform, Configuration, InternalStartCoroutine, Events);
             _push = new PushCountlyService(Events, requests, notificationsService, Notifications);
             Session = new SessionCountlyService(Configuration, Events, _push, requests, OptionalParameters, eventNumberInSameSessionHelper);
             

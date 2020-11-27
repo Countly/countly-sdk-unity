@@ -4,21 +4,24 @@ using System.Threading.Tasks;
 using Plugins.CountlySDK.Helpers;
 using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK.Services;
+using UnityEngine;
 
 namespace Notifications.Impls
 {
 	public class ProxyNotificationsService : INotificationsService
 	{
-		private readonly INotificationsService _service;
+        private Transform _counltyGameObject;
+        private readonly INotificationsService _service;
         private readonly EventCountlyService _eventCountlyService;
 
-        internal ProxyNotificationsService(CountlyConfiguration config, Action<IEnumerator> startCoroutine, EventCountlyService eventCountlyService)
+        internal ProxyNotificationsService(Transform counltyGameObject, CountlyConfiguration config, Action<IEnumerator> startCoroutine, EventCountlyService eventCountlyService)
 		{
+            _counltyGameObject = counltyGameObject;
 
 #if UNITY_ANDROID
-            _service = new Notifications.Impls.Android.AndroidNotificationsService(config, eventCountlyService);
+            _service = new Notifications.Impls.Android.AndroidNotificationsService(_counltyGameObject, config, eventCountlyService);
 #elif UNITY_IOS
-			_service = new Notifications.Impls.iOs.IOsNotificationsService(config, startCoroutine, eventCountlyService);
+			_service = new Notifications.Impls.iOs.IOsNotificationsService(_counltyGameObject, config, startCoroutine, eventCountlyService);
 #endif
         }
 

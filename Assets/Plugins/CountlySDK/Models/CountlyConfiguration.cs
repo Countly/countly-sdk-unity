@@ -1,5 +1,6 @@
 ﻿using System;
 using Plugins.CountlySDK.Enums;
+using UnityEngine;
 
 namespace Plugins.CountlySDK.Models
 {
@@ -23,6 +24,8 @@ namespace Plugins.CountlySDK.Models
         public int StoredRequestLimit = 1000;
         public int TotalBreadcrumbsAllowed = 100;
         public bool EnableAutomaticCrashReporting = true;
+
+        public GameObject Parent = null;
 
         public CountlyConfiguration() { }
 
