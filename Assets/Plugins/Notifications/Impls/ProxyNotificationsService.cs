@@ -10,18 +10,18 @@ namespace Notifications.Impls
 {
 	public class ProxyNotificationsService : INotificationsService
 	{
-        private Transform _counltyGameObject;
+        private Transform _countlyGameObject;
         private readonly INotificationsService _service;
         private readonly EventCountlyService _eventCountlyService;
 
-        internal ProxyNotificationsService(Transform counltyGameObject, CountlyConfiguration config, Action<IEnumerator> startCoroutine, EventCountlyService eventCountlyService)
+        internal ProxyNotificationsService(Transform countlyGameObject, CountlyConfiguration config, Action<IEnumerator> startCoroutine, EventCountlyService eventCountlyService)
 		{
-            _counltyGameObject = counltyGameObject;
+            _countlyGameObject = countlyGameObject;
 
 #if UNITY_ANDROID
-            _service = new Notifications.Impls.Android.AndroidNotificationsService(_counltyGameObject, config, eventCountlyService);
+            _service = new Notifications.Impls.Android.AndroidNotificationsService(_countlyGameObject, config, eventCountlyService);
 #elif UNITY_IOS
-			_service = new Notifications.Impls.iOs.IOsNotificationsService(_counltyGameObject, config, startCoroutine, eventCountlyService);
+			_service = new Notifications.Impls.iOs.IOsNotificationsService(_countlyGameObject, config, startCoroutine, eventCountlyService);
 #endif
         }
 

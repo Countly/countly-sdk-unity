@@ -10,30 +10,23 @@ using UnityEngine;
 
 public class CountlyEntryPoint : MonoBehaviour, INotificationListener
 {
-    public GameObject parent;
-    public Countly countlyPrefab;
-
     private Countly countly;
 
     private void Awake()
     {
-        DontDestroyOnLoad(parent);
         CountlyConfiguration configuration = new CountlyConfiguration
         {
-            ServerUrl = "https://master.count.ly/",
-            AppKey = "8e2fe772c091355076ead703f987fee94490fff4",
+            ServerUrl = "https://try.count.ly/",
+            AppKey = "YOUR_APP_KEY",
             EnableConsoleLogging = true,
-            SessionDuration = 5,
+            SessionDuration = 100,
             EventQueueThreshold = 10,
             StoredRequestLimit = 1000,
-            NotificationMode = TestMode.AndroidTestToken,
-            Parent = parent
+            NotificationMode = TestMode.AndroidTestToken
         };
 
         Countly.Instance.Init(configuration);
         countly = Countly.Instance;
-
-       // countly = Instantiate(countlyPrefab);
     }
 
     private void Start()

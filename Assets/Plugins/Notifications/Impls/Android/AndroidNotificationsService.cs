@@ -10,7 +10,7 @@ namespace Notifications.Impls.Android
 {
 	public class AndroidNotificationsService : INotificationsService
 	{
-        private Transform _counltyGameObject;
+        private Transform _countlyGameObject;
         private const string BridgeName = "[Android] Bridge";
         private const string StorePackageName = "ly.count.unity.push_fcm.MessageStore";
         private const string CountlyPushPluginPackageName = "ly.count.unity.push_fcm.CountlyPushPlugin";
@@ -20,14 +20,14 @@ namespace Notifications.Impls.Android
         private readonly CountlyConfiguration _config;
         private readonly EventCountlyService _eventCountlyService;
 
-        internal AndroidNotificationsService(Transform counltyGameObject, CountlyConfiguration config, EventCountlyService eventCountlyService)
+        internal AndroidNotificationsService(Transform countlyGameObject, CountlyConfiguration config, EventCountlyService eventCountlyService)
 		{
             _config = config;
-            _counltyGameObject = counltyGameObject;
+            _countlyGameObject = countlyGameObject;
             _eventCountlyService = eventCountlyService;
 
             var gameObject = new GameObject(BridgeName);
-            gameObject.transform.parent = _counltyGameObject;
+            gameObject.transform.parent = _countlyGameObject;
 			_bridge = gameObject.AddComponent<AndroidBridge>();
             _bridge.Config = _config;
 

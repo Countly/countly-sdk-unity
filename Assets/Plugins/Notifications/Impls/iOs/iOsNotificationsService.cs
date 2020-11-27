@@ -10,7 +10,7 @@ namespace Notifications.Impls.iOs
 {
     public class IOsNotificationsService : INotificationsService
     {
-        private Transform _counltyGameObject;
+        private Transform _countlyGameObject;
         private readonly CountlyConfiguration _config;
         private readonly Action<IEnumerator> _startCoroutine;
         private readonly EventCountlyService _eventCountlyService;
@@ -22,15 +22,15 @@ namespace Notifications.Impls.iOs
         private Action<string, int> _OnNotificationClickResult;
 
 
-        internal IOsNotificationsService(Transform counltyGameObject, CountlyConfiguration config, Action<IEnumerator> startCoroutine, EventCountlyService eventCountlyService)
+        internal IOsNotificationsService(Transform countlyGameObject, CountlyConfiguration config, Action<IEnumerator> startCoroutine, EventCountlyService eventCountlyService)
         {
             _config = config;
             _startCoroutine = startCoroutine;
-            _counltyGameObject = counltyGameObject;
+            _countlyGameObject = countlyGameObject;
             _eventCountlyService = eventCountlyService;
 
             var gameObject = new GameObject(BridgeName);
-            gameObject.transform.parent = _counltyGameObject;
+            gameObject.transform.parent = _countlyGameObject;
 
             _bridge = gameObject.AddComponent<IOSBridage>();
             _bridge.Config = _config;
