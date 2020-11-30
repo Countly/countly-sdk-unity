@@ -13,7 +13,6 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
     public Countly countlyPrefab;
 
     private Countly countly;
-    string hmm;
 
     private void Awake()
     {
