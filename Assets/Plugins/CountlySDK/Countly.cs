@@ -108,8 +108,6 @@ namespace Plugins.CountlySDK
                 return;
             }
 
-            IsSDKInitialized = true;
-
             if (configuration.Parent != null)
             {
                 transform.parent = configuration.Parent.transform;
@@ -145,6 +143,8 @@ namespace Plugins.CountlySDK
             Device.InitDeviceId(configuration.DeviceId);
 
             await Initialization.SetDefaults(Configuration);
+
+            IsSDKInitialized = true;
         }
 
         private void Init(RequestRepository requestRepo, ViewEventRepository viewEventRepo,
