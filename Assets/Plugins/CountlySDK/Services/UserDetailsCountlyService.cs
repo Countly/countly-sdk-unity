@@ -43,7 +43,7 @@ namespace Plugins.CountlySDK.Services
         /// Deletes an already defined custom property from the Countly server, if it is supplied with a NULL value
         /// </summary>
         /// <param name="userDetails"></param>
-        /// <returCountlyUserDetailsModel.Pushns></returns>
+        /// <return></returns>
         internal async Task UserCustomDetailsAsync(CountlyUserDetailsModel userDetails)
         {
             if (userDetails == null)

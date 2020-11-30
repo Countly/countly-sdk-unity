@@ -13,11 +13,10 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
     public Countly countlyPrefab;
 
     private Countly countly;
-    readonly string hmm = "";
+    string hmm;
 
     private void Awake()
     {
-        if (hmm != null) { }
         CountlyConfiguration configuration = new CountlyConfiguration
         {
             ServerUrl = "https://try.count.ly/",
@@ -44,7 +43,7 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
         int participants = 13;
         Barrier barrier = new Barrier(participantCount: participants, (bar) =>
         {
-            Debug.Log("All threads reached the barrierat: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+            Debug.Log("All threads reached the barrier at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
         });
 
         Thread[] threads = new Thread[participants];
