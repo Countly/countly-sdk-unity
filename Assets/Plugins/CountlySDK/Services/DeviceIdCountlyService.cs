@@ -28,7 +28,7 @@ namespace Plugins.CountlySDK.Services
         {
             //**Priority is**
             //Cached DeviceID (remains even after after app kill)
-            //Static DeviceID (only when the app is running in either background/foreground)
+            //Static DeviceID (only when the app is running or in the background)
             //User provided DeviceID
             //Generate Random DeviceID
             var storedDeviceId = PlayerPrefs.GetString("DeviceID");
