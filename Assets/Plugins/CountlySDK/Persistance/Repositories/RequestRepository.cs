@@ -1,4 +1,4 @@
-using Plugins.CountlySDK.Helpers;
+﻿using Plugins.CountlySDK.Helpers;
 using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK.Persistance.Entities;
 using Plugins.iBoxDB;
@@ -7,7 +7,7 @@ namespace Plugins.CountlySDK.Persistance.Repositories
 {
     internal class RequestRepository : Repository<RequestEntity, CountlyRequestModel>
     {
-        public RequestRepository(Dao<RequestEntity> dao, CountlyConfigModel config) : base(dao, config)
+        public RequestRepository(Dao<RequestEntity> dao, CountlyConfiguration config) : base(dao, config)
         {
         }
 

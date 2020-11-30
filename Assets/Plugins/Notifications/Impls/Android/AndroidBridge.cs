@@ -11,14 +11,19 @@ namespace Notifications.Impls.Android
         private Action<string> _OnNotificationReceiveResult;
         private Action<string, int> _OnNotificationClickResult;
 
-        public CountlyConfigModel Config { get; set; }
+        public CountlyConfiguration Config { get; set; }
 
         public void ListenTokenResult(Action<string> result) => _onTokenResult = result;
         public void ListenReceiveResult(Action<string> result) => _OnNotificationReceiveResult = result;
         public void ListenClickResult(Action<string, int> result) => _OnNotificationClickResult = result;
-        
 
-		public void OnTokenResult(string token)
+
+        private void Awake()
+        {
+            DontDestroyOnLoad(gameObject);
+        }
+
+            public void OnTokenResult(string token)
 		{
 			_onTokenResult?.Invoke(token);
             if(Config.EnableConsoleLogging)

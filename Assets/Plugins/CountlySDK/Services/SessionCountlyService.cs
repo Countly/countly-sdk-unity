@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Timers;
@@ -17,14 +17,14 @@ namespace Plugins.CountlySDK.Services
 
 		private DateTime _lastInputTime;
 		
-		private readonly CountlyConfigModel _configModel;
+		private readonly CountlyConfiguration _configModel;
 		private readonly EventCountlyService _eventService;
 		private readonly PushCountlyService _pushCountlyService;
         private readonly RequestCountlyHelper _requestCountlyHelper;
         private readonly OptionalParametersCountlyService _optionalParametersCountlyService;
         private readonly EventNumberInSameSessionHelper _eventNumberInSameSessionHelper;
 
-        internal SessionCountlyService(CountlyConfigModel configModel, EventCountlyService eventService, PushCountlyService pushCountlyService, 
+        internal SessionCountlyService(CountlyConfiguration configModel, EventCountlyService eventService, PushCountlyService pushCountlyService, 
             RequestCountlyHelper requestCountlyHelper, OptionalParametersCountlyService optionalParametersCountlyService,
             EventNumberInSameSessionHelper eventNumberInSameSessionHelper)
         {

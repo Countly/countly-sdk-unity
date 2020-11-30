@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Plugins.CountlySDK.Helpers;
@@ -10,10 +10,10 @@ namespace Plugins.CountlySDK.Services
     public class CrashReportsCountlyService
     {
         private readonly Queue<string> _crashBreadcrumbs = new Queue<string>();
-        private readonly CountlyConfigModel _configModel;
+        private readonly CountlyConfiguration _configModel;
         private readonly RequestCountlyHelper _requestCountlyHelper;
 
-        internal CrashReportsCountlyService(CountlyConfigModel configModel, RequestCountlyHelper requestCountlyHelper)
+        internal CrashReportsCountlyService(CountlyConfiguration configModel, RequestCountlyHelper requestCountlyHelper)
         {
             _configModel = configModel;
             _requestCountlyHelper = requestCountlyHelper;

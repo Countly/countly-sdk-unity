@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,7 +13,7 @@ namespace Plugins.CountlySDK.Services
 {
     public class RemoteConfigCountlyService
     {
-        private readonly CountlyConfigModel _config;
+        private readonly CountlyConfiguration _config;
         private readonly CountlyUtils _countlyUtils;
         private readonly Dao<ConfigEntity> _configDao;
         private readonly RequestCountlyHelper _requestCountlyHelper;
@@ -22,7 +22,7 @@ namespace Plugins.CountlySDK.Services
 
         private readonly StringBuilder _requestStringBuilder = new StringBuilder();
 
-        internal RemoteConfigCountlyService(CountlyConfigModel config, RequestCountlyHelper requestCountlyHelper, CountlyUtils countlyUtils, Dao<ConfigEntity> configDao)
+        internal RemoteConfigCountlyService(CountlyConfiguration config, RequestCountlyHelper requestCountlyHelper, CountlyUtils countlyUtils, Dao<ConfigEntity> configDao)
         {
             _config = config;
             _configDao = configDao;

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Threading.Tasks;
 using Plugins.CountlySDK.Helpers;
 using Plugins.CountlySDK.Models;
@@ -45,7 +45,7 @@ namespace Plugins.CountlySDK.Services
         /// <param name="enableConsoleErrorLogging"></param>
         /// <param name="ignoreSessionCooldown"></param>
         /// <returns></returns>
-        internal async Task SetDefaults(CountlyConfigModel configModel)
+        internal async Task SetDefaults(CountlyConfiguration configModel)
         {
             if (!configModel.EnableManualSessionHandling)
             {

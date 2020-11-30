@@ -1,5 +1,6 @@
 ﻿using Notifications;
 using Plugins.CountlySDK;
+using Plugins.CountlySDK.Enums;
 using Plugins.CountlySDK.Models;
 using System;
 using System.Collections.Generic;
@@ -12,10 +13,21 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
     public Countly countlyPrefab;
 
     private Countly countly;
+    readonly string hmm = "";
 
     private void Awake()
     {
-        countly = Instantiate(countlyPrefab);
+        if (hmm != null) { }
+        CountlyConfiguration configuration = new CountlyConfiguration
+        {
+            ServerUrl = "https://try.count.ly/",
+            AppKey = "YOUR_APP_KEY",
+            EnableConsoleLogging = true,
+            NotificationMode = TestMode.AndroidTestToken
+        };
+
+        Countly.Instance.Init(configuration);
+        countly = Countly.Instance;
     }
 
     private void Start()
