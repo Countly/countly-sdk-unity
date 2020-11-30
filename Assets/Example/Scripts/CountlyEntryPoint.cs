@@ -13,13 +13,15 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
     public Countly countlyPrefab;
 
     private Countly countly;
+    readonly string hmm = "";
 
     private void Awake()
     {
+        if (hmm != null) { }
         CountlyConfiguration configuration = new CountlyConfiguration
         {
-            ServerUrl = "https://master.count.ly/",
-            AppKey = "8e2fe772c091355076ead703f987fee94490fff4",
+            ServerUrl = "https://try.count.ly/",
+            AppKey = "YOUR_APP_KEY",
             EnableConsoleLogging = true,
             NotificationMode = TestMode.AndroidTestToken
         };
