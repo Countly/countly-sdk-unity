@@ -184,7 +184,7 @@ namespace Plugins.CountlySDK.Services
         }
 
         /// <summary>
-        ///     Reports a custom event to the Counlty server.
+        ///     Reports a custom event to the Countly server.
         /// </summary>
         /// <returns></returns>
         public async Task ReportCustomEventAsync(string key,

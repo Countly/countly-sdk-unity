@@ -28,7 +28,7 @@ namespace Plugins.CountlySDK.Services
         {
             //**Priority is**
             //Cached DeviceID (remains even after after app kill)
-            //Static DeviceID (only when the app is running either backgroun/foreground)
+            //Static DeviceID (only when the app is running or in the background)
             //User provided DeviceID
             //Generate Random DeviceID
             var storedDeviceId = PlayerPrefs.GetString("DeviceID");
@@ -48,7 +48,7 @@ namespace Plugins.CountlySDK.Services
         /// Changes Device Id.
         /// Adds currently recorded but not queued events to request queue.
         /// Clears all started timed-events
-        /// Ends cuurent session with old Device Id.
+        /// Ends current session with old Device Id.
         /// Begins a new session with new Device Id
         /// </summary>
         /// <param name="deviceId"></param>

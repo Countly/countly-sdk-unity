@@ -37,7 +37,7 @@ namespace Plugins.CountlySDK.Services
         }
 
 		/// <summary>
-		/// Intializes the timer for extending session with specified interval
+		/// Initializes the timer for extending session with specified interval
 		/// </summary>
 		/// <param name="sessionInterval">In milliseconds</param>
 		private void InitSessionTimer()
