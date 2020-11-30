@@ -10,18 +10,17 @@ using UnityEngine;
 
 public class CountlyEntryPoint : MonoBehaviour, INotificationListener
 {
+    public Countly countlyPrefab;
+
     private Countly countly;
 
     private void Awake()
     {
         CountlyConfiguration configuration = new CountlyConfiguration
         {
-            ServerUrl = "https://try.count.ly/",
-            AppKey = "YOUR_APP_KEY",
+            ServerUrl = "https://master.count.ly/",
+            AppKey = "8e2fe772c091355076ead703f987fee94490fff4",
             EnableConsoleLogging = true,
-            SessionDuration = 100,
-            EventQueueThreshold = 10,
-            StoredRequestLimit = 1000,
             NotificationMode = TestMode.AndroidTestToken
         };
 
