@@ -134,7 +134,7 @@ namespace Plugins.CountlySDK.Services
 //                }
 //            }
       
-            _requestStringBuilder.Insert(0, _countlyUtils.ConfigUrl);
+            _requestStringBuilder.Insert(0, _countlyUtils.ServerOutputUrl);
             return _requestStringBuilder.ToString();
         }
 

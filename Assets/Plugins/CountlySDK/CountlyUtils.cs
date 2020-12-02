@@ -12,19 +12,16 @@ namespace Plugins.CountlySDK
 
         private readonly Countly _countly;
 
-        internal string InputUrl { get; private set; }
+        internal string ServerInputUrl { get; private set; }
 
-        internal string OutputUrl { get; private set; }
-
-        internal string ConfigUrl { get; private set; }
+        internal string ServerOutputUrl { get; private set; }
 
         public CountlyUtils(Countly countly)
         {
             _countly = countly;
 
-            InputUrl = _countly.Initialization.ServerUrl + "/i?";
-            OutputUrl = _countly.Initialization.ServerUrl + "/o?";
-            ConfigUrl = _countly.Initialization.ServerUrl + "/o/sdk?";
+            ServerInputUrl = _countly.Initialization.ServerUrl + "/i?";
+            ServerOutputUrl = _countly.Initialization.ServerUrl + "/o/sdk?";
         }
 
         public string GetUniqueDeviceId()
