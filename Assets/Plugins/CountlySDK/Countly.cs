@@ -23,9 +23,19 @@ namespace Plugins.CountlySDK
         public CountlyAuthModel Auth;
         public CountlyConfigModel Config;
         private CountlyConfiguration Configuration;
+
+        /// <summary>
+        /// Is sdk has been initialized?
+        /// </summary>
+        /// <returns>bool</returns>
         public bool IsSDKInitialized { get; private set; }
 
         private static Countly _instance = null;
+
+        /// <summary>
+        /// Return countly shared instance.
+        /// </summary>
+        /// <returns>Countly</returns>
         public static Countly Instance {
             get
             {
@@ -45,31 +55,76 @@ namespace Plugins.CountlySDK
             }
         }
 
+        /// <summary>
+        /// Check/Update for a particular feature.
+        /// </summary>
+        ///<returns>ConsentCountlyService</returns>
         public ConsentCountlyService Consents { get; private set; }
 
         [Obsolete("CrushReports is deprecated, please use CrashReports instead.")]
         public CrashReportsCountlyService CrushReports { get { return CrashReports; } }
 
+        /// <summary>
+        /// Collect crash reports.
+        /// </summary>
+        /// <returns>CrashReportsCountlyService</returns>
         public CrashReportsCountlyService CrashReports { get; private set; }
 
+        /// <summary>
+        /// Changing Device ID.
+        /// </summary>
+        /// <returns>DeviceIdCountlyService</returns>
         public DeviceIdCountlyService Device { get; private set; }
 
+        /// <summary>
+        /// Record events.
+        /// </summary>
+        /// <returns>EventCountlyService</returns>
         public EventCountlyService Events { get; private set; }
 
-        public InitializationCountlyService Initialization { get; private set; }
 
+        /// <summary>
+        ///     Initializes countly instance.
+        /// </summary>
+        /// <returns>InitializationCountlyService</returns>
+        internal InitializationCountlyService Initialization { get; private set; }
+
+        /// <summary>
+        ///     Track user location.
+        /// </summary>
+        /// <returns>OptionalParametersCountlyService</returns>
         public OptionalParametersCountlyService OptionalParameters { get; private set; }
 
+        /// <summary>
+        ///     Access/Update remote config.
+        /// </summary>
+        /// <returns>RemoteConfigCountlyService</returns>
         public RemoteConfigCountlyService RemoteConfigs { get; private set; }
 
+        /// <summary>
+        ///     Collect user feedback and comments.
+        /// </summary>
+        /// <returns>StarRatingCountlyService</returns>
         public StarRatingCountlyService StarRating { get; private set; }
 
+        /// <summary>
+        ///     Upload specific data related to a user.
+        /// </summary>
+        /// <returns>UserDetailsCountlyService</returns>
         public UserDetailsCountlyService UserDetails { get; private set; }
 
+        /// <summary>
+        ///     View tracking.
+        /// </summary>
+        /// <returns>ViewCountlyService</returns>
         public ViewCountlyService Views { get; private set; }
 
         private SessionCountlyService Session { get; set; }
 
+        /// <summary>
+        ///     Listen push notification.
+        /// </summary>
+        /// <returns>NotificationsCallbackService</returns>
         public NotificationsCallbackService Notifications { get; set; }
         
 
