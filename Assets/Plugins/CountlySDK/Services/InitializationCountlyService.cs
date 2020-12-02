@@ -25,16 +25,8 @@ namespace Plugins.CountlySDK.Services
         /// <param name="deviceId"></param>
         internal void Begin(string serverUrl, string appKey)
         {
-            ServerUrl = serverUrl;
             AppKey = appKey;
-
-            if (string.IsNullOrEmpty(ServerUrl))
-                throw new ArgumentNullException(serverUrl, "Server URL is required.");
-            if (string.IsNullOrEmpty(AppKey))
-                throw new ArgumentNullException(appKey, "App Key is required.");
-
-
-            //ConsentGranted = consentGranted;
+            ServerUrl = serverUrl;
         }
 
         /// <summary>

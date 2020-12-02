@@ -12,9 +12,16 @@ namespace Plugins.CountlySDK
 
         private readonly Countly _countly;
 
+        internal string ServerInputUrl { get; private set; }
+
+        internal string ServerOutputUrl { get; private set; }
+
         public CountlyUtils(Countly countly)
         {
             _countly = countly;
+
+            ServerInputUrl = _countly.Initialization.ServerUrl + "/i?";
+            ServerOutputUrl = _countly.Initialization.ServerUrl + "/o/sdk?";
         }
 
         public string GetUniqueDeviceId()
@@ -24,45 +31,6 @@ namespace Plugins.CountlySDK
 #else
             return UnityEngine.SystemInfo.deviceUniqueIdentifier;
 #endif
-        }
-
-        /// <summary>
-        ///     Gets the base url to make requests to the Countly server.
-        /// </summary>
-        /// <returns></returns>
-        public string GetBaseInputUrl()
-        {
-            return string.Format(
-                _countly.Initialization.ServerUrl[_countly.Initialization.ServerUrl.Length - 1] == '/'
-                    ? "{0}i?"
-                    : "{0}/i?",
-                _countly.Initialization.ServerUrl);
-        }
-
-        /// <summary>
-        ///     Gets the base url to make remote configrequests to the Countly server.
-        /// </summary>
-        /// <returns></returns>
-        public string GetBaseOutputUrl()
-        {
-            return string.Format(
-                _countly.Initialization.ServerUrl[_countly.Initialization.ServerUrl.Length - 1] == '/'
-                    ? "{0}o?"
-                    : "{0}/o?",
-                _countly.Initialization.ServerUrl);
-        }
-
-        /// <summary>
-        ///     Gets the base url to make remote configrequests to the Countly server.
-        /// </summary>
-        /// <returns></returns>
-        public string GetRemoteConfigOutputUrl()
-        {
-            return string.Format(
-                _countly.Initialization.ServerUrl[_countly.Initialization.ServerUrl.Length - 1] == '/'
-                    ? "{0}o/sdk?"
-                    : "{0}/o/sdk?",
-                _countly.Initialization.ServerUrl);
         }
 
         /// <summary>
