@@ -25,7 +25,7 @@ namespace Plugins.CountlySDK
         private CountlyConfiguration Configuration;
 
         /// <summary>
-        /// Is sdk has been initialized?
+        /// Check if SDK has initialized?
         /// </summary>
         /// <returns>bool</returns>
         public bool IsSDKInitialized { get; private set; }
@@ -56,7 +56,7 @@ namespace Plugins.CountlySDK
         }
 
         /// <summary>
-        /// Check/Update for a particular feature.
+        /// Check/Update consent for a particular feature.
         /// </summary>
         ///<returns>ConsentCountlyService</returns>
         public ConsentCountlyService Consents { get; private set; }
@@ -65,56 +65,55 @@ namespace Plugins.CountlySDK
         public CrashReportsCountlyService CrushReports { get { return CrashReports; } }
 
         /// <summary>
-        /// Collect crash reports.
+        /// Collect crash reports, which you may examine and resolve later on the server.
+
         /// </summary>
         /// <returns>CrashReportsCountlyService</returns>
         public CrashReportsCountlyService CrashReports { get; private set; }
 
         /// <summary>
-        /// Changing Device ID.
+        /// Add/Update device ID. All tracked information is tied to a "device ID"
         /// </summary>
         /// <returns>DeviceIdCountlyService</returns>
         public DeviceIdCountlyService Device { get; private set; }
 
         /// <summary>
-        /// Record events.
+        /// Report custom events to server.
         /// </summary>
         /// <returns>EventCountlyService</returns>
         public EventCountlyService Events { get; private set; }
 
 
-        /// <summary>
-        ///     Initializes countly instance.
-        /// </summary>
-        /// <returns>InitializationCountlyService</returns>
         internal InitializationCountlyService Initialization { get; private set; }
 
         /// <summary>
-        ///     Track user location.
+        ///     Track user location to know your app?s user base.
         /// </summary>
         /// <returns>OptionalParametersCountlyService</returns>
         public OptionalParametersCountlyService OptionalParameters { get; private set; }
 
         /// <summary>
-        ///     Access/Update remote config.
+        ///     Remote Config allows you to modify how your app functions or looks by requesting key-value pairs from your Countly server.
+        ///     The returned values may be modified based on the user profile.
         /// </summary>
         /// <returns>RemoteConfigCountlyService</returns>
         public RemoteConfigCountlyService RemoteConfigs { get; private set; }
 
         /// <summary>
-        ///     Collect user feedback and comments.
+        ///     Report User rating and feedback to server.
         /// </summary>
         /// <returns>StarRatingCountlyService</returns>
         public StarRatingCountlyService StarRating { get; private set; }
 
         /// <summary>
-        ///     Upload specific data related to a user.
+        ///     Allows you to upload specific data related to a user to the server.
+        ///     It helps you identify users, their devices, event timelines, and application crash information.
         /// </summary>
         /// <returns>UserDetailsCountlyService</returns>
         public UserDetailsCountlyService UserDetails { get; private set; }
 
         /// <summary>
-        ///     View tracking.
+        ///     Report what views a user did and for how long.
         /// </summary>
         /// <returns>ViewCountlyService</returns>
         public ViewCountlyService Views { get; private set; }
@@ -122,7 +121,7 @@ namespace Plugins.CountlySDK
         private SessionCountlyService Session { get; set; }
 
         /// <summary>
-        ///     Listen push notification.
+        ///     Listen push notification receive and click events.
         /// </summary>
         /// <returns>NotificationsCallbackService</returns>
         public NotificationsCallbackService Notifications { get; set; }
