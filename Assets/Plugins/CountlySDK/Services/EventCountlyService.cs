@@ -148,7 +148,7 @@ namespace Plugins.CountlySDK.Services
                 foreach (var item in segmentation)
                 {
                     bool isValidDataType = item.Value.GetType() == typeof(int)
-                        || item.Value.GetType() == typeof(long)
+                        || item.Value.GetType() == typeof(bool)
                         || item.Value.GetType() == typeof(float)
                         || item.Value.GetType() == typeof(double)
                         || item.Value.GetType() == typeof(string);
