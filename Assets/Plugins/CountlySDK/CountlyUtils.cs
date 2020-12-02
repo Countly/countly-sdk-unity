@@ -22,9 +22,9 @@ namespace Plugins.CountlySDK
         {
             _countly = countly;
 
-            InputUrl = GetBaseInputUrl();
-            OutputUrl = GetBaseOutputUrl();
-            ConfigUrl = GetRemoteConfigOutputUrl();
+            InputUrl = _countly.Initialization.ServerUrl + "/i?";
+            OutputUrl = _countly.Initialization.ServerUrl + "/o?";
+            ConfigUrl = _countly.Initialization.ServerUrl + "/o/sdk?";
         }
 
         public string GetUniqueDeviceId()
@@ -34,52 +34,6 @@ namespace Plugins.CountlySDK
 #else
             return UnityEngine.SystemInfo.deviceUniqueIdentifier;
 #endif
-        }
-
-        /// <summary>
-        ///     Gets the base url to make requests to the Countly server.
-        /// </summary>
-        /// <returns></returns>
-        public string GetBaseInputUrl()
-        {
-            string url = _countly.Initialization.ServerUrl;
-            if (url[url.Length - 1] == '/')
-            {
-                url = url.Remove(url.Length - 1);
-            }
-
-            return url + "/i?";
-        }
-
-        /// <summary>
-        ///     Gets the base url to make remote configrequests to the Countly server.
-        /// </summary>
-        /// <returns></returns>
-        public string GetBaseOutputUrl()
-        {
-
-            string url = _countly.Initialization.ServerUrl;
-            if (url[url.Length - 1] == '/')
-            {
-                url = url.Remove(url.Length - 1);
-            }
-
-            return url + "/o?";
-        }
-
-        /// <summary>
-        ///     Gets the base url to make remote configrequests to the Countly server.
-        /// </summary>
-        /// <returns></returns>
-        public string GetRemoteConfigOutputUrl()
-        {
-            string url = _countly.Initialization.ServerUrl;
-            if (url[url.Length - 1] == '/')
-            {
-                url = url.Remove(url.Length - 1);
-            }
-
-            return url + "/o/sdk?";
         }
 
         /// <summary>
