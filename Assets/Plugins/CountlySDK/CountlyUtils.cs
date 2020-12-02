@@ -42,11 +42,13 @@ namespace Plugins.CountlySDK
         /// <returns></returns>
         public string GetBaseInputUrl()
         {
-            return string.Format(
-                _countly.Initialization.ServerUrl[_countly.Initialization.ServerUrl.Length - 1] == '/'
-                    ? "{0}i?"
-                    : "{0}/i?",
-                _countly.Initialization.ServerUrl);
+            string url = _countly.Initialization.ServerUrl;
+            if (url[url.Length - 1] == '/')
+            {
+                url = url.Remove(url.Length - 1);
+            }
+
+            return url + "/i?";
         }
 
         /// <summary>
@@ -55,11 +57,14 @@ namespace Plugins.CountlySDK
         /// <returns></returns>
         public string GetBaseOutputUrl()
         {
-            return string.Format(
-                _countly.Initialization.ServerUrl[_countly.Initialization.ServerUrl.Length - 1] == '/'
-                    ? "{0}o?"
-                    : "{0}/o?",
-                _countly.Initialization.ServerUrl);
+
+            string url = _countly.Initialization.ServerUrl;
+            if (url[url.Length - 1] == '/')
+            {
+                url = url.Remove(url.Length - 1);
+            }
+
+            return url + "/o?";
         }
 
         /// <summary>
@@ -68,11 +73,13 @@ namespace Plugins.CountlySDK
         /// <returns></returns>
         public string GetRemoteConfigOutputUrl()
         {
-            return string.Format(
-                _countly.Initialization.ServerUrl[_countly.Initialization.ServerUrl.Length - 1] == '/'
-                    ? "{0}o/sdk?"
-                    : "{0}/o/sdk?",
-                _countly.Initialization.ServerUrl);
+            string url = _countly.Initialization.ServerUrl;
+            if (url[url.Length - 1] == '/')
+            {
+                url = url.Remove(url.Length - 1);
+            }
+
+            return url + "/o/sdk?";
         }
 
         /// <summary>
