@@ -112,7 +112,17 @@ namespace Plugins.CountlySDK
             {
                 transform.parent = configuration.Parent.transform;
             }
-            
+
+            if (string.IsNullOrEmpty(configuration.ServerUrl))
+                throw new ArgumentNullException(configuration.ServerUrl, "Server URL is required.");
+            if (string.IsNullOrEmpty(configuration.AppKey))
+                throw new ArgumentNullException(configuration.AppKey, "App Key is required.");
+
+            if (configuration.ServerUrl[configuration.ServerUrl.Length - 1] == '/')
+            {
+                configuration.ServerUrl = configuration.ServerUrl.Remove(configuration.ServerUrl.Length - 1);
+            }
+
             Configuration = configuration;
 
             _db = CountlyBoxDbHelper.BuildDatabase(DbNumber);

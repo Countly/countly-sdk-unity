@@ -27,16 +27,6 @@ namespace Plugins.CountlySDK.Services
         {
             AppKey = appKey;
             ServerUrl = serverUrl;
-
-            if (string.IsNullOrEmpty(ServerUrl))
-                throw new ArgumentNullException(serverUrl, "Server URL is required.");
-            if (string.IsNullOrEmpty(AppKey))
-                throw new ArgumentNullException(appKey, "App Key is required.");
-
-            if (ServerUrl[ServerUrl.Length - 1] == '/')
-            {
-                ServerUrl = ServerUrl.Remove(ServerUrl.Length - 1);
-            }
         }
 
         /// <summary>
