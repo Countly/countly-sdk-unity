@@ -134,7 +134,7 @@ namespace Plugins.CountlySDK.Services
 //                }
 //            }
       
-            _requestStringBuilder.Insert(0, _countlyUtils.GetRemoteConfigOutputUrl());
+            _requestStringBuilder.Insert(0, _countlyUtils.ConfigUrl);
             return _requestStringBuilder.ToString();
         }
 

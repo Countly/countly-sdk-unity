@@ -131,12 +131,12 @@ namespace Plugins.CountlySDK.Helpers
                 using (var sha256Hash = SHA256.Create())
                 {
                     var data = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(requestStringBuilder + _config.Salt));
-                    requestStringBuilder.Insert(0, _countlyUtils.GetBaseInputUrl());
+                    requestStringBuilder.Insert(0, _countlyUtils.InputUrl);
                     return requestStringBuilder.AppendFormat("&checksum256={0}", _countlyUtils.GetStringFromBytes(data)).ToString();
                 }
             }
 
-            requestStringBuilder.Insert(0, _countlyUtils.GetBaseInputUrl());
+            requestStringBuilder.Insert(0, _countlyUtils.InputUrl);
             return requestStringBuilder.ToString();
         }
 
@@ -181,7 +181,7 @@ namespace Plugins.CountlySDK.Helpers
             var data = BuildPostRequest(queryParams);
             if (_config.EnablePost || data.Length > 1800)
             {
-                requestModel = new CountlyRequestModel(false, _countlyUtils.GetBaseInputUrl(), BuildPostRequest(queryParams), DateTime.UtcNow);
+                requestModel = new CountlyRequestModel(false, _countlyUtils.InputUrl, BuildPostRequest(queryParams), DateTime.UtcNow);
             }
             else
             {

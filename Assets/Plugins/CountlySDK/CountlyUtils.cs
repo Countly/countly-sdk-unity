@@ -12,9 +12,19 @@ namespace Plugins.CountlySDK
 
         private readonly Countly _countly;
 
+        internal string InputUrl { get; private set; }
+
+        internal string OutputUrl { get; private set; }
+
+        internal string ConfigUrl { get; private set; }
+
         public CountlyUtils(Countly countly)
         {
             _countly = countly;
+
+            InputUrl = GetBaseInputUrl();
+            OutputUrl = GetBaseOutputUrl();
+            ConfigUrl = GetRemoteConfigOutputUrl();
         }
 
         public string GetUniqueDeviceId()
