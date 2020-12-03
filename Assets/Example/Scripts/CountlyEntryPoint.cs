@@ -221,6 +221,21 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
        
     }
 
+    public async void EventWithInvalidSegmentation()
+    {
+        long currentMillis = System.DateTime.UtcNow.Millisecond; // invalid data type
+        CustomDataType customDataType = new CustomDataType("foo", 49); // invalid data type
+        SegmentModel segment = new SegmentModel(new Dictionary<string, object>
+        {
+            { "Current Millis", currentMillis},
+            { "Time Spent", "60"},
+            { "Custome", customDataType},
+            
+        });
+
+        await countly.Events.RecordEventAsync("Event With Invalid Segmentation", segmentation: segment);
+    }
+
     public async void ReportViewMainScene()
     {
         await countly.Views.RecordOpenViewAsync("Main Scene");
@@ -391,5 +406,17 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
     public void OnNotificationClicked(string message, int index)
     {
         Debug.Log("[Countly Example] OnNoticicationClicked: " + message + ", index: " + index);
+    }
+}
+
+public class CustomDataType
+{
+    public int Age { get; private set; }
+    public string Name { get; private set; }
+
+    public CustomDataType(string name, int age)
+    {
+        Age = age;
+        Name = name;
     }
 }
