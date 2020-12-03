@@ -23,9 +23,19 @@ namespace Plugins.CountlySDK
         public CountlyAuthModel Auth;
         public CountlyConfigModel Config;
         private CountlyConfiguration Configuration;
+
+        /// <summary>
+        /// Check if SDK has been initialized.
+        /// </summary>
+        /// <returns>bool</returns>
         public bool IsSDKInitialized { get; private set; }
 
         private static Countly _instance = null;
+
+        /// <summary>
+        /// Return countly shared instance.
+        /// </summary>
+        /// <returns>Countly</returns>
         public static Countly Instance {
             get
             {
@@ -45,31 +55,72 @@ namespace Plugins.CountlySDK
             }
         }
 
+        /// <summary>
+        /// Check/Update consent for a particular feature.
+        /// </summary>
+        ///<returns>ConsentCountlyService</returns>
         public ConsentCountlyService Consents { get; private set; }
 
         [Obsolete("CrushReports is deprecated, please use CrashReports instead.")]
         public CrashReportsCountlyService CrushReports { get { return CrashReports; } }
 
+        /// <summary>
+        /// Exposes functionality to record crashes/errors and record breadcrumbs.
+        /// </summary>
+        /// <returns>CrashReportsCountlyService</returns>
         public CrashReportsCountlyService CrashReports { get; private set; }
 
+        /// <summary>
+        /// Exposes functionality to get the current device ID and change id.
+        /// </summary>
+        /// <returns>DeviceIdCountlyService</returns>
         public DeviceIdCountlyService Device { get; private set; }
 
+        /// <summary>
+        /// Exposes functionality to record custom events.
+        /// </summary>
+        /// <returns>EventCountlyService</returns>
         public EventCountlyService Events { get; private set; }
 
-        public InitializationCountlyService Initialization { get; private set; }
 
+        internal InitializationCountlyService Initialization { get; private set; }
+
+        /// <summary>
+        ///     Exposes functionality to set location parameters that will be used during init.
+        /// </summary>
+        /// <returns>OptionalParametersCountlyService</returns>
         public OptionalParametersCountlyService OptionalParameters { get; private set; }
 
+        /// <summary>
+        ///     Exposes functionality to update the remote config values. It also provides a way to access the currently downloaded ones.
+        /// </summary>
+        /// <returns>RemoteConfigCountlyService</returns>
         public RemoteConfigCountlyService RemoteConfigs { get; private set; }
 
+        /// <summary>
+        ///     Exposes functinality to report start rating.
+        /// </summary>
+        /// <returns>StarRatingCountlyService</returns>
         public StarRatingCountlyService StarRating { get; private set; }
 
+        /// <summary>
+        ///     Exposes functionality to set and change custom user properties and interract with custom property modiffiers.
+        /// </summary>
+        /// <returns>UserDetailsCountlyService</returns>
         public UserDetailsCountlyService UserDetails { get; private set; }
 
+        /// <summary>
+        ///     Exposes functionality to start and stop recording views and report positions for heatmap.
+        /// </summary>
+        /// <returns>ViewCountlyService</returns>
         public ViewCountlyService Views { get; private set; }
 
         private SessionCountlyService Session { get; set; }
 
+        /// <summary>
+        ///     Add callbacks to listen to push notification events for when a notification is received and when it is clicked.
+        /// </summary>
+        /// <returns>NotificationsCallbackService</returns>
         public NotificationsCallbackService Notifications { get; set; }
         
 
