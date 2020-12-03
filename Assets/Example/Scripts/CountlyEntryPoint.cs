@@ -18,8 +18,8 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
     {
         CountlyConfiguration configuration = new CountlyConfiguration
         {
-            ServerUrl = "https://try.count.ly/",
-            AppKey = "YOUR_APP_KEY",
+            ServerUrl = "https://master.count.ly/",
+            AppKey = "8e2fe772c091355076ead703f987fee94490fff4",
             EnableConsoleLogging = true,
             NotificationMode = TestMode.AndroidTestToken
         };
@@ -223,14 +223,23 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
 
     public async void EventWithInvalidSegmentation()
     {
-        long currentMillis = System.DateTime.UtcNow.Millisecond; // invalid data type
-        CustomDataType customDataType = new CustomDataType("foo", 49); // invalid data type
+        int moles = 1; //valid data type
+        string name = "foo";// valid data type
+        bool isMale = true; // valid data type
+        float amount = 10000.75f; //valid data type
+        double totalAmount = 100000.76363;
+        long currentMillis = DateTime.UtcNow.Millisecond; // invalid data type
+        DateTime date = DateTime.UtcNow; // invalid data type
+        
         SegmentModel segment = new SegmentModel(new Dictionary<string, object>
         {
+            { "name", name},
+            { "moles", moles},
+            { "male", isMale},
+            { "amount", amount},
+            { "total amount", totalAmount},
+            { "dob", date},
             { "Current Millis", currentMillis},
-            { "Time Spent", "60"},
-            { "Custome", customDataType},
-            
         });
 
         await countly.Events.RecordEventAsync("Event With Invalid Segmentation", segmentation: segment);
@@ -406,17 +415,5 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
     public void OnNotificationClicked(string message, int index)
     {
         Debug.Log("[Countly Example] OnNoticicationClicked: " + message + ", index: " + index);
-    }
-}
-
-public class CustomDataType
-{
-    public int Age { get; private set; }
-    public string Name { get; private set; }
-
-    public CustomDataType(string name, int age)
-    {
-        Age = age;
-        Name = name;
     }
 }
