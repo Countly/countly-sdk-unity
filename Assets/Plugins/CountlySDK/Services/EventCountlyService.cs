@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -145,6 +146,8 @@ namespace Plugins.CountlySDK.Services
 
             if (segmentation != null)
             {
+                List<string> toRemove = new List<string>();
+              
                 foreach (var item in segmentation)
                 {
                     bool isValidDataType = item.Value.GetType() == typeof(int)
@@ -155,11 +158,15 @@ namespace Plugins.CountlySDK.Services
 
                     if (!isValidDataType)
                     {
-                        segmentation.Remove(item.Key);
+                        toRemove.Add(item.Key);
                         Debug.LogWarning("[Countly] RecordEventAsync : In segmentation Data type of item '" + item .Key + "'isn't valid.");   
                     }
                 }
 
+                foreach (var k in toRemove)
+                {
+                    segmentation.Remove(k);
+                }
             }
             
             var @event = new CountlyEventModel(key, segmentation, count, sum, duration);
