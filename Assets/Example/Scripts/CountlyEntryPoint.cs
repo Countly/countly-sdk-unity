@@ -18,8 +18,8 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
     {
         CountlyConfiguration configuration = new CountlyConfiguration
         {
-            ServerUrl = "https://master.count.ly/",
-            AppKey = "8e2fe772c091355076ead703f987fee94490fff4",
+            ServerUrl = "https://try.count.ly/",
+            AppKey = "YOUR_APP_KEY",
             EnableConsoleLogging = true,
             NotificationMode = TestMode.AndroidTestToken
         };
