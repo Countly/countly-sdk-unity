@@ -221,6 +221,30 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
        
     }
 
+    public async void EventWithInvalidSegmentation()
+    {
+        int moles = 1; //valid data type
+        string name = "foo";// valid data type
+        bool isMale = true; // valid data type
+        float amount = 10000.75f; //valid data type
+        double totalAmount = 100000.76363;
+        long currentMillis = DateTime.UtcNow.Millisecond; // invalid data type
+        DateTime date = DateTime.UtcNow; // invalid data type
+        
+        SegmentModel segment = new SegmentModel(new Dictionary<string, object>
+        {
+            { "name", name},
+            { "moles", moles},
+            { "male", isMale},
+            { "amount", amount},
+            { "total amount", totalAmount},
+            { "dob", date},
+            { "Current Millis", currentMillis},
+        });
+
+        await countly.Events.RecordEventAsync("Event With Invalid Segmentation", segmentation: segment);
+    }
+
     public async void ReportViewMainScene()
     {
         await countly.Views.RecordOpenViewAsync("Main Scene");
