@@ -22,7 +22,7 @@ namespace Plugins.CountlySDK
 
         public CountlyAuthModel Auth;
         public CountlyConfigModel Config;
-        private CountlyConfiguration Configuration;
+        internal CountlyConfiguration Configuration;
 
         /// <summary>
         /// Check if SDK has been initialized.
