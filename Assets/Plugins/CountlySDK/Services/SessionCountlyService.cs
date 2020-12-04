@@ -21,11 +21,11 @@ namespace Plugins.CountlySDK.Services
 		private readonly EventCountlyService _eventService;
 		private readonly PushCountlyService _pushCountlyService;
         private readonly RequestCountlyHelper _requestCountlyHelper;
-        private readonly RecordLocationService _recordLocationService;
+        private readonly LocationService _recordLocationService;
         private readonly EventNumberInSameSessionHelper _eventNumberInSameSessionHelper;
 
         internal SessionCountlyService(CountlyConfiguration configModel, EventCountlyService eventService, PushCountlyService pushCountlyService, 
-            RequestCountlyHelper requestCountlyHelper, RecordLocationService recordLocationService,
+            RequestCountlyHelper requestCountlyHelper, LocationService recordLocationService,
             EventNumberInSameSessionHelper eventNumberInSameSessionHelper)
         {
             _configModel = configModel;
@@ -106,6 +106,9 @@ namespace Plugins.CountlySDK.Services
 
 			if (!string.IsNullOrEmpty(_recordLocationService.IPAddress))
 				requestParams.Add("ip_address", _recordLocationService.IPAddress);
+
+			if (_recordLocationService.Location != null)
+				requestParams.Add("location", _recordLocationService.Location);
 
 			await _requestCountlyHelper.GetResponseAsync(requestParams);
 

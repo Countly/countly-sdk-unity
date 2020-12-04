@@ -25,10 +25,10 @@ namespace Plugins.CountlySDK.Models
         public int TotalBreadcrumbsAllowed = 100;
         public bool EnableAutomaticCrashReporting = true;
 
-        public string City;
-        public string Location;
-        public string IPAddress;
-        public string CountryCode;
+        internal string City;
+        internal string Location;
+        internal string IPAddress;
+        internal string CountryCode;
 
         /// <summary>
         ///     Parent must be undestroyable
@@ -62,6 +62,14 @@ namespace Plugins.CountlySDK.Models
         public override string ToString()
         {
             return $"{nameof(Salt)}: {Salt}, {nameof(EnablePost)}: {EnablePost}, {nameof(EnableConsoleLogging)}: {EnableConsoleLogging}, {nameof(IgnoreSessionCooldown)}: {IgnoreSessionCooldown}, {nameof(NotificationMode)}: {NotificationMode}, {nameof(EnableManualSessionHandling)}: {EnableManualSessionHandling}, {nameof(SessionDuration)}: {SessionDuration}, {nameof(EventQueueThreshold)}: {EventQueueThreshold}, {nameof(StoredRequestLimit)}: {StoredRequestLimit}, {nameof(TotalBreadcrumbsAllowed)}: {TotalBreadcrumbsAllowed}, {nameof(EnableAutomaticCrashReporting)}: {EnableAutomaticCrashReporting}";
+        }
+
+        /// <summary>
+        /// Disabled the location tracking on the Countly server
+        /// </summary>
+        public void DisableLocation()
+        {
+            Location = string.Empty;
         }
 
         /// <summary>

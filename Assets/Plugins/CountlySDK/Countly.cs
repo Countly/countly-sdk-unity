@@ -86,14 +86,13 @@ namespace Plugins.CountlySDK
         internal InitializationCountlyService Initialization { get; private set; }
 
         
-        [Obsolete("OptionalParameters is deprecated, please use Location instead.")]
         public OptionalParametersCountlyService OptionalParameters { get; private set; }
 
         /// <summary>
         ///     Exposes functionality to set location parameters that will be used during init.
         /// </summary>
         /// <returns>RecordLocationService</returns>
-        public RecordLocationService RecordLocation { get; private set; }
+        public Services.LocationService Location { get; private set; }
 
         /// <summary>
         ///     Exposes functionality to update the remote config values. It also provides a way to access the currently downloaded ones.
@@ -220,12 +219,12 @@ namespace Plugins.CountlySDK
 
             Events = new EventCountlyService(Configuration, requests, viewEventRepo, nonViewEventRepo, eventNumberInSameSessionHelper);
 
-            RecordLocation = new RecordLocationService(Configuration);
-            OptionalParameters = new OptionalParametersCountlyService(RecordLocation);
+            Location = new Services.LocationService(Configuration);
+            OptionalParameters = new OptionalParametersCountlyService(Location, Configuration);
             Notifications = new NotificationsCallbackService(Configuration);
             var notificationsService = new ProxyNotificationsService(transform, Configuration, InternalStartCoroutine, Events);
             _push = new PushCountlyService(Events, requests, notificationsService, Notifications);
-            Session = new SessionCountlyService(Configuration, Events, _push, requests, RecordLocation, eventNumberInSameSessionHelper);
+            Session = new SessionCountlyService(Configuration, Events, _push, requests, Location, eventNumberInSameSessionHelper);
             
             Consents = new ConsentCountlyService();
             CrashReports = new CrashReportsCountlyService(Configuration, requests);

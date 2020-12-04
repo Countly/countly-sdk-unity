@@ -1,22 +1,30 @@
+using System;
+using Plugins.CountlySDK.Models;
+using UnityEngine;
+
 namespace Plugins.CountlySDK.Services
 {
     public class OptionalParametersCountlyService
     {
-        private readonly RecordLocationService _recordLocation;
-        public string CountryCode { get; private set; }
-        public string City { get; private set; }
-        public string Location { get; private set; }
-        public string IPAddress { get; private set; }
+        public string CountryCode { get { return _recordLocation.CountryCode; } }
+        public string City { get { return _recordLocation.City; } }
+        public string Location { get { return _recordLocation.Location; } }
+        public string IPAddress { get { return _recordLocation.IPAddress; } }
 
-        internal OptionalParametersCountlyService(RecordLocationService recordLocation)
+        private readonly LocationService _recordLocation;
+        private readonly CountlyConfiguration _countlyConfiguration;
+
+        internal OptionalParametersCountlyService(LocationService recordLocation, CountlyConfiguration countlyConfiguration)
         {
             _recordLocation = recordLocation;
+            _countlyConfiguration = countlyConfiguration;
         }
 
         /// <summary>
         /// Sets Country Code to be used for future requests. Takes ISO Country code as input parameter
         /// </summary>
         /// <param name="country_code"></param>
+        [Obsolete("SetCountryCode is deprecated, please use SetLocation function of LocationService instead.")]
         public void SetCountryCode(string country_code)
         {
             SetLocation(country_code, City, Location, IPAddress);
@@ -26,6 +34,8 @@ namespace Plugins.CountlySDK.Services
         /// Sets City to be used for future requests.
         /// </summary>
         /// <param name="city"></param>
+        /// 
+        [Obsolete("SetCity is deprecated, please use SetLocation function of LocationService instead.")]
         public void SetCity(string city)
         {
             SetLocation(CountryCode, city, Location, IPAddress);
@@ -36,6 +46,7 @@ namespace Plugins.CountlySDK.Services
         /// </summary>
         /// <param name="latitude"></param>
         /// <param name="longitude"></param>
+        [Obsolete("SetLocation is deprecated, please use SetLocation function of LocationService instead.")]
         public void SetLocation(double latitude, double longitude)
         {
             string location = latitude + "," + longitude;
@@ -46,6 +57,7 @@ namespace Plugins.CountlySDK.Services
         /// Sets IP address to be used for future requests.
         /// </summary>
         /// <param name="ip_address"></param>
+        [Obsolete("SetIPAddress is deprecated, please use SetLocation function of LocationService instead.")]
         public void SetIPAddress(string ip_address)
         {
             SetLocation(CountryCode, City, Location, ip_address);
@@ -54,9 +66,9 @@ namespace Plugins.CountlySDK.Services
         /// <summary>
         /// Disabled the location tracking on the Countly server
         /// </summary>
+        [Obsolete("DisableLocation is deprecated, please use DisableLocation function of LocationService instead.")]
         public void DisableLocation()
         {
-            Location = string.Empty;
             _recordLocation.DisableLocation();
         }
 
@@ -69,12 +81,13 @@ namespace Plugins.CountlySDK.Services
         /// <param name="ipAddress"></param>
         public void SetLocation(string countryCode, string city, string gpsCoordinates, string ipAddress)
         {
-            City = city;
-            IPAddress = ipAddress;
-            CountryCode = countryCode;
-            Location = gpsCoordinates;
-
             _recordLocation.SetLocation(countryCode, City, Location, IPAddress);
+
+            if (_countlyConfiguration.EnableConsoleLogging)
+            {
+                Debug.LogWarning("[Counlty] OptionalParameters is deprecated, please use Location instead");
+            } 
+            
         }
     }
 }

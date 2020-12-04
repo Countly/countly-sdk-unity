@@ -3,16 +3,16 @@ using UnityEngine;
 
 namespace Plugins.CountlySDK.Services
 {
-    public class RecordLocationService
+    public class LocationService
     {
-        public string City { get; private set; }
-        public string Location { get; private set; }
-        public string IPAddress { get; private set; }
-        public string CountryCode { get; private set; }
+        internal string City { get; private set; }
+        internal string Location { get; private set; }
+        internal string IPAddress { get; private set; }
+        internal string CountryCode { get; private set; }
 
         private readonly CountlyConfiguration _countlyConfiguration;
 
-        internal RecordLocationService(CountlyConfiguration countlyConfiguration)
+        internal LocationService(CountlyConfiguration countlyConfiguration)
         {
             City = countlyConfiguration.City;
             Location = countlyConfiguration.Location;
