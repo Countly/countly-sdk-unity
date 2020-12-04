@@ -20,8 +20,8 @@ namespace Plugins.CountlySDK
         {
             _countly = countly;
 
-            ServerInputUrl = _countly.Initialization.ServerUrl + "/i?";
-            ServerOutputUrl = _countly.Initialization.ServerUrl + "/o/sdk?";
+            ServerInputUrl = _countly.Configuration.ServerUrl + "/i?";
+            ServerOutputUrl = _countly.Configuration.ServerUrl + "/o/sdk?";
         }
 
         public string GetUniqueDeviceId()
@@ -41,7 +41,7 @@ namespace Plugins.CountlySDK
         {
             var baseParams = new Dictionary<string, object>
             {
-                {"app_key", _countly.Initialization.AppKey},
+                {"app_key", _countly.Configuration.AppKey},
                 {"device_id", _countly.Device.DeviceId},
                 {"sdk_name", Constants.SdkName},
                 {"sdk_version", Constants.SdkVersion}
@@ -68,7 +68,7 @@ namespace Plugins.CountlySDK
         {
             return new Dictionary<string, object>
             {
-                {"app_key", _countly.Initialization.AppKey},
+                {"app_key", _countly.Configuration.AppKey},
                 {"device_id", _countly.Device.DeviceId}
             };
         }
