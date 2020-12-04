@@ -16,12 +16,19 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
 
     private void Awake()
     {
+
+        string latitude = "29.634933";
+        string longitude = "-95.220255";
         CountlyConfiguration configuration = new CountlyConfiguration
         {
             ServerUrl = "https://try.count.ly/",
             AppKey = "YOUR_APP_KEY",
             EnableConsoleLogging = true,
-            NotificationMode = TestMode.AndroidTestToken
+            NotificationMode = TestMode.AndroidTestToken,
+            City = "Lahore",
+            CountryCode = "PK",
+            IPAddress = "192.168.10.1",
+            Location = latitude + "," + longitude
         };
 
         Countly.Instance.Init(configuration);
@@ -264,15 +271,13 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
         string longitude = "-95.220255";
         string ipAddress = null;
 
-        countly.OptionalParameters.SetLocation(countryCode, city, latitude + "," + longitude, ipAddress);
+        countly.RecordLocation.SetLocation(countryCode, city, latitude + "," + longitude, ipAddress);
 
     }
 
     public void DisableLocation()
     {
-        countly.OptionalParameters.DisableLocation();
-        
-        
+        countly.RecordLocation.DisableLocation();
     }
 
 

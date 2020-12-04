@@ -85,11 +85,15 @@ namespace Plugins.CountlySDK
 
         internal InitializationCountlyService Initialization { get; private set; }
 
+        
+        [Obsolete("OptionalParameters is deprecated, please use Location instead.")]
+        public OptionalParametersCountlyService OptionalParameters { get; private set; }
+
         /// <summary>
         ///     Exposes functionality to set location parameters that will be used during init.
         /// </summary>
-        /// <returns>OptionalParametersCountlyService</returns>
-        public OptionalParametersCountlyService OptionalParameters { get; private set; }
+        /// <returns>RecordLocationService</returns>
+        public RecordLocationService RecordLocation { get; private set; }
 
         /// <summary>
         ///     Exposes functionality to update the remote config values. It also provides a way to access the currently downloaded ones.
@@ -215,11 +219,13 @@ namespace Plugins.CountlySDK
             var requests = new RequestCountlyHelper(Configuration, countlyUtils, requestRepo);
 
             Events = new EventCountlyService(Configuration, requests, viewEventRepo, nonViewEventRepo, eventNumberInSameSessionHelper);
-            OptionalParameters = new OptionalParametersCountlyService();
+
+            RecordLocation = new RecordLocationService(Configuration);
+            OptionalParameters = new OptionalParametersCountlyService(RecordLocation);
             Notifications = new NotificationsCallbackService(Configuration);
             var notificationsService = new ProxyNotificationsService(transform, Configuration, InternalStartCoroutine, Events);
             _push = new PushCountlyService(Events, requests, notificationsService, Notifications);
-            Session = new SessionCountlyService(Configuration, Events, _push, requests, OptionalParameters, eventNumberInSameSessionHelper);
+            Session = new SessionCountlyService(Configuration, Events, _push, requests, RecordLocation, eventNumberInSameSessionHelper);
             
             Consents = new ConsentCountlyService();
             CrashReports = new CrashReportsCountlyService(Configuration, requests);

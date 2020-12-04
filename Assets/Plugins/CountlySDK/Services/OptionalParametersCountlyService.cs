@@ -2,13 +2,16 @@ namespace Plugins.CountlySDK.Services
 {
     public class OptionalParametersCountlyService
     {
+        private readonly RecordLocationService _recordLocation;
         public string CountryCode { get; private set; }
         public string City { get; private set; }
         public string Location { get; private set; }
         public string IPAddress { get; private set; }
 
-        internal OptionalParametersCountlyService()
-        { }
+        internal OptionalParametersCountlyService(RecordLocationService recordLocation)
+        {
+            _recordLocation = recordLocation;
+        }
 
         /// <summary>
         /// Sets Country Code to be used for future requests. Takes ISO Country code as input parameter
@@ -54,6 +57,7 @@ namespace Plugins.CountlySDK.Services
         public void DisableLocation()
         {
             Location = string.Empty;
+            _recordLocation.DisableLocation();
         }
 
         /// <summary>
@@ -69,7 +73,8 @@ namespace Plugins.CountlySDK.Services
             IPAddress = ipAddress;
             CountryCode = countryCode;
             Location = gpsCoordinates;
-            
+
+            _recordLocation.SetLocation(countryCode, City, Location, IPAddress);
         }
     }
 }

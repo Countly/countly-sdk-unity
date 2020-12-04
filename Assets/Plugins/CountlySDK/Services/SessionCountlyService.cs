@@ -21,18 +21,18 @@ namespace Plugins.CountlySDK.Services
 		private readonly EventCountlyService _eventService;
 		private readonly PushCountlyService _pushCountlyService;
         private readonly RequestCountlyHelper _requestCountlyHelper;
-        private readonly OptionalParametersCountlyService _optionalParametersCountlyService;
+        private readonly RecordLocationService _recordLocationService;
         private readonly EventNumberInSameSessionHelper _eventNumberInSameSessionHelper;
 
         internal SessionCountlyService(CountlyConfiguration configModel, EventCountlyService eventService, PushCountlyService pushCountlyService, 
-            RequestCountlyHelper requestCountlyHelper, OptionalParametersCountlyService optionalParametersCountlyService,
+            RequestCountlyHelper requestCountlyHelper, RecordLocationService recordLocationService,
             EventNumberInSameSessionHelper eventNumberInSameSessionHelper)
         {
             _configModel = configModel;
 			_eventService = eventService;
 			_pushCountlyService = pushCountlyService;
             _requestCountlyHelper = requestCountlyHelper;
-            _optionalParametersCountlyService = optionalParametersCountlyService;
+            _recordLocationService = recordLocationService;
             _eventNumberInSameSessionHelper = eventNumberInSameSessionHelper;
         }
 
@@ -104,7 +104,8 @@ namespace Plugins.CountlySDK.Services
 			requestParams.Add("metrics", JsonConvert.SerializeObject(CountlyMetricModel.Metrics, Formatting.Indented,
 				new JsonSerializerSettings {NullValueHandling = NullValueHandling.Ignore}));
 
-			requestParams.Add("ip_address", _optionalParametersCountlyService.IPAddress);
+			if (!string.IsNullOrEmpty(_recordLocationService.IPAddress))
+				requestParams.Add("ip_address", _recordLocationService.IPAddress);
 
 			await _requestCountlyHelper.GetResponseAsync(requestParams);
 
