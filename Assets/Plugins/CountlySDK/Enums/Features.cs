@@ -1,6 +1,6 @@
 ﻿namespace Plugins.CountlySDK.Enums
 {
-    public enum FeaturesEnum
+    public enum Features
     {
         Sessions,
         Events,

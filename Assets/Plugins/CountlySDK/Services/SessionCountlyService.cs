@@ -26,14 +26,14 @@ namespace Plugins.CountlySDK.Services
         private readonly EventNumberInSameSessionHelper _eventNumberInSameSessionHelper;
 
         internal SessionCountlyService(CountlyConfiguration configModel, EventCountlyService eventService, PushCountlyService pushCountlyService, 
-            RequestCountlyHelper requestCountlyHelper, LocationService recordLocationService, ConsentCountlyService consentCountlyService,
+            RequestCountlyHelper requestCountlyHelper, LocationService locationService, ConsentCountlyService consentCountlyService,
 			EventNumberInSameSessionHelper eventNumberInSameSessionHelper)
         {
             _configModel = configModel;
 			_eventService = eventService;
 			_pushCountlyService = pushCountlyService;
             _requestCountlyHelper = requestCountlyHelper;
-            _locationService = recordLocationService;
+            _locationService = locationService;
 			_consentService = consentCountlyService;
 			_eventNumberInSameSessionHelper = eventNumberInSameSessionHelper;
         }
@@ -98,13 +98,13 @@ namespace Plugins.CountlySDK.Services
 			var requestParams =
 				new Dictionary<string, object>();
 
-			if (_consentService.CheckConsent(FeaturesEnum.Sessions))
+			if (_consentService.CheckConsent(Features.Sessions))
 			{
 				requestParams.Add("begin_session", 1);
 
 				/* If location is disabled or no location consent is given,
 				the SDK adds an empty location entry to every "begin_session" request. */
-				if (_locationService.IsLocationDisabled || !_consentService.CheckConsent(FeaturesEnum.Location))
+				if (_locationService.IsLocationDisabled || !_consentService.CheckConsent(Features.Location))
 				{
 					requestParams.Add("location", string.Empty);
 				}

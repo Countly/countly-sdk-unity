@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Plugins.CountlySDK.Enums;
 using Plugins.CountlySDK.Helpers;
 using Plugins.CountlySDK.Models;
 
@@ -34,19 +35,22 @@ namespace Plugins.CountlySDK.Services
             AppKey = _configModel.AppKey;
             ServerUrl = _configModel.ServerUrl;
 
-            /* If location is disabled in init
-				 and no session consent is given. Send empty location as separate request.*/
-            if (_locationService.IsLocationDisabled)
+            if (!_consentService.CheckConsent(Features.Sessions))
             {
-                await _locationService.SendRequestWithEmptyLocation();
-            }
-            else
-            {
-                /*
-             * If there is no session consent, 
-             * location values set in init should be sent as a separate location request.
-             */
-                await _locationService.SendIndependantLocationRequest();
+                /* If location is disabled in init
+                and no session consent is given. Send empty location as separate request.*/
+                if (_locationService.IsLocationDisabled)
+                {
+                    await _locationService.SendRequestWithEmptyLocation();
+                }
+                else
+                {
+                    /*
+                 * If there is no session consent, 
+                 * location values set in init should be sent as a separate location request.
+                 */
+                    await _locationService.SendIndependantLocationRequest();
+                }
             }
 
             if (!_configModel.EnableManualSessionHandling)

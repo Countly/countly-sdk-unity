@@ -44,19 +44,19 @@ namespace Plugins.CountlySDK.Models
             CountlyFeatureConsents =
                 new HashSet<ConsentModel>
                 {
-                    new ConsentModel(FeaturesEnum.Sessions.ToString(), "sessions", true),
-                    new ConsentModel(FeaturesEnum.Events.ToString(), "events", true),
-                    new ConsentModel(FeaturesEnum.Location.ToString(), "location", true),
-                    new ConsentModel(FeaturesEnum.Views.ToString(), "views", true),
-                    new ConsentModel(FeaturesEnum.Scrolls.ToString(), "scrolls", true),
-                    new ConsentModel(FeaturesEnum.Clicks.ToString(), "clicks", true),
-                    new ConsentModel(FeaturesEnum.Forms.ToString(), "forms", true),
-                    new ConsentModel(FeaturesEnum.Crashes.ToString(), "crashes", true),
-                    new ConsentModel(FeaturesEnum.Attribution.ToString(), "attribution", true),
-                    new ConsentModel(FeaturesEnum.Users.ToString(), "users", true),
-                    new ConsentModel(FeaturesEnum.Push.ToString(), "push", true),
-                    new ConsentModel(FeaturesEnum.StarRating.ToString(), "star-rating", true),
-                    new ConsentModel(FeaturesEnum.AccessoryDevices.ToString(), "accessory-devices", true),
+                    new ConsentModel(Enums.Features.Sessions.ToString(), "sessions", true),
+                    new ConsentModel(Enums.Features.Events.ToString(), "events", true),
+                    new ConsentModel(Enums.Features.Location.ToString(), "location", true),
+                    new ConsentModel(Enums.Features.Views.ToString(), "views", true),
+                    new ConsentModel(Enums.Features.Scrolls.ToString(), "scrolls", true),
+                    new ConsentModel(Enums.Features.Clicks.ToString(), "clicks", true),
+                    new ConsentModel(Enums.Features.Forms.ToString(), "forms", true),
+                    new ConsentModel(Enums.Features.Crashes.ToString(), "crashes", true),
+                    new ConsentModel(Enums.Features.Attribution.ToString(), "attribution", true),
+                    new ConsentModel(Enums.Features.Users.ToString(), "users", true),
+                    new ConsentModel(Enums.Features.Push.ToString(), "push", true),
+                    new ConsentModel(Enums.Features.StarRating.ToString(), "star-rating", true),
+                    new ConsentModel(Enums.Features.AccessoryDevices.ToString(), "accessory-devices", true),
                 };
         }
 

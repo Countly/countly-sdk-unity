@@ -23,14 +23,25 @@ namespace Plugins.CountlySDK.Services
 
         internal LocationService(CountlyConfiguration countlyConfiguration, RequestCountlyHelper requestCountlyHelper)
         {
-            City = countlyConfiguration.City;
-            Location = countlyConfiguration.Location;
-            IPAddress = countlyConfiguration.IPAddress;
-            CountryCode = countlyConfiguration.CountryCode;
-            IsLocationDisabled = countlyConfiguration.IsLocationDisabled;
-
             _countlyConfiguration = countlyConfiguration;
             _requestCountlyHelper = requestCountlyHelper;
+
+            if (countlyConfiguration.IsLocationDisabled)
+            {
+                City = null;
+                Location = null;
+                IPAddress = null;
+                CountryCode = null;
+                IsLocationDisabled = countlyConfiguration.IsLocationDisabled;
+            }
+            else
+            {
+                City = countlyConfiguration.City;
+                Location = countlyConfiguration.Location;
+                IPAddress = countlyConfiguration.IPAddress;
+                CountryCode = countlyConfiguration.CountryCode;
+                IsLocationDisabled = countlyConfiguration.IsLocationDisabled;
+            }
         }
 
         internal async Task SendRequestWithEmptyLocation()
@@ -50,7 +61,7 @@ namespace Plugins.CountlySDK.Services
         internal async Task SendIndependantLocationRequest()
         {
 
-            if (!_consentService.CheckConsent(FeaturesEnum.Location))
+            if (!_consentService.CheckConsent(Features.Location))
             {
                 return;
             }
@@ -111,10 +122,11 @@ namespace Plugins.CountlySDK.Services
         /// <summary>
         /// Set Country code (ISO Country code), City, Location and IP address to be used for future requests.
         /// </summary>
-        /// <param name="countryCode"></param>
-        /// <param name="city"></param>
-        /// <param name="gpsCoordinates"></param>
-        /// <param name="ipAddress"></param>
+        /// <param name="countryCode">Country code (ISO Country code)</param>
+        /// <param name="city">City name</param>
+        /// <param name="gpsCoordinates">GPS Coordinates</param>
+        /// <param name="ipAddress">IP address</param>
+        /// <returns></returns>
         public async void SetLocation(string countryCode, string city, string gpsCoordinates, string ipAddress)
         {
             /*If city is not paired together with country,

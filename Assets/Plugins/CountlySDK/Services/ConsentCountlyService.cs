@@ -18,7 +18,7 @@ namespace Plugins.CountlySDK.Services
         /// </summary>
         /// <param name="feature"></param>
         /// <returns></returns>
-        public bool CheckConsent(FeaturesEnum feature)
+        public bool CheckConsent(Features feature)
         {
             return true;// ConsentModel.CheckConsent(feature.toString());
         }

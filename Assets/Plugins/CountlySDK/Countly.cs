@@ -88,7 +88,7 @@ namespace Plugins.CountlySDK
         public OptionalParametersCountlyService OptionalParameters { get; private set; }
 
         /// <summary>
-        ///     Exposes functionality to set location parameters that will be used during init.
+        ///     Exposes functionality to set location parameters.
         /// </summary>
         /// <returns>LocationService</returns>
         public Services.LocationService Location { get; private set; }
