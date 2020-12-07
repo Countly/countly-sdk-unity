@@ -26,7 +26,7 @@ namespace Plugins.CountlySDK.Services
         private readonly EventNumberInSameSessionHelper _eventNumberInSameSessionHelper;
 
         internal SessionCountlyService(CountlyConfiguration configModel, EventCountlyService eventService, PushCountlyService pushCountlyService, 
-            RequestCountlyHelper requestCountlyHelper, LocationService locationService, ConsentCountlyService consentCountlyService,
+            RequestCountlyHelper requestCountlyHelper, LocationService locationService, ConsentCountlyService consentService,
 			EventNumberInSameSessionHelper eventNumberInSameSessionHelper)
         {
             _configModel = configModel;
@@ -34,7 +34,7 @@ namespace Plugins.CountlySDK.Services
 			_pushCountlyService = pushCountlyService;
             _requestCountlyHelper = requestCountlyHelper;
             _locationService = locationService;
-			_consentService = consentCountlyService;
+			_consentService = consentService;
 			_eventNumberInSameSessionHelper = eventNumberInSameSessionHelper;
         }
 

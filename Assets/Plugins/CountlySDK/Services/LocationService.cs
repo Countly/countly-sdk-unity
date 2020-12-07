@@ -49,10 +49,6 @@ namespace Plugins.CountlySDK.Services
             var requestParams =
                new Dictionary<string, object>();
 
-
-            requestParams.Add("metrics", JsonConvert.SerializeObject(CountlyMetricModel.Metrics, Formatting.Indented,
-                new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }));
-
             requestParams.Add("location", string.Empty);
 
             await _requestCountlyHelper.GetResponseAsync(requestParams);
@@ -106,9 +102,9 @@ namespace Plugins.CountlySDK.Services
         {
             IsLocationDisabled = true;
             City = null;
+            Location = null;
             IPAddress = null;
             CountryCode = null;
-            Location = string.Empty;
 
             /*
              *If the location feature gets disabled or location consent is removed,
@@ -122,10 +118,10 @@ namespace Plugins.CountlySDK.Services
         /// <summary>
         /// Set Country code (ISO Country code), City, Location and IP address to be used for future requests.
         /// </summary>
-        /// <param name="countryCode">Country code (ISO Country code)</param>
-        /// <param name="city">City name</param>
-        /// <param name="gpsCoordinates">GPS Coordinates</param>
-        /// <param name="ipAddress">IP address</param>
+        /// <param name="countryCode">ISO Country code for the user's country</param>
+        /// <param name="city">Name of the user's city</param>
+        /// <param name="gpsCoordinates">comma separate lat and lng values. For example, "56.42345,123.45325"</param>
+        /// <param name="ipAddress">ipAddress like "192.168.88.33"</param>
         /// <returns></returns>
         public async void SetLocation(string countryCode, string city, string gpsCoordinates, string ipAddress)
         {
