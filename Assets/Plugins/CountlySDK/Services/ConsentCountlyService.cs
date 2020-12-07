@@ -1,3 +1,4 @@
+using Plugins.CountlySDK.Enums;
 using Plugins.CountlySDK.Models;
 
 namespace Plugins.CountlySDK.Services
@@ -17,9 +18,9 @@ namespace Plugins.CountlySDK.Services
         /// </summary>
         /// <param name="feature"></param>
         /// <returns></returns>
-        public bool CheckConsent(string feature)
+        public bool CheckConsent(FeaturesEnum feature)
         {
-            return ConsentModel.CheckConsent(feature);
+            return true;// ConsentModel.CheckConsent(feature.toString());
         }
 
         /// <summary>

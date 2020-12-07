@@ -29,6 +29,7 @@ namespace Plugins.CountlySDK.Models
         internal string Location;
         internal string IPAddress;
         internal string CountryCode;
+        internal bool IsLocationDisabled;
 
         /// <summary>
         ///     Parent must be undestroyable
@@ -69,7 +70,7 @@ namespace Plugins.CountlySDK.Models
         /// </summary>
         public void DisableLocation()
         {
-            Location = string.Empty;
+            IsLocationDisabled = true;
         }
 
         /// <summary>

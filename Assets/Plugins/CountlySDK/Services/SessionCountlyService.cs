@@ -16,7 +16,8 @@ namespace Plugins.CountlySDK.Services
 		public bool IsSessionInitiated { get; private set; }
 
 		private DateTime _lastInputTime;
-		
+
+		private readonly ConsentCountlyService _consentCountlyService;
 		private readonly CountlyConfiguration _configModel;
 		private readonly EventCountlyService _eventService;
 		private readonly PushCountlyService _pushCountlyService;
@@ -25,15 +26,16 @@ namespace Plugins.CountlySDK.Services
         private readonly EventNumberInSameSessionHelper _eventNumberInSameSessionHelper;
 
         internal SessionCountlyService(CountlyConfiguration configModel, EventCountlyService eventService, PushCountlyService pushCountlyService, 
-            RequestCountlyHelper requestCountlyHelper, LocationService recordLocationService,
-            EventNumberInSameSessionHelper eventNumberInSameSessionHelper)
+            RequestCountlyHelper requestCountlyHelper, LocationService recordLocationService, ConsentCountlyService consentCountlyService,
+			EventNumberInSameSessionHelper eventNumberInSameSessionHelper)
         {
             _configModel = configModel;
 			_eventService = eventService;
 			_pushCountlyService = pushCountlyService;
             _requestCountlyHelper = requestCountlyHelper;
             _recordLocationService = recordLocationService;
-            _eventNumberInSameSessionHelper = eventNumberInSameSessionHelper;
+			_consentCountlyService = consentCountlyService;
+			_eventNumberInSameSessionHelper = eventNumberInSameSessionHelper;
         }
 
 		/// <summary>
@@ -96,21 +98,45 @@ namespace Plugins.CountlySDK.Services
 			//if (ConsentModel.CheckConsent(FeaturesEnum.Sessions.ToString()))
 			//{
 			var requestParams =
-				new Dictionary<string, object>
+				new Dictionary<string, object>();
+
+
+			if (_consentCountlyService.CheckConsent(FeaturesEnum.Sessions))
+			{
+				requestParams.Add("begin_session", 1);
+				requestParams.Add("ignore_cooldown", _configModel.IgnoreSessionCooldown);
+
+				/* If location is disabled or no location consent is given,
+				the SDK adds an empty location entry to every "begin_session" request. */
+				if (_recordLocationService.IsLocationDisabled || !_consentCountlyService.CheckConsent(FeaturesEnum.Location))
 				{
-					{"begin_session", 1},
-					{"ignore_cooldown", _configModel.IgnoreSessionCooldown}
-				};
-			requestParams.Add("metrics", JsonConvert.SerializeObject(CountlyMetricModel.Metrics, Formatting.Indented,
-				new JsonSerializerSettings {NullValueHandling = NullValueHandling.Ignore}));
+					requestParams.Add("location", string.Empty);
+				}
 
-			if (!string.IsNullOrEmpty(_recordLocationService.IPAddress))
-				requestParams.Add("ip_address", _recordLocationService.IPAddress);
+				requestParams.Add("metrics", JsonConvert.SerializeObject(CountlyMetricModel.Metrics, Formatting.Indented,
+				new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }));
 
-			if (_recordLocationService.Location != null)
-				requestParams.Add("location", _recordLocationService.Location);
+				await _requestCountlyHelper.GetResponseAsync(requestParams);
+			}
+			else
+			{
+				/* If location is disabled or no location consent is given,
+				 and no session consent is give. I am sending empty location in separete request.*/
+				if (_recordLocationService.IsLocationDisabled || !_consentCountlyService.CheckConsent(FeaturesEnum.Location))
+				{
+					await _recordLocationService.SendRequestWithEmptyLocation();
+				}
+				else
+				{
+					/*
+				 * If there is no session consent, 
+				 * location values set in init should be sent as a separate location request.
+				 */
+					await _recordLocationService.SendIndependatLocationRequest();
+				}
 
-			await _requestCountlyHelper.GetResponseAsync(requestParams);
+				
+			}
 
 			//Start session timer
 			if (!_configModel.EnableManualSessionHandling)
