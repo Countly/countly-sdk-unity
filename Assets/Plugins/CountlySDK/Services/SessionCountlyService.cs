@@ -120,8 +120,8 @@ namespace Plugins.CountlySDK.Services
 			}
 			else
 			{
-				/* If location is disabled or no location consent is given,
-				 and no session consent is give. I am sending empty location in separete request.*/
+				/* If location is disabled in init or no location consent is given,
+				 and no session consent is given . I am sending empty location in separete request.*/
 				if (_recordLocationService.IsLocationDisabled || !_consentCountlyService.CheckConsent(FeaturesEnum.Location))
 				{
 					await _recordLocationService.SendRequestWithEmptyLocation();
