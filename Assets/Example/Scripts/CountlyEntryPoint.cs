@@ -28,7 +28,7 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
         string city = "Houston";
         string latitude = "29.634933";
         string longitude = "-95.220255";
-        string ipAddress = null;
+        string ipAddress = "10.2.33.12";
 
         configuration.SetLocation(countryCode, city, latitude + "," + longitude, ipAddress);
 

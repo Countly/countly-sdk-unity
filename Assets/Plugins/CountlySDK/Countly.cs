@@ -82,16 +82,15 @@ namespace Plugins.CountlySDK
         /// <returns>EventCountlyService</returns>
         public EventCountlyService Events { get; private set; }
 
-
         internal InitializationCountlyService Initialization { get; private set; }
 
-        
+        [Obsolete("OptionalParameters is deprecated, please use Location instead.")]
         public OptionalParametersCountlyService OptionalParameters { get; private set; }
 
         /// <summary>
         ///     Exposes functionality to set location parameters that will be used during init.
         /// </summary>
-        /// <returns>RecordLocationService</returns>
+        /// <returns>LocationService</returns>
         public Services.LocationService Location { get; private set; }
 
         /// <summary>
@@ -203,10 +202,8 @@ namespace Plugins.CountlySDK
             Init(requestRepo, eventViewRepo, eventNonViewRepo, configDao, eventNumberInSameSessionHelper);
 
             
-            Initialization.Begin(configuration.ServerUrl, configuration.AppKey);
             Device.InitDeviceId(configuration.DeviceId);
-
-            await Initialization.SetDefaults(Configuration);
+            await Initialization.OnInitializationComplete();
 
             IsSDKInitialized = true;
         }
@@ -230,7 +227,7 @@ namespace Plugins.CountlySDK
             CrashReports = new CrashReportsCountlyService(Configuration, requests);
 
             Device = new DeviceIdCountlyService(Session, requests, Events, countlyUtils);
-            Initialization = new InitializationCountlyService(Session);
+            Initialization = new InitializationCountlyService(Configuration, Location, Consents, Session);
 
             RemoteConfigs = new RemoteConfigCountlyService(Configuration, requests, countlyUtils, configDao);
 

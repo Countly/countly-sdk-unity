@@ -71,6 +71,11 @@ namespace Plugins.CountlySDK.Models
         public void DisableLocation()
         {
             IsLocationDisabled = true;
+
+            City = null;
+            IPAddress = null;
+            CountryCode = null;
+            Location = string.Empty;
         }
 
         /// <summary>
@@ -79,11 +84,16 @@ namespace Plugins.CountlySDK.Models
         /// <returns></returns>
         public void SetLocation(string countryCode, string city, string gpsCoordinates, string ipAddress)
         {
-            City = city;
-            IPAddress = ipAddress;
-            CountryCode = countryCode;
-            Location = gpsCoordinates;
+            if (countryCode != null || city != null || gpsCoordinates != null || ipAddress != null)
+            {
+                City = city;
+                IPAddress = ipAddress;
+                CountryCode = countryCode;
+                Location = gpsCoordinates;
 
+                IsLocationDisabled = false;
+                
+            }
         }
     }
 }

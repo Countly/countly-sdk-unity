@@ -85,7 +85,7 @@ namespace Plugins.CountlySDK.Services
 
             if (_countlyConfiguration.EnableConsoleLogging)
             {
-                Debug.LogWarning("[Counlty] OptionalParameters is deprecated, please use Location instead");
+                Debug.LogWarning("[Countly] OptionalParameters is deprecated, please use Location instead");
             } 
             
         }
