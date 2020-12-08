@@ -89,8 +89,10 @@ namespace Plugins.CountlySDK.Services
                 requestParams.Add("location", Location);
             }
 
-            await _requestCountlyHelper.GetResponseAsync(requestParams);
-
+            if (requestParams.Count > 0)
+            {
+                await _requestCountlyHelper.GetResponseAsync(requestParams);
+            }
         }
 
 
