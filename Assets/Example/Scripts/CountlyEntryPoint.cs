@@ -24,6 +24,15 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
             NotificationMode = TestMode.AndroidTestToken
         };
 
+        string countryCode = "us";
+        string city = "Houston";
+        string latitude = "29.634933";
+        string longitude = "-95.220255";
+        string ipAddress = "10.2.33.12";
+
+        configuration.SetLocation(countryCode, city, latitude + "," + longitude, ipAddress);
+
+
         Countly.Instance.Init(configuration);
         countly = Countly.Instance;
     }
@@ -264,15 +273,13 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
         string longitude = "-95.220255";
         string ipAddress = null;
 
-        countly.OptionalParameters.SetLocation(countryCode, city, latitude + "," + longitude, ipAddress);
+        countly.Location.SetLocation(countryCode, city, latitude + "," + longitude, ipAddress);
 
     }
 
     public void DisableLocation()
     {
-        countly.OptionalParameters.DisableLocation();
-        
-        
+        countly.Location.DisableLocation();
     }
 
 

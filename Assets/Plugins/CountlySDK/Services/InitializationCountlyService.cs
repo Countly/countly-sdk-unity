@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Plugins.CountlySDK.Enums;
 using Plugins.CountlySDK.Helpers;
 using Plugins.CountlySDK.Models;
 
@@ -7,11 +8,17 @@ namespace Plugins.CountlySDK.Services
 {
     public class InitializationCountlyService
     {
-        private readonly SessionCountlyService _sessionCountlyService;
+        private readonly LocationService _locationService;
+        private readonly CountlyConfiguration _configModel;
+        private readonly ConsentCountlyService _consentService;
+        private readonly SessionCountlyService _sessionService;
 
-        internal InitializationCountlyService(SessionCountlyService sessionCountlyService)
+        internal InitializationCountlyService(CountlyConfiguration configModel, LocationService locationService, ConsentCountlyService consentService, SessionCountlyService sessionCountlyService)
         {
-            _sessionCountlyService = sessionCountlyService;
+            _configModel = configModel;
+            _consentService = consentService;
+            _locationService = locationService;
+            _sessionService = sessionCountlyService;
         }
 
         public string ServerUrl { get; private set; }
@@ -23,37 +30,34 @@ namespace Plugins.CountlySDK.Services
         /// <param name="serverUrl"></param>
         /// <param name="appKey"></param>
         /// <param name="deviceId"></param>
-        internal void Begin(string serverUrl, string appKey)
+        internal async Task OnInitializationComplete()
         {
-            AppKey = appKey;
-            ServerUrl = serverUrl;
-        }
+            AppKey = _configModel.AppKey;
+            ServerUrl = _configModel.ServerUrl;
 
-        /// <summary>
-        ///     Initializes the Countly SDK with default values
-        /// </summary>
-        /// <param name="salt"></param>
-        /// <param name="enablePost"></param>
-        /// <param name="enableConsoleErrorLogging"></param>
-        /// <param name="ignoreSessionCooldown"></param>
-        /// <returns></returns>
-        internal async Task SetDefaults(CountlyConfiguration configModel)
-        {
-            if (!configModel.EnableManualSessionHandling)
+            if (!_consentService.CheckConsent(Features.Sessions))
             {
-                //Start Session and enable push notification
-                await _sessionCountlyService.BeginSessionAsync();
+                /* If location is disabled in init
+                and no session consent is given. Send empty location as separate request.*/
+                if (_locationService.IsLocationDisabled)
+                {
+                    await _locationService.SendRequestWithEmptyLocation();
+                }
+                else
+                {
+                    /*
+                 * If there is no session consent, 
+                 * location values set in init should be sent as a separate location request.
+                 */
+                    await _locationService.SendIndependantLocationRequest();
+                }
             }
-        }
 
-
-        /// <summary>
-        ///     Gets the base url to make requests to the Countly server.
-        /// </summary>
-        /// <returns></returns>
-        internal string GetBaseUrl()
-        {
-            return string.Format(ServerUrl[ServerUrl.Length - 1] == '/' ? "{0}i?" : "{0}/i?", ServerUrl);
+            if (!_configModel.EnableManualSessionHandling)
+            {
+                //Start Session
+                await _sessionService.BeginSessionAsync();
+            }
         }
     }
 }

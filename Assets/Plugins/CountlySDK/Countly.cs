@@ -82,14 +82,16 @@ namespace Plugins.CountlySDK
         /// <returns>EventCountlyService</returns>
         public EventCountlyService Events { get; private set; }
 
-
         internal InitializationCountlyService Initialization { get; private set; }
 
-        /// <summary>
-        ///     Exposes functionality to set location parameters that will be used during init.
-        /// </summary>
-        /// <returns>OptionalParametersCountlyService</returns>
+        [Obsolete("OptionalParameters is deprecated, please use Location instead.")]
         public OptionalParametersCountlyService OptionalParameters { get; private set; }
+
+        /// <summary>
+        ///     Exposes functionality to set location parameters.
+        /// </summary>
+        /// <returns>LocationService</returns>
+        public Services.LocationService Location { get; private set; }
 
         /// <summary>
         ///     Exposes functionality to update the remote config values. It also provides a way to access the currently downloaded ones.
@@ -200,10 +202,8 @@ namespace Plugins.CountlySDK
             Init(requestRepo, eventViewRepo, eventNonViewRepo, configDao, eventNumberInSameSessionHelper);
 
             
-            Initialization.Begin(configuration.ServerUrl, configuration.AppKey);
             Device.InitDeviceId(configuration.DeviceId);
-
-            await Initialization.SetDefaults(Configuration);
+            await Initialization.OnInitializationComplete();
 
             IsSDKInitialized = true;
         }
@@ -214,18 +214,20 @@ namespace Plugins.CountlySDK
             var countlyUtils = new CountlyUtils(this);
             var requests = new RequestCountlyHelper(Configuration, countlyUtils, requestRepo);
 
+            Consents = new ConsentCountlyService();
             Events = new EventCountlyService(Configuration, requests, viewEventRepo, nonViewEventRepo, eventNumberInSameSessionHelper);
-            OptionalParameters = new OptionalParametersCountlyService();
+
+            Location = new Services.LocationService(Configuration, requests);
+            OptionalParameters = new OptionalParametersCountlyService(Location, Configuration);
             Notifications = new NotificationsCallbackService(Configuration);
             var notificationsService = new ProxyNotificationsService(transform, Configuration, InternalStartCoroutine, Events);
             _push = new PushCountlyService(Events, requests, notificationsService, Notifications);
-            Session = new SessionCountlyService(Configuration, Events, _push, requests, OptionalParameters, eventNumberInSameSessionHelper);
+            Session = new SessionCountlyService(Configuration, Events, _push, requests, Location, Consents, eventNumberInSameSessionHelper);
             
-            Consents = new ConsentCountlyService();
             CrashReports = new CrashReportsCountlyService(Configuration, requests);
 
             Device = new DeviceIdCountlyService(Session, requests, Events, countlyUtils);
-            Initialization = new InitializationCountlyService(Session);
+            Initialization = new InitializationCountlyService(Configuration, Location, Consents, Session);
 
             RemoteConfigs = new RemoteConfigCountlyService(Configuration, requests, countlyUtils, configDao);
 

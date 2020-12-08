@@ -25,6 +25,12 @@ namespace Plugins.CountlySDK.Models
         public int TotalBreadcrumbsAllowed = 100;
         public bool EnableAutomaticCrashReporting = true;
 
+        internal string City;
+        internal string Location;
+        internal string IPAddress;
+        internal string CountryCode;
+        internal bool IsLocationDisabled;
+
         /// <summary>
         ///     Parent must be undestroyable
         /// </summary>
@@ -57,6 +63,26 @@ namespace Plugins.CountlySDK.Models
         public override string ToString()
         {
             return $"{nameof(Salt)}: {Salt}, {nameof(EnablePost)}: {EnablePost}, {nameof(EnableConsoleLogging)}: {EnableConsoleLogging}, {nameof(IgnoreSessionCooldown)}: {IgnoreSessionCooldown}, {nameof(NotificationMode)}: {NotificationMode}, {nameof(EnableManualSessionHandling)}: {EnableManualSessionHandling}, {nameof(SessionDuration)}: {SessionDuration}, {nameof(EventQueueThreshold)}: {EventQueueThreshold}, {nameof(StoredRequestLimit)}: {StoredRequestLimit}, {nameof(TotalBreadcrumbsAllowed)}: {TotalBreadcrumbsAllowed}, {nameof(EnableAutomaticCrashReporting)}: {EnableAutomaticCrashReporting}";
+        }
+
+        /// <summary>
+        /// Disabled the location tracking on the Countly server
+        /// </summary>
+        public void DisableLocation()
+        {
+            IsLocationDisabled = true;
+        }
+
+        /// <summary>
+        ///     Set location parameters that will be used during init.
+        /// </summary>
+        /// <returns></returns>
+        public void SetLocation(string countryCode, string city, string gpsCoordinates, string ipAddress)
+        {
+            City = city;
+            IPAddress = ipAddress;
+            CountryCode = countryCode;
+            Location = gpsCoordinates;
         }
     }
 }

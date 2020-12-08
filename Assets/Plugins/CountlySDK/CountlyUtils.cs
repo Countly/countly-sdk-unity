@@ -50,13 +50,6 @@ namespace Plugins.CountlySDK
             foreach (var item in TimeMetricModel.GetTimeMetricModel())
                 baseParams.Add(item.Key, item.Value);
 
-            if (!string.IsNullOrEmpty(_countly.OptionalParameters.CountryCode))
-                baseParams.Add("country_code", _countly.OptionalParameters.CountryCode);
-            if (!string.IsNullOrEmpty(_countly.OptionalParameters.City))
-                baseParams.Add("city", _countly.OptionalParameters.City);
-            if (_countly.OptionalParameters.Location != null)
-                baseParams.Add("location", _countly.OptionalParameters.Location);
-
             return baseParams;
         }
 
