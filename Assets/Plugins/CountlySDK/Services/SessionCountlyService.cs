@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using Plugins.CountlySDK.Enums;
 using Plugins.CountlySDK.Helpers;
 using Plugins.CountlySDK.Models;
+using UnityEngine;
 
 namespace Plugins.CountlySDK.Services
 {
@@ -14,8 +15,6 @@ namespace Plugins.CountlySDK.Services
 		private Timer _sessionTimer;
 		private DateTime _lastSessionRequestTime;
 		public bool IsSessionInitiated { get; private set; }
-
-		private DateTime _lastInputTime;
 
 		private readonly LocationService _locationService;
 		private readonly CountlyConfiguration _configModel;
@@ -65,30 +64,32 @@ namespace Plugins.CountlySDK.Services
 			await _eventService.AddEventsToRequestQueue();
 
 			await _requestCountlyHelper.ProcessQueue();
-            var sessionOver = (DateTime.Now - _lastInputTime).TotalSeconds >= _configModel.SessionDuration;
 
-            if (sessionOver)
-            {
-                await ExecuteEndSessionAsync();
-            }
-            else if (!_configModel.EnableManualSessionHandling)
+            if (!_configModel.EnableManualSessionHandling)
             {
                 await ExtendSessionAsync();
             }
         }
 
-		public async void UpdateInputTime()
-		{
-			_lastInputTime = DateTime.Now;
 
-			if (!IsSessionInitiated && _sessionTimer == null) //session was over
-			{
-				await ExecuteBeginSessionAsync();
-			}
-		}
 
 		public async Task ExecuteBeginSessionAsync()
 		{
+			if (_configModel.EnableTestMode)
+			{
+				return;
+			}
+
+			if (IsSessionInitiated)
+			{
+				return;
+			}
+
+			if (_configModel.EnableConsoleLogging)
+			{
+				Debug.Log("[Countly] SessionCountlyService: ExecuteBeginSessionAsync");
+			}
+
 			FirstLaunchAppHelper.Process();
 			_lastSessionRequestTime = DateTime.Now;
 			//Session initiated
@@ -185,11 +186,6 @@ namespace Plugins.CountlySDK.Services
 		{
 			await ExecuteBeginSessionAsync();
 
-			if (_configModel.EnableTestMode)
-			{
-				return;
-			}
-
 			//Enables push notification on start
 			if (_configModel.NotificationMode != TestMode.None)
 			{
@@ -210,6 +206,12 @@ namespace Plugins.CountlySDK.Services
 		/// </summary>
 		public async Task ExtendSessionAsync()
 		{
+
+			if (_configModel.EnableConsoleLogging)
+			{
+				Debug.Log("[Countly] SessionCountlyService: ExtendSessionAsync");
+			}
+
 			_lastSessionRequestTime = DateTime.Now;
 			//if (ConsentModel.CheckConsent(FeaturesEnum.Sessions.ToString()))
 			//{

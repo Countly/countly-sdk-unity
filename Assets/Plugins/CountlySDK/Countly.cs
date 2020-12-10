@@ -136,7 +136,6 @@ namespace Plugins.CountlySDK
         private bool _logSubscribed;
         private const long DbNumber = 3;
         private PushCountlyService _push;
-        private IInputObserver _inputObserver;
 
         /// <summary>
         ///     Initialize SDK at the start of your app
@@ -234,14 +233,13 @@ namespace Plugins.CountlySDK
             StarRating = new StarRatingCountlyService(Events);
             UserDetails = new UserDetailsCountlyService(requests, countlyUtils);
             Views = new ViewCountlyService(Configuration, Events);
-            _inputObserver = InputObserverResolver.Resolve();
         }
 
 
         /// <summary>
         ///     End session on application close/quit
         /// </summary>
-        private async void OnApplicationQuit()
+        private void OnApplicationQuit()
         {
             if (Configuration.EnableConsoleLogging)
             {
@@ -251,7 +249,6 @@ namespace Plugins.CountlySDK
             if (Session != null && Session.IsSessionInitiated && !Configuration.EnableManualSessionHandling)
             {
                 ReportAll();
-                await Session.EndSessionAsync();
             }
             _db.Close();
         }
@@ -273,7 +270,7 @@ namespace Plugins.CountlySDK
             }
         }
 
-        private void OnApplicationPause(bool pauseStatus)
+        private async void OnApplicationPause(bool pauseStatus)
         {
             if (Configuration.EnableConsoleLogging)
             {
@@ -283,20 +280,18 @@ namespace Plugins.CountlySDK
             if (pauseStatus)
             {
                 HandleAppPauseOrFocus();
+                await Session?.EndSessionAsync();
             }
             else
             {
                 SubscribeAppLog();
+                Session?.ExecuteBeginSessionAsync();
             }
         }
 
         private void HandleAppPauseOrFocus()
         {
             UnsubscribeAppLog();
-            if (Session != null && Session.IsSessionInitiated)
-            {
-                ReportAll();
-            }
         }
 
         // Whenever app is enabled
@@ -336,21 +331,6 @@ namespace Plugins.CountlySDK
 
             Application.logMessageReceived -= LogCallback;
             _logSubscribed = false;
-        }
-
-        private void Update()
-        {
-            CheckInputEvent();
-        }
-
-        private void CheckInputEvent()
-        {
-            if (!_inputObserver.HasInput)
-            {
-                return;
-            }
-
-            Session?.UpdateInputTime();
         }
 
         private void InternalStartCoroutine(IEnumerator enumerator)
