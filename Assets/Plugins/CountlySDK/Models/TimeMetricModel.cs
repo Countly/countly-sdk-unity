@@ -24,10 +24,7 @@ namespace Plugins.CountlySDK.Models
 
         internal static Dictionary<string, object> GetTimeMetricModel()
         {
-            var currentDateTime = DateTime.Now;
-            var model = TimeMetricModel.GetTimeZoneInfoForRequest(currentDateTime);
-
-            model.Timestamp = model.GetUniqueMilliSecTimeStamp();
+            var model = TimeMetricModel.GetTimeZoneInfoForRequest();
             return new Dictionary<string, object>
             {
                 {"timestamp", model.Timestamp },
@@ -58,7 +55,7 @@ namespace Plugins.CountlySDK.Models
             return _lastMilliSecTimeStamp.ToUnixTimeMilliseconds();
         }
 
-        internal static TimeMetricModel GetTimeZoneInfoForRequest(DateTime requestedDatetime)
+        internal static TimeMetricModel GetTimeZoneInfoForRequest()
         {
             var currentDateTime = DateTime.Now;
             var model =
@@ -69,7 +66,7 @@ namespace Plugins.CountlySDK.Models
                     Timezone = TimeZone.CurrentTimeZone.GetUtcOffset(new DateTime()).TotalMinutes.ToString(CultureInfo.InvariantCulture)
                 };
             
-            model.Timestamp = model.GetUniqueMilliSecTimeStamp(requestedDatetime);
+            model.Timestamp = model.GetUniqueMilliSecTimeStamp(currentDateTime);
             return model;
         }
     }
