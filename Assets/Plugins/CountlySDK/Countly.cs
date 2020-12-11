@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Threading.Tasks;
 using CountlySDK.Input;
 using iBoxDB.LocalServer;
 using Notifications;
@@ -124,13 +125,7 @@ namespace Plugins.CountlySDK
         /// </summary>
         /// <returns>NotificationsCallbackService</returns>
         public NotificationsCallbackService Notifications { get; set; }
-        
-
-        public async void ReportAll()
-        {
-            await Events.AddEventsToRequestQueue();
-            await UserDetails.SaveAsync();
-        }
+       
 
         private DB _db;
         private bool _logSubscribed;
@@ -241,19 +236,15 @@ namespace Plugins.CountlySDK
         /// <summary>
         ///     End session on application close/quit
         /// </summary>
-        private async void OnApplicationQuit()
+        private void OnApplicationQuit()
         {
             if (Configuration.EnableConsoleLogging)
             {
                 Debug.Log("[Countly] OnApplicationQuit");
             }
 
-            if (Session != null && Session.IsSessionInitiated && !Configuration.EnableManualSessionHandling)
-            {
-                ReportAll();
-                await Session.EndSessionAsync();
-            }
             _db.Close();
+
         }
 
         private void OnApplicationFocus(bool hasFocus)
@@ -293,10 +284,6 @@ namespace Plugins.CountlySDK
         private void HandleAppPauseOrFocus()
         {
             UnsubscribeAppLog();
-            if (Session != null && Session.IsSessionInitiated)
-            {
-                ReportAll();
-            }
         }
 
         // Whenever app is enabled
