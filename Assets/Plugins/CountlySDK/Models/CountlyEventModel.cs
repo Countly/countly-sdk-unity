@@ -7,7 +7,7 @@ using Plugins.CountlySDK.Persistance;
 namespace Plugins.CountlySDK.Models
 {
     [Serializable]
-    internal class CountlyEventModel : IModel
+    public class CountlyEventModel : IModel
     {
         /// <summary>
         ///     Initializes a new instance of event model.
