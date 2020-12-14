@@ -46,7 +46,7 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
         countly.Notifications.RemoveListener(this);
     }
 
-    public void EventsWithMultiThreads() {
+    public void TestWithMultipleThreads() {
 
         int participants = 13;
         Barrier barrier = new Barrier(participantCount: participants, (bar) =>
@@ -57,7 +57,6 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
         Thread[] threads = new Thread[participants];
         threads[0] = new Thread(delegate () {
             {
-                Debug.Log("Thread[00] started, waiting at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
                 barrier.SignalAndWait();
                 Debug.Log("Thread[00] executing at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
                 EventWithSum();
@@ -68,7 +67,6 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
 
         threads[1] = new Thread(delegate () {
             {
-                Debug.Log("Thread[01] started, waiting at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
                 barrier.SignalAndWait();
                 Debug.Log("Thread[01] executing at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
                 EventWithSegmentation();
@@ -78,7 +76,6 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
 
         threads[2] = new Thread(delegate () {
             {
-                Debug.Log("Thread[02] started, waiting at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
                 barrier.SignalAndWait();
                 Debug.Log("Thread[02] executing at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
                 EventWithSumAndSegmentation();
@@ -88,7 +85,6 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
 
         threads[3] = new Thread(delegate () {
             {
-                Debug.Log("Thread[03] started, waiting at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
                 barrier.SignalAndWait();
                 Debug.Log("Thread[03] executing at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
                 ReportViewMainScene();
@@ -98,7 +94,6 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
 
         threads[4] = new Thread(delegate () {
             {
-                Debug.Log("Thread[04] started, waiting at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
                 barrier.SignalAndWait();
                 Debug.Log("Thread[04] executing at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
                 SendCrashReport();
@@ -107,7 +102,6 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
         });
         threads[5] = new Thread(delegate () {
             {
-                Debug.Log("Thread[05] started, waiting at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
                 barrier.SignalAndWait();
                 Debug.Log("Thread[05] executing at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
                 RecordMultiple();
@@ -117,7 +111,6 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
 
         threads[6] = new Thread(delegate () {
             {
-                Debug.Log("Thread[06] started, waiting at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
                 barrier.SignalAndWait();
                 Debug.Log("Thread[06] executing at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
                 Pull();
@@ -127,7 +120,6 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
 
         threads[7] = new Thread(delegate () {
             {
-                Debug.Log("Thread[07] started, waiting at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
                 barrier.SignalAndWait();
                 Debug.Log("Thread[07] executing at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
                 Push();
@@ -137,7 +129,6 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
 
         threads[8] = new Thread(delegate () {
             {
-                Debug.Log("Thread[08] started, waiting at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
                 barrier.SignalAndWait();
                 Debug.Log("Thread[08] executing at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
                 PushUnique();
@@ -147,7 +138,6 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
 
         threads[9] = new Thread(delegate () {
             {
-                Debug.Log("Thread[09] started, waiting at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
                 barrier.SignalAndWait();
                 Debug.Log("Thread[09] executing at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
                 Min();
@@ -157,7 +147,6 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
 
         threads[10] = new Thread(delegate () {
             {
-                Debug.Log("Thread[10] started, waiting at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
                 barrier.SignalAndWait();
                 Debug.Log("Thread[10] executing at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
                 Multiply();
@@ -166,7 +155,6 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
         });
         threads[11] = new Thread(delegate () {
             {
-                Debug.Log("Thread[11] started, waiting at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
                 barrier.SignalAndWait();
                 Debug.Log("Thread[11] executing at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
                 SetUserDetail();
@@ -175,7 +163,6 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
         });
         threads[12] = new Thread(delegate () {
             {
-                Debug.Log("Thread[12] started, waiting at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
                 barrier.SignalAndWait();
                 Debug.Log("Thread[12] executing at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
                 SetCustomeUserDetail();
