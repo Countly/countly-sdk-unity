@@ -63,7 +63,7 @@ namespace Plugins.CountlySDK.Models
                 {
                     Hour = currentDateTime.TimeOfDay.Hours,
                     DayOfWeek = (int)currentDateTime.DayOfWeek,
-                    Timezone = TimeZone.CurrentTimeZone.GetUtcOffset(new DateTime()).TotalMinutes.ToString(CultureInfo.InvariantCulture)
+                    Timezone = TimeZone.CurrentTimeZone.GetUtcOffset(currentDateTime).TotalMinutes.ToString(CultureInfo.InvariantCulture)
                 };
             
             model.Timestamp = model.GetUniqueMilliSecTimeStamp(currentDateTime);

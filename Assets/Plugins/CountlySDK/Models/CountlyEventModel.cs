@@ -31,14 +31,13 @@ namespace Plugins.CountlySDK.Models
             Sum = sum;
 
             //Records the time the time the event was recorded
-//            TimeRecorded = DateTime.Now;
+            //            TimeRecorded = DateTime.Now;
 
-            var now = DateTime.Now;
-            Hour = now.TimeOfDay.Hours;
-            DayOfWeek = (int)now.DayOfWeek;
-            Timezone = TimeZone.CurrentTimeZone.GetUtcOffset(new DateTime()).TotalMinutes;
-            Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            var timeModel = TimeMetricModel.GetTimeZoneInfoForRequest();
 
+            Hour = timeModel.Hour;
+            DayOfWeek = timeModel.DayOfWeek;
+            Timestamp = timeModel.Timestamp;
         }
 
         public CountlyEventModel()
@@ -64,7 +63,8 @@ namespace Plugins.CountlySDK.Models
 
         [JsonProperty("dow")] public int DayOfWeek { get; set; }
 
-        [JsonProperty("tz")] public double Timezone { get; set; }
+        [JsonIgnore]
+        public double Timezone { get; set; }
 
 //        [JsonIgnore] public DateTime TimeRecorded { get; set; }
 
