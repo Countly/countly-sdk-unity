@@ -7,7 +7,7 @@ using Plugins.CountlySDK.Persistance;
 namespace Plugins.CountlySDK.Models
 {
     [Serializable]
-    public class CountlyEventModel : IModel
+    internal class CountlyEventModel : IModel
     {
         /// <summary>
         ///     Initializes a new instance of event model.
@@ -29,9 +29,6 @@ namespace Plugins.CountlySDK.Models
             }
             Duration = duration;
             Sum = sum;
-
-            //Records the time the time the event was recorded
-            //            TimeRecorded = DateTime.Now;
 
             var timeModel = TimeMetricModel.GetTimeZoneInfoForRequest();
 
@@ -64,7 +61,8 @@ namespace Plugins.CountlySDK.Models
         [JsonProperty("dow")] public int DayOfWeek { get; set; }
 
         [JsonIgnore]
-        public double Timezone { get; set; }
+        [Obsolete("Timezone is deprecated, it will get removed in the future.")]
+        private double Timezone { get; set; }
 
 //        [JsonIgnore] public DateTime TimeRecorded { get; set; }
 
