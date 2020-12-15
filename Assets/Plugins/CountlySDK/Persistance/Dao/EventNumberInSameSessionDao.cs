@@ -10,10 +10,12 @@ namespace Plugins.CountlySDK.Persistance.Dao
 {
     public class EventNumberInSameSessionDao : Dao<EventNumberInSameSessionEntity>
     {
+        private readonly CountlyConfiguration configuration;
         private readonly StringBuilder _stringBuilder = new StringBuilder();
         
         public EventNumberInSameSessionDao(AutoBox auto, string table, CountlyConfiguration config) : base(auto, table, config)
         {
+            configuration = config;
         }
 
         public EventNumberInSameSessionEntity GetByEventName(string eventKey)
@@ -41,7 +43,11 @@ namespace Plugins.CountlySDK.Persistance.Dao
             }
             catch (Exception ex)
             {
-                Debug.LogError("[Countly] EventNumberInSameSessionEntity GetByEventName: Couldn't complete db operation, [" + ex.Message + "]");
+                if (configuration.EnableConsoleLogging)
+                {
+                    Debug.LogError("[Countly] EventNumberInSameSessionEntity GetByEventName: Couldn't complete db operation, [" + ex.Message + "]");
+
+                }
                 return null;
             }
         }
