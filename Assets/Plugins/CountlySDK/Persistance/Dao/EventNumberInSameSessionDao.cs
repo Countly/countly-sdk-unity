@@ -45,7 +45,7 @@ namespace Plugins.CountlySDK.Persistance.Dao
             {
                 if (configuration.EnableConsoleLogging)
                 {
-                    Debug.LogError("[Countly] EventNumberInSameSessionEntity GetByEventName: Couldn't complete db operation, [" + ex.Message + "]");
+                    Debug.LogError("[Countly] EventNumberInSameSessionDao GetByEventName: Couldn't complete db operation, [" + ex.Message + "]");
 
                 }
                 return null;
