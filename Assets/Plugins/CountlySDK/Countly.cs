@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Threading.Tasks;
 using CountlySDK.Input;
 using iBoxDB.LocalServer;
 using Notifications;
@@ -124,13 +125,7 @@ namespace Plugins.CountlySDK
         /// </summary>
         /// <returns>NotificationsCallbackService</returns>
         public NotificationsCallbackService Notifications { get; set; }
-        
-
-        public async void ReportAll()
-        {
-            await Events.AddEventsToRequestQueue();
-            await UserDetails.SaveAsync();
-        }
+       
 
         private DB _db;
         private bool _logSubscribed;
@@ -181,17 +176,17 @@ namespace Plugins.CountlySDK
             _db = CountlyBoxDbHelper.BuildDatabase(DbNumber);
 
             var auto = _db.Open();
-            var configDao = new Dao<ConfigEntity>(auto, EntityType.Configs.ToString());
-            var requestDao = new Dao<RequestEntity>(auto, EntityType.Requests.ToString());
-            var viewEventDao = new Dao<EventEntity>(auto, EntityType.ViewEvents.ToString());
-            var viewSegmentDao = new SegmentDao(auto, EntityType.ViewEventSegments.ToString());
-            var nonViewEventDao = new Dao<EventEntity>(auto, EntityType.NonViewEvents.ToString());  
-            var nonViewSegmentDao = new SegmentDao(auto, EntityType.NonViewEventSegments.ToString());
+            var configDao = new Dao<ConfigEntity>(auto, EntityType.Configs.ToString(), Configuration);
+            var requestDao = new Dao<RequestEntity>(auto, EntityType.Requests.ToString(), Configuration);
+            var viewEventDao = new Dao<EventEntity>(auto, EntityType.ViewEvents.ToString(), Configuration);
+            var viewSegmentDao = new SegmentDao(auto, EntityType.ViewEventSegments.ToString(), Configuration);
+            var nonViewEventDao = new Dao<EventEntity>(auto, EntityType.NonViewEvents.ToString(), Configuration);  
+            var nonViewSegmentDao = new SegmentDao(auto, EntityType.NonViewEventSegments.ToString(), Configuration);
 
             var requestRepo = new RequestRepository(requestDao, Configuration);
             var eventViewRepo = new ViewEventRepository(viewEventDao, viewSegmentDao, Configuration);
             var eventNonViewRepo = new NonViewEventRepository(nonViewEventDao, nonViewSegmentDao, Configuration);
-            var eventNrInSameSessionDao = new EventNumberInSameSessionDao(auto, EntityType.EventNumberInSameSessions.ToString());
+            var eventNrInSameSessionDao = new EventNumberInSameSessionDao(auto, EntityType.EventNumberInSameSessions.ToString(), Configuration);
 
             requestRepo.Initialize();
             eventViewRepo.Initialize();
@@ -241,19 +236,15 @@ namespace Plugins.CountlySDK
         /// <summary>
         ///     End session on application close/quit
         /// </summary>
-        private async void OnApplicationQuit()
+        private void OnApplicationQuit()
         {
             if (Configuration.EnableConsoleLogging)
             {
                 Debug.Log("[Countly] OnApplicationQuit");
             }
 
-            if (Session != null && Session.IsSessionInitiated && !Configuration.EnableManualSessionHandling)
-            {
-                ReportAll();
-                await Session.EndSessionAsync();
-            }
             _db.Close();
+
         }
 
         private void OnApplicationFocus(bool hasFocus)
@@ -293,10 +284,6 @@ namespace Plugins.CountlySDK
         private void HandleAppPauseOrFocus()
         {
             UnsubscribeAppLog();
-            if (Session != null && Session.IsSessionInitiated)
-            {
-                ReportAll();
-            }
         }
 
         // Whenever app is enabled
