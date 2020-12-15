@@ -1,8 +1,6 @@
-using System;
 using System.Collections.Generic;
 using iBoxDB.LocalServer;
 using Plugins.CountlySDK.Persistance.Entities;
-using UnityEngine;
 
 namespace Plugins.iBoxDB
 {
@@ -19,89 +17,36 @@ namespace Plugins.iBoxDB
 
         public bool Save(TEntity entity)
         {
-            try
-            {
-                return Auto.Insert(Table, entity);
-            }
-            catch (Exception ex)
-            {
-                Debug.LogError(ex.Message);
-            }
-
-            return false;
+            return Auto.Insert(Table, entity);
         }
 
         public bool Update(TEntity entity)
         {
-            try
-            {
-                return Auto.Update(Table, entity);
-            }
-            catch (Exception ex)
-            {
-                Debug.LogError(ex.Message);
-            }
-
-            return false;
+            return Auto.Update(Table, entity);
         }
 
         public List<TEntity> LoadAll()
         {
-            List<TEntity> result = new List<TEntity>();
-            try
-            {
-                result = Auto.Select<TEntity>("from " + Table);
-            }
-            catch (Exception ex)
-            {
-                Debug.LogError(ex.Message);
-            }
-
-            return result;
+            return Auto.Select<TEntity>("from " + Table);
         }
 
         public void Remove(params object[] key)
         {
-            try
-            {
-                Auto.Delete(Table, key);
-            }
-            catch (Exception ex)
-            {
-                Debug.LogError(ex.Message);
-            }
+            Auto.Delete(Table, key);
         }
 
         public void RemoveAll()
         {
-            try
+            var list = Auto.Select<TEntity>("from " + Table);
+            foreach (var entity in list)
             {
-                var list = Auto.Select<TEntity>("from " + Table);
-                foreach (var entity in list)
-                {
-                    Auto.Delete(Table, entity.GetId());
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.LogError(ex.Message);
+                Auto.Delete(Table, entity.GetId());    
             }
         }
 
         public long GenerateNewId()
         {
-            long result;
-            try
-            {
-                result =  Auto.NewId();
-            }
-            catch (Exception ex)
-            {
-                result = 0;
-                Debug.LogError(ex.Message);
-            }
-
-            return result;
+            return Auto.NewId();
         }
     }
 }
