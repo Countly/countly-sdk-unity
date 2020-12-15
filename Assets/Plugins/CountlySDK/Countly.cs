@@ -176,17 +176,17 @@ namespace Plugins.CountlySDK
             _db = CountlyBoxDbHelper.BuildDatabase(DbNumber);
 
             var auto = _db.Open();
-            var configDao = new Dao<ConfigEntity>(auto, EntityType.Configs.ToString());
-            var requestDao = new Dao<RequestEntity>(auto, EntityType.Requests.ToString());
-            var viewEventDao = new Dao<EventEntity>(auto, EntityType.ViewEvents.ToString());
-            var viewSegmentDao = new SegmentDao(auto, EntityType.ViewEventSegments.ToString());
-            var nonViewEventDao = new Dao<EventEntity>(auto, EntityType.NonViewEvents.ToString());  
-            var nonViewSegmentDao = new SegmentDao(auto, EntityType.NonViewEventSegments.ToString());
+            var configDao = new Dao<ConfigEntity>(auto, EntityType.Configs.ToString(), Configuration);
+            var requestDao = new Dao<RequestEntity>(auto, EntityType.Requests.ToString(), Configuration);
+            var viewEventDao = new Dao<EventEntity>(auto, EntityType.ViewEvents.ToString(), Configuration);
+            var viewSegmentDao = new SegmentDao(auto, EntityType.ViewEventSegments.ToString(), Configuration);
+            var nonViewEventDao = new Dao<EventEntity>(auto, EntityType.NonViewEvents.ToString(), Configuration);  
+            var nonViewSegmentDao = new SegmentDao(auto, EntityType.NonViewEventSegments.ToString(), Configuration);
 
             var requestRepo = new RequestRepository(requestDao, Configuration);
             var eventViewRepo = new ViewEventRepository(viewEventDao, viewSegmentDao, Configuration);
             var eventNonViewRepo = new NonViewEventRepository(nonViewEventDao, nonViewSegmentDao, Configuration);
-            var eventNrInSameSessionDao = new EventNumberInSameSessionDao(auto, EntityType.EventNumberInSameSessions.ToString());
+            var eventNrInSameSessionDao = new EventNumberInSameSessionDao(auto, EntityType.EventNumberInSameSessions.ToString(), Configuration);
 
             requestRepo.Initialize();
             eventViewRepo.Initialize();

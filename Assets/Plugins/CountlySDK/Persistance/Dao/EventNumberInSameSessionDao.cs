@@ -1,6 +1,7 @@
 using System;
 using System.Text;
 using iBoxDB.LocalServer;
+using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK.Persistance.Entities;
 using Plugins.iBoxDB;
 
@@ -10,7 +11,7 @@ namespace Plugins.CountlySDK.Persistance.Dao
     {
         private readonly StringBuilder _stringBuilder = new StringBuilder();
         
-        public EventNumberInSameSessionDao(AutoBox auto, string table) : base(auto, table)
+        public EventNumberInSameSessionDao(AutoBox auto, string table, CountlyConfiguration config) : base(auto, table, config)
         {
         }
 
