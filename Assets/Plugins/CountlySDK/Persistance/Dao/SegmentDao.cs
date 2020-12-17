@@ -23,11 +23,11 @@ namespace Plugins.CountlySDK.Persistance.Dao
         {
             _stringBuilder.Clear();
 
-            var ql = _stringBuilder.Append("from ").Append(Table).Append(" where EventId==?").ToString();
+            string ql = _stringBuilder.Append("from ").Append(Table).Append(" where EventId==?").ToString();
 
             try
             {
-                var entities = Auto.Select<SegmentEntity>(ql, eventId);
+                System.Collections.Generic.List<SegmentEntity> entities = Auto.Select<SegmentEntity>(ql, eventId);
                 if (entities.Count > 1)
                 {
                     throw new ArgumentException("Only one or zero segment can be assigned to entity with id " + eventId + ". "
@@ -35,7 +35,9 @@ namespace Plugins.CountlySDK.Persistance.Dao
                 }
 
                 if (entities.Count == 0)
+                {
                     return null;
+                }
 
                 return entities[0];
             }

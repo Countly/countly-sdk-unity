@@ -24,7 +24,7 @@ namespace Plugins.CountlySDK.Models
 
         internal static Dictionary<string, object> GetTimeMetricModel()
         {
-            var model = TimeMetricModel.GetTimeZoneInfoForRequest();
+            TimeMetricModel model = TimeMetricModel.GetTimeZoneInfoForRequest();
             return new Dictionary<string, object>
             {
                 {"timestamp", model.Timestamp },
@@ -37,7 +37,7 @@ namespace Plugins.CountlySDK.Models
         private long GetUniqueMilliSecTimeStamp(DateTime? requestedDatetime = null)
         {
             //get current timestamp in miliseconds
-            var currentMilliSecTimeStamp = DateTimeOffset.UtcNow;
+            DateTimeOffset currentMilliSecTimeStamp = DateTimeOffset.UtcNow;
 
             if (requestedDatetime.HasValue)
             {
@@ -57,8 +57,8 @@ namespace Plugins.CountlySDK.Models
 
         internal static TimeMetricModel GetTimeZoneInfoForRequest()
         {
-            var currentDateTime = DateTime.Now;
-            var model =
+            DateTime currentDateTime = DateTime.Now;
+            TimeMetricModel model =
                 new TimeMetricModel
                 {
                     Hour = currentDateTime.TimeOfDay.Hours,

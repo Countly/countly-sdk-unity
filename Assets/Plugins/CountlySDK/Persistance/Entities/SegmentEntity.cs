@@ -23,9 +23,21 @@ namespace Plugins.CountlySDK.Persistance.Entities
 
         public override bool Equals(object obj)
         {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != this.GetType()) return false;
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
+            if (obj.GetType() != this.GetType())
+            {
+                return false;
+            }
+
             return Equals((SegmentEntity) obj);
         }
 
@@ -33,7 +45,7 @@ namespace Plugins.CountlySDK.Persistance.Entities
         {
             unchecked
             {
-                var hashCode = Id.GetHashCode();
+                int hashCode = Id.GetHashCode();
                 hashCode = (hashCode * 397) ^ (Json != null ? Json.GetHashCode() : 0);
                 hashCode = (hashCode * 397) ^ EventId.GetHashCode();
                 return hashCode;

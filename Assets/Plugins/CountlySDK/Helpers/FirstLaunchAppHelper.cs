@@ -28,7 +28,10 @@ namespace Plugins.CountlySDK.Helpers
             get
             {
                 if (!_firstLaunchApp.HasValue)
+                {
                     throw new ArgumentException("FirstLaunchAppHelper.Process should be called when session begins");
+                }
+
                 return _firstLaunchApp.Value;
             }
         }

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Plugins.CountlySDK.Helpers;
 using Plugins.CountlySDK.Models;
 
 namespace Plugins.CountlySDK.Services
@@ -31,7 +30,7 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
 
-            var segment =
+            StarRatingSegment segment =
                 new StarRatingSegment
                 {
                     Platform = platform,

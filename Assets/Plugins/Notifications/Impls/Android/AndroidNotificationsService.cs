@@ -10,7 +10,7 @@ namespace Notifications.Impls.Android
 {
 	public class AndroidNotificationsService : INotificationsService
 	{
-        private Transform _countlyGameObject;
+        private readonly Transform _countlyGameObject;
         private const string BridgeName = "[Android] Bridge";
         private const string StorePackageName = "ly.count.unity.push_fcm.MessageStore";
         private const string CountlyPushPluginPackageName = "ly.count.unity.push_fcm.CountlyPushPlugin";
@@ -26,12 +26,12 @@ namespace Notifications.Impls.Android
             _countlyGameObject = countlyGameObject;
             _eventCountlyService = eventCountlyService;
 
-            var gameObject = new GameObject(BridgeName);
+            GameObject gameObject = new GameObject(BridgeName);
             gameObject.transform.parent = _countlyGameObject;
 			_bridge = gameObject.AddComponent<AndroidBridge>();
             _bridge.Config = _config;
 
-            var countlyPushPlugin = new AndroidJavaClass(CountlyPushPluginPackageName);
+            AndroidJavaClass countlyPushPlugin = new AndroidJavaClass(CountlyPushPluginPackageName);
             countlyPushPlugin.CallStatic("setEnableLog", config.EnableConsoleLogging);
 
         }
@@ -40,7 +40,7 @@ namespace Notifications.Impls.Android
 		{
 			_bridge.ListenTokenResult(result);
 			
-			using (var jc = new AndroidJavaObject(NotficationServicePackageName))
+			using (AndroidJavaObject jc = new AndroidJavaObject(NotficationServicePackageName))
             {
                 jc.Call("getToken");
             }
@@ -89,7 +89,7 @@ namespace Notifications.Impls.Android
                     string mesageId = item.GetValue("messageId").ToString();
                     string identifier = item.GetValue("action_index").ToString();
 
-                    var segment =
+                    PushCountlyService.PushActionSegment segment =
                     new Plugins.CountlySDK.Services.PushCountlyService.PushActionSegment
                     {
                         MessageID = mesageId,

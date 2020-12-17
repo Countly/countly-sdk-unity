@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using Newtonsoft.Json;
 using Plugins.CountlySDK.Persistance;
 
@@ -30,7 +29,7 @@ namespace Plugins.CountlySDK.Models
             Duration = duration;
             Sum = sum;
 
-            var timeModel = TimeMetricModel.GetTimeZoneInfoForRequest();
+            TimeMetricModel timeModel = TimeMetricModel.GetTimeZoneInfoForRequest();
 
             Hour = timeModel.Hour;
             DayOfWeek = timeModel.DayOfWeek;
@@ -85,9 +84,21 @@ namespace Plugins.CountlySDK.Models
 
         public override bool Equals(object obj)
         {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != this.GetType()) return false;
+            if (obj is null)
+            {
+                return false;
+            }
+                
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
+            if (obj.GetType() != GetType())
+            {
+                return false;
+            }
+
             return Equals((CountlyEventModel) obj);
         }
 
@@ -95,7 +106,7 @@ namespace Plugins.CountlySDK.Models
         {
             unchecked
             {
-                var hashCode = Id.GetHashCode();
+                int hashCode = Id.GetHashCode();
                 hashCode = (hashCode * 397) ^ (Key != null ? Key.GetHashCode() : 0);
                 hashCode = (hashCode * 397) ^ Count.GetHashCode();
                 hashCode = (hashCode * 397) ^ Sum.GetHashCode();

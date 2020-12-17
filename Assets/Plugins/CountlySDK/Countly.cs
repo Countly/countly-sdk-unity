@@ -1,6 +1,5 @@
 using System;
 using System.Collections;
-using System.Threading.Tasks;
 using CountlySDK.Input;
 using iBoxDB.LocalServer;
 using Notifications;
@@ -43,7 +42,7 @@ namespace Plugins.CountlySDK
                 if (_instance == null)
                 {
 
-                    var gameObject = new GameObject("_countly");
+                    GameObject gameObject = new GameObject("_countly");
                     _instance = gameObject.AddComponent<Countly>();
                 }
 
@@ -162,9 +161,14 @@ namespace Plugins.CountlySDK
             }
 
             if (string.IsNullOrEmpty(configuration.ServerUrl))
+            {
                 throw new ArgumentNullException(configuration.ServerUrl, "Server URL is required.");
+            }
+
             if (string.IsNullOrEmpty(configuration.AppKey))
+            {
                 throw new ArgumentNullException(configuration.AppKey, "App Key is required.");
+            }
 
             if (configuration.ServerUrl[configuration.ServerUrl.Length - 1] == '/')
             {
@@ -175,24 +179,24 @@ namespace Plugins.CountlySDK
 
             _db = CountlyBoxDbHelper.BuildDatabase(DbNumber);
 
-            var auto = _db.Open();
-            var configDao = new Dao<ConfigEntity>(auto, EntityType.Configs.ToString(), Configuration);
-            var requestDao = new Dao<RequestEntity>(auto, EntityType.Requests.ToString(), Configuration);
-            var viewEventDao = new Dao<EventEntity>(auto, EntityType.ViewEvents.ToString(), Configuration);
-            var viewSegmentDao = new SegmentDao(auto, EntityType.ViewEventSegments.ToString(), Configuration);
-            var nonViewEventDao = new Dao<EventEntity>(auto, EntityType.NonViewEvents.ToString(), Configuration);  
-            var nonViewSegmentDao = new SegmentDao(auto, EntityType.NonViewEventSegments.ToString(), Configuration);
+            DB.AutoBox auto = _db.Open();
+            Dao<ConfigEntity> configDao = new Dao<ConfigEntity>(auto, EntityType.Configs.ToString(), Configuration);
+            Dao<RequestEntity> requestDao = new Dao<RequestEntity>(auto, EntityType.Requests.ToString(), Configuration);
+            Dao<EventEntity> viewEventDao = new Dao<EventEntity>(auto, EntityType.ViewEvents.ToString(), Configuration);
+            SegmentDao viewSegmentDao = new SegmentDao(auto, EntityType.ViewEventSegments.ToString(), Configuration);
+            Dao<EventEntity> nonViewEventDao = new Dao<EventEntity>(auto, EntityType.NonViewEvents.ToString(), Configuration);
+            SegmentDao nonViewSegmentDao = new SegmentDao(auto, EntityType.NonViewEventSegments.ToString(), Configuration);
 
-            var requestRepo = new RequestRepository(requestDao, Configuration);
-            var eventViewRepo = new ViewEventRepository(viewEventDao, viewSegmentDao, Configuration);
-            var eventNonViewRepo = new NonViewEventRepository(nonViewEventDao, nonViewSegmentDao, Configuration);
-            var eventNrInSameSessionDao = new EventNumberInSameSessionDao(auto, EntityType.EventNumberInSameSessions.ToString(), Configuration);
+            RequestRepository requestRepo = new RequestRepository(requestDao, Configuration);
+            ViewEventRepository eventViewRepo = new ViewEventRepository(viewEventDao, viewSegmentDao, Configuration);
+            NonViewEventRepository eventNonViewRepo = new NonViewEventRepository(nonViewEventDao, nonViewSegmentDao, Configuration);
+            EventNumberInSameSessionDao eventNrInSameSessionDao = new EventNumberInSameSessionDao(auto, EntityType.EventNumberInSameSessions.ToString(), Configuration);
 
             requestRepo.Initialize();
             eventViewRepo.Initialize();
             eventNonViewRepo.Initialize();
 
-            var eventNumberInSameSessionHelper = new EventNumberInSameSessionHelper(eventNrInSameSessionDao);
+            EventNumberInSameSessionHelper eventNumberInSameSessionHelper = new EventNumberInSameSessionHelper(eventNrInSameSessionDao);
 
             Init(requestRepo, eventViewRepo, eventNonViewRepo, configDao, eventNumberInSameSessionHelper);
 
@@ -206,8 +210,8 @@ namespace Plugins.CountlySDK
         private void Init(RequestRepository requestRepo, ViewEventRepository viewEventRepo,
             NonViewEventRepository nonViewEventRepo, Dao<ConfigEntity> configDao, EventNumberInSameSessionHelper eventNumberInSameSessionHelper)
         {
-            var countlyUtils = new CountlyUtils(this);
-            var requests = new RequestCountlyHelper(Configuration, countlyUtils, requestRepo);
+            CountlyUtils countlyUtils = new CountlyUtils(this);
+            RequestCountlyHelper requests = new RequestCountlyHelper(Configuration, countlyUtils, requestRepo);
 
             Consents = new ConsentCountlyService();
             Events = new EventCountlyService(Configuration, requests, viewEventRepo, nonViewEventRepo, eventNumberInSameSessionHelper);
@@ -215,7 +219,7 @@ namespace Plugins.CountlySDK
             Location = new Services.LocationService(Configuration, requests);
             OptionalParameters = new OptionalParametersCountlyService(Location, Configuration);
             Notifications = new NotificationsCallbackService(Configuration);
-            var notificationsService = new ProxyNotificationsService(transform, Configuration, InternalStartCoroutine, Events);
+            ProxyNotificationsService notificationsService = new ProxyNotificationsService(transform, Configuration, InternalStartCoroutine, Events);
             _push = new PushCountlyService(Events, requests, notificationsService, Notifications);
             Session = new SessionCountlyService(Configuration, Events, _push, requests, Location, Consents, eventNumberInSameSessionHelper);
             

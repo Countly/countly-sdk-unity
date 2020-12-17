@@ -92,8 +92,8 @@ namespace Plugins.iBoxDB
         {
             try
             {
-                var list = Auto.Select<TEntity>("from " + Table);
-                foreach (var entity in list)
+                List<TEntity> list = Auto.Select<TEntity>("from " + Table);
+                foreach (TEntity entity in list)
                 {
                     Auto.Delete(Table, entity.GetId());
                 }

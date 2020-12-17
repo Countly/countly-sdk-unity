@@ -6,8 +6,8 @@ namespace Notifications
 {
     public class NotificationsCallbackService 
     {
-        CountlyConfiguration _config;
-        private List<INotificationListener> _listeners;
+        private readonly CountlyConfiguration _config;
+        private readonly List<INotificationListener> _listeners;
         internal NotificationsCallbackService(CountlyConfiguration config)
         {
             _config = config;

@@ -44,8 +44,12 @@ namespace Plugins.CountlySDK.Services
 		/// <param name="sessionInterval">In milliseconds</param>
 		private void InitSessionTimer()
 		{
-			if (_configModel.EnableManualSessionHandling) return;
-			_sessionTimer = new Timer {Interval = _configModel.SessionDuration * 1000};
+			if (_configModel.EnableManualSessionHandling)
+			{
+                return;
+            }
+
+            _sessionTimer = new Timer {Interval = _configModel.SessionDuration * 1000};
 			_sessionTimer.Elapsed += SessionTimerOnElapsedAsync;
 			_sessionTimer.AutoReset = true;
 		}
@@ -65,7 +69,7 @@ namespace Plugins.CountlySDK.Services
 			await _eventService.AddEventsToRequestQueue();
 
 			await _requestCountlyHelper.ProcessQueue();
-            var sessionOver = (DateTime.Now - _lastInputTime).TotalSeconds >= _configModel.SessionDuration;
+            bool sessionOver = (DateTime.Now - _lastInputTime).TotalSeconds >= _configModel.SessionDuration;
 
             if (sessionOver)
             {
@@ -95,7 +99,7 @@ namespace Plugins.CountlySDK.Services
 			IsSessionInitiated = true;
 			_eventNumberInSameSessionHelper.RemoveAllEvents();
 
-			var requestParams =
+            Dictionary<string, object> requestParams =
 				new Dictionary<string, object>();
 
 			if (_consentService.CheckConsent(Features.Sessions))
@@ -151,8 +155,8 @@ namespace Plugins.CountlySDK.Services
 			//{
 			IsSessionInitiated = false;
 			_eventNumberInSameSessionHelper.RemoveAllEvents();
-			
-			var requestParams =
+
+            Dictionary<string, object> requestParams =
 				new Dictionary<string, object>
 				{
 					{"end_session", 1},
@@ -209,15 +213,13 @@ namespace Plugins.CountlySDK.Services
 		/// Extends a session by another 60 seconds
 		/// </summary>
 		public async Task ExtendSessionAsync()
-		{
-			_lastSessionRequestTime = DateTime.Now;
-			//if (ConsentModel.CheckConsent(FeaturesEnum.Sessions.ToString()))
-			//{
-			var requestParams =
-				new Dictionary<string, object>
-				{
-					{
-						"session_duration", _configModel.SessionDuration
+        {
+            _lastSessionRequestTime = DateTime.Now;
+            Dictionary<string, object> requestParams =
+                new Dictionary<string, object>
+                {
+                    {
+                        "session_duration", _configModel.SessionDuration
 					},
 					{"ignore_cooldown", _configModel.IgnoreSessionCooldown.ToString().ToLower()}
 				};

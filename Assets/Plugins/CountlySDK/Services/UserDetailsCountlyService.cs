@@ -61,9 +61,11 @@ namespace Plugins.CountlySDK.Services
         public async Task SetUserDetailsAsync(CountlyUserDetailsModel userDetailsModel)
         {
             if (!_countlyUtils.IsPictureValid(userDetailsModel.PictureUrl))
+            {
                 throw new Exception("Accepted picture formats are .png, .gif and .jpeg");
+            }
 
-            var requestParams =
+            Dictionary<string, object> requestParams =
                 new Dictionary<string, object>
                 {
                     { "user_details", JsonConvert.SerializeObject(userDetailsModel, Formatting.Indented, 
@@ -79,7 +81,7 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async Task SetCustomUserDetailsAsync(CountlyUserDetailsModel userDetailsModel)
         {
-            var requestParams =
+            Dictionary<string, object> requestParams =
                 new Dictionary<string, object>
                 {
                     { "user_details",
@@ -104,7 +106,7 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
 
-            var model = new CountlyUserDetailsModel(_customDataProperties);
+            CountlyUserDetailsModel model = new CountlyUserDetailsModel(_customDataProperties);
 
             _customDataProperties = new Dictionary<string, object> { };
             await SetCustomUserDetailsAsync(model);
@@ -225,7 +227,7 @@ namespace Plugins.CountlySDK.Services
         {
             if (_customDataProperties.ContainsKey(key))
             {
-                var item = _customDataProperties.Select(x => x.Key).FirstOrDefault(x => x.Equals(key, StringComparison.OrdinalIgnoreCase));
+                string item = _customDataProperties.Select(x => x.Key).FirstOrDefault(x => x.Equals(key, StringComparison.OrdinalIgnoreCase));
                 if (item != null)
                 {
                     _customDataProperties.Remove(item);

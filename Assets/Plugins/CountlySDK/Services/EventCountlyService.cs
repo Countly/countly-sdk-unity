@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Plugins.CountlySDK.Helpers;
 using Plugins.CountlySDK.Models;
-using Plugins.CountlySDK.Persistance;
 using Plugins.CountlySDK.Persistance.Repositories.Impls;
 using UnityEngine;
 
@@ -41,7 +37,7 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
 
-            var result = new Queue();
+            Queue result = new Queue();
             
 
             while (_nonViewEventRepo.Count > 0)
@@ -54,7 +50,7 @@ namespace Plugins.CountlySDK.Services
             }
 
             //Send all at once
-            var requestParams =
+            Dictionary<string, object> requestParams =
                 new Dictionary<string, object>
                 {
                     {
@@ -148,7 +144,7 @@ namespace Plugins.CountlySDK.Services
             {
                 List<string> toRemove = new List<string>();
               
-                foreach (var item in segmentation)
+                foreach (KeyValuePair<string, object> item in segmentation)
                 {
                     bool isValidDataType = item.Value.GetType() == typeof(int)
                         || item.Value.GetType() == typeof(bool)
@@ -163,13 +159,13 @@ namespace Plugins.CountlySDK.Services
                     }
                 }
 
-                foreach (var k in toRemove)
+                foreach (string k in toRemove)
                 {
                     segmentation.Remove(k);
                 }
             }
-            
-            var @event = new CountlyEventModel(key, segmentation, count, sum, duration);
+
+            CountlyEventModel @event = new CountlyEventModel(key, segmentation, count, sum, duration);
             
             if (useNumberInSameSession)
             {
@@ -187,17 +183,19 @@ namespace Plugins.CountlySDK.Services
         internal async Task ReportMultipleEventsAsync(List<CountlyEventModel> events)
         {
             if (events == null || events.Count == 0)
+            {
                 return;
+            }
 
             if (_countlyConfiguration.EnableFirstAppLaunchSegment)
             {
-                foreach (var evt in events)
+                foreach (CountlyEventModel evt in events)
                 {
                     AddFirstAppSegment(evt);
                 }       
             }
 
-            var requestParams =
+            Dictionary<string, object> requestParams =
                 new Dictionary<string, object>
                 {
                     {
@@ -218,17 +216,18 @@ namespace Plugins.CountlySDK.Services
             int? count = 1, double? sum = null, double? duration = null)
         {
             if (string.IsNullOrEmpty(key) && string.IsNullOrWhiteSpace(key))
+            {
                 return;
+            }
 
-            var evt = new CountlyEventModel(key, segmentation, count, sum, duration);
+            CountlyEventModel evt = new CountlyEventModel(key, segmentation, count, sum, duration);
 
             if (_countlyConfiguration.EnableFirstAppLaunchSegment)
             {
-                AddFirstAppSegment(evt);   
+                AddFirstAppSegment(evt);
             }
-//            SetTimeZoneInfo(evt, DateTime.UtcNow);
 
-            var requestParams =
+            Dictionary<string, object> requestParams =
                 new Dictionary<string, object>
                 {
                     {

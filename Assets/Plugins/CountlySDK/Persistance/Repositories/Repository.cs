@@ -23,11 +23,14 @@ namespace Plugins.CountlySDK.Persistance.Repositories
 
         public virtual void Initialize()
         {
-            var entities = _dao.LoadAll();
-            foreach (var entity in entities)
+            List<TEntity> entities = _dao.LoadAll();
+            foreach (TEntity entity in entities)
             {
-                var model = ConvertEntityToModel(entity);
-                if (!ValidateModelBeforeEnqueue(model)) continue;
+                TModel model = ConvertEntityToModel(entity);
+                if (!ValidateModelBeforeEnqueue(model))
+                {
+                    continue;
+                }
 
                 if (_config.EnableConsoleLogging)
                 {
@@ -45,10 +48,12 @@ namespace Plugins.CountlySDK.Persistance.Repositories
         public virtual bool Enqueue(TModel model)
         {
             if (!ValidateModelBeforeEnqueue(model))
+            {
                 return false;
+            }
             Models.Enqueue(model);
-            var entity = ConvertModelToEntity(model);
-            var res = _dao.Save(entity);
+            TEntity entity = ConvertModelToEntity(model);
+            bool res = _dao.Save(entity);
             if (!res && _config.EnableConsoleLogging)
             {
                 Debug.LogError("Request entity save failed, entity: " + entity);
@@ -59,7 +64,7 @@ namespace Plugins.CountlySDK.Persistance.Repositories
 
         public virtual TModel Dequeue()
         {
-            var model = Models.Dequeue();
+            TModel model = Models.Dequeue();
 //            Debug.Log("Dequeue model " + typeof(TModel) + ", model: \n" + model);
             _dao.Remove(model.Id);
             return model;

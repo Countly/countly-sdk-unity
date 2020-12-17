@@ -12,7 +12,7 @@ namespace Plugins.iBoxDB
 		private static DB BuildDatabase()
 		{
 			DB.Root(Application.persistentDataPath);
-			var db = new DB();
+            DB db = new DB();
 			return db;
 		}
 	}

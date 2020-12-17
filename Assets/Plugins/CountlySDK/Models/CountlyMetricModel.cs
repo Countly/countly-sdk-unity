@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Globalization;
 using Newtonsoft.Json;
 using Plugins.CountlySDK.Helpers;
 using UnityEngine;

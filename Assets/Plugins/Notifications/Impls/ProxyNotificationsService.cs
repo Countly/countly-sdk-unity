@@ -10,7 +10,7 @@ namespace Notifications.Impls
 {
 	public class ProxyNotificationsService : INotificationsService
 	{
-        private Transform _countlyGameObject;
+        private readonly Transform _countlyGameObject;
         private readonly INotificationsService _service;
         private readonly EventCountlyService _eventCountlyService;
 

@@ -22,11 +22,15 @@ namespace Plugins.CountlySDK.Persistance.Repositories
         public override void Initialize()
         {
             base.Initialize();
-            foreach (var model in Models)
+            foreach (CountlyEventModel model in Models)
             {
-                var segmentEntity = _segmentDao.GetByEventId(model.Id);
-                if(segmentEntity == null) continue;
-                var segmentModel = Converter.ConvertSegmentEntityToSegmentModel(segmentEntity);
+                SegmentEntity segmentEntity = _segmentDao.GetByEventId(model.Id);
+                if(segmentEntity == null)
+                {
+                    continue;
+                }
+
+                SegmentModel segmentModel = Converter.ConvertSegmentEntityToSegmentModel(segmentEntity);
                 @model.Segmentation = segmentModel;
             }
         }
@@ -43,13 +47,16 @@ namespace Plugins.CountlySDK.Persistance.Repositories
 
         public override bool Enqueue(CountlyEventModel model)
         {
-            var res = base.Enqueue(model);
+            bool res = base.Enqueue(model);
             if (!res)
+            {
                 return false;
-            var segmentModel = model.Segmentation;
+            }
+
+            SegmentModel segmentModel = model.Segmentation;
             if (segmentModel != null)
             {
-                var segmentEntity = Converter.ConvertSegmentModelToSegmentEntity(segmentModel, _segmentDao.GenerateNewId());
+                SegmentEntity segmentEntity = Converter.ConvertSegmentModelToSegmentEntity(segmentModel, _segmentDao.GenerateNewId());
                 segmentEntity.EventId = model.Id;
                 _segmentDao.Save(segmentEntity);
             }
@@ -63,11 +70,11 @@ namespace Plugins.CountlySDK.Persistance.Repositories
 
         public override CountlyEventModel Dequeue()
         {
-            var @event =  base.Dequeue();
-            var segmentEntity = _segmentDao.GetByEventId(@event.Id);
+            CountlyEventModel @event =  base.Dequeue();
+            SegmentEntity segmentEntity = _segmentDao.GetByEventId(@event.Id);
             if (segmentEntity != null)
             {
-                var segmentModel = Converter.ConvertSegmentEntityToSegmentModel(segmentEntity);
+                SegmentModel segmentModel = Converter.ConvertSegmentEntityToSegmentModel(segmentEntity);
                 @event.Segmentation = segmentModel;   
             }
             return @event;

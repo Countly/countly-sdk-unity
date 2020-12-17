@@ -18,8 +18,8 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
     {
         CountlyConfiguration configuration = new CountlyConfiguration
         {
-            ServerUrl = "https://try.count.ly/",
-            AppKey = "YOUR_APP_KEY",
+            ServerUrl = "https://master.count.ly/",
+            AppKey = "8e2fe772c091355076ead703f987fee94490fff4",
             EnableConsoleLogging = true,
             NotificationMode = TestMode.AndroidTestToken
         };
@@ -291,7 +291,7 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
 
     public async void SetUserDetail()
     {
-        var userDetails = new CountlyUserDetailsModel(
+        CountlyUserDetailsModel userDetails = new CountlyUserDetailsModel(
                                   "Full Name", "username", "useremail@email.com", "Organization",
                                   "222-222-222",
                   "http://webresizer.com/images2/bird1_after.jpg",
@@ -308,7 +308,7 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
 
     public async void SetCustomeUserDetail()
     {
-        var userDetails = new CountlyUserDetailsModel(
+        CountlyUserDetailsModel userDetails = new CountlyUserDetailsModel(
                                 new Dictionary<string, object>
                                 {
             { "Nationality", "Turkish" },

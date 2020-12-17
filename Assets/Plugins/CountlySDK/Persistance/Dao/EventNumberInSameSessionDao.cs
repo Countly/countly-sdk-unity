@@ -21,14 +21,14 @@ namespace Plugins.CountlySDK.Persistance.Dao
         public EventNumberInSameSessionEntity GetByEventName(string eventKey)
         {
             _stringBuilder.Clear();
-            
-            var ql = _stringBuilder.Append("from ").Append(Table)
+
+            string ql = _stringBuilder.Append("from ").Append(Table)
                 .Append(" where EventKey==?").ToString();
 
             try
             {
 
-                var entities = Auto.Select<EventNumberInSameSessionEntity>(ql, eventKey);
+                System.Collections.Generic.List<EventNumberInSameSessionEntity> entities = Auto.Select<EventNumberInSameSessionEntity>(ql, eventKey);
 
                 if (entities.Count > 1)
                 {
@@ -37,7 +37,9 @@ namespace Plugins.CountlySDK.Persistance.Dao
                 }
 
                 if (entities.Count == 0)
+                {
                     return null;
+                }
 
                 return entities[0];
             }

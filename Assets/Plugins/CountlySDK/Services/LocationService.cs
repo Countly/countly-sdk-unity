@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 using Plugins.CountlySDK.Enums;
 using Plugins.CountlySDK.Helpers;
 using Plugins.CountlySDK.Models;
@@ -46,7 +45,7 @@ namespace Plugins.CountlySDK.Services
 
         internal async Task SendRequestWithEmptyLocation()
         {
-            var requestParams =
+            Dictionary<string, object> requestParams =
                new Dictionary<string, object>();
 
             requestParams.Add("location", string.Empty);
@@ -61,8 +60,8 @@ namespace Plugins.CountlySDK.Services
             {
                 return;
             }
-            
-            var requestParams =
+
+            Dictionary<string, object> requestParams =
                 new Dictionary<string, object>();
 
             /*
@@ -131,8 +130,8 @@ namespace Plugins.CountlySDK.Services
              * a warning should be printed that they should be set together.
              */
             if (_countlyConfiguration.EnableConsoleLogging &&
-                (!string.IsNullOrEmpty(CountryCode) && string.IsNullOrEmpty(City)
-                || !string.IsNullOrEmpty(City) && string.IsNullOrEmpty(CountryCode)))
+                ((!string.IsNullOrEmpty(CountryCode) && string.IsNullOrEmpty(City))
+                || (!string.IsNullOrEmpty(City) && string.IsNullOrEmpty(CountryCode))))
             {
                 Debug.LogWarning("[Countly LocationService] In \"SetLocation\" both country code and city should be set together");
             }

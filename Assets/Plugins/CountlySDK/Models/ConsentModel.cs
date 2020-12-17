@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Plugins.CountlySDK.Enums;
 
 namespace Plugins.CountlySDK.Models
 {
@@ -71,7 +70,7 @@ namespace Plugins.CountlySDK.Models
         /// <returns></returns>
         public static bool CheckConsent(string consentToSearch)
         {
-            var consent = CountlyFeatureConsents.FirstOrDefault(item => item.ConsentFormattedName == consentToSearch);
+            ConsentModel consent = CountlyFeatureConsents.FirstOrDefault(item => item.ConsentFormattedName == consentToSearch);
             return consent != null && consent.IsConsentGranted;
         }
 
@@ -82,7 +81,7 @@ namespace Plugins.CountlySDK.Models
         /// <param name="isConsentGranted"></param>
         public static void UpdateConsent(string consentToUpdate, bool isConsentGranted)
         {
-            var consent = CountlyFeatureConsents.FirstOrDefault(item => item.ConsentFormattedName == consentToUpdate);
+            ConsentModel consent = CountlyFeatureConsents.FirstOrDefault(item => item.ConsentFormattedName == consentToUpdate);
             if (consent != null)
             {
                 consent.IsConsentGranted = isConsentGranted;

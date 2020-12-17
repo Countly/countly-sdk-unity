@@ -32,8 +32,8 @@ namespace Plugins.CountlySDK.Services
             {
                 return;
             }
-            
-            var currentViewSegment =
+
+            ViewSegment currentViewSegment =
                 new ViewSegment
                 {
                     Name = name,
@@ -53,8 +53,8 @@ namespace Plugins.CountlySDK.Services
             {
                 Debug.Log("[ViewCountlyService] RecordOpenViewAsync: " + name);
             }
-            
-            var currentView = new CountlyEventModel(CountlyEventModel.ViewEvent, currentViewSegment.ToDictionary());
+
+            CountlyEventModel currentView = new CountlyEventModel(CountlyEventModel.ViewEvent, currentViewSegment.ToDictionary());
             await _eventService.RecordEventAsync(currentView);
         }
 
@@ -70,8 +70,8 @@ namespace Plugins.CountlySDK.Services
             {
                 return;
             }
-            
-            var currentViewSegment =
+
+            ViewSegment currentViewSegment =
                 new ViewSegment
                 {
                     Name = name,
@@ -85,7 +85,7 @@ namespace Plugins.CountlySDK.Services
             double? duration = null;
             if (_viewToLastViewStartTime.ContainsKey(name))
             {
-                var lastViewStartTime = _viewToLastViewStartTime[name];
+                DateTime lastViewStartTime = _viewToLastViewStartTime[name];
                 duration = (DateTime.UtcNow - lastViewStartTime).TotalSeconds;
 
                 _viewToLastViewStartTime.Remove(name);
@@ -96,7 +96,7 @@ namespace Plugins.CountlySDK.Services
                 Debug.Log("[ViewCountlyService] RecordCloseViewAsync: " + name + ", duration: " + duration);
             }
 
-            var currentView = new CountlyEventModel(CountlyEventModel.ViewEvent, currentViewSegment.ToDictionary(), 1, null, duration);
+            CountlyEventModel currentView = new CountlyEventModel(CountlyEventModel.ViewEvent, currentViewSegment.ToDictionary(), 1, null, duration);
             await _eventService.RecordEventAsync(currentView);
         }
         
@@ -115,7 +115,7 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async Task ReportActionAsync(string type, int x, int y, int width, int height)
         {
-            var segment =
+            ActionSegment segment =
                 new ActionSegment
                 {
                     Type = type,
@@ -144,7 +144,7 @@ namespace Plugins.CountlySDK.Services
             
             public IDictionary<string, object> ToDictionary()
             {
-                var dict = new Dictionary<string, object>
+                Dictionary<string, object> dict = new Dictionary<string, object>
                 {
                     {"name", Name}, 
                     {"segment", Segment}, 

@@ -1,14 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using Notifications;
 using Plugins.CountlySDK.Enums;
 using Plugins.CountlySDK.Helpers;
-using Plugins.CountlySDK.Models;
-using UnityEngine;
-
 namespace Plugins.CountlySDK.Services
 {
     public class PushCountlyService
@@ -70,7 +65,7 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
 
-            var requestParams =
+            Dictionary<string, object> requestParams =
                 new Dictionary<string, object>
                 {
                     { "token_session", 1 },

@@ -44,7 +44,7 @@ namespace Plugins.CountlySDK.Services
 
         private Dictionary<string, object> FetchConfigFromDB() {
             Dictionary<string, object> config = null;
-            var allConfigs = _configDao.LoadAll();
+            List<ConfigEntity> allConfigs = _configDao.LoadAll();
             if (allConfigs != null && allConfigs.Count > 0)
             {
                 config = Converter.ConvertJsonToDictionary(allConfigs[0].Json);
@@ -64,20 +64,20 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async Task<CountlyResponse> Update()
         {
-            var requestParams =
+            Dictionary<string, object> requestParams =
                 new Dictionary<string, object>
                 {
                     { "method", "fetch_remote_config" }
                 };
 
-            var url = BuildGetRequest(requestParams);
-            
-            
-            var response =  await Task.Run(() => _requestCountlyHelper.GetAsync(url));
+            string url = BuildGetRequest(requestParams);
+
+
+            CountlyResponse response =  await Task.Run(() => _requestCountlyHelper.GetAsync(url));
             if (response.IsSuccess)
             {
                 _configDao.RemoveAll();
-                var configEntity = new ConfigEntity
+                ConfigEntity configEntity = new ConfigEntity
                 {
                     Id = _configDao.GenerateNewId(),
                     Json = response.Data
@@ -104,7 +104,7 @@ namespace Plugins.CountlySDK.Services
         {
             _requestStringBuilder.Clear();
             //Metrics added to each request
-            foreach (var item in _countlyUtils.GetAppKeyAndDeviceIdParams())
+            foreach (KeyValuePair<string, object> item in _countlyUtils.GetAppKeyAndDeviceIdParams())
             {
                 _requestStringBuilder.AppendFormat((item.Key != "app_key" ? "&" : string.Empty) + "{0}={1}",
                     UnityWebRequest.EscapeURL(item.Key), UnityWebRequest.EscapeURL(Convert.ToString(item.Value))); 
@@ -112,7 +112,7 @@ namespace Plugins.CountlySDK.Services
 
 
             //Query params supplied for creating request
-            foreach (var item in queryParams)
+            foreach (KeyValuePair<string, object> item in queryParams)
             {
                 if (!string.IsNullOrEmpty(item.Key) && item.Value != null)
                 {

@@ -10,7 +10,7 @@ namespace Plugins.CountlySDK.Helpers
         public static DB BuildDatabase(long dbNumber)
         {
             DB.Root(Application.persistentDataPath);
-            var db = new DB(dbNumber);
+            DB db = new DB(dbNumber);
 
             db.GetConfig().EnsureTable<RequestEntity>(EntityType.Requests.ToString(), "Id");
             db.GetConfig().EnsureTable<EventEntity>(EntityType.ViewEvents.ToString(), "Id");

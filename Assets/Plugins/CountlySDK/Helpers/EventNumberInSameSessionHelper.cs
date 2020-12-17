@@ -17,7 +17,7 @@ namespace Plugins.CountlySDK.Helpers
         
         public void IncreaseNumberInSameSession(CountlyEventModel @event)
         {
-            var entity = IncrementEventNumberInSameSessionAndSaveOrUpdate(@event.Key);
+            EventNumberInSameSessionEntity entity = IncrementEventNumberInSameSessionAndSaveOrUpdate(@event.Key);
             AddNumberInSameSessionToEvent(@event, entity.Number);
         }
 
@@ -28,7 +28,7 @@ namespace Plugins.CountlySDK.Helpers
 
         private EventNumberInSameSessionEntity IncrementEventNumberInSameSessionAndSaveOrUpdate(string eventKey)
         {
-            var entity = _dao.GetByEventName(eventKey);
+            EventNumberInSameSessionEntity entity = _dao.GetByEventName(eventKey);
             if (entity == null)
             {
                 const int number = 1;

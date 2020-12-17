@@ -47,9 +47,7 @@ namespace Plugins.CountlySDK.Services
         public async Task SendCrashReportAsync(string message, string stackTrace, LogType type,
             IDictionary<string, object> segments = null, bool nonfatal = true)
         {
-            //if (ConsentModel.CheckConsent(FeaturesEnum.Crashes.ToString()))
-            //{
-            var model = CountlyExceptionDetailModel.ExceptionDetailModel;
+            CountlyExceptionDetailModel model = CountlyExceptionDetailModel.ExceptionDetailModel;
             model.Error = stackTrace;
             model.Name = message;
             model.Nonfatal = nonfatal;
@@ -61,7 +59,7 @@ namespace Plugins.CountlySDK.Services
 #if UNITY_ANDROID
             model.Manufacture = SystemInfo.deviceModel;
 #endif
-            var requestParams = new Dictionary<string, object>
+            Dictionary<string, object> requestParams = new Dictionary<string, object>
             {
                 {
                     "crash", JsonConvert.SerializeObject(model, Formatting.Indented,
@@ -91,10 +89,12 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
 
-            var validBreadcrumb = value.Length > 1000 ? value.Substring(0, 1000) : value;
+            string validBreadcrumb = value.Length > 1000 ? value.Substring(0, 1000) : value;
 
             if (_crashBreadcrumbs.Count == _configModel.TotalBreadcrumbsAllowed)
+            {
                 _crashBreadcrumbs.Dequeue();
+            }
 
             _crashBreadcrumbs.Enqueue(value);
         }

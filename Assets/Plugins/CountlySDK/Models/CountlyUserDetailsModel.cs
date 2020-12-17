@@ -54,7 +54,9 @@ namespace Plugins.CountlySDK.Models
             Gender = gender;
             BirthYear = birthYear;
             if (customData != null)
+            {
                 Custom = customData as Dictionary<string, object>;
+            }
         }
 
         /// <summary>

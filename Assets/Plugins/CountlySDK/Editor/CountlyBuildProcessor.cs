@@ -1,7 +1,5 @@
 ﻿using UnityEditor.Build;
-using UnityEngine;
 using UnityEditor.Build.Reporting;
-using System.IO;
 namespace Plugins.CountlySDK.Editor
 {
     public class CountlyBuildProcessor : IPreprocessBuildWithReport
