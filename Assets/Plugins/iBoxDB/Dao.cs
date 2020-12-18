@@ -22,14 +22,10 @@ namespace Plugins.iBoxDB
 
         public bool Save(TEntity entity)
         {
-            try
-            {
+            try {
                 return Auto.Insert(Table, entity);
-            }
-            catch (Exception ex)
-            {
-                if (Configuration.EnableConsoleLogging)
-                {
+            } catch (Exception ex) {
+                if (Configuration.EnableConsoleLogging) {
                     Debug.LogError("[Countly] Dao Save: Couldn't complete db operation, [" + ex.Message + "]");
                 }
             }
@@ -39,17 +35,13 @@ namespace Plugins.iBoxDB
 
         public bool Update(TEntity entity)
         {
-            try
-            {
+            try {
                 return Auto.Update(Table, entity);
-            }
-            catch (Exception ex)
-            {
-                if (Configuration.EnableConsoleLogging)
-                {
+            } catch (Exception ex) {
+                if (Configuration.EnableConsoleLogging) {
                     Debug.LogError("[Countly] Dao Update: Couldn't complete db operation, [" + ex.Message + "]");
                 }
-                
+
             }
 
             return false;
@@ -58,14 +50,10 @@ namespace Plugins.iBoxDB
         public List<TEntity> LoadAll()
         {
             List<TEntity> result = new List<TEntity>();
-            try
-            {
+            try {
                 result = Auto.Select<TEntity>("from " + Table);
-            }
-            catch (Exception ex)
-            {
-                if (Configuration.EnableConsoleLogging)
-                {
+            } catch (Exception ex) {
+                if (Configuration.EnableConsoleLogging) {
                     Debug.LogError("[Countly] Dao LoadAll: Couldn't complete db operation, [" + ex.Message + "]");
                 }
             }
@@ -75,14 +63,10 @@ namespace Plugins.iBoxDB
 
         public void Remove(params object[] key)
         {
-            try
-            {
+            try {
                 Auto.Delete(Table, key);
-            }
-            catch (Exception ex)
-            {
-                if (Configuration.EnableConsoleLogging)
-                {
+            } catch (Exception ex) {
+                if (Configuration.EnableConsoleLogging) {
                     Debug.LogError("[Countly] Dao Remove: Couldn't complete db operation, [" + ex.Message + "]");
                 }
             }
@@ -90,18 +74,13 @@ namespace Plugins.iBoxDB
 
         public void RemoveAll()
         {
-            try
-            {
+            try {
                 List<TEntity> list = Auto.Select<TEntity>("from " + Table);
-                foreach (TEntity entity in list)
-                {
+                foreach (TEntity entity in list) {
                     Auto.Delete(Table, entity.GetId());
                 }
-            }
-            catch (Exception ex)
-            {
-                if (Configuration.EnableConsoleLogging)
-                {
+            } catch (Exception ex) {
+                if (Configuration.EnableConsoleLogging) {
                     Debug.LogError("[Countly] Dao RemoveAll: Couldn't complete db operation, [" + ex.Message + "]");
                 }
             }
@@ -110,15 +89,11 @@ namespace Plugins.iBoxDB
         public long GenerateNewId()
         {
             long result;
-            try
-            {
+            try {
                 result = Auto.NewId();
-            }
-            catch (Exception ex)
-            {
+            } catch (Exception ex) {
                 result = 0;
-                if (Configuration.EnableConsoleLogging)
-                {
+                if (Configuration.EnableConsoleLogging) {
                     Debug.LogError("[Countly] Dao GenerateNewId: Couldn't complete db operation, [" + ex.Message + "]");
                 }
             }

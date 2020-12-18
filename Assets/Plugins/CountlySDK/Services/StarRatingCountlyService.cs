@@ -25,14 +25,12 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async Task ReportStarRatingAsync(string platform, string appVersion, int rating)
         {
-            if (rating < 1 || rating > 5)
-            {
+            if (rating < 1 || rating > 5) {
                 return;
             }
 
             StarRatingSegment segment =
-                new StarRatingSegment
-                {
+                new StarRatingSegment {
                     Platform = platform,
                     AppVersion = appVersion,
                     Rating = rating,
@@ -42,8 +40,8 @@ namespace Plugins.CountlySDK.Services
                 CountlyEventModel.StarRatingEvent, segment.ToDictionary(),
                 null, null, null);
         }
-        
-        
+
+
         /// <summary>
         /// Custom Segmentation for Star Rating event.
         /// </summary>
@@ -53,7 +51,7 @@ namespace Plugins.CountlySDK.Services
             public string Platform { get; set; }
             public string AppVersion { get; set; }
             public int Rating { get; set; }
-            
+
             public IDictionary<string, object> ToDictionary()
             {
                 return new Dictionary<string, object>()
@@ -63,7 +61,7 @@ namespace Plugins.CountlySDK.Services
                     {"rating", Rating},
                 };
             }
-            
+
         }
 
     }

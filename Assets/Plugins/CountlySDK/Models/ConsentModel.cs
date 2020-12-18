@@ -82,8 +82,7 @@ namespace Plugins.CountlySDK.Models
         public static void UpdateConsent(string consentToUpdate, bool isConsentGranted)
         {
             ConsentModel consent = CountlyFeatureConsents.FirstOrDefault(item => item.ConsentFormattedName == consentToUpdate);
-            if (consent != null)
-            {
+            if (consent != null) {
                 consent.IsConsentGranted = isConsentGranted;
             }
         }

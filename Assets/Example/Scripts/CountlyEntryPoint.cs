@@ -16,8 +16,7 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
 
     private void Awake()
     {
-        CountlyConfiguration configuration = new CountlyConfiguration
-        {
+        CountlyConfiguration configuration = new CountlyConfiguration {
             ServerUrl = "https://try.count.ly/",
             AppKey = "YOUR_APP_KEY",
             EnableConsoleLogging = true,
@@ -42,15 +41,16 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
         countly.Notifications.AddListener(this);
     }
 
-    private void Stop() {
+    private void Stop()
+    {
         countly.Notifications.RemoveListener(this);
     }
 
-    public void TestWithMultipleThreads() {
+    public void TestWithMultipleThreads()
+    {
 
         int participants = 13;
-        Barrier barrier = new Barrier(participantCount: participants, (bar) =>
-        {
+        Barrier barrier = new Barrier(participantCount: participants, (bar) => {
             Debug.Log("All threads reached the barrier at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
         });
 
@@ -170,21 +170,19 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
             }
         });
 
-        for (int i = 0; i < participants; i++)
-        {
+        for (int i = 0; i < participants; i++) {
             threads[i].Start();
         }
 
 
-        for (int i = 0; i < participants; i++)
-        {
+        for (int i = 0; i < participants; i++) {
             threads[i].Join();
         }
 
         Debug.Log("All threads completed at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
     }
 
-    public  async void BasicEvent()
+    public async void BasicEvent()
     {
         await countly.Events.RecordEventAsync("Basic Event");
     }
@@ -214,7 +212,7 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
         });
 
         await countly.Events.RecordEventAsync("Event With Sum And Segmentation", segmentation: segments, sum: 23);
-       
+
     }
 
     public async void EventWithInvalidSegmentation()
@@ -226,7 +224,7 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
         double totalAmount = 100000.76363;
         long currentMillis = DateTime.UtcNow.Millisecond; // invalid data type
         DateTime date = DateTime.UtcNow; // invalid data type
-        
+
         SegmentModel segment = new SegmentModel(new Dictionary<string, object>
         {
             { "name", name},
@@ -244,7 +242,7 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
     public async void ReportViewMainScene()
     {
         await countly.Views.RecordOpenViewAsync("Main Scene");
-        
+
     }
 
     public async void ReportViewHomeScene()
@@ -272,21 +270,18 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
 
     public async void SendCrashReport()
     {
-        try
-        {
+        try {
 
             throw new DivideByZeroException();
+        } catch (Exception ex) {
+            await countly.CrashReports.SendCrashReportAsync(ex.Message, ex.StackTrace, LogType.Exception);
         }
-        catch (Exception ex)
-        {
-           await countly.CrashReports.SendCrashReportAsync(ex.Message, ex.StackTrace, LogType.Exception); 
-        }
-       
+
     }
 
     public async void SetRating()
     {
-           await countly.StarRating.ReportStarRatingAsync("unity", "0.1", 3);
+        await countly.StarRating.ReportStarRatingAsync("unity", "0.1", 3);
     }
 
     public async void SetUserDetail()
@@ -322,8 +317,8 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
     public async void SetPropertyOnce()
     {
         countly.UserDetails.SetOnce("Distance", "10KM");
-       await countly.UserDetails.SaveAsync();
-        
+        await countly.UserDetails.SaveAsync();
+
     }
 
     public async void IncreamentValue()
@@ -388,7 +383,8 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
         //Remove one or many values
         countly.UserDetails.Max("Weight", 90);
         countly.UserDetails.SetOnce("Distance", "10KM");
-        countly.UserDetails.Push("Mole", new string[] { "Left Cheek", "Back", "Toe" }); ;
+        countly.UserDetails.Push("Mole", new string[] { "Left Cheek", "Back", "Toe" });
+        ;
         await countly.UserDetails.SaveAsync();
 
     }

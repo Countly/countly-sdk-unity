@@ -4,7 +4,7 @@ namespace Plugins.CountlySDK.Persistance.Entities
     {
         public long Id;
         public string Json;
-        
+
         public long GetId()
         {
             return Id;

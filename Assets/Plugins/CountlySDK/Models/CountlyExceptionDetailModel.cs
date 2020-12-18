@@ -68,8 +68,7 @@ namespace Plugins.CountlySDK.Models
         private CountlyExceptionDetailModel() { }
 
         public static readonly CountlyExceptionDetailModel ExceptionDetailModel
-            = new CountlyExceptionDetailModel
-            {
+            = new CountlyExceptionDetailModel {
                 OS = Constants.UnityPlatform,
                 OSVersion = SystemInfo.operatingSystem,
                 Device = SystemInfo.deviceName,

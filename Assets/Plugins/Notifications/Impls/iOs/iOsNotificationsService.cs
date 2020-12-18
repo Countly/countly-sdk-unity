@@ -45,17 +45,14 @@ namespace Notifications.Impls.iOs
             string mesageId = _bridge.MessageId;
             string identifier = _bridge.ButtonIndex;
 
-            if (_bridge.MessageId != null)
-            {
+            if (_bridge.MessageId != null) {
                 PushCountlyService.PushActionSegment segment =
-                    new Plugins.CountlySDK.Services.PushCountlyService.PushActionSegment
-                    {
+                    new Plugins.CountlySDK.Services.PushCountlyService.PushActionSegment {
                         MessageID = mesageId,
                         Identifier = identifier
                     };
 
-                if (_config.EnableConsoleLogging)
-                {
+                if (_config.EnableConsoleLogging) {
                     Debug.Log("[Countly] ReportPushActionAsync key: " + CountlyEventModel.PushActionEvent + ", segments: " + segment);
                 }
 
@@ -66,34 +63,31 @@ namespace Notifications.Impls.iOs
             _bridge.MessageId = null;
             _bridge.ButtonIndex = null;
 
-            return new CountlyResponse
-            {
+            return new CountlyResponse {
                 IsSuccess = true,
             };
         }
 
         public void OnNotificationClicked(Action<string, int> result)
         {
-            if (_config.EnableConsoleLogging)
-            {
+            if (_config.EnableConsoleLogging) {
                 Debug.Log("[Countly] OnNotificationClicked register");
             }
-            
+
             _bridge.ListenClickResult(result);
 
         }
 
         public void OnNotificationReceived(Action<string> result)
         {
-            if (_config.EnableConsoleLogging)
-            {
+            if (_config.EnableConsoleLogging) {
                 Debug.Log("[Countly] OnNotificationReceived register");
             }
 
             _bridge.ListenReceiveResult(result);
-           
+
         }
 
-       
+
     }
 }

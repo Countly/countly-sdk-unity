@@ -12,21 +12,20 @@ namespace Plugins.CountlySDK.Helpers
             CountlyEventModel model = JsonConvert.DeserializeObject<CountlyEventModel>(entity.Json);
             model.Id = entity.Id;
             return model;
-        } 
-        
+        }
+
         public static EventEntity ConvertEventModelToEventEntity(CountlyEventModel model, long id)
         {
             string json = JsonConvert.SerializeObject(model, Formatting.Indented,
-                new JsonSerializerSettings {NullValueHandling = NullValueHandling.Ignore});
+                new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
             model.Id = id;
-            
-            return new EventEntity
-            {
+
+            return new EventEntity {
                 Id = id,
                 Json = json
             };
         }
-        
+
         public static SegmentModel ConvertSegmentEntityToSegmentModel(SegmentEntity entity)
         {
             SegmentModel model = JsonConvert.DeserializeObject<SegmentModel>(entity.Json);
@@ -37,16 +36,15 @@ namespace Plugins.CountlySDK.Helpers
         public static SegmentEntity ConvertSegmentModelToSegmentEntity(SegmentModel model, long id)
         {
             string json = JsonConvert.SerializeObject(model, Formatting.Indented,
-                new JsonSerializerSettings {NullValueHandling = NullValueHandling.Ignore});
+                new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
             model.Id = id;
-            
-            return new SegmentEntity
-            {
+
+            return new SegmentEntity {
                 Id = id,
                 Json = json
             };
         }
-        
+
         public static CountlyRequestModel ConvertRequestEntityToRequestModel(RequestEntity entity)
         {
             CountlyRequestModel model = JsonConvert.DeserializeObject<CountlyRequestModel>(entity.Json);
@@ -57,11 +55,10 @@ namespace Plugins.CountlySDK.Helpers
         public static RequestEntity ConvertRequestModelToRequestEntity(CountlyRequestModel model, long id)
         {
             string json = JsonConvert.SerializeObject(model, Formatting.Indented,
-                new JsonSerializerSettings {NullValueHandling = NullValueHandling.Ignore});
+                new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
             model.Id = id;
-            
-            return new RequestEntity
-            {
+
+            return new RequestEntity {
                 Id = id,
                 Json = json
             };

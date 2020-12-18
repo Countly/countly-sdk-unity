@@ -8,27 +8,27 @@ using UnityEngine;
 
 namespace Notifications.Impls.Android
 {
-	public class AndroidNotificationsService : INotificationsService
-	{
+    public class AndroidNotificationsService : INotificationsService
+    {
         private readonly Transform _countlyGameObject;
         private const string BridgeName = "[Android] Bridge";
         private const string StorePackageName = "ly.count.unity.push_fcm.MessageStore";
         private const string CountlyPushPluginPackageName = "ly.count.unity.push_fcm.CountlyPushPlugin";
         private const string NotficationServicePackageName = "ly.count.unity.push_fcm.RemoteNotificationsService";
 
-		private readonly AndroidBridge _bridge;
+        private readonly AndroidBridge _bridge;
         private readonly CountlyConfiguration _config;
         private readonly EventCountlyService _eventCountlyService;
 
         internal AndroidNotificationsService(Transform countlyGameObject, CountlyConfiguration config, EventCountlyService eventCountlyService)
-		{
+        {
             _config = config;
             _countlyGameObject = countlyGameObject;
             _eventCountlyService = eventCountlyService;
 
             GameObject gameObject = new GameObject(BridgeName);
             gameObject.transform.parent = _countlyGameObject;
-			_bridge = gameObject.AddComponent<AndroidBridge>();
+            _bridge = gameObject.AddComponent<AndroidBridge>();
             _bridge.Config = _config;
 
             AndroidJavaClass countlyPushPlugin = new AndroidJavaClass(CountlyPushPluginPackageName);
@@ -37,11 +37,10 @@ namespace Notifications.Impls.Android
         }
 
         public void GetToken(Action<string> result)
-		{
-			_bridge.ListenTokenResult(result);
-			
-			using (AndroidJavaObject jc = new AndroidJavaObject(NotficationServicePackageName))
-            {
+        {
+            _bridge.ListenTokenResult(result);
+
+            using (AndroidJavaObject jc = new AndroidJavaObject(NotficationServicePackageName)) {
                 jc.Call("getToken");
             }
         }
@@ -61,8 +60,7 @@ namespace Notifications.Impls.Android
             AndroidJavaClass store = new AndroidJavaClass(StorePackageName);
 
             bool isInitialized = store.CallStatic<bool>("isInitialized");
-            if (!isInitialized)
-            {
+            if (!isInitialized) {
                 AndroidJavaClass unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
                 AndroidJavaObject activity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity");
                 AndroidJavaObject applicationContext = activity.Call<AndroidJavaObject>("getApplicationContext");
@@ -71,10 +69,8 @@ namespace Notifications.Impls.Android
             }
 
             string data = store.CallStatic<string>("getMessagesData");
-            if (string.IsNullOrEmpty(data))
-            {
-                return new CountlyResponse
-                {
+            if (string.IsNullOrEmpty(data)) {
+                return new CountlyResponse {
                     IsSuccess = false,
                     ErrorMessage = "Key is required."
                 };
@@ -82,22 +78,18 @@ namespace Notifications.Impls.Android
 
             JArray jArray = JArray.Parse(data);
 
-            if (jArray != null)
-            {
-                foreach (JObject item in jArray)
-                {
+            if (jArray != null) {
+                foreach (JObject item in jArray) {
                     string mesageId = item.GetValue("messageId").ToString();
                     string identifier = item.GetValue("action_index").ToString();
 
                     PushCountlyService.PushActionSegment segment =
-                    new Plugins.CountlySDK.Services.PushCountlyService.PushActionSegment
-                    {
+                    new Plugins.CountlySDK.Services.PushCountlyService.PushActionSegment {
                         MessageID = mesageId,
                         Identifier = identifier
                     };
 
-                    if (_config.EnableConsoleLogging)
-                    {
+                    if (_config.EnableConsoleLogging) {
                         Debug.Log("[Countly] ReportPushActionAsync key: " + CountlyEventModel.PushActionEvent + ", segments: " + segment);
                     }
 
@@ -106,11 +98,10 @@ namespace Notifications.Impls.Android
                 }
 
                 store.CallStatic("clearMessagesData");
-                
+
             }
 
-            return new CountlyResponse
-            {
+            return new CountlyResponse {
                 IsSuccess = true,
             };
         }

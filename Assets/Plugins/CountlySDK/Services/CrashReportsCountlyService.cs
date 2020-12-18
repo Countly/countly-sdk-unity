@@ -29,8 +29,7 @@ namespace Plugins.CountlySDK.Services
         public async void LogCallback(string message, string stackTrace, LogType type)
         {
             if (_configModel.EnableAutomaticCrashReporting
-                && (type == LogType.Error || type == LogType.Exception))
-            {
+                && (type == LogType.Error || type == LogType.Exception)) {
                 await SendCrashReportAsync(message, stackTrace, type, null, false);
             }
         }
@@ -68,7 +67,7 @@ namespace Plugins.CountlySDK.Services
             };
 
             await _requestCountlyHelper.GetResponseAsync(requestParams);
-            
+
         }
 
         /// <summary>
@@ -79,20 +78,17 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value"></param>
         public void AddBreadcrumbs(string value)
         {
-            if (_configModel.EnableConsoleLogging)
-            {
+            if (_configModel.EnableConsoleLogging) {
                 Debug.Log("[Countly] AddBreadcrumbs : " + value);
             }
 
-            if (_configModel.EnableTestMode)
-            {
+            if (_configModel.EnableTestMode) {
                 return;
             }
 
             string validBreadcrumb = value.Length > 1000 ? value.Substring(0, 1000) : value;
 
-            if (_crashBreadcrumbs.Count == _configModel.TotalBreadcrumbsAllowed)
-            {
+            if (_crashBreadcrumbs.Count == _configModel.TotalBreadcrumbsAllowed) {
                 _crashBreadcrumbs.Dequeue();
             }
 

@@ -30,8 +30,7 @@ namespace Plugins.CountlySDK.Services
         internal void EnablePushNotificationAsync(TestMode mode)
         {
             _mode = mode;
-            _notificationsService.GetToken(async result =>
-            {
+            _notificationsService.GetToken(async result => {
                 _token = result;
                 /*
                  * When the push notification service gets enabled successfully for the device, 
@@ -41,14 +40,12 @@ namespace Plugins.CountlySDK.Services
                 await ReportPushActionAsync();
             });
 
-            _notificationsService.OnNotificationClicked(async (data, index) =>
-            {
+            _notificationsService.OnNotificationClicked(async (data, index) => {
                 _notificationsCallbackService.NotifyOnNotificationClicked(data, index);
                 await ReportPushActionAsync();
             });
 
-            _notificationsService.OnNotificationReceived(data =>
-            {
+            _notificationsService.OnNotificationReceived(data => {
                 _notificationsCallbackService.NotifyOnNotificationReceived(data);
             });
 
@@ -60,8 +57,7 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         private async Task PostToCountlyAsync(TestMode? mode, string token)
         {
-            if (!_mode.HasValue)
-            {
+            if (!_mode.HasValue) {
                 return;
             }
 

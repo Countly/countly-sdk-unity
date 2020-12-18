@@ -28,14 +28,12 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async Task RecordOpenViewAsync(string name, bool hasSessionBegunWithView = false)
         {
-            if (string.IsNullOrEmpty(name))
-            {
+            if (string.IsNullOrEmpty(name)) {
                 return;
             }
 
             ViewSegment currentViewSegment =
-                new ViewSegment
-                {
+                new ViewSegment {
                     Name = name,
                     Segment = Constants.UnityPlatform,
                     Visit = 1,
@@ -44,13 +42,11 @@ namespace Plugins.CountlySDK.Services
                     HasSessionBegunWithView = hasSessionBegunWithView
                 };
 
-            if (!_viewToLastViewStartTime.ContainsKey(name))
-            {
-                _viewToLastViewStartTime.Add(name, DateTime.UtcNow);   
+            if (!_viewToLastViewStartTime.ContainsKey(name)) {
+                _viewToLastViewStartTime.Add(name, DateTime.UtcNow);
             }
 
-            if (_config.EnableConsoleLogging)
-            {
+            if (_config.EnableConsoleLogging) {
                 Debug.Log("[ViewCountlyService] RecordOpenViewAsync: " + name);
             }
 
@@ -66,43 +62,39 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async Task RecordCloseViewAsync(string name, bool hasSessionBegunWithView = false)
         {
-            if (string.IsNullOrEmpty(name))
-            {
+            if (string.IsNullOrEmpty(name)) {
                 return;
             }
 
             ViewSegment currentViewSegment =
-                new ViewSegment
-                {
+                new ViewSegment {
                     Name = name,
                     Segment = Constants.UnityPlatform,
                     Visit = 0,
-                    Exit =  1,
+                    Exit = 1,
                     Bounce = 0,
                     HasSessionBegunWithView = hasSessionBegunWithView
                 };
 
             double? duration = null;
-            if (_viewToLastViewStartTime.ContainsKey(name))
-            {
+            if (_viewToLastViewStartTime.ContainsKey(name)) {
                 DateTime lastViewStartTime = _viewToLastViewStartTime[name];
                 duration = (DateTime.UtcNow - lastViewStartTime).TotalSeconds;
 
                 _viewToLastViewStartTime.Remove(name);
             }
 
-            if (_config.EnableConsoleLogging)
-            {
+            if (_config.EnableConsoleLogging) {
                 Debug.Log("[ViewCountlyService] RecordCloseViewAsync: " + name + ", duration: " + duration);
             }
 
             CountlyEventModel currentView = new CountlyEventModel(CountlyEventModel.ViewEvent, currentViewSegment.ToDictionary(), 1, null, duration);
             await _eventService.RecordEventAsync(currentView);
         }
-        
-        
-        
-       
+
+
+
+
 
         /// <summary>
         /// Reports a particular action with the specified details
@@ -116,8 +108,7 @@ namespace Plugins.CountlySDK.Services
         public async Task ReportActionAsync(string type, int x, int y, int width, int height)
         {
             ActionSegment segment =
-                new ActionSegment
-                {
+                new ActionSegment {
                     Type = type,
                     PositionX = x,
                     PositionY = y,
@@ -127,7 +118,7 @@ namespace Plugins.CountlySDK.Services
 
             await _eventService.ReportCustomEventAsync(CountlyEventModel.ViewActionEvent, segment.ToDictionary());
         }
-        
+
         /// <summary>
         /// Custom Segmentation for Views related events.
         /// </summary>
@@ -141,15 +132,15 @@ namespace Plugins.CountlySDK.Services
             public int Bounce { get; set; }
             public bool HasSessionBegunWithView { get; set; }
             private int Start => HasSessionBegunWithView ? 1 : 0;
-            
+
             public IDictionary<string, object> ToDictionary()
             {
                 Dictionary<string, object> dict = new Dictionary<string, object>
                 {
-                    {"name", Name}, 
-                    {"segment", Segment}, 
-                    {"exit", Exit}, 
-                    {"visit", Visit}, 
+                    {"name", Name},
+                    {"segment", Segment},
+                    {"exit", Exit},
+                    {"visit", Visit},
                     {"start", Start},
                     {"bounce", Bounce}
                 };
@@ -157,7 +148,7 @@ namespace Plugins.CountlySDK.Services
             }
         }
 
-        
+
         /// <summary>
         /// Custom Segmentation for Action related events.
         /// </summary>
@@ -169,7 +160,7 @@ namespace Plugins.CountlySDK.Services
             public int PositionY { get; set; }
             public int Width { get; set; }
             public int Height { get; set; }
-            
+
             public IDictionary<string, object> ToDictionary()
             {
                 return new Dictionary<string, object>()

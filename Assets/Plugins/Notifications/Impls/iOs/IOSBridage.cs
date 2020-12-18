@@ -41,13 +41,11 @@ public class IOSBridage : MonoBehaviour
     //Sent when the application successfully registered with Apple Push Notification Service (APNS).
     void OnDidRegisterForRemoteNotificationsWithDeviceToken(string deviceToken)
     {
-        if (deviceToken != null && deviceToken.Length != 0)
-        {
-            if (Config.EnableConsoleLogging)
-            {
+        if (deviceToken != null && deviceToken.Length != 0) {
+            if (Config.EnableConsoleLogging) {
                 Debug.Log("[Countly] OnDidRegisterForRemoteNotificationsWithDeviceToken Token: " + deviceToken);
             }
-            
+
             _onTokenResult?.Invoke(deviceToken);
         }
     }
@@ -55,17 +53,15 @@ public class IOSBridage : MonoBehaviour
     //Sent when the application failed to be registered with Apple Push Notification Service (APNS).
     void OnDidFailToRegisterForRemoteNotificcallBackationsWithError(string error)
     {
-        if (Config.EnableConsoleLogging)
-        {
+        if (Config.EnableConsoleLogging) {
             Debug.Log("[Countly] OnDidFailToRegisterForRemoteNotificcallBackationsWithError error: " + error);
         }
     }
 
-    
+
     void OnPushNotificationsReceived(string pushData)
     {
-        if (Config.EnableConsoleLogging)
-        {
+        if (Config.EnableConsoleLogging) {
             Debug.Log("[Countly] OnPushNotificationsReceived: " + pushData);
         }
         _OnNotificationReceiveResult?.Invoke(pushData);
@@ -74,8 +70,7 @@ public class IOSBridage : MonoBehaviour
 
     void OnPushNotificationsClicked(string pushData)
     {
-        if (Config.EnableConsoleLogging)
-        {
+        if (Config.EnableConsoleLogging) {
             Debug.Log("[Countly] OnPushNotificationsClicked: " + pushData);
         }
 
@@ -91,8 +86,7 @@ public class IOSBridage : MonoBehaviour
 
     void OnDidRegisterUserNotificationSettings(string setting)
     {
-        if (Config.EnableConsoleLogging)
-        {
+        if (Config.EnableConsoleLogging) {
             Debug.Log("[Countly] OnDidRegisterUserNotificationSettings error: " + setting);
         }
     }

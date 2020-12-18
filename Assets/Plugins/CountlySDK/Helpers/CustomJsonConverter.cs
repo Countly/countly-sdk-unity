@@ -25,8 +25,7 @@ namespace Plugins.CountlySDK.Helpers
             }
 
             writer.WriteStartObject();
-            foreach (KeyValuePair<string, object> item in list)
-            {
+            foreach (KeyValuePair<string, object> item in list) {
                 writer.WritePropertyName(item.Key);
                 serializer.Serialize(writer, item.Value);
             }

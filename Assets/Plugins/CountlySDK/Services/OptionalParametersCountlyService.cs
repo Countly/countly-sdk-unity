@@ -83,11 +83,10 @@ namespace Plugins.CountlySDK.Services
         {
             _recordLocation.SetLocation(countryCode, city, gpsCoordinates, ipAddress);
 
-            if (_countlyConfiguration.EnableConsoleLogging)
-            {
+            if (_countlyConfiguration.EnableConsoleLogging) {
                 Debug.LogWarning("[Countly] OptionalParameters is deprecated, please use Location instead");
-            } 
-            
+            }
+
         }
     }
 }

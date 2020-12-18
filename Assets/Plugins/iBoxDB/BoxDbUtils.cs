@@ -3,17 +3,17 @@ using UnityEngine;
 
 namespace Plugins.iBoxDB
 {
-	public class BoxDbUtils
-	{
-		private static DB _db;
-		
-		public static DB Database => _db ?? (_db = BuildDatabase());
+    public class BoxDbUtils
+    {
+        private static DB _db;
 
-		private static DB BuildDatabase()
-		{
-			DB.Root(Application.persistentDataPath);
+        public static DB Database => _db ?? (_db = BuildDatabase());
+
+        private static DB BuildDatabase()
+        {
+            DB.Root(Application.persistentDataPath);
             DB db = new DB();
-			return db;
-		}
-	}
+            return db;
+        }
+    }
 }

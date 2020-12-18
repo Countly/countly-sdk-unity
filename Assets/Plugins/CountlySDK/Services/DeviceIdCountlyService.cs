@@ -13,7 +13,7 @@ namespace Plugins.CountlySDK.Services
         private readonly EventCountlyService _eventCountlyService;
         private readonly CountlyUtils _countlyUtils;
 
-        internal DeviceIdCountlyService(SessionCountlyService sessionCountlyService, 
+        internal DeviceIdCountlyService(SessionCountlyService sessionCountlyService,
             RequestCountlyHelper requestCountlyHelper, EventCountlyService eventCountlyService, CountlyUtils countlyUtils)
         {
             _sessionCountlyService = sessionCountlyService;
@@ -38,14 +38,13 @@ namespace Plugins.CountlySDK.Services
                     ? DeviceId
                     : !_countlyUtils.IsNullEmptyOrWhitespace(deviceId)
                         ? deviceId : _countlyUtils.GetUniqueDeviceId();
-            
+
             //Set DeviceID in Cache if it doesn't already exists in Cache
-            if (_countlyUtils.IsNullEmptyOrWhitespace(storedDeviceId))
-            {
+            if (_countlyUtils.IsNullEmptyOrWhitespace(storedDeviceId)) {
                 PlayerPrefs.SetString(Constants.DeviceIDKey, DeviceId);
             }
         }
-        
+
         /// <summary>
         /// Changes Device Id.
         /// Adds currently recorded but not queued events to request queue.
@@ -63,7 +62,7 @@ namespace Plugins.CountlySDK.Services
 
             //Add currently recorded events to request queue-----------------------------------
             await _eventCountlyService.AddEventsToRequestQueue();
-            
+
             //Ends current session
             //Do not dispose timer object
             await _sessionCountlyService.ExecuteEndSessionAsync(false);
@@ -87,8 +86,7 @@ namespace Plugins.CountlySDK.Services
         public async Task ChangeDeviceIdAndMergeSessionDataAsync(string deviceId)
         {
             //Ignore call if new and old device id are same
-            if (DeviceId == deviceId)
-            {
+            if (DeviceId == deviceId) {
                 return;
             }
 
@@ -106,9 +104,9 @@ namespace Plugins.CountlySDK.Services
                };
 
             await _requestCountlyHelper.GetResponseAsync(requestParams);
-            
+
         }
-        
+
         /// <summary>
         /// Updates Device ID both in app and in cache
         /// </summary>

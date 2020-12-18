@@ -17,7 +17,7 @@ namespace Plugins.CountlySDK.Services
         private readonly NonViewEventRepository _nonViewEventRepo;
         private readonly EventNumberInSameSessionHelper _eventNumberInSameSessionHelper;
 
-        internal EventCountlyService(CountlyConfiguration countlyConfiguration, RequestCountlyHelper requestCountlyHelper, 
+        internal EventCountlyService(CountlyConfiguration countlyConfiguration, RequestCountlyHelper requestCountlyHelper,
             ViewEventRepository viewEventRepo, NonViewEventRepository nonViewEventRepo, EventNumberInSameSessionHelper eventNumberInSameSessionHelper)
         {
             _countlyConfiguration = countlyConfiguration;
@@ -32,20 +32,17 @@ namespace Plugins.CountlySDK.Services
         /// </summary>
         internal async Task AddEventsToRequestQueue()
         {
-            if ((_viewEventRepo.Models.Count + _nonViewEventRepo.Models.Count) == 0)
-            {
+            if ((_viewEventRepo.Models.Count + _nonViewEventRepo.Models.Count) == 0) {
                 return;
             }
 
             Queue result = new Queue();
-            
 
-            while (_nonViewEventRepo.Count > 0)
-            {
+
+            while (_nonViewEventRepo.Count > 0) {
                 result.Enqueue(_nonViewEventRepo.Dequeue());
             }
-            while (_viewEventRepo.Count > 0)
-            {
+            while (_viewEventRepo.Count > 0) {
                 result.Enqueue(_viewEventRepo.Dequeue());
             }
 
@@ -60,43 +57,35 @@ namespace Plugins.CountlySDK.Services
                 };
 
             await _requestCountlyHelper.GetResponseAsync(requestParams);
-            
+
         }
 
         internal async Task RecordEventAsync(CountlyEventModel @event, bool useNumberInSameSession = false)
         {
 
-            if (_countlyConfiguration.EnableConsoleLogging)
-            {
+            if (_countlyConfiguration.EnableConsoleLogging) {
                 Debug.Log("[Countly] RecordEventAsync : " + @event.ToString());
             }
 
-            if (_countlyConfiguration.EnableTestMode)
-            {
+            if (_countlyConfiguration.EnableTestMode) {
                 return;
             }
 
-            if (_countlyConfiguration.EnableFirstAppLaunchSegment)
-            {
-                AddFirstAppSegment(@event);   
+            if (_countlyConfiguration.EnableFirstAppLaunchSegment) {
+                AddFirstAppSegment(@event);
             }
 
-            if (@event.Key.Equals(CountlyEventModel.ViewEvent))
-            {
+            if (@event.Key.Equals(CountlyEventModel.ViewEvent)) {
                 _viewEventRepo.Enqueue(@event);
-            }
-            else
-            {
+            } else {
                 _nonViewEventRepo.Enqueue(@event);
             }
 
-            if (useNumberInSameSession)
-            {
+            if (useNumberInSameSession) {
                 _eventNumberInSameSessionHelper.IncreaseNumberInSameSession(@event);
             }
 
-            if ((_viewEventRepo.Count + _nonViewEventRepo.Count) >= _countlyConfiguration.EventQueueThreshold)
-            {
+            if ((_viewEventRepo.Count + _nonViewEventRepo.Count) >= _countlyConfiguration.EventQueueThreshold) {
                 await AddEventsToRequestQueue();
             }
         }
@@ -125,53 +114,45 @@ namespace Plugins.CountlySDK.Services
         public async Task RecordEventAsync(string key, SegmentModel segmentation, bool useNumberInSameSession = false,
             int? count = 1, double? sum = 0, double? duration = null)
         {
-            if (_countlyConfiguration.EnableConsoleLogging)
-            {
+            if (_countlyConfiguration.EnableConsoleLogging) {
                 Debug.Log("[Countly] RecordEventAsync : key = " + key);
             }
 
-            if (_countlyConfiguration.EnableTestMode)
-            {
+            if (_countlyConfiguration.EnableTestMode) {
                 return;
             }
 
-            if (string.IsNullOrEmpty(key) && string.IsNullOrWhiteSpace(key))
-            {
-                return;            
+            if (string.IsNullOrEmpty(key) && string.IsNullOrWhiteSpace(key)) {
+                return;
             }
 
-            if (segmentation != null)
-            {
+            if (segmentation != null) {
                 List<string> toRemove = new List<string>();
-              
-                foreach (KeyValuePair<string, object> item in segmentation)
-                {
+
+                foreach (KeyValuePair<string, object> item in segmentation) {
                     bool isValidDataType = item.Value.GetType() == typeof(int)
                         || item.Value.GetType() == typeof(bool)
                         || item.Value.GetType() == typeof(float)
                         || item.Value.GetType() == typeof(double)
                         || item.Value.GetType() == typeof(string);
 
-                    if (!isValidDataType)
-                    {
+                    if (!isValidDataType) {
                         toRemove.Add(item.Key);
-                        Debug.LogWarning("[Countly] RecordEventAsync : In segmentation Data type of item '" + item .Key + "'isn't valid.");   
+                        Debug.LogWarning("[Countly] RecordEventAsync : In segmentation Data type of item '" + item.Key + "'isn't valid.");
                     }
                 }
 
-                foreach (string k in toRemove)
-                {
+                foreach (string k in toRemove) {
                     segmentation.Remove(k);
                 }
             }
 
             CountlyEventModel @event = new CountlyEventModel(key, segmentation, count, sum, duration);
-            
-            if (useNumberInSameSession)
-            {
+
+            if (useNumberInSameSession) {
                 _eventNumberInSameSessionHelper.IncreaseNumberInSameSession(@event);
             }
-            
+
             await RecordEventAsync(@event);
         }
 
@@ -182,17 +163,14 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         internal async Task ReportMultipleEventsAsync(List<CountlyEventModel> events)
         {
-            if (events == null || events.Count == 0)
-            {
+            if (events == null || events.Count == 0) {
                 return;
             }
 
-            if (_countlyConfiguration.EnableFirstAppLaunchSegment)
-            {
-                foreach (CountlyEventModel evt in events)
-                {
+            if (_countlyConfiguration.EnableFirstAppLaunchSegment) {
+                foreach (CountlyEventModel evt in events) {
                     AddFirstAppSegment(evt);
-                }       
+                }
             }
 
             Dictionary<string, object> requestParams =
@@ -215,15 +193,13 @@ namespace Plugins.CountlySDK.Services
             IDictionary<string, object> segmentation = null,
             int? count = 1, double? sum = null, double? duration = null)
         {
-            if (string.IsNullOrEmpty(key) && string.IsNullOrWhiteSpace(key))
-            {
+            if (string.IsNullOrEmpty(key) && string.IsNullOrWhiteSpace(key)) {
                 return;
             }
 
             CountlyEventModel evt = new CountlyEventModel(key, segmentation, count, sum, duration);
 
-            if (_countlyConfiguration.EnableFirstAppLaunchSegment)
-            {
+            if (_countlyConfiguration.EnableFirstAppLaunchSegment) {
                 AddFirstAppSegment(evt);
             }
 
@@ -241,8 +217,7 @@ namespace Plugins.CountlySDK.Services
 
         private void AddFirstAppSegment(CountlyEventModel @event)
         {
-            if (@event.Segmentation == null)
-            {
+            if (@event.Segmentation == null) {
                 @event.Segmentation = new SegmentModel();
             }
             @event.Segmentation.Add(Constants.FirstAppLaunchSegment, FirstLaunchAppHelper.IsFirstLaunchApp);

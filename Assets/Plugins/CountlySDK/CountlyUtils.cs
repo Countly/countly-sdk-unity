@@ -47,8 +47,7 @@ namespace Plugins.CountlySDK
                 {"sdk_version", Constants.SdkVersion}
             };
 
-            foreach (KeyValuePair<string, object> item in TimeMetricModel.GetTimeMetricModel())
-            {
+            foreach (KeyValuePair<string, object> item in TimeMetricModel.GetTimeMetricModel()) {
                 baseParams.Add(item.Key, item.Value);
             }
 
@@ -80,9 +79,8 @@ namespace Plugins.CountlySDK
         /// <returns></returns>
         public bool IsPictureValid(string pictureUrl)
         {
-            if (!string.IsNullOrEmpty(pictureUrl) && pictureUrl.Contains("?"))
-            {
-                pictureUrl = pictureUrl.Split(new[] {'?'}, StringSplitOptions.RemoveEmptyEntries)[0];
+            if (!string.IsNullOrEmpty(pictureUrl) && pictureUrl.Contains("?")) {
+                pictureUrl = pictureUrl.Split(new[] { '?' }, StringSplitOptions.RemoveEmptyEntries)[0];
             }
 
             return string.IsNullOrEmpty(pictureUrl)
@@ -94,8 +92,7 @@ namespace Plugins.CountlySDK
 
         public string GetStringFromBytes(byte[] bytes)
         {
-            for (int i = 0; i < bytes.Length; i++)
-            {
+            for (int i = 0; i < bytes.Length; i++) {
                 Builder.Append(bytes[i].ToString("x2"));
             }
 

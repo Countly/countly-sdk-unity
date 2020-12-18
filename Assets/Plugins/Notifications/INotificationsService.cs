@@ -4,8 +4,8 @@ using System.Threading.Tasks;
 
 namespace Notifications
 {
-	public interface INotificationsService
-	{
+    public interface INotificationsService
+    {
         void GetToken(Action<string> result);
         void OnNotificationClicked(Action<string, int> result);
         void OnNotificationReceived(Action<string> result);

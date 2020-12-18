@@ -7,14 +7,14 @@ namespace Plugins.CountlySDK.Helpers
     public class EventNumberInSameSessionHelper
     {
         public const string NumberInSameSessionSegment = "numberInSameSession";
-        
+
         private readonly EventNumberInSameSessionDao _dao;
 
         public EventNumberInSameSessionHelper(EventNumberInSameSessionDao dao)
         {
             _dao = dao;
         }
-        
+
         public void IncreaseNumberInSameSession(CountlyEventModel @event)
         {
             EventNumberInSameSessionEntity entity = IncrementEventNumberInSameSessionAndSaveOrUpdate(@event.Key);
@@ -29,11 +29,9 @@ namespace Plugins.CountlySDK.Helpers
         private EventNumberInSameSessionEntity IncrementEventNumberInSameSessionAndSaveOrUpdate(string eventKey)
         {
             EventNumberInSameSessionEntity entity = _dao.GetByEventName(eventKey);
-            if (entity == null)
-            {
+            if (entity == null) {
                 const int number = 1;
-                entity = new  EventNumberInSameSessionEntity
-                {
+                entity = new EventNumberInSameSessionEntity {
                     Id = _dao.GenerateNewId(),
                     EventKey = eventKey,
                     Number = number
@@ -50,8 +48,7 @@ namespace Plugins.CountlySDK.Helpers
 
         private void AddNumberInSameSessionToEvent(CountlyEventModel @event, int number)
         {
-            if (@event.Segmentation == null)
-            {
+            if (@event.Segmentation == null) {
                 @event.Segmentation = new SegmentModel();
             }
             @event.Segmentation.Add(NumberInSameSessionSegment, number);

@@ -16,17 +16,15 @@ namespace Plugins.CountlySDK.Persistance.Repositories
         {
             _config = config;
             _segmentDao = segmentDao;
-            
+
         }
 
         public override void Initialize()
         {
             base.Initialize();
-            foreach (CountlyEventModel model in Models)
-            {
+            foreach (CountlyEventModel model in Models) {
                 SegmentEntity segmentEntity = _segmentDao.GetByEventId(model.Id);
-                if(segmentEntity == null)
-                {
+                if (segmentEntity == null) {
                     continue;
                 }
 
@@ -38,7 +36,7 @@ namespace Plugins.CountlySDK.Persistance.Repositories
         protected override CountlyEventModel ConvertEntityToModel(EventEntity entity)
         {
             return Converter.ConvertEventEntityToEventModel(entity);
-        }    
+        }
 
         protected override EventEntity ConvertModelToEntity(CountlyEventModel model)
         {
@@ -48,21 +46,18 @@ namespace Plugins.CountlySDK.Persistance.Repositories
         public override bool Enqueue(CountlyEventModel model)
         {
             bool res = base.Enqueue(model);
-            if (!res)
-            {
+            if (!res) {
                 return false;
             }
 
             SegmentModel segmentModel = model.Segmentation;
-            if (segmentModel != null)
-            {
+            if (segmentModel != null) {
                 SegmentEntity segmentEntity = Converter.ConvertSegmentModelToSegmentEntity(segmentModel, _segmentDao.GenerateNewId());
                 segmentEntity.EventId = model.Id;
                 _segmentDao.Save(segmentEntity);
             }
 
-            if (_config.EnableConsoleLogging)
-            {
+            if (_config.EnableConsoleLogging) {
                 Debug.Log("[" + GetType().Name + "] Event repo enqueue: \n" + model + ", segment: " + segmentModel);
             }
             return true;
@@ -70,12 +65,11 @@ namespace Plugins.CountlySDK.Persistance.Repositories
 
         public override CountlyEventModel Dequeue()
         {
-            CountlyEventModel @event =  base.Dequeue();
+            CountlyEventModel @event = base.Dequeue();
             SegmentEntity segmentEntity = _segmentDao.GetByEventId(@event.Id);
-            if (segmentEntity != null)
-            {
+            if (segmentEntity != null) {
                 SegmentModel segmentModel = Converter.ConvertSegmentEntityToSegmentModel(segmentEntity);
-                @event.Segmentation = segmentModel;   
+                @event.Segmentation = segmentModel;
             }
             return @event;
         }
