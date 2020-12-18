@@ -12,7 +12,7 @@ namespace Plugins.CountlySDK.Persistance.Dao
     {
         private readonly CountlyConfiguration _configuration;
         private readonly StringBuilder _stringBuilder = new StringBuilder();
-        
+
         public SegmentDao(AutoBox auto, string table, CountlyConfiguration configuration) : base(auto, table, configuration)
         {
             _configuration = configuration;
@@ -23,31 +23,27 @@ namespace Plugins.CountlySDK.Persistance.Dao
         {
             _stringBuilder.Clear();
 
-            var ql = _stringBuilder.Append("from ").Append(Table).Append(" where EventId==?").ToString();
+            string ql = _stringBuilder.Append("from ").Append(Table).Append(" where EventId==?").ToString();
 
-            try
-            {
-                var entities = Auto.Select<SegmentEntity>(ql, eventId);
-                if (entities.Count > 1)
-                {
+            try {
+                System.Collections.Generic.List<SegmentEntity> entities = Auto.Select<SegmentEntity>(ql, eventId);
+                if (entities.Count > 1) {
                     throw new ArgumentException("Only one or zero segment can be assigned to entity with id " + eventId + ". "
                                                 + entities.Count + " segments found.");
                 }
 
-                if (entities.Count == 0)
+                if (entities.Count == 0) {
                     return null;
+                }
 
                 return entities[0];
-            }
-            catch (Exception ex)
-            {
-                if (_configuration.EnableConsoleLogging)
-                {
+            } catch (Exception ex) {
+                if (_configuration.EnableConsoleLogging) {
                     Debug.LogError("[Countly] SegmentDao GetByEventId: Couldn't complete db operation, [" + ex.Message + "]");
                 }
                 return null;
             }
         }
-        
+
     }
 }

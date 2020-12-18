@@ -39,7 +39,7 @@ namespace Plugins.CountlySDK
         /// <returns></returns>
         public Dictionary<string, object> GetBaseParams()
         {
-            var baseParams = new Dictionary<string, object>
+            Dictionary<string, object> baseParams = new Dictionary<string, object>
             {
                 {"app_key", _countly.Configuration.AppKey},
                 {"device_id", _countly.Device.DeviceId},
@@ -47,8 +47,9 @@ namespace Plugins.CountlySDK
                 {"sdk_version", Constants.SdkVersion}
             };
 
-            foreach (var item in TimeMetricModel.GetTimeMetricModel())
+            foreach (KeyValuePair<string, object> item in TimeMetricModel.GetTimeMetricModel()) {
                 baseParams.Add(item.Key, item.Value);
+            }
 
             return baseParams;
         }
@@ -78,8 +79,9 @@ namespace Plugins.CountlySDK
         /// <returns></returns>
         public bool IsPictureValid(string pictureUrl)
         {
-            if (!string.IsNullOrEmpty(pictureUrl) && pictureUrl.Contains("?"))
-                pictureUrl = pictureUrl.Split(new[] {'?'}, StringSplitOptions.RemoveEmptyEntries)[0];
+            if (!string.IsNullOrEmpty(pictureUrl) && pictureUrl.Contains("?")) {
+                pictureUrl = pictureUrl.Split(new[] { '?' }, StringSplitOptions.RemoveEmptyEntries)[0];
+            }
 
             return string.IsNullOrEmpty(pictureUrl)
                    || pictureUrl.EndsWith(".png")
@@ -90,7 +92,10 @@ namespace Plugins.CountlySDK
 
         public string GetStringFromBytes(byte[] bytes)
         {
-            for (var i = 0; i < bytes.Length; i++) Builder.Append(bytes[i].ToString("x2"));
+            for (int i = 0; i < bytes.Length; i++) {
+                Builder.Append(bytes[i].ToString("x2"));
+            }
+
             return Builder.ToString();
         }
     }

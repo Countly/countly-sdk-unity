@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Globalization;
 using Newtonsoft.Json;
 using Plugins.CountlySDK.Helpers;
 using UnityEngine;
@@ -10,8 +9,7 @@ namespace Plugins.CountlySDK.Models
     internal class CountlyMetricModel
     {
         public static readonly CountlyMetricModel Metrics =
-            new CountlyMetricModel
-            {
+            new CountlyMetricModel {
                 OS = Constants.UnityPlatform,
                 OSVersion = SystemInfo.operatingSystem,
                 Device = SystemInfo.deviceModel,

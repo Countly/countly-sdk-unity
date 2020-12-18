@@ -24,7 +24,7 @@ namespace Plugins.CountlySDK.Models
 
         internal static Dictionary<string, object> GetTimeMetricModel()
         {
-            var model = TimeMetricModel.GetTimeZoneInfoForRequest();
+            TimeMetricModel model = TimeMetricModel.GetTimeZoneInfoForRequest();
             return new Dictionary<string, object>
             {
                 {"timestamp", model.Timestamp },
@@ -37,18 +37,15 @@ namespace Plugins.CountlySDK.Models
         private long GetUniqueMilliSecTimeStamp(DateTime? requestedDatetime = null)
         {
             //get current timestamp in miliseconds
-            var currentMilliSecTimeStamp = DateTimeOffset.UtcNow;
+            DateTimeOffset currentMilliSecTimeStamp = DateTimeOffset.UtcNow;
 
-            if (requestedDatetime.HasValue)
-            {
+            if (requestedDatetime.HasValue) {
                 currentMilliSecTimeStamp = requestedDatetime.Value;
 
                 _lastMilliSecTimeStamp = _lastMilliSecTimeStamp >= currentMilliSecTimeStamp
                                         ? _lastMilliSecTimeStamp.AddMilliseconds(1)
                                         : _lastMilliSecTimeStamp = currentMilliSecTimeStamp;
-            }
-            else
-            {
+            } else {
                 _lastMilliSecTimeStamp = currentMilliSecTimeStamp;
             }
 
@@ -57,15 +54,14 @@ namespace Plugins.CountlySDK.Models
 
         internal static TimeMetricModel GetTimeZoneInfoForRequest()
         {
-            var currentDateTime = DateTime.Now;
-            var model =
-                new TimeMetricModel
-                {
+            DateTime currentDateTime = DateTime.Now;
+            TimeMetricModel model =
+                new TimeMetricModel {
                     Hour = currentDateTime.TimeOfDay.Hours,
                     DayOfWeek = (int)currentDateTime.DayOfWeek,
                     Timezone = TimeZone.CurrentTimeZone.GetUtcOffset(currentDateTime).TotalMinutes.ToString(CultureInfo.InvariantCulture)
                 };
-            
+
             model.Timestamp = model.GetUniqueMilliSecTimeStamp(currentDateTime);
             return model;
         }

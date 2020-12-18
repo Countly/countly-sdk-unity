@@ -13,7 +13,7 @@ namespace Plugins.CountlySDK.Services
         private readonly EventCountlyService _eventCountlyService;
         private readonly CountlyUtils _countlyUtils;
 
-        internal DeviceIdCountlyService(SessionCountlyService sessionCountlyService, 
+        internal DeviceIdCountlyService(SessionCountlyService sessionCountlyService,
             RequestCountlyHelper requestCountlyHelper, EventCountlyService eventCountlyService, CountlyUtils countlyUtils)
         {
             _sessionCountlyService = sessionCountlyService;
@@ -31,19 +31,20 @@ namespace Plugins.CountlySDK.Services
             //Static DeviceID (only when the app is running or in the background)
             //User provided DeviceID
             //Generate Random DeviceID
-            var storedDeviceId = PlayerPrefs.GetString("DeviceID");
+            string storedDeviceId = PlayerPrefs.GetString("DeviceID");
             DeviceId = !_countlyUtils.IsNullEmptyOrWhitespace(storedDeviceId)
                 ? storedDeviceId
                 : !_countlyUtils.IsNullEmptyOrWhitespace(DeviceId)
                     ? DeviceId
                     : !_countlyUtils.IsNullEmptyOrWhitespace(deviceId)
                         ? deviceId : _countlyUtils.GetUniqueDeviceId();
-            
+
             //Set DeviceID in Cache if it doesn't already exists in Cache
-            if (_countlyUtils.IsNullEmptyOrWhitespace(storedDeviceId))
+            if (_countlyUtils.IsNullEmptyOrWhitespace(storedDeviceId)) {
                 PlayerPrefs.SetString(Constants.DeviceIDKey, DeviceId);
+            }
         }
-        
+
         /// <summary>
         /// Changes Device Id.
         /// Adds currently recorded but not queued events to request queue.
@@ -55,12 +56,13 @@ namespace Plugins.CountlySDK.Services
         public async Task<CountlyResponse> ChangeDeviceIdAndEndCurrentSessionAsync(string deviceId)
         {
             //Ignore call if new and old device id are same
-            if (DeviceId == deviceId)
+            if (DeviceId == deviceId) {
                 return new CountlyResponse { IsSuccess = true };
+            }
 
             //Add currently recorded events to request queue-----------------------------------
             await _eventCountlyService.AddEventsToRequestQueue();
-            
+
             //Ends current session
             //Do not dispose timer object
             await _sessionCountlyService.ExecuteEndSessionAsync(false);
@@ -84,28 +86,27 @@ namespace Plugins.CountlySDK.Services
         public async Task ChangeDeviceIdAndMergeSessionDataAsync(string deviceId)
         {
             //Ignore call if new and old device id are same
-            if (DeviceId == deviceId)
-            {
+            if (DeviceId == deviceId) {
                 return;
             }
 
             //Keep old device id
-            var oldDeviceId = DeviceId;
+            string oldDeviceId = DeviceId;
 
             //Update device id
             UpdateDeviceId(deviceId);
 
             //Merge user data for old and new device
-            var requestParams =
+            Dictionary<string, object> requestParams =
                new Dictionary<string, object>
                {
                         { "old_device_id", oldDeviceId }
                };
 
             await _requestCountlyHelper.GetResponseAsync(requestParams);
-            
+
         }
-        
+
         /// <summary>
         /// Updates Device ID both in app and in cache
         /// </summary>

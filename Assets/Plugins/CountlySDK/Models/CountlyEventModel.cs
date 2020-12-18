@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using Newtonsoft.Json;
 using Plugins.CountlySDK.Persistance;
 
@@ -23,14 +22,13 @@ namespace Plugins.CountlySDK.Models
         {
             Key = key;
             Count = count ?? 1;
-            if (segmentation != null)
-            {
+            if (segmentation != null) {
                 Segmentation = new SegmentModel(segmentation);
             }
             Duration = duration;
             Sum = sum;
 
-            var timeModel = TimeMetricModel.GetTimeZoneInfoForRequest();
+            TimeMetricModel timeModel = TimeMetricModel.GetTimeZoneInfoForRequest();
 
             Hour = timeModel.Hour;
             DayOfWeek = timeModel.DayOfWeek;
@@ -43,7 +41,7 @@ namespace Plugins.CountlySDK.Models
 
         [JsonIgnore]
         public long Id { get; set; }
-        
+
         [JsonProperty("key")] public string Key { get; set; }
 
         [JsonProperty("count")] public int? Count { get; set; }
@@ -64,7 +62,7 @@ namespace Plugins.CountlySDK.Models
         [Obsolete("Timezone is deprecated, it will get removed in the future.")]
         private double Timezone { get; set; }
 
-//        [JsonIgnore] public DateTime TimeRecorded { get; set; }
+        //        [JsonIgnore] public DateTime TimeRecorded { get; set; }
 
         #region Reserved Event Names
 
@@ -85,17 +83,25 @@ namespace Plugins.CountlySDK.Models
 
         public override bool Equals(object obj)
         {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != this.GetType()) return false;
-            return Equals((CountlyEventModel) obj);
+            if (obj is null) {
+                return false;
+            }
+
+            if (ReferenceEquals(this, obj)) {
+                return true;
+            }
+
+            if (obj.GetType() != GetType()) {
+                return false;
+            }
+
+            return Equals((CountlyEventModel)obj);
         }
 
         public override int GetHashCode()
         {
-            unchecked
-            {
-                var hashCode = Id.GetHashCode();
+            unchecked {
+                int hashCode = Id.GetHashCode();
                 hashCode = (hashCode * 397) ^ (Key != null ? Key.GetHashCode() : 0);
                 hashCode = (hashCode * 397) ^ Count.GetHashCode();
                 hashCode = (hashCode * 397) ^ Sum.GetHashCode();

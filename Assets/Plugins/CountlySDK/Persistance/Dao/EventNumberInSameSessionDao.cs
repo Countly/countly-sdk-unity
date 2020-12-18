@@ -12,7 +12,7 @@ namespace Plugins.CountlySDK.Persistance.Dao
     {
         private readonly CountlyConfiguration configuration;
         private readonly StringBuilder _stringBuilder = new StringBuilder();
-        
+
         public EventNumberInSameSessionDao(AutoBox auto, string table, CountlyConfiguration config) : base(auto, table, config)
         {
             configuration = config;
@@ -21,30 +21,26 @@ namespace Plugins.CountlySDK.Persistance.Dao
         public EventNumberInSameSessionEntity GetByEventName(string eventKey)
         {
             _stringBuilder.Clear();
-            
-            var ql = _stringBuilder.Append("from ").Append(Table)
+
+            string ql = _stringBuilder.Append("from ").Append(Table)
                 .Append(" where EventKey==?").ToString();
 
-            try
-            {
+            try {
 
-                var entities = Auto.Select<EventNumberInSameSessionEntity>(ql, eventKey);
+                System.Collections.Generic.List<EventNumberInSameSessionEntity> entities = Auto.Select<EventNumberInSameSessionEntity>(ql, eventKey);
 
-                if (entities.Count > 1)
-                {
+                if (entities.Count > 1) {
                     throw new ArgumentException("Only one or zero event can be assigned to entity with key " + eventKey + ". "
                                                 + entities.Count + " events found.");
                 }
 
-                if (entities.Count == 0)
+                if (entities.Count == 0) {
                     return null;
+                }
 
                 return entities[0];
-            }
-            catch (Exception ex)
-            {
-                if (configuration.EnableConsoleLogging)
-                {
+            } catch (Exception ex) {
+                if (configuration.EnableConsoleLogging) {
                     Debug.LogError("[Countly] EventNumberInSameSessionDao GetByEventName: Couldn't complete db operation, [" + ex.Message + "]");
 
                 }

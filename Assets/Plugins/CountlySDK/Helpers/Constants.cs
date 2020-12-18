@@ -37,8 +37,8 @@ namespace Plugins.CountlySDK.Helpers
 
         public const string FirstAppLaunch = "Countly.FirstAppLaunch";
         public const string FirstAppLaunchSegment = "firstAppLaunch";
-        
-#region Notification Keys
+
+        #region Notification Keys
 
         public const string MessageIDKey = "c.i";
         public const string TitleDataKey = "title";
@@ -47,15 +47,15 @@ namespace Plugins.CountlySDK.Helpers
         public const string ActionButtonKey = "c.b";
         public const string SoundDataKey = "sound";
 
-#endregion
+        #endregion
 
-#region Unity System
+        #region Unity System
 
         public static string UnityPlatform =>
             UnityEngine.Application.platform.ToString().ToLower() == "iphoneplayer"
             ? "ios"
             : UnityEngine.Application.platform.ToString().ToLower();
 
-#endregion
+        #endregion
     }
 }

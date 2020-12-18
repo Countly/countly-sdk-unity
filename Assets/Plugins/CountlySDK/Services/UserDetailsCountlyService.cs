@@ -12,7 +12,7 @@ namespace Plugins.CountlySDK.Services
     {
         private Dictionary<string, object> _customDataProperties = new Dictionary<string, object>();
 
-        
+
         private readonly RequestCountlyHelper _requestCountlyHelper;
         private readonly CountlyUtils _countlyUtils;
 
@@ -30,8 +30,7 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         internal async Task UserDetailsAsync(CountlyUserDetailsModel userDetails)
         {
-            if (userDetails == null)
-            {
+            if (userDetails == null) {
                 return;
             }
 
@@ -46,27 +45,27 @@ namespace Plugins.CountlySDK.Services
         /// <return></returns>
         internal async Task UserCustomDetailsAsync(CountlyUserDetailsModel userDetails)
         {
-            if (userDetails == null)
-            {
+            if (userDetails == null) {
                 return;
             }
 
             await SetCustomUserDetailsAsync(userDetails);
         }
-        
+
         /// <summary>
         /// Uploads all user details
         /// </summary>
         /// <returns></returns>
         public async Task SetUserDetailsAsync(CountlyUserDetailsModel userDetailsModel)
         {
-            if (!_countlyUtils.IsPictureValid(userDetailsModel.PictureUrl))
+            if (!_countlyUtils.IsPictureValid(userDetailsModel.PictureUrl)) {
                 throw new Exception("Accepted picture formats are .png, .gif and .jpeg");
+            }
 
-            var requestParams =
+            Dictionary<string, object> requestParams =
                 new Dictionary<string, object>
                 {
-                    { "user_details", JsonConvert.SerializeObject(userDetailsModel, Formatting.Indented, 
+                    { "user_details", JsonConvert.SerializeObject(userDetailsModel, Formatting.Indented,
                         new JsonSerializerSettings{ NullValueHandling = NullValueHandling.Ignore }) },
                 };
 
@@ -79,7 +78,7 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async Task SetCustomUserDetailsAsync(CountlyUserDetailsModel userDetailsModel)
         {
-            var requestParams =
+            Dictionary<string, object> requestParams =
                 new Dictionary<string, object>
                 {
                     { "user_details",
@@ -92,25 +91,24 @@ namespace Plugins.CountlySDK.Services
                 };
             await _requestCountlyHelper.GetResponseAsync(requestParams);
         }
-        
+
         /// <summary>
         /// Saves all custom user data updates done since the last save request.
         /// </summary>
         /// <returns></returns>
         public async Task SaveAsync()
         {
-            if (!_customDataProperties.Any())
-            {
+            if (!_customDataProperties.Any()) {
                 return;
             }
 
-            var model = new CountlyUserDetailsModel(_customDataProperties);
+            CountlyUserDetailsModel model = new CountlyUserDetailsModel(_customDataProperties);
 
             _customDataProperties = new Dictionary<string, object> { };
             await SetCustomUserDetailsAsync(model);
         }
-        
-        
+
+
         /// <summary>
         /// Sets value to key.
         /// Doesn't report it to the server until save is called.
@@ -223,18 +221,16 @@ namespace Plugins.CountlySDK.Services
 
         public void AddToCustomData(string key, object value)
         {
-            if (_customDataProperties.ContainsKey(key))
-            {
-                var item = _customDataProperties.Select(x => x.Key).FirstOrDefault(x => x.Equals(key, StringComparison.OrdinalIgnoreCase));
-                if (item != null)
-                {
+            if (_customDataProperties.ContainsKey(key)) {
+                string item = _customDataProperties.Select(x => x.Key).FirstOrDefault(x => x.Equals(key, StringComparison.OrdinalIgnoreCase));
+                if (item != null) {
                     _customDataProperties.Remove(item);
                 }
             }
 
             _customDataProperties.Add(key, value);
         }
-        
-        
+
+
     }
 }

@@ -1,6 +1,5 @@
 using System;
 using System.Collections;
-using System.Threading.Tasks;
 using CountlySDK.Input;
 using iBoxDB.LocalServer;
 using Notifications;
@@ -37,21 +36,19 @@ namespace Plugins.CountlySDK
         /// Return countly shared instance.
         /// </summary>
         /// <returns>Countly</returns>
-        public static Countly Instance {
-            get
-            {
-                if (_instance == null)
-                {
+        public static Countly Instance
+        {
+            get {
+                if (_instance == null) {
 
-                    var gameObject = new GameObject("_countly");
+                    GameObject gameObject = new GameObject("_countly");
                     _instance = gameObject.AddComponent<Countly>();
                 }
 
                 return _instance;
 
             }
-            internal set
-            {
+            internal set {
                 _instance = value;
             }
         }
@@ -125,7 +122,7 @@ namespace Plugins.CountlySDK
         /// </summary>
         /// <returns>NotificationsCallbackService</returns>
         public NotificationsCallbackService Notifications { get; set; }
-       
+
 
         private DB _db;
         private bool _logSubscribed;
@@ -142,32 +139,31 @@ namespace Plugins.CountlySDK
             Instance = this;
 
             //Auth and Config will not be null in case initializing through countly prefab
-            if (Auth != null && Config != null)
-            {
+            if (Auth != null && Config != null) {
                 Init(new CountlyConfiguration(Auth, Config));
             }
-            
+
         }
 
         public async void Init(CountlyConfiguration configuration)
         {
-            if (IsSDKInitialized)
-            {
+            if (IsSDKInitialized) {
                 return;
             }
 
-            if (configuration.Parent != null)
-            {
+            if (configuration.Parent != null) {
                 transform.parent = configuration.Parent.transform;
             }
 
-            if (string.IsNullOrEmpty(configuration.ServerUrl))
+            if (string.IsNullOrEmpty(configuration.ServerUrl)) {
                 throw new ArgumentNullException(configuration.ServerUrl, "Server URL is required.");
-            if (string.IsNullOrEmpty(configuration.AppKey))
-                throw new ArgumentNullException(configuration.AppKey, "App Key is required.");
+            }
 
-            if (configuration.ServerUrl[configuration.ServerUrl.Length - 1] == '/')
-            {
+            if (string.IsNullOrEmpty(configuration.AppKey)) {
+                throw new ArgumentNullException(configuration.AppKey, "App Key is required.");
+            }
+
+            if (configuration.ServerUrl[configuration.ServerUrl.Length - 1] == '/') {
                 configuration.ServerUrl = configuration.ServerUrl.Remove(configuration.ServerUrl.Length - 1);
             }
 
@@ -175,28 +171,28 @@ namespace Plugins.CountlySDK
 
             _db = CountlyBoxDbHelper.BuildDatabase(DbNumber);
 
-            var auto = _db.Open();
-            var configDao = new Dao<ConfigEntity>(auto, EntityType.Configs.ToString(), Configuration);
-            var requestDao = new Dao<RequestEntity>(auto, EntityType.Requests.ToString(), Configuration);
-            var viewEventDao = new Dao<EventEntity>(auto, EntityType.ViewEvents.ToString(), Configuration);
-            var viewSegmentDao = new SegmentDao(auto, EntityType.ViewEventSegments.ToString(), Configuration);
-            var nonViewEventDao = new Dao<EventEntity>(auto, EntityType.NonViewEvents.ToString(), Configuration);  
-            var nonViewSegmentDao = new SegmentDao(auto, EntityType.NonViewEventSegments.ToString(), Configuration);
+            DB.AutoBox auto = _db.Open();
+            Dao<ConfigEntity> configDao = new Dao<ConfigEntity>(auto, EntityType.Configs.ToString(), Configuration);
+            Dao<RequestEntity> requestDao = new Dao<RequestEntity>(auto, EntityType.Requests.ToString(), Configuration);
+            Dao<EventEntity> viewEventDao = new Dao<EventEntity>(auto, EntityType.ViewEvents.ToString(), Configuration);
+            SegmentDao viewSegmentDao = new SegmentDao(auto, EntityType.ViewEventSegments.ToString(), Configuration);
+            Dao<EventEntity> nonViewEventDao = new Dao<EventEntity>(auto, EntityType.NonViewEvents.ToString(), Configuration);
+            SegmentDao nonViewSegmentDao = new SegmentDao(auto, EntityType.NonViewEventSegments.ToString(), Configuration);
 
-            var requestRepo = new RequestRepository(requestDao, Configuration);
-            var eventViewRepo = new ViewEventRepository(viewEventDao, viewSegmentDao, Configuration);
-            var eventNonViewRepo = new NonViewEventRepository(nonViewEventDao, nonViewSegmentDao, Configuration);
-            var eventNrInSameSessionDao = new EventNumberInSameSessionDao(auto, EntityType.EventNumberInSameSessions.ToString(), Configuration);
+            RequestRepository requestRepo = new RequestRepository(requestDao, Configuration);
+            ViewEventRepository eventViewRepo = new ViewEventRepository(viewEventDao, viewSegmentDao, Configuration);
+            NonViewEventRepository eventNonViewRepo = new NonViewEventRepository(nonViewEventDao, nonViewSegmentDao, Configuration);
+            EventNumberInSameSessionDao eventNrInSameSessionDao = new EventNumberInSameSessionDao(auto, EntityType.EventNumberInSameSessions.ToString(), Configuration);
 
             requestRepo.Initialize();
             eventViewRepo.Initialize();
             eventNonViewRepo.Initialize();
 
-            var eventNumberInSameSessionHelper = new EventNumberInSameSessionHelper(eventNrInSameSessionDao);
+            EventNumberInSameSessionHelper eventNumberInSameSessionHelper = new EventNumberInSameSessionHelper(eventNrInSameSessionDao);
 
             Init(requestRepo, eventViewRepo, eventNonViewRepo, configDao, eventNumberInSameSessionHelper);
 
-            
+
             Device.InitDeviceId(configuration.DeviceId);
             await Initialization.OnInitializationComplete();
 
@@ -206,8 +202,8 @@ namespace Plugins.CountlySDK
         private void Init(RequestRepository requestRepo, ViewEventRepository viewEventRepo,
             NonViewEventRepository nonViewEventRepo, Dao<ConfigEntity> configDao, EventNumberInSameSessionHelper eventNumberInSameSessionHelper)
         {
-            var countlyUtils = new CountlyUtils(this);
-            var requests = new RequestCountlyHelper(Configuration, countlyUtils, requestRepo);
+            CountlyUtils countlyUtils = new CountlyUtils(this);
+            RequestCountlyHelper requests = new RequestCountlyHelper(Configuration, countlyUtils, requestRepo);
 
             Consents = new ConsentCountlyService();
             Events = new EventCountlyService(Configuration, requests, viewEventRepo, nonViewEventRepo, eventNumberInSameSessionHelper);
@@ -215,10 +211,10 @@ namespace Plugins.CountlySDK
             Location = new Services.LocationService(Configuration, requests);
             OptionalParameters = new OptionalParametersCountlyService(Location, Configuration);
             Notifications = new NotificationsCallbackService(Configuration);
-            var notificationsService = new ProxyNotificationsService(transform, Configuration, InternalStartCoroutine, Events);
+            ProxyNotificationsService notificationsService = new ProxyNotificationsService(transform, Configuration, InternalStartCoroutine, Events);
             _push = new PushCountlyService(Events, requests, notificationsService, Notifications);
             Session = new SessionCountlyService(Configuration, Events, _push, requests, Location, Consents, eventNumberInSameSessionHelper);
-            
+
             CrashReports = new CrashReportsCountlyService(Configuration, requests);
 
             Device = new DeviceIdCountlyService(Session, requests, Events, countlyUtils);
@@ -238,8 +234,7 @@ namespace Plugins.CountlySDK
         /// </summary>
         private void OnApplicationQuit()
         {
-            if (Configuration.EnableConsoleLogging)
-            {
+            if (Configuration.EnableConsoleLogging) {
                 Debug.Log("[Countly] OnApplicationQuit");
             }
 
@@ -249,34 +244,26 @@ namespace Plugins.CountlySDK
 
         private void OnApplicationFocus(bool hasFocus)
         {
-            if (Configuration.EnableConsoleLogging)
-            {
+            if (Configuration.EnableConsoleLogging) {
                 Debug.Log("[Countly] OnApplicationFocus: " + hasFocus);
             }
 
-            if (hasFocus)
-            {
+            if (hasFocus) {
                 SubscribeAppLog();
-            }
-            else
-            {
+            } else {
                 HandleAppPauseOrFocus();
             }
         }
 
         private void OnApplicationPause(bool pauseStatus)
         {
-            if (Configuration.EnableConsoleLogging)
-            {
+            if (Configuration.EnableConsoleLogging) {
                 Debug.Log("[Countly] OnApplicationPause: " + pauseStatus);
             }
 
-            if (pauseStatus)
-            {
+            if (pauseStatus) {
                 HandleAppPauseOrFocus();
-            }
-            else
-            {
+            } else {
                 SubscribeAppLog();
             }
         }
@@ -305,8 +292,7 @@ namespace Plugins.CountlySDK
 
         private void SubscribeAppLog()
         {
-            if (_logSubscribed)
-            {
+            if (_logSubscribed) {
                 return;
             }
 
@@ -316,8 +302,7 @@ namespace Plugins.CountlySDK
 
         private void UnsubscribeAppLog()
         {
-            if (!_logSubscribed)
-            {
+            if (!_logSubscribed) {
                 return;
             }
 
@@ -332,8 +317,7 @@ namespace Plugins.CountlySDK
 
         private void CheckInputEvent()
         {
-            if (!_inputObserver.HasInput)
-            {
+            if (!_inputObserver.HasInput) {
                 return;
             }
 

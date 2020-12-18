@@ -18,9 +18,9 @@ namespace Plugins.CountlySDK.Models
         {
         }
 
-        public bool IsRequestGetType { get; set;  }
-        public string RequestUrl { get; set;  }
-        public string RequestData { get; set;  }
+        public bool IsRequestGetType { get; set; }
+        public string RequestUrl { get; set; }
+        public string RequestData { get; set; }
         public DateTime RequestDateTime { get; set; }
         public long Id { get; set; }
 

@@ -14,15 +14,18 @@ namespace Plugins.CountlySDK.Helpers
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
-            var customValue = value as Dictionary<string, List<KeyValuePair<string, object>>>;
-            if (customValue == null || customValue.Count == 0) return;
+            Dictionary<string, List<KeyValuePair<string, object>>> customValue = value as Dictionary<string, List<KeyValuePair<string, object>>>;
+            if (customValue == null || customValue.Count == 0) {
+                return;
+            }
 
-            var list = customValue.First().Value as List<KeyValuePair<string, object>>;
-            if (list == null || list.Count == 0) return;
+            List<KeyValuePair<string, object>> list = customValue.First().Value as List<KeyValuePair<string, object>>;
+            if (list == null || list.Count == 0) {
+                return;
+            }
 
             writer.WriteStartObject();
-            foreach (var item in list)
-            {
+            foreach (KeyValuePair<string, object> item in list) {
                 writer.WritePropertyName(item.Key);
                 serializer.Serialize(writer, item.Value);
             }

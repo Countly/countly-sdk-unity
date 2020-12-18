@@ -29,8 +29,7 @@ namespace Plugins.CountlySDK.Services
         public async void LogCallback(string message, string stackTrace, LogType type)
         {
             if (_configModel.EnableAutomaticCrashReporting
-                && (type == LogType.Error || type == LogType.Exception))
-            {
+                && (type == LogType.Error || type == LogType.Exception)) {
                 await SendCrashReportAsync(message, stackTrace, type, null, false);
             }
         }
@@ -47,9 +46,7 @@ namespace Plugins.CountlySDK.Services
         public async Task SendCrashReportAsync(string message, string stackTrace, LogType type,
             IDictionary<string, object> segments = null, bool nonfatal = true)
         {
-            //if (ConsentModel.CheckConsent(FeaturesEnum.Crashes.ToString()))
-            //{
-            var model = CountlyExceptionDetailModel.ExceptionDetailModel;
+            CountlyExceptionDetailModel model = CountlyExceptionDetailModel.ExceptionDetailModel;
             model.Error = stackTrace;
             model.Name = message;
             model.Nonfatal = nonfatal;
@@ -61,7 +58,7 @@ namespace Plugins.CountlySDK.Services
 #if UNITY_ANDROID
             model.Manufacture = SystemInfo.deviceModel;
 #endif
-            var requestParams = new Dictionary<string, object>
+            Dictionary<string, object> requestParams = new Dictionary<string, object>
             {
                 {
                     "crash", JsonConvert.SerializeObject(model, Formatting.Indented,
@@ -70,7 +67,7 @@ namespace Plugins.CountlySDK.Services
             };
 
             await _requestCountlyHelper.GetResponseAsync(requestParams);
-            
+
         }
 
         /// <summary>
@@ -81,20 +78,19 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value"></param>
         public void AddBreadcrumbs(string value)
         {
-            if (_configModel.EnableConsoleLogging)
-            {
+            if (_configModel.EnableConsoleLogging) {
                 Debug.Log("[Countly] AddBreadcrumbs : " + value);
             }
 
-            if (_configModel.EnableTestMode)
-            {
+            if (_configModel.EnableTestMode) {
                 return;
             }
 
-            var validBreadcrumb = value.Length > 1000 ? value.Substring(0, 1000) : value;
+            string validBreadcrumb = value.Length > 1000 ? value.Substring(0, 1000) : value;
 
-            if (_crashBreadcrumbs.Count == _configModel.TotalBreadcrumbsAllowed)
+            if (_crashBreadcrumbs.Count == _configModel.TotalBreadcrumbsAllowed) {
                 _crashBreadcrumbs.Dequeue();
+            }
 
             _crashBreadcrumbs.Enqueue(value);
         }

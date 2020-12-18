@@ -4,10 +4,10 @@ using UnityEngine;
 
 namespace Notifications
 {
-    public class NotificationsCallbackService 
+    public class NotificationsCallbackService
     {
-        CountlyConfiguration _config;
-        private List<INotificationListener> _listeners;
+        private readonly CountlyConfiguration _config;
+        private readonly List<INotificationListener> _listeners;
         internal NotificationsCallbackService(CountlyConfiguration config)
         {
             _config = config;
@@ -26,8 +26,7 @@ namespace Notifications
 
             _listeners.Add(listener);
 
-            if (_config.EnableConsoleLogging)
-            {
+            if (_config.EnableConsoleLogging) {
                 Debug.Log("[Countly NotificationsCallbackService] AddListener: " + listener);
             }
         }
@@ -39,8 +38,7 @@ namespace Notifications
         {
             _listeners.Remove(listener);
 
-            if (_config.EnableConsoleLogging)
-            {
+            if (_config.EnableConsoleLogging) {
                 Debug.Log("[Countly NotificationsCallbackService] RemoveListener: " + listener);
             }
         }
@@ -51,16 +49,13 @@ namespace Notifications
         /// <param name="data"></param>
         internal void NotifyOnNotificationReceived(string data)
         {
-            foreach (INotificationListener listener in _listeners)
-            {
-                if (listener != null)
-                {
+            foreach (INotificationListener listener in _listeners) {
+                if (listener != null) {
                     listener.OnNotificationReceived(data);
                 }
             }
 
-            if (_config.EnableConsoleLogging)
-            {
+            if (_config.EnableConsoleLogging) {
                 Debug.Log("[Countly NotificationsCallbackService] SendMessageToListeners: " + data);
             }
         }
@@ -72,16 +67,13 @@ namespace Notifications
         /// <param name="index"></param>
         internal void NotifyOnNotificationClicked(string data, int index)
         {
-            foreach (INotificationListener listener in _listeners)
-            {
-                if (listener != null)
-                {
+            foreach (INotificationListener listener in _listeners) {
+                if (listener != null) {
                     listener.OnNotificationClicked(data, index);
                 }
             }
 
-            if (_config.EnableConsoleLogging)
-            {
+            if (_config.EnableConsoleLogging) {
                 Debug.Log("[Countly NotificationsCallbackService] SendMessageToListeners: " + data);
             }
         }

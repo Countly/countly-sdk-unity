@@ -9,7 +9,7 @@ namespace Plugins.CountlySDK.Persistance.Entities
         {
             return Id;
         }
-        
+
         public override string ToString()
         {
             return $"{nameof(Id)}: {Id}, {nameof(Json)}: {Json}";
@@ -22,16 +22,24 @@ namespace Plugins.CountlySDK.Persistance.Entities
 
         public override bool Equals(object obj)
         {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != this.GetType()) return false;
-            return Equals((EventEntity) obj);
+            if (ReferenceEquals(null, obj)) {
+                return false;
+            }
+
+            if (ReferenceEquals(this, obj)) {
+                return true;
+            }
+
+            if (obj.GetType() != this.GetType()) {
+                return false;
+            }
+
+            return Equals((EventEntity)obj);
         }
 
         public override int GetHashCode()
         {
-            unchecked
-            {
+            unchecked {
                 return (Id.GetHashCode() * 397) ^ (Json != null ? Json.GetHashCode() : 0);
             }
         }

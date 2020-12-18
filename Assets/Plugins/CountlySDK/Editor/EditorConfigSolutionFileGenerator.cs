@@ -11,35 +11,35 @@ using SyntaxTree.VisualStudio.Unity.Bridge;
 [InitializeOnLoad]
 public class EditorConfigSolutionFileGenerator
 {
-	public static string kEditorConfigProjectFindStr = "EndProject\r\nGlobal";
-	public static string kEditorConfigProjectReplaceStr =
-		"EndProject\r\n" +
-		"Project(\"{2150E333-8FDC-42A3-9474-1A3956D46DE8}\") = \"Solution Items\", \"Solution Items\", \"{B24FE069-BB5F-4F16-BCDA-61C28EABC46B}\"\r\n" +
-		"	ProjectSection(SolutionItems) = preProject\r\n" +
-		"		.editorconfig = .editorconfig\r\n" +
-		"	EndProjectSection\r\n" +
-		"EndProject\r\n" +
-		"Global";
+    public static string kEditorConfigProjectFindStr = "EndProject\r\nGlobal";
+    public static string kEditorConfigProjectReplaceStr =
+        "EndProject\r\n" +
+        "Project(\"{2150E333-8FDC-42A3-9474-1A3956D46DE8}\") = \"Solution Items\", \"Solution Items\", \"{B24FE069-BB5F-4F16-BCDA-61C28EABC46B}\"\r\n" +
+        "	ProjectSection(SolutionItems) = preProject\r\n" +
+        "		.editorconfig = .editorconfig\r\n" +
+        "	EndProjectSection\r\n" +
+        "EndProject\r\n" +
+        "Global";
 
-	public static string kGlobalSectionFindStr = "EndGlobalSection\r\nEndGlobal";
-	public static string kGlobalSectionReplaceStr =
-		"EndGlobalSection\r\n" +
-		"	GlobalSection(ExtensibilityGlobals) = postSolution\r\n" +
-		"		SolutionGuid = {FD87994B-C032-4821-BD72-E057C33083EF}\r\n" +
-		"	EndGlobalSection\r\n" +
-		"EndGlobal";
+    public static string kGlobalSectionFindStr = "EndGlobalSection\r\nEndGlobal";
+    public static string kGlobalSectionReplaceStr =
+        "EndGlobalSection\r\n" +
+        "	GlobalSection(ExtensibilityGlobals) = postSolution\r\n" +
+        "		SolutionGuid = {FD87994B-C032-4821-BD72-E057C33083EF}\r\n" +
+        "	EndGlobalSection\r\n" +
+        "EndGlobal";
 
-	static EditorConfigSolutionFileGenerator()
-	{
-		ProjectFilesGenerator.SolutionFileGeneration += AppendEditorConfig;
-	}
+    static EditorConfigSolutionFileGenerator()
+    {
+        ProjectFilesGenerator.SolutionFileGeneration += AppendEditorConfig;
+    }
 
-	protected static string AppendEditorConfig(string fileName, string fileContent)
-	{
-		fileContent = fileContent.Replace( kEditorConfigProjectFindStr, kEditorConfigProjectReplaceStr );
-		fileContent = fileContent.Replace( kGlobalSectionFindStr, kGlobalSectionReplaceStr );
+    protected static string AppendEditorConfig(string fileName, string fileContent)
+    {
+        fileContent = fileContent.Replace(kEditorConfigProjectFindStr, kEditorConfigProjectReplaceStr);
+        fileContent = fileContent.Replace(kGlobalSectionFindStr, kGlobalSectionReplaceStr);
 
-		return fileContent;
-	}
+        return fileContent;
+    }
 }
 #endif
