@@ -1,5 +1,11 @@
 ﻿using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
+
+#if UNITY_ANDROID
+using System.IO;
+using UnityEngine;
+#endif
+
 namespace Plugins.CountlySDK.Editor
 {
     public class CountlyBuildProcessor : IPreprocessBuildWithReport
@@ -9,8 +15,7 @@ namespace Plugins.CountlySDK.Editor
         {
 #if UNITY_ANDROID
             string filePath = "/Plugins/Android/Notifications/libs/countly_notifications.jar";
-            if (!File.Exists(Application.dataPath + "" + filePath))
-            {
+            if (!File.Exists(Application.dataPath + "" + filePath)) {
                 Debug.LogError("[Countly] notifications.jar not found at: " + filePath);
             }
 #endif

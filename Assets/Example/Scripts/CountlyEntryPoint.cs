@@ -384,7 +384,6 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
         countly.UserDetails.Max("Weight", 90);
         countly.UserDetails.SetOnce("Distance", "10KM");
         countly.UserDetails.Push("Mole", new string[] { "Left Cheek", "Back", "Toe" });
-        ;
         await countly.UserDetails.SaveAsync();
 
     }
