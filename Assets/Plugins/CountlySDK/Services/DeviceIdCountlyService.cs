@@ -77,11 +77,11 @@ namespace Plugins.CountlySDK.Services
         /// Begins a new session with new Device Id
         /// </summary>
         /// <param name="deviceId"></param>
-        public async Task<CountlyResponse> ChangeDeviceIdAndEndCurrentSessionAsync(string deviceId)
+        public async Task ChangeDeviceIdAndEndCurrentSessionAsync(string deviceId)
         {
             //Ignore call if new and old device id are same
             if (DeviceId == deviceId) {
-                return new CountlyResponse { IsSuccess = true };
+                return;
             }
 
             //Add currently recorded events to request queue-----------------------------------
@@ -97,8 +97,7 @@ namespace Plugins.CountlySDK.Services
             //Begin new session with new device id
             //Do not initiate timer again, it is already initiated
             await _sessionCountlyService.ExecuteBeginSessionAsync();
-
-            return new CountlyResponse { IsSuccess = true };
+            NotifyListeners(false);
         }
 
         /// <summary>
@@ -128,7 +127,7 @@ namespace Plugins.CountlySDK.Services
                };
 
             await _requestCountlyHelper.GetResponseAsync(requestParams);
-
+            NotifyListeners(true);
         }
 
         /// <summary>
@@ -144,5 +143,11 @@ namespace Plugins.CountlySDK.Services
             PlayerPrefs.SetString(Constants.DeviceIDKey, DeviceId);
         }
 
+        private void NotifyListeners(bool merged)
+        {
+            foreach (IBaseService listener in _listeners) {
+                listener.DeviceIdChanged(DeviceId, merged);
+            }
+        }
     }
 }
