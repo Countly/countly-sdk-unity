@@ -50,20 +50,8 @@ namespace Plugins.CountlySDK.Services
         public async Task SendCrashReportAsync(string message, string stackTrace, LogType type,
             IDictionary<string, object> segments = null, bool nonfatal = true)
         {
-            CountlyExceptionDetailModel model = CountlyExceptionDetailModel.ExceptionDetailModel;
-            model.Background = IsApplicationInBackground.ToString();
-            model.Run = (DateTimeOffset.UtcNow.ToUnixTimeSeconds() - _startTime).ToString();
-            model.Error = stackTrace;
-            model.Name = message;
-            model.Nonfatal = nonfatal;
-            model.Custom = segments as Dictionary<string, object>;
-            model.Logs = string.Join("\n", _crashBreadcrumbs);
-#if UNITY_IOS
-            model.Manufacture = UnityEngine.iOS.Device.generation.ToString();
-#endif
-#if UNITY_ANDROID
-            model.Manufacture = SystemInfo.deviceModel;
-#endif
+            CountlyExceptionDetailModel model = ExceptionDetailModel(message, stackTrace, nonfatal, segments);
+
             Dictionary<string, object> requestParams = new Dictionary<string, object>
             {
                 {
@@ -99,6 +87,42 @@ namespace Plugins.CountlySDK.Services
             }
 
             _crashBreadcrumbs.Enqueue(value);
+        }
+
+        private CountlyExceptionDetailModel ExceptionDetailModel(string message, string stackTrace, bool nonfatal, IDictionary<string, object> segments)
+        {
+            return new CountlyExceptionDetailModel {
+                OS = Constants.UnityPlatform,
+                OSVersion = SystemInfo.operatingSystem,
+                Device = SystemInfo.deviceName,
+                Resolution = Screen.currentResolution.ToString(),
+                AppVersion = Application.version,
+                Cpu = SystemInfo.processorType,
+                Opengl = SystemInfo.graphicsDeviceVersion,
+                RamTotal = SystemInfo.systemMemorySize.ToString(),
+                Battery = SystemInfo.batteryLevel.ToString(),
+                Orientation = Screen.orientation.ToString(),
+                Online = (Application.internetReachability > 0).ToString(),
+
+                Name = message,
+                Error = stackTrace,
+                Nonfatal = nonfatal,
+                RamCurrent = null,
+                DiskCurrent = null,
+                DiskTotal = null,
+                Muted = null,
+                Background = IsApplicationInBackground.ToString(),
+                Root = null,
+                Logs = string.Join("\n", _crashBreadcrumbs),
+                Custom = segments as Dictionary<string, object>,
+                Run = (DateTimeOffset.UtcNow.ToUnixTimeSeconds() - _startTime).ToString(),
+#if UNITY_IOS
+                Manufacture = UnityEngine.iOS.Device.generation.ToString()
+#endif
+#if UNITY_ANDROID
+                Manufacture = SystemInfo.deviceModel
+#endif
+            };
         }
     }
 }
