@@ -10,7 +10,7 @@ namespace Plugins.CountlySDK.Services
 {
     public class CrashReportsCountlyService
     {
-        private readonly long _startTime;
+        private static long _startTime;
         public bool IsApplicationInBackground { get; internal set; }
         private readonly Queue<string> _crashBreadcrumbs = new Queue<string>();
         private readonly CountlyConfiguration _configModel;
