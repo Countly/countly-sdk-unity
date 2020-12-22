@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Plugins.CountlySDK.Services
 {
-    public class CrashReportsCountlyService
+    public class CrashReportsCountlyService : IBaseService
     {
         private readonly Queue<string> _crashBreadcrumbs = new Queue<string>();
         private readonly CountlyConfiguration _configModel;
@@ -93,6 +93,11 @@ namespace Plugins.CountlySDK.Services
             }
 
             _crashBreadcrumbs.Enqueue(value);
+        }
+
+        public void DeviceIdChanged(string deviceId, bool merged)
+        {
+
         }
     }
 }

@@ -3,7 +3,7 @@ using Plugins.CountlySDK.Models;
 
 namespace Plugins.CountlySDK.Services
 {
-    public class ConsentCountlyService
+    public class ConsentCountlyService : IBaseService
     {
 
         internal ConsentCountlyService()
@@ -21,6 +21,11 @@ namespace Plugins.CountlySDK.Services
         public bool CheckConsent(Features feature)
         {
             return true;// ConsentModel.CheckConsent(feature.toString());
+        }
+
+        public void DeviceIdChanged(string deviceId, bool merged)
+        {
+            
         }
 
         /// <summary>

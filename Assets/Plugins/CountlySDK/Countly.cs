@@ -216,18 +216,31 @@ namespace Plugins.CountlySDK
             Session = new SessionCountlyService(Configuration, Events, _push, requests, Location, Consents, eventNumberInSameSessionHelper);
 
             CrashReports = new CrashReportsCountlyService(Configuration, requests);
-
-            Device = new DeviceIdCountlyService(Session, requests, Events, countlyUtils);
             Initialization = new InitializationCountlyService(Configuration, Location, Consents, Session);
-
             RemoteConfigs = new RemoteConfigCountlyService(Configuration, requests, countlyUtils, configDao);
 
             StarRating = new StarRatingCountlyService(Events);
             UserDetails = new UserDetailsCountlyService(requests, countlyUtils);
             Views = new ViewCountlyService(Configuration, Events);
+            Device = new DeviceIdCountlyService(Configuration, Session, requests, Events, countlyUtils);
             _inputObserver = InputObserverResolver.Resolve();
+
+            RegisterServicesToDeviceService();
         }
 
+        private void RegisterServicesToDeviceService() {
+            Device.AddLitener(Consents);
+            Device.AddLitener(CrashReports);
+            Device.AddLitener(Events);
+            Device.AddLitener(Views);
+            Device.AddLitener(Initialization);
+            Device.AddLitener(Location);
+            Device.AddLitener(_push);
+            Device.AddLitener(RemoteConfigs);
+            Device.AddLitener(Session);
+            Device.AddLitener(StarRating);
+            Device.AddLitener(UserDetails);
+        }
 
         /// <summary>
         ///     End session on application close/quit

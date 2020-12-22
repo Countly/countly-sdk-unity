@@ -11,7 +11,7 @@ using UnityEngine.Networking;
 
 namespace Plugins.CountlySDK.Services
 {
-    public class RemoteConfigCountlyService
+    public class RemoteConfigCountlyService : IBaseService
     {
         private readonly CountlyConfiguration _config;
         private readonly CountlyUtils _countlyUtils;
@@ -130,5 +130,9 @@ namespace Plugins.CountlySDK.Services
             return _requestStringBuilder.ToString();
         }
 
+        public void DeviceIdChanged(string deviceId, bool merged)
+        {
+            
+        }
     }
 }

@@ -1,28 +1,45 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Plugins.CountlySDK.Helpers;
+using Plugins.CountlySDK.Models;
 using UnityEngine;
 
 namespace Plugins.CountlySDK.Services
 {
     public class DeviceIdCountlyService
     {
-
+        private readonly CountlyConfiguration _config;
+        private readonly List<IBaseService> _listeners;
         private readonly SessionCountlyService _sessionCountlyService;
         private readonly RequestCountlyHelper _requestCountlyHelper;
         private readonly EventCountlyService _eventCountlyService;
         private readonly CountlyUtils _countlyUtils;
 
-        internal DeviceIdCountlyService(SessionCountlyService sessionCountlyService,
+        internal DeviceIdCountlyService(CountlyConfiguration config, SessionCountlyService sessionCountlyService,
             RequestCountlyHelper requestCountlyHelper, EventCountlyService eventCountlyService, CountlyUtils countlyUtils)
         {
-            _sessionCountlyService = sessionCountlyService;
-            _requestCountlyHelper = requestCountlyHelper;
-            _eventCountlyService = eventCountlyService;
+            _config = config;
             _countlyUtils = countlyUtils;
+            _eventCountlyService = eventCountlyService;
+            _requestCountlyHelper = requestCountlyHelper;
+            _sessionCountlyService = sessionCountlyService;
+            _listeners = new List<IBaseService>();
         }
 
         public string DeviceId { get; private set; }
+
+        internal void AddLitener(IBaseService listener)
+        {
+            if (listener == null) {
+                return;
+            }
+
+            _listeners.Add(listener);
+
+            if (_config.EnableConsoleLogging) {
+                Debug.Log("[Countly NotificationsCallbackService] AddListener: " + listener);
+            }
+        }
 
         internal void InitDeviceId(string deviceId = null)
         {
@@ -32,12 +49,19 @@ namespace Plugins.CountlySDK.Services
             //User provided DeviceID
             //Generate Random DeviceID
             string storedDeviceId = PlayerPrefs.GetString("DeviceID");
-            DeviceId = !_countlyUtils.IsNullEmptyOrWhitespace(storedDeviceId)
-                ? storedDeviceId
-                : !_countlyUtils.IsNullEmptyOrWhitespace(DeviceId)
-                    ? DeviceId
-                    : !_countlyUtils.IsNullEmptyOrWhitespace(deviceId)
-                        ? deviceId : _countlyUtils.GetUniqueDeviceId();
+            if (!_countlyUtils.IsNullEmptyOrWhitespace(storedDeviceId)) {
+                DeviceId = storedDeviceId;
+            } else {
+                if (!_countlyUtils.IsNullEmptyOrWhitespace(DeviceId)) {
+                    return;
+                }
+
+                if (!_countlyUtils.IsNullEmptyOrWhitespace(deviceId)) {
+                    DeviceId = deviceId;
+                } else {
+                    DeviceId = _countlyUtils.GetUniqueDeviceId();
+                }
+            }
 
             //Set DeviceID in Cache if it doesn't already exists in Cache
             if (_countlyUtils.IsNullEmptyOrWhitespace(storedDeviceId)) {

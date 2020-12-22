@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace Plugins.CountlySDK.Services
 {
-    public class EventCountlyService
+    public class EventCountlyService : IBaseService
     {
         private readonly CountlyConfiguration _countlyConfiguration;
         private readonly RequestCountlyHelper _requestCountlyHelper;
@@ -221,6 +221,11 @@ namespace Plugins.CountlySDK.Services
                 @event.Segmentation = new SegmentModel();
             }
             @event.Segmentation.Add(Constants.FirstAppLaunchSegment, FirstLaunchAppHelper.IsFirstLaunchApp);
+        }
+
+        public void DeviceIdChanged(string deviceId, bool merged)
+        {
+            
         }
     }
 }
