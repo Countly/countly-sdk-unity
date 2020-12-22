@@ -67,29 +67,33 @@ namespace Plugins.CountlySDK.Models
         static CountlyExceptionDetailModel() { }
         private CountlyExceptionDetailModel() { }
 
-        public static readonly CountlyExceptionDetailModel ExceptionDetailModel
-            = new CountlyExceptionDetailModel {
-                OS = Constants.UnityPlatform,
-                OSVersion = SystemInfo.operatingSystem,
-                Device = SystemInfo.deviceName,
-                Resolution = Screen.currentResolution.ToString(),
-                AppVersion = Application.version,
-                Cpu = SystemInfo.processorType,
-                Opengl = SystemInfo.graphicsDeviceVersion,
-                RamTotal = SystemInfo.systemMemorySize.ToString(),
-                Battery = SystemInfo.batteryLevel.ToString(),
-                Orientation = Screen.orientation.ToString(),
-                Online = (Application.internetReachability > 0).ToString(),
+        public static  CountlyExceptionDetailModel ExceptionDetailModel
+        {
+            get {
+                return new CountlyExceptionDetailModel {
+                    OS = Constants.UnityPlatform,
+                    OSVersion = SystemInfo.operatingSystem,
+                    Device = SystemInfo.deviceName,
+                    Resolution = Screen.currentResolution.ToString(),
+                    AppVersion = Application.version,
+                    Cpu = SystemInfo.processorType,
+                    Opengl = SystemInfo.graphicsDeviceVersion,
+                    RamTotal = SystemInfo.systemMemorySize.ToString(),
+                    Battery = SystemInfo.batteryLevel.ToString(),
+                    Orientation = Screen.orientation.ToString(),
+                    Online = (Application.internetReachability > 0).ToString(),
 
-                //Not found
-                RamCurrent = null,
-                DiskCurrent = null,
-                DiskTotal = null,
-                Muted = null,
-                Background = null,
-                Root = null,
-                Logs = null,
-                Run = null,
-            };
+                    //Not found
+                    RamCurrent = null,
+                    DiskCurrent = null,
+                    DiskTotal = null,
+                    Muted = null,
+                    Background = null,
+                    Root = null,
+                    Logs = null,
+                    Run = null,
+                };
+            }
+        }
     }
 }

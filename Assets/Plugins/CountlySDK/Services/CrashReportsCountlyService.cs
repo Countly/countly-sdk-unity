@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Plugins.CountlySDK.Helpers;
@@ -9,6 +10,8 @@ namespace Plugins.CountlySDK.Services
 {
     public class CrashReportsCountlyService
     {
+        private readonly long _startTime;
+        public bool IsApplicationInBackground { get; internal set; }
         private readonly Queue<string> _crashBreadcrumbs = new Queue<string>();
         private readonly CountlyConfiguration _configModel;
         private readonly RequestCountlyHelper _requestCountlyHelper;
@@ -17,6 +20,7 @@ namespace Plugins.CountlySDK.Services
         {
             _configModel = configModel;
             _requestCountlyHelper = requestCountlyHelper;
+            _startTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         }
 
 
@@ -47,6 +51,8 @@ namespace Plugins.CountlySDK.Services
             IDictionary<string, object> segments = null, bool nonfatal = true)
         {
             CountlyExceptionDetailModel model = CountlyExceptionDetailModel.ExceptionDetailModel;
+            model.Background = IsApplicationInBackground.ToString();
+            model.Run = (DateTimeOffset.UtcNow.ToUnixTimeSeconds() - _startTime).ToString();
             model.Error = stackTrace;
             model.Name = message;
             model.Nonfatal = nonfatal;
