@@ -10,7 +10,7 @@ namespace Plugins.CountlySDK.Services
 {
     public class CrashReportsCountlyService
     {
-        private static long _startTime;
+        private static readonly long _startTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         public bool IsApplicationInBackground { get; internal set; }
         private readonly Queue<string> _crashBreadcrumbs = new Queue<string>();
         private readonly CountlyConfiguration _configModel;
@@ -20,7 +20,6 @@ namespace Plugins.CountlySDK.Services
         {
             _configModel = configModel;
             _requestCountlyHelper = requestCountlyHelper;
-            _startTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         }
 
 
