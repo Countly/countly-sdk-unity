@@ -28,7 +28,7 @@ namespace Plugins.CountlySDK.Services
 
         public string DeviceId { get; private set; }
 
-        internal void AddLitener(IBaseService listener)
+        internal void AddListener(IBaseService listener)
         {
             if (listener == null) {
                 return;
@@ -52,14 +52,12 @@ namespace Plugins.CountlySDK.Services
             if (!_countlyUtils.IsNullEmptyOrWhitespace(storedDeviceId)) {
                 DeviceId = storedDeviceId;
             } else {
-                if (!_countlyUtils.IsNullEmptyOrWhitespace(DeviceId)) {
-                    return;
-                }
-
-                if (!_countlyUtils.IsNullEmptyOrWhitespace(deviceId)) {
-                    DeviceId = deviceId;
-                } else {
-                    DeviceId = _countlyUtils.GetUniqueDeviceId();
+                if (_countlyUtils.IsNullEmptyOrWhitespace(DeviceId)) {
+                    if (!_countlyUtils.IsNullEmptyOrWhitespace(deviceId)) {
+                        DeviceId = deviceId;
+                    } else {
+                        DeviceId = _countlyUtils.GetUniqueDeviceId();
+                    }
                 }
             }
 

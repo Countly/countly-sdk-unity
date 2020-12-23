@@ -229,17 +229,17 @@ namespace Plugins.CountlySDK
         }
 
         private void RegisterServicesToDeviceService() {
-            Device.AddLitener(Consents);
-            Device.AddLitener(CrashReports);
-            Device.AddLitener(Events);
-            Device.AddLitener(Views);
-            Device.AddLitener(Initialization);
-            Device.AddLitener(Location);
-            Device.AddLitener(_push);
-            Device.AddLitener(RemoteConfigs);
-            Device.AddLitener(Session);
-            Device.AddLitener(StarRating);
-            Device.AddLitener(UserDetails);
+            Device.AddListener(Consents);
+            Device.AddListener(CrashReports);
+            Device.AddListener(Events);
+            Device.AddListener(Views);
+            Device.AddListener(Initialization);
+            Device.AddListener(Location);
+            Device.AddListener(_push);
+            Device.AddListener(RemoteConfigs);
+            Device.AddListener(Session);
+            Device.AddListener(StarRating);
+            Device.AddListener(UserDetails);
         }
 
         /// <summary>
