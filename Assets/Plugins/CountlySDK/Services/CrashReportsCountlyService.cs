@@ -10,7 +10,6 @@ namespace Plugins.CountlySDK.Services
 {
     public class CrashReportsCountlyService
     {
-        private static readonly long _startTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         public bool IsApplicationInBackground { get; internal set; }
         private readonly Queue<string> _crashBreadcrumbs = new Queue<string>();
         private readonly CountlyConfiguration _configModel;
@@ -114,7 +113,7 @@ namespace Plugins.CountlySDK.Services
                 Root = null,
                 Logs = string.Join("\n", _crashBreadcrumbs),
                 Custom = segments as Dictionary<string, object>,
-                Run = (DateTimeOffset.UtcNow.ToUnixTimeSeconds() - _startTime).ToString(),
+                Run = Time.realtimeSinceStartup.ToString(),
 #if UNITY_IOS
                 Manufacture = UnityEngine.iOS.Device.generation.ToString()
 #endif
