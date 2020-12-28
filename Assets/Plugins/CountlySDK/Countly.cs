@@ -1,5 +1,7 @@
 using System;
 using System.Collections;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using CountlySDK.Input;
 using iBoxDB.LocalServer;
 using Notifications;
@@ -15,6 +17,7 @@ using Plugins.CountlySDK.Services;
 using Plugins.iBoxDB;
 using UnityEngine;
 
+[assembly: InternalsVisibleTo("Tests")]
 namespace Plugins.CountlySDK
 {
     public class Countly : MonoBehaviour
@@ -145,6 +148,12 @@ namespace Plugins.CountlySDK
 
         }
 
+
+        public void OnDestroy()
+        {
+            _db.Close();
+        }
+
         public async void Init(CountlyConfiguration configuration)
         {
             if (IsSDKInitialized) {
@@ -187,7 +196,7 @@ namespace Plugins.CountlySDK
             requestRepo.Initialize();
             eventViewRepo.Initialize();
             eventNonViewRepo.Initialize();
-
+            
             EventNumberInSameSessionHelper eventNumberInSameSessionHelper = new EventNumberInSameSessionHelper(eventNrInSameSessionDao);
 
             Init(requestRepo, eventViewRepo, eventNonViewRepo, configDao, eventNumberInSameSessionHelper);
@@ -239,7 +248,6 @@ namespace Plugins.CountlySDK
             }
 
             _db.Close();
-
         }
 
         private void OnApplicationFocus(bool hasFocus)
