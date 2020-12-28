@@ -149,7 +149,7 @@ namespace Plugins.CountlySDK
         }
 
 
-        public void OnDestroy()
+        internal void ResetDB()
         {
             _db.Close();
         }

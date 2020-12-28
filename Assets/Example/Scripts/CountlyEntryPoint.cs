@@ -311,7 +311,7 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
                                     { "Mole", "Lower Left Cheek" }
                  });
 
-        await countly.UserDetails.SetUserDetailsAsync(userDetails);
+        await countly.UserDetails.SetCustomUserDetailsAsync(userDetails);
     }
 
     public async void SetPropertyOnce()
