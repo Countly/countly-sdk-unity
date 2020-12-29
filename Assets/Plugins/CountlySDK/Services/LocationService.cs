@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Plugins.CountlySDK.Services
 {
-    public class LocationService
+    public class LocationService : IBaseService
     {
         internal bool IsLocationDisabled { get; private set; }
         internal string City { get; private set; }
@@ -139,6 +139,11 @@ namespace Plugins.CountlySDK.Services
                 IsLocationDisabled = false;
                 await SendIndependantLocationRequest();
             }
+        }
+
+        public void DeviceIdChanged(string deviceId, bool merged)
+        {
+            
         }
     }
 }

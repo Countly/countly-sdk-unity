@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using CountlySDK.Input;
 using iBoxDB.LocalServer;
 using Notifications;
@@ -31,6 +32,7 @@ namespace Plugins.CountlySDK
         public bool IsSDKInitialized { get; private set; }
 
         private static Countly _instance = null;
+        private List<IBaseService> _listeners = new List<IBaseService>();
 
         /// <summary>
         /// Return countly shared instance.
@@ -216,18 +218,40 @@ namespace Plugins.CountlySDK
             Session = new SessionCountlyService(Configuration, Events, _push, requests, Location, Consents, eventNumberInSameSessionHelper);
 
             CrashReports = new CrashReportsCountlyService(Configuration, requests);
-
-            Device = new DeviceIdCountlyService(Session, requests, Events, countlyUtils);
             Initialization = new InitializationCountlyService(Configuration, Location, Consents, Session);
-
             RemoteConfigs = new RemoteConfigCountlyService(Configuration, requests, countlyUtils, configDao);
 
             StarRating = new StarRatingCountlyService(Events);
             UserDetails = new UserDetailsCountlyService(requests, countlyUtils);
             Views = new ViewCountlyService(Configuration, Events);
+            Device = new DeviceIdCountlyService(Configuration, Session, requests, Events, countlyUtils);
             _inputObserver = InputObserverResolver.Resolve();
+
+            CreateListOfIBaseService();
+            RegisterListenersToDeviceService();
         }
 
+        private void CreateListOfIBaseService()
+        {
+            _listeners.Clear();
+
+            _listeners.Add(Consents);
+            _listeners.Add(CrashReports);
+            _listeners.Add(Events);
+            _listeners.Add(Views);
+            _listeners.Add(Initialization);
+            _listeners.Add(Location);
+            _listeners.Add(_push);
+            _listeners.Add(RemoteConfigs);
+            _listeners.Add(Session);
+            _listeners.Add(StarRating);
+            _listeners.Add(UserDetails);
+        }
+
+        private void RegisterListenersToDeviceService()
+        {
+            Device.AddListeners(_listeners);
+        }
 
         /// <summary>
         ///     End session on application close/quit

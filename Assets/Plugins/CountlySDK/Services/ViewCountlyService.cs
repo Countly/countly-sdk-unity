@@ -8,7 +8,7 @@ using UnityEngine;
 namespace Plugins.CountlySDK.Services
 {
 
-    public class ViewCountlyService
+    public class ViewCountlyService : IBaseService
     {
         private readonly CountlyConfiguration _config;
         private readonly Dictionary<string, DateTime> _viewToLastViewStartTime = new Dictionary<string, DateTime>();
@@ -117,6 +117,11 @@ namespace Plugins.CountlySDK.Services
                 };
 
             await _eventService.ReportCustomEventAsync(CountlyEventModel.ViewActionEvent, segment.ToDictionary());
+        }
+
+        public void DeviceIdChanged(string deviceId, bool merged)
+        {
+            
         }
 
         /// <summary>

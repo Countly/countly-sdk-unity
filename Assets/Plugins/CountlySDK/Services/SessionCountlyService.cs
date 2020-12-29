@@ -9,7 +9,7 @@ using Plugins.CountlySDK.Models;
 
 namespace Plugins.CountlySDK.Services
 {
-    public class SessionCountlyService
+    public class SessionCountlyService : IBaseService
     {
         private Timer _sessionTimer;
         private DateTime _lastSessionRequestTime;
@@ -210,6 +210,11 @@ namespace Plugins.CountlySDK.Services
 
             await _requestCountlyHelper.GetResponseAsync(requestParams);
 
+        }
+
+        public void DeviceIdChanged(string deviceId, bool merged)
+        {
+            
         }
 
 

@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Plugins.CountlySDK.Services
 {
-    public class CrashReportsCountlyService
+    public class CrashReportsCountlyService : IBaseService
     {
         public bool IsApplicationInBackground { get; internal set; }
         private readonly Queue<string> _crashBreadcrumbs = new Queue<string>();
@@ -121,6 +121,10 @@ namespace Plugins.CountlySDK.Services
                 Manufacture = SystemInfo.deviceModel
 #endif
             };
+        }
+        public void DeviceIdChanged(string deviceId, bool merged)
+        {
+
         }
     }
 }

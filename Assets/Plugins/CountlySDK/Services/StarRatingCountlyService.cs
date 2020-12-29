@@ -5,7 +5,7 @@ using Plugins.CountlySDK.Models;
 
 namespace Plugins.CountlySDK.Services
 {
-    public class StarRatingCountlyService
+    public class StarRatingCountlyService : IBaseService
     {
 
         private readonly EventCountlyService _eventCountlyService;
@@ -13,6 +13,11 @@ namespace Plugins.CountlySDK.Services
         internal StarRatingCountlyService(EventCountlyService eventCountlyService)
         {
             _eventCountlyService = eventCountlyService;
+        }
+
+        public void DeviceIdChanged(string deviceId, bool merged)
+        {
+            
         }
 
 
