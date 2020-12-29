@@ -227,10 +227,12 @@ namespace Plugins.CountlySDK
             Device = new DeviceIdCountlyService(Configuration, Session, requests, Events, countlyUtils);
             _inputObserver = InputObserverResolver.Resolve();
 
-            RegisterServicesToDeviceService();
+            CreateListOfIBaseService();
+            RegisterListenersToDeviceService();
         }
 
-        private void RegisterServicesToDeviceService() {
+        private void CreateListOfIBaseService()
+        {
             _listeners.Clear();
 
             _listeners.Add(Consents);
@@ -244,7 +246,10 @@ namespace Plugins.CountlySDK
             _listeners.Add(Session);
             _listeners.Add(StarRating);
             _listeners.Add(UserDetails);
+        }
 
+        private void RegisterListenersToDeviceService()
+        {
             Device.AddListeners(_listeners);
         }
 
