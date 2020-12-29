@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Plugins.CountlySDK.Helpers;
@@ -9,6 +10,7 @@ namespace Plugins.CountlySDK.Services
 {
     public class CrashReportsCountlyService : IBaseService
     {
+        public bool IsApplicationInBackground { get; internal set; }
         private readonly Queue<string> _crashBreadcrumbs = new Queue<string>();
         private readonly CountlyConfiguration _configModel;
         private readonly RequestCountlyHelper _requestCountlyHelper;
@@ -46,18 +48,8 @@ namespace Plugins.CountlySDK.Services
         public async Task SendCrashReportAsync(string message, string stackTrace, LogType type,
             IDictionary<string, object> segments = null, bool nonfatal = true)
         {
-            CountlyExceptionDetailModel model = CountlyExceptionDetailModel.ExceptionDetailModel;
-            model.Error = stackTrace;
-            model.Name = message;
-            model.Nonfatal = nonfatal;
-            model.Custom = segments as Dictionary<string, object>;
-            model.Logs = string.Join("\n", _crashBreadcrumbs);
-#if UNITY_IOS
-            model.Manufacture = UnityEngine.iOS.Device.generation.ToString();
-#endif
-#if UNITY_ANDROID
-            model.Manufacture = SystemInfo.deviceModel;
-#endif
+            CountlyExceptionDetailModel model = ExceptionDetailModel(message, stackTrace, nonfatal, segments);
+
             Dictionary<string, object> requestParams = new Dictionary<string, object>
             {
                 {
@@ -95,6 +87,41 @@ namespace Plugins.CountlySDK.Services
             _crashBreadcrumbs.Enqueue(value);
         }
 
+        private CountlyExceptionDetailModel ExceptionDetailModel(string message, string stackTrace, bool nonfatal, IDictionary<string, object> segments)
+        {
+            return new CountlyExceptionDetailModel {
+                OS = Constants.UnityPlatform,
+                OSVersion = SystemInfo.operatingSystem,
+                Device = SystemInfo.deviceName,
+                Resolution = Screen.currentResolution.ToString(),
+                AppVersion = Application.version,
+                Cpu = SystemInfo.processorType,
+                Opengl = SystemInfo.graphicsDeviceVersion,
+                RamTotal = SystemInfo.systemMemorySize.ToString(),
+                Battery = SystemInfo.batteryLevel.ToString(),
+                Orientation = Screen.orientation.ToString(),
+                Online = (Application.internetReachability > 0).ToString(),
+
+                Name = message,
+                Error = stackTrace,
+                Nonfatal = nonfatal,
+                RamCurrent = null,
+                DiskCurrent = null,
+                DiskTotal = null,
+                Muted = null,
+                Background = IsApplicationInBackground.ToString(),
+                Root = null,
+                Logs = string.Join("\n", _crashBreadcrumbs),
+                Custom = segments as Dictionary<string, object>,
+                Run = Time.realtimeSinceStartup.ToString(),
+#if UNITY_IOS
+                Manufacture = UnityEngine.iOS.Device.generation.ToString()
+#endif
+#if UNITY_ANDROID
+                Manufacture = SystemInfo.deviceModel
+#endif
+            };
+        }
         public void DeviceIdChanged(string deviceId, bool merged)
         {
 

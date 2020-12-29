@@ -285,6 +285,10 @@ namespace Plugins.CountlySDK
                 Debug.Log("[Countly] OnApplicationPause: " + pauseStatus);
             }
 
+            if (CrashReports != null) {
+                CrashReports.IsApplicationInBackground = pauseStatus;
+            }
+
             if (pauseStatus) {
                 HandleAppPauseOrFocus();
             } else {
