@@ -8,12 +8,13 @@ namespace Plugins.CountlySDK.Services
 {
     public class DeviceIdCountlyService
     {
+        private List<IBaseService> _listeners;
+        private readonly CountlyUtils _countlyUtils;
         private readonly CountlyConfiguration _config;
-        private readonly List<IBaseService> _listeners;
         private readonly SessionCountlyService _sessionCountlyService;
         private readonly RequestCountlyHelper _requestCountlyHelper;
         private readonly EventCountlyService _eventCountlyService;
-        private readonly CountlyUtils _countlyUtils;
+        
 
         internal DeviceIdCountlyService(CountlyConfiguration config, SessionCountlyService sessionCountlyService,
             RequestCountlyHelper requestCountlyHelper, EventCountlyService eventCountlyService, CountlyUtils countlyUtils)
@@ -23,21 +24,15 @@ namespace Plugins.CountlySDK.Services
             _eventCountlyService = eventCountlyService;
             _requestCountlyHelper = requestCountlyHelper;
             _sessionCountlyService = sessionCountlyService;
-            _listeners = new List<IBaseService>();
         }
 
         public string DeviceId { get; private set; }
 
-        internal void AddListener(IBaseService listener)
+        internal void AddListeners(List<IBaseService> listeners)
         {
-            if (listener == null) {
-                return;
-            }
-
-            _listeners.Add(listener);
-
+            _listeners = listeners;
             if (_config.EnableConsoleLogging) {
-                Debug.Log("[Countly NotificationsCallbackService] AddListener: " + listener);
+                Debug.Log("[Countly DeviceIdCountlyService] AddListeners");
             }
         }
 
@@ -143,6 +138,10 @@ namespace Plugins.CountlySDK.Services
 
         private void NotifyListeners(bool merged)
         {
+            if (_listeners == null) {
+                return;
+            }
+
             foreach (IBaseService listener in _listeners) {
                 listener.DeviceIdChanged(DeviceId, merged);
             }

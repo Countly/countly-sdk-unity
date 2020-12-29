@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using CountlySDK.Input;
 using iBoxDB.LocalServer;
 using Notifications;
@@ -31,6 +32,7 @@ namespace Plugins.CountlySDK
         public bool IsSDKInitialized { get; private set; }
 
         private static Countly _instance = null;
+        private List<IBaseService> _listeners = new List<IBaseService>();
 
         /// <summary>
         /// Return countly shared instance.
@@ -229,17 +231,21 @@ namespace Plugins.CountlySDK
         }
 
         private void RegisterServicesToDeviceService() {
-            Device.AddListener(Consents);
-            Device.AddListener(CrashReports);
-            Device.AddListener(Events);
-            Device.AddListener(Views);
-            Device.AddListener(Initialization);
-            Device.AddListener(Location);
-            Device.AddListener(_push);
-            Device.AddListener(RemoteConfigs);
-            Device.AddListener(Session);
-            Device.AddListener(StarRating);
-            Device.AddListener(UserDetails);
+            _listeners.Clear();
+
+            _listeners.Add(Consents);
+            _listeners.Add(CrashReports);
+            _listeners.Add(Events);
+            _listeners.Add(Views);
+            _listeners.Add(Initialization);
+            _listeners.Add(Location);
+            _listeners.Add(_push);
+            _listeners.Add(RemoteConfigs);
+            _listeners.Add(Session);
+            _listeners.Add(StarRating);
+            _listeners.Add(UserDetails);
+
+            Device.AddListeners(_listeners);
         }
 
         /// <summary>
