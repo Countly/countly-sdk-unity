@@ -4,7 +4,7 @@ using Plugins.CountlySDK.Models;
 
 namespace Plugins.CountlySDK.Services
 {
-    public class InitializationCountlyService
+    public class InitializationCountlyService : IBaseService
     {
         private readonly LocationService _locationService;
         private readonly CountlyConfiguration _configModel;
@@ -21,6 +21,11 @@ namespace Plugins.CountlySDK.Services
 
         public string ServerUrl { get; private set; }
         public string AppKey { get; private set; }
+
+        public void DeviceIdChanged(string deviceId, bool merged)
+        {
+            
+        }
 
         /// <summary>
         ///     Initializes countly instance

@@ -6,7 +6,7 @@ using Plugins.CountlySDK.Enums;
 using Plugins.CountlySDK.Helpers;
 namespace Plugins.CountlySDK.Services
 {
-    public class PushCountlyService
+    public class PushCountlyService : IBaseService
     {
         private string _token;
         private TestMode? _mode;
@@ -78,6 +78,11 @@ namespace Plugins.CountlySDK.Services
         private async Task<CountlyResponse> ReportPushActionAsync()
         {
             return await _notificationsService.ReportPushActionAsync();
+        }
+
+        public void DeviceIdChanged(string deviceId, bool merged)
+        {
+            
         }
 
         [Serializable]
