@@ -44,6 +44,10 @@ namespace Plugins.CountlySDK.Services
         /// <param name="sessionInterval">In milliseconds</param>
         private void InitSessionTimer()
         {
+            if (_configModel.EnableManualSessionHandling) {
+                return;
+            }
+
             _sessionTimer = new Timer { Interval = _configModel.SessionDuration * 1000 };
             _sessionTimer.Elapsed += SessionTimerOnElapsedAsync;
             _sessionTimer.AutoReset = true;

@@ -126,17 +126,18 @@ namespace Plugins.CountlySDK
         /// <returns>NotificationsCallbackService</returns>
         public NotificationsCallbackService Notifications { get; set; }
 
-        private RequestRepository RequestRepo { get; set; }
-
-        private ViewEventRepository ViewEventRepo { get; set; }
-
-        private NonViewEventRepository NonViewEventRepo { get; set; }
-
         private DB _db;
         private bool _logSubscribed;
-        internal static  long DbNumber = 3;
+        internal const long DbNumber = 3;
         private PushCountlyService _push;
         private IInputObserver _inputObserver;
+
+        private Dao<ConfigEntity> _configDao;
+        private RequestRepository _requestRepo;
+        private ViewEventRepository _viewEventRepo;
+        private NonViewEventRepository _nonViewEventRepo;
+        private EventNumberInSameSessionHelper _eventNumberInSameSessionHelper;
+        
 
         /// <summary>
         ///     Initialize SDK at the start of your app
@@ -180,25 +181,25 @@ namespace Plugins.CountlySDK
             _db = CountlyBoxDbHelper.BuildDatabase(DbNumber);
 
             DB.AutoBox auto = _db.Open();
-            Dao<ConfigEntity> configDao = new Dao<ConfigEntity>(auto, EntityType.Configs.ToString(), Configuration);
+            _configDao = new Dao<ConfigEntity>(auto, EntityType.Configs.ToString(), Configuration);
             Dao<RequestEntity> requestDao = new Dao<RequestEntity>(auto, EntityType.Requests.ToString(), Configuration);
             Dao<EventEntity> viewEventDao = new Dao<EventEntity>(auto, EntityType.ViewEvents.ToString(), Configuration);
             SegmentDao viewSegmentDao = new SegmentDao(auto, EntityType.ViewEventSegments.ToString(), Configuration);
             Dao<EventEntity> nonViewEventDao = new Dao<EventEntity>(auto, EntityType.NonViewEvents.ToString(), Configuration);
             SegmentDao nonViewSegmentDao = new SegmentDao(auto, EntityType.NonViewEventSegments.ToString(), Configuration);
 
-            RequestRepo = new RequestRepository(requestDao, Configuration);
-            ViewEventRepo = new ViewEventRepository(viewEventDao, viewSegmentDao, Configuration);
-            NonViewEventRepo = new NonViewEventRepository(nonViewEventDao, nonViewSegmentDao, Configuration);
+            _requestRepo = new RequestRepository(requestDao, Configuration);
+            _viewEventRepo = new ViewEventRepository(viewEventDao, viewSegmentDao, Configuration);
+            _nonViewEventRepo = new NonViewEventRepository(nonViewEventDao, nonViewSegmentDao, Configuration);
             EventNumberInSameSessionDao eventNrInSameSessionDao = new EventNumberInSameSessionDao(auto, EntityType.EventNumberInSameSessions.ToString(), Configuration);
 
-            RequestRepo.Initialize();
-            ViewEventRepo.Initialize();
-            NonViewEventRepo.Initialize();
+            _requestRepo.Initialize();
+            _viewEventRepo.Initialize();
+            _nonViewEventRepo.Initialize();
 
-            EventNumberInSameSessionHelper eventNumberInSameSessionHelper = new EventNumberInSameSessionHelper(eventNrInSameSessionDao);
+            _eventNumberInSameSessionHelper = new EventNumberInSameSessionHelper(eventNrInSameSessionDao);
 
-            Init(RequestRepo, ViewEventRepo, NonViewEventRepo, configDao, eventNumberInSameSessionHelper);
+            Init(_requestRepo, _viewEventRepo, _nonViewEventRepo, _configDao, _eventNumberInSameSessionHelper);
 
             Device.InitDeviceId(configuration.DeviceId);
 
@@ -249,11 +250,15 @@ namespace Plugins.CountlySDK
             _db.Close();
         }
 
-        internal void ResetDB()
+        internal void ClearStorage()
         {
-            RequestRepo.Clear();
-            ViewEventRepo.Clear();
-            NonViewEventRepo.Clear();
+            _requestRepo.Clear();
+            _viewEventRepo.Clear();
+            _configDao.RemoveAll();
+            _nonViewEventRepo.Clear();
+            _eventNumberInSameSessionHelper.RemoveAllEvents();
+
+            PlayerPrefs.DeleteAll();
 
             _db.Close();
         }
