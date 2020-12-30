@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Tests
 {
-    public class SDKInitialisationTests
+    public class ConfigurationTests
     {
         private readonly string _serverUrl = "https://xyz.com/";
         private readonly string _appKey = "772c091355076ead703f987fee94490";
@@ -78,7 +78,20 @@ namespace Tests
             Assert.AreEqual(Countly.Instance.Configuration.EventQueueThreshold, 100);
             Assert.AreEqual(Countly.Instance.Configuration.TotalBreadcrumbsAllowed, 100);
             Assert.AreEqual(Countly.Instance.Configuration.NotificationMode, TestMode.None);
+
+            Assert.AreEqual(Countly.Instance.Configuration.Salt, null);
+            Assert.AreEqual(Countly.Instance.Configuration.EnablePost, false);
+            Assert.AreEqual(Countly.Instance.Configuration.EnableTestMode, false);
+            Assert.AreEqual(Countly.Instance.Configuration.EnableConsoleLogging, false);
+            Assert.AreEqual(Countly.Instance.Configuration.EnableFirstAppLaunchSegment, false);
+
+            Assert.AreEqual(Countly.Instance.Configuration.City, null);
+            Assert.AreEqual(Countly.Instance.Configuration.Location, null);
+            Assert.AreEqual(Countly.Instance.Configuration.IPAddress, null);
+            Assert.AreEqual(Countly.Instance.Configuration.CountryCode, null);
         }
+
+       
 
         [TearDown]
         public void End()
