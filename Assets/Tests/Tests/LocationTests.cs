@@ -12,16 +12,21 @@ namespace Tests
 {
     public class LocationTests
     {
-        // A Test behaves as an ordinary method
-        [SetUp]
-        public void InitSDK()
+        private readonly string _serverUrl = "https://xyz.com/";
+        private readonly string _appKey = "772c091355076ead703f987fee94490";
+
+        [OneTimeSetUp]
+        public void DbNumberSetup()
+        {
+            Countly.DbNumber = 999;
+        }
+
+        [Test]
+        public void TestLocationValuesSetDuringInit()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = "https://try.count.ly/",
-                AppKey = "YOUR_APP_KEY",
-                EnableConsoleLogging = true,
-                EnableTestMode = true,
-                NotificationMode = TestMode.None
+                ServerUrl = _serverUrl,
+                AppKey = _appKey,
             };
 
             string countryCode = "us";
@@ -33,31 +38,14 @@ namespace Tests
             configuration.SetLocation(countryCode, city, latitude + "," + longitude, ipAddress);
             Countly.Instance.Init(configuration);
 
-        }
-
-        [Test]
-        public void TestNullValue()
-        {
-            Assert.AreNotEqual(Countly.Instance.Device, null);
-        }
-
-
-        [Test]
-        public void TestLocationValuesSetDuringInit()
-        {
             Assert.AreNotEqual(Countly.Instance.Location, null);
             Assert.AreEqual(Countly.Instance.Location.City, Countly.Instance.Configuration.City);
             Assert.AreEqual(Countly.Instance.Location.Location, Countly.Instance.Configuration.Location);
             Assert.AreEqual(Countly.Instance.Location.IPAddress, Countly.Instance.Configuration.IPAddress);
             Assert.AreEqual(Countly.Instance.Location.CountryCode, Countly.Instance.Configuration.CountryCode);
             Assert.AreEqual(Countly.Instance.Location.IsLocationDisabled, Countly.Instance.Configuration.IsLocationDisabled);
-        }
 
-        [Test]
-        public void TestLocationDisable()
-        {
             Countly.Instance.Location.DisableLocation();
-            Assert.AreEqual(Countly.Instance.Location.Location, null);
             Assert.AreEqual(Countly.Instance.Location.City, null);
             Assert.AreEqual(Countly.Instance.Location.IPAddress, null);
             Assert.AreEqual(Countly.Instance.Location.CountryCode, null);

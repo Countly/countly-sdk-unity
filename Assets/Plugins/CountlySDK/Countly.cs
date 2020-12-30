@@ -134,26 +134,26 @@ namespace Plugins.CountlySDK
 
         private DB _db;
         private bool _logSubscribed;
-        private const long DbNumber = 3;
+        internal static  long DbNumber = 3;
         private PushCountlyService _push;
         private IInputObserver _inputObserver;
 
         /// <summary>
         ///     Initialize SDK at the start of your app
         /// </summary>
-        private async void Awake()
+        private void Awake()
         {
             DontDestroyOnLoad(gameObject);
             Instance = this;
 
             //Auth and Config will not be null in case initializing through countly prefab
             if (Auth != null && Config != null) {
-                await Init(new CountlyConfiguration(Auth, Config));
+                Init(new CountlyConfiguration(Auth, Config));
             }
 
         }
 
-        public async Task Init(CountlyConfiguration configuration)
+        public async void Init(CountlyConfiguration configuration)
         {
             if (IsSDKInitialized) {
                 return;
@@ -200,11 +200,11 @@ namespace Plugins.CountlySDK
 
             Init(RequestRepo, ViewEventRepo, NonViewEventRepo, configDao, eventNumberInSameSessionHelper);
 
-
             Device.InitDeviceId(configuration.DeviceId);
-            await Initialization.OnInitializationComplete();
 
             IsSDKInitialized = true;
+
+            await Initialization.OnInitializationComplete();
         }
 
         private void Init(RequestRepository requestRepo, ViewEventRepository viewEventRepo,

@@ -9,101 +9,64 @@ namespace Tests
 {
     public class ConfigurationTests
     {
+        private readonly string _serverUrl = "https://xyz.com/";
+        private readonly string _appKey = "772c091355076ead703f987fee94490";
 
-        [SetUp]
-        public void InitSDK()
+        [OneTimeSetUp]
+        public void DbNumberSetup()
         {
+            Countly.DbNumber = 999;
         }
 
         [Test]
         public void TestSDKInitParams()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = "https://.com/",
-                AppKey = "772c091355076ead703f987fee94490",
+                ServerUrl = _serverUrl,
+                AppKey = _appKey,
             };
 
-            Task task = Countly.Instance.Init(configuration);
-            Task allTasks = Task.WhenAll(task);
+            string city = "Houston";
+            string countryCode = "us";
+            string latitude = "29.634933";
+            string longitude = "-95.220255";
+            string ipAddress = "10.2.33.12";
 
-            if (allTasks.IsCompleted) {
-                Assert.AreNotEqual(Countly.Instance, null);
-                Assert.AreNotEqual(Countly.Instance.Configuration, null);
-                Assert.AreEqual(Countly.Instance.IsSDKInitialized, true);
-                Assert.AreEqual(Countly.Instance.isActiveAndEnabled, true);
-            }
+            configuration.SetLocation(countryCode, city, latitude + "," + longitude, ipAddress);
+            Countly.Instance.Init(configuration);
+
+            Assert.AreNotEqual(Countly.Instance.Configuration, null);
+
+            Assert.AreEqual(Countly.Instance.Configuration.AppKey, _appKey);
+            Assert.AreEqual(Countly.Instance.Configuration.ServerUrl, "https://xyz.com");
+
+            Assert.AreEqual(Countly.Instance.Configuration.City, "Houston");
+            Assert.AreEqual(Countly.Instance.Configuration.IsLocationDisabled, false);
+            Assert.AreEqual(Countly.Instance.Configuration.Location, "29.634933,-95.220255");
         }
 
         [Test]
         public void TestDefaultConfigValues()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = "https://try.count.ly/",
-                AppKey = "8e2fe772c091355076ead703f987fee94490fff4",
+                ServerUrl = _serverUrl,
+                AppKey = _appKey,
             };
 
-            Task task = Countly.Instance.Init(configuration);
-            var allTasks = Task.WhenAll(task);
+            Countly.Instance.Init(configuration);
 
-            if (allTasks.IsCompleted) {
-
-                Assert.AreEqual(Countly.Instance.Configuration.SessionDuration, 60);
-                Assert.AreEqual(Countly.Instance.Configuration.StoredRequestLimit, 1000);
-                Assert.AreEqual(Countly.Instance.Configuration.EventQueueThreshold, 100);
-                Assert.AreEqual(Countly.Instance.Configuration.TotalBreadcrumbsAllowed, 100);
-                Assert.AreEqual(Countly.Instance.Configuration.NotificationMode, TestMode.None);
-            }
-        }
-
-        [Test]
-        public void TestServerURLAndAppKey()
-        {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = "https://try.count.ly/",
-                AppKey = "8e2fe772c091355076ead703f987fee94490fff4",
-            };
-
-            Task task = Countly.Instance.Init(configuration);
-            Task allTasks = Task.WhenAll(task);
-
-            if (allTasks.IsCompleted) {
-                Assert.AreEqual(Countly.Instance.Configuration.AppKey, "8e2fe772c091355076ead703f987fee94490fff4");
-                Assert.AreEqual(Countly.Instance.Configuration.ServerUrl, "https://try.count.ly");
-            }
-
-        }
-
-        [Test]
-        public void TestLocationFields()
-        {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = "https://try.count.ly/",
-                AppKey = "8e2fe772c091355076ead703f987fee94490fff4",
-            };
-
-            string countryCode = "us";
-            string city = "Houston";
-            string latitude = "29.634933";
-            string longitude = "-95.220255";
-            string ipAddress = "10.2.33.12";
-
-            configuration.SetLocation(countryCode, city, latitude + "," + longitude, ipAddress);
-            Task task = Countly.Instance.Init(configuration);
-            Task allTasks = Task.WhenAll(task);
-
-            if (allTasks.IsCompleted) {
-
-                Assert.AreEqual(Countly.Instance.Configuration.City, "Houston");
-                Assert.AreEqual(Countly.Instance.Configuration.IsLocationDisabled, false);
-                Assert.AreEqual(Countly.Instance.Configuration.Location, "29.634933,-95.220255");
-            }
-
+            Assert.AreEqual(Countly.Instance.Configuration.SessionDuration, 60);
+            Assert.AreEqual(Countly.Instance.Configuration.StoredRequestLimit, 1000);
+            Assert.AreEqual(Countly.Instance.Configuration.EventQueueThreshold, 100);
+            Assert.AreEqual(Countly.Instance.Configuration.TotalBreadcrumbsAllowed, 100);
+            Assert.AreEqual(Countly.Instance.Configuration.NotificationMode, TestMode.None);
         }
 
         [TearDown]
         public void End()
         {
             Countly.Instance.ResetDB();
+            Object.DestroyImmediate(Countly.Instance);
         }
     }
 }

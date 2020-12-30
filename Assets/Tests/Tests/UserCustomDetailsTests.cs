@@ -12,34 +12,31 @@ namespace Tests
 {
     public class UserCustomDetailsTests
     {
-        // A Test behaves as an ordinary method
-        [SetUp]
-        public void InitSDK()
+        private readonly string _serverUrl = "https://xyz.com/";
+        private readonly string _appKey = "772c091355076ead703f987fee94490";
+
+        [OneTimeSetUp]
+        public void DbNumberSetup()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = "https://try.count.ly/",
-                AppKey = "YOUR_APP_KEY",
-                EnableConsoleLogging = true,
-                EnableTestMode = true
-            };
-
-            Countly.Instance.Init(configuration);
-
-        }
-
-        [Test]
-        public void TestNullValue()
-        {
-            Assert.AreNotEqual(Countly.Instance.UserDetails, null);
+            Countly.DbNumber = 999;
         }
 
         [Test]
         public void TestUserCustomeDetailModel()
         {
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                ServerUrl = _serverUrl,
+                AppKey = _appKey,
+            };
+
+            Countly.Instance.Init(configuration);
+
+            Assert.AreNotEqual(Countly.Instance.UserDetails, null);
+
             Countly.Instance.UserDetails.SetOnce("Distance", "10KM");
             Assert.AreEqual(Countly.Instance.UserDetails.CustomeDataProperties.ContainsKey("Distance"), true);
-            Dictionary<string, object>  dic = Countly.Instance.UserDetails.CustomeDataProperties["Distance"] as Dictionary<string, object>;
-            Assert.AreEqual(dic["$setOnce"], "10KM");   
+            Dictionary<string, object> dic = Countly.Instance.UserDetails.CustomeDataProperties["Distance"] as Dictionary<string, object>;
+            Assert.AreEqual(dic["$setOnce"], "10KM");
         }
 
         [TearDown]
@@ -49,11 +46,5 @@ namespace Tests
             Object.DestroyImmediate(Countly.Instance);
         }
 
-   
-
-        private void IncreamentValue()
-        {
-            Countly.Instance.UserDetails.Increment("Weight");
-        }
     }
 }

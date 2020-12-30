@@ -1,16 +1,12 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using UnityEngine;
-using UnityEngine.TestTools;
 using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK;
-using Plugins.CountlySDK.Enums;
 using System.Threading.Tasks;
 
 namespace Tests
 {
-    public class SDKInitialisationTests
+    public class DeviceIdTests
     {
         private readonly string _serverUrl = "https://xyz.com/";
         private readonly string _appKey = "772c091355076ead703f987fee94490";
@@ -21,9 +17,8 @@ namespace Tests
             Countly.DbNumber = 999;
         }
 
-
         [Test]
-        public void TestSDKInitialize()
+        public void TestNullValues()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 ServerUrl = _serverUrl,
@@ -31,10 +26,8 @@ namespace Tests
             };
 
             Countly.Instance.Init(configuration);
-
-            Assert.AreNotEqual(Countly.Instance, null);
-            Assert.AreEqual(Countly.Instance.IsSDKInitialized, true);
-            Assert.AreEqual(Countly.Instance.isActiveAndEnabled, true);
+            Assert.AreNotEqual(Countly.Instance.Device, null);
+            Assert.AreNotEqual(Countly.Instance.Device.DeviceId, null);
         }
 
         [TearDown]
@@ -43,6 +36,5 @@ namespace Tests
             Countly.Instance.ResetDB();
             Object.DestroyImmediate(Countly.Instance);
         }
-
     }
 }

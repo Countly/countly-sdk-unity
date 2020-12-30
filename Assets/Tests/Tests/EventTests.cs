@@ -12,33 +12,26 @@ namespace Tests
 {
     public class EventTests
     {
-        // A Test behaves as an ordinary method
-        [SetUp]
-        public void InitSDK()
+        private readonly string _serverUrl = "https://xyz.com/";
+        private readonly string _appKey = "772c091355076ead703f987fee94490";
+
+        [OneTimeSetUp]
+        public void DbNumberSetup()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = "https://try.count.ly/",
-                AppKey = "YOUR_APP_KEY",
-                EnableConsoleLogging = true,
-                EnableTestMode = true,
-                NotificationMode = TestMode.None
-            };
-
-            string countryCode = "us";
-            string city = "Houston";
-            string latitude = "29.634933";
-            string longitude = "-95.220255";
-            string ipAddress = "10.2.33.12";
-
-            configuration.SetLocation(countryCode, city, latitude + "," + longitude, ipAddress);
-            Countly.Instance.Init(configuration);
-
+            Countly.DbNumber = 999;
         }
 
         [Test]
         public void TestNullValue()
         {
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                ServerUrl = _serverUrl,
+                AppKey = _appKey,
+            };
+
+            Countly.Instance.Init(configuration);
             Assert.AreNotEqual(Countly.Instance.Events, null);
+
         } 
 
         [TearDown]
