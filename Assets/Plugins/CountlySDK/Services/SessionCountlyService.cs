@@ -44,10 +44,6 @@ namespace Plugins.CountlySDK.Services
         /// <param name="sessionInterval">In milliseconds</param>
         private void InitSessionTimer()
         {
-            if (_configModel.EnableManualSessionHandling || !_configModel.EnableTestMode) {
-                return;
-            }
-
             _sessionTimer = new Timer { Interval = _configModel.SessionDuration * 1000 };
             _sessionTimer.Elapsed += SessionTimerOnElapsedAsync;
             _sessionTimer.AutoReset = true;
@@ -129,7 +125,7 @@ namespace Plugins.CountlySDK.Services
             }
 
             //Start session timer
-            if (!_configModel.EnableManualSessionHandling || !_configModel.EnableTestMode) {
+            if (!_configModel.EnableManualSessionHandling) {
                 InitSessionTimer();
                 _sessionTimer.Start();
             }

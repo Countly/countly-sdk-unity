@@ -1,26 +1,71 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using NUnit.Framework;
-using UnityEngine;
-using UnityEngine.TestTools;
+﻿using NUnit.Framework;
 using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK;
 using Plugins.CountlySDK.Enums;
-using System.Threading.Tasks;
 
 namespace Tests
 {
     public class ConfigurationTests
     {
-        // A Test behaves as an ordinary method
-        [SetUp]
-        public void InitSDK()
+        [Test]
+        public void TestSDKInitParams()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 ServerUrl = "https://try.count.ly/",
-                AppKey = "YOUR_APP_KEY",
-                EnableConsoleLogging = true,
-                EnableTestMode = true,
+                AppKey = "8e2fe772c091355076ead703f987fee94490fff4",
+            };
+
+            Countly.Instance.Init(configuration);
+
+            Assert.AreNotEqual(Countly.Instance, null);
+            Assert.AreNotEqual(Countly.Instance.Configuration, null);
+          //  Assert.AreEqual(Countly.Instance.IsSDKInitialized, true);
+          //  Assert.AreEqual(Countly.Instance.isActiveAndEnabled, true);
+
+            Countly.Instance.ResetDB();
+        }
+
+        [Test]
+        public void TestDefaultConfigValues()
+        {
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                ServerUrl = "https://try.count.ly/",
+                AppKey = "8e2fe772c091355076ead703f987fee94490fff4",
+            };
+
+            Countly.Instance.Init(configuration);
+
+            Assert.AreEqual(Countly.Instance.Configuration.SessionDuration, 60);
+            Assert.AreEqual(Countly.Instance.Configuration.StoredRequestLimit, 1000);
+            Assert.AreEqual(Countly.Instance.Configuration.EventQueueThreshold, 100);
+            Assert.AreEqual(Countly.Instance.Configuration.TotalBreadcrumbsAllowed, 100);
+            Assert.AreEqual(Countly.Instance.Configuration.NotificationMode, TestMode.None);
+
+            Countly.Instance.ResetDB();
+        }
+
+        [Test]
+        public void TestServerURLAndAppKey()
+        {
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                ServerUrl = "https://try.count.ly/",
+                AppKey = "8e2fe772c091355076ead703f987fee94490fff4",
+            };
+
+            Countly.Instance.Init(configuration);
+
+            Assert.AreEqual(Countly.Instance.Configuration.AppKey, "8e2fe772c091355076ead703f987fee94490fff4");
+            Assert.AreEqual(Countly.Instance.Configuration.ServerUrl, "https://try.count.ly");
+
+            Countly.Instance.ResetDB();
+        }
+
+        [Test]
+        public void TestLocationFields()
+        {
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                ServerUrl = "https://try.count.ly/",
+                AppKey = "8e2fe772c091355076ead703f987fee94490fff4",
             };
 
             string countryCode = "us";
@@ -32,44 +77,11 @@ namespace Tests
             configuration.SetLocation(countryCode, city, latitude + "," + longitude, ipAddress);
             Countly.Instance.Init(configuration);
 
-        }
-
-        [Test]
-        public void TestNullValue()
-        {
-            Assert.AreNotEqual(Countly.Instance.Configuration, null);
-        }
-
-        [Test]
-        public void TestDefaultConfigValues()
-        {
-            Assert.AreEqual(Countly.Instance.Configuration.SessionDuration, 60);
-            Assert.AreEqual(Countly.Instance.Configuration.StoredRequestLimit, 1000);
-            Assert.AreEqual(Countly.Instance.Configuration.EventQueueThreshold, 100);
-            Assert.AreEqual(Countly.Instance.Configuration.TotalBreadcrumbsAllowed, 100);
-            Assert.AreEqual(Countly.Instance.Configuration.NotificationMode, TestMode.None);
-        }
-
-        [Test]
-        public void TestServerURLAndAppKey()
-        {
-            Assert.AreEqual(Countly.Instance.Configuration.AppKey, "YOUR_APP_KEY");
-            Assert.AreEqual(Countly.Instance.Configuration.ServerUrl, "https://try.count.ly");
-        }
-
-        [Test]
-        public void TestLocationFields()
-        {
             Assert.AreEqual(Countly.Instance.Configuration.City, "Houston");
             Assert.AreEqual(Countly.Instance.Configuration.IsLocationDisabled, false);
             Assert.AreEqual(Countly.Instance.Configuration.Location, "29.634933,-95.220255");
-        }
 
-        [TearDown]
-        public void End()
-        {
             Countly.Instance.ResetDB();
-            Object.DestroyImmediate(Countly.Instance);
         }
     }
 }

@@ -126,6 +126,12 @@ namespace Plugins.CountlySDK
         /// <returns>NotificationsCallbackService</returns>
         public NotificationsCallbackService Notifications { get; set; }
 
+        internal RequestRepository RequestRepo { get; private set; }
+
+        private ViewEventRepository ViewEventRepo { get;  set; }
+
+        private NonViewEventRepository NonViewEventRepo { get; set; }
+
 
         private DB _db;
         private bool _logSubscribed;
@@ -146,12 +152,6 @@ namespace Plugins.CountlySDK
                 Init(new CountlyConfiguration(Auth, Config));
             }
 
-        }
-
-
-        internal void ResetDB()
-        {
-            _db.Close();
         }
 
         public async void Init(CountlyConfiguration configuration)
@@ -188,18 +188,18 @@ namespace Plugins.CountlySDK
             Dao<EventEntity> nonViewEventDao = new Dao<EventEntity>(auto, EntityType.NonViewEvents.ToString(), Configuration);
             SegmentDao nonViewSegmentDao = new SegmentDao(auto, EntityType.NonViewEventSegments.ToString(), Configuration);
 
-            RequestRepository requestRepo = new RequestRepository(requestDao, Configuration);
-            ViewEventRepository eventViewRepo = new ViewEventRepository(viewEventDao, viewSegmentDao, Configuration);
-            NonViewEventRepository eventNonViewRepo = new NonViewEventRepository(nonViewEventDao, nonViewSegmentDao, Configuration);
+            RequestRepo = new RequestRepository(requestDao, Configuration);
+            ViewEventRepo = new ViewEventRepository(viewEventDao, viewSegmentDao, Configuration);
+            NonViewEventRepo = new NonViewEventRepository(nonViewEventDao, nonViewSegmentDao, Configuration);
             EventNumberInSameSessionDao eventNrInSameSessionDao = new EventNumberInSameSessionDao(auto, EntityType.EventNumberInSameSessions.ToString(), Configuration);
 
-            requestRepo.Initialize();
-            eventViewRepo.Initialize();
-            eventNonViewRepo.Initialize();
+            RequestRepo.Initialize();
+            ViewEventRepo.Initialize();
+            NonViewEventRepo.Initialize();
             
             EventNumberInSameSessionHelper eventNumberInSameSessionHelper = new EventNumberInSameSessionHelper(eventNrInSameSessionDao);
 
-            Init(requestRepo, eventViewRepo, eventNonViewRepo, configDao, eventNumberInSameSessionHelper);
+            Init(RequestRepo, ViewEventRepo, NonViewEventRepo, configDao, eventNumberInSameSessionHelper);
 
 
             Device.InitDeviceId(configuration.DeviceId);
@@ -248,6 +248,16 @@ namespace Plugins.CountlySDK
             }
 
             _db.Close();
+        }
+
+        internal void ResetDB()
+        {
+            //RequestRepo.Clear();
+            //ViewEventRepo.Clear();
+            //NonViewEventRepo.Clear();
+
+            _db.Close();
+            Instance = null;
         }
 
         private void OnApplicationFocus(bool hasFocus)
