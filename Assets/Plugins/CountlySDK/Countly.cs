@@ -126,12 +126,11 @@ namespace Plugins.CountlySDK
         /// <returns>NotificationsCallbackService</returns>
         public NotificationsCallbackService Notifications { get; set; }
 
-        internal RequestRepository RequestRepo { get; private set; }
+        private RequestRepository RequestRepo { get; set; }
 
-        private ViewEventRepository ViewEventRepo { get;  set; }
+        private ViewEventRepository ViewEventRepo { get; set; }
 
         private NonViewEventRepository NonViewEventRepo { get; set; }
-
 
         private DB _db;
         private bool _logSubscribed;
@@ -142,19 +141,19 @@ namespace Plugins.CountlySDK
         /// <summary>
         ///     Initialize SDK at the start of your app
         /// </summary>
-        private void Awake()
+        private async void Awake()
         {
             DontDestroyOnLoad(gameObject);
             Instance = this;
 
             //Auth and Config will not be null in case initializing through countly prefab
             if (Auth != null && Config != null) {
-                Init(new CountlyConfiguration(Auth, Config));
+                await Init(new CountlyConfiguration(Auth, Config));
             }
 
         }
 
-        public async void Init(CountlyConfiguration configuration)
+        public async Task Init(CountlyConfiguration configuration)
         {
             if (IsSDKInitialized) {
                 return;
@@ -196,7 +195,7 @@ namespace Plugins.CountlySDK
             RequestRepo.Initialize();
             ViewEventRepo.Initialize();
             NonViewEventRepo.Initialize();
-            
+
             EventNumberInSameSessionHelper eventNumberInSameSessionHelper = new EventNumberInSameSessionHelper(eventNrInSameSessionDao);
 
             Init(RequestRepo, ViewEventRepo, NonViewEventRepo, configDao, eventNumberInSameSessionHelper);
@@ -252,12 +251,11 @@ namespace Plugins.CountlySDK
 
         internal void ResetDB()
         {
-            //RequestRepo.Clear();
-            //ViewEventRepo.Clear();
-            //NonViewEventRepo.Clear();
+            RequestRepo.Clear();
+            ViewEventRepo.Clear();
+            NonViewEventRepo.Clear();
 
             _db.Close();
-            Instance = null;
         }
 
         private void OnApplicationFocus(bool hasFocus)
