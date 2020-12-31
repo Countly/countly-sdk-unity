@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using Plugins.CountlySDK.Enums;
 using Plugins.CountlySDK.Helpers;
 using Plugins.CountlySDK.Models;
+using UnityEngine;
 
 namespace Plugins.CountlySDK.Services
 {
@@ -14,8 +15,6 @@ namespace Plugins.CountlySDK.Services
         private Timer _sessionTimer;
         private DateTime _lastSessionRequestTime;
         public bool IsSessionInitiated { get; private set; }
-
-        private DateTime _lastInputTime;
 
         private readonly LocationService _locationService;
         private readonly CountlyConfiguration _configModel;
@@ -67,27 +66,22 @@ namespace Plugins.CountlySDK.Services
             await _eventService.AddEventsToRequestQueue();
 
             await _requestCountlyHelper.ProcessQueue();
-            bool sessionOver = (DateTime.Now - _lastInputTime).TotalSeconds >= _configModel.SessionDuration;
 
-            if (sessionOver) {
-                await ExecuteEndSessionAsync();
-            } else if (!_configModel.EnableManualSessionHandling) {
+            if (!_configModel.EnableManualSessionHandling) {
                 await ExtendSessionAsync();
-            }
-        }
-
-        public async void UpdateInputTime()
-        {
-            _lastInputTime = DateTime.Now;
-
-            if (!IsSessionInitiated && _sessionTimer == null) //session was over
-            {
-                await ExecuteBeginSessionAsync();
             }
         }
 
         public async Task ExecuteBeginSessionAsync()
         {
+            if (IsSessionInitiated) {
+                return;
+            }
+
+            if (_configModel.EnableConsoleLogging) {
+                Debug.Log("[Countly] SessionCountlyService: ExecuteBeginSessionAsync");
+            }
+
             FirstLaunchAppHelper.Process();
             _lastSessionRequestTime = DateTime.Now;
             //Session initiated
@@ -188,6 +182,10 @@ namespace Plugins.CountlySDK.Services
         /// </summary>
         public async Task EndSessionAsync()
         {
+            if (_configModel.EnableConsoleLogging) {
+                Debug.Log("[Countly] SessionCountlyService: ExtendSessionAsync");
+            }
+
             await ExecuteEndSessionAsync();
         }
 
@@ -214,7 +212,7 @@ namespace Plugins.CountlySDK.Services
 
         public void DeviceIdChanged(string deviceId, bool merged)
         {
-            
+
         }
 
 
