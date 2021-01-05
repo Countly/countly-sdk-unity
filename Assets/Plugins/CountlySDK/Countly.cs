@@ -178,13 +178,13 @@ namespace Plugins.CountlySDK
             Dao<EventEntity> viewEventDao = new Dao<EventEntity>(auto, EntityType.ViewEvents.ToString(), Configuration);
             SegmentDao viewSegmentDao = new SegmentDao(auto, EntityType.ViewEventSegments.ToString(), Configuration);
             Dao<EventEntity> nonViewEventDao = new Dao<EventEntity>(auto, EntityType.NonViewEvents.ToString(), Configuration);
-            SegmentDao nonViewSegmentDao = new SegmentDao(auto, EntityType.EventNumberInSameSessions.ToString(), Configuration);
+            SegmentDao nonViewSegmentDao = new SegmentDao(auto, EntityType.NonViewEventSegments.ToString(), Configuration);
 
             RequestRepository requestRepo = new RequestRepository(requestDao, Configuration);
             ViewEventRepository eventViewRepo = new ViewEventRepository(viewEventDao, viewSegmentDao, Configuration);
             NonViewEventRepository eventNonViewRepo = new NonViewEventRepository(nonViewEventDao, nonViewSegmentDao, Configuration);
 
-            Dao<EventNumberInSameSessionEntity> eventNrInSameSessionDao = new Dao<EventNumberInSameSessionEntity>(auto, EntityType.NonViewEvents.ToString(), Configuration);
+            Dao<EventNumberInSameSessionEntity> eventNrInSameSessionDao = new Dao<EventNumberInSameSessionEntity>(auto, EntityType.EventNumberInSameSessions.ToString(), Configuration);
             eventNrInSameSessionDao.RemoveAll(); /* Clear EventNumberInSameSessions Entity data */
 
             requestRepo.Initialize();
