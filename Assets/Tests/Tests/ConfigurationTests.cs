@@ -17,26 +17,6 @@ namespace Tests
 
 
         [Test]
-        public void TestSDKInitialize()
-        {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-            };
-
-            Countly.Instance.Init(configuration);
-
-            Assert.AreNotEqual(Countly.Instance, null);
-            Assert.AreEqual(Countly.Instance.IsSDKInitialized, true);
-            Assert.AreEqual(Countly.Instance.isActiveAndEnabled, true);
-
-            Assert.AreNotEqual(Countly.Instance.Events, null);
-
-            Assert.AreNotEqual(Countly.Instance.Device, null);
-            Assert.AreNotEqual(Countly.Instance.Device.DeviceId, null);
-        }
-
-        [Test]
         public void TestSDKInitParams()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
@@ -52,6 +32,15 @@ namespace Tests
 
             configuration.SetLocation(countryCode, city, latitude + "," + longitude, ipAddress);
             Countly.Instance.Init(configuration);
+
+            Assert.AreNotEqual(Countly.Instance, null);
+            Assert.AreEqual(Countly.Instance.IsSDKInitialized, true);
+            Assert.AreEqual(Countly.Instance.isActiveAndEnabled, true);
+
+            Assert.AreNotEqual(Countly.Instance.Events, null);
+
+            Assert.AreNotEqual(Countly.Instance.Device, null);
+            Assert.AreNotEqual(Countly.Instance.Device.DeviceId, null);
 
             Assert.AreNotEqual(Countly.Instance.Configuration, null);
 
