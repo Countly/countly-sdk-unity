@@ -130,7 +130,6 @@ namespace Plugins.CountlySDK
         private bool _logSubscribed;
         private const long DbNumber = 3;
         private PushCountlyService _push;
-        private IInputObserver _inputObserver;
 
         /// <summary>
         ///     Initialize SDK at the start of your app
@@ -225,7 +224,6 @@ namespace Plugins.CountlySDK
             UserDetails = new UserDetailsCountlyService(requests, countlyUtils);
             Views = new ViewCountlyService(Configuration, Events);
             Device = new DeviceIdCountlyService(Configuration, Session, requests, Events, countlyUtils);
-            _inputObserver = InputObserverResolver.Resolve();
 
             CreateListOfIBaseService();
             RegisterListenersToDeviceService();
@@ -279,7 +277,7 @@ namespace Plugins.CountlySDK
             }
         }
 
-        private void OnApplicationPause(bool pauseStatus)
+        private async void OnApplicationPause(bool pauseStatus)
         {
             if (Configuration.EnableConsoleLogging) {
                 Debug.Log("[Countly] OnApplicationPause: " + pauseStatus);
@@ -291,8 +289,11 @@ namespace Plugins.CountlySDK
 
             if (pauseStatus) {
                 HandleAppPauseOrFocus();
+                await Session?.EndSessionAsync();
             } else {
                 SubscribeAppLog();
+                await Session?.ExecuteBeginSessionAsync();
+
             }
         }
 
@@ -336,20 +337,6 @@ namespace Plugins.CountlySDK
 
             Application.logMessageReceived -= LogCallback;
             _logSubscribed = false;
-        }
-
-        private void Update()
-        {
-            CheckInputEvent();
-        }
-
-        private void CheckInputEvent()
-        {
-            if (!_inputObserver.HasInput) {
-                return;
-            }
-
-            Session?.UpdateInputTime();
         }
 
         private void InternalStartCoroutine(IEnumerator enumerator)
