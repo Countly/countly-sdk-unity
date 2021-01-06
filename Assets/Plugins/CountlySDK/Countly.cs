@@ -1,5 +1,7 @@
 using System;
 using System.Collections;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using System.Collections.Generic;
 using CountlySDK.Input;
 using iBoxDB.LocalServer;
@@ -16,6 +18,7 @@ using Plugins.CountlySDK.Services;
 using Plugins.iBoxDB;
 using UnityEngine;
 
+[assembly: InternalsVisibleTo("Tests")]
 namespace Plugins.CountlySDK
 {
     public class Countly : MonoBehaviour
@@ -125,11 +128,17 @@ namespace Plugins.CountlySDK
         /// <returns>NotificationsCallbackService</returns>
         public NotificationsCallbackService Notifications { get; set; }
 
-
         private DB _db;
         private bool _logSubscribed;
-        private const long DbNumber = 3;
+        internal const long DbNumber = 3;
         private PushCountlyService _push;
+
+        private Dao<ConfigEntity> _configDao;
+        private RequestRepository _requestRepo;
+        private ViewEventRepository _viewEventRepo;
+        private NonViewEventRepository _nonViewEventRepo;
+        private EventNumberInSameSessionHelper _eventNumberInSameSessionHelper;
+        
 
         /// <summary>
         ///     Initialize SDK at the start of your app
@@ -173,16 +182,16 @@ namespace Plugins.CountlySDK
             _db = CountlyBoxDbHelper.BuildDatabase(DbNumber);
 
             DB.AutoBox auto = _db.Open();
-            Dao<ConfigEntity> configDao = new Dao<ConfigEntity>(auto, EntityType.Configs.ToString(), Configuration);
+            _configDao = new Dao<ConfigEntity>(auto, EntityType.Configs.ToString(), Configuration);
             Dao<RequestEntity> requestDao = new Dao<RequestEntity>(auto, EntityType.Requests.ToString(), Configuration);
             Dao<EventEntity> viewEventDao = new Dao<EventEntity>(auto, EntityType.ViewEvents.ToString(), Configuration);
             SegmentDao viewSegmentDao = new SegmentDao(auto, EntityType.ViewEventSegments.ToString(), Configuration);
             Dao<EventEntity> nonViewEventDao = new Dao<EventEntity>(auto, EntityType.NonViewEvents.ToString(), Configuration);
             SegmentDao nonViewSegmentDao = new SegmentDao(auto, EntityType.NonViewEventSegments.ToString(), Configuration);
 
-            RequestRepository requestRepo = new RequestRepository(requestDao, Configuration);
-            ViewEventRepository eventViewRepo = new ViewEventRepository(viewEventDao, viewSegmentDao, Configuration);
-            NonViewEventRepository eventNonViewRepo = new NonViewEventRepository(nonViewEventDao, nonViewSegmentDao, Configuration);
+            _requestRepo = new RequestRepository(requestDao, Configuration);
+            _viewEventRepo = new ViewEventRepository(viewEventDao, viewSegmentDao, Configuration);
+            _nonViewEventRepo = new NonViewEventRepository(nonViewEventDao, nonViewSegmentDao, Configuration);
 
             Dao<EventNumberInSameSessionEntity> eventNrInSameSessionDao = new Dao<EventNumberInSameSessionEntity>(auto, EntityType.EventNumberInSameSessions.ToString(), Configuration);
             eventNrInSameSessionDao.RemoveAll(); /* Clear EventNumberInSameSessions Entity data */
@@ -193,11 +202,11 @@ namespace Plugins.CountlySDK
 
             Init(requestRepo, eventViewRepo, eventNonViewRepo, configDao);
 
-
             Device.InitDeviceId(configuration.DeviceId);
-            await Initialization.OnInitializationComplete();
 
             IsSDKInitialized = true;
+
+            await Initialization.OnInitializationComplete();
         }
 
         private void Init(RequestRepository requestRepo, ViewEventRepository viewEventRepo,
@@ -261,7 +270,19 @@ namespace Plugins.CountlySDK
             }
 
             _db.Close();
+        }
 
+        internal void ClearStorage()
+        {
+            _requestRepo.Clear();
+            _viewEventRepo.Clear();
+            _configDao.RemoveAll();
+            _nonViewEventRepo.Clear();
+            _eventNumberInSameSessionHelper.RemoveAllEvents();
+
+            PlayerPrefs.DeleteAll();
+
+            _db.Close();
         }
 
         private void OnApplicationFocus(bool hasFocus)

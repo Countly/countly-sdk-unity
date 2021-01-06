@@ -10,7 +10,7 @@ namespace Plugins.CountlySDK.Services
 {
     public class UserDetailsCountlyService : IBaseService
     {
-        private Dictionary<string, object> _customDataProperties = new Dictionary<string, object>();
+        internal Dictionary<string, object> CustomeDataProperties { get; private set; }
 
 
         private readonly RequestCountlyHelper _requestCountlyHelper;
@@ -20,6 +20,7 @@ namespace Plugins.CountlySDK.Services
         {
             _requestCountlyHelper = requestCountlyHelper;
             _countlyUtils = countlyUtils;
+            CustomeDataProperties = new Dictionary<string, object>();
         }
 
         /// <summary>
@@ -98,13 +99,13 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async Task SaveAsync()
         {
-            if (!_customDataProperties.Any()) {
+            if (!CustomeDataProperties.Any()) {
                 return;
             }
 
-            CountlyUserDetailsModel model = new CountlyUserDetailsModel(_customDataProperties);
+            CountlyUserDetailsModel model = new CountlyUserDetailsModel(CustomeDataProperties);
 
-            _customDataProperties = new Dictionary<string, object> { };
+            CustomeDataProperties = new Dictionary<string, object> { };
             await SetCustomUserDetailsAsync(model);
         }
 
@@ -221,14 +222,14 @@ namespace Plugins.CountlySDK.Services
 
         public void AddToCustomData(string key, object value)
         {
-            if (_customDataProperties.ContainsKey(key)) {
-                string item = _customDataProperties.Select(x => x.Key).FirstOrDefault(x => x.Equals(key, StringComparison.OrdinalIgnoreCase));
+            if (CustomeDataProperties.ContainsKey(key)) {
+                string item = CustomeDataProperties.Select(x => x.Key).FirstOrDefault(x => x.Equals(key, StringComparison.OrdinalIgnoreCase));
                 if (item != null) {
-                    _customDataProperties.Remove(item);
+                    CustomeDataProperties.Remove(item);
                 }
             }
 
-            _customDataProperties.Add(key, value);
+            CustomeDataProperties.Add(key, value);
         }
 
         public void DeviceIdChanged(string deviceId, bool merged)
