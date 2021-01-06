@@ -1,12 +1,8 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using UnityEngine;
-using UnityEngine.TestTools;
 using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK;
 using Plugins.CountlySDK.Enums;
-using System.Threading.Tasks;
 
 namespace Tests
 {
@@ -15,13 +11,27 @@ namespace Tests
         private readonly string _serverUrl = "https://xyz.com/";
         private readonly string _appKey = "772c091355076ead703f987fee94490";
 
-
         [Test]
         public void TestSDKInitParams()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
                 AppKey = _appKey,
+                ServerUrl = _serverUrl,
+
+                Salt = "091355076ead",
+                DeviceId = "device-xyz",
+
+                EnablePost = true,
+                EnableTestMode = true,
+                EnableConsoleLogging = true,
+                EnableFirstAppLaunchSegment = true,
+                EnableAutomaticCrashReporting = false,
+
+                SessionDuration = 10,
+                StoredRequestLimit = 100,
+                TotalBreadcrumbsAllowed = 200,
+
+                NotificationMode = TestMode.AndroidTestToken
             };
 
             string city = "Houston";
@@ -48,16 +58,32 @@ namespace Tests
             Assert.AreEqual(Countly.Instance.Configuration.ServerUrl, "https://xyz.com");
 
             Assert.AreEqual(Countly.Instance.Configuration.City, "Houston");
+            Assert.AreEqual(Countly.Instance.Configuration.CountryCode, "us");
             Assert.AreEqual(Countly.Instance.Configuration.IsLocationDisabled, false);
             Assert.AreEqual(Countly.Instance.Configuration.Location, "29.634933,-95.220255");
+
+            Assert.AreEqual(Countly.Instance.Configuration.SessionDuration, 10);
+            Assert.AreEqual(Countly.Instance.Configuration.StoredRequestLimit, 100);
+            Assert.AreEqual(Countly.Instance.Configuration.EventQueueThreshold, 100);
+            Assert.AreEqual(Countly.Instance.Configuration.TotalBreadcrumbsAllowed, 200);
+            Assert.AreEqual(Countly.Instance.Configuration.NotificationMode, TestMode.AndroidTestToken);
+
+            Assert.AreEqual(Countly.Instance.Configuration.Salt, "091355076ead");
+            Assert.AreEqual(Countly.Instance.Configuration.DeviceId, "device-xyz");
+
+            Assert.AreEqual(Countly.Instance.Configuration.EnablePost, true);
+            Assert.AreEqual(Countly.Instance.Configuration.EnableTestMode, true);
+            Assert.AreEqual(Countly.Instance.Configuration.EnableConsoleLogging, true);
+            Assert.AreEqual(Countly.Instance.Configuration.EnableFirstAppLaunchSegment, true);
+            Assert.AreEqual(Countly.Instance.Configuration.EnableAutomaticCrashReporting, false);
         }
 
         [Test]
         public void TestDefaultConfigValues()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
                 AppKey = _appKey,
+                ServerUrl = _serverUrl
             };
 
             Countly.Instance.Init(configuration);
@@ -69,15 +95,18 @@ namespace Tests
             Assert.AreEqual(Countly.Instance.Configuration.NotificationMode, TestMode.None);
 
             Assert.AreEqual(Countly.Instance.Configuration.Salt, null);
+            Assert.AreEqual(Countly.Instance.Configuration.DeviceId, null);
             Assert.AreEqual(Countly.Instance.Configuration.EnablePost, false);
             Assert.AreEqual(Countly.Instance.Configuration.EnableTestMode, false);
             Assert.AreEqual(Countly.Instance.Configuration.EnableConsoleLogging, false);
             Assert.AreEqual(Countly.Instance.Configuration.EnableFirstAppLaunchSegment, false);
+            Assert.AreEqual(Countly.Instance.Configuration.EnableAutomaticCrashReporting, true);
 
             Assert.AreEqual(Countly.Instance.Configuration.City, null);
             Assert.AreEqual(Countly.Instance.Configuration.Location, null);
             Assert.AreEqual(Countly.Instance.Configuration.IPAddress, null);
             Assert.AreEqual(Countly.Instance.Configuration.CountryCode, null);
+            Assert.AreEqual(Countly.Instance.Configuration.IsLocationDisabled, false);
         }
 
        
