@@ -22,19 +22,16 @@ namespace Plugins.CountlySDK.Services
         private readonly ConsentCountlyService _consentService;
         private readonly PushCountlyService _pushCountlyService;
         private readonly RequestCountlyHelper _requestCountlyHelper;
-        private readonly EventNumberInSameSessionHelper _eventNumberInSameSessionHelper;
 
         internal SessionCountlyService(CountlyConfiguration configModel, EventCountlyService eventService, PushCountlyService pushCountlyService,
-            RequestCountlyHelper requestCountlyHelper, LocationService locationService, ConsentCountlyService consentService,
-            EventNumberInSameSessionHelper eventNumberInSameSessionHelper)
+            RequestCountlyHelper requestCountlyHelper, LocationService locationService, ConsentCountlyService consentService)
         {
             _configModel = configModel;
             _eventService = eventService;
+            _consentService = consentService;
+            _locationService = locationService;
             _pushCountlyService = pushCountlyService;
             _requestCountlyHelper = requestCountlyHelper;
-            _locationService = locationService;
-            _consentService = consentService;
-            _eventNumberInSameSessionHelper = eventNumberInSameSessionHelper;
         }
 
         /// <summary>
@@ -86,7 +83,6 @@ namespace Plugins.CountlySDK.Services
             _lastSessionRequestTime = DateTime.Now;
             //Session initiated
             IsSessionInitiated = true;
-            _eventNumberInSameSessionHelper.RemoveAllEvents();
 
             Dictionary<string, object> requestParams =
                 new Dictionary<string, object>();
@@ -131,10 +127,7 @@ namespace Plugins.CountlySDK.Services
 
         public async Task ExecuteEndSessionAsync(bool disposeTimer = true)
         {
-            //if (ConsentModel.CheckConsent(FeaturesEnum.Sessions.ToString()))
-            //{
             IsSessionInitiated = false;
-            _eventNumberInSameSessionHelper.RemoveAllEvents();
 
             Dictionary<string, object> requestParams =
                 new Dictionary<string, object>

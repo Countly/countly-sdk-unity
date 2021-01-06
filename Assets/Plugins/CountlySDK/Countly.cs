@@ -183,15 +183,15 @@ namespace Plugins.CountlySDK
             RequestRepository requestRepo = new RequestRepository(requestDao, Configuration);
             ViewEventRepository eventViewRepo = new ViewEventRepository(viewEventDao, viewSegmentDao, Configuration);
             NonViewEventRepository eventNonViewRepo = new NonViewEventRepository(nonViewEventDao, nonViewSegmentDao, Configuration);
-            EventNumberInSameSessionDao eventNrInSameSessionDao = new EventNumberInSameSessionDao(auto, EntityType.EventNumberInSameSessions.ToString(), Configuration);
+
+            Dao<EventNumberInSameSessionEntity> eventNrInSameSessionDao = new Dao<EventNumberInSameSessionEntity>(auto, EntityType.EventNumberInSameSessions.ToString(), Configuration);
+            eventNrInSameSessionDao.RemoveAll(); /* Clear EventNumberInSameSessions Entity data */
 
             requestRepo.Initialize();
             eventViewRepo.Initialize();
             eventNonViewRepo.Initialize();
 
-            EventNumberInSameSessionHelper eventNumberInSameSessionHelper = new EventNumberInSameSessionHelper(eventNrInSameSessionDao);
-
-            Init(requestRepo, eventViewRepo, eventNonViewRepo, configDao, eventNumberInSameSessionHelper);
+            Init(requestRepo, eventViewRepo, eventNonViewRepo, configDao);
 
 
             Device.InitDeviceId(configuration.DeviceId);
@@ -201,20 +201,20 @@ namespace Plugins.CountlySDK
         }
 
         private void Init(RequestRepository requestRepo, ViewEventRepository viewEventRepo,
-            NonViewEventRepository nonViewEventRepo, Dao<ConfigEntity> configDao, EventNumberInSameSessionHelper eventNumberInSameSessionHelper)
+            NonViewEventRepository nonViewEventRepo, Dao<ConfigEntity> configDao)
         {
             CountlyUtils countlyUtils = new CountlyUtils(this);
             RequestCountlyHelper requests = new RequestCountlyHelper(Configuration, countlyUtils, requestRepo);
 
             Consents = new ConsentCountlyService();
-            Events = new EventCountlyService(Configuration, requests, viewEventRepo, nonViewEventRepo, eventNumberInSameSessionHelper);
+            Events = new EventCountlyService(Configuration, requests, viewEventRepo, nonViewEventRepo);
 
             Location = new Services.LocationService(Configuration, requests);
             OptionalParameters = new OptionalParametersCountlyService(Location, Configuration);
             Notifications = new NotificationsCallbackService(Configuration);
             ProxyNotificationsService notificationsService = new ProxyNotificationsService(transform, Configuration, InternalStartCoroutine, Events);
             _push = new PushCountlyService(Events, requests, notificationsService, Notifications);
-            Session = new SessionCountlyService(Configuration, Events, _push, requests, Location, Consents, eventNumberInSameSessionHelper);
+            Session = new SessionCountlyService(Configuration, Events, _push, requests, Location, Consents);
 
             CrashReports = new CrashReportsCountlyService(Configuration, requests);
             Initialization = new InitializationCountlyService(Configuration, Location, Consents, Session);
