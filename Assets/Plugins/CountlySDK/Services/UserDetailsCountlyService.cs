@@ -8,7 +8,7 @@ using Plugins.CountlySDK.Models;
 
 namespace Plugins.CountlySDK.Services
 {
-    public class UserDetailsCountlyService
+    public class UserDetailsCountlyService : IBaseService
     {
         internal Dictionary<string, object> CustomeDataProperties { get; private set; }
 
@@ -232,6 +232,9 @@ namespace Plugins.CountlySDK.Services
             CustomeDataProperties.Add(key, value);
         }
 
-
+        public void DeviceIdChanged(string deviceId, bool merged)
+        {
+            
+        }
     }
 }

@@ -9,22 +9,20 @@ using UnityEngine;
 
 namespace Plugins.CountlySDK.Services
 {
-    public class EventCountlyService
+    public class EventCountlyService : IBaseService
     {
-        private readonly CountlyConfiguration _countlyConfiguration;
-        private readonly RequestCountlyHelper _requestCountlyHelper;
         private readonly ViewEventRepository _viewEventRepo;
         private readonly NonViewEventRepository _nonViewEventRepo;
-        private readonly EventNumberInSameSessionHelper _eventNumberInSameSessionHelper;
+        private readonly CountlyConfiguration _countlyConfiguration;
+        private readonly RequestCountlyHelper _requestCountlyHelper;
 
         internal EventCountlyService(CountlyConfiguration countlyConfiguration, RequestCountlyHelper requestCountlyHelper,
-            ViewEventRepository viewEventRepo, NonViewEventRepository nonViewEventRepo, EventNumberInSameSessionHelper eventNumberInSameSessionHelper)
+            ViewEventRepository viewEventRepo, NonViewEventRepository nonViewEventRepo)
         {
-            _countlyConfiguration = countlyConfiguration;
-            _requestCountlyHelper = requestCountlyHelper;
             _viewEventRepo = viewEventRepo;
             _nonViewEventRepo = nonViewEventRepo;
-            _eventNumberInSameSessionHelper = eventNumberInSameSessionHelper;
+            _countlyConfiguration = countlyConfiguration;
+            _requestCountlyHelper = requestCountlyHelper;
         }
 
         /// <summary>
@@ -60,7 +58,7 @@ namespace Plugins.CountlySDK.Services
 
         }
 
-        internal async Task RecordEventAsync(CountlyEventModel @event, bool useNumberInSameSession = false)
+        internal async Task RecordEventAsync(CountlyEventModel @event)
         {
 
             if (_countlyConfiguration.EnableConsoleLogging) {
@@ -81,10 +79,6 @@ namespace Plugins.CountlySDK.Services
                 _nonViewEventRepo.Enqueue(@event);
             }
 
-            if (useNumberInSameSession) {
-                _eventNumberInSameSessionHelper.IncreaseNumberInSameSession(@event);
-            }
-
             if ((_viewEventRepo.Count + _nonViewEventRepo.Count) >= _countlyConfiguration.EventQueueThreshold) {
                 await AddEventsToRequestQueue();
             }
@@ -96,9 +90,9 @@ namespace Plugins.CountlySDK.Services
         /// <param name="key"></param>
         /// <param name="useNumberInSameSession"></param>
         /// <returns></returns>
-        public async Task RecordEventAsync(string key, bool useNumberInSameSession = false)
+        public async Task RecordEventAsync(string key)
         {
-            await RecordEventAsync(key, null, useNumberInSameSession);
+            await RecordEventAsync(key, null);
         }
 
         /// <summary>
@@ -111,7 +105,7 @@ namespace Plugins.CountlySDK.Services
         /// <param name="sum"></param>
         /// <param name="duration"></param>
         /// <returns></returns>
-        public async Task RecordEventAsync(string key, SegmentModel segmentation, bool useNumberInSameSession = false,
+        public async Task RecordEventAsync(string key, SegmentModel segmentation,
             int? count = 1, double? sum = 0, double? duration = null)
         {
             if (_countlyConfiguration.EnableConsoleLogging) {
@@ -148,10 +142,6 @@ namespace Plugins.CountlySDK.Services
             }
 
             CountlyEventModel @event = new CountlyEventModel(key, segmentation, count, sum, duration);
-
-            if (useNumberInSameSession) {
-                _eventNumberInSameSessionHelper.IncreaseNumberInSameSession(@event);
-            }
 
             await RecordEventAsync(@event);
         }
@@ -221,6 +211,11 @@ namespace Plugins.CountlySDK.Services
                 @event.Segmentation = new SegmentModel();
             }
             @event.Segmentation.Add(Constants.FirstAppLaunchSegment, FirstLaunchAppHelper.IsFirstLaunchApp);
+        }
+
+        public void DeviceIdChanged(string deviceId, bool merged)
+        {
+            
         }
     }
 }

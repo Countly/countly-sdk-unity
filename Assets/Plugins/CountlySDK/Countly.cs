@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 using CountlySDK.Input;
 using iBoxDB.LocalServer;
 using Notifications;
@@ -34,6 +35,7 @@ namespace Plugins.CountlySDK
         public bool IsSDKInitialized { get; private set; }
 
         private static Countly _instance = null;
+        private List<IBaseService> _listeners = new List<IBaseService>();
 
         /// <summary>
         /// Return countly shared instance.
@@ -130,7 +132,6 @@ namespace Plugins.CountlySDK
         private bool _logSubscribed;
         internal const long DbNumber = 3;
         private PushCountlyService _push;
-        private IInputObserver _inputObserver;
 
         private Dao<ConfigEntity> _configDao;
         private RequestRepository _requestRepo;
@@ -191,15 +192,15 @@ namespace Plugins.CountlySDK
             _requestRepo = new RequestRepository(requestDao, Configuration);
             _viewEventRepo = new ViewEventRepository(viewEventDao, viewSegmentDao, Configuration);
             _nonViewEventRepo = new NonViewEventRepository(nonViewEventDao, nonViewSegmentDao, Configuration);
-            EventNumberInSameSessionDao eventNrInSameSessionDao = new EventNumberInSameSessionDao(auto, EntityType.EventNumberInSameSessions.ToString(), Configuration);
 
-            _requestRepo.Initialize();
-            _viewEventRepo.Initialize();
-            _nonViewEventRepo.Initialize();
+            Dao<EventNumberInSameSessionEntity> eventNrInSameSessionDao = new Dao<EventNumberInSameSessionEntity>(auto, EntityType.EventNumberInSameSessions.ToString(), Configuration);
+            eventNrInSameSessionDao.RemoveAll(); /* Clear EventNumberInSameSessions Entity data */
 
-            _eventNumberInSameSessionHelper = new EventNumberInSameSessionHelper(eventNrInSameSessionDao);
+            requestRepo.Initialize();
+            eventViewRepo.Initialize();
+            eventNonViewRepo.Initialize();
 
-            Init(_requestRepo, _viewEventRepo, _nonViewEventRepo, _configDao, _eventNumberInSameSessionHelper);
+            Init(requestRepo, eventViewRepo, eventNonViewRepo, configDao);
 
             Device.InitDeviceId(configuration.DeviceId);
 
@@ -209,34 +210,55 @@ namespace Plugins.CountlySDK
         }
 
         private void Init(RequestRepository requestRepo, ViewEventRepository viewEventRepo,
-            NonViewEventRepository nonViewEventRepo, Dao<ConfigEntity> configDao, EventNumberInSameSessionHelper eventNumberInSameSessionHelper)
+            NonViewEventRepository nonViewEventRepo, Dao<ConfigEntity> configDao)
         {
             CountlyUtils countlyUtils = new CountlyUtils(this);
             RequestCountlyHelper requests = new RequestCountlyHelper(Configuration, countlyUtils, requestRepo);
 
             Consents = new ConsentCountlyService();
-            Events = new EventCountlyService(Configuration, requests, viewEventRepo, nonViewEventRepo, eventNumberInSameSessionHelper);
+            Events = new EventCountlyService(Configuration, requests, viewEventRepo, nonViewEventRepo);
 
             Location = new Services.LocationService(Configuration, requests);
             OptionalParameters = new OptionalParametersCountlyService(Location, Configuration);
             Notifications = new NotificationsCallbackService(Configuration);
             ProxyNotificationsService notificationsService = new ProxyNotificationsService(transform, Configuration, InternalStartCoroutine, Events);
             _push = new PushCountlyService(Events, requests, notificationsService, Notifications);
-            Session = new SessionCountlyService(Configuration, Events, _push, requests, Location, Consents, eventNumberInSameSessionHelper);
+            Session = new SessionCountlyService(Configuration, Events, _push, requests, Location, Consents);
 
             CrashReports = new CrashReportsCountlyService(Configuration, requests);
-
-            Device = new DeviceIdCountlyService(Session, requests, Events, countlyUtils);
             Initialization = new InitializationCountlyService(Configuration, Location, Consents, Session);
-
             RemoteConfigs = new RemoteConfigCountlyService(Configuration, requests, countlyUtils, configDao);
 
             StarRating = new StarRatingCountlyService(Events);
             UserDetails = new UserDetailsCountlyService(requests, countlyUtils);
             Views = new ViewCountlyService(Configuration, Events);
-            _inputObserver = InputObserverResolver.Resolve();
+            Device = new DeviceIdCountlyService(Configuration, Session, requests, Events, countlyUtils);
+
+            CreateListOfIBaseService();
+            RegisterListenersToDeviceService();
         }
 
+        private void CreateListOfIBaseService()
+        {
+            _listeners.Clear();
+
+            _listeners.Add(Consents);
+            _listeners.Add(CrashReports);
+            _listeners.Add(Events);
+            _listeners.Add(Views);
+            _listeners.Add(Initialization);
+            _listeners.Add(Location);
+            _listeners.Add(_push);
+            _listeners.Add(RemoteConfigs);
+            _listeners.Add(Session);
+            _listeners.Add(StarRating);
+            _listeners.Add(UserDetails);
+        }
+
+        private void RegisterListenersToDeviceService()
+        {
+            Device.AddListeners(_listeners);
+        }
 
         /// <summary>
         ///     End session on application close/quit
@@ -276,16 +298,23 @@ namespace Plugins.CountlySDK
             }
         }
 
-        private void OnApplicationPause(bool pauseStatus)
+        private async void OnApplicationPause(bool pauseStatus)
         {
             if (Configuration.EnableConsoleLogging) {
                 Debug.Log("[Countly] OnApplicationPause: " + pauseStatus);
             }
 
+            if (CrashReports != null) {
+                CrashReports.IsApplicationInBackground = pauseStatus;
+            }
+
             if (pauseStatus) {
                 HandleAppPauseOrFocus();
+                await Session?.EndSessionAsync();
             } else {
                 SubscribeAppLog();
+                await Session?.ExecuteBeginSessionAsync();
+
             }
         }
 
@@ -329,20 +358,6 @@ namespace Plugins.CountlySDK
 
             Application.logMessageReceived -= LogCallback;
             _logSubscribed = false;
-        }
-
-        private void Update()
-        {
-            CheckInputEvent();
-        }
-
-        private void CheckInputEvent()
-        {
-            if (!_inputObserver.HasInput) {
-                return;
-            }
-
-            Session?.UpdateInputTime();
         }
 
         private void InternalStartCoroutine(IEnumerator enumerator)
