@@ -29,6 +29,7 @@ namespace Tests
 
                 SessionDuration = 10,
                 StoredRequestLimit = 100,
+                EventQueueThreshold = 150,
                 TotalBreadcrumbsAllowed = 200,
 
                 NotificationMode = TestMode.AndroidTestToken
@@ -64,7 +65,7 @@ namespace Tests
 
             Assert.AreEqual(Countly.Instance.Configuration.SessionDuration, 10);
             Assert.AreEqual(Countly.Instance.Configuration.StoredRequestLimit, 100);
-            Assert.AreEqual(Countly.Instance.Configuration.EventQueueThreshold, 100);
+            Assert.AreEqual(Countly.Instance.Configuration.EventQueueThreshold, 150);
             Assert.AreEqual(Countly.Instance.Configuration.TotalBreadcrumbsAllowed, 200);
             Assert.AreEqual(Countly.Instance.Configuration.NotificationMode, TestMode.AndroidTestToken);
 
