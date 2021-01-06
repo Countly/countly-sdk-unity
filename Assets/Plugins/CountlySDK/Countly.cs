@@ -137,7 +137,6 @@ namespace Plugins.CountlySDK
         private RequestRepository _requestRepo;
         private ViewEventRepository _viewEventRepo;
         private NonViewEventRepository _nonViewEventRepo;
-        private EventNumberInSameSessionHelper _eventNumberInSameSessionHelper;
         
 
         /// <summary>
@@ -196,11 +195,11 @@ namespace Plugins.CountlySDK
             Dao<EventNumberInSameSessionEntity> eventNrInSameSessionDao = new Dao<EventNumberInSameSessionEntity>(auto, EntityType.EventNumberInSameSessions.ToString(), Configuration);
             eventNrInSameSessionDao.RemoveAll(); /* Clear EventNumberInSameSessions Entity data */
 
-            requestRepo.Initialize();
-            eventViewRepo.Initialize();
-            eventNonViewRepo.Initialize();
+            _requestRepo.Initialize();
+            _viewEventRepo.Initialize();
+            _nonViewEventRepo.Initialize();
 
-            Init(requestRepo, eventViewRepo, eventNonViewRepo, configDao);
+            Init(_requestRepo, _viewEventRepo, _nonViewEventRepo, _configDao);
 
             Device.InitDeviceId(configuration.DeviceId);
 
@@ -278,7 +277,6 @@ namespace Plugins.CountlySDK
             _viewEventRepo.Clear();
             _configDao.RemoveAll();
             _nonViewEventRepo.Clear();
-            _eventNumberInSameSessionHelper.RemoveAllEvents();
 
             PlayerPrefs.DeleteAll();
 
