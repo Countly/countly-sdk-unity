@@ -8,7 +8,7 @@ namespace CountlySDK.Input
         public static IInputObserver Resolve()
         {
             IInputObserver observer = null;
-#if !UNITY_EDITOR && (UNITY_ANDROID || UNITY_IOS)
+#if UNITY_ANDROID || UNITY_IOS
 			observer = new MobileInputObserver();
 #else
             observer = new DefaultInputObserver();
