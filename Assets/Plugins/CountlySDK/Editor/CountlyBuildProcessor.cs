@@ -23,7 +23,6 @@ namespace Plugins.CountlySDK.Editor
                 }
             }
 #endif
-            }
         }
     }
 }
