@@ -82,9 +82,10 @@ namespace Tests
         [Test]
         public void TestDefaultConfigValues()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                AppKey = _appKey,
-                ServerUrl = _serverUrl
+            CountlyConfiguration configuration = new CountlyConfiguration
+            {
+               AppKey = _appKey,
+               ServerUrl = _serverUrl
             };
 
             Countly.Instance.Init(configuration);
@@ -110,7 +111,7 @@ namespace Tests
             Assert.AreEqual(Countly.Instance.Configuration.IsLocationDisabled, false);
         }
 
-       
+
 
         [TearDown]
         public void End()

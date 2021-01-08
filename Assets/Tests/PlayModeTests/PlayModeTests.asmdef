@@ -1,13 +1,11 @@
 {
-    "name": "Tests",
+    "name": "PlayModeTests",
     "references": [
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
         "PluginAssembly"
     ],
-    "includePlatforms": [
-        "Editor"
-    ],
+    "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": true,
