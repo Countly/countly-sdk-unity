@@ -38,11 +38,13 @@ namespace Notifications.Impls.Android
 
         public void GetToken(Action<string> result)
         {
+#if !UNITY_EDITOR
             _bridge.ListenTokenResult(result);
 
             using (AndroidJavaObject jc = new AndroidJavaObject(NotficationServicePackageName)) {
                 jc.Call("getToken");
             }
+#endif
         }
 
         public void OnNotificationClicked(Action<string, int> result)

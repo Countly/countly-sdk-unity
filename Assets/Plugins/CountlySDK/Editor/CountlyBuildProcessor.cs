@@ -15,11 +15,15 @@ namespace Plugins.CountlySDK.Editor
         public void OnPreprocessBuild(BuildReport report)
         {
 #if UNITY_ANDROID
+            string directoryPath = "/Plugins/Android/Notifications/";
             string filePath = "/Plugins/Android/Notifications/libs/countly_notifications.jar";
             if (!File.Exists(Application.dataPath + "" + filePath)) {
-                Debug.LogError("[Countly] notifications.jar not found at: " + filePath);
+                if (Directory.Exists(Application.dataPath + directoryPath) && !File.Exists(Application.dataPath + "" + filePath)) {
+                    Debug.LogError("[Countly] notifications.jar not found at: " + filePath);
+                }
             }
 #endif
+            }
         }
     }
 }

@@ -222,10 +222,10 @@ namespace Plugins.CountlySDK
             Notifications = new NotificationsCallbackService(Configuration);
             ProxyNotificationsService notificationsService = new ProxyNotificationsService(transform, Configuration, InternalStartCoroutine, Events);
             _push = new PushCountlyService(Events, requests, notificationsService, Notifications);
-            Session = new SessionCountlyService(Configuration, Events, _push, requests, Location, Consents);
+            Session = new SessionCountlyService(Configuration, Events, requests, Location, Consents);
 
             CrashReports = new CrashReportsCountlyService(Configuration, requests);
-            Initialization = new InitializationCountlyService(Configuration, Location, Consents, Session);
+            Initialization = new InitializationCountlyService(Configuration, _push, Location, Consents, Session);
             RemoteConfigs = new RemoteConfigCountlyService(Configuration, requests, countlyUtils, configDao);
 
             StarRating = new StarRatingCountlyService(Events);
