@@ -6,13 +6,15 @@ namespace Plugins.CountlySDK.Services
 {
     public class InitializationCountlyService : IBaseService
     {
+        private readonly PushCountlyService _pushService;
         private readonly LocationService _locationService;
         private readonly CountlyConfiguration _configModel;
         private readonly ConsentCountlyService _consentService;
         private readonly SessionCountlyService _sessionService;
-
-        internal InitializationCountlyService(CountlyConfiguration configModel, LocationService locationService, ConsentCountlyService consentService, SessionCountlyService sessionCountlyService)
+       
+        internal InitializationCountlyService(CountlyConfiguration configModel, PushCountlyService pushService, LocationService locationService, ConsentCountlyService consentService, SessionCountlyService sessionCountlyService)
         {
+            _pushService = pushService;
             _configModel = configModel;
             _consentService = consentService;
             _locationService = locationService;
@@ -55,6 +57,15 @@ namespace Plugins.CountlySDK.Services
             if (!_configModel.EnableManualSessionHandling) {
                 //Start Session
                 await _sessionService.BeginSessionAsync();
+            }
+
+            if (_configModel.EnableTestMode) {
+                return;
+            }
+
+            //Enables push notification on start
+            if (_configModel.NotificationMode != TestMode.None) {
+                _pushService.EnablePushNotificationAsync(_configModel.NotificationMode);
             }
         }
     }

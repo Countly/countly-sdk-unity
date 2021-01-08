@@ -20,17 +20,15 @@ namespace Plugins.CountlySDK.Services
         private readonly CountlyConfiguration _configModel;
         private readonly EventCountlyService _eventService;
         private readonly ConsentCountlyService _consentService;
-        private readonly PushCountlyService _pushCountlyService;
         private readonly RequestCountlyHelper _requestCountlyHelper;
 
-        internal SessionCountlyService(CountlyConfiguration configModel, EventCountlyService eventService, PushCountlyService pushCountlyService,
+        internal SessionCountlyService(CountlyConfiguration configModel, EventCountlyService eventService,
             RequestCountlyHelper requestCountlyHelper, LocationService locationService, ConsentCountlyService consentService)
         {
             _configModel = configModel;
             _eventService = eventService;
             _consentService = consentService;
             _locationService = locationService;
-            _pushCountlyService = pushCountlyService;
             _requestCountlyHelper = requestCountlyHelper;
         }
 
@@ -159,15 +157,6 @@ namespace Plugins.CountlySDK.Services
         public async Task BeginSessionAsync()
         {
             await ExecuteBeginSessionAsync();
-
-            if (_configModel.EnableTestMode) {
-                return;
-            }
-
-            //Enables push notification on start
-            if (_configModel.NotificationMode != TestMode.None) {
-                _pushCountlyService.EnablePushNotificationAsync(_configModel.NotificationMode);
-            }
         }
 
         /// <summary>

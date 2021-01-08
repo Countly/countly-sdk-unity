@@ -23,7 +23,7 @@ public class IOSBridage : MonoBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
-#if COUNTLY_ENABLE_IOS_PUSH
+#if !UNITY_EDITOR && COUNTLY_ENABLE_IOS_PUSH
     [System.Runtime.InteropServices.DllImport("__Internal")]
     extern static public void registerForRemoteNotifications();
 #endif
@@ -31,7 +31,7 @@ public class IOSBridage : MonoBehaviour
     public void GetToken()
     {
 
-#if COUNTLY_ENABLE_IOS_PUSH
+#if !UNITY_EDITOR && COUNTLY_ENABLE_IOS_PUSH
         registerForRemoteNotifications();
 #endif
 
