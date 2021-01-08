@@ -15,7 +15,7 @@ namespace Notifications.Impls.iOs
         private readonly Action<IEnumerator> _startCoroutine;
         private readonly EventCountlyService _eventCountlyService;
 
-        private readonly IOSBridage _bridge;
+        private readonly IOSBridge _bridge;
         private const string BridgeName = "[iOS] Bridge";
 
         internal IOsNotificationsService(Transform countlyGameObject, CountlyConfiguration config, Action<IEnumerator> startCoroutine, EventCountlyService eventCountlyService)
@@ -28,7 +28,7 @@ namespace Notifications.Impls.iOs
             GameObject gameObject = new GameObject(BridgeName);
             gameObject.transform.parent = _countlyGameObject;
 
-            _bridge = gameObject.AddComponent<IOSBridage>();
+            _bridge = gameObject.AddComponent<IOSBridge>();
             _bridge.Config = _config;
 
         }
