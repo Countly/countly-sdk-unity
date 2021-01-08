@@ -18,7 +18,6 @@ namespace Tests
         [TearDown]
         public void End()
         {
-            Countly.Instance.ClearStorage();
             Object.DestroyImmediate(Countly.Instance);
         }
     }

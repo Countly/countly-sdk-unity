@@ -1,4 +1,5 @@
-﻿using UnityEditor.Build;
+﻿#if ENABLE_VSTU
+using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
 
 #if UNITY_ANDROID
@@ -25,3 +26,5 @@ namespace Plugins.CountlySDK.Editor
             }
         }
     }
+}
+#endif

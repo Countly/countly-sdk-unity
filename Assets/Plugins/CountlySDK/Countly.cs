@@ -18,7 +18,7 @@ using Plugins.CountlySDK.Services;
 using Plugins.iBoxDB;
 using UnityEngine;
 
-[assembly: InternalsVisibleTo("Tests")]
+[assembly: InternalsVisibleTo("PlayModeTests")]
 namespace Plugins.CountlySDK
 {
     public class Countly : MonoBehaviour
