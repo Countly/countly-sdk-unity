@@ -20,8 +20,9 @@ namespace Plugins.CountlySDK.Services
         private readonly CountlyConfiguration _countlyConfiguration;
 
 
-        internal LocationService(CountlyConfiguration countlyConfiguration, RequestCountlyHelper requestCountlyHelper)
+        internal LocationService(CountlyConfiguration countlyConfiguration, RequestCountlyHelper requestCountlyHelper, ConsentCountlyService consentService)
         {
+            _consentService = consentService;
             _countlyConfiguration = countlyConfiguration;
             _requestCountlyHelper = requestCountlyHelper;
 

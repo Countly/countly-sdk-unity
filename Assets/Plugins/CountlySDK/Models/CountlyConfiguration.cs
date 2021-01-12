@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Plugins.CountlySDK.Enums;
 using UnityEngine;
 
@@ -31,15 +33,25 @@ namespace Plugins.CountlySDK.Models
         internal string CountryCode;
         internal bool IsLocationDisabled;
 
+        public bool RequiresConsent = false;
+        internal Features[] Features { get; private set;}
+        internal Dictionary<string, Features[]> FeatureGroups { get; private set; }
+        
+
         /// <summary>
         ///     Parent must be undestroyable
         /// </summary>
         public GameObject Parent = null;
 
-        public CountlyConfiguration() { }
+        public CountlyConfiguration()
+        {
+            FeatureGroups = new Dictionary<string, Features[]>();
+        }
 
         internal CountlyConfiguration(CountlyAuthModel authModel, CountlyConfigModel config)
         {
+            FeatureGroups = new Dictionary<string, Features[]>();
+
             ServerUrl = authModel.ServerUrl;
             AppKey = authModel.AppKey;
             DeviceId = authModel.DeviceId;
@@ -84,5 +96,62 @@ namespace Plugins.CountlySDK.Models
             CountryCode = countryCode;
             Location = gpsCoordinates;
         }
+
+        public void EnableFeatursConsents(Features[] features)
+        {
+            if (!RequiresConsent) {
+                if (EnableConsoleLogging) {
+                    Debug.Log("[Countly] CountlyConfiguration: Enable Consents");
+                }
+
+                return;
+            }
+
+            if (features == null) {
+                if (EnableConsoleLogging) {
+                    Debug.Log("[Countly] CountlyConfiguration: Calling GiveConsent with null features list!");
+                }
+
+                return;
+            }
+        }
+
+        public void CreateFeatureGroup(string groupName, Features[] features)
+        {
+            if (!RequiresConsent) {
+                if (EnableConsoleLogging) {
+                    Debug.Log("[Countly CountlyConfiguration] : Consents are not enable");
+                }
+
+                return;
+            }
+
+            if (groupName == null) {
+                if (EnableConsoleLogging) {
+                    Debug.Log("[Countly] CountlyConfiguration: Calling CreateFeatureGroup with null groupName!");
+                }
+                return;
+            }
+
+            if (features == null) {
+                if (EnableConsoleLogging) {
+                    Debug.Log("[Countly] CountlyConfiguration: Calling CreateFeatureGroup with null features list!");
+                }
+                return;
+            }
+
+
+            if (FeatureGroups.ContainsKey(groupName)) {
+                if (EnableConsoleLogging) {
+                    Debug.Log("[Countly] ConsentCountlyService: Feature Group '" + groupName + "' already exist!");
+                }
+                return;
+            }
+
+            FeatureGroups.Add(groupName, features);
+
+        }
     }
+
+
 }

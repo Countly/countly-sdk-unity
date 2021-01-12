@@ -214,16 +214,15 @@ namespace Plugins.CountlySDK
             CountlyUtils countlyUtils = new CountlyUtils(this);
             RequestCountlyHelper requests = new RequestCountlyHelper(Configuration, countlyUtils, requestRepo);
 
+            Consents = new ConsentCountlyService(Configuration);
             Events = new EventCountlyService(Configuration, requests, viewEventRepo, nonViewEventRepo);
 
-            Location = new Services.LocationService(Configuration, requests);
+            Location = new Services.LocationService(Configuration, requests, Consents);
             OptionalParameters = new OptionalParametersCountlyService(Location, Configuration);
             Notifications = new NotificationsCallbackService(Configuration);
             ProxyNotificationsService notificationsService = new ProxyNotificationsService(transform, Configuration, InternalStartCoroutine, Events);
             _push = new PushCountlyService(Events, requests, notificationsService, Notifications);
             Session = new SessionCountlyService(Configuration, Events, requests, Location, Consents);
-
-            Consents = new ConsentCountlyService(Configuration, Location);
 
             CrashReports = new CrashReportsCountlyService(Configuration, requests);
             Initialization = new InitializationCountlyService(Configuration, _push, Location, Consents, Session);
