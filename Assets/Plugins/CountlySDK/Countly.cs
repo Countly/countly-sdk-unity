@@ -137,7 +137,7 @@ namespace Plugins.CountlySDK
         private RequestRepository _requestRepo;
         private ViewEventRepository _viewEventRepo;
         private NonViewEventRepository _nonViewEventRepo;
-        
+
 
         /// <summary>
         ///     Initialize SDK at the start of your app
@@ -214,7 +214,6 @@ namespace Plugins.CountlySDK
             CountlyUtils countlyUtils = new CountlyUtils(this);
             RequestCountlyHelper requests = new RequestCountlyHelper(Configuration, countlyUtils, requestRepo);
 
-            Consents = new ConsentCountlyService();
             Events = new EventCountlyService(Configuration, requests, viewEventRepo, nonViewEventRepo);
 
             Location = new Services.LocationService(Configuration, requests);
@@ -223,6 +222,8 @@ namespace Plugins.CountlySDK
             ProxyNotificationsService notificationsService = new ProxyNotificationsService(transform, Configuration, InternalStartCoroutine, Events);
             _push = new PushCountlyService(Events, requests, notificationsService, Notifications);
             Session = new SessionCountlyService(Configuration, Events, requests, Location, Consents);
+
+            Consents = new ConsentCountlyService(Configuration, Location);
 
             CrashReports = new CrashReportsCountlyService(Configuration, requests);
             Initialization = new InitializationCountlyService(Configuration, _push, Location, Consents, Session);
