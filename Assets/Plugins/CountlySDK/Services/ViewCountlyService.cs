@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Plugins.CountlySDK.Enums;
 using Plugins.CountlySDK.Helpers;
 using Plugins.CountlySDK.Models;
 using UnityEngine;
@@ -119,10 +120,17 @@ namespace Plugins.CountlySDK.Services
             await _eventService.ReportCustomEventAsync(CountlyEventModel.ViewActionEvent, segment.ToDictionary());
         }
 
+        #region override Methods
         public void DeviceIdChanged(string deviceId, bool merged)
         {
-            
+
         }
+
+        public void ConsentChanged(Dictionary<Features, bool> updatedConsents)
+        {
+
+        }
+        #endregion
 
         /// <summary>
         /// Custom Segmentation for Views related events.

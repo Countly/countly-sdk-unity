@@ -192,28 +192,16 @@ namespace Plugins.CountlySDK.Services
 
         }
 
+        #region override Methods
         public void DeviceIdChanged(string deviceId, bool merged)
         {
 
         }
 
+        public void ConsentChanged(Dictionary<Features, bool> updatedConsents)
+        {
 
-        #region Unused Code
-
-        ///// <summary>
-        ///// The method must be used only when Manual Session Handling is disabled.
-        ///// Sets the session duration. Session will be extended each time this interval elapses. The interval value must be in seconds.
-        ///// </summary>
-        ///// <param name="interval"></param>
-        //private static void SetSessionDuration(int interval)
-        //{
-        //    if (!IsManualSessionHandlingEnabled)
-        //    {
-        //        _extendSessionInterval = interval;
-        //        _sessionTimer.Interval = _extendSessionInterval * 1000;
-        //    }
-        //}
-
+        }
         #endregion
     }
 }

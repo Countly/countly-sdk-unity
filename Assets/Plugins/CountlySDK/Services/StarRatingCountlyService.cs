@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Plugins.CountlySDK.Enums;
 using Plugins.CountlySDK.Models;
 
 namespace Plugins.CountlySDK.Services
@@ -15,10 +16,17 @@ namespace Plugins.CountlySDK.Services
             _eventCountlyService = eventCountlyService;
         }
 
+        #region override Methods
         public void DeviceIdChanged(string deviceId, bool merged)
         {
-            
+
         }
+
+        public void ConsentChanged(Dictionary<Features, bool> updatedConsents)
+        {
+
+        }
+        #endregion
 
 
         /// <summary>

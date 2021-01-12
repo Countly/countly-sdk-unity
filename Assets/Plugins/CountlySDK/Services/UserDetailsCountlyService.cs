@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Plugins.CountlySDK.Enums;
 using Plugins.CountlySDK.Helpers;
 using Plugins.CountlySDK.Models;
 
@@ -232,9 +233,16 @@ namespace Plugins.CountlySDK.Services
             CustomeDataProperties.Add(key, value);
         }
 
+        #region override Methods
         public void DeviceIdChanged(string deviceId, bool merged)
         {
-            
+
         }
+
+        public void ConsentChanged(Dictionary<Features, bool> updatedConsents)
+        {
+
+        }
+        #endregion
     }
 }

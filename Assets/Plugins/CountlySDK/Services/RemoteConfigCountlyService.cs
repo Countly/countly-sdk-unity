@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using Plugins.CountlySDK.Enums;
 using Plugins.CountlySDK.Helpers;
 using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK.Persistance.Entities;
@@ -130,9 +131,16 @@ namespace Plugins.CountlySDK.Services
             return _requestStringBuilder.ToString();
         }
 
+        #region override Methods
         public void DeviceIdChanged(string deviceId, bool merged)
         {
-            
+
         }
+
+        public void ConsentChanged(Dictionary<Features, bool> updatedConsents)
+        {
+
+        }
+        #endregion
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Plugins.CountlySDK.Enums;
 using Plugins.CountlySDK.Helpers;
 using Plugins.CountlySDK.Models;
 using UnityEngine;
@@ -122,9 +123,16 @@ namespace Plugins.CountlySDK.Services
 #endif
             };
         }
+        #region override Methods
         public void DeviceIdChanged(string deviceId, bool merged)
         {
 
         }
+
+        public void ConsentChanged(Dictionary<Features, bool> updatedConsents)
+        {
+
+        }
+        #endregion
     }
 }

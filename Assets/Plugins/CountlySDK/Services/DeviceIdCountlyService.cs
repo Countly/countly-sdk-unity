@@ -1,12 +1,13 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Plugins.CountlySDK.Enums;
 using Plugins.CountlySDK.Helpers;
 using Plugins.CountlySDK.Models;
 using UnityEngine;
 
 namespace Plugins.CountlySDK.Services
 {
-    public class DeviceIdCountlyService
+    public class DeviceIdCountlyService : IBaseService
     {
         private List<IBaseService> _listeners;
         private readonly CountlyUtils _countlyUtils;
@@ -146,5 +147,17 @@ namespace Plugins.CountlySDK.Services
                 listener.DeviceIdChanged(DeviceId, merged);
             }
         }
+
+        #region override Methods
+        public void DeviceIdChanged(string deviceId, bool merged)
+        {
+
+        }
+
+        public void ConsentChanged(Dictionary<Features, bool> updatedConsents)
+        {
+
+        }
+        #endregion
     }
 }

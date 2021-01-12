@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using Plugins.CountlySDK.Enums;
 using Plugins.CountlySDK.Models;
 
@@ -24,10 +25,17 @@ namespace Plugins.CountlySDK.Services
         public string ServerUrl { get; private set; }
         public string AppKey { get; private set; }
 
+        #region override Methods
         public void DeviceIdChanged(string deviceId, bool merged)
         {
-            
+
         }
+
+        public void ConsentChanged(Dictionary<Features, bool> updatedConsents)
+        {
+
+        }
+        #endregion
 
         /// <summary>
         ///     Initializes countly instance

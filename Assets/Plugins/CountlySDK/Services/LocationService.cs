@@ -141,9 +141,28 @@ namespace Plugins.CountlySDK.Services
             }
         }
 
+        /*
+         * If location consent is removed,
+         * the SDK sends a request with an empty "location" parameter.
+         */
+        private async void OnLocationConsentRemoved()
+        {
+            await SendRequestWithEmptyLocation();
+        }
+
+        #region override Methods
         public void DeviceIdChanged(string deviceId, bool merged)
         {
+
+        }
+
+        public void ConsentChanged(Dictionary<Features, bool> updatedConsents)
+        {
+            if (updatedConsents.ContainsKey(Features.Location) && !updatedConsents[Features.Location]) {
+                OnLocationConsentRemoved();
+            }
             
         }
+        #endregion
     }
 }

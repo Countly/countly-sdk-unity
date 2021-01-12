@@ -235,29 +235,31 @@ namespace Plugins.CountlySDK
             Device = new DeviceIdCountlyService(Configuration, Session, requests, Events, countlyUtils);
 
             CreateListOfIBaseService();
-            RegisterListenersToDeviceService();
+            RegisterListenersToServices();
         }
 
         private void CreateListOfIBaseService()
         {
             _listeners.Clear();
 
-            _listeners.Add(Consents);
-            _listeners.Add(CrashReports);
-            _listeners.Add(Events);
-            _listeners.Add(Views);
-            _listeners.Add(Initialization);
-            _listeners.Add(Location);
             _listeners.Add(_push);
-            _listeners.Add(RemoteConfigs);
+            _listeners.Add(Views);
+            _listeners.Add(Events);
+            _listeners.Add(Device);
             _listeners.Add(Session);
+            _listeners.Add(Location);
+            _listeners.Add(Consents);
             _listeners.Add(StarRating);
             _listeners.Add(UserDetails);
+            _listeners.Add(CrashReports);
+            _listeners.Add(RemoteConfigs);
+            _listeners.Add(Initialization);   
         }
 
-        private void RegisterListenersToDeviceService()
+        private void RegisterListenersToServices()
         {
             Device.AddListeners(_listeners);
+            Consents.AddListeners(_listeners);
         }
 
         /// <summary>
