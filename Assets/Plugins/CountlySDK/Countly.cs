@@ -178,7 +178,7 @@ namespace Plugins.CountlySDK
 
             Configuration = configuration;
 
-            _db = CountlyBoxDbHelper.BuildDatabase(DbNumber);
+            _db = CountlyStorageHelper.BuildDatabase(DbNumber);
 
             DB.AutoBox auto = _db.Open();
             _configDao = new Dao<ConfigEntity>(auto, EntityType.Configs.ToString(), Configuration);

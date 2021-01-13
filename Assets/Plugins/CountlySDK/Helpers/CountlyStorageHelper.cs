@@ -5,7 +5,12 @@ using UnityEngine;
 
 namespace Plugins.CountlySDK.Helpers
 {
-    public class CountlyBoxDbHelper
+    public enum EntityType
+    {
+        ViewEvents, NonViewEvents, Requests, ViewEventSegments, NonViewEventSegments, Configs, EventNumberInSameSessions
+    }
+
+    public class CountlyStorageHelper
     {
         public static DB BuildDatabase(long dbNumber)
         {
