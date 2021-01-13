@@ -11,7 +11,7 @@ namespace Plugins.CountlySDK.Services
 {
     public class UserDetailsCountlyService : IBaseService
     {
-        internal Dictionary<string, object> CustomeDataProperties { get; private set; }
+        internal Dictionary<string, object> CustomDataProperties { get; private set; }
 
 
         private readonly RequestCountlyHelper _requestCountlyHelper;
@@ -21,7 +21,7 @@ namespace Plugins.CountlySDK.Services
         {
             _requestCountlyHelper = requestCountlyHelper;
             _countlyUtils = countlyUtils;
-            CustomeDataProperties = new Dictionary<string, object>();
+            CustomDataProperties = new Dictionary<string, object>();
         }
 
         /// <summary>
@@ -100,13 +100,13 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async Task SaveAsync()
         {
-            if (!CustomeDataProperties.Any()) {
+            if (!CustomDataProperties.Any()) {
                 return;
             }
 
-            CountlyUserDetailsModel model = new CountlyUserDetailsModel(CustomeDataProperties);
+            CountlyUserDetailsModel model = new CountlyUserDetailsModel(CustomDataProperties);
 
-            CustomeDataProperties = new Dictionary<string, object> { };
+            CustomDataProperties = new Dictionary<string, object> { };
             await SetCustomUserDetailsAsync(model);
         }
 
@@ -223,14 +223,14 @@ namespace Plugins.CountlySDK.Services
 
         public void AddToCustomData(string key, object value)
         {
-            if (CustomeDataProperties.ContainsKey(key)) {
-                string item = CustomeDataProperties.Select(x => x.Key).FirstOrDefault(x => x.Equals(key, StringComparison.OrdinalIgnoreCase));
+            if (CustomDataProperties.ContainsKey(key)) {
+                string item = CustomDataProperties.Select(x => x.Key).FirstOrDefault(x => x.Equals(key, StringComparison.OrdinalIgnoreCase));
                 if (item != null) {
-                    CustomeDataProperties.Remove(item);
+                    CustomDataProperties.Remove(item);
                 }
             }
 
-            CustomeDataProperties.Add(key, value);
+            CustomDataProperties.Add(key, value);
         }
 
         #region override Methods

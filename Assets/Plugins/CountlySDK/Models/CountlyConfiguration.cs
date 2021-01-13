@@ -97,7 +97,7 @@ namespace Plugins.CountlySDK.Models
             Location = gpsCoordinates;
         }
 
-        public void EnableFeatursConsents(Features[] features)
+        public void EnableFeaturesConsents(Features[] features)
         {
             if (!RequiresConsent) {
                 if (EnableConsoleLogging) {

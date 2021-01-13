@@ -103,13 +103,13 @@ namespace Plugins.CountlySDK
         public RemoteConfigCountlyService RemoteConfigs { get; private set; }
 
         /// <summary>
-        ///     Exposes functinality to report start rating.
+        ///     Exposes functionality to report start rating.
         /// </summary>
         /// <returns>StarRatingCountlyService</returns>
         public StarRatingCountlyService StarRating { get; private set; }
 
         /// <summary>
-        ///     Exposes functionality to set and change custom user properties and interract with custom property modiffiers.
+        ///     Exposes functionality to set and change custom user properties and interract with custom property modifiers.
         /// </summary>
         /// <returns>UserDetailsCountlyService</returns>
         public UserDetailsCountlyService UserDetails { get; private set; }

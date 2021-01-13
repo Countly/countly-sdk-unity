@@ -32,7 +32,7 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
         configuration.SetLocation(countryCode, city, latitude + "," + longitude, ipAddress);
 
         configuration.RequiresConsent = true;
-        configuration.EnableFeatursConsents(new Features[] { Features.Crashes, Features.Events});
+        configuration.EnableFeaturesConsents(new Features[] { Features.Crashes, Features.Events});
         configuration.CreateFeatureGroup("User-Consents", new Features[] { Features.Users, Features.Location });
 
         Countly.Instance.Init(configuration);
