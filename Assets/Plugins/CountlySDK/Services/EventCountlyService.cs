@@ -10,7 +10,7 @@ using UnityEngine;
 
 namespace Plugins.CountlySDK.Services
 {
-    public class EventCountlyService : IBaseService
+    public class EventCountlyService : AbstractBaseService
     {
         private readonly ViewEventRepository _viewEventRepo;
         private readonly NonViewEventRepository _nonViewEventRepo;
@@ -215,12 +215,12 @@ namespace Plugins.CountlySDK.Services
         }
 
         #region override Methods
-        public void DeviceIdChanged(string deviceId, bool merged)
+        internal override void DeviceIdChanged(string deviceId, bool merged)
         {
 
         }
 
-        public void ConsentChanged(Dictionary<Features, bool> updatedConsents)
+        internal override void ConsentChanged(Dictionary<Features, bool> updatedConsents)
         {
 
         }

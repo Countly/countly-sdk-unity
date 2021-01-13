@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Plugins.CountlySDK.Enums;
@@ -6,7 +6,7 @@ using Plugins.CountlySDK.Models;
 
 namespace Plugins.CountlySDK.Services
 {
-    public class StarRatingCountlyService : IBaseService
+    public class StarRatingCountlyService : AbstractBaseService
     {
 
         private readonly EventCountlyService _eventCountlyService;
@@ -17,12 +17,12 @@ namespace Plugins.CountlySDK.Services
         }
 
         #region override Methods
-        public void DeviceIdChanged(string deviceId, bool merged)
+        internal override void DeviceIdChanged(string deviceId, bool merged)
         {
 
         }
 
-        public void ConsentChanged(Dictionary<Features, bool> updatedConsents)
+        internal override void ConsentChanged(Dictionary<Features, bool> updatedConsents)
         {
 
         }

@@ -7,9 +7,9 @@ using UnityEngine;
 
 namespace Plugins.CountlySDK.Services
 {
-    public class DeviceIdCountlyService : IBaseService
+    public class DeviceIdCountlyService : AbstractBaseService
     {
-        private List<IBaseService> _listeners;
+        private List<AbstractBaseService> _listeners;
         private readonly CountlyUtils _countlyUtils;
         private readonly CountlyConfiguration _config;
         private readonly SessionCountlyService _sessionCountlyService;
@@ -29,7 +29,7 @@ namespace Plugins.CountlySDK.Services
 
         public string DeviceId { get; private set; }
 
-        internal void AddListeners(List<IBaseService> listeners)
+        internal void AddListeners(List<AbstractBaseService> listeners)
         {
             _listeners = listeners;
             if (_config.EnableConsoleLogging) {
@@ -143,18 +143,18 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
 
-            foreach (IBaseService listener in _listeners) {
+            foreach (AbstractBaseService listener in _listeners) {
                 listener.DeviceIdChanged(DeviceId, merged);
             }
         }
 
         #region override Methods
-        public void DeviceIdChanged(string deviceId, bool merged)
+        internal override void DeviceIdChanged(string deviceId, bool merged)
         {
 
         }
 
-        public void ConsentChanged(Dictionary<Features, bool> updatedConsents)
+        internal override void ConsentChanged(Dictionary<Features, bool> updatedConsents)
         {
 
         }

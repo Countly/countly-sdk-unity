@@ -9,7 +9,7 @@ using UnityEngine;
 namespace Plugins.CountlySDK.Services
 {
 
-    public class ViewCountlyService : IBaseService
+    public class ViewCountlyService : AbstractBaseService
     {
         private readonly CountlyConfiguration _config;
         private readonly Dictionary<string, DateTime> _viewToLastViewStartTime = new Dictionary<string, DateTime>();
@@ -121,12 +121,12 @@ namespace Plugins.CountlySDK.Services
         }
 
         #region override Methods
-        public void DeviceIdChanged(string deviceId, bool merged)
+        internal override void DeviceIdChanged(string deviceId, bool merged)
         {
 
         }
 
-        public void ConsentChanged(Dictionary<Features, bool> updatedConsents)
+        internal override void ConsentChanged(Dictionary<Features, bool> updatedConsents)
         {
 
         }

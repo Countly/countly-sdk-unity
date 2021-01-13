@@ -6,7 +6,7 @@ using Plugins.CountlySDK.Enums;
 using Plugins.CountlySDK.Helpers;
 namespace Plugins.CountlySDK.Services
 {
-    public class PushCountlyService : IBaseService
+    public class PushCountlyService : AbstractBaseService
     {
         private string _token;
         private TestMode? _mode;
@@ -81,12 +81,12 @@ namespace Plugins.CountlySDK.Services
         }
 
         #region override Methods
-        public void DeviceIdChanged(string deviceId, bool merged)
+        internal override void DeviceIdChanged(string deviceId, bool merged)
         {
 
         }
 
-        public void ConsentChanged(Dictionary<Features, bool> updatedConsents)
+        internal override void ConsentChanged(Dictionary<Features, bool> updatedConsents)
         {
 
         }

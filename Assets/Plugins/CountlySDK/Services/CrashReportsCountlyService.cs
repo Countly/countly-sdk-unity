@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace Plugins.CountlySDK.Services
 {
-    public class CrashReportsCountlyService : IBaseService
+    public class CrashReportsCountlyService : AbstractBaseService
     {
         public bool IsApplicationInBackground { get; internal set; }
         private readonly Queue<string> _crashBreadcrumbs = new Queue<string>();
@@ -124,12 +124,7 @@ namespace Plugins.CountlySDK.Services
             };
         }
         #region override Methods
-        public void DeviceIdChanged(string deviceId, bool merged)
-        {
-
-        }
-
-        public void ConsentChanged(Dictionary<Features, bool> updatedConsents)
+        internal override void DeviceIdChanged(string deviceId, bool merged)
         {
 
         }

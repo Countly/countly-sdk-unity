@@ -5,7 +5,7 @@ using Plugins.CountlySDK.Models;
 
 namespace Plugins.CountlySDK.Services
 {
-    public class InitializationCountlyService : IBaseService
+    public class InitializationCountlyService : AbstractBaseService
     {
         private readonly PushCountlyService _pushService;
         private readonly LocationService _locationService;
@@ -26,12 +26,12 @@ namespace Plugins.CountlySDK.Services
         public string AppKey { get; private set; }
 
         #region override Methods
-        public void DeviceIdChanged(string deviceId, bool merged)
+        internal override void DeviceIdChanged(string deviceId, bool merged)
         {
 
         }
 
-        public void ConsentChanged(Dictionary<Features, bool> updatedConsents)
+        internal override void ConsentChanged(Dictionary<Features, bool> updatedConsents)
         {
 
         }

@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Plugins.CountlySDK.Services
 {
-    public class LocationService : IBaseService
+    public class LocationService : AbstractBaseService
     {
         internal bool IsLocationDisabled { get; private set; }
         internal string City { get; private set; }
@@ -152,12 +152,12 @@ namespace Plugins.CountlySDK.Services
         }
 
         #region override Methods
-        public void DeviceIdChanged(string deviceId, bool merged)
+        internal override void DeviceIdChanged(string deviceId, bool merged)
         {
 
         }
 
-        public void ConsentChanged(Dictionary<Features, bool> updatedConsents)
+        internal override void ConsentChanged(Dictionary<Features, bool> updatedConsents)
         {
             if (updatedConsents.ContainsKey(Features.Location) && !updatedConsents[Features.Location]) {
                 OnLocationConsentRemoved();

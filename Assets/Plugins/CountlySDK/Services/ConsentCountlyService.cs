@@ -7,11 +7,11 @@ using UnityEngine;
 
 namespace Plugins.CountlySDK.Services
 {
-    public class ConsentCountlyService : IBaseService
+    public class ConsentCountlyService : AbstractBaseService
     {
         internal bool RequiresConsent { get; private set; }
 
-        private List<IBaseService> _listeners;
+        private List<AbstractBaseService> _listeners;
         private readonly CountlyConfiguration _config;
         private readonly Dictionary<Features, bool> _modifiedConsents;
         private readonly Dictionary<Features, bool> _countlyFeatureConsents;
@@ -34,7 +34,7 @@ namespace Plugins.CountlySDK.Services
             
         }
 
-        internal void AddListeners(List<IBaseService> listeners)
+        internal void AddListeners(List<AbstractBaseService> listeners)
         {
             _listeners = listeners;
             if (_config.EnableConsoleLogging) {
@@ -327,22 +327,17 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
 
-            foreach (IBaseService listener in _listeners) {
+            foreach (AbstractBaseService listener in _listeners) {
                 listener.ConsentChanged(_modifiedConsents);
+                
             }
         }
         #endregion
 
         #region override Methods
-        public void DeviceIdChanged(string deviceId, bool merged)
-        {
 
-        }
+        internal override void DeviceIdChanged(string deviceId, bool merged) { }
 
-        public void ConsentChanged(Dictionary<Features, bool> updatedConsents)
-        {
-
-        }
         #endregion
     }
 }

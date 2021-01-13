@@ -10,7 +10,7 @@ using UnityEngine;
 
 namespace Plugins.CountlySDK.Services
 {
-    public class SessionCountlyService : IBaseService
+    public class SessionCountlyService : AbstractBaseService
     {
         private Timer _sessionTimer;
         private DateTime _lastSessionRequestTime;
@@ -193,12 +193,12 @@ namespace Plugins.CountlySDK.Services
         }
 
         #region override Methods
-        public void DeviceIdChanged(string deviceId, bool merged)
+        internal override void DeviceIdChanged(string deviceId, bool merged)
         {
 
         }
 
-        public void ConsentChanged(Dictionary<Features, bool> updatedConsents)
+        internal override void ConsentChanged(Dictionary<Features, bool> updatedConsents)
         {
 
         }

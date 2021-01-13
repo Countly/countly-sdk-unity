@@ -35,7 +35,7 @@ namespace Plugins.CountlySDK
         public bool IsSDKInitialized { get; private set; }
 
         private static Countly _instance = null;
-        private List<IBaseService> _listeners = new List<IBaseService>();
+        private List<AbstractBaseService> _listeners = new List<AbstractBaseService>();
 
         /// <summary>
         /// Return countly shared instance.

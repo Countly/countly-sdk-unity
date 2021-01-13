@@ -9,7 +9,7 @@ using Plugins.CountlySDK.Models;
 
 namespace Plugins.CountlySDK.Services
 {
-    public class UserDetailsCountlyService : IBaseService
+    public class UserDetailsCountlyService : AbstractBaseService
     {
         internal Dictionary<string, object> CustomDataProperties { get; private set; }
 
@@ -234,12 +234,12 @@ namespace Plugins.CountlySDK.Services
         }
 
         #region override Methods
-        public void DeviceIdChanged(string deviceId, bool merged)
+        internal override void DeviceIdChanged(string deviceId, bool merged)
         {
 
         }
 
-        public void ConsentChanged(Dictionary<Features, bool> updatedConsents)
+        internal override void ConsentChanged(Dictionary<Features, bool> updatedConsents)
         {
 
         }

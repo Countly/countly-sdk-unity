@@ -34,9 +34,9 @@ namespace Plugins.CountlySDK.Models
         internal bool IsLocationDisabled;
 
         public bool RequiresConsent = false;
-        internal Features[] Features { get; private set;}
+        internal Features[] Features { get; private set; }
         internal Dictionary<string, Features[]> FeatureGroups { get; private set; }
-        
+
 
         /// <summary>
         ///     Parent must be undestroyable
@@ -99,59 +99,12 @@ namespace Plugins.CountlySDK.Models
 
         public void EnableFeaturesConsents(Features[] features)
         {
-            if (!RequiresConsent) {
-                if (EnableConsoleLogging) {
-                    Debug.Log("[Countly] CountlyConfiguration: Enable Consents");
-                }
-
-                return;
-            }
-
-            if (features == null) {
-                if (EnableConsoleLogging) {
-                    Debug.Log("[Countly] CountlyConfiguration: Calling GiveConsent with null features list!");
-                }
-
-                return;
-            }
+            Features = features;
         }
 
         public void CreateFeatureGroup(string groupName, Features[] features)
         {
-            if (!RequiresConsent) {
-                if (EnableConsoleLogging) {
-                    Debug.Log("[Countly CountlyConfiguration] : Consents are not enable");
-                }
-
-                return;
-            }
-
-            if (groupName == null) {
-                if (EnableConsoleLogging) {
-                    Debug.Log("[Countly] CountlyConfiguration: Calling CreateFeatureGroup with null groupName!");
-                }
-                return;
-            }
-
-            if (features == null) {
-                if (EnableConsoleLogging) {
-                    Debug.Log("[Countly] CountlyConfiguration: Calling CreateFeatureGroup with null features list!");
-                }
-                return;
-            }
-
-
-            if (FeatureGroups.ContainsKey(groupName)) {
-                if (EnableConsoleLogging) {
-                    Debug.Log("[Countly] ConsentCountlyService: Feature Group '" + groupName + "' already exist!");
-                }
-                return;
-            }
-
             FeatureGroups.Add(groupName, features);
-
         }
     }
-
-
 }
