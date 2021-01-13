@@ -50,7 +50,7 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
     {
 
         int participants = 13;
-        Barrier barrier = new Barrier(participantCount: participants, (bar) => {
+        Barrier barrier = new Barrier(participantCount: participants, postPhaseAction: (bar) => {
             Debug.Log("All threads reached the barrier at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
         });
 
