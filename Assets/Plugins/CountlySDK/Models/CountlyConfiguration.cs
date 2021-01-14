@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 using Plugins.CountlySDK.Enums;
 using UnityEngine;
 
@@ -97,12 +98,12 @@ namespace Plugins.CountlySDK.Models
             Location = gpsCoordinates;
         }
 
-        public void EnableFeaturesConsents(Features[] features)
+        public void EnableFeaturesConsents([NotNull] Features[] features)
         {
             Features = features;
         }
 
-        public void CreateFeatureGroup(string groupName, Features[] features)
+        public void  CreateFeatureGroup([NotNull] string groupName, [NotNull] Features[] features)
         {
             FeatureGroups.Add(groupName, features);
         }

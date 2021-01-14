@@ -80,18 +80,6 @@ namespace Plugins.CountlySDK.Services
             return await _notificationsService.ReportPushActionAsync();
         }
 
-        #region override Methods
-        internal override void DeviceIdChanged(string deviceId, bool merged)
-        {
-
-        }
-
-        internal override void ConsentChanged(Dictionary<Features, bool> updatedConsents)
-        {
-
-        }
-        #endregion
-
         [Serializable]
         public struct PushActionSegment
         {

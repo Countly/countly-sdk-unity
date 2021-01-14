@@ -19,15 +19,13 @@ namespace Plugins.CountlySDK.Services
         private readonly LocationService _locationService;
         private readonly CountlyConfiguration _configModel;
         private readonly EventCountlyService _eventService;
-        private readonly ConsentCountlyService _consentService;
         private readonly RequestCountlyHelper _requestCountlyHelper;
 
         internal SessionCountlyService(CountlyConfiguration configModel, EventCountlyService eventService,
-            RequestCountlyHelper requestCountlyHelper, LocationService locationService, ConsentCountlyService consentService)
+            RequestCountlyHelper requestCountlyHelper, LocationService locationService)
         {
             _configModel = configModel;
             _eventService = eventService;
-            _consentService = consentService;
             _locationService = locationService;
             _requestCountlyHelper = requestCountlyHelper;
         }
@@ -69,6 +67,10 @@ namespace Plugins.CountlySDK.Services
 
         public async Task ExecuteBeginSessionAsync()
         {
+            if (!Consent.CheckConsent(Features.Sessions)) {
+                return;
+            }
+
             if (IsSessionInitiated) {
                 return;
             }
@@ -85,36 +87,35 @@ namespace Plugins.CountlySDK.Services
             Dictionary<string, object> requestParams =
                 new Dictionary<string, object>();
 
-            if (_consentService.CheckConsent(Features.Sessions)) {
-                requestParams.Add("begin_session", 1);
 
-                /* If location is disabled or no location consent is given,
-				the SDK adds an empty location entry to every "begin_session" request. */
-                if (_locationService.IsLocationDisabled || !_consentService.CheckConsent(Features.Location)) {
-                    requestParams.Add("location", string.Empty);
-                } else {
-                    if (!string.IsNullOrEmpty(_locationService.IPAddress)) {
-                        requestParams.Add("ip_address", _locationService.IPAddress);
-                    }
+            requestParams.Add("begin_session", 1);
 
-                    if (!string.IsNullOrEmpty(_locationService.CountryCode)) {
-                        requestParams.Add("country_code", _locationService.CountryCode);
-                    }
-
-                    if (!string.IsNullOrEmpty(_locationService.City)) {
-                        requestParams.Add("city", _locationService.City);
-                    }
-
-                    if (!string.IsNullOrEmpty(_locationService.Location)) {
-                        requestParams.Add("location", _locationService.Location);
-                    }
+            /* If location is disabled or no location consent is given,
+            the SDK adds an empty location entry to every "begin_session" request. */
+            if (_locationService.IsLocationDisabled || !Consent.CheckConsent(Features.Location)) {
+                requestParams.Add("location", string.Empty);
+            } else {
+                if (!string.IsNullOrEmpty(_locationService.IPAddress)) {
+                    requestParams.Add("ip_address", _locationService.IPAddress);
                 }
 
-                requestParams.Add("metrics", JsonConvert.SerializeObject(CountlyMetricModel.Metrics, Formatting.Indented,
-                new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }));
+                if (!string.IsNullOrEmpty(_locationService.CountryCode)) {
+                    requestParams.Add("country_code", _locationService.CountryCode);
+                }
 
-                await _requestCountlyHelper.GetResponseAsync(requestParams);
+                if (!string.IsNullOrEmpty(_locationService.City)) {
+                    requestParams.Add("city", _locationService.City);
+                }
+
+                if (!string.IsNullOrEmpty(_locationService.Location)) {
+                    requestParams.Add("location", _locationService.Location);
+                }
             }
+
+            requestParams.Add("metrics", JsonConvert.SerializeObject(CountlyMetricModel.Metrics, Formatting.Indented,
+            new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }));
+
+            await _requestCountlyHelper.GetResponseAsync(requestParams);
 
             //Start session timer
             if (!_configModel.EnableManualSessionHandling) {
@@ -164,6 +165,10 @@ namespace Plugins.CountlySDK.Services
         /// </summary>
         public async Task EndSessionAsync()
         {
+            if (!Consent.CheckConsent(Features.Sessions)) {
+                return;
+            }
+
             if (_configModel.EnableConsoleLogging) {
                 Debug.Log("[Countly] SessionCountlyService: ExtendSessionAsync");
             }
@@ -176,6 +181,10 @@ namespace Plugins.CountlySDK.Services
         /// </summary>
         public async Task ExtendSessionAsync()
         {
+            if (!Consent.CheckConsent(Features.Sessions)) {
+                return;
+            }
+
             _lastSessionRequestTime = DateTime.Now;
             Dictionary<string, object> requestParams =
                 new Dictionary<string, object>

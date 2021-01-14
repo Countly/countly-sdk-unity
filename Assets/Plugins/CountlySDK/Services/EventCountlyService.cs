@@ -93,6 +93,10 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async Task RecordEventAsync(string key)
         {
+            if (!Consent.CheckConsent(Features.Events)) {
+                return;
+            }
+
             await RecordEventAsync(key, null);
         }
 
@@ -109,6 +113,10 @@ namespace Plugins.CountlySDK.Services
         public async Task RecordEventAsync(string key, SegmentModel segmentation,
             int? count = 1, double? sum = 0, double? duration = null)
         {
+            if (!Consent.CheckConsent(Features.Events)) {
+                return;
+            }
+
             if (_countlyConfiguration.EnableConsoleLogging) {
                 Debug.Log("[Countly] RecordEventAsync : key = " + key);
             }
@@ -184,6 +192,10 @@ namespace Plugins.CountlySDK.Services
             IDictionary<string, object> segmentation = null,
             int? count = 1, double? sum = null, double? duration = null)
         {
+            if (!Consent.CheckConsent(Features.Events)) {
+                return;
+            }
+
             if (string.IsNullOrEmpty(key) && string.IsNullOrWhiteSpace(key)) {
                 return;
             }

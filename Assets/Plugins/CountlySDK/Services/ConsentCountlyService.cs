@@ -28,10 +28,8 @@ namespace Plugins.CountlySDK.Services
             RequiresConsent = _config.RequiresConsent;
             _countlyFeatureGroups = new Dictionary<string, Features[]>(_config.FeatureGroups);
 
-            if (_config.Features != null) {
-                GiveConsent(_config.Features);
-            }
-            
+            GiveConsentInternal(_config.Features);
+
         }
 
         internal void AddListeners(List<AbstractBaseService> listeners)
@@ -61,28 +59,7 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public void GiveConsent(Features[] features)
         {
-            if (!RequiresConsent) {
-                if (_config.EnableConsoleLogging) {
-                    Debug.Log("[Countly] ConsentCountlyService: Enable Consents");
-                }
-
-                return;
-            }
-
-            if (features == null) {
-                if (_config.EnableConsoleLogging) {
-                    Debug.Log("[Countly] ConsentCountlyService: Calling GiveConsent with null features list!");
-                }
-
-                return;
-            }
-            //Remove Duplicates entries
-            features = features.Distinct().ToArray();
-
-            foreach (Features feature in features) {
-                GiveConsentInternal(feature);
-            }
-
+            GiveConsentInternal(features);
             NotifyListeners();
         }
 
@@ -280,6 +257,31 @@ namespace Plugins.CountlySDK.Services
 
             if (_config.EnableConsoleLogging) {
                 Debug.Log("[Countly] Setting consent for feature: [" + feature.ToString() + "] with value: [true]");
+            }
+        }
+
+        private void GiveConsentInternal(Features[] features)
+        {
+            if (!RequiresConsent) {
+                if (_config.EnableConsoleLogging) {
+                    Debug.Log("[Countly] ConsentCountlyService: Enable Consents");
+                }
+
+                return;
+            }
+
+            if (features == null) {
+                if (_config.EnableConsoleLogging) {
+                    Debug.Log("[Countly] ConsentCountlyService: Calling GiveConsent with null features list!");
+                }
+
+                return;
+            }
+            //Remove Duplicates entries
+            features = features.Distinct().ToArray();
+
+            foreach (Features feature in features) {
+                GiveConsentInternal(feature);
             }
         }
 

@@ -10,14 +10,12 @@ namespace Plugins.CountlySDK.Services
         private readonly PushCountlyService _pushService;
         private readonly LocationService _locationService;
         private readonly CountlyConfiguration _configModel;
-        private readonly ConsentCountlyService _consentService;
         private readonly SessionCountlyService _sessionService;
        
-        internal InitializationCountlyService(CountlyConfiguration configModel, PushCountlyService pushService, LocationService locationService, ConsentCountlyService consentService, SessionCountlyService sessionCountlyService)
+        internal InitializationCountlyService(CountlyConfiguration configModel, PushCountlyService pushService, LocationService locationService, SessionCountlyService sessionCountlyService)
         {
             _pushService = pushService;
             _configModel = configModel;
-            _consentService = consentService;
             _locationService = locationService;
             _sessionService = sessionCountlyService;
         }
@@ -48,7 +46,7 @@ namespace Plugins.CountlySDK.Services
             AppKey = _configModel.AppKey;
             ServerUrl = _configModel.ServerUrl;
 
-            if (!_consentService.CheckConsent(Features.Sessions)) {
+            if (!Consent.CheckConsent(Features.Sessions)) {
                 /* If location is disabled in init
                 and no session consent is given. Send empty location as separate request.*/
                 if (_locationService.IsLocationDisabled) {
@@ -62,12 +60,12 @@ namespace Plugins.CountlySDK.Services
                 }
             }
 
-            if (!_configModel.EnableManualSessionHandling) {
+            else if (!_configModel.EnableManualSessionHandling) {
                 //Start Session
                 await _sessionService.BeginSessionAsync();
             }
 
-            if (_configModel.EnableTestMode) {
+            if (!Consent.CheckConsent(Features.Sessions) || _configModel.EnableTestMode) {
                 return;
             }
 

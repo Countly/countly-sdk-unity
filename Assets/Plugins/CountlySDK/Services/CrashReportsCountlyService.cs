@@ -31,6 +31,10 @@ namespace Plugins.CountlySDK.Services
         /// <param name="type">Excpetion type like error, warning, etc</param>
         public async void LogCallback(string message, string stackTrace, LogType type)
         {
+            if (!Consent.CheckConsent(Features.Crashes)) {
+                return;
+            }
+
             if (_configModel.EnableAutomaticCrashReporting
                 && (type == LogType.Error || type == LogType.Exception)) {
                 await SendCrashReportAsync(message, stackTrace, type, null, false);
@@ -49,6 +53,10 @@ namespace Plugins.CountlySDK.Services
         public async Task SendCrashReportAsync(string message, string stackTrace, LogType type,
             IDictionary<string, object> segments = null, bool nonfatal = true)
         {
+            if (!Consent.CheckConsent(Features.Crashes)) {
+                return;
+            }
+
             CountlyExceptionDetailModel model = ExceptionDetailModel(message, stackTrace, nonfatal, segments);
 
             Dictionary<string, object> requestParams = new Dictionary<string, object>

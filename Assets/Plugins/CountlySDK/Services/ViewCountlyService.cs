@@ -29,6 +29,10 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async Task RecordOpenViewAsync(string name, bool hasSessionBegunWithView = false)
         {
+            if (!Consent.CheckConsent(Features.Views)) {
+                return;
+            }
+
             if (string.IsNullOrEmpty(name)) {
                 return;
             }
@@ -63,6 +67,10 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async Task RecordCloseViewAsync(string name, bool hasSessionBegunWithView = false)
         {
+            if (!Consent.CheckConsent(Features.Views)) {
+                return;
+            }
+
             if (string.IsNullOrEmpty(name)) {
                 return;
             }
@@ -108,6 +116,10 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async Task ReportActionAsync(string type, int x, int y, int width, int height)
         {
+            if (!Consent.CheckConsent(Features.Views)) {
+                return;
+            }
+
             ActionSegment segment =
                 new ActionSegment {
                     Type = type,

@@ -38,6 +38,10 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async Task ReportStarRatingAsync(string platform, string appVersion, int rating)
         {
+            if (!Consent.CheckConsent(Features.StarRating)) {
+                return;
+            }
+
             if (rating < 1 || rating > 5) {
                 return;
             }

@@ -15,14 +15,12 @@ namespace Plugins.CountlySDK.Services
         internal string IPAddress { get; private set; }
         internal string CountryCode { get; private set; }
 
-        private readonly ConsentCountlyService _consentService;
         private readonly RequestCountlyHelper _requestCountlyHelper;
         private readonly CountlyConfiguration _countlyConfiguration;
 
 
-        internal LocationService(CountlyConfiguration countlyConfiguration, RequestCountlyHelper requestCountlyHelper, ConsentCountlyService consentService)
+        internal LocationService(CountlyConfiguration countlyConfiguration, RequestCountlyHelper requestCountlyHelper)
         {
-            _consentService = consentService;
             _countlyConfiguration = countlyConfiguration;
             _requestCountlyHelper = requestCountlyHelper;
 
@@ -54,7 +52,7 @@ namespace Plugins.CountlySDK.Services
         internal async Task SendIndependantLocationRequest()
         {
 
-            if (!_consentService.CheckConsent(Features.Location)) {
+            if (!Consent.CheckConsent(Features.Location)) {
                 return;
             }
 
@@ -93,6 +91,10 @@ namespace Plugins.CountlySDK.Services
         /// </summary>
         public async void DisableLocation()
         {
+            if (!Consent.CheckConsent(Features.Location)) {
+                return;
+            }
+
             IsLocationDisabled = true;
             City = null;
             Location = null;
@@ -118,6 +120,10 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async void SetLocation(string countryCode, string city, string gpsCoordinates, string ipAddress)
         {
+            if (!Consent.CheckConsent(Features.AccessoryDevices)) {
+                return;
+            }
+
             /*If city is not paired together with country,
              * a warning should be printed that they should be set together.
              */

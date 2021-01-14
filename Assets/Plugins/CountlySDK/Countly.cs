@@ -217,15 +217,15 @@ namespace Plugins.CountlySDK
             Consents = new ConsentCountlyService(Configuration);
             Events = new EventCountlyService(Configuration, requests, viewEventRepo, nonViewEventRepo);
 
-            Location = new Services.LocationService(Configuration, requests, Consents);
+            Location = new Services.LocationService(Configuration, requests);
             OptionalParameters = new OptionalParametersCountlyService(Location, Configuration);
             Notifications = new NotificationsCallbackService(Configuration);
             ProxyNotificationsService notificationsService = new ProxyNotificationsService(transform, Configuration, InternalStartCoroutine, Events);
             _push = new PushCountlyService(Events, requests, notificationsService, Notifications);
-            Session = new SessionCountlyService(Configuration, Events, requests, Location, Consents);
+            Session = new SessionCountlyService(Configuration, Events, requests, Location);
 
             CrashReports = new CrashReportsCountlyService(Configuration, requests);
-            Initialization = new InitializationCountlyService(Configuration, _push, Location, Consents, Session);
+            Initialization = new InitializationCountlyService(Configuration, _push, Location, Session);
             RemoteConfigs = new RemoteConfigCountlyService(Configuration, requests, countlyUtils, configDao);
 
             StarRating = new StarRatingCountlyService(Events);

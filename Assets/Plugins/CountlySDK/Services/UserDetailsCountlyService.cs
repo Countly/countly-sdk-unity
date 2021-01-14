@@ -60,6 +60,10 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async Task SetUserDetailsAsync(CountlyUserDetailsModel userDetailsModel)
         {
+            if (!Consent.CheckConsent(Features.Users)) {
+                return;
+            }
+
             if (!_countlyUtils.IsPictureValid(userDetailsModel.PictureUrl)) {
                 throw new Exception("Accepted picture formats are .png, .gif and .jpeg");
             }
@@ -80,6 +84,10 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async Task SetCustomUserDetailsAsync(CountlyUserDetailsModel userDetailsModel)
         {
+            if (!Consent.CheckConsent(Features.Users)) {
+                return;
+            }
+
             Dictionary<string, object> requestParams =
                 new Dictionary<string, object>
                 {
@@ -221,8 +229,12 @@ namespace Plugins.CountlySDK.Services
         }
 
 
-        public void AddToCustomData(string key, object value)
+        private void AddToCustomData(string key, object value)
         {
+            if (!Consent.CheckConsent(Features.Users)) {
+                return;
+            }
+
             if (CustomDataProperties.ContainsKey(key)) {
                 string item = CustomDataProperties.Select(x => x.Key).FirstOrDefault(x => x.Equals(key, StringComparison.OrdinalIgnoreCase));
                 if (item != null) {

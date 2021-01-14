@@ -73,6 +73,10 @@ namespace Plugins.CountlySDK.Services
         /// <param name="deviceId"></param>
         public async Task ChangeDeviceIdAndEndCurrentSessionAsync(string deviceId)
         {
+            if (!Consent.CheckConsent(Features.AccessoryDevices)) {
+                return;
+            }
+
             //Ignore call if new and old device id are same
             if (DeviceId == deviceId) {
                 return;
@@ -102,6 +106,10 @@ namespace Plugins.CountlySDK.Services
         /// <param name="deviceId"></param>
         public async Task ChangeDeviceIdAndMergeSessionDataAsync(string deviceId)
         {
+            if (!Consent.CheckConsent(Features.AccessoryDevices)) {
+                return;
+            }
+
             //Ignore call if new and old device id are same
             if (DeviceId == deviceId) {
                 return;
