@@ -10,14 +10,12 @@ namespace Plugins.CountlySDK.Services
     public class ConsentCountlyService : AbstractBaseService
     {
         internal bool RequiresConsent { get; private set; }
-
-        private List<AbstractBaseService> _listeners;
         private readonly CountlyConfiguration _config;
         private readonly Dictionary<Features, bool> _modifiedConsents;
         private readonly Dictionary<Features, bool> _countlyFeatureConsents;
         private readonly Dictionary<string, Features[]> _countlyFeatureGroups;
 
-        internal ConsentCountlyService(CountlyConfiguration config)
+        internal ConsentCountlyService(CountlyConfiguration config, ConsentCountlyService consentService) : base(consentService)
         {
             _modifiedConsents = new Dictionary<Features, bool>();
             _countlyFeatureConsents = new Dictionary<Features, bool>();
@@ -30,14 +28,6 @@ namespace Plugins.CountlySDK.Services
 
             GiveConsentInternal(_config.Features);
 
-        }
-
-        internal void AddListeners(List<AbstractBaseService> listeners)
-        {
-            _listeners = listeners;
-            if (_config.EnableConsoleLogging) {
-                Debug.Log("[Countly DeviceIdCountlyService] AddListeners");
-            }
         }
 
         #region Public Methods
@@ -300,6 +290,10 @@ namespace Plugins.CountlySDK.Services
 
         private void NotifyListeners()
         {
+            if (Listeners == null) {
+                return;
+            }
+
             Features[] features = Enum.GetValues(typeof(Features)).Cast<Features>().ToArray();
             foreach (Features feature in features) {
 
@@ -325,21 +319,15 @@ namespace Plugins.CountlySDK.Services
                 }
             }
 
-            if (_listeners == null) {
-                return;
-            }
-
-            foreach (AbstractBaseService listener in _listeners) {
+            foreach (AbstractBaseService listener in Listeners) {
                 listener.ConsentChanged(_modifiedConsents);
-                
+
             }
         }
         #endregion
 
         #region override Methods
-
         internal override void DeviceIdChanged(string deviceId, bool merged) { }
-
         #endregion
     }
 }

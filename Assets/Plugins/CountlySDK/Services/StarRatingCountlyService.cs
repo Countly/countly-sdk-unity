@@ -11,7 +11,7 @@ namespace Plugins.CountlySDK.Services
 
         private readonly EventCountlyService _eventCountlyService;
 
-        internal StarRatingCountlyService(EventCountlyService eventCountlyService)
+        internal StarRatingCountlyService(EventCountlyService eventCountlyService, ConsentCountlyService consentService) : base(consentService)
         {
             _eventCountlyService = eventCountlyService;
         }
@@ -38,7 +38,7 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async Task ReportStarRatingAsync(string platform, string appVersion, int rating)
         {
-            if (!Consent.CheckConsent(Features.StarRating)) {
+            if (!_consentService.CheckConsent(Features.StarRating)) {
                 return;
             }
 

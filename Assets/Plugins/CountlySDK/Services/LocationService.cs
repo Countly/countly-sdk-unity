@@ -19,7 +19,7 @@ namespace Plugins.CountlySDK.Services
         private readonly CountlyConfiguration _countlyConfiguration;
 
 
-        internal LocationService(CountlyConfiguration countlyConfiguration, RequestCountlyHelper requestCountlyHelper)
+        internal LocationService(CountlyConfiguration countlyConfiguration, RequestCountlyHelper requestCountlyHelper, ConsentCountlyService consentService) : base(consentService)
         {
             _countlyConfiguration = countlyConfiguration;
             _requestCountlyHelper = requestCountlyHelper;
@@ -52,7 +52,7 @@ namespace Plugins.CountlySDK.Services
         internal async Task SendIndependantLocationRequest()
         {
 
-            if (!Consent.CheckConsent(Features.Location)) {
+            if (!_consentService.CheckConsent(Features.Location)) {
                 return;
             }
 
@@ -91,7 +91,7 @@ namespace Plugins.CountlySDK.Services
         /// </summary>
         public async void DisableLocation()
         {
-            if (!Consent.CheckConsent(Features.Location)) {
+            if (!_consentService.CheckConsent(Features.Location)) {
                 return;
             }
 
@@ -120,7 +120,7 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async void SetLocation(string countryCode, string city, string gpsCoordinates, string ipAddress)
         {
-            if (!Consent.CheckConsent(Features.AccessoryDevices)) {
+            if (!_consentService.CheckConsent(Features.AccessoryDevices)) {
                 return;
             }
 

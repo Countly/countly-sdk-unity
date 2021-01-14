@@ -16,7 +16,7 @@ namespace Plugins.CountlySDK.Services
         private readonly CountlyConfiguration _configModel;
         private readonly RequestCountlyHelper _requestCountlyHelper;
 
-        internal CrashReportsCountlyService(CountlyConfiguration configModel, RequestCountlyHelper requestCountlyHelper)
+        internal CrashReportsCountlyService(CountlyConfiguration configModel, RequestCountlyHelper requestCountlyHelper, ConsentCountlyService consentService) : base(consentService)
         {
             _configModel = configModel;
             _requestCountlyHelper = requestCountlyHelper;
@@ -31,7 +31,7 @@ namespace Plugins.CountlySDK.Services
         /// <param name="type">Excpetion type like error, warning, etc</param>
         public async void LogCallback(string message, string stackTrace, LogType type)
         {
-            if (!Consent.CheckConsent(Features.Crashes)) {
+            if (!_consentService.CheckConsent(Features.Crashes)) {
                 return;
             }
 
@@ -53,7 +53,7 @@ namespace Plugins.CountlySDK.Services
         public async Task SendCrashReportAsync(string message, string stackTrace, LogType type,
             IDictionary<string, object> segments = null, bool nonfatal = true)
         {
-            if (!Consent.CheckConsent(Features.Crashes)) {
+            if (!_consentService.CheckConsent(Features.Crashes)) {
                 return;
             }
 

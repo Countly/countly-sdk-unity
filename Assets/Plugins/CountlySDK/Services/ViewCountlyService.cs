@@ -16,7 +16,7 @@ namespace Plugins.CountlySDK.Services
 
         private readonly EventCountlyService _eventService;
 
-        internal ViewCountlyService(CountlyConfiguration config, EventCountlyService eventService)
+        internal ViewCountlyService(CountlyConfiguration config, EventCountlyService eventService, ConsentCountlyService consentService) : base(consentService)
         {
             _config = config;
             _eventService = eventService;
@@ -29,7 +29,7 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async Task RecordOpenViewAsync(string name, bool hasSessionBegunWithView = false)
         {
-            if (!Consent.CheckConsent(Features.Views)) {
+            if (!_consentService.CheckConsent(Features.Views)) {
                 return;
             }
 
@@ -67,7 +67,7 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async Task RecordCloseViewAsync(string name, bool hasSessionBegunWithView = false)
         {
-            if (!Consent.CheckConsent(Features.Views)) {
+            if (!_consentService.CheckConsent(Features.Views)) {
                 return;
             }
 
@@ -116,7 +116,7 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async Task ReportActionAsync(string type, int x, int y, int width, int height)
         {
-            if (!Consent.CheckConsent(Features.Views)) {
+            if (!_consentService.CheckConsent(Features.Views)) {
                 return;
             }
 

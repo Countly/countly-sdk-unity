@@ -14,7 +14,7 @@ namespace Plugins.CountlySDK.Services
         private readonly LocationService _recordLocation;
         private readonly CountlyConfiguration _countlyConfiguration;
 
-        internal OptionalParametersCountlyService(LocationService recordLocation, CountlyConfiguration countlyConfiguration)
+        internal OptionalParametersCountlyService(LocationService recordLocation, CountlyConfiguration countlyConfiguration, ConsentCountlyService consentService) : base(consentService)
         {
             _recordLocation = recordLocation;
             _countlyConfiguration = countlyConfiguration;

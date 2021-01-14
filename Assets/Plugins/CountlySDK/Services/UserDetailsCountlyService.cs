@@ -17,7 +17,7 @@ namespace Plugins.CountlySDK.Services
         private readonly RequestCountlyHelper _requestCountlyHelper;
         private readonly CountlyUtils _countlyUtils;
 
-        internal UserDetailsCountlyService(RequestCountlyHelper requestCountlyHelper, CountlyUtils countlyUtils)
+        internal UserDetailsCountlyService(RequestCountlyHelper requestCountlyHelper, CountlyUtils countlyUtils, ConsentCountlyService consentService) : base(consentService)
         {
             _requestCountlyHelper = requestCountlyHelper;
             _countlyUtils = countlyUtils;
@@ -60,7 +60,7 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async Task SetUserDetailsAsync(CountlyUserDetailsModel userDetailsModel)
         {
-            if (!Consent.CheckConsent(Features.Users)) {
+            if (!_consentService.CheckConsent(Features.Users)) {
                 return;
             }
 
@@ -84,7 +84,7 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async Task SetCustomUserDetailsAsync(CountlyUserDetailsModel userDetailsModel)
         {
-            if (!Consent.CheckConsent(Features.Users)) {
+            if (!_consentService.CheckConsent(Features.Users)) {
                 return;
             }
 
@@ -231,7 +231,7 @@ namespace Plugins.CountlySDK.Services
 
         private void AddToCustomData(string key, object value)
         {
-            if (!Consent.CheckConsent(Features.Users)) {
+            if (!_consentService.CheckConsent(Features.Users)) {
                 return;
             }
 

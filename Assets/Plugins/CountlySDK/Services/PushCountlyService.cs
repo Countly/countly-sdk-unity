@@ -15,7 +15,7 @@ namespace Plugins.CountlySDK.Services
         private readonly INotificationsService _notificationsService;
         private readonly NotificationsCallbackService _notificationsCallbackService;
 
-        internal PushCountlyService(EventCountlyService eventCountlyService, RequestCountlyHelper requestCountlyHelper, INotificationsService notificationsService, NotificationsCallbackService notificationsCallbackService)
+        internal PushCountlyService(EventCountlyService eventCountlyService, RequestCountlyHelper requestCountlyHelper, INotificationsService notificationsService, NotificationsCallbackService notificationsCallbackService, ConsentCountlyService consentService) : base(consentService)
         {
             _eventCountlyService = eventCountlyService;
             _requestCountlyHelper = requestCountlyHelper;

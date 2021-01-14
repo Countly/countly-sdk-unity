@@ -214,24 +214,24 @@ namespace Plugins.CountlySDK
             CountlyUtils countlyUtils = new CountlyUtils(this);
             RequestCountlyHelper requests = new RequestCountlyHelper(Configuration, countlyUtils, requestRepo);
 
-            Consents = new ConsentCountlyService(Configuration);
-            Events = new EventCountlyService(Configuration, requests, viewEventRepo, nonViewEventRepo);
+            Consents = new ConsentCountlyService(Configuration, Consents);
+            Events = new EventCountlyService(Configuration, requests, viewEventRepo, nonViewEventRepo, Consents);
 
-            Location = new Services.LocationService(Configuration, requests);
-            OptionalParameters = new OptionalParametersCountlyService(Location, Configuration);
+            Location = new Services.LocationService(Configuration, requests, Consents);
+            OptionalParameters = new OptionalParametersCountlyService(Location, Configuration, Consents);
             Notifications = new NotificationsCallbackService(Configuration);
             ProxyNotificationsService notificationsService = new ProxyNotificationsService(transform, Configuration, InternalStartCoroutine, Events);
-            _push = new PushCountlyService(Events, requests, notificationsService, Notifications);
-            Session = new SessionCountlyService(Configuration, Events, requests, Location);
+            _push = new PushCountlyService(Events, requests, notificationsService, Notifications, Consents);
+            Session = new SessionCountlyService(Configuration, Events, requests, Location, Consents);
 
-            CrashReports = new CrashReportsCountlyService(Configuration, requests);
-            Initialization = new InitializationCountlyService(Configuration, _push, Location, Session);
-            RemoteConfigs = new RemoteConfigCountlyService(Configuration, requests, countlyUtils, configDao);
+            CrashReports = new CrashReportsCountlyService(Configuration, requests, Consents);
+            Initialization = new InitializationCountlyService(Configuration, _push, Location, Session, Consents);
+            RemoteConfigs = new RemoteConfigCountlyService(Configuration, requests, countlyUtils, configDao, Consents);
 
-            StarRating = new StarRatingCountlyService(Events);
-            UserDetails = new UserDetailsCountlyService(requests, countlyUtils);
-            Views = new ViewCountlyService(Configuration, Events);
-            Device = new DeviceIdCountlyService(Configuration, Session, requests, Events, countlyUtils);
+            StarRating = new StarRatingCountlyService(Events, Consents);
+            UserDetails = new UserDetailsCountlyService(requests, countlyUtils, Consents);
+            Views = new ViewCountlyService(Configuration, Events, Consents);
+            Device = new DeviceIdCountlyService(Configuration, Session, requests, Events, countlyUtils, Consents);
 
             CreateListOfIBaseService();
             RegisterListenersToServices();
@@ -257,8 +257,8 @@ namespace Plugins.CountlySDK
 
         private void RegisterListenersToServices()
         {
-            Device.AddListeners(_listeners);
-            Consents.AddListeners(_listeners);
+            Device.Listeners =  _listeners;
+            Consents.Listeners = _listeners;
         }
 
         /// <summary>

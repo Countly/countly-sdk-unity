@@ -22,7 +22,7 @@ namespace Plugins.CountlySDK.Services
         private readonly RequestCountlyHelper _requestCountlyHelper;
 
         internal SessionCountlyService(CountlyConfiguration configModel, EventCountlyService eventService,
-            RequestCountlyHelper requestCountlyHelper, LocationService locationService)
+            RequestCountlyHelper requestCountlyHelper, LocationService locationService, ConsentCountlyService consentService) : base(consentService)
         {
             _configModel = configModel;
             _eventService = eventService;
@@ -67,7 +67,7 @@ namespace Plugins.CountlySDK.Services
 
         public async Task ExecuteBeginSessionAsync()
         {
-            if (!Consent.CheckConsent(Features.Sessions)) {
+            if (!_consentService.CheckConsent(Features.Sessions)) {
                 return;
             }
 
@@ -92,7 +92,7 @@ namespace Plugins.CountlySDK.Services
 
             /* If location is disabled or no location consent is given,
             the SDK adds an empty location entry to every "begin_session" request. */
-            if (_locationService.IsLocationDisabled || !Consent.CheckConsent(Features.Location)) {
+            if (_locationService.IsLocationDisabled || !_consentService.CheckConsent(Features.Location)) {
                 requestParams.Add("location", string.Empty);
             } else {
                 if (!string.IsNullOrEmpty(_locationService.IPAddress)) {
@@ -165,7 +165,7 @@ namespace Plugins.CountlySDK.Services
         /// </summary>
         public async Task EndSessionAsync()
         {
-            if (!Consent.CheckConsent(Features.Sessions)) {
+            if (!_consentService.CheckConsent(Features.Sessions)) {
                 return;
             }
 
@@ -181,7 +181,7 @@ namespace Plugins.CountlySDK.Services
         /// </summary>
         public async Task ExtendSessionAsync()
         {
-            if (!Consent.CheckConsent(Features.Sessions)) {
+            if (!_consentService.CheckConsent(Features.Sessions)) {
                 return;
             }
 

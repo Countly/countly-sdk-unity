@@ -18,7 +18,7 @@ namespace Plugins.CountlySDK.Services
         private readonly RequestCountlyHelper _requestCountlyHelper;
 
         internal EventCountlyService(CountlyConfiguration countlyConfiguration, RequestCountlyHelper requestCountlyHelper,
-            ViewEventRepository viewEventRepo, NonViewEventRepository nonViewEventRepo)
+            ViewEventRepository viewEventRepo, NonViewEventRepository nonViewEventRepo, ConsentCountlyService consentService) : base(consentService)
         {
             _viewEventRepo = viewEventRepo;
             _nonViewEventRepo = nonViewEventRepo;
@@ -93,7 +93,7 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async Task RecordEventAsync(string key)
         {
-            if (!Consent.CheckConsent(Features.Events)) {
+            if (!_consentService.CheckConsent(Features.Events)) {
                 return;
             }
 
@@ -113,7 +113,7 @@ namespace Plugins.CountlySDK.Services
         public async Task RecordEventAsync(string key, SegmentModel segmentation,
             int? count = 1, double? sum = 0, double? duration = null)
         {
-            if (!Consent.CheckConsent(Features.Events)) {
+            if (!_consentService.CheckConsent(Features.Events)) {
                 return;
             }
 
@@ -192,7 +192,7 @@ namespace Plugins.CountlySDK.Services
             IDictionary<string, object> segmentation = null,
             int? count = 1, double? sum = null, double? duration = null)
         {
-            if (!Consent.CheckConsent(Features.Events)) {
+            if (!_consentService.CheckConsent(Features.Events)) {
                 return;
             }
 
