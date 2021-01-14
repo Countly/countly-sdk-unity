@@ -63,6 +63,12 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async Task<CountlyResponse> Update()
         {
+            if (!_consentService.CheckConsent(Features.RemoteConfig)) {
+                return new CountlyResponse {
+                    IsSuccess = false
+                };
+            }
+
             Dictionary<string, object> requestParams =
                 new Dictionary<string, object>
                 {

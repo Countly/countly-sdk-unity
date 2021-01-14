@@ -218,7 +218,7 @@ namespace Plugins.CountlySDK
             Events = new EventCountlyService(Configuration, requests, viewEventRepo, nonViewEventRepo, Consents);
 
             Location = new Services.LocationService(Configuration, requests, Consents);
-            OptionalParameters = new OptionalParametersCountlyService(Location, Configuration, Consents);
+            OptionalParameters = new OptionalParametersCountlyService(Location, Configuration);
             Notifications = new NotificationsCallbackService(Configuration);
             ProxyNotificationsService notificationsService = new ProxyNotificationsService(transform, Configuration, InternalStartCoroutine, Events);
             _push = new PushCountlyService(Events, requests, notificationsService, Notifications, Consents);

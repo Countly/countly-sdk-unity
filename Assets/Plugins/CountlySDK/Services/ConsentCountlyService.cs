@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Plugins.CountlySDK.Enums;
 using Plugins.CountlySDK.Models;
+using UnityEditor;
 using UnityEngine;
 
 namespace Plugins.CountlySDK.Services
@@ -40,6 +41,22 @@ namespace Plugins.CountlySDK.Services
         public bool CheckConsent(Features feature)
         {
             return !RequiresConsent || (_countlyFeatureConsents.ContainsKey(feature) && _countlyFeatureConsents[feature]);
+        }
+
+        internal bool AnyConsentGiven()
+        {
+            if (!RequiresConsent) {
+                //no consent required - all consent given
+                return true;
+            }
+
+            foreach (KeyValuePair<Features, bool> entry in _countlyFeatureConsents) {
+                if (entry.Value) {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -192,46 +209,6 @@ namespace Plugins.CountlySDK.Services
 
             NotifyListeners();
         }
-
-        /// <summary>
-        /// Remove group and consent of features of this group
-        /// </summary>
-        /// <param name="groupName">name of the consent group</param>
-        /// <returns></returns>
-        public void RemoveFeatureGroup(string[] groupName)
-        {
-            if (!RequiresConsent) {
-                if (_config.EnableConsoleLogging) {
-                    Debug.Log("[Countly] ConsentCountlyService: Enable Consents");
-                }
-
-                return;
-            }
-
-            if (groupName == null) {
-                if (_config.EnableConsoleLogging) {
-                    Debug.Log("[Countly] ConsentCountlyService: Calling RemoveFeatureGroup with null groupName!");
-                }
-                return;
-            }
-
-            //Remove Consent of features groups
-            RemoveConsentOfFeatureGroup(groupName);
-
-            //Remove features groups
-            foreach (string name in groupName) {
-                if (!_countlyFeatureGroups.ContainsKey(name)) {
-                    if (_config.EnableConsoleLogging) {
-                        Debug.Log("[Countly] ConsentCountlyService: Feature Group '" + name + "' does not exist!");
-                    }
-                    return;
-                }
-                _countlyFeatureGroups.Remove(name);
-            }
-
-            NotifyListeners();
-        }
-
         #endregion
 
         #region Helper Methods

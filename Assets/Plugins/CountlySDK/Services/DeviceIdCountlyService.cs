@@ -63,7 +63,7 @@ namespace Plugins.CountlySDK.Services
         /// <param name="deviceId"></param>
         public async Task ChangeDeviceIdAndEndCurrentSessionAsync(string deviceId)
         {
-            if (!_consentService.CheckConsent(Features.AccessoryDevices)) {
+            if (!_consentService.AnyConsentGiven()) {
                 return;
             }
 
@@ -96,7 +96,7 @@ namespace Plugins.CountlySDK.Services
         /// <param name="deviceId"></param>
         public async Task ChangeDeviceIdAndMergeSessionDataAsync(string deviceId)
         {
-            if (!_consentService.CheckConsent(Features.AccessoryDevices)) {
+            if (!_consentService.AnyConsentGiven()) {
                 return;
             }
 

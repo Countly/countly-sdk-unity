@@ -126,6 +126,10 @@ namespace Plugins.CountlySDK.Services
 
         public async Task ExecuteEndSessionAsync(bool disposeTimer = true)
         {
+            if (!_consentService.CheckConsent(Features.Sessions)) {
+                return;
+            }
+
             IsSessionInitiated = false;
 
             Dictionary<string, object> requestParams =

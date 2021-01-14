@@ -42,9 +42,9 @@ namespace Plugins.CountlySDK.Services
         internal async Task SendRequestWithEmptyLocation()
         {
             Dictionary<string, object> requestParams =
-               new Dictionary<string, object>();
-
-            requestParams.Add("location", string.Empty);
+               new Dictionary<string, object> {
+                   { "location", string.Empty }
+               };
 
             await _requestCountlyHelper.GetResponseAsync(requestParams);
         }
@@ -119,7 +119,7 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async void SetLocation(string countryCode, string city, string gpsCoordinates, string ipAddress)
         {
-            if (!_consentService.CheckConsent(Features.AccessoryDevices)) {
+            if (!_consentService.CheckConsent(Features.Location)) {
                 return;
             }
 
