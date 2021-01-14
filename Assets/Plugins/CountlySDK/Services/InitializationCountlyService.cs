@@ -11,7 +11,7 @@ namespace Plugins.CountlySDK.Services
         private readonly LocationService _locationService;
         private readonly CountlyConfiguration _configModel;
         private readonly SessionCountlyService _sessionService;
-       
+
         internal InitializationCountlyService(CountlyConfiguration configModel, PushCountlyService pushService, LocationService locationService, SessionCountlyService sessionCountlyService)
         {
             _pushService = pushService;
@@ -58,21 +58,17 @@ namespace Plugins.CountlySDK.Services
                  */
                     await _locationService.SendIndependantLocationRequest();
                 }
-            }
-
-            else if (!_configModel.EnableManualSessionHandling) {
+            } else if (!_configModel.EnableManualSessionHandling) {
                 //Start Session
                 await _sessionService.BeginSessionAsync();
             }
 
-            if (!Consent.CheckConsent(Features.Sessions) || _configModel.EnableTestMode) {
+            if (_configModel.EnableTestMode || !Consent.CheckConsent(Features.Push) || _configModel.NotificationMode == TestMode.None) {
                 return;
             }
 
             //Enables push notification on start
-            if (_configModel.NotificationMode != TestMode.None) {
-                _pushService.EnablePushNotificationAsync(_configModel.NotificationMode);
-            }
+            _pushService.EnablePushNotificationAsync(_configModel.NotificationMode);
         }
     }
 }
