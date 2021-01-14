@@ -79,6 +79,10 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value"></param>
         public void AddBreadcrumbs(string value)
         {
+            if (!_consentService.CheckConsent(Features.Crashes)) {
+                return;
+            }
+
             if (_configModel.EnableConsoleLogging) {
                 Debug.Log("[Countly] AddBreadcrumbs : " + value);
             }

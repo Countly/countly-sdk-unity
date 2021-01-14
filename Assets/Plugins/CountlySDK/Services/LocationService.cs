@@ -104,7 +104,6 @@ namespace Plugins.CountlySDK.Services
             /*
              *If the location feature gets disabled or location consent is removed,
              *the SDK sends a request with an empty "location". 
-             *TODO ~ On Consent removed
              */
 
             await SendRequestWithEmptyLocation();
