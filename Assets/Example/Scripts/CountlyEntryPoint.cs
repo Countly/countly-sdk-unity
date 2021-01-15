@@ -44,9 +44,6 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
     private void Start()
     {
         countly.Notifications.AddListener(this);
-        Countly.Instance.Consents.RemoveConsent(new Features[] { Features.Crashes});
-        Countly.Instance.Consents.RemoveConsentOfFeatureGroup(new string[] { "GroupA" });
-        Countly.Instance.Consents.RemoveAllConsent();
     }
 
     private void Stop()
