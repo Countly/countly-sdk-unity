@@ -9,11 +9,11 @@ namespace Plugins.CountlySDK.Services
 {
     public class LocationService : AbstractBaseService
     {
-        internal bool IsLocationDisabled { get; private set; }
         internal string City { get; private set; }
         internal string Location { get; private set; }
         internal string IPAddress { get; private set; }
         internal string CountryCode { get; private set; }
+        internal bool IsLocationDisabled { get; private set; }
 
         private readonly RequestCountlyHelper _requestCountlyHelper;
         private readonly CountlyConfiguration _countlyConfiguration;
@@ -23,19 +23,18 @@ namespace Plugins.CountlySDK.Services
         {
             _countlyConfiguration = countlyConfiguration;
             _requestCountlyHelper = requestCountlyHelper;
+            IsLocationDisabled = countlyConfiguration.IsLocationDisabled;
 
-            if (countlyConfiguration.IsLocationDisabled) {
+            if (IsLocationDisabled || !_consentService.CheckConsent(Features.Location)) {
                 City = null;
                 Location = null;
                 IPAddress = null;
                 CountryCode = null;
-                IsLocationDisabled = countlyConfiguration.IsLocationDisabled;
             } else {
                 City = countlyConfiguration.City;
                 Location = countlyConfiguration.Location;
                 IPAddress = countlyConfiguration.IPAddress;
                 CountryCode = countlyConfiguration.CountryCode;
-                IsLocationDisabled = countlyConfiguration.IsLocationDisabled;
             }
         }
 
@@ -153,6 +152,11 @@ namespace Plugins.CountlySDK.Services
          */
         private async void OnLocationConsentRemoved()
         {
+            City = null;
+            Location = null;
+            IPAddress = null;
+            CountryCode = null;
+
             await SendRequestWithEmptyLocation();
         }
 

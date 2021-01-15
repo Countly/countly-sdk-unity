@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using JetBrains.Annotations;
 using Plugins.CountlySDK.Enums;
 using UnityEngine;
@@ -28,16 +27,16 @@ namespace Plugins.CountlySDK.Models
         public int TotalBreadcrumbsAllowed = 100;
         public bool EnableAutomaticCrashReporting = true;
 
-        internal string City;
-        internal string Location;
-        internal string IPAddress;
-        internal string CountryCode;
-        internal bool IsLocationDisabled;
-
+        internal string City = null;
+        internal string Location = null;
+        internal string IPAddress = null;
+        internal string CountryCode = null;
+        internal bool IsLocationDisabled = false;
+ 
         public bool RequiresConsent = false;
         internal Features[] Features { get; private set; }
         internal Dictionary<string, Features[]> FeatureGroups { get; private set; }
-
+        internal Dictionary<string, bool> EnableFeatureGroups { get; private set; }
 
         /// <summary>
         ///     Parent must be undestroyable
@@ -47,11 +46,13 @@ namespace Plugins.CountlySDK.Models
         public CountlyConfiguration()
         {
             FeatureGroups = new Dictionary<string, Features[]>();
+            EnableFeatureGroups = new Dictionary<string, bool>();
         }
 
         internal CountlyConfiguration(CountlyAuthModel authModel, CountlyConfigModel config)
         {
             FeatureGroups = new Dictionary<string, Features[]>();
+            EnableFeatureGroups = new Dictionary<string, bool>();
 
             ServerUrl = authModel.ServerUrl;
             AppKey = authModel.AppKey;
@@ -105,7 +106,12 @@ namespace Plugins.CountlySDK.Models
 
         public void  CreateFeatureGroup([NotNull] string groupName, [NotNull] Features[] features)
         {
-            FeatureGroups.Add(groupName, features);
+            FeatureGroups[groupName] = features;
+        }
+
+        public void GiveConsentToFeatureGroup([NotNull] string groupName)
+        {
+            EnableFeatureGroups[groupName] = true;
         }
     }
 }

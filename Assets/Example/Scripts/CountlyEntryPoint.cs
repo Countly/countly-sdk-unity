@@ -31,9 +31,11 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
 
         configuration.SetLocation(countryCode, city, latitude + "," + longitude, ipAddress);
 
+        string groupName = "GroupA";
         configuration.RequiresConsent = true;
         configuration.EnableFeaturesConsents(new Features[] { Features.Crashes, Features.Events});
-        configuration.CreateFeatureGroup("User-Consents", new Features[] { Features.Users, Features.Location });
+        configuration.CreateFeatureGroup(groupName, new Features[] { Features.Users, Features.Location });
+        configuration.GiveConsentToFeatureGroup(groupName);
 
         Countly.Instance.Init(configuration);
         countly = Countly.Instance;
@@ -42,6 +44,9 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
     private void Start()
     {
         countly.Notifications.AddListener(this);
+        Countly.Instance.Consents.RemoveConsent(new Features[] { Features.Crashes});
+        Countly.Instance.Consents.RemoveConsentOfFeatureGroup(new string[] { "GroupA" });
+        Countly.Instance.Consents.RemoveAllConsent();
     }
 
     private void Stop()
