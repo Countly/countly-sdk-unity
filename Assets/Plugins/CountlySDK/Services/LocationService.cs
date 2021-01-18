@@ -166,9 +166,9 @@ namespace Plugins.CountlySDK.Services
 
         }
 
-        internal override void ConsentChanged(Dictionary<Features, bool> updatedConsents)
+        internal override void ConsentChanged(List<Features> updatedConsents, bool newConsentValue)
         {
-            if (updatedConsents.ContainsKey(Features.Location) && !updatedConsents[Features.Location]) {
+            if (updatedConsents.Contains(Features.Location) && !newConsentValue) {
                 OnLocationConsentRemoved();
             }
             

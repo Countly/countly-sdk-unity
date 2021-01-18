@@ -22,7 +22,7 @@ namespace Plugins.CountlySDK.Services
 
         }
 
-        internal override void ConsentChanged(Dictionary<Features, bool> updatedConsents)
+        internal override void ConsentChanged(List<Features> updatedConsents, bool newConsentValue)
         {
 
         }

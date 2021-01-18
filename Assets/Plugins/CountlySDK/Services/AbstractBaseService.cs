@@ -16,7 +16,7 @@ namespace Plugins.CountlySDK.Services
         }
 
         internal virtual void DeviceIdChanged(string deviceId, bool merged) { }
-        internal virtual void ConsentChanged(Dictionary<Features, bool> updatedConsents) { }
+        internal virtual void ConsentChanged(List<Features> updatedConsents, bool newConsentValue) { }
     }
 
 }
