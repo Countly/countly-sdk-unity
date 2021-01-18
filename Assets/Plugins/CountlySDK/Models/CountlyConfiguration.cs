@@ -34,9 +34,9 @@ namespace Plugins.CountlySDK.Models
         internal bool IsLocationDisabled = false;
  
         public bool RequiresConsent = false;
-        internal Features[] Features { get; private set; }
+        internal Features[] GivenConsent { get; private set; }
         internal Dictionary<string, Features[]> FeatureGroups { get; private set; }
-        internal Dictionary<string, bool> EnableFeatureGroups { get; private set; }
+        internal List<string> EnabledFeatureGroups { get; private set; }
 
         /// <summary>
         ///     Parent must be undestroyable
@@ -46,13 +46,13 @@ namespace Plugins.CountlySDK.Models
         public CountlyConfiguration()
         {
             FeatureGroups = new Dictionary<string, Features[]>();
-            EnableFeatureGroups = new Dictionary<string, bool>();
+            EnabledFeatureGroups = new List<string>();
         }
 
         internal CountlyConfiguration(CountlyAuthModel authModel, CountlyConfigModel config)
         {
             FeatureGroups = new Dictionary<string, Features[]>();
-            EnableFeatureGroups = new Dictionary<string, bool>();
+            EnabledFeatureGroups = new List<string>();
 
             ServerUrl = authModel.ServerUrl;
             AppKey = authModel.AppKey;
@@ -99,19 +99,19 @@ namespace Plugins.CountlySDK.Models
             Location = gpsCoordinates;
         }
 
-        public void EnableFeaturesConsents([NotNull] Features[] features)
+        public void GiveConsent([NotNull] Features[] consents)
         {
-            Features = features;
+            GivenConsent = consents;
         }
 
-        public void  CreateFeatureGroup([NotNull] string groupName, [NotNull] Features[] features)
+        public void  CreateConsentGroup([NotNull] string groupName, [NotNull] Features[] consents)
         {
-            FeatureGroups[groupName] = features;
+            FeatureGroups[groupName] = consents;
         }
 
         public void GiveConsentToFeatureGroup([NotNull] string groupName)
         {
-            EnableFeatureGroups[groupName] = true;
+            EnabledFeatureGroups.Add(groupName);
         }
     }
 }

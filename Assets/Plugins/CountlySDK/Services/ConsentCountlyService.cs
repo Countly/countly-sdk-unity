@@ -26,12 +26,12 @@ namespace Plugins.CountlySDK.Services
             _countlyFeatureGroups = new Dictionary<string, Features[]>(_config.FeatureGroups);
 
             foreach (KeyValuePair<string, Features[]> entry in _countlyFeatureGroups) {
-                if (_config.EnableFeatureGroups.ContainsKey(entry.Key)) {
+                if (_config.EnabledFeatureGroups.Contains(entry.Key)) {
                     GiveConsentInternal(entry.Value);
                 }
             }
 
-            GiveConsentInternal(_config.Features);
+            GiveConsentInternal(_config.GivenConsent);
             _modifiedConsents.Clear();
 
         }
