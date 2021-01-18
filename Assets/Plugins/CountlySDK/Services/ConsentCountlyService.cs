@@ -220,7 +220,7 @@ namespace Plugins.CountlySDK.Services
             List<Consents> updatedConsents = new List<Consents>();
             foreach (Consents consent in consents) {
                 if (_countlyConsents.ContainsKey(consent) && _countlyConsents[consent] == flag) {
-                    return;
+                    continue;
                 }
 
                 updatedConsents.Add(consent);
