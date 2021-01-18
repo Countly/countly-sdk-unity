@@ -199,7 +199,7 @@ namespace Plugins.CountlySDK.Services
 
         #region Helper Methods
 
-        private void SetConsentInternal(Consents[] consents, bool flag)
+        private void SetConsentInternal(Consents[] consents, bool value)
         {
             if (!RequiresConsent) {
                 if (_config.EnableConsoleLogging) {
@@ -217,21 +217,21 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
 
-            List<Consents> updatedConsents = new List<Consents>();
+            List<Consents> updatedConsents = new List<Consents>(consents.Length);
             foreach (Consents consent in consents) {
-                if (_countlyConsents.ContainsKey(consent) && _countlyConsents[consent] == flag) {
+                if (_countlyConsents.ContainsKey(consent) && _countlyConsents[consent] == value) {
                     continue;
                 }
 
                 updatedConsents.Add(consent);
-                _countlyConsents[consent] = flag;
+                _countlyConsents[consent] = value;
 
                 if (_config.EnableConsoleLogging) {
-                    Debug.Log("[Countly] Setting consent for feature: [" + consent.ToString() + "] with value: [" + flag + "]");
+                    Debug.Log("[Countly] Setting consent for feature: [" + consent.ToString() + "] with value: [" + value + "]");
                 }
             }
 
-            NotifyListeners(updatedConsents, flag);
+            NotifyListeners(updatedConsents, value);
         }
 
         private void NotifyListeners(List<Consents> updatedConsents, bool newConsentValue)

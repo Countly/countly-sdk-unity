@@ -2,13 +2,14 @@
 {
     public enum Consents
     {
-        Sessions,
-        Events,
-        Location,
-        Views,
-        Crashes,
-        Users,
         Push,
+        Views,
+        Users,
+        Events,
+        Clicks,
+        Crashes,
+        Location,
+        Sessions,
         StarRating,
         RemoteConfig
     }

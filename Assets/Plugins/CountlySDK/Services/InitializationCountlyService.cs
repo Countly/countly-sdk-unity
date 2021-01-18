@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Plugins.CountlySDK.Enums;
 using Plugins.CountlySDK.Models;
 
@@ -20,32 +19,14 @@ namespace Plugins.CountlySDK.Services
             _sessionService = sessionCountlyService;
         }
 
-        public string ServerUrl { get; private set; }
-        public string AppKey { get; private set; }
-
-        #region override Methods
-        internal override void DeviceIdChanged(string deviceId, bool merged)
-        {
-
-        }
-
-        internal override void ConsentChanged(List<Consents> updatedConsents, bool newConsentValue)
-        {
-
-        }
-        #endregion
-
-        /// <summary>
-        ///     Initializes countly instance
-        /// </summary>
-        /// <param name="serverUrl"></param>
-        /// <param name="appKey"></param>
-        /// <param name="deviceId"></param>
         internal async Task OnInitializationComplete()
         {
-            AppKey = _configModel.AppKey;
-            ServerUrl = _configModel.ServerUrl;
+            await StartSession();
+            EnableNotification();
+        }
 
+        private async Task StartSession()
+        {
             if (!_consentService.CheckConsent(Consents.Sessions)) {
                 /* If location is disabled in init
                 and no session consent is given. Send empty location as separate request.*/
@@ -62,12 +43,15 @@ namespace Plugins.CountlySDK.Services
                 //Start Session
                 await _sessionService.BeginSessionAsync();
             }
+        }
 
+        private void EnableNotification()
+        {
+            //Enables push notification on start
             if (_configModel.EnableTestMode || !_consentService.CheckConsent(Consents.Push) || _configModel.NotificationMode == TestMode.None) {
                 return;
             }
 
-            //Enables push notification on start
             _pushService.EnablePushNotificationAsync(_configModel.NotificationMode);
         }
     }
