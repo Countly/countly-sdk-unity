@@ -13,19 +13,19 @@ namespace Plugins.CountlySDK.Services
         internal bool RequiresConsent { get; private set; }
 
         private readonly CountlyConfiguration _config;
-        private Dictionary<Features, bool> _countlyFeatureConsents;
-        private Dictionary<string, Features[]> _countlyFeatureGroups;
+        private Dictionary<Consents, bool> _countlyConsents;
+        private Dictionary<string, Consents[]> _countlyConsentGroups;
 
         internal ConsentCountlyService(CountlyConfiguration config, ConsentCountlyService consentService) : base(consentService)
         {
             _config = config;
-            _countlyFeatureConsents = new Dictionary<Features, bool>();
+            _countlyConsents = new Dictionary<Consents, bool>();
 
             RequiresConsent = _config.RequiresConsent;
-            _countlyFeatureGroups = new Dictionary<string, Features[]>(_config.FeatureGroups);
+            _countlyConsentGroups = new Dictionary<string, Consents[]>(_config.ConsentGroups);
 
-            foreach (KeyValuePair<string, Features[]> entry in _countlyFeatureGroups) {
-                if (_config.EnabledFeatureGroups.Contains(entry.Key)) {
+            foreach (KeyValuePair<string, Consents[]> entry in _countlyConsentGroups) {
+                if (_config.EnabledConsentGroups.Contains(entry.Key)) {
                     SetConsentInternal(entry.Value, true);
                 }
             }
@@ -38,11 +38,11 @@ namespace Plugins.CountlySDK.Services
         /// <summary>
         /// Checks consent for a particular feature
         /// </summary>
-        /// <param name="feature">a feature for which consent should be checked</param>
+        /// <param name="consent">a feature for which consent should be checked</param>
         /// <returns>bool</returns>
-        public bool CheckConsent(Features feature)
+        public bool CheckConsent(Consents consent)
         {
-            return !RequiresConsent || (_countlyFeatureConsents.ContainsKey(feature) && _countlyFeatureConsents[feature]);
+            return !RequiresConsent || (_countlyConsents.ContainsKey(consent) && _countlyConsents[consent]);
         }
 
         internal bool AnyConsentGiven()
@@ -52,7 +52,7 @@ namespace Plugins.CountlySDK.Services
                 return true;
             }
 
-            foreach (KeyValuePair<Features, bool> entry in _countlyFeatureConsents) {
+            foreach (KeyValuePair<Consents, bool> entry in _countlyConsents) {
                 if (entry.Value) {
                     return true;
                 }
@@ -64,11 +64,11 @@ namespace Plugins.CountlySDK.Services
         /// <summary>
         /// Give consent to list of features
         /// </summary>
-        /// <param name="features">List of features for which consents should be given</param>
+        /// <param name="consents">List of features for which consents should be given</param>
         /// <returns></returns>
-        public void GiveConsent(Features[] features)
+        public void GiveConsent(Consents[] consents)
         {
-            SetConsentInternal(features, true);
+            SetConsentInternal(consents, true);
 
         }
 
@@ -86,16 +86,16 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
 
-            Features[] features = Enum.GetValues(typeof(Features)).Cast<Features>().ToArray();
-            SetConsentInternal(features, true);
+            Consents[] consents = Enum.GetValues(typeof(Consents)).Cast<Consents>().ToArray();
+            SetConsentInternal(consents, true);
         }
 
         /// <summary>
         /// Remove consent of features
         /// </summary>
-        /// <param name="features">List of features for which consents should be removed</param>
+        /// <param name="consents">List of features for which consents should be removed</param>
         /// <returns></returns>
-        public void RemoveConsent(Features[] features)
+        public void RemoveConsent(Consents[] consents)
         {
             if (!RequiresConsent) {
                 if (_config.EnableConsoleLogging) {
@@ -105,7 +105,7 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
 
-            if (features == null) {
+            if (consents == null) {
                 if (_config.EnableConsoleLogging) {
                     Debug.Log("[Countly] ConsentCountlyService: Calling RemoveConsent with null features list!");
                 }
@@ -113,9 +113,9 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
             //Remove Duplicates entries
-            features = features.Distinct().ToArray();
+            consents = consents.Distinct().ToArray();
 
-            SetConsentInternal(features, false);
+            SetConsentInternal(consents, false);
 
         }
 
@@ -132,7 +132,7 @@ namespace Plugins.CountlySDK.Services
 
                 return;
             }
-            SetConsentInternal(_countlyFeatureConsents.Keys.ToArray(), false);
+            SetConsentInternal(_countlyConsents.Keys.ToArray(), false);
         }
 
         /// <summary>
@@ -140,7 +140,7 @@ namespace Plugins.CountlySDK.Services
         /// </summary>
         /// <param name="groupName">name of the consent group</param>
         /// <returns></returns>
-        public void GiveConsentToFeatureGroup(string[] groupName)
+        public void GiveConsentToGroup(string[] groupName)
         {
             if (!RequiresConsent) {
                 if (_config.EnableConsoleLogging) {
@@ -152,15 +152,15 @@ namespace Plugins.CountlySDK.Services
 
             if (groupName == null) {
                 if (_config.EnableConsoleLogging) {
-                    Debug.Log("[Countly] ConsentCountlyService: Calling GiveConsentToFeatureGroup with null groupName!");
+                    Debug.Log("[Countly] ConsentCountlyService: Calling GiveConsentToGroup with null groupName!");
                 }
                 return;
             }
 
             foreach (string name in groupName) {
-                if (_countlyFeatureGroups.ContainsKey(name)) {
-                    Features[] features = _countlyFeatureGroups[name];
-                    SetConsentInternal(features, true);
+                if (_countlyConsentGroups.ContainsKey(name)) {
+                    Consents[] consents = _countlyConsentGroups[name];
+                    SetConsentInternal(consents, true);
                 }
             }
         }
@@ -170,7 +170,7 @@ namespace Plugins.CountlySDK.Services
         /// </summary>
         /// <param name="groupName">name of the consent group</param>
         /// <returns></returns>
-        public void RemoveConsentOfFeatureGroup(string[] groupName)
+        public void RemoveConsentOfGroup(string[] groupName)
         {
             if (!RequiresConsent) {
                 if (_config.EnableConsoleLogging) {
@@ -182,16 +182,16 @@ namespace Plugins.CountlySDK.Services
 
             if (groupName == null) {
                 if (_config.EnableConsoleLogging) {
-                    Debug.Log("[Countly] ConsentCountlyService: Calling RemoveConsentOfFeatureGroup with null groupName!");
+                    Debug.Log("[Countly] ConsentCountlyService: Calling RemoveConsentOfGroup with null groupName!");
                 }
 
                 return;
             }
 
             foreach (string name in groupName) {
-                if (_countlyFeatureGroups.ContainsKey(name)) {
-                    Features[] features = _countlyFeatureGroups[name];
-                    SetConsentInternal(features, false);
+                if (_countlyConsentGroups.ContainsKey(name)) {
+                    Consents[] consents = _countlyConsentGroups[name];
+                    SetConsentInternal(consents, false);
                 }
             }
         }
@@ -199,7 +199,7 @@ namespace Plugins.CountlySDK.Services
 
         #region Helper Methods
 
-        private void SetConsentInternal(Features[] features, bool flag)
+        private void SetConsentInternal(Consents[] consents, bool flag)
         {
             if (!RequiresConsent) {
                 if (_config.EnableConsoleLogging) {
@@ -209,32 +209,32 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
 
-            if (features == null) {
+            if (consents == null) {
                 if (_config.EnableConsoleLogging) {
-                    Debug.Log("[Countly] ConsentCountlyService: Calling GiveConsent with null features list!");
+                    Debug.Log("[Countly] ConsentCountlyService: Calling GiveConsent with null consents list!");
                 }
 
                 return;
             }
 
-            List<Features> updatedConsents = new List<Features>();
-            foreach (Features feature in features) {
-                if (_countlyFeatureConsents.ContainsKey(feature) && _countlyFeatureConsents[feature] == flag) {
+            List<Consents> updatedConsents = new List<Consents>();
+            foreach (Consents consent in consents) {
+                if (_countlyConsents.ContainsKey(consent) && _countlyConsents[consent] == flag) {
                     return;
                 }
 
-                updatedConsents.Add(feature);
-                _countlyFeatureConsents[feature] = flag;
+                updatedConsents.Add(consent);
+                _countlyConsents[consent] = flag;
 
                 if (_config.EnableConsoleLogging) {
-                    Debug.Log("[Countly] Setting consent for feature: [" + feature.ToString() + "] with value: [" + flag + "]");
+                    Debug.Log("[Countly] Setting consent for feature: [" + consent.ToString() + "] with value: [" + flag + "]");
                 }
             }
 
             NotifyListeners(updatedConsents, flag);
         }
 
-        private void NotifyListeners(List<Features> updatedConsents, bool newConsentValue)
+        private void NotifyListeners(List<Consents> updatedConsents, bool newConsentValue)
         {
             if (Listeners == null || updatedConsents.Count < 1) {
                 return;

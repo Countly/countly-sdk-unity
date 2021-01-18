@@ -33,9 +33,9 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
 
         string groupName = "GroupA";
         configuration.RequiresConsent = true;
-        configuration.GiveConsent(new Features[] { Features.Crashes, Features.Events});
-        configuration.CreateConsentGroup(groupName, new Features[] { Features.Users, Features.Location });
-        configuration.GiveConsentToFeatureGroup(groupName);
+        configuration.GiveConsent(new Consents[] { Consents.Crashes, Consents.Events});
+        configuration.CreateConsentGroup(groupName, new Consents[] { Consents.Users, Consents.Location });
+        configuration.GiveConsentToGroup(groupName);
 
         Countly.Instance.Init(configuration);
         countly = Countly.Instance;

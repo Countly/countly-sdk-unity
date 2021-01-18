@@ -30,7 +30,7 @@ namespace Plugins.CountlySDK.Services
             _countlyUtils = countlyUtils;
             _requestCountlyHelper = requestCountlyHelper;
 
-            if (_consentService.CheckConsent(Features.RemoteConfig)) {
+            if (_consentService.CheckConsent(Consents.RemoteConfig)) {
                 Configs = FetchConfigFromDB();
             } else {
                 _configDao.RemoveAll();
@@ -68,7 +68,7 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async Task<CountlyResponse> Update()
         {
-            if (!_consentService.CheckConsent(Features.RemoteConfig)) {
+            if (!_consentService.CheckConsent(Consents.RemoteConfig)) {
                 return new CountlyResponse {
                     IsSuccess = false
                 };
@@ -148,9 +148,9 @@ namespace Plugins.CountlySDK.Services
 
         }
 
-        internal override void ConsentChanged(List<Features> updatedConsents, bool newConsentValue)
+        internal override void ConsentChanged(List<Consents> updatedConsents, bool newConsentValue)
         {
-            if (updatedConsents.Contains(Features.RemoteConfig) && !newConsentValue) {
+            if (updatedConsents.Contains(Consents.RemoteConfig) && !newConsentValue) {
                 Configs = null;
                 _configDao.RemoveAll();
             }

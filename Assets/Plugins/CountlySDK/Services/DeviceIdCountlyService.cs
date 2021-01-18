@@ -153,7 +153,7 @@ namespace Plugins.CountlySDK.Services
 
         }
 
-        internal override void ConsentChanged(List<Features> updatedConsents, bool newConsentValue)
+        internal override void ConsentChanged(List<Consents> updatedConsents, bool newConsentValue)
         {
 
         }

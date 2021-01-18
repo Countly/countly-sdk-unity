@@ -29,7 +29,7 @@ namespace Plugins.CountlySDK.Services
 
         }
 
-        internal override void ConsentChanged(List<Features> updatedConsents, bool newConsentValue)
+        internal override void ConsentChanged(List<Consents> updatedConsents, bool newConsentValue)
         {
 
         }
@@ -46,7 +46,7 @@ namespace Plugins.CountlySDK.Services
             AppKey = _configModel.AppKey;
             ServerUrl = _configModel.ServerUrl;
 
-            if (!_consentService.CheckConsent(Features.Sessions)) {
+            if (!_consentService.CheckConsent(Consents.Sessions)) {
                 /* If location is disabled in init
                 and no session consent is given. Send empty location as separate request.*/
                 if (_locationService.IsLocationDisabled) {
@@ -63,7 +63,7 @@ namespace Plugins.CountlySDK.Services
                 await _sessionService.BeginSessionAsync();
             }
 
-            if (_configModel.EnableTestMode || !_consentService.CheckConsent(Features.Push) || _configModel.NotificationMode == TestMode.None) {
+            if (_configModel.EnableTestMode || !_consentService.CheckConsent(Consents.Push) || _configModel.NotificationMode == TestMode.None) {
                 return;
             }
 

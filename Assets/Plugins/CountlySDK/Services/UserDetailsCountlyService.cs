@@ -60,7 +60,7 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async Task SetUserDetailsAsync(CountlyUserDetailsModel userDetailsModel)
         {
-            if (!_consentService.CheckConsent(Features.Users)) {
+            if (!_consentService.CheckConsent(Consents.Users)) {
                 return;
             }
 
@@ -84,7 +84,7 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async Task SetCustomUserDetailsAsync(CountlyUserDetailsModel userDetailsModel)
         {
-            if (!_consentService.CheckConsent(Features.Users)) {
+            if (!_consentService.CheckConsent(Consents.Users)) {
                 return;
             }
 
@@ -231,7 +231,7 @@ namespace Plugins.CountlySDK.Services
 
         private void AddToCustomData(string key, object value)
         {
-            if (!_consentService.CheckConsent(Features.Users)) {
+            if (!_consentService.CheckConsent(Consents.Users)) {
                 return;
             }
 
@@ -251,7 +251,7 @@ namespace Plugins.CountlySDK.Services
 
         }
 
-        internal override void ConsentChanged(List<Features> updatedConsents, bool newConsentValue)
+        internal override void ConsentChanged(List<Consents> updatedConsents, bool newConsentValue)
         {
 
         }

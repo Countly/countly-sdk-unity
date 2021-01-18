@@ -93,7 +93,7 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async Task RecordEventAsync(string key)
         {
-            if (!_consentService.CheckConsent(Features.Events)) {
+            if (!_consentService.CheckConsent(Consents.Events)) {
                 return;
             }
 
@@ -113,7 +113,7 @@ namespace Plugins.CountlySDK.Services
         public async Task RecordEventAsync(string key, SegmentModel segmentation,
             int? count = 1, double? sum = 0, double? duration = null)
         {
-            if (!_consentService.CheckConsent(Features.Events)) {
+            if (!_consentService.CheckConsent(Consents.Events)) {
                 return;
             }
 
@@ -192,7 +192,7 @@ namespace Plugins.CountlySDK.Services
             IDictionary<string, object> segmentation = null,
             int? count = 1, double? sum = null, double? duration = null)
         {
-            if (!_consentService.CheckConsent(Features.Events)) {
+            if (!_consentService.CheckConsent(Consents.Events)) {
                 return;
             }
 
@@ -232,7 +232,7 @@ namespace Plugins.CountlySDK.Services
 
         }
 
-        internal override void ConsentChanged(List<Features> updatedConsents, bool newConsentValue)
+        internal override void ConsentChanged(List<Consents> updatedConsents, bool newConsentValue)
         {
 
         }

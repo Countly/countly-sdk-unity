@@ -34,9 +34,9 @@ namespace Plugins.CountlySDK.Models
         internal bool IsLocationDisabled = false;
  
         public bool RequiresConsent = false;
-        internal Features[] GivenConsent { get; private set; }
-        internal Dictionary<string, Features[]> FeatureGroups { get; private set; }
-        internal List<string> EnabledFeatureGroups { get; private set; }
+        internal Consents[] GivenConsent { get; private set; }
+        internal Dictionary<string, Consents[]> ConsentGroups { get; private set; }
+        internal List<string> EnabledConsentGroups { get; private set; }
 
         /// <summary>
         ///     Parent must be undestroyable
@@ -45,14 +45,14 @@ namespace Plugins.CountlySDK.Models
 
         public CountlyConfiguration()
         {
-            FeatureGroups = new Dictionary<string, Features[]>();
-            EnabledFeatureGroups = new List<string>();
+            ConsentGroups = new Dictionary<string, Consents[]>();
+            EnabledConsentGroups = new List<string>();
         }
 
         internal CountlyConfiguration(CountlyAuthModel authModel, CountlyConfigModel config)
         {
-            FeatureGroups = new Dictionary<string, Features[]>();
-            EnabledFeatureGroups = new List<string>();
+            ConsentGroups = new Dictionary<string, Consents[]>();
+            EnabledConsentGroups = new List<string>();
 
             ServerUrl = authModel.ServerUrl;
             AppKey = authModel.AppKey;
@@ -99,19 +99,19 @@ namespace Plugins.CountlySDK.Models
             Location = gpsCoordinates;
         }
 
-        public void GiveConsent([NotNull] Features[] consents)
+        public void GiveConsent([NotNull] Consents[] consents)
         {
             GivenConsent = consents;
         }
 
-        public void  CreateConsentGroup([NotNull] string groupName, [NotNull] Features[] consents)
+        public void  CreateConsentGroup([NotNull] string groupName, [NotNull] Consents[] consents)
         {
-            FeatureGroups[groupName] = consents;
+            ConsentGroups[groupName] = consents;
         }
 
-        public void GiveConsentToFeatureGroup([NotNull] string groupName)
+        public void GiveConsentToGroup([NotNull] string groupName)
         {
-            EnabledFeatureGroups.Add(groupName);
+            EnabledConsentGroups.Add(groupName);
         }
     }
 }

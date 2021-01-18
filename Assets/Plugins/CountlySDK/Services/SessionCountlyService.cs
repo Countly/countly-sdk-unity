@@ -67,7 +67,7 @@ namespace Plugins.CountlySDK.Services
 
         public async Task ExecuteBeginSessionAsync()
         {
-            if (!_consentService.CheckConsent(Features.Sessions)) {
+            if (!_consentService.CheckConsent(Consents.Sessions)) {
                 return;
             }
 
@@ -92,7 +92,7 @@ namespace Plugins.CountlySDK.Services
 
             /* If location is disabled or no location consent is given,
             the SDK adds an empty location entry to every "begin_session" request. */
-            if (_locationService.IsLocationDisabled || !_consentService.CheckConsent(Features.Location)) {
+            if (_locationService.IsLocationDisabled || !_consentService.CheckConsent(Consents.Location)) {
                 requestParams.Add("location", string.Empty);
             } else {
                 if (!string.IsNullOrEmpty(_locationService.IPAddress)) {
@@ -126,7 +126,7 @@ namespace Plugins.CountlySDK.Services
 
         public async Task ExecuteEndSessionAsync(bool disposeTimer = true)
         {
-            if (!_consentService.CheckConsent(Features.Sessions)) {
+            if (!_consentService.CheckConsent(Consents.Sessions)) {
                 return;
             }
 
@@ -169,7 +169,7 @@ namespace Plugins.CountlySDK.Services
         /// </summary>
         public async Task EndSessionAsync()
         {
-            if (!_consentService.CheckConsent(Features.Sessions)) {
+            if (!_consentService.CheckConsent(Consents.Sessions)) {
                 return;
             }
 
@@ -185,7 +185,7 @@ namespace Plugins.CountlySDK.Services
         /// </summary>
         public async Task ExtendSessionAsync()
         {
-            if (!_consentService.CheckConsent(Features.Sessions)) {
+            if (!_consentService.CheckConsent(Consents.Sessions)) {
                 return;
             }
 
@@ -211,7 +211,7 @@ namespace Plugins.CountlySDK.Services
 
         }
 
-        internal override void ConsentChanged(List<Features> updatedConsents, bool newConsentValue)
+        internal override void ConsentChanged(List<Consents> updatedConsents, bool newConsentValue)
         {
 
         }

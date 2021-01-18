@@ -25,7 +25,7 @@ namespace Plugins.CountlySDK.Services
             _requestCountlyHelper = requestCountlyHelper;
             IsLocationDisabled = countlyConfiguration.IsLocationDisabled;
 
-            if (IsLocationDisabled || !_consentService.CheckConsent(Features.Location)) {
+            if (IsLocationDisabled || !_consentService.CheckConsent(Consents.Location)) {
                 City = null;
                 Location = null;
                 IPAddress = null;
@@ -51,7 +51,7 @@ namespace Plugins.CountlySDK.Services
         internal async Task SendIndependantLocationRequest()
         {
 
-            if (!_consentService.CheckConsent(Features.Location)) {
+            if (!_consentService.CheckConsent(Consents.Location)) {
                 return;
             }
 
@@ -90,7 +90,7 @@ namespace Plugins.CountlySDK.Services
         /// </summary>
         public async void DisableLocation()
         {
-            if (!_consentService.CheckConsent(Features.Location)) {
+            if (!_consentService.CheckConsent(Consents.Location)) {
                 return;
             }
 
@@ -118,7 +118,7 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async void SetLocation(string countryCode, string city, string gpsCoordinates, string ipAddress)
         {
-            if (!_consentService.CheckConsent(Features.Location)) {
+            if (!_consentService.CheckConsent(Consents.Location)) {
                 return;
             }
 
@@ -166,9 +166,9 @@ namespace Plugins.CountlySDK.Services
 
         }
 
-        internal override void ConsentChanged(List<Features> updatedConsents, bool newConsentValue)
+        internal override void ConsentChanged(List<Consents> updatedConsents, bool newConsentValue)
         {
-            if (updatedConsents.Contains(Features.Location) && !newConsentValue) {
+            if (updatedConsents.Contains(Consents.Location) && !newConsentValue) {
                 OnLocationConsentRemoved();
             }
             

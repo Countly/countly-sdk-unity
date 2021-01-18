@@ -22,7 +22,7 @@ namespace Plugins.CountlySDK.Services
 
         }
 
-        internal override void ConsentChanged(List<Features> updatedConsents, bool newConsentValue)
+        internal override void ConsentChanged(List<Consents> updatedConsents, bool newConsentValue)
         {
 
         }
@@ -38,7 +38,7 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async Task ReportStarRatingAsync(string platform, string appVersion, int rating)
         {
-            if (!_consentService.CheckConsent(Features.StarRating)) {
+            if (!_consentService.CheckConsent(Consents.StarRating)) {
                 return;
             }
 

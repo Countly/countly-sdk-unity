@@ -29,7 +29,7 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async Task RecordOpenViewAsync(string name, bool hasSessionBegunWithView = false)
         {
-            if (!_consentService.CheckConsent(Features.Views)) {
+            if (!_consentService.CheckConsent(Consents.Views)) {
                 return;
             }
 
@@ -67,7 +67,7 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async Task RecordCloseViewAsync(string name, bool hasSessionBegunWithView = false)
         {
-            if (!_consentService.CheckConsent(Features.Views)) {
+            if (!_consentService.CheckConsent(Consents.Views)) {
                 return;
             }
 
@@ -116,7 +116,7 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async Task ReportActionAsync(string type, int x, int y, int width, int height)
         {
-            if (!_consentService.CheckConsent(Features.Views)) {
+            if (!_consentService.CheckConsent(Consents.Views)) {
                 return;
             }
 
@@ -138,7 +138,7 @@ namespace Plugins.CountlySDK.Services
 
         }
 
-        internal override void ConsentChanged(List<Features> updatedConsents, bool newConsentValue)
+        internal override void ConsentChanged(List<Consents> updatedConsents, bool newConsentValue)
         {
 
         }
