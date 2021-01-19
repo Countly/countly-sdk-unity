@@ -3,7 +3,7 @@
 
 * Added Consent feature
 * Added data type checking for segmentation
-* Added Unit Testing
+* Added Unit Tests
 
 * Reworked init
 * Reworked location handling
