@@ -1,3 +1,16 @@
+## 20.11.1
+* Public properties commented and documented
+
+* Added Consent feature
+* Added data type checking for segmentation
+* Added Unit Testing
+
+* Reworked init
+* Reworked location handling
+* Reworked timestamp, dow, hours and tz
+* Reworked Server url cleaning
+* Fixed crash on Application quit
+
 ## 20.11.0
 * Added Sample App
 * Added test mode feature 
