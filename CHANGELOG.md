@@ -1,15 +1,11 @@
 ## 20.11.1
-* Public properties commented and documented
-
 * Added Consent feature
 * Added data type checking for segmentation
-* Added Unit Tests
+* Reworked init, added a new way to init the SDK from code. That will be the mandatoy method going further.
 
-* Reworked init
-* Reworked location handling
-* Reworked timestamp, dow, hours and tz
-* Reworked Server url cleaning
-* Fixed crash on Application quit
+* Fixed issues with location handling and reworked some aspects of it's behaviour
+* Fixed potential issues by calculating Timestamp, dow, hours and tz from the same time moment
+* Fixed crashes that could happen on Application quit
 
 ## 20.11.0
 * Added Sample App
