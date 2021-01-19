@@ -1,3 +1,12 @@
+## 20.11.1
+* Added Consent feature
+* Added data type checking for segmentation
+* Reworked init, added a new way to init the SDK from code. That will be the mandatoy method going further.
+
+* Fixed issues with location handling and reworked some aspects of it's behaviour
+* Fixed potential issues by calculating Timestamp, dow, hours and tz from the same time moment
+* Fixed crashes that could happen on Application quit
+
 ## 20.11.0
 * Added Sample App
 * Added test mode feature 
