@@ -64,6 +64,7 @@ namespace Plugins.CountlySDK.Services
         public async Task ChangeDeviceIdAndEndCurrentSessionAsync(string deviceId)
         {
             if (!_consentService.AnyConsentGiven()) {
+                Debug.Log("[Countly DeviceIdCountlyService] ChangeDeviceIdAndEndCurrentSessionAsync: Please set at least a single consent before calling this!");
                 return;
             }
 
@@ -97,6 +98,7 @@ namespace Plugins.CountlySDK.Services
         public async Task ChangeDeviceIdAndMergeSessionDataAsync(string deviceId)
         {
             if (!_consentService.AnyConsentGiven()) {
+                Debug.Log("[Countly DeviceIdCountlyService] ChangeDeviceIdAndMergeSessionDataAsync: Please set at least a single consent before calling this!");
                 return;
             }
 
