@@ -62,9 +62,9 @@ namespace Plugins.CountlySDK.Services
         }
 
         /// <summary>
-        /// Give consent to a list
+        /// Give consent to an array of consents
         /// </summary>
-        /// <param name="consents">List of consents</param>
+        /// <param name="consents">array of consents for which consent should be given</param>
         /// <returns></returns>
         public void GiveConsent(Consents[] consents)
         {
@@ -73,7 +73,7 @@ namespace Plugins.CountlySDK.Services
         }
 
         /// <summary>
-        /// Gives all consent
+        /// Give consent to all consents
         /// </summary>
         /// <returns></returns>
         public void GiveConsentAll()
@@ -91,9 +91,9 @@ namespace Plugins.CountlySDK.Services
         }
 
         /// <summary>
-        /// Remove consent
+        /// Remove consent of an array of consents
         /// </summary>
-        /// <param name="consents">List of consents that should be removed</param>
+        /// <param name="consents">array of consents for which consent should be removed</param>
         /// <returns></returns>
         public void RemoveConsent(Consents[] consents)
         {
@@ -120,7 +120,7 @@ namespace Plugins.CountlySDK.Services
         }
 
         /// <summary>
-        /// Remove All consents
+        /// Remove consent of all consents
         /// </summary>
         /// <returns></returns>
         public void RemoveAllConsent()
@@ -136,9 +136,9 @@ namespace Plugins.CountlySDK.Services
         }
 
         /// <summary>
-        /// Give consent to a group list
+        /// Give consents to an array of consent group
         /// </summary>
-        /// <param name="groupName">list of the consents group name</param>
+        /// <param name="groupName">array of consent group for which consent should be given</param>
         /// <returns></returns>
         public void GiveConsentToGroup(string[] groupName)
         {
@@ -166,9 +166,9 @@ namespace Plugins.CountlySDK.Services
         }
 
         /// <summary>
-        /// Remove consent of a group
+        /// Remove consents of an array of consent group
         /// </summary>
-        /// <param name="groupName">name of the consent group</param>
+        /// <param name="groupName">array of consent group for which consent should be removed</param>
         /// <returns></returns>
         public void RemoveConsentOfGroup(string[] groupName)
         {

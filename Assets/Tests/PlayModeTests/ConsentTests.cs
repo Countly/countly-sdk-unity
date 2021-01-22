@@ -36,7 +36,7 @@ namespace Tests
         }
 
         [Test]
-        public void TestConsentsDefaultValuesWRCT()
+        public void TestConsentDefaultValuesWithRequiresConsentTrue()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 AppKey = _appKey,
@@ -61,7 +61,7 @@ namespace Tests
         }
 
         [Test]
-        public void TestConsentsDefaultValuesWRCF()
+        public void TestConsentDefaultValuesWithRequiresConsentFalse()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 AppKey = _appKey,

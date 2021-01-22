@@ -104,11 +104,22 @@ namespace Plugins.CountlySDK.Models
             GivenConsent = consents;
         }
 
+        /// <summary>
+        /// Group multiple consents into a consent group
+        /// </summary>
+        /// <param name="groupName">name of the consent group</param>
+        /// <param name="consents">array of consent to be added to the consent group</param>
+        /// <returns></returns>
         public void  CreateConsentGroup([NotNull] string groupName, [NotNull] Consents[] consents)
         {
             ConsentGroups[groupName] = consents;
         }
 
+        /// <summary>
+        /// Give consents to an array of consent group
+        /// </summary>
+        /// <param name="groupName">array of consent group for which consent should be given</param>
+        /// <returns></returns>
         public void GiveConsentToGroup([NotNull] string groupName)
         {
             EnabledConsentGroups.Add(groupName);
