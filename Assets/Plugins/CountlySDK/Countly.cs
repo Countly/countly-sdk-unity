@@ -221,7 +221,7 @@ namespace Plugins.CountlySDK
             OptionalParameters = new OptionalParametersCountlyService(Location, Configuration);
             Notifications = new NotificationsCallbackService(Configuration);
             ProxyNotificationsService notificationsService = new ProxyNotificationsService(transform, Configuration, InternalStartCoroutine, Events);
-            _push = new PushCountlyService(Events, requests, notificationsService, Notifications, Consents);
+            _push = new PushCountlyService(Configuration, Events, requests, notificationsService, Notifications, Consents);
             Session = new SessionCountlyService(Configuration, Events, requests, Location, Consents);
 
             CrashReports = new CrashReportsCountlyService(Configuration, requests, Consents);
