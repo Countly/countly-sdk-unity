@@ -3,6 +3,8 @@ using UnityEngine;
 using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK;
 using Plugins.CountlySDK.Enums;
+using Plugins.CountlySDK.Services;
+using System.Collections.Generic;
 
 namespace Tests
 {
@@ -126,6 +128,39 @@ namespace Tests
             Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.StarRating), true);
             Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.RemoteConfig), true);
 
+
+        }
+
+        [Test]
+        public void TestConsentsGivenDuringInit()
+        {
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                AppKey = _appKey,
+                ServerUrl = _serverUrl,
+                EnableTestMode = true,
+                RequiresConsent = true
+            };
+
+            string groupA = "GroupA";
+            configuration.GiveConsent(new Consents[] { Consents.Crashes, Consents.Events });
+
+            configuration.CreateConsentGroup(groupA, new Consents[] { Consents.Sessions, Consents.Location });
+
+            configuration.GiveConsentToGroup(groupA);
+
+            Countly.Instance.Init(configuration);
+
+            Assert.AreNotEqual(Countly.Instance.Consents, null);
+
+            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Views), false);
+            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Users), false);
+            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Events), true);
+            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Clicks), false);
+            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Crashes), true);
+            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Sessions), true);
+            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Location), true);
+            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.StarRating), false);
+            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.RemoteConfig), false);
 
         }
 
@@ -344,7 +379,7 @@ namespace Tests
             Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Location), true);
             Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.RemoteConfig), true);
 
-           
+
             Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Views), false);
             Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Clicks), false);
             Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Events), false);
@@ -451,7 +486,8 @@ namespace Tests
             Assert.AreEqual(Countly.Instance.Location.IsLocationDisabled, false);
         }
 
-        public void TestRemoteConfigConsentChangedListener()
+        [Test]
+        public void TestListenerOnMultipleConsentOfSameFeature()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 AppKey = _appKey,
@@ -460,19 +496,211 @@ namespace Tests
                 EnableTestMode = true,
             };
 
-            configuration.GiveConsent(new Consents[] { Consents.Location, Consents.RemoteConfig });
-            Countly.Instance.Init(configuration);
 
-            Assert.AreNotEqual(Countly.Instance.Location, null);
-            Countly.Instance.Consents.RemoveConsent(new Consents[] { Consents.RemoteConfig });
-            Assert.AreEqual(Countly.Instance.RemoteConfigs.Configs, null);
+            ConsentTestHelperClass eventListener = new ConsentTestHelperClass(Consents.Events);
+            ConsentTestHelperClass locatoinListener = new ConsentTestHelperClass(Consents.Location);
+            ConsentTestHelperClass starRatingListener = new ConsentTestHelperClass(Consents.StarRating);
+            ConsentTestHelperClass remoteConfigListener = new ConsentTestHelperClass(Consents.RemoteConfig);
+
+            List<AbstractBaseService> listeners = new List<AbstractBaseService> { eventListener, locatoinListener, remoteConfigListener, starRatingListener };
+
+            ConsentCountlyService consentCountlyService = new ConsentCountlyService(configuration, null);
+            consentCountlyService.Listeners = listeners;
+
+            consentCountlyService.GiveConsent(new Consents[] { Consents.Location, Consents.RemoteConfig, Consents.RemoteConfig, Consents.Events });
+
+            Assert.AreEqual(eventListener.Count, 1);
+            Assert.AreEqual(locatoinListener.Count, 1);
+            Assert.AreEqual(starRatingListener.Count, 0);
+            Assert.AreEqual(remoteConfigListener.Count, 1);
+
+            consentCountlyService.RemoveConsent(new Consents[] { Consents.Location, Consents.Location, Consents.StarRating, Consents.Events });
+
+            Assert.AreEqual(eventListener.Count, 1);
+            Assert.AreEqual(locatoinListener.Count, 1);
+            Assert.AreEqual(starRatingListener.Count, 1);
+            Assert.AreEqual(remoteConfigListener.Count, 0);
         }
 
+        [Test]
+        public void TestListenerOnConsentChanged()
+        {
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                AppKey = _appKey,
+                ServerUrl = _serverUrl,
+                RequiresConsent = true,
+                EnableTestMode = true,
+            };
+
+            ConsentTestHelperClass eventListener = new ConsentTestHelperClass(Consents.Events);
+            ConsentTestHelperClass locatoinListener = new ConsentTestHelperClass(Consents.Location);
+            ConsentTestHelperClass starRatingListener = new ConsentTestHelperClass(Consents.StarRating);
+            ConsentTestHelperClass remoteConfigListener = new ConsentTestHelperClass(Consents.RemoteConfig);
+
+            List<AbstractBaseService> listeners = new List<AbstractBaseService> { eventListener, locatoinListener, remoteConfigListener, starRatingListener };
+
+            ConsentCountlyService consentCountlyService = new ConsentCountlyService(configuration, null);
+            consentCountlyService.Listeners = listeners;
+
+            consentCountlyService.GiveConsent(new Consents[] { Consents.Location, Consents.RemoteConfig, Consents.Events });
+            Assert.AreEqual(eventListener.Count, 1);
+            Assert.AreEqual(locatoinListener.Count, 1);
+            Assert.AreEqual(starRatingListener.Count, 0);
+            Assert.AreEqual(remoteConfigListener.Count, 1);
+
+            consentCountlyService.GiveConsent(new Consents[] { Consents.Location, Consents.StarRating });
+            Assert.AreEqual(eventListener.Count, 0);
+            Assert.AreEqual(locatoinListener.Count, 0);
+            Assert.AreEqual(starRatingListener.Count, 1);
+            Assert.AreEqual(remoteConfigListener.Count, 0);
+
+            consentCountlyService.RemoveConsent(new Consents[] { Consents.Location, Consents.StarRating });
+            Assert.AreEqual(eventListener.Count, 0);
+            Assert.AreEqual(locatoinListener.Count, 1);
+            Assert.AreEqual(starRatingListener.Count, 1);
+            Assert.AreEqual(remoteConfigListener.Count, 0);
+
+            consentCountlyService.RemoveConsent(new Consents[] { Consents.Events, Consents.StarRating });
+            Assert.AreEqual(eventListener.Count, 1);
+            Assert.AreEqual(locatoinListener.Count, 0);
+            Assert.AreEqual(starRatingListener.Count, 0);
+            Assert.AreEqual(remoteConfigListener.Count, 0);
+        }
+
+        [Test]
+        public void TestListenerOnConsentGroups()
+        {
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                AppKey = _appKey,
+                ServerUrl = _serverUrl,
+                RequiresConsent = true,
+                EnableTestMode = true,
+            };
+
+            string groupA = "GroupA";
+            string groupB = "GroupB";
+
+            configuration.CreateConsentGroup(groupA, new Consents[] { Consents.Clicks, Consents.Views });
+
+            ConsentTestHelperClass pushListener = new ConsentTestHelperClass(Consents.Push);
+            ConsentTestHelperClass UsersListener = new ConsentTestHelperClass(Consents.Users);
+            ConsentTestHelperClass viewsListener = new ConsentTestHelperClass(Consents.Views);
+            ConsentTestHelperClass ClicksListener = new ConsentTestHelperClass(Consents.Clicks);
+
+
+            List<AbstractBaseService> listeners = new List<AbstractBaseService> { viewsListener, ClicksListener, UsersListener, pushListener };
+
+            ConsentCountlyService consentCountlyService = new ConsentCountlyService(configuration, null);
+            consentCountlyService.Listeners = listeners;
+
+            consentCountlyService.GiveConsentToGroup(new string[] { groupA });
+            Assert.AreEqual(pushListener.Count, 0);
+            Assert.AreEqual(UsersListener.Count, 0);
+            Assert.AreEqual(viewsListener.Count, 1);
+            Assert.AreEqual(ClicksListener.Count, 1);
+
+            consentCountlyService.GiveConsentToGroup(new string[] { groupB });
+            Assert.AreEqual(pushListener.Count, 0);
+            Assert.AreEqual(UsersListener.Count, 0);
+            Assert.AreEqual(viewsListener.Count, 1);
+            Assert.AreEqual(ClicksListener.Count, 1);
+
+            consentCountlyService.RemoveConsentOfGroup(new string[] { groupA });
+            Assert.AreEqual(pushListener.Count, 0);
+            Assert.AreEqual(UsersListener.Count, 0);
+            Assert.AreEqual(viewsListener.Count, 1);
+            Assert.AreEqual(ClicksListener.Count, 1);
+
+            consentCountlyService.RemoveConsentOfGroup(new string[] { groupB });
+            Assert.AreEqual(pushListener.Count, 0);
+            Assert.AreEqual(UsersListener.Count, 0);
+            Assert.AreEqual(viewsListener.Count, 1);
+            Assert.AreEqual(ClicksListener.Count, 1);
+
+            consentCountlyService.GiveConsent(new Consents[] { Consents.Push, Consents.Views });
+            Assert.AreEqual(pushListener.Count, 1);
+            Assert.AreEqual(UsersListener.Count, 0);
+            Assert.AreEqual(viewsListener.Count, 1);
+            Assert.AreEqual(ClicksListener.Count, 0);
+
+            consentCountlyService.GiveConsentToGroup(new string[] { groupA });
+            Assert.AreEqual(pushListener.Count, 0);
+            Assert.AreEqual(UsersListener.Count, 0);
+            Assert.AreEqual(viewsListener.Count, 0);
+            Assert.AreEqual(ClicksListener.Count, 1);
+
+        }
+
+        [Test]
+        public void TestListenerOnAllConsentRemovalAndGiven()
+        {
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                AppKey = _appKey,
+                ServerUrl = _serverUrl,
+                RequiresConsent = true,
+                EnableTestMode = true,
+            };
+
+            string groupA = "GroupA";
+
+            configuration.CreateConsentGroup(groupA, new Consents[] { Consents.Clicks, Consents.Views });
+
+            ConsentTestHelperClass pushListener = new ConsentTestHelperClass(Consents.Push);
+            ConsentTestHelperClass UsersListener = new ConsentTestHelperClass(Consents.Users);
+            ConsentTestHelperClass viewsListener = new ConsentTestHelperClass(Consents.Views);
+            ConsentTestHelperClass ClicksListener = new ConsentTestHelperClass(Consents.Clicks);
+
+
+            List<AbstractBaseService> listeners = new List<AbstractBaseService> { viewsListener, ClicksListener, UsersListener, pushListener };
+
+            ConsentCountlyService consentCountlyService = new ConsentCountlyService(configuration, null);
+            consentCountlyService.Listeners = listeners;
+
+            consentCountlyService.GiveConsentToGroup(new string[] { groupA });
+            Assert.AreEqual(pushListener.Count, 0);
+            Assert.AreEqual(UsersListener.Count, 0);
+            Assert.AreEqual(viewsListener.Count, 1);
+            Assert.AreEqual(ClicksListener.Count, 1);
+
+            consentCountlyService.RemoveAllConsent();
+            Assert.AreEqual(pushListener.Count, 0);
+            Assert.AreEqual(UsersListener.Count, 0);
+            Assert.AreEqual(viewsListener.Count, 1);
+            Assert.AreEqual(ClicksListener.Count, 1);
+
+            consentCountlyService.GiveConsentAll();
+            Assert.AreEqual(pushListener.Count, 1);
+            Assert.AreEqual(UsersListener.Count, 1);
+            Assert.AreEqual(viewsListener.Count, 1);
+            Assert.AreEqual(ClicksListener.Count, 1);
+
+        }
         [TearDown]
         public void End()
         {
             Countly.Instance.ClearStorage();
             Object.DestroyImmediate(Countly.Instance);
+
+        }
+
+        private class ConsentTestHelperClass : AbstractBaseService
+        {
+            internal int Count { set; get; }
+            internal Consents _consent;
+            internal ConsentTestHelperClass(Consents consent) : base(null)
+            {
+                _consent = consent;
+            }
+
+            internal override void ConsentChanged(List<Consents> updatedConsents, bool newConsentValue)
+            {
+                Count = 0;
+                foreach (Consents consent in updatedConsents) {
+                    if (consent == _consent) {
+                        ++Count;
+                    }
+                }
+            }
         }
     }
 }

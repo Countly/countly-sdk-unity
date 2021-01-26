@@ -252,12 +252,12 @@ namespace Plugins.CountlySDK
             _listeners.Add(UserDetails);
             _listeners.Add(CrashReports);
             _listeners.Add(RemoteConfigs);
-            _listeners.Add(Initialization);   
+            _listeners.Add(Initialization);
         }
 
         private void RegisterListenersToServices()
         {
-            Device.Listeners =  _listeners;
+            Device.Listeners = _listeners;
             Consents.Listeners = _listeners;
         }
 
@@ -266,6 +266,10 @@ namespace Plugins.CountlySDK
         /// </summary>
         private void OnApplicationQuit()
         {
+            if (!IsSDKInitialized) {
+                return;
+            }
+
             if (Configuration.EnableConsoleLogging) {
                 Debug.Log("[Countly] OnApplicationQuit");
             }
@@ -275,6 +279,9 @@ namespace Plugins.CountlySDK
 
         internal void ClearStorage()
         {
+            if (!IsSDKInitialized) {
+                return;
+            }
             _requestRepo.Clear();
             _viewEventRepo.Clear();
             _configDao.RemoveAll();

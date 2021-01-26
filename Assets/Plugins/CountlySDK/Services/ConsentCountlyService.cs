@@ -36,7 +36,7 @@ namespace Plugins.CountlySDK.Services
         #region Public Methods
 
         /// <summary>
-        /// Checks consent
+        ///  Get the current state of consent
         /// </summary>
         /// <param name="consent">a consent that should be checked</param>
         /// <returns>bool</returns>
@@ -45,6 +45,10 @@ namespace Plugins.CountlySDK.Services
             return !RequiresConsent || (_countlyConsents.ContainsKey(consent) && _countlyConsents[consent]);
         }
 
+        /// <summary>
+        ///  Check if any consent is given
+        /// </summary>
+        /// <returns>bool</returns>
         internal bool AnyConsentGiven()
         {
             if (!RequiresConsent) {
@@ -73,7 +77,7 @@ namespace Plugins.CountlySDK.Services
         }
 
         /// <summary>
-        /// Give consent to all consents
+        /// Give consent to the provided features
         /// </summary>
         /// <returns></returns>
         public void GiveConsentAll()
@@ -91,7 +95,7 @@ namespace Plugins.CountlySDK.Services
         }
 
         /// <summary>
-        /// Remove consent of an array of consents
+        /// Remove consent to the provided features
         /// </summary>
         /// <param name="consents">array of consents for which consent should be removed</param>
         /// <returns></returns>
@@ -120,7 +124,7 @@ namespace Plugins.CountlySDK.Services
         }
 
         /// <summary>
-        /// Remove consent of all consents
+        /// Remove consent from all features
         /// </summary>
         /// <returns></returns>
         public void RemoveAllConsent()
@@ -136,7 +140,7 @@ namespace Plugins.CountlySDK.Services
         }
 
         /// <summary>
-        /// Give consents to an array of consent group
+        /// Give consent to the provided feature group
         /// </summary>
         /// <param name="groupName">array of consent group for which consent should be given</param>
         /// <returns></returns>
@@ -166,7 +170,7 @@ namespace Plugins.CountlySDK.Services
         }
 
         /// <summary>
-        /// Remove consents of an array of consent group
+        /// Remove consent from the provided features groups
         /// </summary>
         /// <param name="groupName">array of consent group for which consent should be removed</param>
         /// <returns></returns>
