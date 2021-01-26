@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using JetBrains.Annotations;
 using Plugins.CountlySDK.Enums;
 using UnityEngine;
@@ -36,7 +37,7 @@ namespace Plugins.CountlySDK.Models
         public bool RequiresConsent = false;
         internal Consents[] GivenConsent { get; private set; }
         internal Dictionary<string, Consents[]> ConsentGroups { get; private set; }
-        internal List<string> EnabledConsentGroups { get; private set; }
+        internal string[] EnabledConsentGroups { get; private set; }
 
         /// <summary>
         ///     Parent must be undestroyable
@@ -46,14 +47,11 @@ namespace Plugins.CountlySDK.Models
         public CountlyConfiguration()
         {
             ConsentGroups = new Dictionary<string, Consents[]>();
-            EnabledConsentGroups = new List<string>();
         }
 
         internal CountlyConfiguration(CountlyAuthModel authModel, CountlyConfigModel config)
         {
             ConsentGroups = new Dictionary<string, Consents[]>();
-            EnabledConsentGroups = new List<string>();
-
             ServerUrl = authModel.ServerUrl;
             AppKey = authModel.AppKey;
             DeviceId = authModel.DeviceId;
@@ -107,7 +105,7 @@ namespace Plugins.CountlySDK.Models
         /// <summary>
         /// Group multiple consents into a consent group
         /// </summary>
-        /// <param name="groupName">name of the consent group</param>
+        /// <param name="groupName">name of the consent group that will be created</param>
         /// <param name="consents">array of consent to be added to the consent group</param>
         /// <returns></returns>
         public void  CreateConsentGroup([NotNull] string groupName, [NotNull] Consents[] consents)
@@ -120,9 +118,9 @@ namespace Plugins.CountlySDK.Models
         /// </summary>
         /// <param name="groupName">array of consent group for which consent should be given</param>
         /// <returns></returns>
-        public void GiveConsentToGroup([NotNull] string groupName)
+        public void GiveConsentToGroup([NotNull] string[] groupName)
         {
-            EnabledConsentGroups.Add(groupName);
+            EnabledConsentGroups = groupName;
         }
     }
 }

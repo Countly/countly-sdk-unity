@@ -18,7 +18,7 @@ namespace Tests
         public void AssertConsentArray(Consents[] consents, bool expectedValue)
         {
             foreach (Consents consent in consents) {
-                Assert.AreEqual(Countly.Instance.Consents.CheckConsent(consent), expectedValue);
+                Assert.AreEqual(expectedValue, Countly.Instance.Consents.CheckConsent(consent));
             }
         }
 
@@ -34,12 +34,11 @@ namespace Tests
             CountlyConfiguration configuration = new CountlyConfiguration {
                 AppKey = _appKey,
                 ServerUrl = _serverUrl,
-                EnableTestMode = true,
             };
 
             Countly.Instance.Init(configuration);
 
-            Assert.AreNotEqual(Countly.Instance.Consents, null);
+            Assert.AreNotEqual(null, Countly.Instance.Consents);
             AssertConsentAll(expectedValue: true);
         }
 
@@ -49,13 +48,12 @@ namespace Tests
             CountlyConfiguration configuration = new CountlyConfiguration {
                 AppKey = _appKey,
                 ServerUrl = _serverUrl,
-                EnableTestMode = true,
                 RequiresConsent = true
             };
 
             Countly.Instance.Init(configuration);
 
-            Assert.AreNotEqual(Countly.Instance.Consents, null);
+            Assert.AreNotEqual(null, Countly.Instance.Consents);
 
             AssertConsentAll(expectedValue: false);
         }
@@ -66,7 +64,6 @@ namespace Tests
             CountlyConfiguration configuration = new CountlyConfiguration {
                 AppKey = _appKey,
                 ServerUrl = _serverUrl,
-                EnableTestMode = true,
             };
 
             string groupA = "GroupA";
@@ -74,11 +71,11 @@ namespace Tests
 
             configuration.CreateConsentGroup(groupA, new Consents[] { Consents.Sessions, Consents.Location });
 
-            configuration.GiveConsentToGroup(groupA);
+            configuration.GiveConsentToGroup(new string[] { groupA });
 
             Countly.Instance.Init(configuration);
 
-            Assert.AreNotEqual(Countly.Instance.Consents, null);
+            Assert.AreNotEqual(null, Countly.Instance.Consents);
 
             AssertConsentAll(expectedValue: true);
 
@@ -102,7 +99,6 @@ namespace Tests
             CountlyConfiguration configuration = new CountlyConfiguration {
                 AppKey = _appKey,
                 ServerUrl = _serverUrl,
-                EnableTestMode = true,
                 RequiresConsent = true
             };
 
@@ -111,14 +107,14 @@ namespace Tests
 
             configuration.CreateConsentGroup(groupA, new Consents[] { Consents.Sessions, Consents.Location });
 
-            configuration.GiveConsentToGroup(groupA);
+            configuration.GiveConsentToGroup(new string[] { groupA });
 
             Countly.Instance.Init(configuration);
 
-            Assert.AreNotEqual(Countly.Instance.Consents, null);
+            Assert.AreNotEqual(null, Countly.Instance.Consents);
 
             AssertConsentArray(new Consents[] { Consents.Events, Consents.Crashes, Consents.Sessions, Consents.Location }, true);
-            AssertConsentArray(new Consents[] { Consents.Views, Consents.Users, Consents.Clicks, Consents.StarRating, Consents.RemoteConfig}, false);
+            AssertConsentArray(new Consents[] { Consents.Views, Consents.Users, Consents.Clicks, Consents.StarRating, Consents.RemoteConfig }, false);
 
         }
 
@@ -128,14 +124,13 @@ namespace Tests
             CountlyConfiguration configuration = new CountlyConfiguration {
                 AppKey = _appKey,
                 ServerUrl = _serverUrl,
-                EnableTestMode = true,
                 RequiresConsent = true
             };
 
 
             Countly.Instance.Init(configuration);
 
-            Assert.AreNotEqual(Countly.Instance.Consents, null);
+            Assert.AreNotEqual(null, Countly.Instance.Consents);
             AssertConsentAll(expectedValue: false);
 
 
@@ -156,7 +151,6 @@ namespace Tests
                 AppKey = _appKey,
                 ServerUrl = _serverUrl,
                 RequiresConsent = true,
-                EnableTestMode = true,
             };
 
             string groupA = "GroupA";
@@ -170,12 +164,11 @@ namespace Tests
             configuration.CreateConsentGroup(groupB, new Consents[] { Consents.RemoteConfig, Consents.Users, Consents.Location });
             configuration.CreateConsentGroup(groupC, new Consents[] { Consents.StarRating });
 
-            configuration.GiveConsentToGroup(groupA);
-            configuration.GiveConsentToGroup(groupC);
+            configuration.GiveConsentToGroup(new string[] { groupA, groupC });
 
             Countly.Instance.Init(configuration);
 
-            Assert.AreNotEqual(Countly.Instance.Consents, null);
+            Assert.AreNotEqual(null, Countly.Instance.Consents);
 
             AssertConsentArray(new Consents[] { Consents.Events, Consents.Crashes, Consents.Sessions, Consents.Location, Consents.StarRating }, true);
             AssertConsentArray(new Consents[] { Consents.Views, Consents.Users, Consents.Clicks, Consents.RemoteConfig }, false);
@@ -189,16 +182,15 @@ namespace Tests
                 AppKey = _appKey,
                 ServerUrl = _serverUrl,
                 RequiresConsent = true,
-                EnableTestMode = true,
             };
 
 
             Countly.Instance.Init(configuration);
 
-            Assert.AreNotEqual(Countly.Instance.Consents, null);
+            Assert.AreNotEqual(null, Countly.Instance.Consents);
 
             Countly.Instance.Consents.GiveConsent(new Consents[] { Consents.Events, Consents.Crashes });
-            AssertConsentArray(new Consents[] { Consents.Events, Consents.Crashes}, true);
+            AssertConsentArray(new Consents[] { Consents.Events, Consents.Crashes }, true);
             AssertConsentArray(new Consents[] { Consents.Views, Consents.Users, Consents.Clicks, Consents.RemoteConfig, Consents.Sessions, Consents.Location, Consents.StarRating }, false);
 
             Countly.Instance.Consents.GiveConsent(new Consents[] { Consents.StarRating });
@@ -214,7 +206,6 @@ namespace Tests
                 AppKey = _appKey,
                 ServerUrl = _serverUrl,
                 RequiresConsent = true,
-                EnableTestMode = true,
             };
 
             configuration.GiveConsent(new Consents[] { Consents.Crashes, Consents.Views, Consents.StarRating, Consents.Events, Consents.Users });
@@ -235,7 +226,6 @@ namespace Tests
                 AppKey = _appKey,
                 ServerUrl = _serverUrl,
                 RequiresConsent = true,
-                EnableTestMode = true,
             };
 
             string groupA = "GroupA";
@@ -244,11 +234,11 @@ namespace Tests
             configuration.CreateConsentGroup(groupA, new Consents[] { Consents.Sessions, Consents.Location });
             configuration.CreateConsentGroup(groupB, new Consents[] { Consents.RemoteConfig, Consents.Users });
 
-            configuration.GiveConsentToGroup(groupA);
+            configuration.GiveConsentToGroup(new string[] { groupA });
 
             Countly.Instance.Init(configuration);
 
-            Assert.AreNotEqual(Countly.Instance.Consents, null);
+            Assert.AreNotEqual(null, Countly.Instance.Consents);
             AssertConsentArray(new Consents[] { Consents.Sessions, Consents.Location }, true);
             AssertConsentArray(new Consents[] { Consents.Views, Consents.Users, Consents.Clicks, Consents.RemoteConfig, Consents.Events, Consents.Crashes, Consents.StarRating }, false);
 
@@ -265,7 +255,6 @@ namespace Tests
                 AppKey = _appKey,
                 ServerUrl = _serverUrl,
                 RequiresConsent = true,
-                EnableTestMode = true,
             };
 
             string groupA = "GroupA";
@@ -277,7 +266,7 @@ namespace Tests
 
             Countly.Instance.Init(configuration);
 
-            Assert.AreNotEqual(Countly.Instance.Consents, null);
+            Assert.AreNotEqual(null, Countly.Instance.Consents);
 
             Countly.Instance.Consents.GiveConsentAll();
             AssertConsentAll(expectedValue: true);
@@ -299,7 +288,6 @@ namespace Tests
                 AppKey = _appKey,
                 ServerUrl = _serverUrl,
                 RequiresConsent = true,
-                EnableTestMode = true,
             };
 
             string city = "Houston";
@@ -322,7 +310,7 @@ namespace Tests
             Assert.AreEqual(Countly.Instance.Location.IsLocationDisabled, false);
             Assert.AreEqual(Countly.Instance.Location.Location, "29.634933,-95.220255");
 
-            Assert.AreNotEqual(Countly.Instance.Consents, null);
+            Assert.AreNotEqual(null, Countly.Instance.Consents);
             Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Location), true);
 
             Countly.Instance.Consents.RemoveConsent(new Consents[] { Consents.Location });
@@ -342,7 +330,6 @@ namespace Tests
                 AppKey = _appKey,
                 ServerUrl = _serverUrl,
                 RequiresConsent = true,
-                EnableTestMode = true,
             };
 
 
@@ -378,7 +365,6 @@ namespace Tests
                 AppKey = _appKey,
                 ServerUrl = _serverUrl,
                 RequiresConsent = true,
-                EnableTestMode = true,
             };
 
             ConsentTestHelperClass eventListener = new ConsentTestHelperClass(Consents.Events);
@@ -423,7 +409,6 @@ namespace Tests
                 AppKey = _appKey,
                 ServerUrl = _serverUrl,
                 RequiresConsent = true,
-                EnableTestMode = true,
             };
 
             string groupA = "GroupA";
@@ -487,7 +472,6 @@ namespace Tests
                 AppKey = _appKey,
                 ServerUrl = _serverUrl,
                 RequiresConsent = true,
-                EnableTestMode = true,
             };
 
             string groupA = "GroupA";

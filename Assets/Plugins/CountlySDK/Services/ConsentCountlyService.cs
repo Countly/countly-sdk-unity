@@ -24,9 +24,11 @@ namespace Plugins.CountlySDK.Services
             RequiresConsent = _config.RequiresConsent;
             _countlyConsentGroups = new Dictionary<string, Consents[]>(_config.ConsentGroups);
 
-            foreach (KeyValuePair<string, Consents[]> entry in _countlyConsentGroups) {
-                if (_config.EnabledConsentGroups.Contains(entry.Key)) {
-                    SetConsentInternal(entry.Value, true);
+            if (_config.EnabledConsentGroups != null) {
+                foreach (KeyValuePair<string, Consents[]> entry in _countlyConsentGroups) {
+                    if (_config.EnabledConsentGroups.Contains(entry.Key)) {
+                        SetConsentInternal(entry.Value, true);
+                    }
                 }
             }
 
@@ -36,19 +38,19 @@ namespace Plugins.CountlySDK.Services
         #region Public Methods
 
         /// <summary>
-        ///  Get the current state of consent
+        ///  Check if consent for the specific feature has been given
         /// </summary>
-        /// <param name="consent">a consent that should be checked</param>
-        /// <returns>bool</returns>
+        /// <param name="consent">The consent that should be checked</param>
+        /// <returns>Returns "true" if the consent for the checked feature has been provided</returns>
         public bool CheckConsent(Consents consent)
         {
             return !RequiresConsent || (_countlyConsents.ContainsKey(consent) && _countlyConsents[consent]);
         }
 
         /// <summary>
-        ///  Check if any consent is given
+        ///  Check if consent for any feature has been given
         /// </summary>
-        /// <returns>bool</returns>
+        /// <returns>Returns "true" if consent is given for any of the possible features</returns>
         internal bool AnyConsentGiven()
         {
             if (!RequiresConsent) {
@@ -66,7 +68,7 @@ namespace Plugins.CountlySDK.Services
         }
 
         /// <summary>
-        /// Give consent to an array of consents
+        /// "Give consent to the provided consent groups"
         /// </summary>
         /// <param name="consents">array of consents for which consent should be given</param>
         /// <returns></returns>
@@ -77,7 +79,7 @@ namespace Plugins.CountlySDK.Services
         }
 
         /// <summary>
-        /// Give consent to the provided features
+        /// Give consent to all features
         /// </summary>
         /// <returns></returns>
         public void GiveConsentAll()
@@ -95,7 +97,7 @@ namespace Plugins.CountlySDK.Services
         }
 
         /// <summary>
-        /// Remove consent to the provided features
+        /// Remove consent from the provided features
         /// </summary>
         /// <param name="consents">array of consents for which consent should be removed</param>
         /// <returns></returns>
@@ -140,7 +142,7 @@ namespace Plugins.CountlySDK.Services
         }
 
         /// <summary>
-        /// Give consent to the provided feature group
+        /// Give consent to the provided feature groups
         /// </summary>
         /// <param name="groupName">array of consent group for which consent should be given</param>
         /// <returns></returns>
@@ -170,9 +172,9 @@ namespace Plugins.CountlySDK.Services
         }
 
         /// <summary>
-        /// Remove consent from the provided features groups
+        /// Remove consent from the provided feature groups
         /// </summary>
-        /// <param name="groupName">array of consent group for which consent should be removed</param>
+        /// <param name="groupName">An array of consent group names for which consent should be removed</param>
         /// <returns></returns>
         public void RemoveConsentOfGroup(string[] groupName)
         {
