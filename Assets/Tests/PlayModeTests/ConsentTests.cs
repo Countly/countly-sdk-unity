@@ -5,6 +5,7 @@ using Plugins.CountlySDK;
 using Plugins.CountlySDK.Enums;
 using Plugins.CountlySDK.Services;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Tests
 {
@@ -12,6 +13,20 @@ namespace Tests
     {
         private readonly string _serverUrl = "https://xyz.com/";
         private readonly string _appKey = "772c091355076ead703f987fee94490";
+
+
+        public void AssertConsentArray(Consents[] consents, bool expectedValue)
+        {
+            foreach (Consents consent in consents) {
+                Assert.AreEqual(Countly.Instance.Consents.CheckConsent(consent), expectedValue);
+            }
+        }
+
+        public void AssertConsentAll(bool expectedValue)
+        {
+            Consents[] consents = System.Enum.GetValues(typeof(Consents)).Cast<Consents>().ToArray();
+            AssertConsentArray(consents, expectedValue);
+        }
 
         [Test]
         public void TestDefaultStateOfConsents()
@@ -25,16 +40,7 @@ namespace Tests
             Countly.Instance.Init(configuration);
 
             Assert.AreNotEqual(Countly.Instance.Consents, null);
-
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Views), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Users), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Events), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Clicks), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Crashes), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Sessions), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Location), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.StarRating), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.RemoteConfig), true);
+            AssertConsentAll(expectedValue: true);
         }
 
         [Test]
@@ -51,15 +57,7 @@ namespace Tests
 
             Assert.AreNotEqual(Countly.Instance.Consents, null);
 
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Views), false);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Users), false);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Events), false);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Clicks), false);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Crashes), false);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Sessions), false);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Location), false);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.StarRating), false);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.RemoteConfig), false);
+            AssertConsentAll(expectedValue: false);
         }
 
         [Test]
@@ -82,52 +80,19 @@ namespace Tests
 
             Assert.AreNotEqual(Countly.Instance.Consents, null);
 
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Views), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Users), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Events), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Clicks), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Crashes), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Sessions), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Location), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.StarRating), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.RemoteConfig), true);
+            AssertConsentAll(expectedValue: true);
 
             Countly.Instance.Consents.RemoveConsent(new Consents[] { Consents.Crashes, Consents.Location });
 
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Views), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Users), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Events), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Clicks), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Crashes), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Sessions), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Location), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.StarRating), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.RemoteConfig), true);
+            AssertConsentAll(expectedValue: true);
 
             Countly.Instance.Consents.RemoveConsentOfGroup(new string[] { groupA });
 
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Views), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Users), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Events), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Clicks), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Crashes), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Sessions), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Location), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.StarRating), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.RemoteConfig), true);
+            AssertConsentAll(expectedValue: true);
 
             Countly.Instance.Consents.RemoveAllConsent();
 
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Views), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Users), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Events), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Clicks), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Crashes), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Sessions), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Location), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.StarRating), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.RemoteConfig), true);
-
+            AssertConsentAll(expectedValue: true);
 
         }
 
@@ -152,15 +117,8 @@ namespace Tests
 
             Assert.AreNotEqual(Countly.Instance.Consents, null);
 
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Views), false);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Users), false);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Events), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Clicks), false);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Crashes), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Sessions), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Location), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.StarRating), false);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.RemoteConfig), false);
+            AssertConsentArray(new Consents[] { Consents.Events, Consents.Crashes, Consents.Sessions, Consents.Location }, true);
+            AssertConsentArray(new Consents[] { Consents.Views, Consents.Users, Consents.Clicks, Consents.StarRating, Consents.RemoteConfig}, false);
 
         }
 
@@ -178,39 +136,16 @@ namespace Tests
             Countly.Instance.Init(configuration);
 
             Assert.AreNotEqual(Countly.Instance.Consents, null);
+            AssertConsentAll(expectedValue: false);
 
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Views), false);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Users), false);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Events), false);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Clicks), false);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Crashes), false);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Sessions), false);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Location), false);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.StarRating), false);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.RemoteConfig), false);
 
             Countly.Instance.Consents.GiveConsentAll();
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Views), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Users), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Events), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Clicks), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Crashes), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Sessions), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Location), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.StarRating), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.RemoteConfig), true);
+            AssertConsentAll(expectedValue: true);
+
 
             Countly.Instance.Consents.RemoveAllConsent();
+            AssertConsentAll(expectedValue: false);
 
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Views), false);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Users), false);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Events), false);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Clicks), false);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Crashes), false);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Sessions), false);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Location), false);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.StarRating), false);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.RemoteConfig), false);
 
         }
 
@@ -242,15 +177,9 @@ namespace Tests
 
             Assert.AreNotEqual(Countly.Instance.Consents, null);
 
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Views), false);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Users), false);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Events), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Clicks), false);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Crashes), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Sessions), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Location), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.StarRating), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.RemoteConfig), false);
+            AssertConsentArray(new Consents[] { Consents.Events, Consents.Crashes, Consents.Sessions, Consents.Location, Consents.StarRating }, true);
+            AssertConsentArray(new Consents[] { Consents.Views, Consents.Users, Consents.Clicks, Consents.RemoteConfig }, false);
+
         }
 
         [Test]
@@ -269,30 +198,13 @@ namespace Tests
             Assert.AreNotEqual(Countly.Instance.Consents, null);
 
             Countly.Instance.Consents.GiveConsent(new Consents[] { Consents.Events, Consents.Crashes });
-
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Events), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Crashes), true);
-
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Views), false);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Users), false);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Clicks), false);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Sessions), false);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Location), false);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.StarRating), false);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.RemoteConfig), false);
+            AssertConsentArray(new Consents[] { Consents.Events, Consents.Crashes}, true);
+            AssertConsentArray(new Consents[] { Consents.Views, Consents.Users, Consents.Clicks, Consents.RemoteConfig, Consents.Sessions, Consents.Location, Consents.StarRating }, false);
 
             Countly.Instance.Consents.GiveConsent(new Consents[] { Consents.StarRating });
+            AssertConsentArray(new Consents[] { Consents.Events, Consents.Crashes, Consents.StarRating }, true);
+            AssertConsentArray(new Consents[] { Consents.Views, Consents.Users, Consents.Clicks, Consents.RemoteConfig, Consents.Sessions, Consents.Location }, false);
 
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Events), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Crashes), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.StarRating), true);
-
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Views), false);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Users), false);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Clicks), false);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Sessions), false);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Location), false);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.RemoteConfig), false);
         }
 
         [Test]
@@ -308,34 +220,12 @@ namespace Tests
             configuration.GiveConsent(new Consents[] { Consents.Crashes, Consents.Views, Consents.StarRating, Consents.Events, Consents.Users });
             Countly.Instance.Init(configuration);
 
-            Assert.AreNotEqual(Countly.Instance.Consents, null);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Views), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Users), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Events), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Crashes), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.StarRating), true);
-
-
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Clicks), false);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Sessions), false);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Location), false);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.RemoteConfig), false);
-
+            AssertConsentArray(new Consents[] { Consents.Events, Consents.Crashes, Consents.StarRating, Consents.Views, Consents.Users }, true);
+            AssertConsentArray(new Consents[] { Consents.Clicks, Consents.RemoteConfig, Consents.Sessions, Consents.Location }, false);
 
             Countly.Instance.Consents.RemoveConsent(new Consents[] { Consents.Views, Consents.Users });
-
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Events), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Crashes), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.StarRating), true);
-
-
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Users), false);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Views), false);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Clicks), false);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Sessions), false);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Location), false);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.RemoteConfig), false);
-
+            AssertConsentArray(new Consents[] { Consents.Events, Consents.Crashes, Consents.StarRating }, true);
+            AssertConsentArray(new Consents[] { Consents.Clicks, Consents.RemoteConfig, Consents.Sessions, Consents.Location, Consents.Views, Consents.Users }, false);
         }
 
         [Test]
@@ -359,35 +249,16 @@ namespace Tests
             Countly.Instance.Init(configuration);
 
             Assert.AreNotEqual(Countly.Instance.Consents, null);
+            AssertConsentArray(new Consents[] { Consents.Sessions, Consents.Location }, true);
+            AssertConsentArray(new Consents[] { Consents.Views, Consents.Users, Consents.Clicks, Consents.RemoteConfig, Consents.Events, Consents.Crashes, Consents.StarRating }, false);
 
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Sessions), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Location), true);
-
-
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Users), false);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Views), false);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Clicks), false);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Events), false);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Crashes), false);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.StarRating), false);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.RemoteConfig), false);
 
             Countly.Instance.Consents.GiveConsentToGroup(new string[] { groupB });
-
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Users), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Sessions), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Location), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.RemoteConfig), true);
-
-
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Views), false);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Clicks), false);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Events), false);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Crashes), false);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.StarRating), false);
-
+            AssertConsentArray(new Consents[] { Consents.Sessions, Consents.Location, Consents.Users, Consents.RemoteConfig, }, true);
+            AssertConsentArray(new Consents[] { Consents.Views, Consents.Clicks, Consents.Events, Consents.Crashes, Consents.StarRating }, false);
         }
 
+        [Test]
         public void TestRemoveConsentOfGroup()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
@@ -409,38 +280,16 @@ namespace Tests
             Assert.AreNotEqual(Countly.Instance.Consents, null);
 
             Countly.Instance.Consents.GiveConsentAll();
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Users), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Views), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Events), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Clicks), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Crashes), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Sessions), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Location), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.StarRating), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.RemoteConfig), true);
-
+            AssertConsentAll(expectedValue: true);
 
             Countly.Instance.Consents.RemoveConsentOfGroup(new string[] { groupA });
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Users), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Views), false);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Events), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Clicks), false);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Crashes), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Sessions), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Location), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.StarRating), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.RemoteConfig), true);
+            AssertConsentArray(new Consents[] { Consents.Sessions, Consents.Location, Consents.Users, Consents.RemoteConfig, Consents.Events, Consents.Crashes, Consents.StarRating }, true);
+            AssertConsentArray(new Consents[] { Consents.Views, Consents.Clicks }, false);
 
-            Countly.Instance.Consents.GiveConsentToGroup(new string[] { groupB });
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Users), false);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Views), false);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Events), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Clicks), false);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Crashes), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Sessions), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Location), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.StarRating), true);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.RemoteConfig), false);
+
+            Countly.Instance.Consents.RemoveConsentOfGroup(new string[] { groupB });
+            AssertConsentArray(new Consents[] { Consents.Sessions, Consents.Location, Consents.Events, Consents.Crashes, Consents.StarRating }, true);
+            AssertConsentArray(new Consents[] { Consents.Views, Consents.Clicks, Consents.Users, Consents.RemoteConfig }, false);
         }
 
         [Test]
