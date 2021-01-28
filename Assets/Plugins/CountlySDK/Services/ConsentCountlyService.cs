@@ -68,7 +68,7 @@ namespace Plugins.CountlySDK.Services
         }
 
         /// <summary>
-        /// Give consent to the provided consent groups
+        /// Give consent to the provided features
         /// </summary>
         /// <param name="consents">array of consents for which consent should be given</param>
         /// <returns></returns>

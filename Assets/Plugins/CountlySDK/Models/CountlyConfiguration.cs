@@ -114,7 +114,7 @@ namespace Plugins.CountlySDK.Models
         }
 
         /// <summary>
-        /// Give consents to an array of consent group
+        /// Give consent to the provided consent groups
         /// </summary>
         /// <param name="groupName">array of consent group for which consent should be given</param>
         /// <returns></returns>
