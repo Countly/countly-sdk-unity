@@ -6,6 +6,7 @@ using Plugins.CountlySDK.Enums;
 using Plugins.CountlySDK.Services;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine.UIElements;
 
 namespace Tests
 {
@@ -322,7 +323,7 @@ namespace Tests
             Assert.AreEqual(Countly.Instance.Location.CountryCode, null);
             Assert.AreEqual(Countly.Instance.Location.IsLocationDisabled, false);
         }
-
+/*
         [Test]
         public void TestListenerOnMultipleConsentOfSameFeature()
         {
@@ -463,7 +464,7 @@ namespace Tests
             Assert.AreEqual(viewsListener.Count, 0);
             Assert.AreEqual(ClicksListener.Count, 1);
 
-        }
+        } */
 
         [Test]
         public void TestListenerOnAllConsentRemovalAndGiven()
@@ -478,34 +479,24 @@ namespace Tests
 
             configuration.CreateConsentGroup(groupA, new Consents[] { Consents.Clicks, Consents.Views });
 
-            ConsentTestHelperClass pushListener = new ConsentTestHelperClass(Consents.Push);
-            ConsentTestHelperClass UsersListener = new ConsentTestHelperClass(Consents.Users);
-            ConsentTestHelperClass viewsListener = new ConsentTestHelperClass(Consents.Views);
-            ConsentTestHelperClass ClicksListener = new ConsentTestHelperClass(Consents.Clicks);
-
-
-            List<AbstractBaseService> listeners = new List<AbstractBaseService> { viewsListener, ClicksListener, UsersListener, pushListener };
-
+            ConsentTestHelperClass listener = new ConsentTestHelperClass();
+            List<AbstractBaseService> listeners = new List<AbstractBaseService> {listener };
             ConsentCountlyService consentCountlyService = new ConsentCountlyService(configuration, null);
+
             consentCountlyService.Listeners = listeners;
 
             consentCountlyService.GiveConsentToGroup(new string[] { groupA });
-            Assert.AreEqual(pushListener.Count, 0);
-            Assert.AreEqual(UsersListener.Count, 0);
-            Assert.AreEqual(viewsListener.Count, 1);
-            Assert.AreEqual(ClicksListener.Count, 1);
+            Assert.AreEqual(true, listener.Validate(0, new Consents[] { Consents.Clicks, Consents.Views }, true));
+
 
             consentCountlyService.RemoveAllConsent();
-            Assert.AreEqual(pushListener.Count, 0);
-            Assert.AreEqual(UsersListener.Count, 0);
-            Assert.AreEqual(viewsListener.Count, 1);
-            Assert.AreEqual(ClicksListener.Count, 1);
+            Assert.AreEqual(true, listener.Validate(1, new Consents[] { Consents.Clicks, Consents.Views }, false));
 
             consentCountlyService.GiveConsentAll();
-            Assert.AreEqual(pushListener.Count, 1);
-            Assert.AreEqual(UsersListener.Count, 1);
-            Assert.AreEqual(viewsListener.Count, 1);
-            Assert.AreEqual(ClicksListener.Count, 1);
+            Consents[] consents = System.Enum.GetValues(typeof(Consents)).Cast<Consents>().ToArray();
+            Assert.AreEqual(true, listener.Validate(2, consents, true));
+
+            Assert.AreEqual(3, listener.DeltaConsentsList.Count);
 
         }
         [TearDown]
@@ -518,21 +509,47 @@ namespace Tests
 
         private class ConsentTestHelperClass : AbstractBaseService
         {
-            internal int Count { set; get; }
-            internal Consents _consent;
-            internal ConsentTestHelperClass(Consents consent) : base(null)
+            internal List<DeltaConsents> DeltaConsentsList { get; private set; }
+            internal ConsentTestHelperClass() : base(null)
             {
-                _consent = consent;
+                DeltaConsentsList = new List<DeltaConsents>();
             }
 
             internal override void ConsentChanged(List<Consents> updatedConsents, bool newConsentValue)
             {
-                Count = 0;
-                foreach (Consents consent in updatedConsents) {
-                    if (consent == _consent) {
-                        ++Count;
+                DeltaConsents deltaConsents;
+                deltaConsents.value = newConsentValue;
+                deltaConsents.updatedConsents = updatedConsents;
+
+                DeltaConsentsList.Add(deltaConsents);
+
+            }
+
+            internal bool Validate(int callIndex, Consents[] calledConsents, bool theirValue)
+            {
+                if (callIndex < 0 || callIndex > DeltaConsentsList.Count - 1) {
+                    return false;
+                }
+
+                DeltaConsents deltaConsents = DeltaConsentsList[callIndex];
+
+                if (deltaConsents.value != theirValue || deltaConsents.updatedConsents.Count != calledConsents.Length) {
+                    return false;
+                }
+
+                foreach (Consents consent in calledConsents) {
+                    if (!deltaConsents.updatedConsents.Contains(consent)) {
+                        return false;
                     }
                 }
+
+                return true;
+            }
+
+            internal struct DeltaConsents
+            {
+                internal bool value;
+                internal List<Consents> updatedConsents;
             }
         }
     }
