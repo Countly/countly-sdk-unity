@@ -19,10 +19,9 @@ namespace Plugins.CountlySDK.Services
             _sessionService = sessionCountlyService;
         }
 
-        internal async Task OnInitializationComplete()
+        internal async Task OnInitialisationComplete()
         {
             await StartSession();
-            EnableNotification();
         }
 
         private async Task StartSession()
@@ -30,7 +29,7 @@ namespace Plugins.CountlySDK.Services
             if (!_consentService.CheckConsent(Consents.Sessions)) {
                 /* If location is disabled in init
                 and no session consent is given. Send empty location as separate request.*/
-                if (_locationService.IsLocationDisabled) {
+                if (_locationService.IsLocationDisabled || !_consentService.CheckConsent(Consents.Location)) {
                     await _locationService.SendRequestWithEmptyLocation();
                 } else {
                     /*
@@ -43,16 +42,6 @@ namespace Plugins.CountlySDK.Services
                 //Start Session
                 await _sessionService.BeginSessionAsync();
             }
-        }
-
-        private void EnableNotification()
-        {
-            //Enables push notification on start
-            if (_configModel.EnableTestMode || !_consentService.CheckConsent(Consents.Push) || _configModel.NotificationMode == TestMode.None) {
-                return;
-            }
-
-            _pushService.EnablePushNotificationAsync(_configModel.NotificationMode);
         }
     }
 }

@@ -202,10 +202,7 @@ namespace Plugins.CountlySDK
             Init(_requestRepo, _viewEventRepo, _nonViewEventRepo, _configDao);
 
             Device.InitDeviceId(configuration.DeviceId);
-
-            IsSDKInitialized = true;
-
-            await Initialization.OnInitializationComplete();
+            OnInitialisationComplete();
         }
 
         private void Init(RequestRepository requestRepo, ViewEventRepository viewEventRepo,
@@ -235,6 +232,15 @@ namespace Plugins.CountlySDK
 
             CreateListOfIBaseService();
             RegisterListenersToServices();
+        }
+
+        private async void OnInitialisationComplete()
+        {
+            IsSDKInitialized = true;
+            await Initialization.OnInitialisationComplete();
+            foreach (AbstractBaseService listener in _listeners) {
+                listener.OnInitializationComplete();
+            }
         }
 
         private void CreateListOfIBaseService()

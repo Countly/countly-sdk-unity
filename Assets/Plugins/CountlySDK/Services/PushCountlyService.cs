@@ -12,7 +12,7 @@ namespace Plugins.CountlySDK.Services
     {
         private string _token;
         private TestMode? _mode;
-        private bool _isDeviceRegister;
+        private bool _isDeviceRegistered;
         private readonly CountlyConfiguration _configuration;
         private readonly EventCountlyService _eventCountlyService;
         private readonly RequestCountlyHelper _requestCountlyHelper;
@@ -28,14 +28,24 @@ namespace Plugins.CountlySDK.Services
             _notificationsCallbackService = notificationsCallbackService;
         }
 
+        private void EnableNotification()
+        {
+            //Enables push notification on start
+            if (_configuration.EnableTestMode || !_consentService.CheckConsent(Consents.Push) || _configuration.NotificationMode == TestMode.None) {
+                return;
+            }
+
+            EnablePushNotificationAsync(_configuration.NotificationMode);
+        }
+
         /// <summary>
         /// Registers device for receiving Push Notifications
         /// </summary>
         /// <param name="mode">Application mode</param>
-        internal void EnablePushNotificationAsync(TestMode mode)
+        private void EnablePushNotificationAsync(TestMode mode)
         {
             _mode = mode;
-            _isDeviceRegister = true;
+            _isDeviceRegistered = true;
             _notificationsService.GetToken(async result => {
                 _token = result;
                 /*
@@ -91,6 +101,11 @@ namespace Plugins.CountlySDK.Services
         }
 
         #region override Methods
+        internal override void OnInitializationComplete()
+        {
+            EnableNotification();
+        }
+
         internal override void DeviceIdChanged(string deviceId, bool merged)
         {
 
@@ -98,15 +113,9 @@ namespace Plugins.CountlySDK.Services
 
         internal override void ConsentChanged(List<Consents> updatedConsents, bool newConsentValue)
         {
-            if (updatedConsents.Contains(Consents.Push) && newConsentValue) {
-
-                if (_isDeviceRegister || _configuration.NotificationMode == TestMode.None || _configuration.EnableTestMode) {
-                    return;
-                }
-
-                EnablePushNotificationAsync(_configuration.NotificationMode);
+            if (updatedConsents.Contains(Consents.Push) && newConsentValue && !_isDeviceRegistered) {
+                EnableNotification();
             }
-
         }
         #endregion
 
