@@ -83,6 +83,10 @@ namespace Plugins.CountlySDK.Services
         /// </summary>
         private async Task<CountlyResponse> ReportPushActionAsync()
         {
+            if (!_consentService.CheckConsent(Consents.Push)) {
+                return new CountlyResponse { IsSuccess = false};
+            }
+
             return await _notificationsService.ReportPushActionAsync();
         }
 
