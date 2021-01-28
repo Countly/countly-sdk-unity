@@ -323,7 +323,7 @@ namespace Tests
             Assert.AreEqual(Countly.Instance.Location.CountryCode, null);
             Assert.AreEqual(Countly.Instance.Location.IsLocationDisabled, false);
         }
-/*
+
         [Test]
         public void TestListenerOnMultipleConsentOfSameFeature()
         {
@@ -334,29 +334,20 @@ namespace Tests
             };
 
 
-            ConsentTestHelperClass eventListener = new ConsentTestHelperClass(Consents.Events);
-            ConsentTestHelperClass locatoinListener = new ConsentTestHelperClass(Consents.Location);
-            ConsentTestHelperClass starRatingListener = new ConsentTestHelperClass(Consents.StarRating);
-            ConsentTestHelperClass remoteConfigListener = new ConsentTestHelperClass(Consents.RemoteConfig);
-
-            List<AbstractBaseService> listeners = new List<AbstractBaseService> { eventListener, locatoinListener, remoteConfigListener, starRatingListener };
-
+            ConsentTestHelperClass listener = new ConsentTestHelperClass();
             ConsentCountlyService consentCountlyService = new ConsentCountlyService(configuration, null);
-            consentCountlyService.Listeners = listeners;
+
+            consentCountlyService.Listeners = new List<AbstractBaseService> { listener };
 
             consentCountlyService.GiveConsent(new Consents[] { Consents.Location, Consents.RemoteConfig, Consents.RemoteConfig, Consents.Events });
 
-            Assert.AreEqual(eventListener.Count, 1);
-            Assert.AreEqual(locatoinListener.Count, 1);
-            Assert.AreEqual(starRatingListener.Count, 0);
-            Assert.AreEqual(remoteConfigListener.Count, 1);
+            Assert.AreEqual(3, listener.DeltaConsentsList[0].updatedConsents.Count);
+            Assert.AreEqual(true, listener.Validate(0, new Consents[] { Consents.Location, Consents.RemoteConfig, Consents.Events }, true));
 
             consentCountlyService.RemoveConsent(new Consents[] { Consents.Location, Consents.Location, Consents.StarRating, Consents.Events });
 
-            Assert.AreEqual(eventListener.Count, 1);
-            Assert.AreEqual(locatoinListener.Count, 1);
-            Assert.AreEqual(starRatingListener.Count, 1);
-            Assert.AreEqual(remoteConfigListener.Count, 0);
+            Assert.AreEqual(2, listener.DeltaConsentsList[1].updatedConsents.Count);
+            Assert.AreEqual(true, listener.Validate(1, new Consents[] { Consents.Location, Consents.Events }, false));
         }
 
         [Test]
@@ -368,39 +359,28 @@ namespace Tests
                 RequiresConsent = true,
             };
 
-            ConsentTestHelperClass eventListener = new ConsentTestHelperClass(Consents.Events);
-            ConsentTestHelperClass locatoinListener = new ConsentTestHelperClass(Consents.Location);
-            ConsentTestHelperClass starRatingListener = new ConsentTestHelperClass(Consents.StarRating);
-            ConsentTestHelperClass remoteConfigListener = new ConsentTestHelperClass(Consents.RemoteConfig);
 
-            List<AbstractBaseService> listeners = new List<AbstractBaseService> { eventListener, locatoinListener, remoteConfigListener, starRatingListener };
-
+            ConsentTestHelperClass listener = new ConsentTestHelperClass();
             ConsentCountlyService consentCountlyService = new ConsentCountlyService(configuration, null);
-            consentCountlyService.Listeners = listeners;
+
+            consentCountlyService.Listeners = new List<AbstractBaseService> { listener };
 
             consentCountlyService.GiveConsent(new Consents[] { Consents.Location, Consents.RemoteConfig, Consents.Events });
-            Assert.AreEqual(eventListener.Count, 1);
-            Assert.AreEqual(locatoinListener.Count, 1);
-            Assert.AreEqual(starRatingListener.Count, 0);
-            Assert.AreEqual(remoteConfigListener.Count, 1);
+            Assert.AreEqual(true, listener.Validate(0, new Consents[] { Consents.Location, Consents.RemoteConfig, Consents.Events }, true));
 
             consentCountlyService.GiveConsent(new Consents[] { Consents.Location, Consents.StarRating });
-            Assert.AreEqual(eventListener.Count, 0);
-            Assert.AreEqual(locatoinListener.Count, 0);
-            Assert.AreEqual(starRatingListener.Count, 1);
-            Assert.AreEqual(remoteConfigListener.Count, 0);
+            Assert.AreEqual(1, listener.DeltaConsentsList[1].updatedConsents.Count);
+            Assert.AreEqual(true, listener.Validate(1, new Consents[] { Consents.StarRating }, true));
+
 
             consentCountlyService.RemoveConsent(new Consents[] { Consents.Location, Consents.StarRating });
-            Assert.AreEqual(eventListener.Count, 0);
-            Assert.AreEqual(locatoinListener.Count, 1);
-            Assert.AreEqual(starRatingListener.Count, 1);
-            Assert.AreEqual(remoteConfigListener.Count, 0);
+            Assert.AreEqual(2, listener.DeltaConsentsList[2].updatedConsents.Count);
+            Assert.AreEqual(true, listener.Validate(2, new Consents[] { Consents.Location, Consents.StarRating }, false));
+
 
             consentCountlyService.RemoveConsent(new Consents[] { Consents.Events, Consents.StarRating });
-            Assert.AreEqual(eventListener.Count, 1);
-            Assert.AreEqual(locatoinListener.Count, 0);
-            Assert.AreEqual(starRatingListener.Count, 0);
-            Assert.AreEqual(remoteConfigListener.Count, 0);
+            Assert.AreEqual(1, listener.DeltaConsentsList[3].updatedConsents.Count);
+            Assert.AreEqual(true, listener.Validate(3, new Consents[] { Consents.Events }, false));
         }
 
         [Test]
@@ -417,54 +397,28 @@ namespace Tests
 
             configuration.CreateConsentGroup(groupA, new Consents[] { Consents.Clicks, Consents.Views });
 
-            ConsentTestHelperClass pushListener = new ConsentTestHelperClass(Consents.Push);
-            ConsentTestHelperClass UsersListener = new ConsentTestHelperClass(Consents.Users);
-            ConsentTestHelperClass viewsListener = new ConsentTestHelperClass(Consents.Views);
-            ConsentTestHelperClass ClicksListener = new ConsentTestHelperClass(Consents.Clicks);
-
-
-            List<AbstractBaseService> listeners = new List<AbstractBaseService> { viewsListener, ClicksListener, UsersListener, pushListener };
-
+            ConsentTestHelperClass listener = new ConsentTestHelperClass();
             ConsentCountlyService consentCountlyService = new ConsentCountlyService(configuration, null);
-            consentCountlyService.Listeners = listeners;
+
+            consentCountlyService.Listeners = new List<AbstractBaseService> { listener };
 
             consentCountlyService.GiveConsentToGroup(new string[] { groupA });
-            Assert.AreEqual(pushListener.Count, 0);
-            Assert.AreEqual(UsersListener.Count, 0);
-            Assert.AreEqual(viewsListener.Count, 1);
-            Assert.AreEqual(ClicksListener.Count, 1);
+            Assert.AreEqual(true, listener.Validate(0, new Consents[] { Consents.Clicks, Consents.Views }, true));
 
             consentCountlyService.GiveConsentToGroup(new string[] { groupB });
-            Assert.AreEqual(pushListener.Count, 0);
-            Assert.AreEqual(UsersListener.Count, 0);
-            Assert.AreEqual(viewsListener.Count, 1);
-            Assert.AreEqual(ClicksListener.Count, 1);
+            Assert.AreEqual(false, listener.Validate(1, new Consents[] { Consents.Clicks, Consents.Views }, true));
 
             consentCountlyService.RemoveConsentOfGroup(new string[] { groupA });
-            Assert.AreEqual(pushListener.Count, 0);
-            Assert.AreEqual(UsersListener.Count, 0);
-            Assert.AreEqual(viewsListener.Count, 1);
-            Assert.AreEqual(ClicksListener.Count, 1);
+            Assert.AreEqual(true, listener.Validate(1, new Consents[] { Consents.Clicks, Consents.Views }, false));
 
-            consentCountlyService.RemoveConsentOfGroup(new string[] { groupB });
-            Assert.AreEqual(pushListener.Count, 0);
-            Assert.AreEqual(UsersListener.Count, 0);
-            Assert.AreEqual(viewsListener.Count, 1);
-            Assert.AreEqual(ClicksListener.Count, 1);
 
             consentCountlyService.GiveConsent(new Consents[] { Consents.Push, Consents.Views });
-            Assert.AreEqual(pushListener.Count, 1);
-            Assert.AreEqual(UsersListener.Count, 0);
-            Assert.AreEqual(viewsListener.Count, 1);
-            Assert.AreEqual(ClicksListener.Count, 0);
+            Assert.AreEqual(true, listener.Validate(2, new Consents[] { Consents.Push, Consents.Views }, true));
 
             consentCountlyService.GiveConsentToGroup(new string[] { groupA });
-            Assert.AreEqual(pushListener.Count, 0);
-            Assert.AreEqual(UsersListener.Count, 0);
-            Assert.AreEqual(viewsListener.Count, 0);
-            Assert.AreEqual(ClicksListener.Count, 1);
-
-        } */
+            Assert.AreEqual(1, listener.DeltaConsentsList[3].updatedConsents.Count);
+            Assert.AreEqual(true, listener.Validate(3, new Consents[] { Consents.Clicks }, true));
+        }
 
         [Test]
         public void TestListenerOnAllConsentRemovalAndGiven()
@@ -480,10 +434,9 @@ namespace Tests
             configuration.CreateConsentGroup(groupA, new Consents[] { Consents.Clicks, Consents.Views });
 
             ConsentTestHelperClass listener = new ConsentTestHelperClass();
-            List<AbstractBaseService> listeners = new List<AbstractBaseService> {listener };
             ConsentCountlyService consentCountlyService = new ConsentCountlyService(configuration, null);
 
-            consentCountlyService.Listeners = listeners;
+            consentCountlyService.Listeners = new List<AbstractBaseService> { listener };
 
             consentCountlyService.GiveConsentToGroup(new string[] { groupA });
             Assert.AreEqual(true, listener.Validate(0, new Consents[] { Consents.Clicks, Consents.Views }, true));
@@ -495,9 +448,7 @@ namespace Tests
             consentCountlyService.GiveConsentAll();
             Consents[] consents = System.Enum.GetValues(typeof(Consents)).Cast<Consents>().ToArray();
             Assert.AreEqual(true, listener.Validate(2, consents, true));
-
             Assert.AreEqual(3, listener.DeltaConsentsList.Count);
-
         }
         [TearDown]
         public void End()
@@ -525,7 +476,7 @@ namespace Tests
 
             }
 
-            internal bool Validate(int callIndex, Consents[] calledConsents, bool theirValue)
+            internal bool Validate(int callIndex, Consents[] calledConsents, bool targetValue)
             {
                 if (callIndex < 0 || callIndex > DeltaConsentsList.Count - 1) {
                     return false;
@@ -533,7 +484,7 @@ namespace Tests
 
                 DeltaConsents deltaConsents = DeltaConsentsList[callIndex];
 
-                if (deltaConsents.value != theirValue || deltaConsents.updatedConsents.Count != calledConsents.Length) {
+                if (deltaConsents.value != targetValue || deltaConsents.updatedConsents.Count != calledConsents.Length) {
                     return false;
                 }
 

@@ -68,7 +68,7 @@ namespace Plugins.CountlySDK.Services
         }
 
         /// <summary>
-        /// "Give consent to the provided consent groups"
+        /// Give consent to the provided consent groups
         /// </summary>
         /// <param name="consents">array of consents for which consent should be given</param>
         /// <returns></returns>
@@ -218,6 +218,10 @@ namespace Plugins.CountlySDK.Services
             List<Consents> updatedConsents = new List<Consents>(consents.Length);
             foreach (Consents consent in consents) {
                 if (_countlyConsents.ContainsKey(consent) && _countlyConsents[consent] == value) {
+                    continue;
+                }
+
+                if (!_countlyConsents.ContainsKey(consent) && !value) {
                     continue;
                 }
 
