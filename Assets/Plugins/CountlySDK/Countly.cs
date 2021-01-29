@@ -239,7 +239,7 @@ namespace Plugins.CountlySDK
             IsSDKInitialized = true;
             await Initialization.OnInitialisationComplete();
             foreach (AbstractBaseService listener in _listeners) {
-                listener.OnInitializationComplete();
+                listener.OnInitializationCompleted();
             }
         }
 

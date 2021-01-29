@@ -73,7 +73,7 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         private async Task PostToCountlyAsync(TestMode? mode, string token)
         {
-            if (!_mode.HasValue) {
+            if (!_mode.HasValue || !_consentService.CheckConsent(Consents.Push)) {
                 return;
             }
 
@@ -101,7 +101,7 @@ namespace Plugins.CountlySDK.Services
         }
 
         #region override Methods
-        internal override void OnInitializationComplete()
+        internal override void OnInitializationCompleted()
         {
             EnableNotification();
         }

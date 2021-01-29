@@ -39,7 +39,7 @@ namespace Tests
 
             Countly.Instance.Init(configuration);
 
-            Assert.AreNotEqual(null, Countly.Instance.Consents);
+            Assert.IsNotNull(Countly.Instance.Consents);
             AssertConsentAll(expectedValue: true);
         }
 
@@ -54,7 +54,7 @@ namespace Tests
 
             Countly.Instance.Init(configuration);
 
-            Assert.AreNotEqual(null, Countly.Instance.Consents);
+            Assert.IsNotNull(Countly.Instance.Consents);
 
             AssertConsentAll(expectedValue: false);
         }
@@ -76,7 +76,7 @@ namespace Tests
 
             Countly.Instance.Init(configuration);
 
-            Assert.AreNotEqual(null, Countly.Instance.Consents);
+            Assert.IsNotNull(Countly.Instance.Consents);
 
             AssertConsentAll(expectedValue: true);
 
@@ -112,7 +112,7 @@ namespace Tests
 
             Countly.Instance.Init(configuration);
 
-            Assert.AreNotEqual(null, Countly.Instance.Consents);
+            Assert.IsNotNull(Countly.Instance.Consents);
 
             AssertConsentArray(new Consents[] { Consents.Events, Consents.Crashes, Consents.Sessions, Consents.Location }, true);
             AssertConsentArray(new Consents[] { Consents.Views, Consents.Users, Consents.Clicks, Consents.StarRating, Consents.RemoteConfig }, false);
@@ -131,7 +131,7 @@ namespace Tests
 
             Countly.Instance.Init(configuration);
 
-            Assert.AreNotEqual(null, Countly.Instance.Consents);
+            Assert.IsNotNull(Countly.Instance.Consents);
             AssertConsentAll(expectedValue: false);
 
 
@@ -169,7 +169,7 @@ namespace Tests
 
             Countly.Instance.Init(configuration);
 
-            Assert.AreNotEqual(null, Countly.Instance.Consents);
+            Assert.IsNotNull(Countly.Instance.Consents);
 
             AssertConsentArray(new Consents[] { Consents.Events, Consents.Crashes, Consents.Sessions, Consents.Location, Consents.StarRating }, true);
             AssertConsentArray(new Consents[] { Consents.Views, Consents.Users, Consents.Clicks, Consents.RemoteConfig }, false);
@@ -188,7 +188,7 @@ namespace Tests
 
             Countly.Instance.Init(configuration);
 
-            Assert.AreNotEqual(null, Countly.Instance.Consents);
+            Assert.IsNotNull(Countly.Instance.Consents);
 
             Countly.Instance.Consents.GiveConsent(new Consents[] { Consents.Events, Consents.Crashes });
             AssertConsentArray(new Consents[] { Consents.Events, Consents.Crashes }, true);
@@ -239,7 +239,7 @@ namespace Tests
 
             Countly.Instance.Init(configuration);
 
-            Assert.AreNotEqual(null, Countly.Instance.Consents);
+            Assert.IsNotNull(Countly.Instance.Consents);
             AssertConsentArray(new Consents[] { Consents.Sessions, Consents.Location }, true);
             AssertConsentArray(new Consents[] { Consents.Views, Consents.Users, Consents.Clicks, Consents.RemoteConfig, Consents.Events, Consents.Crashes, Consents.StarRating }, false);
 
@@ -267,7 +267,7 @@ namespace Tests
 
             Countly.Instance.Init(configuration);
 
-            Assert.AreNotEqual(null, Countly.Instance.Consents);
+            Assert.IsNotNull(Countly.Instance.Consents);
 
             Countly.Instance.Consents.GiveConsentAll();
             AssertConsentAll(expectedValue: true);
@@ -303,25 +303,25 @@ namespace Tests
 
             Countly.Instance.Init(configuration);
 
-            Assert.AreNotEqual(Countly.Instance.Location, null);
+            Assert.IsNotNull(Countly.Instance.Location);
 
             Assert.AreEqual(Countly.Instance.Location.City, "Houston");
             Assert.AreEqual(Countly.Instance.Location.CountryCode, "us");
+            Assert.IsFalse(Countly.Instance.Location.IsLocationDisabled);
             Assert.AreEqual(Countly.Instance.Location.IPAddress, "10.2.33.12");
-            Assert.AreEqual(Countly.Instance.Location.IsLocationDisabled, false);
             Assert.AreEqual(Countly.Instance.Location.Location, "29.634933,-95.220255");
 
-            Assert.AreNotEqual(null, Countly.Instance.Consents);
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Location), true);
+            Assert.IsNotNull(Countly.Instance.Consents);
+            Assert.IsTrue(Countly.Instance.Consents.CheckConsent(Consents.Location));
 
             Countly.Instance.Consents.RemoveConsent(new Consents[] { Consents.Location });
 
-            Assert.AreEqual(Countly.Instance.Consents.CheckConsent(Consents.Location), false);
-            Assert.AreEqual(Countly.Instance.Location.City, null);
-            Assert.AreEqual(Countly.Instance.Location.Location, null);
-            Assert.AreEqual(Countly.Instance.Location.IPAddress, null);
-            Assert.AreEqual(Countly.Instance.Location.CountryCode, null);
-            Assert.AreEqual(Countly.Instance.Location.IsLocationDisabled, false);
+            Assert.IsFalse(Countly.Instance.Consents.CheckConsent(Consents.Location));
+            Assert.IsNull(Countly.Instance.Location.City);
+            Assert.IsNull(Countly.Instance.Location.Location);
+            Assert.IsNull(Countly.Instance.Location.IPAddress);
+            Assert.IsNull(Countly.Instance.Location.CountryCode);
+            Assert.IsFalse(Countly.Instance.Location.IsLocationDisabled);
         }
 
         [Test]
@@ -340,14 +340,11 @@ namespace Tests
             consentCountlyService.Listeners = new List<AbstractBaseService> { listener };
 
             consentCountlyService.GiveConsent(new Consents[] { Consents.Location, Consents.RemoteConfig, Consents.RemoteConfig, Consents.Events });
-
-            Assert.AreEqual(3, listener.DeltaConsentsList[0].updatedConsents.Count);
-            Assert.AreEqual(true, listener.Validate(0, new Consents[] { Consents.Location, Consents.RemoteConfig, Consents.Events }, true));
+            Assert.IsTrue(listener.Validate(0, new Consents[] { Consents.Location, Consents.RemoteConfig, Consents.Events }, true));
 
             consentCountlyService.RemoveConsent(new Consents[] { Consents.Location, Consents.Location, Consents.StarRating, Consents.Events });
-
             Assert.AreEqual(2, listener.DeltaConsentsList[1].updatedConsents.Count);
-            Assert.AreEqual(true, listener.Validate(1, new Consents[] { Consents.Location, Consents.Events }, false));
+            Assert.IsTrue(listener.Validate(1, new Consents[] { Consents.Location, Consents.Events }, false));
         }
 
         [Test]
@@ -366,21 +363,16 @@ namespace Tests
             consentCountlyService.Listeners = new List<AbstractBaseService> { listener };
 
             consentCountlyService.GiveConsent(new Consents[] { Consents.Location, Consents.RemoteConfig, Consents.Events });
-            Assert.AreEqual(true, listener.Validate(0, new Consents[] { Consents.Location, Consents.RemoteConfig, Consents.Events }, true));
+            Assert.IsTrue(listener.Validate(0, new Consents[] { Consents.Location, Consents.RemoteConfig, Consents.Events }, true));
 
             consentCountlyService.GiveConsent(new Consents[] { Consents.Location, Consents.StarRating });
-            Assert.AreEqual(1, listener.DeltaConsentsList[1].updatedConsents.Count);
-            Assert.AreEqual(true, listener.Validate(1, new Consents[] { Consents.StarRating }, true));
-
+            Assert.IsTrue(listener.Validate(1, new Consents[] { Consents.StarRating }, true));
 
             consentCountlyService.RemoveConsent(new Consents[] { Consents.Location, Consents.StarRating });
-            Assert.AreEqual(2, listener.DeltaConsentsList[2].updatedConsents.Count);
-            Assert.AreEqual(true, listener.Validate(2, new Consents[] { Consents.Location, Consents.StarRating }, false));
-
+            Assert.IsTrue(listener.Validate(2, new Consents[] { Consents.Location, Consents.StarRating }, false));
 
             consentCountlyService.RemoveConsent(new Consents[] { Consents.Events, Consents.StarRating });
-            Assert.AreEqual(1, listener.DeltaConsentsList[3].updatedConsents.Count);
-            Assert.AreEqual(true, listener.Validate(3, new Consents[] { Consents.Events }, false));
+            Assert.IsTrue(listener.Validate(3, new Consents[] { Consents.Events }, false));
         }
 
         [Test]
@@ -403,21 +395,20 @@ namespace Tests
             consentCountlyService.Listeners = new List<AbstractBaseService> { listener };
 
             consentCountlyService.GiveConsentToGroup(new string[] { groupA });
-            Assert.AreEqual(true, listener.Validate(0, new Consents[] { Consents.Clicks, Consents.Views }, true));
+            Assert.IsTrue(listener.Validate(0, new Consents[] { Consents.Clicks, Consents.Views }, true));
 
             consentCountlyService.GiveConsentToGroup(new string[] { groupB });
-            Assert.AreEqual(false, listener.Validate(1, new Consents[] { Consents.Clicks, Consents.Views }, true));
+            Assert.AreEqual(1, listener.DeltaConsentsList.Count);
 
             consentCountlyService.RemoveConsentOfGroup(new string[] { groupA });
-            Assert.AreEqual(true, listener.Validate(1, new Consents[] { Consents.Clicks, Consents.Views }, false));
+            Assert.IsTrue(listener.Validate(1, new Consents[] { Consents.Clicks, Consents.Views }, false));
 
 
             consentCountlyService.GiveConsent(new Consents[] { Consents.Push, Consents.Views });
-            Assert.AreEqual(true, listener.Validate(2, new Consents[] { Consents.Push, Consents.Views }, true));
+            Assert.IsTrue(listener.Validate(2, new Consents[] { Consents.Push, Consents.Views }, true));
 
             consentCountlyService.GiveConsentToGroup(new string[] { groupA });
-            Assert.AreEqual(1, listener.DeltaConsentsList[3].updatedConsents.Count);
-            Assert.AreEqual(true, listener.Validate(3, new Consents[] { Consents.Clicks }, true));
+            Assert.IsTrue(listener.Validate(3, new Consents[] { Consents.Clicks }, true));
         }
 
         [Test]
@@ -439,16 +430,15 @@ namespace Tests
             consentCountlyService.Listeners = new List<AbstractBaseService> { listener };
 
             consentCountlyService.GiveConsentToGroup(new string[] { groupA });
-            Assert.AreEqual(true, listener.Validate(0, new Consents[] { Consents.Clicks, Consents.Views }, true));
+            Assert.IsTrue(listener.Validate(0, new Consents[] { Consents.Clicks, Consents.Views }, true));
 
 
             consentCountlyService.RemoveAllConsent();
-            Assert.AreEqual(true, listener.Validate(1, new Consents[] { Consents.Clicks, Consents.Views }, false));
+            Assert.IsTrue(listener.Validate(1, new Consents[] { Consents.Clicks, Consents.Views }, false));
 
             consentCountlyService.GiveConsentAll();
             Consents[] consents = System.Enum.GetValues(typeof(Consents)).Cast<Consents>().ToArray();
-            Assert.AreEqual(true, listener.Validate(2, consents, true));
-            Assert.AreEqual(3, listener.DeltaConsentsList.Count);
+            Assert.IsTrue(listener.Validate(2, consents, true));
         }
         [TearDown]
         public void End()

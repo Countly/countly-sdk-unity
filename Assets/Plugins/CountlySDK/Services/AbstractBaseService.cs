@@ -15,7 +15,7 @@ namespace Plugins.CountlySDK.Services
             _consentService = consentService;
         }
 
-        internal virtual void OnInitializationComplete() { }
+        internal virtual void OnInitializationCompleted() { }
         internal virtual void DeviceIdChanged(string deviceId, bool merged) { }
         internal virtual void ConsentChanged(List<Consents> updatedConsents, bool newConsentValue) { }
     }
