@@ -35,7 +35,7 @@ namespace Plugins.CountlySDK
         public bool IsSDKInitialized { get; private set; }
 
         private static Countly _instance = null;
-        private List<IBaseService> _listeners = new List<IBaseService>();
+        private List<AbstractBaseService> _listeners = new List<AbstractBaseService>();
 
         /// <summary>
         /// Return countly shared instance.
@@ -103,13 +103,13 @@ namespace Plugins.CountlySDK
         public RemoteConfigCountlyService RemoteConfigs { get; private set; }
 
         /// <summary>
-        ///     Exposes functinality to report start rating.
+        ///     Exposes functionality to report start rating.
         /// </summary>
         /// <returns>StarRatingCountlyService</returns>
         public StarRatingCountlyService StarRating { get; private set; }
 
         /// <summary>
-        ///     Exposes functionality to set and change custom user properties and interract with custom property modiffiers.
+        ///     Exposes functionality to set and change custom user properties and interract with custom property modifiers.
         /// </summary>
         /// <returns>UserDetailsCountlyService</returns>
         public UserDetailsCountlyService UserDetails { get; private set; }
@@ -137,7 +137,7 @@ namespace Plugins.CountlySDK
         private RequestRepository _requestRepo;
         private ViewEventRepository _viewEventRepo;
         private NonViewEventRepository _nonViewEventRepo;
-        
+
 
         /// <summary>
         ///     Initialize SDK at the start of your app
@@ -202,10 +202,7 @@ namespace Plugins.CountlySDK
             Init(_requestRepo, _viewEventRepo, _nonViewEventRepo, _configDao);
 
             Device.InitDeviceId(configuration.DeviceId);
-
-            IsSDKInitialized = true;
-
-            await Initialization.OnInitializationComplete();
+            OnInitialisationComplete();
         }
 
         private void Init(RequestRepository requestRepo, ViewEventRepository viewEventRepo,
@@ -214,49 +211,60 @@ namespace Plugins.CountlySDK
             CountlyUtils countlyUtils = new CountlyUtils(this);
             RequestCountlyHelper requests = new RequestCountlyHelper(Configuration, countlyUtils, requestRepo);
 
-            Consents = new ConsentCountlyService();
-            Events = new EventCountlyService(Configuration, requests, viewEventRepo, nonViewEventRepo);
+            Consents = new ConsentCountlyService(Configuration, Consents);
+            Events = new EventCountlyService(Configuration, requests, viewEventRepo, nonViewEventRepo, Consents);
 
-            Location = new Services.LocationService(Configuration, requests);
+            Location = new Services.LocationService(Configuration, requests, Consents);
             OptionalParameters = new OptionalParametersCountlyService(Location, Configuration);
             Notifications = new NotificationsCallbackService(Configuration);
             ProxyNotificationsService notificationsService = new ProxyNotificationsService(transform, Configuration, InternalStartCoroutine, Events);
-            _push = new PushCountlyService(Events, requests, notificationsService, Notifications);
+            _push = new PushCountlyService(Configuration, Events, requests, notificationsService, Notifications, Consents);
             Session = new SessionCountlyService(Configuration, Events, requests, Location, Consents);
 
-            CrashReports = new CrashReportsCountlyService(Configuration, requests);
-            Initialization = new InitializationCountlyService(Configuration, _push, Location, Consents, Session);
-            RemoteConfigs = new RemoteConfigCountlyService(Configuration, requests, countlyUtils, configDao);
+            CrashReports = new CrashReportsCountlyService(Configuration, requests, Consents);
+            Initialization = new InitializationCountlyService(Configuration, _push, Location, Session, Consents);
+            RemoteConfigs = new RemoteConfigCountlyService(Configuration, requests, countlyUtils, configDao, Consents);
 
-            StarRating = new StarRatingCountlyService(Events);
-            UserDetails = new UserDetailsCountlyService(requests, countlyUtils);
-            Views = new ViewCountlyService(Configuration, Events);
-            Device = new DeviceIdCountlyService(Configuration, Session, requests, Events, countlyUtils);
+            StarRating = new StarRatingCountlyService(Events, Consents);
+            UserDetails = new UserDetailsCountlyService(requests, countlyUtils, Consents);
+            Views = new ViewCountlyService(Configuration, Events, Consents);
+            Device = new DeviceIdCountlyService(Configuration, Session, requests, Events, countlyUtils, Consents);
 
             CreateListOfIBaseService();
-            RegisterListenersToDeviceService();
+            RegisterListenersToServices();
+        }
+
+        private async void OnInitialisationComplete()
+        {
+            IsSDKInitialized = true;
+            await Initialization.OnInitialisationComplete();
+            foreach (AbstractBaseService listener in _listeners) {
+                listener.OnInitializationCompleted();
+            }
         }
 
         private void CreateListOfIBaseService()
         {
             _listeners.Clear();
 
-            _listeners.Add(Consents);
-            _listeners.Add(CrashReports);
-            _listeners.Add(Events);
-            _listeners.Add(Views);
-            _listeners.Add(Initialization);
-            _listeners.Add(Location);
             _listeners.Add(_push);
-            _listeners.Add(RemoteConfigs);
+            _listeners.Add(Views);
+            _listeners.Add(Events);
+            _listeners.Add(Device);
             _listeners.Add(Session);
+            _listeners.Add(Location);
+            _listeners.Add(Consents);
             _listeners.Add(StarRating);
             _listeners.Add(UserDetails);
+            _listeners.Add(CrashReports);
+            _listeners.Add(RemoteConfigs);
+            _listeners.Add(Initialization);
         }
 
-        private void RegisterListenersToDeviceService()
+        private void RegisterListenersToServices()
         {
-            Device.AddListeners(_listeners);
+            Device.Listeners = _listeners;
+            Consents.Listeners = _listeners;
         }
 
         /// <summary>
@@ -264,6 +272,10 @@ namespace Plugins.CountlySDK
         /// </summary>
         private void OnApplicationQuit()
         {
+            if (!IsSDKInitialized) {
+                return;
+            }
+
             if (Configuration.EnableConsoleLogging) {
                 Debug.Log("[Countly] OnApplicationQuit");
             }
@@ -273,6 +285,9 @@ namespace Plugins.CountlySDK
 
         internal void ClearStorage()
         {
+            if (!IsSDKInitialized) {
+                return;
+            }
             _requestRepo.Clear();
             _viewEventRepo.Clear();
             _configDao.RemoveAll();

@@ -10,7 +10,7 @@ using UnityEngine;
 
 namespace Plugins.CountlySDK.Services
 {
-    public class SessionCountlyService : IBaseService
+    public class SessionCountlyService : AbstractBaseService
     {
         private Timer _sessionTimer;
         private DateTime _lastSessionRequestTime;
@@ -19,15 +19,13 @@ namespace Plugins.CountlySDK.Services
         private readonly LocationService _locationService;
         private readonly CountlyConfiguration _configModel;
         private readonly EventCountlyService _eventService;
-        private readonly ConsentCountlyService _consentService;
         private readonly RequestCountlyHelper _requestCountlyHelper;
 
         internal SessionCountlyService(CountlyConfiguration configModel, EventCountlyService eventService,
-            RequestCountlyHelper requestCountlyHelper, LocationService locationService, ConsentCountlyService consentService)
+            RequestCountlyHelper requestCountlyHelper, LocationService locationService, ConsentCountlyService consentService) : base(consentService)
         {
             _configModel = configModel;
             _eventService = eventService;
-            _consentService = consentService;
             _locationService = locationService;
             _requestCountlyHelper = requestCountlyHelper;
         }
@@ -69,6 +67,10 @@ namespace Plugins.CountlySDK.Services
 
         public async Task ExecuteBeginSessionAsync()
         {
+            if (!_consentService.CheckConsent(Consents.Sessions)) {
+                return;
+            }
+
             if (IsSessionInitiated) {
                 return;
             }
@@ -85,36 +87,35 @@ namespace Plugins.CountlySDK.Services
             Dictionary<string, object> requestParams =
                 new Dictionary<string, object>();
 
-            if (_consentService.CheckConsent(Features.Sessions)) {
-                requestParams.Add("begin_session", 1);
 
-                /* If location is disabled or no location consent is given,
-				the SDK adds an empty location entry to every "begin_session" request. */
-                if (_locationService.IsLocationDisabled || !_consentService.CheckConsent(Features.Location)) {
-                    requestParams.Add("location", string.Empty);
-                } else {
-                    if (!string.IsNullOrEmpty(_locationService.IPAddress)) {
-                        requestParams.Add("ip_address", _locationService.IPAddress);
-                    }
+            requestParams.Add("begin_session", 1);
 
-                    if (!string.IsNullOrEmpty(_locationService.CountryCode)) {
-                        requestParams.Add("country_code", _locationService.CountryCode);
-                    }
-
-                    if (!string.IsNullOrEmpty(_locationService.City)) {
-                        requestParams.Add("city", _locationService.City);
-                    }
-
-                    if (!string.IsNullOrEmpty(_locationService.Location)) {
-                        requestParams.Add("location", _locationService.Location);
-                    }
+            /* If location is disabled or no location consent is given,
+            the SDK adds an empty location entry to every "begin_session" request. */
+            if (_locationService.IsLocationDisabled || !_consentService.CheckConsent(Consents.Location)) {
+                requestParams.Add("location", string.Empty);
+            } else {
+                if (!string.IsNullOrEmpty(_locationService.IPAddress)) {
+                    requestParams.Add("ip_address", _locationService.IPAddress);
                 }
 
-                requestParams.Add("metrics", JsonConvert.SerializeObject(CountlyMetricModel.Metrics, Formatting.Indented,
-                new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }));
+                if (!string.IsNullOrEmpty(_locationService.CountryCode)) {
+                    requestParams.Add("country_code", _locationService.CountryCode);
+                }
 
-                await _requestCountlyHelper.GetResponseAsync(requestParams);
+                if (!string.IsNullOrEmpty(_locationService.City)) {
+                    requestParams.Add("city", _locationService.City);
+                }
+
+                if (!string.IsNullOrEmpty(_locationService.Location)) {
+                    requestParams.Add("location", _locationService.Location);
+                }
             }
+
+            requestParams.Add("metrics", JsonConvert.SerializeObject(CountlyMetricModel.Metrics, Formatting.Indented,
+            new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }));
+
+            await _requestCountlyHelper.GetResponseAsync(requestParams);
 
             //Start session timer
             if (!_configModel.EnableManualSessionHandling) {
@@ -125,6 +126,10 @@ namespace Plugins.CountlySDK.Services
 
         public async Task ExecuteEndSessionAsync(bool disposeTimer = true)
         {
+            if (!_consentService.CheckConsent(Consents.Sessions)) {
+                return;
+            }
+
             IsSessionInitiated = false;
 
             Dictionary<string, object> requestParams =
@@ -164,6 +169,10 @@ namespace Plugins.CountlySDK.Services
         /// </summary>
         public async Task EndSessionAsync()
         {
+            if (!_consentService.CheckConsent(Consents.Sessions)) {
+                return;
+            }
+
             if (_configModel.EnableConsoleLogging) {
                 Debug.Log("[Countly] SessionCountlyService: ExtendSessionAsync");
             }
@@ -176,6 +185,10 @@ namespace Plugins.CountlySDK.Services
         /// </summary>
         public async Task ExtendSessionAsync()
         {
+            if (!_consentService.CheckConsent(Consents.Sessions)) {
+                return;
+            }
+
             _lastSessionRequestTime = DateTime.Now;
             Dictionary<string, object> requestParams =
                 new Dictionary<string, object>
@@ -192,28 +205,16 @@ namespace Plugins.CountlySDK.Services
 
         }
 
-        public void DeviceIdChanged(string deviceId, bool merged)
+        #region override Methods
+        internal override void DeviceIdChanged(string deviceId, bool merged)
         {
 
         }
 
+        internal override void ConsentChanged(List<Consents> updatedConsents, bool newConsentValue)
+        {
 
-        #region Unused Code
-
-        ///// <summary>
-        ///// The method must be used only when Manual Session Handling is disabled.
-        ///// Sets the session duration. Session will be extended each time this interval elapses. The interval value must be in seconds.
-        ///// </summary>
-        ///// <param name="interval"></param>
-        //private static void SetSessionDuration(int interval)
-        //{
-        //    if (!IsManualSessionHandlingEnabled)
-        //    {
-        //        _extendSessionInterval = interval;
-        //        _sessionTimer.Interval = _extendSessionInterval * 1000;
-        //    }
-        //}
-
+        }
         #endregion
     }
 }

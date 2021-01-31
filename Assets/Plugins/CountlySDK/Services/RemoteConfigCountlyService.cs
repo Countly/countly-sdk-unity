@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using Plugins.CountlySDK.Enums;
 using Plugins.CountlySDK.Helpers;
 using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK.Persistance.Entities;
@@ -11,7 +12,7 @@ using UnityEngine.Networking;
 
 namespace Plugins.CountlySDK.Services
 {
-    public class RemoteConfigCountlyService : IBaseService
+    public class RemoteConfigCountlyService : AbstractBaseService
     {
         private readonly CountlyConfiguration _config;
         private readonly CountlyUtils _countlyUtils;
@@ -22,14 +23,19 @@ namespace Plugins.CountlySDK.Services
 
         private readonly StringBuilder _requestStringBuilder = new StringBuilder();
 
-        internal RemoteConfigCountlyService(CountlyConfiguration config, RequestCountlyHelper requestCountlyHelper, CountlyUtils countlyUtils, Dao<ConfigEntity> configDao)
+        internal RemoteConfigCountlyService(CountlyConfiguration config, RequestCountlyHelper requestCountlyHelper, CountlyUtils countlyUtils, Dao<ConfigEntity> configDao, ConsentCountlyService consentService) : base(consentService)
         {
             _config = config;
             _configDao = configDao;
             _countlyUtils = countlyUtils;
             _requestCountlyHelper = requestCountlyHelper;
 
-            Configs = FetchConfigFromDB();
+            if (_consentService.CheckConsent(Consents.RemoteConfig)) {
+                Configs = FetchConfigFromDB();
+            } else {
+                _configDao.RemoveAll();
+            }
+            
         }
 
         internal async Task<CountlyResponse> InitConfig()
@@ -62,6 +68,12 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async Task<CountlyResponse> Update()
         {
+            if (!_consentService.CheckConsent(Consents.RemoteConfig)) {
+                return new CountlyResponse {
+                    IsSuccess = false
+                };
+            }
+
             Dictionary<string, object> requestParams =
                 new Dictionary<string, object>
                 {
@@ -130,9 +142,19 @@ namespace Plugins.CountlySDK.Services
             return _requestStringBuilder.ToString();
         }
 
-        public void DeviceIdChanged(string deviceId, bool merged)
+        #region override Methods
+        internal override void DeviceIdChanged(string deviceId, bool merged)
         {
-            
+
         }
+
+        internal override void ConsentChanged(List<Consents> updatedConsents, bool newConsentValue)
+        {
+            if (updatedConsents.Contains(Consents.RemoteConfig) && !newConsentValue) {
+                Configs = null;
+                _configDao.RemoveAll();
+            }
+        }
+        #endregion
     }
 }

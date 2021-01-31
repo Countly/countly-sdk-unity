@@ -3,24 +3,25 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Plugins.CountlySDK.Enums;
 using Plugins.CountlySDK.Helpers;
 using Plugins.CountlySDK.Models;
 
 namespace Plugins.CountlySDK.Services
 {
-    public class UserDetailsCountlyService : IBaseService
+    public class UserDetailsCountlyService : AbstractBaseService
     {
-        internal Dictionary<string, object> CustomeDataProperties { get; private set; }
+        internal Dictionary<string, object> CustomDataProperties { get; private set; }
 
 
         private readonly RequestCountlyHelper _requestCountlyHelper;
         private readonly CountlyUtils _countlyUtils;
 
-        internal UserDetailsCountlyService(RequestCountlyHelper requestCountlyHelper, CountlyUtils countlyUtils)
+        internal UserDetailsCountlyService(RequestCountlyHelper requestCountlyHelper, CountlyUtils countlyUtils, ConsentCountlyService consentService) : base(consentService)
         {
             _requestCountlyHelper = requestCountlyHelper;
             _countlyUtils = countlyUtils;
-            CustomeDataProperties = new Dictionary<string, object>();
+            CustomDataProperties = new Dictionary<string, object>();
         }
 
         /// <summary>
@@ -59,6 +60,10 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async Task SetUserDetailsAsync(CountlyUserDetailsModel userDetailsModel)
         {
+            if (!_consentService.CheckConsent(Consents.Users)) {
+                return;
+            }
+
             if (!_countlyUtils.IsPictureValid(userDetailsModel.PictureUrl)) {
                 throw new Exception("Accepted picture formats are .png, .gif and .jpeg");
             }
@@ -79,6 +84,10 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async Task SetCustomUserDetailsAsync(CountlyUserDetailsModel userDetailsModel)
         {
+            if (!_consentService.CheckConsent(Consents.Users)) {
+                return;
+            }
+
             Dictionary<string, object> requestParams =
                 new Dictionary<string, object>
                 {
@@ -99,13 +108,13 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async Task SaveAsync()
         {
-            if (!CustomeDataProperties.Any()) {
+            if (!CustomDataProperties.Any()) {
                 return;
             }
 
-            CountlyUserDetailsModel model = new CountlyUserDetailsModel(CustomeDataProperties);
+            CountlyUserDetailsModel model = new CountlyUserDetailsModel(CustomDataProperties);
 
-            CustomeDataProperties = new Dictionary<string, object> { };
+            CustomDataProperties = new Dictionary<string, object> { };
             await SetCustomUserDetailsAsync(model);
         }
 
@@ -220,21 +229,32 @@ namespace Plugins.CountlySDK.Services
         }
 
 
-        public void AddToCustomData(string key, object value)
+        private void AddToCustomData(string key, object value)
         {
-            if (CustomeDataProperties.ContainsKey(key)) {
-                string item = CustomeDataProperties.Select(x => x.Key).FirstOrDefault(x => x.Equals(key, StringComparison.OrdinalIgnoreCase));
+            if (!_consentService.CheckConsent(Consents.Users)) {
+                return;
+            }
+
+            if (CustomDataProperties.ContainsKey(key)) {
+                string item = CustomDataProperties.Select(x => x.Key).FirstOrDefault(x => x.Equals(key, StringComparison.OrdinalIgnoreCase));
                 if (item != null) {
-                    CustomeDataProperties.Remove(item);
+                    CustomDataProperties.Remove(item);
                 }
             }
 
-            CustomeDataProperties.Add(key, value);
+            CustomDataProperties.Add(key, value);
         }
 
-        public void DeviceIdChanged(string deviceId, bool merged)
+        #region override Methods
+        internal override void DeviceIdChanged(string deviceId, bool merged)
         {
-            
+
         }
+
+        internal override void ConsentChanged(List<Consents> updatedConsents, bool newConsentValue)
+        {
+
+        }
+        #endregion
     }
 }

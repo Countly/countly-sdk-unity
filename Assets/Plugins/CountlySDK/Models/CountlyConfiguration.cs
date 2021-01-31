@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using JetBrains.Annotations;
 using Plugins.CountlySDK.Enums;
 using UnityEngine;
 
@@ -25,21 +28,30 @@ namespace Plugins.CountlySDK.Models
         public int TotalBreadcrumbsAllowed = 100;
         public bool EnableAutomaticCrashReporting = true;
 
-        internal string City;
-        internal string Location;
-        internal string IPAddress;
-        internal string CountryCode;
-        internal bool IsLocationDisabled;
+        internal string City = null;
+        internal string Location = null;
+        internal string IPAddress = null;
+        internal string CountryCode = null;
+        internal bool IsLocationDisabled = false;
+ 
+        public bool RequiresConsent = false;
+        internal Consents[] GivenConsent { get; private set; }
+        internal Dictionary<string, Consents[]> ConsentGroups { get; private set; }
+        internal string[] EnabledConsentGroups { get; private set; }
 
         /// <summary>
         ///     Parent must be undestroyable
         /// </summary>
         public GameObject Parent = null;
 
-        public CountlyConfiguration() { }
+        public CountlyConfiguration()
+        {
+            ConsentGroups = new Dictionary<string, Consents[]>();
+        }
 
         internal CountlyConfiguration(CountlyAuthModel authModel, CountlyConfigModel config)
         {
+            ConsentGroups = new Dictionary<string, Consents[]>();
             ServerUrl = authModel.ServerUrl;
             AppKey = authModel.AppKey;
             DeviceId = authModel.DeviceId;
@@ -83,6 +95,32 @@ namespace Plugins.CountlySDK.Models
             IPAddress = ipAddress;
             CountryCode = countryCode;
             Location = gpsCoordinates;
+        }
+
+        public void GiveConsent([NotNull] Consents[] consents)
+        {
+            GivenConsent = consents;
+        }
+
+        /// <summary>
+        /// Group multiple consents into a consent group
+        /// </summary>
+        /// <param name="groupName">name of the consent group that will be created</param>
+        /// <param name="consents">array of consent to be added to the consent group</param>
+        /// <returns></returns>
+        public void  CreateConsentGroup([NotNull] string groupName, [NotNull] Consents[] consents)
+        {
+            ConsentGroups[groupName] = consents;
+        }
+
+        /// <summary>
+        /// Give consent to the provided consent groups
+        /// </summary>
+        /// <param name="groupName">array of consent group for which consent should be given</param>
+        /// <returns></returns>
+        public void GiveConsentToGroup([NotNull] string[] groupName)
+        {
+            EnabledConsentGroups = groupName;
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Plugins.CountlySDK.Enums;
 using Plugins.CountlySDK.Helpers;
 using Plugins.CountlySDK.Models;
 using UnityEngine;
@@ -8,14 +9,14 @@ using UnityEngine;
 namespace Plugins.CountlySDK.Services
 {
 
-    public class ViewCountlyService : IBaseService
+    public class ViewCountlyService : AbstractBaseService
     {
         private readonly CountlyConfiguration _config;
         private readonly Dictionary<string, DateTime> _viewToLastViewStartTime = new Dictionary<string, DateTime>();
 
         private readonly EventCountlyService _eventService;
 
-        internal ViewCountlyService(CountlyConfiguration config, EventCountlyService eventService)
+        internal ViewCountlyService(CountlyConfiguration config, EventCountlyService eventService, ConsentCountlyService consentService) : base(consentService)
         {
             _config = config;
             _eventService = eventService;
@@ -28,6 +29,10 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async Task RecordOpenViewAsync(string name, bool hasSessionBegunWithView = false)
         {
+            if (!_consentService.CheckConsent(Consents.Views)) {
+                return;
+            }
+
             if (string.IsNullOrEmpty(name)) {
                 return;
             }
@@ -62,6 +67,10 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async Task RecordCloseViewAsync(string name, bool hasSessionBegunWithView = false)
         {
+            if (!_consentService.CheckConsent(Consents.Views)) {
+                return;
+            }
+
             if (string.IsNullOrEmpty(name)) {
                 return;
             }
@@ -107,6 +116,10 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async Task ReportActionAsync(string type, int x, int y, int width, int height)
         {
+            if (!_consentService.CheckConsent(Consents.Views)) {
+                return;
+            }
+
             ActionSegment segment =
                 new ActionSegment {
                     Type = type,
@@ -119,10 +132,17 @@ namespace Plugins.CountlySDK.Services
             await _eventService.ReportCustomEventAsync(CountlyEventModel.ViewActionEvent, segment.ToDictionary());
         }
 
-        public void DeviceIdChanged(string deviceId, bool merged)
+        #region override Methods
+        internal override void DeviceIdChanged(string deviceId, bool merged)
         {
-            
+
         }
+
+        internal override void ConsentChanged(List<Consents> updatedConsents, bool newConsentValue)
+        {
+
+        }
+        #endregion
 
         /// <summary>
         /// Custom Segmentation for Views related events.

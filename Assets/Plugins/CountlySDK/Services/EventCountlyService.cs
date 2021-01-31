@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Plugins.CountlySDK.Enums;
 using Plugins.CountlySDK.Helpers;
 using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK.Persistance.Repositories.Impls;
@@ -9,7 +10,7 @@ using UnityEngine;
 
 namespace Plugins.CountlySDK.Services
 {
-    public class EventCountlyService : IBaseService
+    public class EventCountlyService : AbstractBaseService
     {
         private readonly ViewEventRepository _viewEventRepo;
         private readonly NonViewEventRepository _nonViewEventRepo;
@@ -17,7 +18,7 @@ namespace Plugins.CountlySDK.Services
         private readonly RequestCountlyHelper _requestCountlyHelper;
 
         internal EventCountlyService(CountlyConfiguration countlyConfiguration, RequestCountlyHelper requestCountlyHelper,
-            ViewEventRepository viewEventRepo, NonViewEventRepository nonViewEventRepo)
+            ViewEventRepository viewEventRepo, NonViewEventRepository nonViewEventRepo, ConsentCountlyService consentService) : base(consentService)
         {
             _viewEventRepo = viewEventRepo;
             _nonViewEventRepo = nonViewEventRepo;
@@ -92,6 +93,10 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async Task RecordEventAsync(string key)
         {
+            if (!_consentService.CheckConsent(Consents.Events)) {
+                return;
+            }
+
             await RecordEventAsync(key, null);
         }
 
@@ -108,6 +113,10 @@ namespace Plugins.CountlySDK.Services
         public async Task RecordEventAsync(string key, SegmentModel segmentation,
             int? count = 1, double? sum = 0, double? duration = null)
         {
+            if (!_consentService.CheckConsent(Consents.Events)) {
+                return;
+            }
+
             if (_countlyConfiguration.EnableConsoleLogging) {
                 Debug.Log("[Countly] RecordEventAsync : key = " + key);
             }
@@ -183,6 +192,10 @@ namespace Plugins.CountlySDK.Services
             IDictionary<string, object> segmentation = null,
             int? count = 1, double? sum = null, double? duration = null)
         {
+            if (!_consentService.CheckConsent(Consents.Events)) {
+                return;
+            }
+
             if (string.IsNullOrEmpty(key) && string.IsNullOrWhiteSpace(key)) {
                 return;
             }
@@ -213,9 +226,16 @@ namespace Plugins.CountlySDK.Services
             @event.Segmentation.Add(Constants.FirstAppLaunchSegment, FirstLaunchAppHelper.IsFirstLaunchApp);
         }
 
-        public void DeviceIdChanged(string deviceId, bool merged)
+        #region override Methods
+        internal override void DeviceIdChanged(string deviceId, bool merged)
         {
-            
+
         }
+
+        internal override void ConsentChanged(List<Consents> updatedConsents, bool newConsentValue)
+        {
+
+        }
+        #endregion
     }
 }
