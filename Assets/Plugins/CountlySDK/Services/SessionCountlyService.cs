@@ -13,8 +13,8 @@ namespace Plugins.CountlySDK.Services
     public class SessionCountlyService : AbstractBaseService
     {
         private Timer _sessionTimer;
+        private bool _isSessionInitiated;
         private DateTime _lastSessionRequestTime;
-        public bool IsSessionInitiated { get; private set; }
 
         private readonly LocationService _locationService;
         private readonly CountlyConfiguration _configModel;
@@ -53,7 +53,7 @@ namespace Plugins.CountlySDK.Services
         /// <param name="elapsedEventArgs"></param>
         private async void SessionTimerOnElapsedAsync(object sender, ElapsedEventArgs elapsedEventArgs)
         {
-            if (!IsSessionInitiated) {
+            if (!_isSessionInitiated) {
                 return;
             }
 
@@ -75,7 +75,7 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
 
-            if (IsSessionInitiated) {
+            if (_isSessionInitiated) {
                 return;
             }
 
@@ -86,7 +86,7 @@ namespace Plugins.CountlySDK.Services
             FirstLaunchAppHelper.Process();
             _lastSessionRequestTime = DateTime.Now;
             //Session initiated
-            IsSessionInitiated = true;
+            _isSessionInitiated = true;
 
             Dictionary<string, object> requestParams =
                 new Dictionary<string, object>();
@@ -134,7 +134,7 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
 
-            if (!IsSessionInitiated) {
+            if (!_isSessionInitiated) {
                 return;
             }
 
@@ -160,7 +160,7 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
 
-            if (!IsSessionInitiated) {
+            if (!_isSessionInitiated) {
                 return;
             }
 
@@ -168,7 +168,7 @@ namespace Plugins.CountlySDK.Services
                 Debug.Log("[Countly] SessionCountlyService: ExecuteEndSessionAsync");
             }
 
-            IsSessionInitiated = false;
+            _isSessionInitiated = false;
 
             Dictionary<string, object> requestParams =
                 new Dictionary<string, object>
