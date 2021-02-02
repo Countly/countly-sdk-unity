@@ -25,7 +25,7 @@ namespace Plugins.CountlySDK.Services
             _sessionCountlyService = sessionCountlyService;
         }
 
-        public string DeviceId { get; private set; }
+        internal string DeviceId { get; private set; }
 
         internal void InitDeviceId(string deviceId = null)
         {

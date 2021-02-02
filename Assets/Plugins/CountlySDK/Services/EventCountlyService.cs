@@ -88,8 +88,7 @@ namespace Plugins.CountlySDK.Services
         /// <summary>
         /// Report an event to the server.
         /// </summary>
-        /// <param name="key"></param>
-        /// <param name="useNumberInSameSession"></param>
+        /// <param name="key">event key</param>
         /// <returns></returns>
         public async Task RecordEventAsync(string key)
         {
@@ -103,12 +102,11 @@ namespace Plugins.CountlySDK.Services
         /// <summary>
         /// Report an event to the server with segmentation.
         /// </summary>
-        /// <param name="key"></param>
-        /// <param name="segmentation"></param>
-        /// <param name="useNumberInSameSession"></param>
-        /// <param name="count"></param>
-        /// <param name="sum"></param>
-        /// <param name="duration"></param>
+        /// <param name="key">event key</param>
+        /// <param name="segmentation">custom segmentation you want to set, leave null if you don't want to add anything</param>
+        /// <param name="count">how many of these events have occured, default value is "1"</param>
+        /// <param name="sum">set sum if needed, default value is "0"</param>
+        /// <param name="duration">set sum if needed, default value is "0"</param>
         /// <returns></returns>
         public async Task RecordEventAsync(string key, SegmentModel segmentation,
             int? count = 1, double? sum = 0, double? duration = null)

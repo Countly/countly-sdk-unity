@@ -18,7 +18,9 @@ namespace Plugins.CountlySDK.Services
         private readonly CountlyUtils _countlyUtils;
         private readonly Dao<ConfigEntity> _configDao;
         private readonly RequestCountlyHelper _requestCountlyHelper;
-
+        /// <summary>
+        /// Get the stored config value
+        /// </summary>
         public Dictionary<string, object> Configs { private set; get; }
 
         private readonly StringBuilder _requestStringBuilder = new StringBuilder();

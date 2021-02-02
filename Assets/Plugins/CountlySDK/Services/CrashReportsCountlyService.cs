@@ -11,7 +11,7 @@ namespace Plugins.CountlySDK.Services
 {
     public class CrashReportsCountlyService : AbstractBaseService
     {
-        public bool IsApplicationInBackground { get; internal set; }
+        internal bool IsApplicationInBackground { get; set; }
         private readonly Queue<string> _crashBreadcrumbs = new Queue<string>();
         private readonly CountlyConfiguration _configModel;
         private readonly RequestCountlyHelper _requestCountlyHelper;
@@ -44,11 +44,11 @@ namespace Plugins.CountlySDK.Services
         /// <summary>
         /// Public method that sends crash details to the server. Set param "nonfatal" to true for Custom Logged errors
         /// </summary>
-        /// <param name="message"></param>
-        /// <param name="stackTrace"></param>
-        /// <param name="type"></param>
-        /// <param name="segments"></param>
-        /// <param name="nonfatal"></param>
+        /// <param name="message">a string that contain detailed description of exception.</param>
+        /// <param name="stackTrace">a string that describes the contents of call stack.</param>
+        /// <param name="type">the type of the log message</param>
+        /// <param name="segments">custom key/values to be reported</param>
+        /// <param name="nonfatal">type of error that force programe to close</param>
         /// <returns></returns>
         public async Task SendCrashReportAsync(string message, string stackTrace, LogType type,
             IDictionary<string, object> segments = null, bool nonfatal = true)
