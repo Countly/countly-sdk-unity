@@ -104,7 +104,7 @@ namespace Plugins.CountlySDK.Services
         /// </summary>
         /// <param name="key">event key</param>
         /// <param name="segmentation">custom segmentation you want to set, leave null if you don't want to add anything</param>
-        /// <param name="count">how many of these events have occured, default value is "1"</param>
+        /// <param name="count">how many of these events have occurred, default value is "1"</param>
         /// <param name="sum">set sum if needed, default value is "0"</param>
         /// <param name="duration">set sum if needed, default value is "0"</param>
         /// <returns></returns>
