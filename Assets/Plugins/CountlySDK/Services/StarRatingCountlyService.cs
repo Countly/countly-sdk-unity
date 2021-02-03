@@ -11,7 +11,7 @@ namespace Plugins.CountlySDK.Services
 
         private readonly EventCountlyService _eventCountlyService;
 
-        internal StarRatingCountlyService(EventCountlyService eventCountlyService, ConsentCountlyService consentService) : base(consentService)
+        internal StarRatingCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, ConsentCountlyService consentService, EventCountlyService eventCountlyService) : base(configuration, logHelper, consentService)
         {
             _eventCountlyService = eventCountlyService;
         }

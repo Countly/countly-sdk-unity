@@ -13,12 +13,10 @@ namespace Plugins.CountlySDK.Services
     {
         public bool IsApplicationInBackground { get; internal set; }
         private readonly Queue<string> _crashBreadcrumbs = new Queue<string>();
-        private readonly CountlyConfiguration _configModel;
         private readonly RequestCountlyHelper _requestCountlyHelper;
 
-        internal CrashReportsCountlyService(CountlyConfiguration configModel, RequestCountlyHelper requestCountlyHelper, ConsentCountlyService consentService) : base(consentService)
+        internal CrashReportsCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, RequestCountlyHelper requestCountlyHelper, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
         {
-            _configModel = configModel;
             _requestCountlyHelper = requestCountlyHelper;
         }
 
@@ -35,7 +33,7 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
 
-            if (_configModel.EnableAutomaticCrashReporting
+            if (_configuration.EnableAutomaticCrashReporting
                 && (type == LogType.Error || type == LogType.Exception)) {
                 await SendCrashReportAsync(message, stackTrace, type, null, false);
             }
@@ -83,17 +81,15 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
 
-            if (_configModel.EnableConsoleLogging) {
-                Debug.Log("[Countly] AddBreadcrumbs : " + value);
-            }
+            Log.Info("[Countly] AddBreadcrumbs : " + value);
 
-            if (_configModel.EnableTestMode) {
+            if (_configuration.EnableTestMode) {
                 return;
             }
 
             string validBreadcrumb = value.Length > 1000 ? value.Substring(0, 1000) : value;
 
-            if (_crashBreadcrumbs.Count == _configModel.TotalBreadcrumbsAllowed) {
+            if (_crashBreadcrumbs.Count == _configuration.TotalBreadcrumbsAllowed) {
                 _crashBreadcrumbs.Dequeue();
             }
 

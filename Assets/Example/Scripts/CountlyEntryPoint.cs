@@ -17,10 +17,11 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
     private void Awake()
     {
         CountlyConfiguration configuration = new CountlyConfiguration {
-            ServerUrl = "https://try.count.ly/",
-            AppKey = "YOUR_APP_KEY",
+            ServerUrl = "https://master.count.ly/",
+            AppKey = "8e2fe772c091355076ead703f987fee94490fff4",
             EnableConsoleLogging = true,
             RequiresConsent = true,
+            SessionDuration = 10,
             NotificationMode = TestMode.AndroidTestToken
         };
 
@@ -35,6 +36,8 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
 
         Countly.Instance.Init(configuration);
         countly = Countly.Instance;
+
+        Debug.LogErrorFormat("[{0} {1}] {2}", "Countly", "EnteryPoint", "awake method called.");
     }
 
     private void Start()
@@ -275,7 +278,11 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
 
             throw new DivideByZeroException();
         } catch (Exception ex) {
-            await countly.CrashReports.SendCrashReportAsync(ex.Message, ex.StackTrace, LogType.Exception);
+            Dictionary<string, object> seg = new Dictionary<string, object>{
+                { "Time Spent", "1234455"},
+                { "Retry Attempts", "10"}
+            };
+            await countly.CrashReports.SendCrashReportAsync(ex.Message, ex.StackTrace, LogType.Exception, seg);
         }
 
     }

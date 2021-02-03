@@ -6,15 +6,11 @@ namespace Plugins.CountlySDK.Services
 {
     public class InitializationCountlyService : AbstractBaseService
     {
-        private readonly PushCountlyService _pushService;
         private readonly LocationService _locationService;
-        private readonly CountlyConfiguration _configModel;
         private readonly SessionCountlyService _sessionService;
 
-        internal InitializationCountlyService(CountlyConfiguration configModel, PushCountlyService pushService, LocationService locationService, SessionCountlyService sessionCountlyService, ConsentCountlyService consentService) : base(consentService)
+        internal InitializationCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, LocationService locationService, SessionCountlyService sessionCountlyService, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
         {
-            _pushService = pushService;
-            _configModel = configModel;
             _locationService = locationService;
             _sessionService = sessionCountlyService;
         }
@@ -38,7 +34,7 @@ namespace Plugins.CountlySDK.Services
                  */
                     await _locationService.SendIndependantLocationRequest();
                 }
-            } else if (!_configModel.EnableManualSessionHandling) {
+            } else if (!_configuration.EnableManualSessionHandling) {
                 //Start Session
                 await _sessionService.BeginSessionAsync();
             }

@@ -1,9 +1,7 @@
 using System;
 using System.Collections;
 using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
 using System.Collections.Generic;
-using CountlySDK.Input;
 using iBoxDB.LocalServer;
 using Notifications;
 using Notifications.Impls;
@@ -34,6 +32,7 @@ namespace Plugins.CountlySDK
         /// <returns>bool</returns>
         public bool IsSDKInitialized { get; private set; }
 
+        private CountlyLogHelper _logHelper;
         private static Countly _instance = null;
         private List<AbstractBaseService> _listeners = new List<AbstractBaseService>();
 
@@ -154,7 +153,7 @@ namespace Plugins.CountlySDK
 
         }
 
-        public async void Init(CountlyConfiguration configuration)
+        public void Init(CountlyConfiguration configuration)
         {
             if (IsSDKInitialized) {
                 return;
@@ -177,6 +176,7 @@ namespace Plugins.CountlySDK
             }
 
             Configuration = configuration;
+            _logHelper = new CountlyLogHelper(Configuration);
 
             _db = CountlyBoxDbHelper.BuildDatabase(DbNumber);
 
@@ -211,24 +211,24 @@ namespace Plugins.CountlySDK
             CountlyUtils countlyUtils = new CountlyUtils(this);
             RequestCountlyHelper requests = new RequestCountlyHelper(Configuration, countlyUtils, requestRepo);
 
-            Consents = new ConsentCountlyService(Configuration, Consents);
-            Events = new EventCountlyService(Configuration, requests, viewEventRepo, nonViewEventRepo, Consents);
+            Consents = new ConsentCountlyService(Configuration, _logHelper, Consents);
+            Events = new EventCountlyService(Configuration, _logHelper, requests, viewEventRepo, nonViewEventRepo, Consents);
 
-            Location = new Services.LocationService(Configuration, requests, Consents);
+            Location = new Services.LocationService(Configuration, _logHelper, requests, Consents);
             OptionalParameters = new OptionalParametersCountlyService(Location, Configuration);
-            Notifications = new NotificationsCallbackService(Configuration);
-            ProxyNotificationsService notificationsService = new ProxyNotificationsService(transform, Configuration, InternalStartCoroutine, Events);
-            _push = new PushCountlyService(Configuration, Events, requests, notificationsService, Notifications, Consents);
-            Session = new SessionCountlyService(Configuration, Events, requests, Location, Consents);
+            Notifications = new NotificationsCallbackService(_logHelper);
+            ProxyNotificationsService notificationsService = new ProxyNotificationsService(transform, Configuration, _logHelper, InternalStartCoroutine, Events);
+            _push = new PushCountlyService(Configuration, _logHelper, requests, notificationsService, Notifications, Consents);
+            Session = new SessionCountlyService(Configuration, _logHelper, Events, requests, Location, Consents);
 
-            CrashReports = new CrashReportsCountlyService(Configuration, requests, Consents);
-            Initialization = new InitializationCountlyService(Configuration, _push, Location, Session, Consents);
-            RemoteConfigs = new RemoteConfigCountlyService(Configuration, requests, countlyUtils, configDao, Consents);
+            CrashReports = new CrashReportsCountlyService(Configuration, _logHelper, requests, Consents);
+            Initialization = new InitializationCountlyService(Configuration, _logHelper, Location, Session, Consents);
+            RemoteConfigs = new RemoteConfigCountlyService(Configuration, _logHelper, requests, countlyUtils, configDao, Consents);
 
-            StarRating = new StarRatingCountlyService(Events, Consents);
-            UserDetails = new UserDetailsCountlyService(requests, countlyUtils, Consents);
-            Views = new ViewCountlyService(Configuration, Events, Consents);
-            Device = new DeviceIdCountlyService(Configuration, Session, requests, Events, countlyUtils, Consents);
+            StarRating = new StarRatingCountlyService(Configuration, _logHelper, Consents, Events);
+            UserDetails = new UserDetailsCountlyService(Configuration, _logHelper, requests, countlyUtils, Consents);
+            Views = new ViewCountlyService(Configuration, _logHelper, Events, Consents);
+            Device = new DeviceIdCountlyService(Configuration, _logHelper, Session, requests, Events, countlyUtils, Consents);
 
             CreateListOfIBaseService();
             RegisterListenersToServices();

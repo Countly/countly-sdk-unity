@@ -14,7 +14,6 @@ namespace Plugins.CountlySDK.Services
 {
     public class RemoteConfigCountlyService : AbstractBaseService
     {
-        private readonly CountlyConfiguration _config;
         private readonly CountlyUtils _countlyUtils;
         private readonly Dao<ConfigEntity> _configDao;
         private readonly RequestCountlyHelper _requestCountlyHelper;
@@ -23,9 +22,8 @@ namespace Plugins.CountlySDK.Services
 
         private readonly StringBuilder _requestStringBuilder = new StringBuilder();
 
-        internal RemoteConfigCountlyService(CountlyConfiguration config, RequestCountlyHelper requestCountlyHelper, CountlyUtils countlyUtils, Dao<ConfigEntity> configDao, ConsentCountlyService consentService) : base(consentService)
+        internal RemoteConfigCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, RequestCountlyHelper requestCountlyHelper, CountlyUtils countlyUtils, Dao<ConfigEntity> configDao, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
         {
-            _config = config;
             _configDao = configDao;
             _countlyUtils = countlyUtils;
             _requestCountlyHelper = requestCountlyHelper;
@@ -35,12 +33,12 @@ namespace Plugins.CountlySDK.Services
             } else {
                 _configDao.RemoveAll();
             }
-            
+
         }
 
         internal async Task<CountlyResponse> InitConfig()
         {
-            if (_config.EnableTestMode) {
+            if (_configuration.EnableTestMode) {
                 return new CountlyResponse { IsSuccess = true };
             }
 
@@ -53,10 +51,7 @@ namespace Plugins.CountlySDK.Services
             List<ConfigEntity> allConfigs = _configDao.LoadAll();
             if (allConfigs != null && allConfigs.Count > 0) {
                 config = Converter.ConvertJsonToDictionary(allConfigs[0].Json);
-
-                if (_config.EnableConsoleLogging) {
-                    Debug.Log("Configs: " + config.ToString());
-                }
+                Log.Info("Configs: " + config.ToString());
             }
 
             return config;
@@ -93,9 +88,8 @@ namespace Plugins.CountlySDK.Services
                 _configDao.Save(configEntity);
                 Configs = Converter.ConvertJsonToDictionary(response.Data);
 
-                if (_config.EnableConsoleLogging) {
-                    Debug.Log("[Countly] RemoteConfigCountlyService UpdateConfig: " + response.ToString());
-                }
+                Log.Info("[Countly] RemoteConfigCountlyService UpdateConfig: " + response.ToString());
+
             }
 
             return response;
@@ -124,19 +118,6 @@ namespace Plugins.CountlySDK.Services
                         UnityWebRequest.EscapeURL(Convert.ToString(item.Value)));
                 }
             }
-
-            //Not sure if we need checksum here
-
-            //            if (!string.IsNullOrEmpty(_config.Salt))
-            //            {
-            //                // Create a SHA256   
-            //                using (var sha256Hash = SHA256.Create())
-            //                {
-            //                    var data = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(_requestStringBuilder + _config.Salt));
-            //                    _requestStringBuilder.Insert(0, _countly.GetBaseUrl());
-            //                    return _requestStringBuilder.AppendFormat("&checksum256={0}", Impl.Countly.GetStringFromBytes(data)).ToString();
-            //                }
-            //            }
 
             _requestStringBuilder.Insert(0, _countlyUtils.ServerOutputUrl);
             return _requestStringBuilder.ToString();

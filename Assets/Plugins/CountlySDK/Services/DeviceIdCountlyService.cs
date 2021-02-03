@@ -10,15 +10,13 @@ namespace Plugins.CountlySDK.Services
     public class DeviceIdCountlyService : AbstractBaseService
     {
         private readonly CountlyUtils _countlyUtils;
-        private readonly CountlyConfiguration _config;
         private readonly EventCountlyService _eventCountlyService;
         private readonly RequestCountlyHelper _requestCountlyHelper;
         private readonly SessionCountlyService _sessionCountlyService;
 
-        internal DeviceIdCountlyService(CountlyConfiguration config, SessionCountlyService sessionCountlyService,
-            RequestCountlyHelper requestCountlyHelper, EventCountlyService eventCountlyService, CountlyUtils countlyUtils, ConsentCountlyService conentService) : base(conentService)
+        internal DeviceIdCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, SessionCountlyService sessionCountlyService,
+            RequestCountlyHelper requestCountlyHelper, EventCountlyService eventCountlyService, CountlyUtils countlyUtils, ConsentCountlyService conentService) : base(configuration, logHelper, conentService)
         {
-            _config = config;
             _countlyUtils = countlyUtils;
             _eventCountlyService = eventCountlyService;
             _requestCountlyHelper = requestCountlyHelper;
@@ -64,7 +62,7 @@ namespace Plugins.CountlySDK.Services
         public async Task ChangeDeviceIdAndEndCurrentSessionAsync(string deviceId)
         {
             if (!_consentService.AnyConsentGiven()) {
-                Debug.Log("[Countly DeviceIdCountlyService] ChangeDeviceIdAndEndCurrentSessionAsync: Please set at least a single consent before calling this!");
+                Log.Info("[Countly DeviceIdCountlyService] ChangeDeviceIdAndEndCurrentSessionAsync: Please set at least a single consent before calling this!");
                 return;
             }
 
@@ -98,7 +96,7 @@ namespace Plugins.CountlySDK.Services
         public async Task ChangeDeviceIdAndMergeSessionDataAsync(string deviceId)
         {
             if (!_consentService.AnyConsentGiven()) {
-                Debug.Log("[Countly DeviceIdCountlyService] ChangeDeviceIdAndMergeSessionDataAsync: Please set at least a single consent before calling this!");
+                Log.Info("[Countly DeviceIdCountlyService] ChangeDeviceIdAndMergeSessionDataAsync: Please set at least a single consent before calling this!");
                 return;
             }
 

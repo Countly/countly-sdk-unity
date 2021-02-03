@@ -16,20 +16,20 @@ namespace Notifications.Impls.Android
         private const string CountlyPushPluginPackageName = "ly.count.unity.push_fcm.CountlyPushPlugin";
         private const string NotficationServicePackageName = "ly.count.unity.push_fcm.RemoteNotificationsService";
 
+        private readonly CountlyLogHelper Log;
         private readonly AndroidBridge _bridge;
-        private readonly CountlyConfiguration _config;
         private readonly EventCountlyService _eventCountlyService;
 
-        internal AndroidNotificationsService(Transform countlyGameObject, CountlyConfiguration config, EventCountlyService eventCountlyService)
+        internal AndroidNotificationsService(Transform countlyGameObject, CountlyConfiguration config, CountlyLogHelper log, EventCountlyService eventCountlyService)
         {
-            _config = config;
+            Log = log;
             _countlyGameObject = countlyGameObject;
             _eventCountlyService = eventCountlyService;
 
             GameObject gameObject = new GameObject(BridgeName);
             gameObject.transform.parent = _countlyGameObject;
             _bridge = gameObject.AddComponent<AndroidBridge>();
-            _bridge.Config = _config;
+            _bridge.Log = Log;
 
             AndroidJavaClass countlyPushPlugin = new AndroidJavaClass(CountlyPushPluginPackageName);
             countlyPushPlugin.CallStatic("setEnableLog", config.EnableConsoleLogging);
@@ -91,9 +91,7 @@ namespace Notifications.Impls.Android
                         Identifier = identifier
                     };
 
-                    if (_config.EnableConsoleLogging) {
-                        Debug.Log("[Countly] ReportPushActionAsync key: " + CountlyEventModel.PushActionEvent + ", segments: " + segment);
-                    }
+                    Log.Info("[Countly] ReportPushActionAsync key: " + CountlyEventModel.PushActionEvent + ", segments: " + segment);
 
                     await _eventCountlyService.ReportCustomEventAsync(
                         CountlyEventModel.PushActionEvent, segment.ToDictionary());

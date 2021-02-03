@@ -8,7 +8,7 @@ public class IOSBridge : MonoBehaviour
     public string MessageId { get; set; }
     public string ButtonIndex { get; set; }
 
-    public CountlyConfiguration Config { get; set; }
+    public CountlyLogHelper Log { get; set; }
 
     private Action<string> _onTokenResult;
     private Action<string> _OnNotificationReceiveResult;
@@ -42,9 +42,7 @@ public class IOSBridge : MonoBehaviour
     void OnDidRegisterForRemoteNotificationsWithDeviceToken(string deviceToken)
     {
         if (deviceToken != null && deviceToken.Length != 0) {
-            if (Config.EnableConsoleLogging) {
-                Debug.Log("[Countly] OnDidRegisterForRemoteNotificationsWithDeviceToken Token: " + deviceToken);
-            }
+            Log.Info("[Countly] OnDidRegisterForRemoteNotificationsWithDeviceToken Token: " + deviceToken);
 
             _onTokenResult?.Invoke(deviceToken);
         }
@@ -53,26 +51,22 @@ public class IOSBridge : MonoBehaviour
     //Sent when the application failed to be registered with Apple Push Notification Service (APNS).
     void OnDidFailToRegisterForRemoteNotificcallBackationsWithError(string error)
     {
-        if (Config.EnableConsoleLogging) {
-            Debug.Log("[Countly] OnDidFailToRegisterForRemoteNotificcallBackationsWithError error: " + error);
-        }
+        Log.Info("[Countly] OnDidFailToRegisterForRemoteNotificcallBackationsWithError error: " + error);
+
     }
 
 
     void OnPushNotificationsReceived(string pushData)
     {
-        if (Config.EnableConsoleLogging) {
-            Debug.Log("[Countly] OnPushNotificationsReceived: " + pushData);
-        }
+        Log.Info("[Countly] OnPushNotificationsReceived: " + pushData);
+
         _OnNotificationReceiveResult?.Invoke(pushData);
 
     }
 
     void OnPushNotificationsClicked(string pushData)
     {
-        if (Config.EnableConsoleLogging) {
-            Debug.Log("[Countly] OnPushNotificationsClicked: " + pushData);
-        }
+        Log.Info("[Countly] OnPushNotificationsClicked: " + pushData);
 
         JObject item = JObject.Parse(pushData);
 
@@ -86,9 +80,7 @@ public class IOSBridge : MonoBehaviour
 
     void OnDidRegisterUserNotificationSettings(string setting)
     {
-        if (Config.EnableConsoleLogging) {
-            Debug.Log("[Countly] OnDidRegisterUserNotificationSettings error: " + setting);
-        }
+        Log.Info("[Countly] OnDidRegisterUserNotificationSettings error: " + setting);
     }
 
 }

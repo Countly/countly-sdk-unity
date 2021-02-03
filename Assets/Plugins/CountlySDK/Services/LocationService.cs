@@ -16,14 +16,11 @@ namespace Plugins.CountlySDK.Services
         internal bool IsLocationDisabled { get; private set; }
 
         private readonly RequestCountlyHelper _requestCountlyHelper;
-        private readonly CountlyConfiguration _countlyConfiguration;
 
-
-        internal LocationService(CountlyConfiguration countlyConfiguration, RequestCountlyHelper requestCountlyHelper, ConsentCountlyService consentService) : base(consentService)
+        internal LocationService(CountlyConfiguration configuration, CountlyLogHelper logHelper, RequestCountlyHelper requestCountlyHelper, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
         {
-            _countlyConfiguration = countlyConfiguration;
             _requestCountlyHelper = requestCountlyHelper;
-            IsLocationDisabled = countlyConfiguration.IsLocationDisabled;
+            IsLocationDisabled = configuration.IsLocationDisabled;
 
             if (IsLocationDisabled || !_consentService.CheckConsent(Consents.Location)) {
                 City = null;
@@ -31,10 +28,10 @@ namespace Plugins.CountlySDK.Services
                 IPAddress = null;
                 CountryCode = null;
             } else {
-                City = countlyConfiguration.City;
-                Location = countlyConfiguration.Location;
-                IPAddress = countlyConfiguration.IPAddress;
-                CountryCode = countlyConfiguration.CountryCode;
+                City = configuration.City;
+                Location = configuration.Location;
+                IPAddress = configuration.IPAddress;
+                CountryCode = configuration.CountryCode;
             }
         }
 
@@ -125,10 +122,9 @@ namespace Plugins.CountlySDK.Services
             /*If city is not paired together with country,
              * a warning should be printed that they should be set together.
              */
-            if (_countlyConfiguration.EnableConsoleLogging &&
-                ((!string.IsNullOrEmpty(CountryCode) && string.IsNullOrEmpty(City))
-                || (!string.IsNullOrEmpty(City) && string.IsNullOrEmpty(CountryCode)))) {
-                Debug.LogWarning("[Countly LocationService] In \"SetLocation\" both country code and city should be set together");
+            if ((!string.IsNullOrEmpty(CountryCode) && string.IsNullOrEmpty(City))
+                || (!string.IsNullOrEmpty(City) && string.IsNullOrEmpty(CountryCode))) {
+                Log.Warning("[Countly LocationService] In \"SetLocation\" both country code and city should be set together");
             }
 
             City = city;
@@ -171,7 +167,7 @@ namespace Plugins.CountlySDK.Services
             if (updatedConsents.Contains(Consents.Location) && !newConsentValue) {
                 OnLocationConsentRemoved();
             }
-            
+
         }
         #endregion
     }

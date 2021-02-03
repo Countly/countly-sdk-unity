@@ -11,14 +11,12 @@ namespace Plugins.CountlySDK.Services
 
     public class ViewCountlyService : AbstractBaseService
     {
-        private readonly CountlyConfiguration _config;
         private readonly Dictionary<string, DateTime> _viewToLastViewStartTime = new Dictionary<string, DateTime>();
 
         private readonly EventCountlyService _eventService;
 
-        internal ViewCountlyService(CountlyConfiguration config, EventCountlyService eventService, ConsentCountlyService consentService) : base(consentService)
+        internal ViewCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, EventCountlyService eventService, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
         {
-            _config = config;
             _eventService = eventService;
         }
         /// <summary>
@@ -51,9 +49,7 @@ namespace Plugins.CountlySDK.Services
                 _viewToLastViewStartTime.Add(name, DateTime.UtcNow);
             }
 
-            if (_config.EnableConsoleLogging) {
-                Debug.Log("[ViewCountlyService] RecordOpenViewAsync: " + name);
-            }
+            Log.Info("[ViewCountlyService] RecordOpenViewAsync: " + name);
 
             CountlyEventModel currentView = new CountlyEventModel(CountlyEventModel.ViewEvent, currentViewSegment.ToDictionary());
             await _eventService.RecordEventAsync(currentView);
@@ -93,9 +89,7 @@ namespace Plugins.CountlySDK.Services
                 _viewToLastViewStartTime.Remove(name);
             }
 
-            if (_config.EnableConsoleLogging) {
-                Debug.Log("[ViewCountlyService] RecordCloseViewAsync: " + name + ", duration: " + duration);
-            }
+            Log.Info("[ViewCountlyService] RecordCloseViewAsync: " + name + ", duration: " + duration);
 
             CountlyEventModel currentView = new CountlyEventModel(CountlyEventModel.ViewEvent, currentViewSegment.ToDictionary(), 1, null, duration);
             await _eventService.RecordEventAsync(currentView);
