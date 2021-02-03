@@ -181,18 +181,18 @@ namespace Plugins.CountlySDK
             _db = CountlyBoxDbHelper.BuildDatabase(DbNumber);
 
             DB.AutoBox auto = _db.Open();
-            _configDao = new Dao<ConfigEntity>(auto, EntityType.Configs.ToString(), Configuration);
-            Dao<RequestEntity> requestDao = new Dao<RequestEntity>(auto, EntityType.Requests.ToString(), Configuration);
-            Dao<EventEntity> viewEventDao = new Dao<EventEntity>(auto, EntityType.ViewEvents.ToString(), Configuration);
-            SegmentDao viewSegmentDao = new SegmentDao(auto, EntityType.ViewEventSegments.ToString(), Configuration);
-            Dao<EventEntity> nonViewEventDao = new Dao<EventEntity>(auto, EntityType.NonViewEvents.ToString(), Configuration);
-            SegmentDao nonViewSegmentDao = new SegmentDao(auto, EntityType.NonViewEventSegments.ToString(), Configuration);
+            _configDao = new Dao<ConfigEntity>(auto, EntityType.Configs.ToString(), _logHelper);
+            Dao<RequestEntity> requestDao = new Dao<RequestEntity>(auto, EntityType.Requests.ToString(), _logHelper);
+            Dao<EventEntity> viewEventDao = new Dao<EventEntity>(auto, EntityType.ViewEvents.ToString(), _logHelper);
+            SegmentDao viewSegmentDao = new SegmentDao(auto, EntityType.ViewEventSegments.ToString(), _logHelper);
+            Dao<EventEntity> nonViewEventDao = new Dao<EventEntity>(auto, EntityType.NonViewEvents.ToString(), _logHelper);
+            SegmentDao nonViewSegmentDao = new SegmentDao(auto, EntityType.NonViewEventSegments.ToString(), _logHelper);
 
-            _requestRepo = new RequestRepository(requestDao, Configuration);
-            _viewEventRepo = new ViewEventRepository(viewEventDao, viewSegmentDao, Configuration);
-            _nonViewEventRepo = new NonViewEventRepository(nonViewEventDao, nonViewSegmentDao, Configuration);
+            _requestRepo = new RequestRepository(requestDao, _logHelper);
+            _viewEventRepo = new ViewEventRepository(viewEventDao, viewSegmentDao, _logHelper);
+            _nonViewEventRepo = new NonViewEventRepository(nonViewEventDao, nonViewSegmentDao, _logHelper);
 
-            Dao<EventNumberInSameSessionEntity> eventNrInSameSessionDao = new Dao<EventNumberInSameSessionEntity>(auto, EntityType.EventNumberInSameSessions.ToString(), Configuration);
+            Dao<EventNumberInSameSessionEntity> eventNrInSameSessionDao = new Dao<EventNumberInSameSessionEntity>(auto, EntityType.EventNumberInSameSessions.ToString(), _logHelper);
             eventNrInSameSessionDao.RemoveAll(); /* Clear EventNumberInSameSessions Entity data */
 
             _requestRepo.Initialize();
@@ -209,7 +209,7 @@ namespace Plugins.CountlySDK
             NonViewEventRepository nonViewEventRepo, Dao<ConfigEntity> configDao)
         {
             CountlyUtils countlyUtils = new CountlyUtils(this);
-            RequestCountlyHelper requests = new RequestCountlyHelper(Configuration, countlyUtils, requestRepo);
+            RequestCountlyHelper requests = new RequestCountlyHelper(Configuration, _logHelper, countlyUtils, requestRepo);
 
             Consents = new ConsentCountlyService(Configuration, _logHelper, Consents);
             Events = new EventCountlyService(Configuration, _logHelper, requests, viewEventRepo, nonViewEventRepo, Consents);
@@ -276,9 +276,7 @@ namespace Plugins.CountlySDK
                 return;
             }
 
-            if (Configuration.EnableConsoleLogging) {
-                Debug.Log("[Countly] OnApplicationQuit");
-            }
+            _logHelper.Info("[Countly] OnApplicationQuit");
 
             _db.Close();
         }
@@ -301,7 +299,7 @@ namespace Plugins.CountlySDK
         private void OnApplicationFocus(bool hasFocus)
         {
             if (Configuration.EnableConsoleLogging) {
-                Debug.Log("[Countly] OnApplicationFocus: " + hasFocus);
+                _logHelper.Info("[Countly] OnApplicationFocus: " + hasFocus);
             }
 
             if (hasFocus) {
@@ -314,7 +312,7 @@ namespace Plugins.CountlySDK
         private async void OnApplicationPause(bool pauseStatus)
         {
             if (Configuration.EnableConsoleLogging) {
-                Debug.Log("[Countly] OnApplicationPause: " + pauseStatus);
+                _logHelper.Info("[Countly] OnApplicationPause: " + pauseStatus);
             }
 
             if (CrashReports != null) {

@@ -113,9 +113,7 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
 
-            if (_configuration.EnableConsoleLogging) {
-                Debug.Log("[Countly] RecordEventAsync : key = " + key);
-            }
+            Log.Info("[Countly] RecordEventAsync : key = " + key);
 
             if (_configuration.EnableTestMode) {
                 return;
