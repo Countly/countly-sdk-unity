@@ -24,8 +24,10 @@ namespace Plugins.CountlySDK.Services
             _requestCountlyHelper = requestCountlyHelper;
             _sessionCountlyService = sessionCountlyService;
         }
-
-        internal string DeviceId { get; private set; }
+        /// <summary>
+        /// Return Device ID
+        /// </summary>
+        public string DeviceId { get; private set; }
 
         internal void InitDeviceId(string deviceId = null)
         {

@@ -13,8 +13,13 @@ namespace Plugins.CountlySDK.Services
     public class SessionCountlyService : AbstractBaseService
     {
         private Timer _sessionTimer;
-        private bool _isSessionInitiated;
         private DateTime _lastSessionRequestTime;
+
+        /// <summary>
+        /// Check if session has been initiated.
+        /// </summary>
+        /// <returns>bool</returns>
+        public bool IsSessionInitiated { get; private set; }
 
         private readonly LocationService _locationService;
         private readonly CountlyConfiguration _configModel;
@@ -30,7 +35,6 @@ namespace Plugins.CountlySDK.Services
             _requestCountlyHelper = requestCountlyHelper;
         }
 
-        #region private Methods
         /// <summary>
         /// Initializes the timer for extending session with specified interval
         /// </summary>
@@ -53,7 +57,7 @@ namespace Plugins.CountlySDK.Services
         /// <param name="elapsedEventArgs"></param>
         private async void SessionTimerOnElapsedAsync(object sender, ElapsedEventArgs elapsedEventArgs)
         {
-            if (!_isSessionInitiated) {
+            if (!IsSessionInitiated) {
                 return;
             }
 
@@ -62,20 +66,17 @@ namespace Plugins.CountlySDK.Services
             await _requestCountlyHelper.ProcessQueue();
 
             if (!_configModel.EnableManualSessionHandling) {
-                await ExecuteExtendSessionAsync();
+                await ExtendSessionAsync();
             }
         }
 
-        #endregion
-
-        #region internal Methods
-        internal async Task ExecuteBeginSessionAsync()
+        public async Task ExecuteBeginSessionAsync()
         {
             if (!_consentService.CheckConsent(Consents.Sessions)) {
                 return;
             }
 
-            if (_isSessionInitiated) {
+            if (IsSessionInitiated) {
                 return;
             }
 
@@ -86,7 +87,7 @@ namespace Plugins.CountlySDK.Services
             FirstLaunchAppHelper.Process();
             _lastSessionRequestTime = DateTime.Now;
             //Session initiated
-            _isSessionInitiated = true;
+            IsSessionInitiated = true;
 
             Dictionary<string, object> requestParams =
                 new Dictionary<string, object>();
@@ -128,13 +129,67 @@ namespace Plugins.CountlySDK.Services
             }
         }
 
-        internal async Task ExecuteExtendSessionAsync()
+        public async Task ExecuteEndSessionAsync(bool disposeTimer = true)
         {
             if (!_consentService.CheckConsent(Consents.Sessions)) {
                 return;
             }
 
-            if (!_isSessionInitiated) {
+            IsSessionInitiated = false;
+
+            Dictionary<string, object> requestParams =
+                new Dictionary<string, object>
+                {
+                    {"end_session", 1},
+                    {"session_duration", (DateTime.Now - _lastSessionRequestTime).TotalSeconds},
+                    {"ignore_cooldown", _configModel.IgnoreSessionCooldown.ToString().ToLower()}
+                };
+            requestParams.Add("metrics", JsonConvert.SerializeObject(CountlyMetricModel.Metrics, Formatting.Indented,
+                new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }));
+
+            await _requestCountlyHelper.GetResponseAsync(requestParams);
+
+            if (!_configModel.EnableManualSessionHandling) {
+                //Do not extend session after session ends
+                if (disposeTimer) {
+                    _sessionTimer.Stop();
+                    _sessionTimer.Dispose();
+                    _sessionTimer.Close();
+                    _sessionTimer = null;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Initiates a session
+        /// </summary>
+        public async Task BeginSessionAsync()
+        {
+            await ExecuteBeginSessionAsync();
+        }
+
+        /// <summary>
+        /// Ends a session
+        /// </summary>
+        public async Task EndSessionAsync()
+        {
+            if (!_consentService.CheckConsent(Consents.Sessions)) {
+                return;
+            }
+
+            if (_configModel.EnableConsoleLogging) {
+                Debug.Log("[Countly] SessionCountlyService: ExtendSessionAsync");
+            }
+
+            await ExecuteEndSessionAsync();
+        }
+
+        /// <summary>
+        /// Extends a session by another session duration provided in configuration. By defautl session duration is 60 seconds.
+        /// </summary>
+        public async Task ExtendSessionAsync()
+        {
+            if (!_consentService.CheckConsent(Consents.Sessions)) {
                 return;
             }
 
@@ -153,71 +208,6 @@ namespace Plugins.CountlySDK.Services
             await _requestCountlyHelper.GetResponseAsync(requestParams);
 
         }
-
-        internal async Task ExecuteEndSessionAsync()
-        {
-            if (!_consentService.CheckConsent(Consents.Sessions)) {
-                return;
-            }
-
-            if (!_isSessionInitiated) {
-                return;
-            }
-
-            if (_configModel.EnableConsoleLogging) {
-                Debug.Log("[Countly] SessionCountlyService: ExecuteEndSessionAsync");
-            }
-
-            _isSessionInitiated = false;
-
-            Dictionary<string, object> requestParams =
-                new Dictionary<string, object>
-                {
-                    {"end_session", 1},
-                    {"session_duration", (DateTime.Now - _lastSessionRequestTime).TotalSeconds},
-                    {"ignore_cooldown", _configModel.IgnoreSessionCooldown.ToString().ToLower()}
-                };
-            requestParams.Add("metrics", JsonConvert.SerializeObject(CountlyMetricModel.Metrics, Formatting.Indented,
-                new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }));
-
-            await _requestCountlyHelper.GetResponseAsync(requestParams);
-
-            _sessionTimer.Stop();
-            _sessionTimer.Dispose();
-            _sessionTimer.Close();
-            _sessionTimer = null;
-        }
-
-        #endregion
-
-        #region public Methods
-
-        /// <summary>
-        /// Initiates a session
-        /// </summary>
-        public async Task BeginSession()
-        {
-            await ExecuteBeginSessionAsync();
-        }
-
-        /// <summary>
-        /// Extends a session
-        /// </summary>
-        public async Task ExtendSession()
-        {
-            await ExecuteExtendSessionAsync();
-        }
-
-        /// <summary>
-        /// Ends a session
-        /// </summary>
-        ///
-        public async Task EndSession()
-        {
-            await ExecuteEndSessionAsync();
-        }
-
-        #endregion
 
         #region override Methods
         internal override void DeviceIdChanged(string deviceId, bool merged)
