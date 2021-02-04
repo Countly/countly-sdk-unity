@@ -20,6 +20,7 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
             ServerUrl = "https://try.count.ly/",
             AppKey = "YOUR_APP_KEY",
             EnableConsoleLogging = true,
+            RequiresConsent = true,
             NotificationMode = TestMode.AndroidTestToken
         };
 
@@ -30,7 +31,7 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
         string ipAddress = "10.2.33.12";
 
         configuration.SetLocation(countryCode, city, latitude + "," + longitude, ipAddress);
-
+        configuration.GiveConsent(new Consents[] { Consents.Crashes, Consents.Events, Consents.Clicks, Consents.StarRating, Consents.Views, Consents.Users, Consents.Sessions, Consents.Push, Consents.RemoteConfig, Consents.Location });
 
         Countly.Instance.Init(configuration);
         countly = Countly.Instance;

@@ -7,45 +7,43 @@ using UnityEngine;
 
 namespace Plugins.CountlySDK.Services
 {
-    public class LocationService : IBaseService
+    public class LocationService : AbstractBaseService
     {
-        internal bool IsLocationDisabled { get; private set; }
         internal string City { get; private set; }
         internal string Location { get; private set; }
         internal string IPAddress { get; private set; }
         internal string CountryCode { get; private set; }
+        internal bool IsLocationDisabled { get; private set; }
 
-        private readonly ConsentCountlyService _consentService;
         private readonly RequestCountlyHelper _requestCountlyHelper;
         private readonly CountlyConfiguration _countlyConfiguration;
 
 
-        internal LocationService(CountlyConfiguration countlyConfiguration, RequestCountlyHelper requestCountlyHelper)
+        internal LocationService(CountlyConfiguration countlyConfiguration, RequestCountlyHelper requestCountlyHelper, ConsentCountlyService consentService) : base(consentService)
         {
             _countlyConfiguration = countlyConfiguration;
             _requestCountlyHelper = requestCountlyHelper;
+            IsLocationDisabled = countlyConfiguration.IsLocationDisabled;
 
-            if (countlyConfiguration.IsLocationDisabled) {
+            if (IsLocationDisabled || !_consentService.CheckConsent(Consents.Location)) {
                 City = null;
                 Location = null;
                 IPAddress = null;
                 CountryCode = null;
-                IsLocationDisabled = countlyConfiguration.IsLocationDisabled;
             } else {
                 City = countlyConfiguration.City;
                 Location = countlyConfiguration.Location;
                 IPAddress = countlyConfiguration.IPAddress;
                 CountryCode = countlyConfiguration.CountryCode;
-                IsLocationDisabled = countlyConfiguration.IsLocationDisabled;
             }
         }
 
         internal async Task SendRequestWithEmptyLocation()
         {
             Dictionary<string, object> requestParams =
-               new Dictionary<string, object>();
-
-            requestParams.Add("location", string.Empty);
+               new Dictionary<string, object> {
+                   { "location", string.Empty }
+               };
 
             await _requestCountlyHelper.GetResponseAsync(requestParams);
         }
@@ -53,7 +51,7 @@ namespace Plugins.CountlySDK.Services
         internal async Task SendIndependantLocationRequest()
         {
 
-            if (!_consentService.CheckConsent(Features.Location)) {
+            if (!_consentService.CheckConsent(Consents.Location)) {
                 return;
             }
 
@@ -92,6 +90,10 @@ namespace Plugins.CountlySDK.Services
         /// </summary>
         public async void DisableLocation()
         {
+            if (!_consentService.CheckConsent(Consents.Location)) {
+                return;
+            }
+
             IsLocationDisabled = true;
             City = null;
             Location = null;
@@ -101,7 +103,6 @@ namespace Plugins.CountlySDK.Services
             /*
              *If the location feature gets disabled or location consent is removed,
              *the SDK sends a request with an empty "location". 
-             *TODO ~ On Consent removed
              */
 
             await SendRequestWithEmptyLocation();
@@ -117,6 +118,10 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async void SetLocation(string countryCode, string city, string gpsCoordinates, string ipAddress)
         {
+            if (!_consentService.CheckConsent(Consents.Location)) {
+                return;
+            }
+
             /*If city is not paired together with country,
              * a warning should be printed that they should be set together.
              */
@@ -141,9 +146,33 @@ namespace Plugins.CountlySDK.Services
             }
         }
 
-        public void DeviceIdChanged(string deviceId, bool merged)
+        /*
+         * If location consent is removed,
+         * the SDK sends a request with an empty "location" parameter.
+         */
+        private async void OnLocationConsentRemoved()
         {
+            City = null;
+            Location = null;
+            IPAddress = null;
+            CountryCode = null;
+
+            await SendRequestWithEmptyLocation();
+        }
+
+        #region override Methods
+        internal override void DeviceIdChanged(string deviceId, bool merged)
+        {
+
+        }
+
+        internal override void ConsentChanged(List<Consents> updatedConsents, bool newConsentValue)
+        {
+            if (updatedConsents.Contains(Consents.Location) && !newConsentValue) {
+                OnLocationConsentRemoved();
+            }
             
         }
+        #endregion
     }
 }

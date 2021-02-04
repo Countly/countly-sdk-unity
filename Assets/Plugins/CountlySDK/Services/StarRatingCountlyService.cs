@@ -1,24 +1,32 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Plugins.CountlySDK.Enums;
 using Plugins.CountlySDK.Models;
 
 namespace Plugins.CountlySDK.Services
 {
-    public class StarRatingCountlyService : IBaseService
+    public class StarRatingCountlyService : AbstractBaseService
     {
 
         private readonly EventCountlyService _eventCountlyService;
 
-        internal StarRatingCountlyService(EventCountlyService eventCountlyService)
+        internal StarRatingCountlyService(EventCountlyService eventCountlyService, ConsentCountlyService consentService) : base(consentService)
         {
             _eventCountlyService = eventCountlyService;
         }
 
-        public void DeviceIdChanged(string deviceId, bool merged)
+        #region override Methods
+        internal override void DeviceIdChanged(string deviceId, bool merged)
         {
-            
+
         }
+
+        internal override void ConsentChanged(List<Consents> updatedConsents, bool newConsentValue)
+        {
+
+        }
+        #endregion
 
 
         /// <summary>
@@ -30,6 +38,10 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async Task ReportStarRatingAsync(string platform, string appVersion, int rating)
         {
+            if (!_consentService.CheckConsent(Consents.StarRating)) {
+                return;
+            }
+
             if (rating < 1 || rating > 5) {
                 return;
             }

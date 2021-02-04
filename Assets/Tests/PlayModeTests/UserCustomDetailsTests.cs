@@ -29,8 +29,8 @@ namespace Tests
             Assert.AreNotEqual(Countly.Instance.UserDetails, null);
 
             Countly.Instance.UserDetails.SetOnce("Distance", "10KM");
-            Assert.AreEqual(Countly.Instance.UserDetails.CustomeDataProperties.ContainsKey("Distance"), true);
-            Dictionary<string, object> dic = Countly.Instance.UserDetails.CustomeDataProperties["Distance"] as Dictionary<string, object>;
+            Assert.AreEqual(Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Distance"), true);
+            Dictionary<string, object> dic = Countly.Instance.UserDetails.CustomDataProperties["Distance"] as Dictionary<string, object>;
             Assert.AreEqual(dic["$setOnce"], "10KM");
         }
 

@@ -2,20 +2,21 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Plugins.CountlySDK.Enums;
 using Plugins.CountlySDK.Helpers;
 using Plugins.CountlySDK.Models;
 using UnityEngine;
 
 namespace Plugins.CountlySDK.Services
 {
-    public class CrashReportsCountlyService : IBaseService
+    public class CrashReportsCountlyService : AbstractBaseService
     {
         public bool IsApplicationInBackground { get; internal set; }
         private readonly Queue<string> _crashBreadcrumbs = new Queue<string>();
         private readonly CountlyConfiguration _configModel;
         private readonly RequestCountlyHelper _requestCountlyHelper;
 
-        internal CrashReportsCountlyService(CountlyConfiguration configModel, RequestCountlyHelper requestCountlyHelper)
+        internal CrashReportsCountlyService(CountlyConfiguration configModel, RequestCountlyHelper requestCountlyHelper, ConsentCountlyService consentService) : base(consentService)
         {
             _configModel = configModel;
             _requestCountlyHelper = requestCountlyHelper;
@@ -30,6 +31,10 @@ namespace Plugins.CountlySDK.Services
         /// <param name="type">Excpetion type like error, warning, etc</param>
         public async void LogCallback(string message, string stackTrace, LogType type)
         {
+            if (!_consentService.CheckConsent(Consents.Crashes)) {
+                return;
+            }
+
             if (_configModel.EnableAutomaticCrashReporting
                 && (type == LogType.Error || type == LogType.Exception)) {
                 await SendCrashReportAsync(message, stackTrace, type, null, false);
@@ -48,6 +53,10 @@ namespace Plugins.CountlySDK.Services
         public async Task SendCrashReportAsync(string message, string stackTrace, LogType type,
             IDictionary<string, object> segments = null, bool nonfatal = true)
         {
+            if (!_consentService.CheckConsent(Consents.Crashes)) {
+                return;
+            }
+
             CountlyExceptionDetailModel model = ExceptionDetailModel(message, stackTrace, nonfatal, segments);
 
             Dictionary<string, object> requestParams = new Dictionary<string, object>
@@ -70,6 +79,10 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value"></param>
         public void AddBreadcrumbs(string value)
         {
+            if (!_consentService.CheckConsent(Consents.Crashes)) {
+                return;
+            }
+
             if (_configModel.EnableConsoleLogging) {
                 Debug.Log("[Countly] AddBreadcrumbs : " + value);
             }
@@ -122,9 +135,11 @@ namespace Plugins.CountlySDK.Services
 #endif
             };
         }
-        public void DeviceIdChanged(string deviceId, bool merged)
+        #region override Methods
+        internal override void DeviceIdChanged(string deviceId, bool merged)
         {
 
         }
+        #endregion
     }
 }

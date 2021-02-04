@@ -1,23 +1,22 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Plugins.CountlySDK.Enums;
 using Plugins.CountlySDK.Helpers;
 using Plugins.CountlySDK.Models;
 using UnityEngine;
 
 namespace Plugins.CountlySDK.Services
 {
-    public class DeviceIdCountlyService
+    public class DeviceIdCountlyService : AbstractBaseService
     {
-        private List<IBaseService> _listeners;
         private readonly CountlyUtils _countlyUtils;
         private readonly CountlyConfiguration _config;
-        private readonly SessionCountlyService _sessionCountlyService;
-        private readonly RequestCountlyHelper _requestCountlyHelper;
         private readonly EventCountlyService _eventCountlyService;
-
+        private readonly RequestCountlyHelper _requestCountlyHelper;
+        private readonly SessionCountlyService _sessionCountlyService;
 
         internal DeviceIdCountlyService(CountlyConfiguration config, SessionCountlyService sessionCountlyService,
-            RequestCountlyHelper requestCountlyHelper, EventCountlyService eventCountlyService, CountlyUtils countlyUtils)
+            RequestCountlyHelper requestCountlyHelper, EventCountlyService eventCountlyService, CountlyUtils countlyUtils, ConsentCountlyService conentService) : base(conentService)
         {
             _config = config;
             _countlyUtils = countlyUtils;
@@ -27,14 +26,6 @@ namespace Plugins.CountlySDK.Services
         }
 
         public string DeviceId { get; private set; }
-
-        internal void AddListeners(List<IBaseService> listeners)
-        {
-            _listeners = listeners;
-            if (_config.EnableConsoleLogging) {
-                Debug.Log("[Countly DeviceIdCountlyService] AddListeners");
-            }
-        }
 
         internal void InitDeviceId(string deviceId = null)
         {
@@ -72,6 +63,11 @@ namespace Plugins.CountlySDK.Services
         /// <param name="deviceId"></param>
         public async Task ChangeDeviceIdAndEndCurrentSessionAsync(string deviceId)
         {
+            if (!_consentService.AnyConsentGiven()) {
+                Debug.Log("[Countly DeviceIdCountlyService] ChangeDeviceIdAndEndCurrentSessionAsync: Please set at least a single consent before calling this!");
+                return;
+            }
+
             //Ignore call if new and old device id are same
             if (DeviceId == deviceId) {
                 return;
@@ -101,6 +97,11 @@ namespace Plugins.CountlySDK.Services
         /// <param name="deviceId"></param>
         public async Task ChangeDeviceIdAndMergeSessionDataAsync(string deviceId)
         {
+            if (!_consentService.AnyConsentGiven()) {
+                Debug.Log("[Countly DeviceIdCountlyService] ChangeDeviceIdAndMergeSessionDataAsync: Please set at least a single consent before calling this!");
+                return;
+            }
+
             //Ignore call if new and old device id are same
             if (DeviceId == deviceId) {
                 return;
@@ -138,13 +139,26 @@ namespace Plugins.CountlySDK.Services
 
         private void NotifyListeners(bool merged)
         {
-            if (_listeners == null) {
+            if (Listeners == null) {
                 return;
             }
 
-            foreach (IBaseService listener in _listeners) {
+            foreach (AbstractBaseService listener in Listeners) {
                 listener.DeviceIdChanged(DeviceId, merged);
             }
         }
+
+        #region override Methods
+
+        internal override void DeviceIdChanged(string deviceId, bool merged)
+        {
+
+        }
+
+        internal override void ConsentChanged(List<Consents> updatedConsents, bool newConsentValue)
+        {
+
+        }
+        #endregion
     }
 }
