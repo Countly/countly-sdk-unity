@@ -81,7 +81,7 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
 
-            Log.Info("[Countly] AddBreadcrumbs : " + value);
+            Log.Info("[CrashReportsCountlyService] AddBreadcrumbs : " + value);
 
             if (_configuration.EnableTestMode) {
                 return;

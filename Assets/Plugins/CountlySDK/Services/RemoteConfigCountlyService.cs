@@ -88,7 +88,7 @@ namespace Plugins.CountlySDK.Services
                 _configDao.Save(configEntity);
                 Configs = Converter.ConvertJsonToDictionary(response.Data);
 
-                Log.Info("[Countly] RemoteConfigCountlyService UpdateConfig: " + response.ToString());
+                Log.Info("[RemoteConfigCountlyService] UpdateConfig: " + response.ToString());
 
             }
 

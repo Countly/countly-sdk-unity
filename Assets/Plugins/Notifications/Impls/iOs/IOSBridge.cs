@@ -42,7 +42,7 @@ public class IOSBridge : MonoBehaviour
     void OnDidRegisterForRemoteNotificationsWithDeviceToken(string deviceToken)
     {
         if (deviceToken != null && deviceToken.Length != 0) {
-            Log.Info("[Countly] OnDidRegisterForRemoteNotificationsWithDeviceToken Token: " + deviceToken);
+            Log.Info("[IOSBridge] OnDidRegisterForRemoteNotificationsWithDeviceToken Token: " + deviceToken);
 
             _onTokenResult?.Invoke(deviceToken);
         }
@@ -51,14 +51,14 @@ public class IOSBridge : MonoBehaviour
     //Sent when the application failed to be registered with Apple Push Notification Service (APNS).
     void OnDidFailToRegisterForRemoteNotificcallBackationsWithError(string error)
     {
-        Log.Info("[Countly] OnDidFailToRegisterForRemoteNotificcallBackationsWithError error: " + error);
+        Log.Info("[IOSBridge] OnDidFailToRegisterForRemoteNotificcallBackationsWithError error: " + error);
 
     }
 
 
     void OnPushNotificationsReceived(string pushData)
     {
-        Log.Info("[Countly] OnPushNotificationsReceived: " + pushData);
+        Log.Info("[IOSBridge] OnPushNotificationsReceived: " + pushData);
 
         _OnNotificationReceiveResult?.Invoke(pushData);
 
@@ -66,7 +66,7 @@ public class IOSBridge : MonoBehaviour
 
     void OnPushNotificationsClicked(string pushData)
     {
-        Log.Info("[Countly] OnPushNotificationsClicked: " + pushData);
+        Log.Info("[IOSBridge] OnPushNotificationsClicked: " + pushData);
 
         JObject item = JObject.Parse(pushData);
 
@@ -80,7 +80,7 @@ public class IOSBridge : MonoBehaviour
 
     void OnDidRegisterUserNotificationSettings(string setting)
     {
-        Log.Info("[Countly] OnDidRegisterUserNotificationSettings error: " + setting);
+        Log.Info("[IOSBridge] OnDidRegisterUserNotificationSettings error: " + setting);
     }
 
 }

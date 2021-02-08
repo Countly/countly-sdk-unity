@@ -72,7 +72,7 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
 
-            Log.Info("[Countly] SessionCountlyService: ExecuteBeginSessionAsync");
+            Log.Info("[SessionCountlyService] ExecuteBeginSessionAsync");
 
             FirstLaunchAppHelper.Process();
             _lastSessionRequestTime = DateTime.Now;
@@ -168,7 +168,7 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
 
-            Log.Info("[Countly] SessionCountlyService: ExtendSessionAsync");
+            Log.Info("[SessionCountlyService] ExtendSessionAsync");
 
             await ExecuteEndSessionAsync();
         }

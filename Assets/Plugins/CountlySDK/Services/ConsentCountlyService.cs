@@ -81,7 +81,7 @@ namespace Plugins.CountlySDK.Services
         public void GiveConsentAll()
         {
             if (!RequiresConsent) {
-                Log.Info("[Countly ConsentCountlyService] GiveConsentAll: Please set consent to be required before calling this!");
+                Log.Info("[ConsentCountlyService] GiveConsentAll: Please set consent to be required before calling this!");
                 return;
             }
 
@@ -97,12 +97,12 @@ namespace Plugins.CountlySDK.Services
         public void RemoveConsent(Consents[] consents)
         {
             if (!RequiresConsent) {
-                Log.Info("[Countly ConsentCountlyService] RemoveConsent: Please set consent to be required before calling this!");
+                Log.Info("[ConsentCountlyService] RemoveConsent: Please set consent to be required before calling this!");
                 return;
             }
 
             if (consents == null) {
-                Log.Info("[Countly ConsentCountlyService]: Calling RemoveConsent with null consents list!");
+                Log.Info("[ConsentCountlyService] Calling RemoveConsent with null consents list!");
                 return;
             }
             //Remove Duplicates entries
@@ -119,7 +119,7 @@ namespace Plugins.CountlySDK.Services
         public void RemoveAllConsent()
         {
             if (!RequiresConsent) {
-                Log.Info("[Countly ConsentCountlyService] RemoveAllConsent: Please set consent to be required before calling this!");
+                Log.Info("[ConsentCountlyService] RemoveAllConsent: Please set consent to be required before calling this!");
                 return;
             }
             SetConsentInternal(_countlyConsents.Keys.ToArray(), false);
@@ -133,12 +133,12 @@ namespace Plugins.CountlySDK.Services
         public void GiveConsentToGroup(string[] groupName)
         {
             if (!RequiresConsent) {
-                Log.Info("[Countly ConsentCountlyService] GiveConsentToGroup: Please set consent to be required before calling this!");
+                Log.Info("[ConsentCountlyService] GiveConsentToGroup: Please set consent to be required before calling this!");
                 return;
             }
 
             if (groupName == null) {
-                Log.Info("[Countly ConsentCountlyService]: Calling GiveConsentToGroup with null groupName!");
+                Log.Info("[ConsentCountlyService] Calling GiveConsentToGroup with null groupName!");
                 return;
             }
 
@@ -158,12 +158,12 @@ namespace Plugins.CountlySDK.Services
         public void RemoveConsentOfGroup(string[] groupName)
         {
             if (!RequiresConsent) {
-                Log.Info("[Countly ConsentCountlyService] RemoveConsentOfGroup: Please set consent to be required before calling this!");
+                Log.Info("[ConsentCountlyService] RemoveConsentOfGroup: Please set consent to be required before calling this!");
                 return;
             }
 
             if (groupName == null) {
-                Log.Info("[Countly ConsentCountlyService]: Calling RemoveConsentOfGroup with null groupName!");
+                Log.Info("[ConsentCountlyService] Calling RemoveConsentOfGroup with null groupName!");
                 return;
             }
 
@@ -181,7 +181,7 @@ namespace Plugins.CountlySDK.Services
         private void SetConsentInternal(Consents[] consents, bool value)
         {
             if (consents == null) {
-                Log.Info("[Countly ConsentCountlyService]: Calling SetConsentInternal with null consents list!");
+                Log.Info("[ConsentCountlyService] Calling SetConsentInternal with null consents list!");
                 return;
             }
 
@@ -198,7 +198,7 @@ namespace Plugins.CountlySDK.Services
                 updatedConsents.Add(consent);
                 _countlyConsents[consent] = value;
 
-                Log.Info("[Countly ConsentCountlyService] Setting consent for: [" + consent.ToString() + "] with value: [" + value + "]");
+                Log.Info("[ConsentCountlyService] Setting consent for: [" + consent.ToString() + "] with value: [" + value + "]");
             }
 
             NotifyListeners(updatedConsents, value);

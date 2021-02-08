@@ -403,11 +403,11 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
 
     public void OnNotificationReceived(string message)
     {
-        Debug.Log("[Countly Example] OnNotificationReceived: " + message);
+        Debug.Log("[Example] OnNotificationReceived: " + message);
     }
 
     public void OnNotificationClicked(string message, int index)
     {
-        Debug.Log("[Countly Example] OnNoticicationClicked: " + message + ", index: " + index);
+        Debug.Log("[Example] OnNoticicationClicked: " + message + ", index: " + index);
     }
 }

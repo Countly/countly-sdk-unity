@@ -60,7 +60,7 @@ namespace Plugins.CountlySDK.Services
         internal async Task RecordEventAsync(CountlyEventModel @event)
         {
 
-            Log.Info("[Countly] RecordEventAsync : " + @event.ToString());
+            Log.Info("[EventCountlyService] RecordEventAsync : " + @event.ToString());
 
             if (_configuration.EnableTestMode) {
                 return;
@@ -113,7 +113,7 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
 
-            Log.Info("[Countly] RecordEventAsync : key = " + key);
+            Log.Info("[EventCountlyService] RecordEventAsync : key = " + key);
 
             if (_configuration.EnableTestMode) {
                 return;
@@ -135,7 +135,7 @@ namespace Plugins.CountlySDK.Services
 
                     if (!isValidDataType) {
                         toRemove.Add(item.Key);
-                        Log.Warning("[Countly] RecordEventAsync : In segmentation Data type of item '" + item.Key + "'isn't valid.");
+                        Log.Warning("[EventCountlyService] RecordEventAsync : In segmentation Data type of item '" + item.Key + "'isn't valid.");
                     }
                 }
 

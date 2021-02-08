@@ -26,14 +26,14 @@ namespace Notifications.Impls.Android
         public void OnTokenResult(string token)
         {
             _onTokenResult?.Invoke(token);
-            Log.Info("[Countly] AndroidBridge Firebase token: " + token);
+            Log.Info("[AndroidBridge] AndroidBridge Firebase token: " + token);
 
         }
 
         public void OnNotificationReceived(string data)
         {
             _OnNotificationReceiveResult?.Invoke(data);
-            Log.Info("[CountlyAndroidBridge] onMessageReceived");
+            Log.Info("[AndroidBridge] onMessageReceived");
 
         }
 
@@ -47,7 +47,7 @@ namespace Notifications.Impls.Android
                 index = (int)jObject.GetValue("click_index");
             }
             _OnNotificationClickResult?.Invoke(data, index);
-            Log.Info("[CountlyAndroidBridge] OnNotificationClicked");
+            Log.Info("[AndroidBridge] OnNotificationClicked");
         }
     }
 }

@@ -124,7 +124,7 @@ namespace Plugins.CountlySDK.Services
              */
             if ((!string.IsNullOrEmpty(CountryCode) && string.IsNullOrEmpty(City))
                 || (!string.IsNullOrEmpty(City) && string.IsNullOrEmpty(CountryCode))) {
-                Log.Warning("[Countly LocationService] In \"SetLocation\" both country code and city should be set together");
+                Log.Warning("[LocationService] In \"SetLocation\" both country code and city should be set together");
             }
 
             City = city;

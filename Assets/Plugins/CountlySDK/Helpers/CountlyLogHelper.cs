@@ -1,5 +1,4 @@
 ﻿using Plugins.CountlySDK.Models;
-using UnityEngine;
 
 public class CountlyLogHelper
 {
@@ -12,22 +11,38 @@ public class CountlyLogHelper
     internal void Info(string message)
     {
         if (_configuration.EnableConsoleLogging) {
-            Debug.Log(message);
+            UnityEngine.Debug.Log("[Info][Countly]" + message);
         }
         
+    }
+
+    internal void Debug(string message)
+    {
+        if (_configuration.EnableConsoleLogging) {
+            UnityEngine.Debug.Log("[Debug][Countly]" + message);
+        }
+
+    }
+
+    internal void Verbose(string message)
+    {
+        if (_configuration.EnableConsoleLogging) {
+            UnityEngine.Debug.Log("[Verbose][Countly]" + message);
+        }
+
     }
 
     internal void Error(string message)
     {
         if (_configuration.EnableConsoleLogging) {
-            Debug.LogError(message);
+            UnityEngine.Debug.LogError("[Error][Countly]" + message);
         }
     }
 
     internal void Warning(string message)
     {
         if (_configuration.EnableConsoleLogging) {
-            Debug.LogWarning(message);
+            UnityEngine.Debug.LogWarning("[Warning][Countly]" + message);
         }
     }
 

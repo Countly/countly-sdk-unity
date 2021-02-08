@@ -38,7 +38,7 @@ namespace Plugins.CountlySDK.Persistance.Dao
 
                 return entities[0];
             } catch (Exception ex) {
-                Log.Info("[Countly] SegmentDao GetByEventId: Couldn't complete db operation, [" + ex.Message + "]");
+                Log.Info("[SegmentDao] GetByEventId: Couldn't complete db operation, [" + ex.Message + "]");
                 return null;
             }
         }
