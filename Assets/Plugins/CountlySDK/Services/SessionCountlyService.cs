@@ -70,6 +70,9 @@ namespace Plugins.CountlySDK.Services
             }
         }
 
+        /// <summary>
+        /// Initiates a session
+        /// </summary>
         public async Task ExecuteBeginSessionAsync()
         {
             if (!_consentService.CheckConsent(Consents.Sessions)) {
@@ -129,6 +132,9 @@ namespace Plugins.CountlySDK.Services
             }
         }
 
+        /// <summary>
+        /// Ends a session
+        /// </summary>
         public async Task ExecuteEndSessionAsync(bool disposeTimer = true)
         {
             if (!_consentService.CheckConsent(Consents.Sessions)) {
@@ -178,7 +184,7 @@ namespace Plugins.CountlySDK.Services
             }
 
             if (_configModel.EnableConsoleLogging) {
-                Debug.Log("[Countly] SessionCountlyService: ExtendSessionAsync");
+                Debug.Log("[Countly] SessionCountlyService: EndSessionAsync");
             }
 
             await ExecuteEndSessionAsync();

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Plugins.CountlySDK.Enums;
@@ -100,6 +99,14 @@ namespace Plugins.CountlySDK.Services
             _crashBreadcrumbs.Enqueue(value);
         }
 
+        /// <summary>
+        /// Create an CountlyExceptionDetailModel object from parameters.
+        /// </summary>
+        /// <param name="message">a string that contain detailed description of exception.</param>
+        /// <param name="stackTrace">a string that describes the contents of call stack.</param>
+        /// <param name="nonfatal">type of error that force programe to close</param>
+        /// <param name="segments">custom key/values to be reported</param>
+        /// <returns>CountlyExceptionDetailModel</returns>
         private CountlyExceptionDetailModel ExceptionDetailModel(string message, string stackTrace, bool nonfatal, IDictionary<string, object> segments)
         {
             return new CountlyExceptionDetailModel {

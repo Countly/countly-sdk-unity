@@ -43,7 +43,7 @@ namespace Plugins.CountlySDK.Services
         /// Modifies custom user data only. Custom data should be json string.
         /// Deletes an already defined custom property from the Countly server, if it is supplied with a NULL value
         /// </summary>
-        /// <param name="userDetails"></param>
+        /// <param name="userDetails">User's cutome detail object</param>
         /// <return></returns>
         internal async Task UserCustomDetailsAsync(CountlyUserDetailsModel userDetails)
         {
@@ -83,6 +83,7 @@ namespace Plugins.CountlySDK.Services
         /// Sets information about user with custom properties.
         /// In custom properties you can provide any string key values to be stored with user.
         /// </summary>
+        /// <param name="userDetailsModel">User Detail Model with the custome properties</param>
         /// <returns></returns>
         public async Task SetCustomUserDetailsAsync(CountlyUserDetailsModel userDetailsModel)
         {
@@ -174,7 +175,7 @@ namespace Plugins.CountlySDK.Services
         /// Save maximal value between existing and provided.
         /// </summary>
         /// <param name="key">String with property name to check for max</param>
-        /// <param name="value">int value to check for max</param>
+        /// <param name="value">double value to check for max</param>
         public void Max(string key, double value)
         {
             AddToCustomData(key, new Dictionary<string, object> { { "$max", value } });
@@ -184,7 +185,7 @@ namespace Plugins.CountlySDK.Services
         /// Save minimal value between existing and provided.
         /// </summary>
         /// <param name="key">string with property name to check for min</param>
-        /// <param name="value">int value to check for min</param>
+        /// <param name="value">double value to check for min</param>
         public void Min(string key, double value)
         {
             AddToCustomData(key, new Dictionary<string, object> { { "$min", value } });
@@ -213,17 +214,21 @@ namespace Plugins.CountlySDK.Services
         }
 
         /// <summary>
-        /// Create array property, if property does not exist and remove value from array
-        /// You can only use it on array properties or properties that do not exist yet.
+        /// Create array property, if property does not exist and remove value from array.
         /// </summary>
         /// <param name="key">String with property name for array property</param>
-        /// <param name="value">string with value to remove from array</param>
+        /// <param name="value">array with value to remove from array</param>
         public void Pull(string key, string[] value)
         {
             AddToCustomData(key, new Dictionary<string, object> { { "$pull", value } });
         }
 
 
+        /// <summary>
+        /// Create a property
+        /// </summary>
+        /// <param name="key">property name</param>
+        /// <param name="value">property value</param>
         private void AddToCustomData(string key, object value)
         {
             if (!_consentService.CheckConsent(Consents.Users)) {

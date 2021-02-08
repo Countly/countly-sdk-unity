@@ -139,6 +139,10 @@ namespace Plugins.CountlySDK.Services
             PlayerPrefs.SetString(Constants.DeviceIDKey, DeviceId);
         }
 
+        /// <summary>
+        /// Call <code>DeviceIdChanged</code> on all listeners.
+        /// </summary>
+        /// <param name="merged">Pass true on session data merged</param>
         private void NotifyListeners(bool merged)
         {
             if (Listeners == null) {

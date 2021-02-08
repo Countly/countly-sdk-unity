@@ -63,7 +63,7 @@ namespace Plugins.CountlySDK.Services
         /// Stop tracking a view
         /// </summary>
         /// <param name="name of the view"></param>
-        /// <param name="hasSessionBegunWithView"></param>
+        /// <param name="hasSessionBegunWithView">set true if the session is begin with this view</param>
         /// <returns></returns>
         public async Task RecordCloseViewAsync(string name, bool hasSessionBegunWithView = false)
         {
@@ -108,11 +108,11 @@ namespace Plugins.CountlySDK.Services
         /// <summary>
         /// Reports a particular action with the specified details
         /// </summary>
-        /// <param name="type"></param>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
-        /// <param name="width"></param>
-        /// <param name="height"></param>
+        /// <param name="type"> type of action</param>
+        /// <param name="x">x-coordinate</param>
+        /// <param name="y">y-coordinate</param>
+        /// <param name="width">width of screen</param>
+        /// <param name="height">height of screen</param>
         /// <returns></returns>
         public async Task ReportActionAsync(string type, int x, int y, int width, int height)
         {

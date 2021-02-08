@@ -31,6 +31,10 @@ namespace Plugins.CountlySDK.Models
         /// Set to prevent parameter tampering.
         /// </summary>
         public string Salt = null;
+
+        /// <summary>
+        /// Set to send first app launch segment.
+        /// </summary>
         public bool EnableFirstAppLaunchSegment = false;
 
         /// <summary>
@@ -44,9 +48,12 @@ namespace Plugins.CountlySDK.Models
         public bool EnableTestMode = false;
 
         /// <summary>
-        /// Set to true of you want to enable countly internal debugging logs.
+        /// Set to true if you want to enable countly internal debugging logs.
         /// </summary>
         public bool EnableConsoleLogging = false;
+        /// <summary>
+        /// Set to true when you don't want to extend session.
+        /// </summary
         public bool IgnoreSessionCooldown = false;
 
         /// <summary>
@@ -165,7 +172,7 @@ namespace Plugins.CountlySDK.Models
         /// <summary>
         /// Give consent to features in case consent is required.
         /// </summary>
-        /// <param name="consents">array of consent to be added to the consent group</param>
+        /// <param name="consents">array of consent for which consent should be given</param>
         public void GiveConsent([NotNull] Consents[] consents)
         {
             GivenConsent = consents;

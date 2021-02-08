@@ -204,7 +204,11 @@ namespace Plugins.CountlySDK.Services
         #endregion
 
         #region Helper Methods
-
+        /// <summary>
+        /// Private medthod that update selected consents.
+        /// </summary>
+        /// <param name="consents">List of consent</param>
+        /// <param name="value">value to be set</param>
         private void SetConsentInternal(Consents[] consents, bool value)
         {
             if (consents == null) {
@@ -236,6 +240,11 @@ namespace Plugins.CountlySDK.Services
             NotifyListeners(updatedConsents, value);
         }
 
+        /// <summary>
+        /// Call <code>ConsentChanged</code> on all listeners.
+        /// </summary>
+        /// <param name="updatedConsents">List of modified consent</param>
+        /// <param name="newConsentValue">Modified Conents's new value</param>
         private void NotifyListeners(List<Consents> updatedConsents, bool newConsentValue)
         {
             if (Listeners == null || updatedConsents.Count < 1) {

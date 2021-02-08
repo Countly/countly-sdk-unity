@@ -216,6 +216,9 @@ namespace Plugins.CountlySDK.Services
             await _requestCountlyHelper.GetResponseAsync(requestParams);
         }
 
+        /// <summary>
+        ///     Add segment on app's first launch
+        /// </summary>
         private void AddFirstAppSegment(CountlyEventModel @event)
         {
             if (@event.Segmentation == null) {
