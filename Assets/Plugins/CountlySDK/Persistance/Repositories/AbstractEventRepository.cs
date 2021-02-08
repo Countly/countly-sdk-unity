@@ -57,7 +57,7 @@ namespace Plugins.CountlySDK.Persistance.Repositories
                 _segmentDao.Save(segmentEntity);
             }
 
-            Log.Info("[" + GetType().Name + "] Event repo enqueue: \n" + model + ", segment: " + segmentModel);
+            Log.Debug("[" + GetType().Name + "] Event repo enqueue: \n" + model + ", segment: " + segmentModel);
 
             return true;
         }

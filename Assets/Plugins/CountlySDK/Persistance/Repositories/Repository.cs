@@ -30,13 +30,13 @@ namespace Plugins.CountlySDK.Persistance.Repositories
                     continue;
                 }
 
-                Log.Info("[Repository] Loaded model: " + model);
+                Log.Verbose("[Repository] Loaded model: " + model);
 
 
                 Models.Enqueue(model);
             }
 
-            Log.Info("[Repository] Loaded entities of type " + typeof(TEntity).Name + " from db:" + Count);
+            Log.Verbose("[Repository] Loaded entities of type " + typeof(TEntity).Name + " from db:" + Count);
 
         }
 
@@ -49,7 +49,7 @@ namespace Plugins.CountlySDK.Persistance.Repositories
             TEntity entity = ConvertModelToEntity(model);
             bool res = _dao.Save(entity);
 
-            Log.Info("[Repository] Request entity save failed, entity: " + entity);
+            Log.Verbose("[Repository] Request entity save failed, entity: " + entity);
 
             return res;
         }

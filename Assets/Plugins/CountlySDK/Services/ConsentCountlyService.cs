@@ -198,7 +198,7 @@ namespace Plugins.CountlySDK.Services
                 updatedConsents.Add(consent);
                 _countlyConsents[consent] = value;
 
-                Log.Info("[ConsentCountlyService] Setting consent for: [" + consent.ToString() + "] with value: [" + value + "]");
+                Log.Debug("[ConsentCountlyService] Setting consent for: [" + consent.ToString() + "] with value: [" + value + "]");
             }
 
             NotifyListeners(updatedConsents, value);

@@ -60,7 +60,7 @@ namespace Plugins.CountlySDK.Services
         internal async Task RecordEventAsync(CountlyEventModel @event)
         {
 
-            Log.Info("[EventCountlyService] RecordEventAsync : " + @event.ToString());
+            Log.Debug("[EventCountlyService] RecordEventAsync : " + @event.ToString());
 
             if (_configuration.EnableTestMode) {
                 return;

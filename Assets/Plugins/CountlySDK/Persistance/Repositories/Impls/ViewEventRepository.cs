@@ -15,7 +15,7 @@ namespace Plugins.CountlySDK.Persistance.Repositories.Impls
 
         protected override bool ValidateModelBeforeEnqueue(CountlyEventModel model)
         {
-            Log.Info("[ViewEventRepository] Validate model: \n" + model);
+            Log.Debug("[ViewEventRepository] Validate model: \n" + model);
             return model.Key.Equals(CountlyEventModel.ViewEvent);
         }
     }

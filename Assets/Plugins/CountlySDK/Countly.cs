@@ -276,7 +276,7 @@ namespace Plugins.CountlySDK
                 return;
             }
 
-            _logHelper.Info("[Countly] OnApplicationQuit");
+            _logHelper.Debug("[Countly] OnApplicationQuit");
 
             _db.Close();
         }
@@ -299,7 +299,7 @@ namespace Plugins.CountlySDK
         private void OnApplicationFocus(bool hasFocus)
         {
             if (Configuration.EnableConsoleLogging) {
-                _logHelper.Info("[Countly] OnApplicationFocus: " + hasFocus);
+                _logHelper.Debug("[Countly] OnApplicationFocus: " + hasFocus);
             }
 
             if (hasFocus) {
@@ -312,7 +312,7 @@ namespace Plugins.CountlySDK
         private async void OnApplicationPause(bool pauseStatus)
         {
             if (Configuration.EnableConsoleLogging) {
-                _logHelper.Info("[Countly] OnApplicationPause: " + pauseStatus);
+                _logHelper.Debug("[Countly] OnApplicationPause: " + pauseStatus);
             }
 
             if (CrashReports != null) {

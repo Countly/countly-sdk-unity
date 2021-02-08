@@ -66,6 +66,8 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
 
+            Log.Info("[DeviceIdCountlyService] ChangeDeviceIdAndEndCurrentSessionAsync: " + deviceId);
+
             //Ignore call if new and old device id are same
             if (DeviceId == deviceId) {
                 return;
@@ -100,6 +102,8 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
 
+            Log.Info("[DeviceIdCountlyService] ChangeDeviceIdAndMergeSessionDataAsync: " + deviceId);
+
             //Ignore call if new and old device id are same
             if (DeviceId == deviceId) {
                 return;
@@ -133,6 +137,9 @@ namespace Plugins.CountlySDK.Services
 
             //Updating Cache
             PlayerPrefs.SetString(Constants.DeviceIDKey, DeviceId);
+
+            Log.Debug("[DeviceIdCountlyService] UpdateDeviceId: " + newDeviceId);
+
         }
 
         private void NotifyListeners(bool merged)

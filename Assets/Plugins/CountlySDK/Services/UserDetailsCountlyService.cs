@@ -36,6 +36,8 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
 
+            Log.Debug("[StarRatingCountlyService] UserDetailsAsync " + userDetails.ToString());
+
             await SetUserDetailsAsync(userDetails);
         }
 
@@ -51,6 +53,9 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
 
+            Log.Debug("[StarRatingCountlyService] UserCustomDetailsAsync " + userDetails.ToString());
+
+
             await SetCustomUserDetailsAsync(userDetails);
         }
 
@@ -63,6 +68,8 @@ namespace Plugins.CountlySDK.Services
             if (!_consentService.CheckConsent(Consents.Users)) {
                 return;
             }
+
+            Log.Info("[StarRatingCountlyService] SetUserDetailsAsync " + userDetailsModel.ToString());
 
             if (!_countlyUtils.IsPictureValid(userDetailsModel.PictureUrl)) {
                 throw new Exception("Accepted picture formats are .png, .gif and .jpeg");
@@ -88,6 +95,9 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
 
+            Log.Info("[StarRatingCountlyService] SetCustomUserDetailsAsync " + userDetailsModel.ToString());
+
+
             Dictionary<string, object> requestParams =
                 new Dictionary<string, object>
                 {
@@ -111,6 +121,9 @@ namespace Plugins.CountlySDK.Services
             if (!CustomDataProperties.Any()) {
                 return;
             }
+
+            Log.Info("[StarRatingCountlyService] SaveAsync");
+
 
             CountlyUserDetailsModel model = new CountlyUserDetailsModel(CustomDataProperties);
 
@@ -234,6 +247,9 @@ namespace Plugins.CountlySDK.Services
             if (!_consentService.CheckConsent(Consents.Users)) {
                 return;
             }
+
+            Log.Debug("[StarRatingCountlyService] AddToCustomData: " + key + ", " + value.ToString());
+
 
             if (CustomDataProperties.ContainsKey(key)) {
                 string item = CustomDataProperties.Select(x => x.Key).FirstOrDefault(x => x.Equals(key, StringComparison.OrdinalIgnoreCase));

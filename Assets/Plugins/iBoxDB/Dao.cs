@@ -25,7 +25,7 @@ namespace Plugins.iBoxDB
             try {
                 return Auto.Insert(Table, entity);
             } catch (Exception ex) {
-                Log.Info("[Dao] Save: Couldn't complete db operation, [" + ex.Message + "]");
+                Log.Error("[Dao] Save: Couldn't complete db operation, [" + ex.Message + "]");
             }
 
             return false;
@@ -36,7 +36,7 @@ namespace Plugins.iBoxDB
             try {
                 return Auto.Update(Table, entity);
             } catch (Exception ex) {
-                Log.Info("[Dao] Update: Couldn't complete db operation, [" + ex.Message + "]");
+                Log.Error("[Dao] Update: Couldn't complete db operation, [" + ex.Message + "]");
             }
 
             return false;
@@ -48,7 +48,7 @@ namespace Plugins.iBoxDB
             try {
                 result = Auto.Select<TEntity>("from " + Table);
             } catch (Exception ex) {
-                Log.Info("[Dao] LoadAll: Couldn't complete db operation, [" + ex.Message + "]");
+                Log.Error("[Dao] LoadAll: Couldn't complete db operation, [" + ex.Message + "]");
             }
 
             return result;
@@ -59,7 +59,7 @@ namespace Plugins.iBoxDB
             try {
                 Auto.Delete(Table, key);
             } catch (Exception ex) {
-                Log.Info("[Dao] Remove: Couldn't complete db operation, [" + ex.Message + "]");
+                Log.Error("[Dao] Remove: Couldn't complete db operation, [" + ex.Message + "]");
             }
         }
 
@@ -71,7 +71,7 @@ namespace Plugins.iBoxDB
                     Auto.Delete(Table, entity.GetId());
                 }
             } catch (Exception ex) {
-                Log.Info("[Dao] RemoveAll: Couldn't complete db operation, [" + ex.Message + "]");
+                Log.Error("[Dao] RemoveAll: Couldn't complete db operation, [" + ex.Message + "]");
             }
         }
 
@@ -82,7 +82,7 @@ namespace Plugins.iBoxDB
                 result = Auto.NewId();
             } catch (Exception ex) {
                 result = 0;
-                Log.Info("[Dao] GenerateNewId: Couldn't complete db operation, [" + ex.Message + "]");
+                Log.Error("[Dao] GenerateNewId: Couldn't complete db operation, [" + ex.Message + "]");
             }
 
             return result;

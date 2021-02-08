@@ -25,7 +25,7 @@ namespace Notifications
 
             _listeners.Add(listener);
 
-            _logHelper.Info("[NotificationsCallbackService] AddListener: " + listener);
+            _logHelper.Debug("[NotificationsCallbackService] AddListener: " + listener);
         }
         /// <summary>
         /// Remove Notification listener.
@@ -34,7 +34,7 @@ namespace Notifications
         public void RemoveListener(INotificationListener listener)
         {
             _listeners.Remove(listener);
-            _logHelper.Info("[NotificationsCallbackService] RemoveListener: " + listener);
+            _logHelper.Debug("[NotificationsCallbackService] RemoveListener: " + listener);
 
         }
 
@@ -50,7 +50,7 @@ namespace Notifications
                 }
             }
 
-            _logHelper.Info("[NotificationsCallbackService] SendMessageToListeners: " + data);
+            _logHelper.Debug("[NotificationsCallbackService] SendMessageToListeners: " + data);
 
         }
 
@@ -67,7 +67,7 @@ namespace Notifications
                 }
             }
 
-            _logHelper.Info("[NotificationsCallbackService] SendMessageToListeners: " + data);
+            _logHelper.Debug("[NotificationsCallbackService] SendMessageToListeners: " + data);
         }
     }
 

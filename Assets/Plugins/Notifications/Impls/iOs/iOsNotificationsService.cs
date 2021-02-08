@@ -52,7 +52,7 @@ namespace Notifications.Impls.iOs
                         Identifier = identifier
                     };
 
-                Log.Info("[IOsNotificationsService] ReportPushActionAsync key: " + CountlyEventModel.PushActionEvent + ", segments: " + segment);
+                Log.Debug("[IOsNotificationsService] ReportPushActionAsync key: " + CountlyEventModel.PushActionEvent + ", segments: " + segment);
 
                 await _eventCountlyService.ReportCustomEventAsync(
                     CountlyEventModel.PushActionEvent, segment.ToDictionary());
@@ -68,7 +68,7 @@ namespace Notifications.Impls.iOs
 
         public void OnNotificationClicked(Action<string, int> result)
         {
-            Log.Info("[IOsNotificationsService] OnNotificationClicked register");
+            Log.Debug("[IOsNotificationsService] OnNotificationClicked register");
 
             _bridge.ListenClickResult(result);
 
@@ -76,7 +76,7 @@ namespace Notifications.Impls.iOs
 
         public void OnNotificationReceived(Action<string> result)
         {
-            Log.Info("[IOsNotificationsService] OnNotificationReceived register");
+            Log.Debug("[IOsNotificationsService] OnNotificationReceived register");
             _bridge.ListenReceiveResult(result);
 
         }
