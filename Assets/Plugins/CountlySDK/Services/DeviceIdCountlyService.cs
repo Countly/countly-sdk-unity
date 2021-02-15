@@ -84,7 +84,7 @@ namespace Plugins.CountlySDK.Services
 
             //Ends current session
             //Do not dispose timer object
-            await _sessionCountlyService.ExecuteEndSessionAsync();
+            await _sessionCountlyService.ExecuteEndSessionAsync(false);
 
             //Update device id
             UpdateDeviceId(deviceId);
