@@ -28,7 +28,7 @@ namespace Plugins.CountlySDK.Services
         /// Modifies all user data. Custom data should be json string.
         /// Deletes an already defined custom property from the Countly server, if it is supplied with a NULL value
         /// </summary>
-        /// <param name="userDetails"></param>
+        /// <param name="userDetails">User's detail object</param>
         /// <returns></returns>
         internal async Task UserDetailsAsync(CountlyUserDetailsModel userDetails)
         {
@@ -43,7 +43,7 @@ namespace Plugins.CountlySDK.Services
         /// Modifies custom user data only. Custom data should be json string.
         /// Deletes an already defined custom property from the Countly server, if it is supplied with a NULL value
         /// </summary>
-        /// <param name="userDetails">User's cutome detail object</param>
+        /// <param name="userDetails">User's custom detail object</param>
         /// <return></returns>
         internal async Task UserCustomDetailsAsync(CountlyUserDetailsModel userDetails)
         {
@@ -83,7 +83,7 @@ namespace Plugins.CountlySDK.Services
         /// Sets information about user with custom properties.
         /// In custom properties you can provide any string key values to be stored with user.
         /// </summary>
-        /// <param name="userDetailsModel">User Detail Model with the custome properties</param>
+        /// <param name="userDetailsModel">User Detail Model with the custom properties</param>
         /// <returns></returns>
         public async Task SetCustomUserDetailsAsync(CountlyUserDetailsModel userDetailsModel)
         {
@@ -155,7 +155,7 @@ namespace Plugins.CountlySDK.Services
         /// Increment custom property value by provided value.
         /// </summary>
         /// <param name="key">string with property name to increment</param>
-        /// <param name="value">int value by which to increment</param>
+        /// <param name="value">double value by which to increment</param>
         public void IncrementBy(string key, double value)
         {
             AddToCustomData(key, new Dictionary<string, object> { { "$inc", value } });
@@ -165,7 +165,7 @@ namespace Plugins.CountlySDK.Services
         /// Multiply custom property value by provided value.
         /// </summary>
         /// <param name="key">string with property name to multiply</param>
-        /// <param name="value">int value by which to multiply</param>
+        /// <param name="value">double value by which to multiply</param>
         public void Multiply(string key, double value)
         {
             AddToCustomData(key, new Dictionary<string, object> { { "$mul", value } });
@@ -196,7 +196,7 @@ namespace Plugins.CountlySDK.Services
         /// You can only use it on array properties or properties that do not exist yet.
         /// </summary>
         /// <param name="key">string with property name for array property</param>
-        /// <param name="value">string with value to add to array</param>
+        /// <param name="value">array with values to add</param>
         public void Push(string key, string[] value)
         {
             AddToCustomData(key, new Dictionary<string, object> { { "$push", value } });
@@ -207,7 +207,7 @@ namespace Plugins.CountlySDK.Services
         /// You can only use it on array properties or properties that do not exist yet.
         /// </summary>
         /// <param name="key">string with property name for array property</param>
-        /// <param name="value">string with value to add to array</param>
+        /// <param name="value">array with values to add</param>
         public void PushUnique(string key, string[] value)
         {
             AddToCustomData(key, new Dictionary<string, object> { { "$addToSet", value } });
@@ -217,7 +217,7 @@ namespace Plugins.CountlySDK.Services
         /// Create array property, if property does not exist and remove value from array.
         /// </summary>
         /// <param name="key">String with property name for array property</param>
-        /// <param name="value">array with value to remove from array</param>
+        /// <param name="value">array with values to remove from array</param>
         public void Pull(string key, string[] value)
         {
             AddToCustomData(key, new Dictionary<string, object> { { "$pull", value } });

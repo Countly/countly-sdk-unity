@@ -25,7 +25,7 @@ namespace Plugins.CountlySDK.Services
         /// Start tracking a view
         /// </summary>
         /// <param name="name">name of the view</param>
-        /// <param name="hasSessionBegunWithView">set true if the session is begin with this view</param>
+        /// <param name="hasSessionBegunWithView">set true if the session is beginning with this view</param>
         /// <returns></returns>
         public async Task RecordOpenViewAsync(string name, bool hasSessionBegunWithView = false)
         {
@@ -63,7 +63,7 @@ namespace Plugins.CountlySDK.Services
         /// Stop tracking a view
         /// </summary>
         /// <param name="name of the view"></param>
-        /// <param name="hasSessionBegunWithView">set true if the session is begin with this view</param>
+        /// <param name="hasSessionBegunWithView">set true if the session is beginning with this view</param>
         /// <returns></returns>
         public async Task RecordCloseViewAsync(string name, bool hasSessionBegunWithView = false)
         {

@@ -33,7 +33,7 @@ namespace Plugins.CountlySDK.Models
         public string Salt = null;
 
         /// <summary>
-        /// Set to send first app launch segment.
+        /// Set to send first app launch segment with event on app's first launch.
         /// </summary>
         public bool EnableFirstAppLaunchSegment = false;
 
@@ -43,7 +43,7 @@ namespace Plugins.CountlySDK.Models
         public bool EnablePost = false;
 
         /// <summary>
-        /// Set to true when you don't want to send requests to the Countly server.
+        /// Set to true if you want the SDK to pretend that it's functioning.
         /// </summary>
         public bool EnableTestMode = false;
 
@@ -83,7 +83,7 @@ namespace Plugins.CountlySDK.Models
         public int StoredRequestLimit = 1000;
 
         /// <summary>
-        /// Set the lenght of breadcrumbs.
+        /// Set the maximum amount of breadcrumbs.
         /// </summary>
         public int TotalBreadcrumbsAllowed = 100;
 

@@ -28,6 +28,9 @@ namespace Plugins.CountlySDK.Services
             _notificationsCallbackService = notificationsCallbackService;
         }
 
+        /// <summary>
+        /// A private method to register device for receiving Push Notifications.
+        /// </summary>
         private void EnableNotification()
         {
             //Enables push notification on start

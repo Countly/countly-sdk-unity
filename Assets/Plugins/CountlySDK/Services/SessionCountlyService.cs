@@ -53,8 +53,8 @@ namespace Plugins.CountlySDK.Services
         /// <summary>
         /// Extends the session after the session duration is elapsed
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="elapsedEventArgs"></param>
+        /// <param name="sender">reference of caller</param>
+        /// <param name="elapsedEventArgs"> Provides data for <code>Timer.Elapsed</code>event.</param>
         private async void SessionTimerOnElapsedAsync(object sender, ElapsedEventArgs elapsedEventArgs)
         {
             if (!IsSessionInitiated) {
@@ -135,6 +135,7 @@ namespace Plugins.CountlySDK.Services
         /// <summary>
         /// Ends a session
         /// </summary>
+        /// <param name="disposeTimer">Set true to stop extend the session after session ends.</param>
         public async Task ExecuteEndSessionAsync(bool disposeTimer = true)
         {
             if (!_consentService.CheckConsent(Consents.Sessions)) {
@@ -191,7 +192,7 @@ namespace Plugins.CountlySDK.Services
         }
 
         /// <summary>
-        /// Extends a session by another session duration provided in configuration. By defautl session duration is 60 seconds.
+        /// Extends a session by another session duration provided in configuration. By default session duration is 60 seconds.
         /// </summary>
         public async Task ExtendSessionAsync()
         {

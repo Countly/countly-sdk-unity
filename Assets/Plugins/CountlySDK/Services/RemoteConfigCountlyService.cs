@@ -20,7 +20,7 @@ namespace Plugins.CountlySDK.Services
         private readonly RequestCountlyHelper _requestCountlyHelper;
 
         /// <summary>
-        /// Get the remote config. It will return null if there isn't any stored config.
+        /// Get the remote config values.
         /// </summary>
         public Dictionary<string, object> Configs { private set; get; }
 
@@ -41,6 +41,9 @@ namespace Plugins.CountlySDK.Services
             
         }
 
+        /// <summary>
+        ///     Fetch fresh remote config values from server and initialize <code>Configs</code>
+        /// </summary>
         internal async Task<CountlyResponse> InitConfig()
         {
             if (_config.EnableTestMode) {
@@ -51,7 +54,7 @@ namespace Plugins.CountlySDK.Services
         }
 
         /// <summary>
-        ///     Fetch locally stored remote config.
+        ///     Fetch locally stored remote config values.
         /// </summary>
         /// <returns>Stored Remote config</returns>
         private Dictionary<string, object> FetchConfigFromDB()
@@ -70,7 +73,7 @@ namespace Plugins.CountlySDK.Services
         }
 
         /// <summary>
-        ///     Fetch fresh remote config from server and store locally.
+        ///     Fetch fresh remote config values from server and store locally.
         /// </summary>
         /// <returns></returns>
         public async Task<CountlyResponse> Update()

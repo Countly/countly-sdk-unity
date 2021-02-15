@@ -27,7 +27,7 @@ namespace Plugins.CountlySDK.Services
         /// </summary>
         /// <param name="message">Exception Class</param>
         /// <param name="stackTrace">Stack Trace</param>
-        /// <param name="type">Excpetion type like error, warning, etc</param>
+        /// <param name="type">The type of log message e.g error, warning, Exception etc</param>
         public async void LogCallback(string message, string stackTrace, LogType type)
         {
             if (!_consentService.CheckConsent(Consents.Crashes)) {
@@ -43,11 +43,11 @@ namespace Plugins.CountlySDK.Services
         /// <summary>
         /// Public method that sends crash details to the server. Set param "nonfatal" to true for Custom Logged errors
         /// </summary>
-        /// <param name="message">a string that contain detailed description of exception.</param>
-        /// <param name="stackTrace">a string that describes the contents of call stack.</param>
+        /// <param name="message">a string that contain detailed description of the exception.</param>
+        /// <param name="stackTrace">a string that describes the contents of the callstack.</param>
         /// <param name="type">the type of the log message</param>
         /// <param name="segments">custom key/values to be reported</param>
-        /// <param name="nonfatal">type of error that force programe to close</param>
+        /// <param name="nonfatal">Fof automatically captured errors, you should set to <code>false</code>, whereas on logged errors it should be <code>true</code></param>
         /// <returns></returns>
         public async Task SendCrashReportAsync(string message, string stackTrace, LogType type,
             IDictionary<string, object> segments = null, bool nonfatal = true)
@@ -75,7 +75,7 @@ namespace Plugins.CountlySDK.Services
         /// The length of a breadcrumb is limited to 1000 characters. Only first 1000 characters will be accepted in case the length is more 
         /// than 1000 characters.
         /// </summary>
-        /// <param name="value"></param>
+        /// <param name="value">a bread crumb for the crash report</param>
         public void AddBreadcrumbs(string value)
         {
             if (!_consentService.CheckConsent(Consents.Crashes)) {
@@ -102,9 +102,9 @@ namespace Plugins.CountlySDK.Services
         /// <summary>
         /// Create an CountlyExceptionDetailModel object from parameters.
         /// </summary>
-        /// <param name="message">a string that contain detailed description of exception.</param>
-        /// <param name="stackTrace">a string that describes the contents of call stack.</param>
-        /// <param name="nonfatal">type of error that force programe to close</param>
+        /// <param name="message">a string that contain detailed description of the exception.</param>
+        /// <param name="stackTrace">a string that describes the contents of the callstack.</param>
+        /// <param name="nonfatal">for automatically captured errors, you should set to <code>false</code>, whereas on logged errors it should be <code>true</code></param>
         /// <param name="segments">custom key/values to be reported</param>
         /// <returns>CountlyExceptionDetailModel</returns>
         private CountlyExceptionDetailModel ExceptionDetailModel(string message, string stackTrace, bool nonfatal, IDictionary<string, object> segments)

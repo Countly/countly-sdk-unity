@@ -27,7 +27,7 @@ namespace Plugins.CountlySDK.Services
         }
 
         /// <summary>
-        ///     Send all recorded events to request queue
+        ///     Add all recorded events to request queue
         /// </summary>
         internal async Task AddEventsToRequestQueue()
         {
@@ -59,6 +59,11 @@ namespace Plugins.CountlySDK.Services
 
         }
 
+        /// <summary>
+        /// An internal function to add an event to event queue.
+        /// </summary>
+        /// <param name="event">an event</param>
+        /// <returns></returns>
         internal async Task RecordEventAsync(CountlyEventModel @event)
         {
 
@@ -156,7 +161,7 @@ namespace Plugins.CountlySDK.Services
         /// <summary>
         ///     Sends multiple events to the countly server. It expects a list of events as input.
         /// </summary>
-        /// <param name="events"></param>
+        /// <param name="events">a list of events</param>
         /// <returns></returns>
         internal async Task ReportMultipleEventsAsync(List<CountlyEventModel> events)
         {
@@ -185,6 +190,11 @@ namespace Plugins.CountlySDK.Services
         /// <summary>
         ///     Reports a custom event to the Countly server.
         /// </summary>
+        /// <param name="key">event key</param>
+        /// <param name="segmentation">custom segmentation you want to set, leave null if you don't want to add anything</param>
+        /// <param name="count">how many of these events have occurred, default value is "1"</param>
+        /// <param name="sum">set sum if needed, default value is "0"</param>
+        /// <param name="duration">set sum if needed, default value is "0"</param>
         /// <returns></returns>
         public async Task ReportCustomEventAsync(string key,
             IDictionary<string, object> segmentation = null,
@@ -217,8 +227,9 @@ namespace Plugins.CountlySDK.Services
         }
 
         /// <summary>
-        ///     Add segment on app's first launch
+        ///     Add app's first launch segment in event       
         /// </summary>
+        /// <param name="event">an event</param>
         private void AddFirstAppSegment(CountlyEventModel @event)
         {
             if (@event.Segmentation == null) {
