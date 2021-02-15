@@ -17,6 +17,8 @@ namespace Plugins.CountlySDK.Services
 
         internal CrashReportsCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, RequestCountlyHelper requestCountlyHelper, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
         {
+            Log.Debug("[CrashReportsCountlyService] Initializing.");
+
             _requestCountlyHelper = requestCountlyHelper;
         }
 
@@ -32,6 +34,9 @@ namespace Plugins.CountlySDK.Services
             if (!_consentService.CheckConsent(Consents.Crashes)) {
                 return;
             }
+
+            Log.Info("[CrashReportsCountlyService] LogCallback : message = " + message + ", stackTrace = " + stackTrace);
+
 
             if (_configuration.EnableAutomaticCrashReporting
                 && (type == LogType.Error || type == LogType.Exception)) {
@@ -54,6 +59,8 @@ namespace Plugins.CountlySDK.Services
             if (!_consentService.CheckConsent(Consents.Crashes)) {
                 return;
             }
+
+            Log.Info("[CrashReportsCountlyService] LogCallback : message = " + message + ", stackTrace = " + stackTrace);
 
             CountlyExceptionDetailModel model = ExceptionDetailModel(message, stackTrace, nonfatal, segments);
 

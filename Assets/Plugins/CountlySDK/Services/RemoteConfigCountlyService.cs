@@ -24,6 +24,8 @@ namespace Plugins.CountlySDK.Services
 
         internal RemoteConfigCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, RequestCountlyHelper requestCountlyHelper, CountlyUtils countlyUtils, Dao<ConfigEntity> configDao, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
         {
+            Log.Debug("[RemoteConfigCountlyService] Initializing.");
+
             _configDao = configDao;
             _countlyUtils = countlyUtils;
             _requestCountlyHelper = requestCountlyHelper;
@@ -42,6 +44,9 @@ namespace Plugins.CountlySDK.Services
                 return new CountlyResponse { IsSuccess = true };
             }
 
+            Log.Debug("[RemoteConfigCountlyService] InitConfig");
+
+
             return await Update();
         }
 
@@ -51,7 +56,7 @@ namespace Plugins.CountlySDK.Services
             List<ConfigEntity> allConfigs = _configDao.LoadAll();
             if (allConfigs != null && allConfigs.Count > 0) {
                 config = Converter.ConvertJsonToDictionary(allConfigs[0].Json);
-                Log.Info("Configs: " + config.ToString());
+                Log.Debug("[RemoteConfigCountlyService] FetchConfigFromDB : Configs = " + config.ToString());
             }
 
             return config;
@@ -63,6 +68,8 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async Task<CountlyResponse> Update()
         {
+            Log.Info("[RemoteConfigCountlyService] Update");
+
             if (!_consentService.CheckConsent(Consents.RemoteConfig)) {
                 return new CountlyResponse {
                     IsSuccess = false
@@ -88,7 +95,7 @@ namespace Plugins.CountlySDK.Services
                 _configDao.Save(configEntity);
                 Configs = Converter.ConvertJsonToDictionary(response.Data);
 
-                Log.Info("[RemoteConfigCountlyService] UpdateConfig: " + response.ToString());
+                Log.Debug("[RemoteConfigCountlyService] UpdateConfig: " + response.ToString());
 
             }
 

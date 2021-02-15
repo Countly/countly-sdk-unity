@@ -17,6 +17,8 @@ namespace Plugins.CountlySDK.Services
 
         internal ViewCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, EventCountlyService eventService, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
         {
+            Log.Debug("[ViewCountlyService] Initializing.");
+
             _eventService = eventService;
         }
         /// <summary>
@@ -35,6 +37,9 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
 
+            Log.Info("[ViewCountlyService] RecordOpenViewAsync : name = " + name + ", hasSessionBegunWithView = " + hasSessionBegunWithView);
+
+
             ViewSegment currentViewSegment =
                 new ViewSegment {
                     Name = name,
@@ -48,8 +53,6 @@ namespace Plugins.CountlySDK.Services
             if (!_viewToLastViewStartTime.ContainsKey(name)) {
                 _viewToLastViewStartTime.Add(name, DateTime.UtcNow);
             }
-
-            Log.Info("[ViewCountlyService] RecordOpenViewAsync: " + name);
 
             CountlyEventModel currentView = new CountlyEventModel(CountlyEventModel.ViewEvent, currentViewSegment.ToDictionary());
             await _eventService.RecordEventAsync(currentView);
@@ -71,6 +74,9 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
 
+            Log.Info("[ViewCountlyService] RecordCloseViewAsync : name = " + name);
+
+
             ViewSegment currentViewSegment =
                 new ViewSegment {
                     Name = name,
@@ -89,15 +95,9 @@ namespace Plugins.CountlySDK.Services
                 _viewToLastViewStartTime.Remove(name);
             }
 
-            Log.Info("[ViewCountlyService] RecordCloseViewAsync: " + name + ", duration: " + duration);
-
             CountlyEventModel currentView = new CountlyEventModel(CountlyEventModel.ViewEvent, currentViewSegment.ToDictionary(), 1, null, duration);
             await _eventService.RecordEventAsync(currentView);
         }
-
-
-
-
 
         /// <summary>
         /// Reports a particular action with the specified details
@@ -113,6 +113,9 @@ namespace Plugins.CountlySDK.Services
             if (!_consentService.CheckConsent(Consents.Views)) {
                 return;
             }
+
+            Log.Info("[ViewCountlyService] ReportActionAsync : type = " + type + ", x = " + x + ", y = " + y + ", width = " + width + ", height = " + height);
+
 
             ActionSegment segment =
                 new ActionSegment {

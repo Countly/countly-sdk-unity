@@ -159,6 +159,9 @@ namespace Plugins.CountlySDK
                 return;
             }
 
+            _logHelper.Info("[Init] Initializing Countly [SdkName: " + Constants.SdkName + " SdkVersion: " + Constants.SdkVersion + "]");
+
+
             if (configuration.Parent != null) {
                 transform.parent = configuration.Parent.transform;
             }
@@ -203,6 +206,9 @@ namespace Plugins.CountlySDK
 
             Device.InitDeviceId(configuration.DeviceId);
             OnInitialisationComplete();
+
+            _logHelper.Debug("[Countly] Finished Initializing SDK.");
+
         }
 
         private void Init(RequestRepository requestRepo, ViewEventRepository viewEventRepo,
@@ -286,6 +292,8 @@ namespace Plugins.CountlySDK
             if (!IsSDKInitialized) {
                 return;
             }
+            _logHelper.Debug("[Countly] ClearStorage");
+
             _requestRepo.Clear();
             _viewEventRepo.Clear();
             _configDao.RemoveAll();
@@ -298,9 +306,7 @@ namespace Plugins.CountlySDK
 
         private void OnApplicationFocus(bool hasFocus)
         {
-            if (Configuration.EnableConsoleLogging) {
-                _logHelper.Debug("[Countly] OnApplicationFocus: " + hasFocus);
-            }
+            _logHelper.Debug("[Countly] OnApplicationFocus: " + hasFocus);
 
             if (hasFocus) {
                 SubscribeAppLog();
@@ -311,9 +317,7 @@ namespace Plugins.CountlySDK
 
         private async void OnApplicationPause(bool pauseStatus)
         {
-            if (Configuration.EnableConsoleLogging) {
-                _logHelper.Debug("[Countly] OnApplicationPause: " + pauseStatus);
-            }
+            _logHelper.Debug("[Countly] OnApplicationPause: " + pauseStatus);
 
             if (CrashReports != null) {
                 CrashReports.IsApplicationInBackground = pauseStatus;

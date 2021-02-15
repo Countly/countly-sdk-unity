@@ -19,6 +19,8 @@ namespace Plugins.CountlySDK.Services
         internal EventCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, RequestCountlyHelper requestCountlyHelper,
             ViewEventRepository viewEventRepo, NonViewEventRepository nonViewEventRepo, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
         {
+            Log.Debug("[EventCountlyService] Initializing.");
+
             _viewEventRepo = viewEventRepo;
             _nonViewEventRepo = nonViewEventRepo;
             _requestCountlyHelper = requestCountlyHelper;
@@ -29,6 +31,9 @@ namespace Plugins.CountlySDK.Services
         /// </summary>
         internal async Task AddEventsToRequestQueue()
         {
+
+            Log.Debug("[EventCountlyService] AddEventsToRequestQueue");
+
             if ((_viewEventRepo.Models.Count + _nonViewEventRepo.Models.Count) == 0) {
                 return;
             }
@@ -93,6 +98,9 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
 
+            Log.Info("[EventCountlyService] RecordEventAsync : key = " + key);
+
+
             await RecordEventAsync(key, null);
         }
 
@@ -113,7 +121,7 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
 
-            Log.Info("[EventCountlyService] RecordEventAsync : key = " + key);
+            Log.Info("[EventCountlyService] RecordEventAsync : key = " + key + ", segmentation = " + segmentation.ToString() + ", count = " + count + ", sum = " + sum + ", duration = " + duration);
 
             if (_configuration.EnableTestMode) {
                 return;
@@ -193,6 +201,8 @@ namespace Plugins.CountlySDK.Services
             if (string.IsNullOrEmpty(key) && string.IsNullOrWhiteSpace(key)) {
                 return;
             }
+
+            Log.Info("[EventCountlyService] ReportCustomEventAsync : key = " + key + ", segmentation = " + segmentation.ToString() + ", count = " + count + ", sum = " + sum + ", duration = " + duration);
 
             CountlyEventModel evt = new CountlyEventModel(key, segmentation, count, sum, duration);
 

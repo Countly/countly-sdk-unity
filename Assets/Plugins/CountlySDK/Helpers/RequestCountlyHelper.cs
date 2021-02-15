@@ -33,7 +33,7 @@ namespace Plugins.CountlySDK.Helpers
         private async Task AddRequestToQueue(CountlyRequestModel request)
         {
 
-            Log.Debug("[RequestCountlyHelper] AddRequestToQueue: " + request.ToString());
+            Log.Verbose("[RequestCountlyHelper] AddRequestToQueue: " + request.ToString());
 
             if (_config.EnableTestMode) {
                 return;
@@ -66,6 +66,7 @@ namespace Plugins.CountlySDK.Helpers
                 CountlyResponse response = await ProcessRequest(reqModel);
 
                 if (!response.IsSuccess) {
+                    Log.Verbose("[RequestCountlyHelper] ProcessQueue: Request fail, " + response.ToString());
                     break;
                 }
 
@@ -76,6 +77,8 @@ namespace Plugins.CountlySDK.Helpers
 
         private async Task<CountlyResponse> ProcessRequest(CountlyRequestModel model)
         {
+            Log.Verbose("[RequestCountlyHelper] Process request, request: " + model.ToString());
+
             if (model.IsRequestGetType) {
                 return await Task.Run(() => GetAsync(model.RequestUrl));
             } else {
@@ -194,9 +197,7 @@ namespace Plugins.CountlySDK.Helpers
                 countlyResponse.ErrorMessage = ex.Message;
             }
 
-            if (_config.EnableConsoleLogging) {
-                Log.Debug("[RequestCountlyHelper] request: " + url + " response: " + countlyResponse.ToString());
-            }
+            Log.Verbose("[RequestCountlyHelper] request: " + url + " response: " + countlyResponse.ToString());
 
             return countlyResponse;
         }
@@ -237,9 +238,7 @@ namespace Plugins.CountlySDK.Helpers
                 countlyResponse.ErrorMessage = ex.Message;
             }
 
-            if (_config.EnableConsoleLogging) {
-                Log.Debug("[RequestCountlyHelper] request: " + uri + " response: " + countlyResponse.ToString());
-            }
+            Log.Verbose("[RequestCountlyHelper] request: " + uri + " response: " + countlyResponse.ToString());
 
             return countlyResponse;
         }

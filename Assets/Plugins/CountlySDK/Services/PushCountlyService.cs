@@ -19,6 +19,8 @@ namespace Plugins.CountlySDK.Services
 
         internal PushCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, RequestCountlyHelper requestCountlyHelper, INotificationsService notificationsService, NotificationsCallbackService notificationsCallbackService, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
         {
+            Log.Debug("[PushCountlyService] Initializing.");
+
             _requestCountlyHelper = requestCountlyHelper;
             _notificationsService = notificationsService;
             _notificationsCallbackService = notificationsCallbackService;
@@ -31,6 +33,7 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
 
+
             EnablePushNotificationAsync(_configuration.NotificationMode);
         }
 
@@ -40,6 +43,8 @@ namespace Plugins.CountlySDK.Services
         /// <param name="mode">Application mode</param>
         private void EnablePushNotificationAsync(TestMode mode)
         {
+            Log.Debug("[PushCountlyService] EnablePushNotificationAsync : mode = " + mode);
+
             _mode = mode;
             _isDeviceRegistered = true;
             _notificationsService.GetToken(async result => {
@@ -73,6 +78,9 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
 
+            Log.Debug("[PushCountlyService] PostToCountlyAsync : token = " + token);
+
+
             Dictionary<string, object> requestParams =
                 new Dictionary<string, object>
                 {
@@ -92,6 +100,9 @@ namespace Plugins.CountlySDK.Services
             if (!_consentService.CheckConsent(Consents.Push)) {
                 return new CountlyResponse { IsSuccess = false};
             }
+
+            Log.Debug("[PushCountlyService] ReportPushActionAsync");
+
 
             return await _notificationsService.ReportPushActionAsync();
         }

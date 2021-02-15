@@ -22,6 +22,8 @@ namespace Notifications.Impls.Android
 
         internal AndroidNotificationsService(Transform countlyGameObject, CountlyConfiguration config, CountlyLogHelper log, EventCountlyService eventCountlyService)
         {
+            Log.Debug("[AndroidNotificationsService] Initializing.");
+
             Log = log;
             _countlyGameObject = countlyGameObject;
             _eventCountlyService = eventCountlyService;
@@ -38,6 +40,9 @@ namespace Notifications.Impls.Android
 
         public void GetToken(Action<string> result)
         {
+
+            Log.Debug("[AndroidNotificationsService] GetToken");
+
 #if !UNITY_EDITOR
             _bridge.ListenTokenResult(result);
 
@@ -49,16 +54,22 @@ namespace Notifications.Impls.Android
 
         public void OnNotificationClicked(Action<string, int> result)
         {
+            Log.Debug("[AndroidNotificationsService] OnNotificationClicked");
+
             _bridge.ListenClickResult(result);
         }
 
         public void OnNotificationReceived(Action<string> result)
         {
+            Log.Debug("[AndroidNotificationsService] OnNotificationReceived");
+
             _bridge.ListenReceiveResult(result);
         }
 
         public async Task<CountlyResponse> ReportPushActionAsync()
         {
+            Log.Debug("[AndroidNotificationsService] ReportPushActionAsync");
+
             AndroidJavaClass store = new AndroidJavaClass(StorePackageName);
 
             bool isInitialized = store.CallStatic<bool>("isInitialized");

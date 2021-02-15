@@ -19,6 +19,9 @@ namespace Plugins.CountlySDK.Services
 
         internal LocationService(CountlyConfiguration configuration, CountlyLogHelper logHelper, RequestCountlyHelper requestCountlyHelper, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
         {
+
+            Log.Debug("[LocationService] Initializing.");
+
             _requestCountlyHelper = requestCountlyHelper;
             IsLocationDisabled = configuration.IsLocationDisabled;
 
@@ -51,6 +54,9 @@ namespace Plugins.CountlySDK.Services
             if (!_consentService.CheckConsent(Consents.Location)) {
                 return;
             }
+
+            Log.Debug("[LocationService] SendIndependantLocationRequest");
+
 
             Dictionary<string, object> requestParams =
                 new Dictionary<string, object>();
@@ -91,6 +97,8 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
 
+            Log.Info("[LocationService] DisableLocation");
+
             IsLocationDisabled = true;
             City = null;
             Location = null;
@@ -126,6 +134,9 @@ namespace Plugins.CountlySDK.Services
                 || (!string.IsNullOrEmpty(City) && string.IsNullOrEmpty(CountryCode))) {
                 Log.Warning("[LocationService] In \"SetLocation\" both country code and city should be set together");
             }
+
+            Log.Info("[LocationService] SetLocation : countryCode = " + countryCode + ", city = " + city + ", gpsCoordinates = " + gpsCoordinates + ", ipAddress = " + ipAddress);
+
 
             City = city;
             IPAddress = ipAddress;

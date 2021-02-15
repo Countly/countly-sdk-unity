@@ -22,6 +22,8 @@ namespace Plugins.CountlySDK.Services
         internal SessionCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, EventCountlyService eventService,
             RequestCountlyHelper requestCountlyHelper, LocationService locationService, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
         {
+            Log.Debug("[SessionCountlyService] Initializing.");
+
             _eventService = eventService;
             _locationService = locationService;
             _requestCountlyHelper = requestCountlyHelper;
@@ -52,6 +54,8 @@ namespace Plugins.CountlySDK.Services
             if (!IsSessionInitiated) {
                 return;
             }
+
+            Log.Debug("[SessionCountlyService] SessionTimerOnElapsedAsync");
 
             await _eventService.AddEventsToRequestQueue();
 
@@ -125,6 +129,9 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
 
+            Log.Info("[SessionCountlyService] ExecuteEndSessionAsync");
+
+
             IsSessionInitiated = false;
 
             Dictionary<string, object> requestParams =
@@ -156,6 +163,8 @@ namespace Plugins.CountlySDK.Services
         /// </summary>
         public async Task BeginSessionAsync()
         {
+            Log.Info("[SessionCountlyService] BeginSessionAsync");
+
             await ExecuteBeginSessionAsync();
         }
 
@@ -181,6 +190,9 @@ namespace Plugins.CountlySDK.Services
             if (!_consentService.CheckConsent(Consents.Sessions)) {
                 return;
             }
+
+            Log.Info("[SessionCountlyService] ExtendSessionAsync");
+
 
             _lastSessionRequestTime = DateTime.Now;
             Dictionary<string, object> requestParams =

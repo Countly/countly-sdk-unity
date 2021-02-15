@@ -15,6 +15,8 @@ namespace Plugins.CountlySDK.Services
 
         internal ConsentCountlyService(CountlyConfiguration config, CountlyLogHelper logHelper, ConsentCountlyService consentService) : base(config, logHelper, consentService)
         {
+            Log.Debug("[ConsentCountlyService] Initializing.");
+
             _countlyConsents = new Dictionary<Consents, bool>();
 
             RequiresConsent = _configuration.RequiresConsent;
@@ -53,6 +55,8 @@ namespace Plugins.CountlySDK.Services
                 //no consent required - all consent given
                 return true;
             }
+
+            Log.Verbose("[ConsentCountlyService] AnyConsentGiven");
 
             foreach (KeyValuePair<Consents, bool> entry in _countlyConsents) {
                 if (entry.Value) {

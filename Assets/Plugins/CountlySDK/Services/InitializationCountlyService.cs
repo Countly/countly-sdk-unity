@@ -11,6 +11,8 @@ namespace Plugins.CountlySDK.Services
 
         internal InitializationCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, LocationService locationService, SessionCountlyService sessionCountlyService, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
         {
+            Log.Debug("[InitializationCountlyService] Initializing.");
+
             _locationService = locationService;
             _sessionService = sessionCountlyService;
         }

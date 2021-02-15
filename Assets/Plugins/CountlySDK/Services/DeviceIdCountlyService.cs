@@ -15,8 +15,10 @@ namespace Plugins.CountlySDK.Services
         private readonly SessionCountlyService _sessionCountlyService;
 
         internal DeviceIdCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, SessionCountlyService sessionCountlyService,
-            RequestCountlyHelper requestCountlyHelper, EventCountlyService eventCountlyService, CountlyUtils countlyUtils, ConsentCountlyService conentService) : base(configuration, logHelper, conentService)
+            RequestCountlyHelper requestCountlyHelper, EventCountlyService eventCountlyService, CountlyUtils countlyUtils, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
         {
+            Log.Debug("[DeviceIdCountlyService] Initializing.");
+
             _countlyUtils = countlyUtils;
             _eventCountlyService = eventCountlyService;
             _requestCountlyHelper = requestCountlyHelper;
