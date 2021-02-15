@@ -3,7 +3,6 @@ namespace Plugins.CountlySDK.Helpers
 {
     internal class Constants
     {
-        public const string TAG = "Countly";
         public const string SdkVersion = "20.11.1";
 
 #if UNITY_EDITOR
