@@ -40,7 +40,7 @@ namespace Plugins.CountlySDK.Services
                 }
             } else if (!_configModel.EnableManualSessionHandling) {
                 //Start Session
-                await _sessionService.ExecuteBeginSessionAsync();
+                await _sessionService.BeginSessionAsync();
             }
         }
     }
