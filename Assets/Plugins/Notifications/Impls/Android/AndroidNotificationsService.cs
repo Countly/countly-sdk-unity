@@ -22,9 +22,10 @@ namespace Notifications.Impls.Android
 
         internal AndroidNotificationsService(Transform countlyGameObject, CountlyConfiguration config, CountlyLogHelper log, EventCountlyService eventCountlyService)
         {
+            Log = log;
+
             Log.Debug("[AndroidNotificationsService] Initializing.");
 
-            Log = log;
             _countlyGameObject = countlyGameObject;
             _eventCountlyService = eventCountlyService;
 

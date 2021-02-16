@@ -16,6 +16,7 @@ namespace Notifications.Impls
 
         internal ProxyNotificationsService(Transform countlyGameObject, CountlyConfiguration config, CountlyLogHelper logHelper, Action<IEnumerator> startCoroutine, EventCountlyService eventCountlyService)
         {
+            _logHelper = logHelper;
             _logHelper.Debug("[ViewCProxyNotificationsServiceountlyService] Initializing.");
 
             _countlyGameObject = countlyGameObject;

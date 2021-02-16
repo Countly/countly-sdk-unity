@@ -159,6 +159,9 @@ namespace Plugins.CountlySDK
                 return;
             }
 
+             Configuration = configuration;
+            _logHelper = new CountlyLogHelper(Configuration);
+
             _logHelper.Info("[Init] Initializing Countly [SdkName: " + Constants.SdkName + " SdkVersion: " + Constants.SdkVersion + "]");
 
 
@@ -177,9 +180,6 @@ namespace Plugins.CountlySDK
             if (configuration.ServerUrl[configuration.ServerUrl.Length - 1] == '/') {
                 configuration.ServerUrl = configuration.ServerUrl.Remove(configuration.ServerUrl.Length - 1);
             }
-
-            Configuration = configuration;
-            _logHelper = new CountlyLogHelper(Configuration);
 
             _db = CountlyBoxDbHelper.BuildDatabase(DbNumber);
 
@@ -221,7 +221,7 @@ namespace Plugins.CountlySDK
             Events = new EventCountlyService(Configuration, _logHelper, requests, viewEventRepo, nonViewEventRepo, Consents);
 
             Location = new Services.LocationService(Configuration, _logHelper, requests, Consents);
-            OptionalParameters = new OptionalParametersCountlyService(Location, Configuration);
+            OptionalParameters = new OptionalParametersCountlyService(Location, Configuration, _logHelper, Consents);
             Notifications = new NotificationsCallbackService(_logHelper);
             ProxyNotificationsService notificationsService = new ProxyNotificationsService(transform, Configuration, _logHelper, InternalStartCoroutine, Events);
             _push = new PushCountlyService(Configuration, _logHelper, requests, notificationsService, Notifications, Consents);
@@ -306,6 +306,10 @@ namespace Plugins.CountlySDK
 
         private void OnApplicationFocus(bool hasFocus)
         {
+            if (!IsSDKInitialized) {
+                return;
+            }
+
             _logHelper.Debug("[Countly] OnApplicationFocus: " + hasFocus);
 
             if (hasFocus) {
@@ -317,6 +321,10 @@ namespace Plugins.CountlySDK
 
         private async void OnApplicationPause(bool pauseStatus)
         {
+            if (!IsSDKInitialized) {
+                return;
+            }
+
             _logHelper.Debug("[Countly] OnApplicationPause: " + pauseStatus);
 
             if (CrashReports != null) {
