@@ -11,6 +11,9 @@ namespace Tests
         private readonly string _serverUrl = "https://xyz.com/";
         private readonly string _appKey = "772c091355076ead703f987fee94490";
 
+        /// <summary>
+        /// It validates configuration values provided during init and URL sanitation.
+        /// </summary>
         [Test]
         public void TestSDKInitParams()
         {
@@ -79,13 +82,15 @@ namespace Tests
             Assert.AreEqual(Countly.Instance.Configuration.EnableAutomaticCrashReporting, false);
         }
 
+        /// <summary>
+        /// It validates the configuration's default values.
+        /// </summary>
         [Test]
         public void TestDefaultConfigValues()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration
-            {
-               AppKey = _appKey,
-               ServerUrl = _serverUrl
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                AppKey = _appKey,
+                ServerUrl = _serverUrl
             };
 
             Countly.Instance.Init(configuration);
