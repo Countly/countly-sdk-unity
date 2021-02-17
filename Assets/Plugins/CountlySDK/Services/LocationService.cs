@@ -15,13 +15,14 @@ namespace Plugins.CountlySDK.Services
         internal string CountryCode { get; private set; }
         internal bool IsLocationDisabled { get; private set; }
 
+        private readonly CountlyConfiguration _configuration;
         private readonly RequestCountlyHelper _requestCountlyHelper;
 
-        internal LocationService(CountlyConfiguration configuration, CountlyLogHelper logHelper, RequestCountlyHelper requestCountlyHelper, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
+        internal LocationService(CountlyConfiguration configuration, CountlyLogHelper logHelper, RequestCountlyHelper requestCountlyHelper, ConsentCountlyService consentService) : base(logHelper, consentService)
         {
-
             Log.Debug("[LocationService] Initializing.");
 
+            _configuration = configuration;
             _requestCountlyHelper = requestCountlyHelper;
             IsLocationDisabled = configuration.IsLocationDisabled;
 

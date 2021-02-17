@@ -13,12 +13,15 @@ namespace Plugins.CountlySDK.Services
     {
         public bool IsApplicationInBackground { get; internal set; }
         private readonly Queue<string> _crashBreadcrumbs = new Queue<string>();
+
+        private readonly CountlyConfiguration _configuration;
         private readonly RequestCountlyHelper _requestCountlyHelper;
 
-        internal CrashReportsCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, RequestCountlyHelper requestCountlyHelper, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
+        internal CrashReportsCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, RequestCountlyHelper requestCountlyHelper, ConsentCountlyService consentService) : base(logHelper, consentService)
         {
             Log.Debug("[CrashReportsCountlyService] Initializing.");
 
+            _configuration = configuration;
             _requestCountlyHelper = requestCountlyHelper;
         }
 

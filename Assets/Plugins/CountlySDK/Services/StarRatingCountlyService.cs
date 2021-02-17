@@ -8,11 +8,14 @@ namespace Plugins.CountlySDK.Services
 {
     public class StarRatingCountlyService : AbstractBaseService
     {
-
+        private readonly CountlyConfiguration _configuration;
         private readonly EventCountlyService _eventCountlyService;
 
-        internal StarRatingCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, ConsentCountlyService consentService, EventCountlyService eventCountlyService) : base(configuration, logHelper, consentService)
+        internal StarRatingCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, ConsentCountlyService consentService, EventCountlyService eventCountlyService) : base(logHelper, consentService)
         {
+            Log.Debug("[StarRatingCountlyService] Initializing.");
+
+            _configuration = configuration;
             _eventCountlyService = eventCountlyService;
         }
 

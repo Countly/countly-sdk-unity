@@ -13,10 +13,13 @@ namespace Plugins.CountlySDK.Services
         public string IPAddress { get { return _recordLocation.IPAddress; } }
 
         private readonly LocationService _recordLocation;
+        private readonly CountlyConfiguration _configuration;
 
-        internal OptionalParametersCountlyService(LocationService recordLocation, CountlyConfiguration configuration, CountlyLogHelper logHelper, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
+        internal OptionalParametersCountlyService(LocationService recordLocation, CountlyConfiguration configuration, CountlyLogHelper logHelper, ConsentCountlyService consentService) : base(logHelper, consentService)
         {
             Log.Debug("[OptionalParametersCountlyService] Initializing.");
+
+            _configuration = configuration;
             _recordLocation = recordLocation;
         }
 

@@ -10,13 +10,15 @@ namespace Plugins.CountlySDK.Services
     {
         internal bool RequiresConsent { get; private set; }
 
+        private readonly CountlyConfiguration _configuration;
         private readonly Dictionary<Consents, bool> _countlyConsents;
         private Dictionary<string, Consents[]> _countlyConsentGroups;
 
-        internal ConsentCountlyService(CountlyConfiguration config, CountlyLogHelper logHelper, ConsentCountlyService consentService) : base(config, logHelper, consentService)
+        internal ConsentCountlyService(CountlyConfiguration config, CountlyLogHelper logHelper, ConsentCountlyService consentService) : base(logHelper, consentService)
         {
             Log.Debug("[ConsentCountlyService] Initializing.");
 
+            _configuration = config;
             _countlyConsents = new Dictionary<Consents, bool>();
 
             RequiresConsent = _configuration.RequiresConsent;

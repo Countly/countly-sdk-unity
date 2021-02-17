@@ -16,18 +16,20 @@ namespace Plugins.CountlySDK.Services
     {
         private readonly CountlyUtils _countlyUtils;
         private readonly Dao<ConfigEntity> _configDao;
+        private readonly CountlyConfiguration _configuration;
         private readonly RequestCountlyHelper _requestCountlyHelper;
 
         public Dictionary<string, object> Configs { private set; get; }
 
         private readonly StringBuilder _requestStringBuilder = new StringBuilder();
 
-        internal RemoteConfigCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, RequestCountlyHelper requestCountlyHelper, CountlyUtils countlyUtils, Dao<ConfigEntity> configDao, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
+        internal RemoteConfigCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, RequestCountlyHelper requestCountlyHelper, CountlyUtils countlyUtils, Dao<ConfigEntity> configDao, ConsentCountlyService consentService) : base(logHelper, consentService)
         {
             Log.Debug("[RemoteConfigCountlyService] Initializing.");
 
             _configDao = configDao;
             _countlyUtils = countlyUtils;
+            _configuration = configuration;
             _requestCountlyHelper = requestCountlyHelper;
 
             if (_consentService.CheckConsent(Consents.RemoteConfig)) {

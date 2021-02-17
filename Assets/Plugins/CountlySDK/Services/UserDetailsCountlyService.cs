@@ -13,16 +13,16 @@ namespace Plugins.CountlySDK.Services
     {
         internal Dictionary<string, object> CustomDataProperties { get; private set; }
 
-
-        private readonly RequestCountlyHelper _requestCountlyHelper;
         private readonly CountlyUtils _countlyUtils;
-
-        internal UserDetailsCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, RequestCountlyHelper requestCountlyHelper, CountlyUtils countlyUtils, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
+        private readonly CountlyConfiguration _configuration;
+        private readonly RequestCountlyHelper _requestCountlyHelper;
+        internal UserDetailsCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, RequestCountlyHelper requestCountlyHelper, CountlyUtils countlyUtils, ConsentCountlyService consentService) : base(logHelper, consentService)
         {
             Log.Debug("[UserDetailsCountlyService] Initializing.");
 
-            _requestCountlyHelper = requestCountlyHelper;
             _countlyUtils = countlyUtils;
+            _configuration = configuration;
+            _requestCountlyHelper = requestCountlyHelper;
             CustomDataProperties = new Dictionary<string, object>();
         }
 

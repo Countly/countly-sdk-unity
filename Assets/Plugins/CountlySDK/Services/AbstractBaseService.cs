@@ -10,13 +10,11 @@ namespace Plugins.CountlySDK.Services
         internal List<AbstractBaseService> Listeners { get; set; }
 
         protected CountlyLogHelper Log { get; private set; }
-        protected readonly CountlyConfiguration _configuration;
         protected readonly ConsentCountlyService _consentService;
 
-        protected AbstractBaseService(CountlyConfiguration configuration, CountlyLogHelper logHelper, ConsentCountlyService consentService)
+        protected AbstractBaseService(CountlyLogHelper logHelper, ConsentCountlyService consentService)
         {
             Log = logHelper;
-            _configuration = configuration;
             _consentService = consentService;
         }
 

@@ -335,7 +335,8 @@ namespace Tests
 
 
             ConsentTestHelperClass listener = new ConsentTestHelperClass();
-            ConsentCountlyService consentCountlyService = new ConsentCountlyService(configuration, null, null);
+            CountlyLogHelper logHelper = new CountlyLogHelper(configuration);
+            ConsentCountlyService consentCountlyService = new ConsentCountlyService(configuration, logHelper, null);
 
             consentCountlyService.Listeners = new List<AbstractBaseService> { listener };
 
@@ -358,7 +359,8 @@ namespace Tests
 
 
             ConsentTestHelperClass listener = new ConsentTestHelperClass();
-            ConsentCountlyService consentCountlyService = new ConsentCountlyService(configuration, null, null);
+            CountlyLogHelper logHelper = new CountlyLogHelper(configuration);
+            ConsentCountlyService consentCountlyService = new ConsentCountlyService(configuration, logHelper, null);
 
             consentCountlyService.Listeners = new List<AbstractBaseService> { listener };
 
@@ -390,7 +392,8 @@ namespace Tests
             configuration.CreateConsentGroup(groupA, new Consents[] { Consents.Clicks, Consents.Views });
 
             ConsentTestHelperClass listener = new ConsentTestHelperClass();
-            ConsentCountlyService consentCountlyService = new ConsentCountlyService(configuration, null, null);
+            CountlyLogHelper logHelper = new CountlyLogHelper(configuration);
+            ConsentCountlyService consentCountlyService = new ConsentCountlyService(configuration, logHelper, null);
 
             consentCountlyService.Listeners = new List<AbstractBaseService> { listener };
 
@@ -425,7 +428,8 @@ namespace Tests
             configuration.CreateConsentGroup(groupA, new Consents[] { Consents.Clicks, Consents.Views });
 
             ConsentTestHelperClass listener = new ConsentTestHelperClass();
-            ConsentCountlyService consentCountlyService = new ConsentCountlyService(configuration, null, null);
+            CountlyLogHelper logHelper = new CountlyLogHelper(configuration);
+            ConsentCountlyService consentCountlyService = new ConsentCountlyService(configuration, logHelper, null);
 
             consentCountlyService.Listeners = new List<AbstractBaseService> { listener };
 
@@ -451,7 +455,7 @@ namespace Tests
         private class ConsentTestHelperClass : AbstractBaseService
         {
             internal List<DeltaConsents> DeltaConsentsList { get; private set; }
-            internal ConsentTestHelperClass() : base(null, null, null)
+            internal ConsentTestHelperClass() : base(null, null)
             {
                 DeltaConsentsList = new List<DeltaConsents>();
             }

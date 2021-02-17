@@ -11,15 +11,16 @@ namespace Plugins.CountlySDK.Services
 
     public class ViewCountlyService : AbstractBaseService
     {
+        private readonly EventCountlyService _eventService;
+        private readonly CountlyConfiguration _configuration;
         private readonly Dictionary<string, DateTime> _viewToLastViewStartTime = new Dictionary<string, DateTime>();
 
-        private readonly EventCountlyService _eventService;
-
-        internal ViewCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, EventCountlyService eventService, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
+        internal ViewCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, EventCountlyService eventService, ConsentCountlyService consentService) : base(logHelper, consentService)
         {
             Log.Debug("[ViewCountlyService] Initializing.");
 
             _eventService = eventService;
+            _configuration = configuration;
         }
         /// <summary>
         /// Start tracking a view

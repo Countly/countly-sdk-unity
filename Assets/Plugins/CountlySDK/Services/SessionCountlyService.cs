@@ -17,14 +17,16 @@ namespace Plugins.CountlySDK.Services
 
         private readonly LocationService _locationService;
         private readonly EventCountlyService _eventService;
+        private readonly CountlyConfiguration _configuration;
         private readonly RequestCountlyHelper _requestCountlyHelper;
 
         internal SessionCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, EventCountlyService eventService,
-            RequestCountlyHelper requestCountlyHelper, LocationService locationService, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
+            RequestCountlyHelper requestCountlyHelper, LocationService locationService, ConsentCountlyService consentService) : base(logHelper, consentService)
         {
             Log.Debug("[SessionCountlyService] Initializing.");
 
             _eventService = eventService;
+            _configuration = configuration;
             _locationService = locationService;
             _requestCountlyHelper = requestCountlyHelper;
         }
