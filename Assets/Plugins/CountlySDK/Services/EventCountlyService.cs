@@ -70,10 +70,6 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
 
-            if (_countlyConfiguration.EnableFirstAppLaunchSegment) {
-                AddFirstAppSegment(@event);
-            }
-
             if (@event.Key.Equals(CountlyEventModel.ViewEvent)) {
                 _viewEventRepo.Enqueue(@event);
             } else {
@@ -166,12 +162,6 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
 
-            if (_countlyConfiguration.EnableFirstAppLaunchSegment) {
-                foreach (CountlyEventModel evt in events) {
-                    AddFirstAppSegment(evt);
-                }
-            }
-
             Dictionary<string, object> requestParams =
                 new Dictionary<string, object>
                 {
@@ -202,10 +192,6 @@ namespace Plugins.CountlySDK.Services
 
             CountlyEventModel evt = new CountlyEventModel(key, segmentation, count, sum, duration);
 
-            if (_countlyConfiguration.EnableFirstAppLaunchSegment) {
-                AddFirstAppSegment(evt);
-            }
-
             Dictionary<string, object> requestParams =
                 new Dictionary<string, object>
                 {
@@ -216,14 +202,6 @@ namespace Plugins.CountlySDK.Services
                 };
 
             await _requestCountlyHelper.GetResponseAsync(requestParams);
-        }
-
-        private void AddFirstAppSegment(CountlyEventModel @event)
-        {
-            if (@event.Segmentation == null) {
-                @event.Segmentation = new SegmentModel();
-            }
-            @event.Segmentation.Add(Constants.FirstAppLaunchSegment, FirstLaunchAppHelper.IsFirstLaunchApp);
         }
 
         #region override Methods

@@ -7,7 +7,10 @@ namespace Plugins.CountlySDK.Models
     public class CountlyConfigModel
     {
         public string Salt;
+
+        [Obsolete("EnableFirstAppLaunchSegment is deprecated, this is going to be removed in the future.")]
         public bool EnableFirstAppLaunchSegment;
+
         public bool EnablePost;
         public bool EnableTestMode;
         public bool EnableConsoleLogging;

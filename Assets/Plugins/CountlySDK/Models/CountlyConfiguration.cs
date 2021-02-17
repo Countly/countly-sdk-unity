@@ -15,7 +15,10 @@ namespace Plugins.CountlySDK.Models
         public string DeviceId = null;
 
         public string Salt = null;
+
+        [Obsolete("EnableFirstAppLaunchSegment is deprecated, this is going to be removed in the future.")]
         public bool EnableFirstAppLaunchSegment = false;
+
         public bool EnablePost = false;
         public bool EnableTestMode = false;
         public bool EnableConsoleLogging = false;

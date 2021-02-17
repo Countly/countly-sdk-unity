@@ -178,6 +178,10 @@ namespace Plugins.CountlySDK
 
             Configuration = configuration;
 
+            if (Configuration.EnableFirstAppLaunchSegment) {
+                Debug.LogWarning("'EnableFirstAppLaunchSegment' has been deprecated and this only acts as a dummy.");
+            }
+
             _db = CountlyBoxDbHelper.BuildDatabase(DbNumber);
 
             DB.AutoBox auto = _db.Open();
