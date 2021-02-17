@@ -65,12 +65,12 @@ namespace Plugins.CountlySDK.Services
         /// <param name="deviceId"></param>
         public async Task ChangeDeviceIdAndEndCurrentSessionAsync(string deviceId)
         {
+            Log.Info("[DeviceIdCountlyService] ChangeDeviceIdAndEndCurrentSessionAsync: " + deviceId);
+
             if (!_consentService.AnyConsentGiven()) {
                 Log.Info("[DeviceIdCountlyService] ChangeDeviceIdAndEndCurrentSessionAsync: Please set at least a single consent before calling this!");
                 return;
             }
-
-            Log.Info("[DeviceIdCountlyService] ChangeDeviceIdAndEndCurrentSessionAsync: " + deviceId);
 
             //Ignore call if new and old device id are same
             if (DeviceId == deviceId) {
@@ -101,12 +101,12 @@ namespace Plugins.CountlySDK.Services
         /// <param name="deviceId"></param>
         public async Task ChangeDeviceIdAndMergeSessionDataAsync(string deviceId)
         {
+            Log.Info("[DeviceIdCountlyService] ChangeDeviceIdAndMergeSessionDataAsync: " + deviceId);
+
             if (!_consentService.AnyConsentGiven()) {
                 Log.Info("[DeviceIdCountlyService] ChangeDeviceIdAndMergeSessionDataAsync: Please set at least a single consent before calling this!");
                 return;
             }
-
-            Log.Info("[DeviceIdCountlyService] ChangeDeviceIdAndMergeSessionDataAsync: " + deviceId);
 
             //Ignore call if new and old device id are same
             if (DeviceId == deviceId) {

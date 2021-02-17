@@ -34,12 +34,11 @@ namespace Plugins.CountlySDK.Services
         /// <param name="type">Excpetion type like error, warning, etc</param>
         public async void LogCallback(string message, string stackTrace, LogType type)
         {
+            Log.Info("[CrashReportsCountlyService] LogCallback : message = " + message + ", stackTrace = " + stackTrace);
+
             if (!_consentService.CheckConsent(Consents.Crashes)) {
                 return;
             }
-
-            Log.Info("[CrashReportsCountlyService] LogCallback : message = " + message + ", stackTrace = " + stackTrace);
-
 
             if (_configuration.EnableAutomaticCrashReporting
                 && (type == LogType.Error || type == LogType.Exception)) {
@@ -59,11 +58,11 @@ namespace Plugins.CountlySDK.Services
         public async Task SendCrashReportAsync(string message, string stackTrace, LogType type,
             IDictionary<string, object> segments = null, bool nonfatal = true)
         {
+            Log.Info("[CrashReportsCountlyService] LogCallback : message = " + message + ", stackTrace = " + stackTrace);
+
             if (!_consentService.CheckConsent(Consents.Crashes)) {
                 return;
             }
-
-            Log.Info("[CrashReportsCountlyService] LogCallback : message = " + message + ", stackTrace = " + stackTrace);
 
             CountlyExceptionDetailModel model = ExceptionDetailModel(message, stackTrace, nonfatal, segments);
 
@@ -87,11 +86,11 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value"></param>
         public void AddBreadcrumbs(string value)
         {
+            Log.Info("[CrashReportsCountlyService] AddBreadcrumbs : " + value);
+
             if (!_consentService.CheckConsent(Consents.Crashes)) {
                 return;
             }
-
-            Log.Info("[CrashReportsCountlyService] AddBreadcrumbs : " + value);
 
             if (_configuration.EnableTestMode) {
                 return;

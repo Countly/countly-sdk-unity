@@ -67,11 +67,11 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async Task SetUserDetailsAsync(CountlyUserDetailsModel userDetailsModel)
         {
+            Log.Info("[StarRatingCountlyService] SetUserDetailsAsync " + userDetailsModel.ToString());
+
             if (!_consentService.CheckConsent(Consents.Users)) {
                 return;
             }
-
-            Log.Info("[StarRatingCountlyService] SetUserDetailsAsync " + userDetailsModel.ToString());
 
             if (!_countlyUtils.IsPictureValid(userDetailsModel.PictureUrl)) {
                 throw new Exception("Accepted picture formats are .png, .gif and .jpeg");
@@ -93,12 +93,11 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async Task SetCustomUserDetailsAsync(CountlyUserDetailsModel userDetailsModel)
         {
+            Log.Info("[StarRatingCountlyService] SetCustomUserDetailsAsync " + userDetailsModel.ToString());
+
             if (!_consentService.CheckConsent(Consents.Users)) {
                 return;
             }
-
-            Log.Info("[StarRatingCountlyService] SetCustomUserDetailsAsync " + userDetailsModel.ToString());
-
 
             Dictionary<string, object> requestParams =
                 new Dictionary<string, object>
@@ -232,7 +231,7 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value"></param>
         public void Push(string key, string[] value)
         {
-            Log.Info("[UserDetailsCountlyService] Push : key = " + key + ", value = " + value.ToString());
+            Log.Info("[UserDetailsCountlyService] Push : key = " + key + ", value = " + value);
 
             AddToCustomData(key, new Dictionary<string, object> { { "$push", value } });
         }
@@ -245,7 +244,7 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value"></param>
         public void PushUnique(string key, string[] value)
         {
-            Log.Info("[UserDetailsCountlyService] PushUnique : key = " + key + ", value = " + value.ToString());
+            Log.Info("[UserDetailsCountlyService] PushUnique : key = " + key + ", value = " + value);
 
             AddToCustomData(key, new Dictionary<string, object> { { "$addToSet", value } });
         }
@@ -258,7 +257,7 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value"></param>
         public void Pull(string key, string[] value)
         {
-            Log.Info("[UserDetailsCountlyService] Pull : key = " + key + ", value = " + value.ToString());
+            Log.Info("[UserDetailsCountlyService] Pull : key = " + key + ", value = " + value);
 
             AddToCustomData(key, new Dictionary<string, object> { { "$pull", value } });
         }
@@ -266,12 +265,11 @@ namespace Plugins.CountlySDK.Services
 
         private void AddToCustomData(string key, object value)
         {
+            Log.Debug("[StarRatingCountlyService] AddToCustomData: " + key + ", " + value);
+
             if (!_consentService.CheckConsent(Consents.Users)) {
                 return;
             }
-
-            Log.Debug("[StarRatingCountlyService] AddToCustomData: " + key + ", " + value.ToString());
-
 
             if (CustomDataProperties.ContainsKey(key)) {
                 string item = CustomDataProperties.Select(x => x.Key).FirstOrDefault(x => x.Equals(key, StringComparison.OrdinalIgnoreCase));

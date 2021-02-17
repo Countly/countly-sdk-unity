@@ -30,6 +30,8 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async Task RecordOpenViewAsync(string name, bool hasSessionBegunWithView = false)
         {
+            Log.Info("[ViewCountlyService] RecordOpenViewAsync : name = " + name + ", hasSessionBegunWithView = " + hasSessionBegunWithView);
+
             if (!_consentService.CheckConsent(Consents.Views)) {
                 return;
             }
@@ -37,8 +39,6 @@ namespace Plugins.CountlySDK.Services
             if (string.IsNullOrEmpty(name)) {
                 return;
             }
-
-            Log.Info("[ViewCountlyService] RecordOpenViewAsync : name = " + name + ", hasSessionBegunWithView = " + hasSessionBegunWithView);
 
 
             ViewSegment currentViewSegment =
@@ -67,6 +67,8 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async Task RecordCloseViewAsync(string name, bool hasSessionBegunWithView = false)
         {
+            Log.Info("[ViewCountlyService] RecordCloseViewAsync : name = " + name);
+
             if (!_consentService.CheckConsent(Consents.Views)) {
                 return;
             }
@@ -74,9 +76,6 @@ namespace Plugins.CountlySDK.Services
             if (string.IsNullOrEmpty(name)) {
                 return;
             }
-
-            Log.Info("[ViewCountlyService] RecordCloseViewAsync : name = " + name);
-
 
             ViewSegment currentViewSegment =
                 new ViewSegment {
@@ -111,12 +110,11 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async Task ReportActionAsync(string type, int x, int y, int width, int height)
         {
+            Log.Info("[ViewCountlyService] ReportActionAsync : type = " + type + ", x = " + x + ", y = " + y + ", width = " + width + ", height = " + height);
+
             if (!_consentService.CheckConsent(Consents.Views)) {
                 return;
             }
-
-            Log.Info("[ViewCountlyService] ReportActionAsync : type = " + type + ", x = " + x + ", y = " + y + ", width = " + width + ", height = " + height);
-
 
             ActionSegment segment =
                 new ActionSegment {

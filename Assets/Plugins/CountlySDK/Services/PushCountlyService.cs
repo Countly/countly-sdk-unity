@@ -30,6 +30,8 @@ namespace Plugins.CountlySDK.Services
 
         private void EnableNotification()
         {
+            Log.Debug("[PushCountlyService] EnableNotification");
+
             //Enables push notification on start
             if (_configuration.EnableTestMode || !_consentService.CheckConsent(Consents.Push) || _configuration.NotificationMode == TestMode.None) {
                 return;
@@ -76,12 +78,11 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         private async Task PostToCountlyAsync(TestMode? mode, string token)
         {
+            Log.Debug("[PushCountlyService] PostToCountlyAsync : token = " + token);
+
             if (!_mode.HasValue || !_consentService.CheckConsent(Consents.Push)) {
                 return;
             }
-
-            Log.Debug("[PushCountlyService] PostToCountlyAsync : token = " + token);
-
 
             Dictionary<string, object> requestParams =
                 new Dictionary<string, object>
@@ -99,11 +100,11 @@ namespace Plugins.CountlySDK.Services
         /// </summary>
         private async Task<CountlyResponse> ReportPushActionAsync()
         {
+            Log.Debug("[PushCountlyService] ReportPushActionAsync");
+
             if (!_consentService.CheckConsent(Consents.Push)) {
                 return new CountlyResponse { IsSuccess = false};
             }
-
-            Log.Debug("[PushCountlyService] ReportPushActionAsync");
 
 
             return await _notificationsService.ReportPushActionAsync();

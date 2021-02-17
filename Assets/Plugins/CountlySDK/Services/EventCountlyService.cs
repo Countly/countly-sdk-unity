@@ -96,12 +96,11 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async Task RecordEventAsync(string key)
         {
+            Log.Info("[EventCountlyService] RecordEventAsync : key = " + key);
+
             if (!_consentService.CheckConsent(Consents.Events)) {
                 return;
             }
-
-            Log.Info("[EventCountlyService] RecordEventAsync : key = " + key);
-
 
             await RecordEventAsync(key, null);
         }
@@ -119,11 +118,11 @@ namespace Plugins.CountlySDK.Services
         public async Task RecordEventAsync(string key, SegmentModel segmentation,
             int? count = 1, double? sum = 0, double? duration = null)
         {
+            Log.Info("[EventCountlyService] RecordEventAsync : key = " + key + ", segmentation = " + segmentation + ", count = " + count + ", sum = " + sum + ", duration = " + duration);
+
             if (!_consentService.CheckConsent(Consents.Events)) {
                 return;
             }
-
-            Log.Info("[EventCountlyService] RecordEventAsync : key = " + key + ", segmentation = " + segmentation + ", count = " + count + ", sum = " + sum + ", duration = " + duration);
 
             if (_configuration.EnableTestMode) {
                 return;
@@ -196,6 +195,8 @@ namespace Plugins.CountlySDK.Services
             IDictionary<string, object> segmentation = null,
             int? count = 1, double? sum = null, double? duration = null)
         {
+            Log.Info("[EventCountlyService] ReportCustomEventAsync : key = " + key + ", segmentation = " + segmentation.ToString() + ", count = " + count + ", sum = " + sum + ", duration = " + duration);
+
             if (!_consentService.CheckConsent(Consents.Events)) {
                 return;
             }
@@ -203,8 +204,6 @@ namespace Plugins.CountlySDK.Services
             if (string.IsNullOrEmpty(key) && string.IsNullOrWhiteSpace(key)) {
                 return;
             }
-
-            Log.Info("[EventCountlyService] ReportCustomEventAsync : key = " + key + ", segmentation = " + segmentation.ToString() + ", count = " + count + ", sum = " + sum + ", duration = " + duration);
 
             CountlyEventModel evt = new CountlyEventModel(key, segmentation, count, sum, duration);
 

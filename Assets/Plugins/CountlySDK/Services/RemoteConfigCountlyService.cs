@@ -58,8 +58,9 @@ namespace Plugins.CountlySDK.Services
             List<ConfigEntity> allConfigs = _configDao.LoadAll();
             if (allConfigs != null && allConfigs.Count > 0) {
                 config = Converter.ConvertJsonToDictionary(allConfigs[0].Json);
-                Log.Debug("[RemoteConfigCountlyService] FetchConfigFromDB : Configs = " + config.ToString());
             }
+
+            Log.Debug("[RemoteConfigCountlyService] FetchConfigFromDB : Configs = " + config);
 
             return config;
         }

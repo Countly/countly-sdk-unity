@@ -44,7 +44,9 @@ namespace Plugins.CountlySDK.Services
         /// <returns>Returns "true" if the consent for the checked feature has been provided</returns>
         public bool CheckConsent(Consents consent)
         {
-            return !RequiresConsent || (_countlyConsents.ContainsKey(consent) && _countlyConsents[consent]);
+            bool result = !RequiresConsent || (_countlyConsents.ContainsKey(consent) && _countlyConsents[consent]);
+            Log.Verbose("[ConsentCountlyService] CheckConsent : consent = " + consent.ToString() + ", result = " + result);
+            return result;
         }
 
         /// <summary>
@@ -53,20 +55,22 @@ namespace Plugins.CountlySDK.Services
         /// <returns>Returns "true" if consent is given for any of the possible features</returns>
         internal bool AnyConsentGiven()
         {
-            if (!RequiresConsent) {
-                //no consent required - all consent given
-                return true;
-            }
-
-            Log.Verbose("[ConsentCountlyService] AnyConsentGiven");
-
-            foreach (KeyValuePair<Consents, bool> entry in _countlyConsents) {
-                if (entry.Value) {
-                    return true;
+            bool result = false;
+            if (RequiresConsent) {
+                foreach (KeyValuePair<Consents, bool> entry in _countlyConsents) {
+                    if (entry.Value) {
+                        result = true;
+                        break;
+                    }
                 }
+            } else {
+                //no consent required - all consent given
+                result = true;
             }
 
-            return false;
+            Log.Verbose("[ConsentCountlyService] AnyConsentGiven : result = " + result);
+
+            return result;
         }
 
         /// <summary>

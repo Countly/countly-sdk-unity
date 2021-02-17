@@ -41,12 +41,11 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async Task ReportStarRatingAsync(string platform, string appVersion, int rating)
         {
+            Log.Info("[StarRatingCountlyService] ReportStarRatingAsync");
 
             if (!_consentService.CheckConsent(Consents.StarRating)) {
                 return;
             }
-
-            Log.Info("[StarRatingCountlyService] ReportStarRatingAsync");
 
             if (rating < 1 || rating > 5) {
                 return;

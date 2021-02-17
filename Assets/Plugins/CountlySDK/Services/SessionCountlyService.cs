@@ -70,6 +70,8 @@ namespace Plugins.CountlySDK.Services
 
         public async Task ExecuteBeginSessionAsync()
         {
+            Log.Info("[SessionCountlyService] ExecuteBeginSessionAsync");
+
             if (!_consentService.CheckConsent(Consents.Sessions)) {
                 return;
             }
@@ -77,8 +79,6 @@ namespace Plugins.CountlySDK.Services
             if (IsSessionInitiated) {
                 return;
             }
-
-            Log.Info("[SessionCountlyService] ExecuteBeginSessionAsync");
 
             FirstLaunchAppHelper.Process();
             _lastSessionRequestTime = DateTime.Now;
@@ -127,12 +127,11 @@ namespace Plugins.CountlySDK.Services
 
         public async Task ExecuteEndSessionAsync(bool disposeTimer = true)
         {
+            Log.Info("[SessionCountlyService] ExecuteEndSessionAsync");
+
             if (!_consentService.CheckConsent(Consents.Sessions)) {
                 return;
             }
-
-            Log.Info("[SessionCountlyService] ExecuteEndSessionAsync");
-
 
             IsSessionInitiated = false;
 
@@ -175,11 +174,11 @@ namespace Plugins.CountlySDK.Services
         /// </summary>
         public async Task EndSessionAsync()
         {
+            Log.Info("[SessionCountlyService] ExtendSessionAsync");
+
             if (!_consentService.CheckConsent(Consents.Sessions)) {
                 return;
             }
-
-            Log.Info("[SessionCountlyService] ExtendSessionAsync");
 
             await ExecuteEndSessionAsync();
         }
@@ -189,12 +188,11 @@ namespace Plugins.CountlySDK.Services
         /// </summary>
         public async Task ExtendSessionAsync()
         {
+            Log.Info("[SessionCountlyService] ExtendSessionAsync");
+
             if (!_consentService.CheckConsent(Consents.Sessions)) {
                 return;
             }
-
-            Log.Info("[SessionCountlyService] ExtendSessionAsync");
-
 
             _lastSessionRequestTime = DateTime.Now;
             Dictionary<string, object> requestParams =

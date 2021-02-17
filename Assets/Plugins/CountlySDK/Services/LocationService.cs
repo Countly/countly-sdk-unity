@@ -51,13 +51,11 @@ namespace Plugins.CountlySDK.Services
 
         internal async Task SendIndependantLocationRequest()
         {
+            Log.Debug("[LocationService] SendIndependantLocationRequest");
 
             if (!_consentService.CheckConsent(Consents.Location)) {
                 return;
             }
-
-            Log.Debug("[LocationService] SendIndependantLocationRequest");
-
 
             Dictionary<string, object> requestParams =
                 new Dictionary<string, object>();
@@ -94,11 +92,11 @@ namespace Plugins.CountlySDK.Services
         /// </summary>
         public async void DisableLocation()
         {
+            Log.Info("[LocationService] DisableLocation");
+
             if (!_consentService.CheckConsent(Consents.Location)) {
                 return;
             }
-
-            Log.Info("[LocationService] DisableLocation");
 
             IsLocationDisabled = true;
             City = null;
@@ -124,6 +122,8 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async void SetLocation(string countryCode, string city, string gpsCoordinates, string ipAddress)
         {
+            Log.Info("[LocationService] SetLocation : countryCode = " + countryCode + ", city = " + city + ", gpsCoordinates = " + gpsCoordinates + ", ipAddress = " + ipAddress);
+
             if (!_consentService.CheckConsent(Consents.Location)) {
                 return;
             }
@@ -135,9 +135,6 @@ namespace Plugins.CountlySDK.Services
                 || (!string.IsNullOrEmpty(City) && string.IsNullOrEmpty(CountryCode))) {
                 Log.Warning("[LocationService] In \"SetLocation\" both country code and city should be set together");
             }
-
-            Log.Info("[LocationService] SetLocation : countryCode = " + countryCode + ", city = " + city + ", gpsCoordinates = " + gpsCoordinates + ", ipAddress = " + ipAddress);
-
 
             City = city;
             IPAddress = ipAddress;
