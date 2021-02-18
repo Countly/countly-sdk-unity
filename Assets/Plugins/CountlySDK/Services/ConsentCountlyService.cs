@@ -90,7 +90,7 @@ namespace Plugins.CountlySDK.Services
         /// </summary>
         /// <param name="consents">array of consents for which consent should be given</param>
         /// <returns></returns>
-        public void GiveConsent(Consents[] (consents)
+        public void GiveConsent(Consents[] consents)
         {
             Log.Info("[ConsentCountlyService] GiveConsent : consents = " + (consents != null));
 
