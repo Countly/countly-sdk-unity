@@ -25,7 +25,7 @@ namespace Plugins.CountlySDK.Services
             _sessionCountlyService = sessionCountlyService;
         }
         /// <summary>
-        /// Return Device ID assigned to device. It uses to identify a device/user.
+        /// Returns the Device ID that is currently used by the SDK
         /// </summary>
         public string DeviceId { get; private set; }
 
@@ -146,7 +146,7 @@ namespace Plugins.CountlySDK.Services
         /// <summary>
         /// Call <code>DeviceIdChanged</code> on all listeners.
         /// </summary>
-        /// <param name="merged">Pass true on session data merged</param>
+        /// <param name="merged">If passed "true" if will perform a device ID merge serverside of the old and new device ID. This will merge their data</param>
         private void NotifyListeners(bool merged)
         {
             if (Listeners == null) {
