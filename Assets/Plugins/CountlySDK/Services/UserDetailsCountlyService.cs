@@ -93,7 +93,7 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async Task SetCustomUserDetailsAsync(CountlyUserDetailsModel userDetailsModel)
         {
-            Log.Info("[StarRatingCountlyService] SetCustomUserDetailsAsync " + userDetailsModel.ToString());
+            Log.Info("[StarRatingCountlyService] SetCustomUserDetailsAsync " + userDetailsModel);
 
             if (!_consentService.CheckConsent(Consents.Users)) {
                 return;
