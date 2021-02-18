@@ -45,6 +45,8 @@ namespace Plugins.CountlySDK.Persistance.Repositories
 
         public override bool Enqueue(CountlyEventModel model)
         {
+            Log.Debug("[" + GetType().Name + "] Enqueue: \n" + model);
+
             bool res = base.Enqueue(model);
             if (!res) {
                 return false;

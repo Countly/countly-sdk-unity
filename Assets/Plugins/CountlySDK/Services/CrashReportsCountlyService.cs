@@ -32,17 +32,18 @@ namespace Plugins.CountlySDK.Services
         /// <param name="message">Exception Class</param>
         /// <param name="stackTrace">Stack Trace</param>
         /// <param name="type">Excpetion type like error, warning, etc</param>
+
+        [Obsolete("LogCallback is deprecated, this is going to be removed in the future.")]
         public async void LogCallback(string message, string stackTrace, LogType type)
         {
-            Log.Info("[CrashReportsCountlyService] LogCallback : message = " + message + ", stackTrace = " + stackTrace);
-
-            if (!_consentService.CheckConsent(Consents.Crashes)) {
+            //In future make this function internal
+            if (!_consentService.CheckConsentInternal(Consents.Crashes)) {
                 return;
             }
 
             if (_configuration.EnableAutomaticCrashReporting
                 && (type == LogType.Error || type == LogType.Exception)) {
-                await SendCrashReportAsync(message, stackTrace, type, null, false);
+                await SendCrashReportInternal(message, stackTrace, type, null, false);
             }
         }
 
@@ -58,13 +59,23 @@ namespace Plugins.CountlySDK.Services
         public async Task SendCrashReportAsync(string message, string stackTrace, LogType type,
             IDictionary<string, object> segments = null, bool nonfatal = true)
         {
-            Log.Info("[CrashReportsCountlyService] LogCallback : message = " + message + ", stackTrace = " + stackTrace);
+            Log.Info("[CrashReportsCountlyService] SendCrashReportAsync : message = " + message + ", stackTrace = " + stackTrace);
 
-            if (!_consentService.CheckConsent(Consents.Crashes)) {
+            if (!_consentService.CheckConsentInternal(Consents.Crashes)) {
                 return;
             }
 
+            await SendCrashReportInternal(message, stackTrace, type, segments, nonfatal);
+
+        }
+
+        internal async Task SendCrashReportInternal(string message, string stackTrace, LogType type,
+            IDictionary<string, object> segments = null, bool nonfatal = true)
+        {
+
             CountlyExceptionDetailModel model = ExceptionDetailModel(message, stackTrace, nonfatal, segments);
+
+            Log.Debug("[CrashReportsCountlyService] SendCrashReportInternal : model = " + model.ToString());
 
             Dictionary<string, object> requestParams = new Dictionary<string, object>
             {
@@ -88,7 +99,7 @@ namespace Plugins.CountlySDK.Services
         {
             Log.Info("[CrashReportsCountlyService] AddBreadcrumbs : " + value);
 
-            if (!_consentService.CheckConsent(Consents.Crashes)) {
+            if (!_consentService.CheckConsentInternal(Consents.Crashes)) {
                 return;
             }
 

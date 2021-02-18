@@ -34,11 +34,12 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         internal async Task UserDetailsAsync(CountlyUserDetailsModel userDetails)
         {
+
+            Log.Debug("[StarRatingCountlyService] UserDetailsAsync : userDetails = " + (userDetails != null));
+
             if (userDetails == null) {
                 return;
             }
-
-            Log.Debug("[StarRatingCountlyService] UserDetailsAsync " + userDetails.ToString());
 
             await SetUserDetailsAsync(userDetails);
         }
@@ -51,12 +52,11 @@ namespace Plugins.CountlySDK.Services
         /// <return></returns>
         internal async Task UserCustomDetailsAsync(CountlyUserDetailsModel userDetails)
         {
+            Log.Debug("[StarRatingCountlyService] UserCustomDetailsAsync " + (userDetails != null));
+
             if (userDetails == null) {
                 return;
             }
-
-            Log.Debug("[StarRatingCountlyService] UserCustomDetailsAsync " + userDetails.ToString());
-
 
             await SetCustomUserDetailsAsync(userDetails);
         }
@@ -69,7 +69,7 @@ namespace Plugins.CountlySDK.Services
         {
             Log.Info("[StarRatingCountlyService] SetUserDetailsAsync " + userDetailsModel.ToString());
 
-            if (!_consentService.CheckConsent(Consents.Users)) {
+            if (!_consentService.CheckConsentInternal(Consents.Users)) {
                 return;
             }
 
@@ -95,7 +95,7 @@ namespace Plugins.CountlySDK.Services
         {
             Log.Info("[StarRatingCountlyService] SetCustomUserDetailsAsync " + userDetailsModel);
 
-            if (!_consentService.CheckConsent(Consents.Users)) {
+            if (!_consentService.CheckConsentInternal(Consents.Users)) {
                 return;
             }
 
@@ -267,7 +267,7 @@ namespace Plugins.CountlySDK.Services
         {
             Log.Debug("[StarRatingCountlyService] AddToCustomData: " + key + ", " + value);
 
-            if (!_consentService.CheckConsent(Consents.Users)) {
+            if (!_consentService.CheckConsentInternal(Consents.Users)) {
                 return;
             }
 

@@ -98,7 +98,7 @@ namespace Plugins.CountlySDK.Services
         {
             Log.Info("[EventCountlyService] RecordEventAsync : key = " + key);
 
-            if (!_consentService.CheckConsent(Consents.Events)) {
+            if (!_consentService.CheckConsentInternal(Consents.Events)) {
                 return;
             }
 
@@ -120,7 +120,7 @@ namespace Plugins.CountlySDK.Services
         {
             Log.Info("[EventCountlyService] RecordEventAsync : key = " + key + ", segmentation = " + segmentation + ", count = " + count + ", sum = " + sum + ", duration = " + duration);
 
-            if (!_consentService.CheckConsent(Consents.Events)) {
+            if (!_consentService.CheckConsentInternal(Consents.Events)) {
                 return;
             }
 
@@ -195,9 +195,9 @@ namespace Plugins.CountlySDK.Services
             IDictionary<string, object> segmentation = null,
             int? count = 1, double? sum = null, double? duration = null)
         {
-            Log.Info("[EventCountlyService] ReportCustomEventAsync : key = " + key + ", segmentation = " + segmentation.ToString() + ", count = " + count + ", sum = " + sum + ", duration = " + duration);
+            Log.Info("[EventCountlyService] ReportCustomEventAsync : key = " + key + ", segmentation = " + (segmentation != null) + ", count = " + count + ", sum = " + sum + ", duration = " + duration);
 
-            if (!_consentService.CheckConsent(Consents.Events)) {
+            if (!_consentService.CheckConsentInternal(Consents.Events)) {
                 return;
             }
 

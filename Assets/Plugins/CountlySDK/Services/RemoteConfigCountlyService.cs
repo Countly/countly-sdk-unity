@@ -32,7 +32,7 @@ namespace Plugins.CountlySDK.Services
             _configuration = configuration;
             _requestCountlyHelper = requestCountlyHelper;
 
-            if (_consentService.CheckConsent(Consents.RemoteConfig)) {
+            if (_consentService.CheckConsentInternal(Consents.RemoteConfig)) {
                 Configs = FetchConfigFromDB();
             } else {
                 _configDao.RemoveAll();
@@ -42,12 +42,11 @@ namespace Plugins.CountlySDK.Services
 
         internal async Task<CountlyResponse> InitConfig()
         {
+            Log.Debug("[RemoteConfigCountlyService] InitConfig");
+
             if (_configuration.EnableTestMode) {
                 return new CountlyResponse { IsSuccess = true };
             }
-
-            Log.Debug("[RemoteConfigCountlyService] InitConfig");
-
 
             return await Update();
         }
@@ -73,7 +72,7 @@ namespace Plugins.CountlySDK.Services
         {
             Log.Info("[RemoteConfigCountlyService] Update");
 
-            if (!_consentService.CheckConsent(Consents.RemoteConfig)) {
+            if (!_consentService.CheckConsentInternal(Consents.RemoteConfig)) {
                 return new CountlyResponse {
                     IsSuccess = false
                 };

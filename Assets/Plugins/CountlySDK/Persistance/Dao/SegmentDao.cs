@@ -21,6 +21,9 @@ namespace Plugins.CountlySDK.Persistance.Dao
 
         public SegmentEntity GetByEventId(long eventId)
         {
+
+            Log.Debug("[SegmentDao] GetByEventId: eventId = " + eventId);
+
             _stringBuilder.Clear();
 
             string ql = _stringBuilder.Append("from ").Append(Table).Append(" where EventId==?").ToString();
@@ -38,7 +41,7 @@ namespace Plugins.CountlySDK.Persistance.Dao
 
                 return entities[0];
             } catch (Exception ex) {
-                Log.Info("[SegmentDao] GetByEventId: Couldn't complete db operation, [" + ex.Message + "]");
+                Log.Debug("[SegmentDao] GetByEventId: Couldn't complete db operation, [" + ex.Message + "]");
                 return null;
             }
         }

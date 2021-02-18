@@ -26,10 +26,10 @@ namespace Plugins.CountlySDK.Services
 
         private async Task StartSession()
         {
-            if (!_consentService.CheckConsent(Consents.Sessions)) {
+            if (!_consentService.CheckConsentInternal(Consents.Sessions)) {
                 /* If location is disabled in init
                 and no session consent is given. Send empty location as separate request.*/
-                if (_locationService.IsLocationDisabled || !_consentService.CheckConsent(Consents.Location)) {
+                if (_locationService.IsLocationDisabled || !_consentService.CheckConsentInternal(Consents.Location)) {
                     await _locationService.SendRequestWithEmptyLocation();
                 } else {
                     /*

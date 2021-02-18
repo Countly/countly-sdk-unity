@@ -41,9 +41,9 @@ public class IOSBridge : MonoBehaviour
     //Sent when the application successfully registered with Apple Push Notification Service (APNS).
     void OnDidRegisterForRemoteNotificationsWithDeviceToken(string deviceToken)
     {
-        if (deviceToken != null && deviceToken.Length != 0) {
-            Log.Debug("[IOSBridge] OnDidRegisterForRemoteNotificationsWithDeviceToken Token: " + deviceToken);
+        Log.Debug("[IOSBridge] OnDidRegisterForRemoteNotificationsWithDeviceToken Token: " + deviceToken);
 
+        if (deviceToken != null && deviceToken.Length != 0) {
             _onTokenResult?.Invoke(deviceToken);
         }
     }

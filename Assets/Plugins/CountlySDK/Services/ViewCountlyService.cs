@@ -32,7 +32,7 @@ namespace Plugins.CountlySDK.Services
         {
             Log.Info("[ViewCountlyService] RecordOpenViewAsync : name = " + name + ", hasSessionBegunWithView = " + hasSessionBegunWithView);
 
-            if (!_consentService.CheckConsent(Consents.Views)) {
+            if (!_consentService.CheckConsentInternal(Consents.Views)) {
                 return;
             }
 
@@ -69,7 +69,7 @@ namespace Plugins.CountlySDK.Services
         {
             Log.Info("[ViewCountlyService] RecordCloseViewAsync : name = " + name);
 
-            if (!_consentService.CheckConsent(Consents.Views)) {
+            if (!_consentService.CheckConsentInternal(Consents.Views)) {
                 return;
             }
 
@@ -112,7 +112,7 @@ namespace Plugins.CountlySDK.Services
         {
             Log.Info("[ViewCountlyService] ReportActionAsync : type = " + type + ", x = " + x + ", y = " + y + ", width = " + width + ", height = " + height);
 
-            if (!_consentService.CheckConsent(Consents.Views)) {
+            if (!_consentService.CheckConsentInternal(Consents.Views)) {
                 return;
             }
 

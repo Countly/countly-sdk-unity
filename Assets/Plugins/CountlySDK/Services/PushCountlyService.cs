@@ -33,7 +33,7 @@ namespace Plugins.CountlySDK.Services
             Log.Debug("[PushCountlyService] EnableNotification");
 
             //Enables push notification on start
-            if (_configuration.EnableTestMode || !_consentService.CheckConsent(Consents.Push) || _configuration.NotificationMode == TestMode.None) {
+            if (_configuration.EnableTestMode || !_consentService.CheckConsentInternal(Consents.Push) || _configuration.NotificationMode == TestMode.None) {
                 return;
             }
 
@@ -80,7 +80,7 @@ namespace Plugins.CountlySDK.Services
         {
             Log.Debug("[PushCountlyService] PostToCountlyAsync : token = " + token);
 
-            if (!_mode.HasValue || !_consentService.CheckConsent(Consents.Push)) {
+            if (!_mode.HasValue || !_consentService.CheckConsentInternal(Consents.Push)) {
                 return;
             }
 
@@ -102,7 +102,7 @@ namespace Plugins.CountlySDK.Services
         {
             Log.Debug("[PushCountlyService] ReportPushActionAsync");
 
-            if (!_consentService.CheckConsent(Consents.Push)) {
+            if (!_consentService.CheckConsentInternal(Consents.Push)) {
                 return new CountlyResponse { IsSuccess = false};
             }
 

@@ -42,9 +42,12 @@ namespace Plugins.CountlySDK.Persistance.Repositories
 
         public virtual bool Enqueue(TModel model)
         {
+            Log.Verbose("[Repository] Enqueue, TModel: " + model);
+
             if (!ValidateModelBeforeEnqueue(model)) {
                 return false;
             }
+
             Models.Enqueue(model);
             TEntity entity = ConvertModelToEntity(model);
             bool res = _dao.Save(entity);

@@ -53,11 +53,12 @@ namespace Plugins.CountlySDK.Services
         /// <param name="elapsedEventArgs"></param>
         private async void SessionTimerOnElapsedAsync(object sender, ElapsedEventArgs elapsedEventArgs)
         {
+
+            Log.Debug("[SessionCountlyService] SessionTimerOnElapsedAsync");
+
             if (!IsSessionInitiated) {
                 return;
             }
-
-            Log.Debug("[SessionCountlyService] SessionTimerOnElapsedAsync");
 
             await _eventService.AddEventsToRequestQueue();
 
@@ -72,7 +73,7 @@ namespace Plugins.CountlySDK.Services
         {
             Log.Info("[SessionCountlyService] ExecuteBeginSessionAsync");
 
-            if (!_consentService.CheckConsent(Consents.Sessions)) {
+            if (!_consentService.CheckConsentInternal(Consents.Sessions)) {
                 return;
             }
 
@@ -93,7 +94,7 @@ namespace Plugins.CountlySDK.Services
 
             /* If location is disabled or no location consent is given,
             the SDK adds an empty location entry to every "begin_session" request. */
-            if (_locationService.IsLocationDisabled || !_consentService.CheckConsent(Consents.Location)) {
+            if (_locationService.IsLocationDisabled || !_consentService.CheckConsentInternal(Consents.Location)) {
                 requestParams.Add("location", string.Empty);
             } else {
                 if (!string.IsNullOrEmpty(_locationService.IPAddress)) {
@@ -129,7 +130,7 @@ namespace Plugins.CountlySDK.Services
         {
             Log.Info("[SessionCountlyService] ExecuteEndSessionAsync");
 
-            if (!_consentService.CheckConsent(Consents.Sessions)) {
+            if (!_consentService.CheckConsentInternal(Consents.Sessions)) {
                 return;
             }
 
@@ -176,7 +177,7 @@ namespace Plugins.CountlySDK.Services
         {
             Log.Info("[SessionCountlyService] ExtendSessionAsync");
 
-            if (!_consentService.CheckConsent(Consents.Sessions)) {
+            if (!_consentService.CheckConsentInternal(Consents.Sessions)) {
                 return;
             }
 
@@ -190,7 +191,7 @@ namespace Plugins.CountlySDK.Services
         {
             Log.Info("[SessionCountlyService] ExtendSessionAsync");
 
-            if (!_consentService.CheckConsent(Consents.Sessions)) {
+            if (!_consentService.CheckConsentInternal(Consents.Sessions)) {
                 return;
             }
 
