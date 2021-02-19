@@ -183,8 +183,6 @@ namespace Plugins.CountlySDK
             _viewEventRepo = new ViewEventRepository(_storageHelper.ViewEventDao, _storageHelper.ViewSegmentDao, Configuration);
             _nonViewEventRepo = new NonViewEventRepository(_storageHelper.NonViewEventDao, _storageHelper.NonViewSegmentDao, Configuration);
 
-            _storageHelper.EventNrInSameSessionDao.RemoveAll(); /* Clear EventNumberInSameSessions Entity data */
-
             _requestRepo.Initialize();
             _viewEventRepo.Initialize();
             _nonViewEventRepo.Initialize();
