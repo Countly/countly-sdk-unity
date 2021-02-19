@@ -28,7 +28,7 @@ namespace Plugins.CountlySDK.Services
         /// Modifies all user data. Custom data should be json string.
         /// Deletes an already defined custom property from the Countly server, if it is supplied with a NULL value
         /// </summary>
-        /// <param name="userDetails"></param>
+        /// <param name="userDetails">User's detail object</param>
         /// <returns></returns>
         internal async Task UserDetailsAsync(CountlyUserDetailsModel userDetails)
         {
@@ -43,7 +43,7 @@ namespace Plugins.CountlySDK.Services
         /// Modifies custom user data only. Custom data should be json string.
         /// Deletes an already defined custom property from the Countly server, if it is supplied with a NULL value
         /// </summary>
-        /// <param name="userDetails"></param>
+        /// <param name="userDetails">User's custom detail object</param>
         /// <return></returns>
         internal async Task UserCustomDetailsAsync(CountlyUserDetailsModel userDetails)
         {
@@ -55,8 +55,9 @@ namespace Plugins.CountlySDK.Services
         }
 
         /// <summary>
-        /// Uploads all user details
+        /// Sets information about user.
         /// </summary>
+        /// <param name="userDetailsModel">User Model with the specified params</param>
         /// <returns></returns>
         public async Task SetUserDetailsAsync(CountlyUserDetailsModel userDetailsModel)
         {
@@ -79,8 +80,10 @@ namespace Plugins.CountlySDK.Services
         }
 
         /// <summary>
-        /// Uploads only custom data. Doesn't update any other property except Custom Data.
+        /// Sets information about user with custom properties.
+        /// In custom properties you can provide any string key values to be stored with user.
         /// </summary>
+        /// <param name="userDetailsModel">User Detail Model with the custom properties</param>
         /// <returns></returns>
         public async Task SetCustomUserDetailsAsync(CountlyUserDetailsModel userDetailsModel)
         {
@@ -103,7 +106,7 @@ namespace Plugins.CountlySDK.Services
         }
 
         /// <summary>
-        /// Saves all custom user data updates done since the last save request.
+        /// Send provided values to server.
         /// </summary>
         /// <returns></returns>
         public async Task SaveAsync()
@@ -120,115 +123,112 @@ namespace Plugins.CountlySDK.Services
 
 
         /// <summary>
-        /// Sets value to key.
-        /// Doesn't report it to the server until save is called.
+        /// Sets custom provide key/value as custom property.
         /// </summary>
-        /// <param name="key"></param>
-        /// <param name="value"></param>
+        /// <param name="key">string with key for the property</param>
+        /// <param name="value">string with value for the property</param>
         public void Set(string key, string value)
         {
             AddToCustomData(key, value);
         }
 
         /// <summary>
-        /// Sets value to key, only if property was not defined before for this user.
-        /// Doesn't report it to the server until save is called.
+        /// Set value only if property does not exist yet.
         /// </summary>
-        /// <param name="key"></param>
-        /// <param name="value"></param>
+        /// <param name="key">string with property name to set</param>
+        /// <param name="value">string value to set</param>
         public void SetOnce(string key, string value)
         {
             AddToCustomData(key, new Dictionary<string, object> { { "$setOnce", value } });
         }
 
         /// <summary>
-        /// To increment value, for the specified key, on the server by 1.
-        /// Doesn't report it to the server until save is called.
+        /// Increment custom property value by 1.
         /// </summary>
-        /// <param name="key"></param>
+        /// <param name="key">string with property name to increment</param>
         public void Increment(string key)
         {
             AddToCustomData(key, new Dictionary<string, object> { { "$inc", 1 } });
         }
 
         /// <summary>
-        /// To increment value on server by provided value (if no value on server, assumes it is 0).
-        /// Doesn't report it to the server until save is called.
+        /// Increment custom property value by provided value.
         /// </summary>
-        /// <param name="key"></param>
-        /// <param name="value"></param>
+        /// <param name="key">string with property name to increment</param>
+        /// <param name="value">double value by which to increment</param>
         public void IncrementBy(string key, double value)
         {
             AddToCustomData(key, new Dictionary<string, object> { { "$inc", value } });
         }
 
         /// <summary>
-        /// To multiply value on server by provided value (if no value on server, assumes it is 0).
-        /// Doesn't report it to the server until save is called.
+        /// Multiply custom property value by provided value.
         /// </summary>
-        /// <param name="key"></param>
-        /// <param name="value"></param>
+        /// <param name="key">string with property name to multiply</param>
+        /// <param name="value">double value by which to multiply</param>
         public void Multiply(string key, double value)
         {
             AddToCustomData(key, new Dictionary<string, object> { { "$mul", value } });
         }
 
         /// <summary>
-        /// To store maximal value from the one on server and provided value (if no value on server, uses provided value).
-        /// Doesn't report it to the server until save is called.
+        /// Save maximal value between existing and provided.
         /// </summary>
-        /// <param name="key"></param>
-        /// <param name="value"></param>
+        /// <param name="key">String with property name to check for max</param>
+        /// <param name="value">double value to check for max</param>
         public void Max(string key, double value)
         {
             AddToCustomData(key, new Dictionary<string, object> { { "$max", value } });
         }
 
         /// <summary>
-        /// To store minimal value from the one on server and provided value (if no value on server, uses provided value).
-        /// Doesn't report it to the server until save is called.
+        /// Save minimal value between existing and provided.
         /// </summary>
-        /// <param name="key"></param>
-        /// <param name="value"></param>
+        /// <param name="key">string with property name to check for min</param>
+        /// <param name="value">double value to check for min</param>
         public void Min(string key, double value)
         {
             AddToCustomData(key, new Dictionary<string, object> { { "$min", value } });
         }
 
         /// <summary>
-        /// Add one or many values to array property (can have multiple same values, if property is not array, converts it to array).
-        /// Doesn't report it to the server until save is called.
+        /// Create array property, if property does not exist and add value to array
+        /// You can only use it on array properties or properties that do not exist yet.
         /// </summary>
-        /// <param name="key"></param>
-        /// <param name="value"></param>
+        /// <param name="key">string with property name for array property</param>
+        /// <param name="value">array with values to add</param>
         public void Push(string key, string[] value)
         {
             AddToCustomData(key, new Dictionary<string, object> { { "$push", value } });
         }
 
         /// <summary>
-        /// Add one or many values to array property (will only store unique values in array, if property is not array, converts it to array).
-        /// Doesn't report it to the server until save is called.
+        /// Create array property, if property does not exist and add value to array, only if value is not yet in the array
+        /// You can only use it on array properties or properties that do not exist yet.
         /// </summary>
-        /// <param name="key"></param>
-        /// <param name="value"></param>
+        /// <param name="key">string with property name for array property</param>
+        /// <param name="value">array with values to add</param>
         public void PushUnique(string key, string[] value)
         {
             AddToCustomData(key, new Dictionary<string, object> { { "$addToSet", value } });
         }
 
         /// <summary>
-        /// Remove one or many values from array property (only removes value from array properties).
-        /// Doesn't report it to the server until save is called.
+        /// Create array property, if property does not exist and remove value from array.
         /// </summary>
-        /// <param name="key"></param>
-        /// <param name="value"></param>
+        /// <param name="key">String with property name for array property</param>
+        /// <param name="value">array with values to remove from array</param>
         public void Pull(string key, string[] value)
         {
             AddToCustomData(key, new Dictionary<string, object> { { "$pull", value } });
         }
 
 
+        /// <summary>
+        /// Create a property
+        /// </summary>
+        /// <param name="key">property name</param>
+        /// <param name="value">property value</param>
         private void AddToCustomData(string key, object value)
         {
             if (!_consentService.CheckConsent(Consents.Users)) {
