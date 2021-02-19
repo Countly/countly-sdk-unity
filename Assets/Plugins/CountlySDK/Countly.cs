@@ -35,6 +35,7 @@ namespace Plugins.CountlySDK
         public bool IsSDKInitialized { get; private set; }
 
         private static Countly _instance = null;
+        private CountlyStorageHelper _storageHelper;
         private List<AbstractBaseService> _listeners = new List<AbstractBaseService>();
 
         /// <summary>
@@ -128,12 +129,9 @@ namespace Plugins.CountlySDK
         /// <returns>NotificationsCallbackService</returns>
         public NotificationsCallbackService Notifications { get; set; }
 
-        private DB _db;
         private bool _logSubscribed;
-        internal const long DbNumber = 3;
         private PushCountlyService _push;
 
-        private Dao<ConfigEntity> _configDao;
         private RequestRepository _requestRepo;
         private ViewEventRepository _viewEventRepo;
         private NonViewEventRepository _nonViewEventRepo;
@@ -178,28 +176,20 @@ namespace Plugins.CountlySDK
 
             Configuration = configuration;
 
-            _db = CountlyStorageHelper.BuildDatabase(DbNumber);
+            _storageHelper = new CountlyStorageHelper(Configuration);
+            _storageHelper.OpenDB();
 
-            DB.AutoBox auto = _db.Open();
-            _configDao = new Dao<ConfigEntity>(auto, EntityType.Configs.ToString(), Configuration);
-            Dao<RequestEntity> requestDao = new Dao<RequestEntity>(auto, EntityType.Requests.ToString(), Configuration);
-            Dao<EventEntity> viewEventDao = new Dao<EventEntity>(auto, EntityType.ViewEvents.ToString(), Configuration);
-            SegmentDao viewSegmentDao = new SegmentDao(auto, EntityType.ViewEventSegments.ToString(), Configuration);
-            Dao<EventEntity> nonViewEventDao = new Dao<EventEntity>(auto, EntityType.NonViewEvents.ToString(), Configuration);
-            SegmentDao nonViewSegmentDao = new SegmentDao(auto, EntityType.NonViewEventSegments.ToString(), Configuration);
+            _requestRepo = new RequestRepository(_storageHelper.RequestDao, Configuration);
+            _viewEventRepo = new ViewEventRepository(_storageHelper.ViewEventDao, _storageHelper.ViewSegmentDao, Configuration);
+            _nonViewEventRepo = new NonViewEventRepository(_storageHelper.NonViewEventDao, _storageHelper.NonViewSegmentDao, Configuration);
 
-            _requestRepo = new RequestRepository(requestDao, Configuration);
-            _viewEventRepo = new ViewEventRepository(viewEventDao, viewSegmentDao, Configuration);
-            _nonViewEventRepo = new NonViewEventRepository(nonViewEventDao, nonViewSegmentDao, Configuration);
-
-            Dao<EventNumberInSameSessionEntity> eventNrInSameSessionDao = new Dao<EventNumberInSameSessionEntity>(auto, EntityType.EventNumberInSameSessions.ToString(), Configuration);
-            eventNrInSameSessionDao.RemoveAll(); /* Clear EventNumberInSameSessions Entity data */
+            _storageHelper.EventNrInSameSessionDao.RemoveAll(); /* Clear EventNumberInSameSessions Entity data */
 
             _requestRepo.Initialize();
             _viewEventRepo.Initialize();
             _nonViewEventRepo.Initialize();
 
-            Init(_requestRepo, _viewEventRepo, _nonViewEventRepo, _configDao);
+            Init(_requestRepo, _viewEventRepo, _nonViewEventRepo, _storageHelper.ConfigDao);
 
             Device.InitDeviceId(configuration.DeviceId);
             OnInitialisationComplete();
@@ -280,7 +270,7 @@ namespace Plugins.CountlySDK
                 Debug.Log("[Countly] OnApplicationQuit");
             }
 
-            _db.Close();
+            _storageHelper.CloseDB();
         }
 
         internal void ClearStorage()
@@ -290,12 +280,13 @@ namespace Plugins.CountlySDK
             }
             _requestRepo.Clear();
             _viewEventRepo.Clear();
-            _configDao.RemoveAll();
             _nonViewEventRepo.Clear();
+            _storageHelper.ConfigDao.RemoveAll();
+
 
             PlayerPrefs.DeleteAll();
 
-            _db.Close();
+            _storageHelper.CloseDB();
         }
 
         private void OnApplicationFocus(bool hasFocus)
