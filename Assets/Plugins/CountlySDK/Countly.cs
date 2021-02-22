@@ -183,8 +183,12 @@ namespace Plugins.CountlySDK
                 _logHelper.Warning("'EnableFirstAppLaunchSegment' has been deprecated and it's functionality has been removed. This variable is only left for compatability.");
             }
 
+            FirstLaunchAppHelper.Process();
+
             _storageHelper = new CountlyStorageHelper(_logHelper);
             _storageHelper.OpenDB();
+
+            _storageHelper.RunMigration();
 
             _requestRepo = new RequestRepository(_storageHelper.RequestDao, _logHelper);
             _viewEventRepo = new ViewEventRepository(_storageHelper.ViewEventDao, _storageHelper.ViewSegmentDao, _logHelper);

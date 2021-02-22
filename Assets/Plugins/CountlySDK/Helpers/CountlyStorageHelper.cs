@@ -105,6 +105,9 @@ namespace Plugins.CountlySDK.Helpers
             PlayerPrefs.SetInt(Constants.SchemaVersion, _schemaVersion);
         }
 
+        /// <summary>
+        /// Migration to version 1: Deletion Of data in the 'EventNumberInSameSessionEntity' table.
+        /// </summary>
         private void Migration_EventNumberInSameSessionEntityDataRemoval()
         {
             EventNrInSameSessionDao.RemoveAll();
