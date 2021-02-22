@@ -14,15 +14,15 @@ namespace Plugins.CountlySDK.Services
         private TestMode? _mode;
         private bool _isDeviceRegistered;
         private readonly CountlyConfiguration _configuration;
-        private readonly EventCountlyService _eventCountlyService;
         private readonly RequestCountlyHelper _requestCountlyHelper;
         private readonly INotificationsService _notificationsService;
         private readonly NotificationsCallbackService _notificationsCallbackService;
 
-        internal PushCountlyService(CountlyConfiguration configuration, EventCountlyService eventCountlyService, RequestCountlyHelper requestCountlyHelper, INotificationsService notificationsService, NotificationsCallbackService notificationsCallbackService, ConsentCountlyService consentService) : base(consentService)
+        internal PushCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, RequestCountlyHelper requestCountlyHelper, INotificationsService notificationsService, NotificationsCallbackService notificationsCallbackService, ConsentCountlyService consentService) : base(logHelper, consentService)
         {
+            Log.Debug("[PushCountlyService] Initializing.");
+
             _configuration = configuration;
-            _eventCountlyService = eventCountlyService;
             _requestCountlyHelper = requestCountlyHelper;
             _notificationsService = notificationsService;
             _notificationsCallbackService = notificationsCallbackService;
@@ -33,10 +33,13 @@ namespace Plugins.CountlySDK.Services
         /// </summary>
         private void EnableNotification()
         {
+            Log.Debug("[PushCountlyService] EnableNotification");
+
             //Enables push notification on start
-            if (_configuration.EnableTestMode || !_consentService.CheckConsent(Consents.Push) || _configuration.NotificationMode == TestMode.None) {
+            if (_configuration.EnableTestMode || !_consentService.CheckConsentInternal(Consents.Push) || _configuration.NotificationMode == TestMode.None) {
                 return;
             }
+
 
             EnablePushNotificationAsync(_configuration.NotificationMode);
         }
@@ -47,6 +50,8 @@ namespace Plugins.CountlySDK.Services
         /// <param name="mode">Application mode</param>
         private void EnablePushNotificationAsync(TestMode mode)
         {
+            Log.Debug("[PushCountlyService] EnablePushNotificationAsync : mode = " + mode);
+
             _mode = mode;
             _isDeviceRegistered = true;
             _notificationsService.GetToken(async result => {
@@ -76,7 +81,9 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         private async Task PostToCountlyAsync(TestMode? mode, string token)
         {
-            if (!_mode.HasValue || !_consentService.CheckConsent(Consents.Push)) {
+            Log.Debug("[PushCountlyService] PostToCountlyAsync : token = " + token);
+
+            if (!_mode.HasValue || !_consentService.CheckConsentInternal(Consents.Push)) {
                 return;
             }
 
@@ -96,9 +103,12 @@ namespace Plugins.CountlySDK.Services
         /// </summary>
         private async Task<CountlyResponse> ReportPushActionAsync()
         {
-            if (!_consentService.CheckConsent(Consents.Push)) {
+            Log.Debug("[PushCountlyService] ReportPushActionAsync");
+
+            if (!_consentService.CheckConsentInternal(Consents.Push)) {
                 return new CountlyResponse { IsSuccess = false};
             }
+
 
             return await _notificationsService.ReportPushActionAsync();
         }

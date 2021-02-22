@@ -16,12 +16,15 @@ namespace Plugins.CountlySDK.Helpers
     public class RequestCountlyHelper
     {
         private bool isQueueBeingProcess = false;
-        private readonly CountlyConfiguration _config;
+
+        private readonly CountlyLogHelper Log;
         private readonly CountlyUtils _countlyUtils;
+        private readonly CountlyConfiguration _config;
         private readonly RequestRepository _requestRepo;
 
-        internal RequestCountlyHelper(CountlyConfiguration config, CountlyUtils countlyUtils, RequestRepository requestRepo)
+        internal RequestCountlyHelper(CountlyConfiguration config, CountlyLogHelper log, CountlyUtils countlyUtils, RequestRepository requestRepo)
         {
+            Log = log;
             _config = config;
             _countlyUtils = countlyUtils;
             _requestRepo = requestRepo;
@@ -30,9 +33,7 @@ namespace Plugins.CountlySDK.Helpers
         private async Task AddRequestToQueue(CountlyRequestModel request)
         {
 
-            if (_config.EnableConsoleLogging) {
-                Debug.Log("[Countly] RequestCountlyHelper AddRequestToQueue: " + request.ToString());
-            }
+            Log.Verbose("[RequestCountlyHelper] AddRequestToQueue: " + request.ToString());
 
             if (_config.EnableTestMode) {
                 return;
@@ -40,9 +41,7 @@ namespace Plugins.CountlySDK.Helpers
 
             if (_requestRepo.Count == _config.StoredRequestLimit) {
 
-                if (_config.EnableConsoleLogging) {
-                    Debug.LogWarning("[Countly] RequestCountlyHelper Request Queue is full. Dropping the oldest request.");
-                }
+                Log.Warning("[RequestCountlyHelper] Request Queue is full. Dropping the oldest request.");
 
                 _requestRepo.Dequeue();
             }
@@ -61,14 +60,13 @@ namespace Plugins.CountlySDK.Helpers
             isQueueBeingProcess = true;
             CountlyRequestModel[] requests = _requestRepo.Models.ToArray();
 
-            if (_config.EnableConsoleLogging) {
-                Debug.Log("[Countly RequestCountlyHelper] Process queue, requests: " + requests.Length);
-            }
+            Log.Verbose("[RequestCountlyHelper] Process queue, requests: " + requests.Length);
 
             foreach (CountlyRequestModel reqModel in requests) {
                 CountlyResponse response = await ProcessRequest(reqModel);
 
                 if (!response.IsSuccess) {
+                    Log.Verbose("[RequestCountlyHelper] ProcessQueue: Request fail, " + response.ToString());
                     break;
                 }
 
@@ -79,6 +77,8 @@ namespace Plugins.CountlySDK.Helpers
 
         private async Task<CountlyResponse> ProcessRequest(CountlyRequestModel model)
         {
+            Log.Verbose("[RequestCountlyHelper] Process request, request: " + (model != null));
+
             if (model.IsRequestGetType) {
                 return await Task.Run(() => GetAsync(model.RequestUrl));
             } else {
@@ -197,9 +197,7 @@ namespace Plugins.CountlySDK.Helpers
                 countlyResponse.ErrorMessage = ex.Message;
             }
 
-            if (_config.EnableConsoleLogging) {
-                Debug.Log("[Countly] RequestCountlyHelper request: " + url + " response: " + countlyResponse.ToString());
-            }
+            Log.Verbose("[RequestCountlyHelper] request: " + url + " response: " + countlyResponse.ToString());
 
             return countlyResponse;
         }
@@ -240,9 +238,7 @@ namespace Plugins.CountlySDK.Helpers
                 countlyResponse.ErrorMessage = ex.Message;
             }
 
-            if (_config.EnableConsoleLogging) {
-                Debug.Log("[Countly] RequestCountlyHelper request: " + uri + " response: " + countlyResponse.ToString());
-            }
+            Log.Verbose("[RequestCountlyHelper] request: " + uri + " response: " + countlyResponse.ToString());
 
             return countlyResponse;
         }

@@ -1,16 +1,15 @@
 ﻿using System.Collections.Generic;
-using Plugins.CountlySDK.Models;
 using UnityEngine;
 
 namespace Notifications
 {
     public class NotificationsCallbackService
     {
-        private readonly CountlyConfiguration _config;
+        private readonly CountlyLogHelper _logHelper;
         private readonly List<INotificationListener> _listeners;
-        internal NotificationsCallbackService(CountlyConfiguration config)
+        internal NotificationsCallbackService(CountlyLogHelper logHelper)
         {
-            _config = config;
+            _logHelper = logHelper;
             _listeners = new List<INotificationListener>();
         }
 
@@ -26,9 +25,7 @@ namespace Notifications
 
             _listeners.Add(listener);
 
-            if (_config.EnableConsoleLogging) {
-                Debug.Log("[Countly NotificationsCallbackService] AddListener: " + listener);
-            }
+            _logHelper.Debug("[NotificationsCallbackService] AddListener: " + listener);
         }
         /// <summary>
         /// Remove Notification listener.
@@ -37,10 +34,8 @@ namespace Notifications
         public void RemoveListener(INotificationListener listener)
         {
             _listeners.Remove(listener);
+            _logHelper.Debug("[NotificationsCallbackService] RemoveListener: " + listener);
 
-            if (_config.EnableConsoleLogging) {
-                Debug.Log("[Countly NotificationsCallbackService] RemoveListener: " + listener);
-            }
         }
 
         /// <summary>
@@ -55,9 +50,8 @@ namespace Notifications
                 }
             }
 
-            if (_config.EnableConsoleLogging) {
-                Debug.Log("[Countly NotificationsCallbackService] SendMessageToListeners: " + data);
-            }
+            _logHelper.Debug("[NotificationsCallbackService] SendMessageToListeners: " + data);
+
         }
 
         /// <summary>
@@ -73,9 +67,7 @@ namespace Notifications
                 }
             }
 
-            if (_config.EnableConsoleLogging) {
-                Debug.Log("[Countly NotificationsCallbackService] SendMessageToListeners: " + data);
-            }
+            _logHelper.Debug("[NotificationsCallbackService] SendMessageToListeners: " + data);
         }
     }
 

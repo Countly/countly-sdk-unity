@@ -275,7 +275,11 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
 
             throw new DivideByZeroException();
         } catch (Exception ex) {
-            await countly.CrashReports.SendCrashReportAsync(ex.Message, ex.StackTrace, LogType.Exception);
+            Dictionary<string, object> seg = new Dictionary<string, object>{
+                { "Time Spent", "1234455"},
+                { "Retry Attempts", "10"}
+            };
+            await countly.CrashReports.SendCrashReportAsync(ex.Message, ex.StackTrace, LogType.Exception, seg);
         }
 
     }
@@ -399,11 +403,11 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
 
     public void OnNotificationReceived(string message)
     {
-        Debug.Log("[Countly Example] OnNotificationReceived: " + message);
+        Debug.Log("[Example] OnNotificationReceived: " + message);
     }
 
     public void OnNotificationClicked(string message, int index)
     {
-        Debug.Log("[Countly Example] OnNoticicationClicked: " + message + ", index: " + index);
+        Debug.Log("[Example] OnNoticicationClicked: " + message + ", index: " + index);
     }
 }

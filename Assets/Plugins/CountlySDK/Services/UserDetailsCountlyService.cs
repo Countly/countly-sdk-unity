@@ -13,14 +13,16 @@ namespace Plugins.CountlySDK.Services
     {
         internal Dictionary<string, object> CustomDataProperties { get; private set; }
 
-
-        private readonly RequestCountlyHelper _requestCountlyHelper;
         private readonly CountlyUtils _countlyUtils;
-
-        internal UserDetailsCountlyService(RequestCountlyHelper requestCountlyHelper, CountlyUtils countlyUtils, ConsentCountlyService consentService) : base(consentService)
+        private readonly CountlyConfiguration _configuration;
+        private readonly RequestCountlyHelper _requestCountlyHelper;
+        internal UserDetailsCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, RequestCountlyHelper requestCountlyHelper, CountlyUtils countlyUtils, ConsentCountlyService consentService) : base(logHelper, consentService)
         {
-            _requestCountlyHelper = requestCountlyHelper;
+            Log.Debug("[UserDetailsCountlyService] Initializing.");
+
             _countlyUtils = countlyUtils;
+            _configuration = configuration;
+            _requestCountlyHelper = requestCountlyHelper;
             CustomDataProperties = new Dictionary<string, object>();
         }
 
@@ -32,6 +34,9 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         internal async Task UserDetailsAsync(CountlyUserDetailsModel userDetails)
         {
+
+            Log.Debug("[StarRatingCountlyService] UserDetailsAsync : userDetails = " + (userDetails != null));
+
             if (userDetails == null) {
                 return;
             }
@@ -47,6 +52,8 @@ namespace Plugins.CountlySDK.Services
         /// <return></returns>
         internal async Task UserCustomDetailsAsync(CountlyUserDetailsModel userDetails)
         {
+            Log.Debug("[StarRatingCountlyService] UserCustomDetailsAsync " + (userDetails != null));
+
             if (userDetails == null) {
                 return;
             }
@@ -61,7 +68,9 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async Task SetUserDetailsAsync(CountlyUserDetailsModel userDetailsModel)
         {
-            if (!_consentService.CheckConsent(Consents.Users)) {
+            Log.Info("[StarRatingCountlyService] SetUserDetailsAsync " + userDetailsModel.ToString());
+
+            if (!_consentService.CheckConsentInternal(Consents.Users)) {
                 return;
             }
 
@@ -87,7 +96,9 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async Task SetCustomUserDetailsAsync(CountlyUserDetailsModel userDetailsModel)
         {
-            if (!_consentService.CheckConsent(Consents.Users)) {
+            Log.Info("[StarRatingCountlyService] SetCustomUserDetailsAsync " + userDetailsModel);
+
+            if (!_consentService.CheckConsentInternal(Consents.Users)) {
                 return;
             }
 
@@ -115,6 +126,9 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
 
+            Log.Info("[StarRatingCountlyService] SaveAsync");
+
+
             CountlyUserDetailsModel model = new CountlyUserDetailsModel(CustomDataProperties);
 
             CustomDataProperties = new Dictionary<string, object> { };
@@ -129,6 +143,8 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value">string with value for the property</param>
         public void Set(string key, string value)
         {
+            Log.Info("[UserDetailsCountlyService] Set : key = " + key + ", value = " + value);
+
             AddToCustomData(key, value);
         }
 
@@ -139,6 +155,8 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value">string value to set</param>
         public void SetOnce(string key, string value)
         {
+            Log.Info("[UserDetailsCountlyService] SetOnce : key = " + key + ", value = " + value);
+
             AddToCustomData(key, new Dictionary<string, object> { { "$setOnce", value } });
         }
 
@@ -148,6 +166,8 @@ namespace Plugins.CountlySDK.Services
         /// <param name="key">string with property name to increment</param>
         public void Increment(string key)
         {
+            Log.Info("[UserDetailsCountlyService] Increment : key = " + key);
+
             AddToCustomData(key, new Dictionary<string, object> { { "$inc", 1 } });
         }
 
@@ -158,6 +178,8 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value">double value by which to increment</param>
         public void IncrementBy(string key, double value)
         {
+            Log.Info("[UserDetailsCountlyService] IncrementBy : key = " + key + ", value = " + value);
+
             AddToCustomData(key, new Dictionary<string, object> { { "$inc", value } });
         }
 
@@ -168,6 +190,8 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value">double value by which to multiply</param>
         public void Multiply(string key, double value)
         {
+            Log.Info("[UserDetailsCountlyService] Multiply : key = " + key + ", value = " + value);
+
             AddToCustomData(key, new Dictionary<string, object> { { "$mul", value } });
         }
 
@@ -178,6 +202,8 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value">double value to check for max</param>
         public void Max(string key, double value)
         {
+            Log.Info("[UserDetailsCountlyService] Max : key = " + key + ", value = " + value);
+
             AddToCustomData(key, new Dictionary<string, object> { { "$max", value } });
         }
 
@@ -188,6 +214,8 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value">double value to check for min</param>
         public void Min(string key, double value)
         {
+            Log.Info("[UserDetailsCountlyService] Min : key = " + key + ", value = " + value);
+
             AddToCustomData(key, new Dictionary<string, object> { { "$min", value } });
         }
 
@@ -199,6 +227,8 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value">array with values to add</param>
         public void Push(string key, string[] value)
         {
+            Log.Info("[UserDetailsCountlyService] Push : key = " + key + ", value = " + value);
+
             AddToCustomData(key, new Dictionary<string, object> { { "$push", value } });
         }
 
@@ -210,6 +240,8 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value">array with values to add</param>
         public void PushUnique(string key, string[] value)
         {
+            Log.Info("[UserDetailsCountlyService] PushUnique : key = " + key + ", value = " + value);
+
             AddToCustomData(key, new Dictionary<string, object> { { "$addToSet", value } });
         }
 
@@ -220,6 +252,8 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value">array with values to remove from array</param>
         public void Pull(string key, string[] value)
         {
+            Log.Info("[UserDetailsCountlyService] Pull : key = " + key + ", value = " + value);
+
             AddToCustomData(key, new Dictionary<string, object> { { "$pull", value } });
         }
 
@@ -231,7 +265,9 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value">property value</param>
         private void AddToCustomData(string key, object value)
         {
-            if (!_consentService.CheckConsent(Consents.Users)) {
+            Log.Debug("[StarRatingCountlyService] AddToCustomData: " + key + ", " + value);
+
+            if (!_consentService.CheckConsentInternal(Consents.Users)) {
                 return;
             }
 

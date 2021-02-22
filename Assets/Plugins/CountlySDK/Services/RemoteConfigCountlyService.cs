@@ -14,9 +14,9 @@ namespace Plugins.CountlySDK.Services
 {
     public class RemoteConfigCountlyService : AbstractBaseService
     {
-        private readonly CountlyConfiguration _config;
         private readonly CountlyUtils _countlyUtils;
         private readonly Dao<ConfigEntity> _configDao;
+        private readonly CountlyConfiguration _configuration;
         private readonly RequestCountlyHelper _requestCountlyHelper;
 
         /// <summary>
@@ -26,19 +26,21 @@ namespace Plugins.CountlySDK.Services
 
         private readonly StringBuilder _requestStringBuilder = new StringBuilder();
 
-        internal RemoteConfigCountlyService(CountlyConfiguration config, RequestCountlyHelper requestCountlyHelper, CountlyUtils countlyUtils, Dao<ConfigEntity> configDao, ConsentCountlyService consentService) : base(consentService)
+        internal RemoteConfigCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, RequestCountlyHelper requestCountlyHelper, CountlyUtils countlyUtils, Dao<ConfigEntity> configDao, ConsentCountlyService consentService) : base(logHelper, consentService)
         {
-            _config = config;
+            Log.Debug("[RemoteConfigCountlyService] Initializing.");
+
             _configDao = configDao;
             _countlyUtils = countlyUtils;
+            _configuration = configuration;
             _requestCountlyHelper = requestCountlyHelper;
 
-            if (_consentService.CheckConsent(Consents.RemoteConfig)) {
+            if (_consentService.CheckConsentInternal(Consents.RemoteConfig)) {
                 Configs = FetchConfigFromDB();
             } else {
                 _configDao.RemoveAll();
             }
-            
+
         }
 
         /// <summary>
@@ -46,7 +48,9 @@ namespace Plugins.CountlySDK.Services
         /// </summary>
         internal async Task<CountlyResponse> InitConfig()
         {
-            if (_config.EnableTestMode) {
+            Log.Debug("[RemoteConfigCountlyService] InitConfig");
+
+            if (_configuration.EnableTestMode) {
                 return new CountlyResponse { IsSuccess = true };
             }
 
@@ -63,11 +67,9 @@ namespace Plugins.CountlySDK.Services
             List<ConfigEntity> allConfigs = _configDao.LoadAll();
             if (allConfigs != null && allConfigs.Count > 0) {
                 config = Converter.ConvertJsonToDictionary(allConfigs[0].Json);
-
-                if (_config.EnableConsoleLogging) {
-                    Debug.Log("Configs: " + config.ToString());
-                }
             }
+
+            Log.Debug("[RemoteConfigCountlyService] FetchConfigFromDB : Configs = " + config);
 
             return config;
         }
@@ -78,7 +80,9 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async Task<CountlyResponse> Update()
         {
-            if (!_consentService.CheckConsent(Consents.RemoteConfig)) {
+            Log.Info("[RemoteConfigCountlyService] Update");
+
+            if (!_consentService.CheckConsentInternal(Consents.RemoteConfig)) {
                 return new CountlyResponse {
                     IsSuccess = false
                 };
@@ -103,9 +107,8 @@ namespace Plugins.CountlySDK.Services
                 _configDao.Save(configEntity);
                 Configs = Converter.ConvertJsonToDictionary(response.Data);
 
-                if (_config.EnableConsoleLogging) {
-                    Debug.Log("[Countly] RemoteConfigCountlyService UpdateConfig: " + response.ToString());
-                }
+                Log.Debug("[RemoteConfigCountlyService] UpdateConfig: " + response.ToString());
+
             }
 
             return response;
@@ -134,19 +137,6 @@ namespace Plugins.CountlySDK.Services
                         UnityWebRequest.EscapeURL(Convert.ToString(item.Value)));
                 }
             }
-
-            //Not sure if we need checksum here
-
-            //            if (!string.IsNullOrEmpty(_config.Salt))
-            //            {
-            //                // Create a SHA256   
-            //                using (var sha256Hash = SHA256.Create())
-            //                {
-            //                    var data = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(_requestStringBuilder + _config.Salt));
-            //                    _requestStringBuilder.Insert(0, _countly.GetBaseUrl());
-            //                    return _requestStringBuilder.AppendFormat("&checksum256={0}", Impl.Countly.GetStringFromBytes(data)).ToString();
-            //                }
-            //            }
 
             _requestStringBuilder.Insert(0, _countlyUtils.ServerOutputUrl);
             return _requestStringBuilder.ToString();
