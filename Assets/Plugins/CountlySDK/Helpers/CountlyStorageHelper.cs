@@ -57,6 +57,8 @@ namespace Plugins.CountlySDK.Helpers
         /// </summary>
         internal void OpenDB()
         {
+            _logHelper.Debug("[CountlyStorageHelper] OpenDB");
+
             _db = BuildDatabase(_dbNumber);
             DB.AutoBox auto = _db.Open();
 
@@ -76,6 +78,8 @@ namespace Plugins.CountlySDK.Helpers
         /// </summary>
         internal void CloseDB()
         {
+            _logHelper.Debug("[CountlyStorageHelper] CloseDB");
+
             _db.Close();
         }
 
@@ -91,13 +95,21 @@ namespace Plugins.CountlySDK.Helpers
                 currentVersion = PlayerPrefs.GetInt(Constants.SchemaVersion, 0);
             }
 
+            _logHelper.Verbose("[CountlyStorageHelper] RunMigration : currentVersion = " + currentVersion);
+
             // _schemaVersion = 1 : deletion of the data in the “EventNumberInSameSessionEntity” table
             if (currentVersion == 0) {
-                EventNrInSameSessionDao.RemoveAll();
-                PlayerPrefs.SetInt(Constants.SchemaVersion, 1);
+                Migration_EventNumberInSameSessionEntityDataRemoval();
             }
 
             PlayerPrefs.SetInt(Constants.SchemaVersion, _schemaVersion);
+        }
+
+        private void Migration_EventNumberInSameSessionEntityDataRemoval()
+        {
+            EventNrInSameSessionDao.RemoveAll();
+            PlayerPrefs.SetInt(Constants.SchemaVersion, 1);
+            _logHelper.Verbose("[CountlyStorageHelper] Migration_EventNumberInSameSessionEntityDataRemoval");
         }
     }
 }
