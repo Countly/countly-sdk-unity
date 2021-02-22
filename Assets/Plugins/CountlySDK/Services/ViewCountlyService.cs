@@ -11,31 +11,35 @@ namespace Plugins.CountlySDK.Services
 
     public class ViewCountlyService : AbstractBaseService
     {
-        private readonly CountlyConfiguration _config;
+        private readonly EventCountlyService _eventService;
+        private readonly CountlyConfiguration _configuration;
         private readonly Dictionary<string, DateTime> _viewToLastViewStartTime = new Dictionary<string, DateTime>();
 
-        private readonly EventCountlyService _eventService;
-
-        internal ViewCountlyService(CountlyConfiguration config, EventCountlyService eventService, ConsentCountlyService consentService) : base(consentService)
+        internal ViewCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, EventCountlyService eventService, ConsentCountlyService consentService) : base(logHelper, consentService)
         {
-            _config = config;
+            Log.Debug("[ViewCountlyService] Initializing.");
+
             _eventService = eventService;
+            _configuration = configuration;
         }
         /// <summary>
         /// Start tracking a view
         /// </summary>
-        /// <param name="name"></param>
-        /// <param name="hasSessionBegunWithView"></param>
+        /// <param name="name">name of the view</param>
+        /// <param name="hasSessionBegunWithView">set true if the session is beginning with this view</param>
         /// <returns></returns>
         public async Task RecordOpenViewAsync(string name, bool hasSessionBegunWithView = false)
         {
-            if (!_consentService.CheckConsent(Consents.Views)) {
+            Log.Info("[ViewCountlyService] RecordOpenViewAsync : name = " + name + ", hasSessionBegunWithView = " + hasSessionBegunWithView);
+
+            if (!_consentService.CheckConsentInternal(Consents.Views)) {
                 return;
             }
 
             if (string.IsNullOrEmpty(name)) {
                 return;
             }
+
 
             ViewSegment currentViewSegment =
                 new ViewSegment {
@@ -51,10 +55,6 @@ namespace Plugins.CountlySDK.Services
                 _viewToLastViewStartTime.Add(name, DateTime.UtcNow);
             }
 
-            if (_config.EnableConsoleLogging) {
-                Debug.Log("[ViewCountlyService] RecordOpenViewAsync: " + name);
-            }
-
             CountlyEventModel currentView = new CountlyEventModel(CountlyEventModel.ViewEvent, currentViewSegment.ToDictionary());
             await _eventService.RecordEventAsync(currentView);
         }
@@ -62,12 +62,14 @@ namespace Plugins.CountlySDK.Services
         /// <summary>
         /// Stop tracking a view
         /// </summary>
-        /// <param name="name"></param>
-        /// <param name="hasSessionBegunWithView"></param>
+        /// <param name="name of the view"></param>
+        /// <param name="hasSessionBegunWithView">set true if the session is beginning with this view</param>
         /// <returns></returns>
         public async Task RecordCloseViewAsync(string name, bool hasSessionBegunWithView = false)
         {
-            if (!_consentService.CheckConsent(Consents.Views)) {
+            Log.Info("[ViewCountlyService] RecordCloseViewAsync : name = " + name);
+
+            if (!_consentService.CheckConsentInternal(Consents.Views)) {
                 return;
             }
 
@@ -93,30 +95,24 @@ namespace Plugins.CountlySDK.Services
                 _viewToLastViewStartTime.Remove(name);
             }
 
-            if (_config.EnableConsoleLogging) {
-                Debug.Log("[ViewCountlyService] RecordCloseViewAsync: " + name + ", duration: " + duration);
-            }
-
             CountlyEventModel currentView = new CountlyEventModel(CountlyEventModel.ViewEvent, currentViewSegment.ToDictionary(), 1, null, duration);
             await _eventService.RecordEventAsync(currentView);
         }
 
-
-
-
-
         /// <summary>
         /// Reports a particular action with the specified details
         /// </summary>
-        /// <param name="type"></param>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
-        /// <param name="width"></param>
-        /// <param name="height"></param>
+        /// <param name="type"> type of action</param>
+        /// <param name="x">x-coordinate</param>
+        /// <param name="y">y-coordinate</param>
+        /// <param name="width">width of screen</param>
+        /// <param name="height">height of screen</param>
         /// <returns></returns>
         public async Task ReportActionAsync(string type, int x, int y, int width, int height)
         {
-            if (!_consentService.CheckConsent(Consents.Views)) {
+            Log.Info("[ViewCountlyService] ReportActionAsync : type = " + type + ", x = " + x + ", y = " + y + ", width = " + width + ", height = " + height);
+
+            if (!_consentService.CheckConsentInternal(Consents.Views)) {
                 return;
             }
 

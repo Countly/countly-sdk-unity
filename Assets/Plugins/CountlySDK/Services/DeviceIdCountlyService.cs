@@ -10,23 +10,31 @@ namespace Plugins.CountlySDK.Services
     public class DeviceIdCountlyService : AbstractBaseService
     {
         private readonly CountlyUtils _countlyUtils;
-        private readonly CountlyConfiguration _config;
+        private readonly CountlyConfiguration _configuration;
         private readonly EventCountlyService _eventCountlyService;
         private readonly RequestCountlyHelper _requestCountlyHelper;
         private readonly SessionCountlyService _sessionCountlyService;
 
-        internal DeviceIdCountlyService(CountlyConfiguration config, SessionCountlyService sessionCountlyService,
-            RequestCountlyHelper requestCountlyHelper, EventCountlyService eventCountlyService, CountlyUtils countlyUtils, ConsentCountlyService conentService) : base(conentService)
+        internal DeviceIdCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, SessionCountlyService sessionCountlyService,
+            RequestCountlyHelper requestCountlyHelper, EventCountlyService eventCountlyService, CountlyUtils countlyUtils, ConsentCountlyService consentService) : base(logHelper, consentService)
         {
-            _config = config;
+            Log.Debug("[DeviceIdCountlyService] Initializing.");
+
             _countlyUtils = countlyUtils;
+            _configuration = configuration;
             _eventCountlyService = eventCountlyService;
             _requestCountlyHelper = requestCountlyHelper;
             _sessionCountlyService = sessionCountlyService;
         }
-
+        /// <summary>
+        /// Returns the Device ID that is currently used by the SDK
+        /// </summary>
         public string DeviceId { get; private set; }
 
+        /// <summary>
+        /// Initialize <code>DeviceId</code> field with device id provided in configuration or with Randome generated Id and Cache it.
+        /// </summary>
+        /// <param name="deviceId">new device id provided in configuration</param>
         internal void InitDeviceId(string deviceId = null)
         {
             //**Priority is**
@@ -60,11 +68,13 @@ namespace Plugins.CountlySDK.Services
         /// Ends current session with old Device Id.
         /// Begins a new session with new Device Id
         /// </summary>
-        /// <param name="deviceId"></param>
+        /// <param name="deviceId">new device id</param>
         public async Task ChangeDeviceIdAndEndCurrentSessionAsync(string deviceId)
         {
+            Log.Info("[DeviceIdCountlyService] ChangeDeviceIdAndEndCurrentSessionAsync: deviceId = " + deviceId);
+
             if (!_consentService.AnyConsentGiven()) {
-                Debug.Log("[Countly DeviceIdCountlyService] ChangeDeviceIdAndEndCurrentSessionAsync: Please set at least a single consent before calling this!");
+                Log.Debug("[DeviceIdCountlyService] ChangeDeviceIdAndEndCurrentSessionAsync: Please set at least a single consent before calling this!");
                 return;
             }
 
@@ -94,11 +104,13 @@ namespace Plugins.CountlySDK.Services
         /// Continues with the current session.
         /// Merges data for old and new Device Id. 
         /// </summary>
-        /// <param name="deviceId"></param>
+        /// <param name="deviceId">new device id</param>
         public async Task ChangeDeviceIdAndMergeSessionDataAsync(string deviceId)
         {
+            Log.Info("[DeviceIdCountlyService] ChangeDeviceIdAndMergeSessionDataAsync: deviceId = " + deviceId);
+
             if (!_consentService.AnyConsentGiven()) {
-                Debug.Log("[Countly DeviceIdCountlyService] ChangeDeviceIdAndMergeSessionDataAsync: Please set at least a single consent before calling this!");
+                Log.Debug("[DeviceIdCountlyService] ChangeDeviceIdAndMergeSessionDataAsync: Please set at least a single consent before calling this!");
                 return;
             }
 
@@ -127,7 +139,7 @@ namespace Plugins.CountlySDK.Services
         /// <summary>
         /// Updates Device ID both in app and in cache
         /// </summary>
-        /// <param name="newDeviceId"></param>
+        /// <param name="newDeviceId">new device id</param>
         private void UpdateDeviceId(string newDeviceId)
         {
             //Change device id
@@ -135,8 +147,15 @@ namespace Plugins.CountlySDK.Services
 
             //Updating Cache
             PlayerPrefs.SetString(Constants.DeviceIDKey, DeviceId);
+
+            Log.Debug("[DeviceIdCountlyService] UpdateDeviceId: " + newDeviceId);
+
         }
 
+        /// <summary>
+        /// Call <code>DeviceIdChanged</code> on all listeners.
+        /// </summary>
+        /// <param name="merged">If passed "true" if will perform a device ID merge serverside of the old and new device ID. This will merge their data</param>
         private void NotifyListeners(bool merged)
         {
             if (Listeners == null) {

@@ -9,15 +9,13 @@ namespace Plugins.CountlySDK.Persistance.Repositories.Impls
     public class ViewEventRepository : AbstractEventRepository
     {
 
-        public ViewEventRepository(Dao<EventEntity> dao, SegmentDao segmentDao, CountlyConfiguration config) : base(dao, segmentDao, config)
+        public ViewEventRepository(Dao<EventEntity> dao, SegmentDao segmentDao, CountlyLogHelper log) : base(dao, segmentDao, log)
         {
         }
 
         protected override bool ValidateModelBeforeEnqueue(CountlyEventModel model)
         {
-            if (_config.EnableConsoleLogging) {
-                Debug.Log("[ViewEventRepository] Validate model: \n" + model);
-            }
+            Log.Debug("[ViewEventRepository] Validate model: \n" + model);
             return model.Key.Equals(CountlyEventModel.ViewEvent);
         }
     }

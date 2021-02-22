@@ -10,17 +10,20 @@ namespace Plugins.CountlySDK.Persistance.Dao
 {
     public class SegmentDao : Dao<SegmentEntity>
     {
-        private readonly CountlyConfiguration _configuration;
+        private readonly CountlyLogHelper Log;
         private readonly StringBuilder _stringBuilder = new StringBuilder();
 
-        public SegmentDao(AutoBox auto, string table, CountlyConfiguration configuration) : base(auto, table, configuration)
+        public SegmentDao(AutoBox auto, string table, CountlyLogHelper log) : base(auto, table, log)
         {
-            _configuration = configuration;
+            Log = log;
         }
 
 
         public SegmentEntity GetByEventId(long eventId)
         {
+
+            Log.Debug("[SegmentDao] GetByEventId: eventId = " + eventId);
+
             _stringBuilder.Clear();
 
             string ql = _stringBuilder.Append("from ").Append(Table).Append(" where EventId==?").ToString();
@@ -38,9 +41,7 @@ namespace Plugins.CountlySDK.Persistance.Dao
 
                 return entities[0];
             } catch (Exception ex) {
-                if (_configuration.EnableConsoleLogging) {
-                    Debug.LogError("[Countly] SegmentDao GetByEventId: Couldn't complete db operation, [" + ex.Message + "]");
-                }
+                Log.Debug("[SegmentDao] GetByEventId: Couldn't complete db operation, [" + ex.Message + "]");
                 return null;
             }
         }

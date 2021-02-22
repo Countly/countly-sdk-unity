@@ -13,24 +13,29 @@ namespace Plugins.CountlySDK.Services
     public class EventCountlyService : AbstractBaseService
     {
         private readonly ViewEventRepository _viewEventRepo;
+        private readonly CountlyConfiguration _configuration;
         private readonly NonViewEventRepository _nonViewEventRepo;
-        private readonly CountlyConfiguration _countlyConfiguration;
         private readonly RequestCountlyHelper _requestCountlyHelper;
 
-        internal EventCountlyService(CountlyConfiguration countlyConfiguration, RequestCountlyHelper requestCountlyHelper,
-            ViewEventRepository viewEventRepo, NonViewEventRepository nonViewEventRepo, ConsentCountlyService consentService) : base(consentService)
+        internal EventCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, RequestCountlyHelper requestCountlyHelper,
+            ViewEventRepository viewEventRepo, NonViewEventRepository nonViewEventRepo, ConsentCountlyService consentService) : base(logHelper, consentService)
         {
+            Log.Debug("[EventCountlyService] Initializing.");
+
             _viewEventRepo = viewEventRepo;
+            _configuration = configuration;
             _nonViewEventRepo = nonViewEventRepo;
-            _countlyConfiguration = countlyConfiguration;
             _requestCountlyHelper = requestCountlyHelper;
         }
 
         /// <summary>
-        ///     Send all recorded events to request queue
+        ///     Add all recorded events to request queue
         /// </summary>
         internal async Task AddEventsToRequestQueue()
         {
+
+            Log.Debug("[EventCountlyService] AddEventsToRequestQueue");
+
             if ((_viewEventRepo.Models.Count + _nonViewEventRepo.Models.Count) == 0) {
                 return;
             }
@@ -59,14 +64,17 @@ namespace Plugins.CountlySDK.Services
 
         }
 
+        /// <summary>
+        /// An internal function to add an event to event queue.
+        /// </summary>
+        /// <param name="event">an event</param>
+        /// <returns></returns>
         internal async Task RecordEventAsync(CountlyEventModel @event)
         {
 
-            if (_countlyConfiguration.EnableConsoleLogging) {
-                Debug.Log("[Countly] RecordEventAsync : " + @event.ToString());
-            }
+            Log.Debug("[EventCountlyService] RecordEventAsync : " + @event.ToString());
 
-            if (_countlyConfiguration.EnableTestMode) {
+            if (_configuration.EnableTestMode) {
                 return;
             }
 
@@ -76,7 +84,7 @@ namespace Plugins.CountlySDK.Services
                 _nonViewEventRepo.Enqueue(@event);
             }
 
-            if ((_viewEventRepo.Count + _nonViewEventRepo.Count) >= _countlyConfiguration.EventQueueThreshold) {
+            if ((_viewEventRepo.Count + _nonViewEventRepo.Count) >= _configuration.EventQueueThreshold) {
                 await AddEventsToRequestQueue();
             }
         }
@@ -84,12 +92,13 @@ namespace Plugins.CountlySDK.Services
         /// <summary>
         /// Report an event to the server.
         /// </summary>
-        /// <param name="key"></param>
-        /// <param name="useNumberInSameSession"></param>
+        /// <param name="key">event key</param>
         /// <returns></returns>
         public async Task RecordEventAsync(string key)
         {
-            if (!_consentService.CheckConsent(Consents.Events)) {
+            Log.Info("[EventCountlyService] RecordEventAsync : key = " + key);
+
+            if (!_consentService.CheckConsentInternal(Consents.Events)) {
                 return;
             }
 
@@ -99,25 +108,22 @@ namespace Plugins.CountlySDK.Services
         /// <summary>
         /// Report an event to the server with segmentation.
         /// </summary>
-        /// <param name="key"></param>
-        /// <param name="segmentation"></param>
-        /// <param name="useNumberInSameSession"></param>
-        /// <param name="count"></param>
-        /// <param name="sum"></param>
-        /// <param name="duration"></param>
+        /// <param name="key">event key</param>
+        /// <param name="segmentation">custom segmentation you want to set, leave null if you don't want to add anything</param>
+        /// <param name="count">how many of these events have occurred, default value is "1"</param>
+        /// <param name="sum">set sum if needed, default value is "0"</param>
+        /// <param name="duration">set sum if needed, default value is "0"</param>
         /// <returns></returns>
         public async Task RecordEventAsync(string key, SegmentModel segmentation,
             int? count = 1, double? sum = 0, double? duration = null)
         {
-            if (!_consentService.CheckConsent(Consents.Events)) {
+            Log.Info("[EventCountlyService] RecordEventAsync : key = " + key + ", segmentation = " + segmentation + ", count = " + count + ", sum = " + sum + ", duration = " + duration);
+
+            if (!_consentService.CheckConsentInternal(Consents.Events)) {
                 return;
             }
 
-            if (_countlyConfiguration.EnableConsoleLogging) {
-                Debug.Log("[Countly] RecordEventAsync : key = " + key);
-            }
-
-            if (_countlyConfiguration.EnableTestMode) {
+            if (_configuration.EnableTestMode) {
                 return;
             }
 
@@ -137,7 +143,7 @@ namespace Plugins.CountlySDK.Services
 
                     if (!isValidDataType) {
                         toRemove.Add(item.Key);
-                        Debug.LogWarning("[Countly] RecordEventAsync : In segmentation Data type of item '" + item.Key + "'isn't valid.");
+                        Log.Warning("[EventCountlyService] RecordEventAsync : In segmentation Data type of item '" + item.Key + "'isn't valid.");
                     }
                 }
 
@@ -154,14 +160,14 @@ namespace Plugins.CountlySDK.Services
         /// <summary>
         ///     Sends multiple events to the countly server. It expects a list of events as input.
         /// </summary>
-        /// <param name="events"></param>
+        /// <param name="events">a list of events</param>
         /// <returns></returns>
         internal async Task ReportMultipleEventsAsync(List<CountlyEventModel> events)
         {
             if (events == null || events.Count == 0) {
                 return;
             }
-
+            
             Dictionary<string, object> requestParams =
                 new Dictionary<string, object>
                 {
@@ -177,12 +183,19 @@ namespace Plugins.CountlySDK.Services
         /// <summary>
         ///     Reports a custom event to the Countly server.
         /// </summary>
+        /// <param name="key">event key</param>
+        /// <param name="segmentation">custom segmentation you want to set, leave null if you don't want to add anything</param>
+        /// <param name="count">how many of these events have occurred, default value is "1"</param>
+        /// <param name="sum">set sum if needed, default value is "0"</param>
+        /// <param name="duration">set sum if needed, default value is "0"</param>
         /// <returns></returns>
         public async Task ReportCustomEventAsync(string key,
             IDictionary<string, object> segmentation = null,
             int? count = 1, double? sum = null, double? duration = null)
         {
-            if (!_consentService.CheckConsent(Consents.Events)) {
+            Log.Info("[EventCountlyService] ReportCustomEventAsync : key = " + key + ", segmentation = " + (segmentation != null) + ", count = " + count + ", sum = " + sum + ", duration = " + duration);
+
+            if (!_consentService.CheckConsentInternal(Consents.Events)) {
                 return;
             }
 

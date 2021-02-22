@@ -1,10 +1,11 @@
 using System;
+using Plugins.CountlySDK.Helpers;
 using Plugins.CountlySDK.Models;
 using UnityEngine;
 
 namespace Plugins.CountlySDK.Services
 {
-    public class OptionalParametersCountlyService
+    public class OptionalParametersCountlyService : AbstractBaseService
     {
         public string CountryCode { get { return _recordLocation.CountryCode; } }
         public string City { get { return _recordLocation.City; } }
@@ -12,18 +13,20 @@ namespace Plugins.CountlySDK.Services
         public string IPAddress { get { return _recordLocation.IPAddress; } }
 
         private readonly LocationService _recordLocation;
-        private readonly CountlyConfiguration _countlyConfiguration;
+        private readonly CountlyConfiguration _configuration;
 
-        internal OptionalParametersCountlyService(LocationService recordLocation, CountlyConfiguration countlyConfiguration)
+        internal OptionalParametersCountlyService(LocationService recordLocation, CountlyConfiguration configuration, CountlyLogHelper logHelper, ConsentCountlyService consentService) : base(logHelper, consentService)
         {
+            Log.Debug("[OptionalParametersCountlyService] Initializing.");
+
+            _configuration = configuration;
             _recordLocation = recordLocation;
-            _countlyConfiguration = countlyConfiguration;
         }
 
         /// <summary>
         /// Sets Country Code to be used for future requests. Takes ISO Country code as input parameter
         /// </summary>
-        /// <param name="country_code"></param>
+        /// <param name="countryCode">ISO Country code for the user's country</param>
         [Obsolete("SetCountryCode is deprecated, please use SetLocation function of LocationService instead.")]
         public void SetCountryCode(string country_code)
         {
@@ -33,8 +36,7 @@ namespace Plugins.CountlySDK.Services
         /// <summary>
         /// Sets City to be used for future requests.
         /// </summary>
-        /// <param name="city"></param>
-        /// 
+        /// <param name="city">Name of the user's city</param>
         [Obsolete("SetCity is deprecated, please use SetLocation function of LocationService instead.")]
         public void SetCity(string city)
         {
@@ -44,8 +46,8 @@ namespace Plugins.CountlySDK.Services
         /// <summary>
         /// Sets Location to be used for future requests.
         /// </summary>
-        /// <param name="latitude"></param>
-        /// <param name="longitude"></param>
+        /// <param name="latitude">latitude value for example, 56.42345</param>
+        /// <param name="longitude">longitude value for example, 123.45325</param>
         [Obsolete("SetLocation is deprecated, please use SetLocation function of LocationService instead.")]
         public void SetLocation(double latitude, double longitude)
         {
@@ -56,7 +58,7 @@ namespace Plugins.CountlySDK.Services
         /// <summary>
         /// Sets IP address to be used for future requests.
         /// </summary>
-        /// <param name="ip_address"></param>
+        /// <param name="ipAddress">ipAddress like "192.168.88.33"</param>
         [Obsolete("SetIPAddress is deprecated, please use SetLocation function of LocationService instead.")]
         public void SetIPAddress(string ip_address)
         {
@@ -75,18 +77,16 @@ namespace Plugins.CountlySDK.Services
         /// <summary>
         /// Set Country code (ISO Country code), City, Location and IP address to be used for future requests.
         /// </summary>
-        /// <param name="countryCode"></param>
-        /// <param name="city"></param>
-        /// <param name="gpsCoordinates"></param>
-        /// <param name="ipAddress"></param>
+        /// <param name="countryCode">ISO Country code for the user's country</param>
+        /// <param name="city">Name of the user's city</param>
+        /// <param name="gpsCoordinates">comma separate lat and lng values. For example, "56.42345,123.45325"</param>
+        /// <param name="ipAddress">ipAddress like "192.168.88.33"</param>
+        /// <returns></returns>
         public void SetLocation(string countryCode, string city, string gpsCoordinates, string ipAddress)
         {
             _recordLocation.SetLocation(countryCode, city, gpsCoordinates, ipAddress);
 
-            if (_countlyConfiguration.EnableConsoleLogging) {
-                Debug.LogWarning("[Countly] OptionalParameters is deprecated, please use Location instead");
-            }
-
+            Log.Warning("[OptionalParametersCountlyService] OptionalParameters is deprecated, please use Location instead");
         }
     }
 }

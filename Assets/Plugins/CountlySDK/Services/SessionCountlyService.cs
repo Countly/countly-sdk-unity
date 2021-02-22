@@ -6,7 +6,6 @@ using Newtonsoft.Json;
 using Plugins.CountlySDK.Enums;
 using Plugins.CountlySDK.Helpers;
 using Plugins.CountlySDK.Models;
-using UnityEngine;
 
 namespace Plugins.CountlySDK.Services
 {
@@ -14,18 +13,25 @@ namespace Plugins.CountlySDK.Services
     {
         private Timer _sessionTimer;
         private DateTime _lastSessionRequestTime;
+
+        /// <summary>
+        /// Check if session has been initiated.
+        /// </summary>
+        /// <returns>bool</returns>
         public bool IsSessionInitiated { get; private set; }
 
         private readonly LocationService _locationService;
-        private readonly CountlyConfiguration _configModel;
         private readonly EventCountlyService _eventService;
+        private readonly CountlyConfiguration _configuration;
         private readonly RequestCountlyHelper _requestCountlyHelper;
 
-        internal SessionCountlyService(CountlyConfiguration configModel, EventCountlyService eventService,
-            RequestCountlyHelper requestCountlyHelper, LocationService locationService, ConsentCountlyService consentService) : base(consentService)
+        internal SessionCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, EventCountlyService eventService,
+            RequestCountlyHelper requestCountlyHelper, LocationService locationService, ConsentCountlyService consentService) : base(logHelper, consentService)
         {
-            _configModel = configModel;
+            Log.Debug("[SessionCountlyService] Initializing.");
+
             _eventService = eventService;
+            _configuration = configuration;
             _locationService = locationService;
             _requestCountlyHelper = requestCountlyHelper;
         }
@@ -36,11 +42,11 @@ namespace Plugins.CountlySDK.Services
         /// <param name="sessionInterval">In milliseconds</param>
         private void InitSessionTimer()
         {
-            if (_configModel.EnableManualSessionHandling) {
+            if (_configuration.EnableManualSessionHandling) {
                 return;
             }
 
-            _sessionTimer = new Timer { Interval = _configModel.SessionDuration * 1000 };
+            _sessionTimer = new Timer { Interval = _configuration.SessionDuration * 1000 };
             _sessionTimer.Elapsed += SessionTimerOnElapsedAsync;
             _sessionTimer.AutoReset = true;
         }
@@ -48,10 +54,13 @@ namespace Plugins.CountlySDK.Services
         /// <summary>
         /// Extends the session after the session duration is elapsed
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="elapsedEventArgs"></param>
+        /// <param name="sender">reference of caller</param>
+        /// <param name="elapsedEventArgs"> Provides data for <code>Timer.Elapsed</code>event.</param>
         private async void SessionTimerOnElapsedAsync(object sender, ElapsedEventArgs elapsedEventArgs)
         {
+
+            Log.Debug("[SessionCountlyService] SessionTimerOnElapsedAsync");
+
             if (!IsSessionInitiated) {
                 return;
             }
@@ -60,23 +69,24 @@ namespace Plugins.CountlySDK.Services
 
             await _requestCountlyHelper.ProcessQueue();
 
-            if (!_configModel.EnableManualSessionHandling) {
+            if (!_configuration.EnableManualSessionHandling) {
                 await ExtendSessionAsync();
             }
         }
 
+        /// <summary>
+        /// Initiates a session
+        /// </summary>
         public async Task ExecuteBeginSessionAsync()
         {
-            if (!_consentService.CheckConsent(Consents.Sessions)) {
+            Log.Info("[SessionCountlyService] ExecuteBeginSessionAsync");
+
+            if (!_consentService.CheckConsentInternal(Consents.Sessions)) {
                 return;
             }
 
             if (IsSessionInitiated) {
                 return;
-            }
-
-            if (_configModel.EnableConsoleLogging) {
-                Debug.Log("[Countly] SessionCountlyService: ExecuteBeginSessionAsync");
             }
 
             FirstLaunchAppHelper.Process();
@@ -92,7 +102,7 @@ namespace Plugins.CountlySDK.Services
 
             /* If location is disabled or no location consent is given,
             the SDK adds an empty location entry to every "begin_session" request. */
-            if (_locationService.IsLocationDisabled || !_consentService.CheckConsent(Consents.Location)) {
+            if (_locationService.IsLocationDisabled || !_consentService.CheckConsentInternal(Consents.Location)) {
                 requestParams.Add("location", string.Empty);
             } else {
                 if (!string.IsNullOrEmpty(_locationService.IPAddress)) {
@@ -118,15 +128,21 @@ namespace Plugins.CountlySDK.Services
             await _requestCountlyHelper.GetResponseAsync(requestParams);
 
             //Start session timer
-            if (!_configModel.EnableManualSessionHandling) {
+            if (!_configuration.EnableManualSessionHandling) {
                 InitSessionTimer();
                 _sessionTimer.Start();
             }
         }
 
+        /// <summary>
+        /// Ends a session
+        /// </summary>
+        /// <param name="disposeTimer">Set true to stop extend the session after session ends.</param>
         public async Task ExecuteEndSessionAsync(bool disposeTimer = true)
         {
-            if (!_consentService.CheckConsent(Consents.Sessions)) {
+            Log.Info("[SessionCountlyService] ExecuteEndSessionAsync");
+
+            if (!_consentService.CheckConsentInternal(Consents.Sessions)) {
                 return;
             }
 
@@ -137,14 +153,14 @@ namespace Plugins.CountlySDK.Services
                 {
                     {"end_session", 1},
                     {"session_duration", (DateTime.Now - _lastSessionRequestTime).TotalSeconds},
-                    {"ignore_cooldown", _configModel.IgnoreSessionCooldown.ToString().ToLower()}
+                    {"ignore_cooldown", _configuration.IgnoreSessionCooldown.ToString().ToLower()}
                 };
             requestParams.Add("metrics", JsonConvert.SerializeObject(CountlyMetricModel.Metrics, Formatting.Indented,
                 new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }));
 
             await _requestCountlyHelper.GetResponseAsync(requestParams);
 
-            if (!_configModel.EnableManualSessionHandling) {
+            if (!_configuration.EnableManualSessionHandling) {
                 //Do not extend session after session ends
                 if (disposeTimer) {
                     _sessionTimer.Stop();
@@ -155,37 +171,38 @@ namespace Plugins.CountlySDK.Services
             }
         }
 
-
         /// <summary>
-        /// Initiates a session by setting begin_session
+        /// Initiates a session
         /// </summary>
         public async Task BeginSessionAsync()
         {
+            Log.Info("[SessionCountlyService] BeginSessionAsync");
+
             await ExecuteBeginSessionAsync();
         }
 
         /// <summary>
-        /// Ends a session by setting end_session
+        /// Ends a session
         /// </summary>
         public async Task EndSessionAsync()
         {
-            if (!_consentService.CheckConsent(Consents.Sessions)) {
-                return;
-            }
+            Log.Info("[SessionCountlyService] ExtendSessionAsync");
 
-            if (_configModel.EnableConsoleLogging) {
-                Debug.Log("[Countly] SessionCountlyService: ExtendSessionAsync");
+            if (!_consentService.CheckConsentInternal(Consents.Sessions)) {
+                return;
             }
 
             await ExecuteEndSessionAsync();
         }
 
         /// <summary>
-        /// Extends a session by another 60 seconds
+        /// Extends a session by another session duration provided in configuration. By default session duration is 60 seconds.
         /// </summary>
         public async Task ExtendSessionAsync()
         {
-            if (!_consentService.CheckConsent(Consents.Sessions)) {
+            Log.Info("[SessionCountlyService] ExtendSessionAsync");
+
+            if (!_consentService.CheckConsentInternal(Consents.Sessions)) {
                 return;
             }
 
@@ -194,9 +211,9 @@ namespace Plugins.CountlySDK.Services
                 new Dictionary<string, object>
                 {
                     {
-                        "session_duration", _configModel.SessionDuration
+                        "session_duration", _configuration.SessionDuration
                     },
-                    {"ignore_cooldown", _configModel.IgnoreSessionCooldown.ToString().ToLower()}
+                    {"ignore_cooldown", _configuration.IgnoreSessionCooldown.ToString().ToLower()}
                 };
             requestParams.Add("metrics", JsonConvert.SerializeObject(CountlyMetricModel.Metrics, Formatting.Indented,
                 new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }));
