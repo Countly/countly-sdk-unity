@@ -15,8 +15,10 @@ namespace Plugins.CountlySDK.Helpers
     internal class CountlyStorageHelper
     {
         private DB _db;
-        private int _schemaVersion = 1;
+        private int _currentVersion = 0;
         private const long _dbNumber = 3;
+        private const int _schemaVersion = 1;
+
         private CountlyLogHelper _logHelper;
 
         internal SegmentDao ViewSegmentDao { get; private set; }
@@ -31,6 +33,12 @@ namespace Plugins.CountlySDK.Helpers
         internal CountlyStorageHelper(CountlyLogHelper logHelper)
         {
             _logHelper = logHelper;
+
+            if (FirstLaunchAppHelper.IsFirstLaunchApp) {
+                _currentVersion = _schemaVersion;
+            } else {
+                _currentVersion = PlayerPrefs.GetInt(Constants.SchemaVersion, 0);
+            }
         }
 
         /// <summary>
@@ -47,7 +55,10 @@ namespace Plugins.CountlySDK.Helpers
             db.GetConfig().EnsureTable<EventEntity>(EntityType.NonViewEvents.ToString(), "Id");
             db.GetConfig().EnsureTable<SegmentEntity>(EntityType.ViewEventSegments.ToString(), "Id");
             db.GetConfig().EnsureTable<SegmentEntity>(EntityType.NonViewEventSegments.ToString(), "Id");
-            db.GetConfig().EnsureTable<EventNumberInSameSessionEntity>(EntityType.EventNumberInSameSessions.ToString(), "Id");
+
+            if (_currentVersion < _schemaVersion) {
+                db.GetConfig().EnsureTable<EventNumberInSameSessionEntity>(EntityType.EventNumberInSameSessions.ToString(), "Id");
+            }
 
             return db;
         }
@@ -88,17 +99,10 @@ namespace Plugins.CountlySDK.Helpers
         /// </summary>
         internal void RunMigration()
         {
-            int currentVersion;
-            if (FirstLaunchAppHelper.IsFirstLaunchApp) {
-                currentVersion = _schemaVersion;
-            } else {
-                currentVersion = PlayerPrefs.GetInt(Constants.SchemaVersion, 0);
-            }
-
-            _logHelper.Verbose("[CountlyStorageHelper] RunMigration : currentVersion = " + currentVersion);
+            _logHelper.Verbose("[CountlyStorageHelper] RunMigration : currentVersion = " + _currentVersion);
 
             // _schemaVersion = 1 : deletion of the data in the “EventNumberInSameSessionEntity” table
-            if (currentVersion == 0) {
+            if (_currentVersion == 0) {
                 Migration_EventNumberInSameSessionEntityDataRemoval();
             }
 
