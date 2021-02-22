@@ -77,7 +77,7 @@ namespace Tests
         }
 
         /// <summary>
-        /// Case: If 'RequiresConsent' isn't set in the configuration and consents chnage before and after initialization.
+        /// Case: If 'RequiresConsent' isn't set in the configuration and consents change before and after initialization.
         /// Result: All features should work.
         /// </summary>
         [Test]
@@ -159,11 +159,11 @@ namespace Tests
 
             Countly.Instance.Init(configuration);
 
-            /// All consents shouldn't work.
+            /// All consent shouldn't work.
             Assert.IsNotNull(Countly.Instance.Consents);
             AssertConsentAll(expectedValue: false);
 
-            /// All consents should work.
+            /// All consent should work.
             Countly.Instance.Consents.GiveConsentAll();
             AssertConsentAll(expectedValue: true);
 
@@ -230,7 +230,7 @@ namespace Tests
             AssertConsentArray(new Consents[] { Consents.Events, Consents.Crashes }, true);
             AssertConsentArray(new Consents[] { Consents.Views, Consents.Users, Consents.Clicks, Consents.RemoteConfig, Consents.Sessions, Consents.Location, Consents.StarRating }, false);
 
-            // Only Events, Crashes and StarRating features should work
+            // Only Events, Crashes, and StarRating features should work
             Countly.Instance.Consents.GiveConsent(new Consents[] { Consents.StarRating });
             AssertConsentArray(new Consents[] { Consents.Events, Consents.Crashes, Consents.StarRating }, true);
             AssertConsentArray(new Consents[] { Consents.Views, Consents.Users, Consents.Clicks, Consents.RemoteConfig, Consents.Sessions, Consents.Location }, false);
@@ -329,7 +329,7 @@ namespace Tests
         }
 
         /// <summary>
-        /// Case: If 'RequiresConsent' is set in the configuration, the user's location is given and the location consent is given during initialization, and location consent get removed after initialization.
+        /// Case: If 'RequiresConsent' is set in the configuration, the user's location is given and the location consent is given during initialization, and location consent gets removed after initialization.
         /// Result: User's location should reset to the default value.
         /// </summary>
         [Test]
@@ -375,7 +375,7 @@ namespace Tests
         }
 
         /// <summary>
-        /// Case: If 'RequiresConsent' is set in the configuration and consent of specific feature are given multiple times after initialization.
+        /// Case: If 'RequiresConsent' is set in the configuration and consent of a specific feature is given multiple times after initialization.
         /// Result: 'ConsentChanged' should call with distinct modified consents list on listeners. There shouldn't any duplicates entries.
         /// </summary>
         [Test]
