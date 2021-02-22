@@ -181,6 +181,12 @@ namespace Plugins.CountlySDK
                 configuration.ServerUrl = configuration.ServerUrl.Remove(configuration.ServerUrl.Length - 1);
             }
 
+            Configuration = configuration;
+
+            if (Configuration.EnableFirstAppLaunchSegment) {
+                Debug.LogWarning("'EnableFirstAppLaunchSegment' has been deprecated and it's functionality has been removed. This variable is only left for compatability.");
+            }
+
             _db = CountlyBoxDbHelper.BuildDatabase(DbNumber);
 
             DB.AutoBox auto = _db.Open();

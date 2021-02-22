@@ -6,6 +6,7 @@
 * Fixed issues with location handling and reworked some aspects of it's behaviour
 * Fixed potential issues by calculating Timestamp, dow, hours and tz from the same time moment
 * Fixed crashes that could happen on Application quit
+* "EnableFirstAppLaunchSegment" in SDK configuration has been deprecated and it's functinality has been removed. This variable is going to be removed in the future.
 * "LogCallback" in "CrashReportsCountlyService" is deprecated, this is going to be removed in the future.
 
 ## 20.11.0

@@ -35,6 +35,7 @@ namespace Plugins.CountlySDK.Models
         /// <summary>
         /// Set to send first app launch segment with event on app's first launch.
         /// </summary>
+        [Obsolete("EnableFirstAppLaunchSegment is deprecated, this is going to be removed in the future.")]
         public bool EnableFirstAppLaunchSegment = false;
 
         /// <summary>
