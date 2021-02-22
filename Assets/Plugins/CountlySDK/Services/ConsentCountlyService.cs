@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Plugins.CountlySDK.Enums;
 using Plugins.CountlySDK.Models;
+using UnityEditor;
+using UnityEngine;
 
 namespace Plugins.CountlySDK.Services
 {
@@ -95,7 +97,6 @@ namespace Plugins.CountlySDK.Services
             Log.Info("[ConsentCountlyService] GiveConsent : consents = " + (consents != null));
 
             SetConsentInternal(consents, true);
-
         }
 
         /// <summary>
@@ -212,7 +213,11 @@ namespace Plugins.CountlySDK.Services
         #endregion
 
         #region Helper Methods
-
+        /// <summary>
+        /// Private method that update selected consents.
+        /// </summary>
+        /// <param name="consents">List of consent</param>
+        /// <param name="value">value to be set</param>
         private void SetConsentInternal(Consents[] consents, bool value)
         {
             if (consents == null) {
@@ -239,6 +244,11 @@ namespace Plugins.CountlySDK.Services
             NotifyListeners(updatedConsents, value);
         }
 
+        /// <summary>
+        /// On consents changed, call <code>ConsentChanged</code> on all listeners.
+        /// </summary>
+        /// <param name="updatedConsents">List of modified consent</param>
+        /// <param name="newConsentValue">Modified Consents's new value</param>
         private void NotifyListeners(List<Consents> updatedConsents, bool newConsentValue)
         {
             if (Listeners == null || updatedConsents.Count < 1) {

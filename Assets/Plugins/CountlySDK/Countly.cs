@@ -333,7 +333,7 @@ namespace Plugins.CountlySDK
 
             if (pauseStatus) {
                 HandleAppPauseOrFocus();
-                await Session?.EndSessionAsync();
+                await Session?.ExecuteEndSessionAsync();
             } else {
                 SubscribeAppLog();
                 await Session?.ExecuteBeginSessionAsync();

@@ -39,6 +39,9 @@ namespace Plugins.CountlySDK.Services
             }
         }
 
+        /// <summary>
+        /// Sends a request with an empty "location" parameter.
+        /// </summary>
         internal async Task SendRequestWithEmptyLocation()
         {
             Dictionary<string, object> requestParams =
@@ -49,6 +52,9 @@ namespace Plugins.CountlySDK.Services
             await _requestCountlyHelper.GetResponseAsync(requestParams);
         }
 
+        /// <summary>
+        /// An internal function to add user's location request into request queue.
+        /// </summary>
         internal async Task SendIndependantLocationRequest()
         {
             Log.Debug("[LocationService] SendIndependantLocationRequest");
@@ -151,10 +157,9 @@ namespace Plugins.CountlySDK.Services
             }
         }
 
-        /*
-         * If location consent is removed,
-         * the SDK sends a request with an empty "location" parameter.
-         */
+        /// <summary>
+        /// If location consent is removed, the SDK sends a request with an empty "location" parameter.
+        /// </summary>
         private async void OnLocationConsentRemoved()
         {
             City = null;

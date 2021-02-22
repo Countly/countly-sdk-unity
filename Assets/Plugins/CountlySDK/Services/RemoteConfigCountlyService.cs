@@ -19,6 +19,9 @@ namespace Plugins.CountlySDK.Services
         private readonly CountlyConfiguration _configuration;
         private readonly RequestCountlyHelper _requestCountlyHelper;
 
+        /// <summary>
+        /// Get the remote config values.
+        /// </summary>
         public Dictionary<string, object> Configs { private set; get; }
 
         private readonly StringBuilder _requestStringBuilder = new StringBuilder();
@@ -40,6 +43,9 @@ namespace Plugins.CountlySDK.Services
 
         }
 
+        /// <summary>
+        ///     Fetch fresh remote config values from server and initialize <code>Configs</code>
+        /// </summary>
         internal async Task<CountlyResponse> InitConfig()
         {
             Log.Debug("[RemoteConfigCountlyService] InitConfig");
@@ -51,6 +57,10 @@ namespace Plugins.CountlySDK.Services
             return await Update();
         }
 
+        /// <summary>
+        ///     Fetch locally stored remote config values.
+        /// </summary>
+        /// <returns>Stored Remote config</returns>
         private Dictionary<string, object> FetchConfigFromDB()
         {
             Dictionary<string, object> config = null;
@@ -65,7 +75,7 @@ namespace Plugins.CountlySDK.Services
         }
 
         /// <summary>
-        ///     Fetch fresh remote config from server and store locally.
+        ///     Fetch fresh remote config values from server and store locally.
         /// </summary>
         /// <returns></returns>
         public async Task<CountlyResponse> Update()
@@ -108,7 +118,7 @@ namespace Plugins.CountlySDK.Services
         ///     Builds request URL using ServerUrl, AppKey, DeviceID and supplied queryParams parameters.
         ///     The data is appended in the URL.
         /// </summary>
-        /// <param name="queryParams"></param>
+        /// <param name="queryParams">request's parameters</param>
         /// <returns></returns>
         private string BuildGetRequest(Dictionary<string, object> queryParams)
         {

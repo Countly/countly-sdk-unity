@@ -35,9 +35,9 @@ namespace Plugins.CountlySDK.Services
         /// <summary>
         /// Sends app rating to the server.
         /// </summary>
-        /// <param name="platform"></param>
-        /// <param name="appVersion"></param>
-        /// <param name="rating">Rating should be from 1 to 5</param>
+        /// <param name="platform">name of platform</param>
+        /// <param name="appVersion">the current version of the app</param>
+        /// <param name="rating">value from 0 to 5 that will be set as the rating value</param>
         /// <returns></returns>
         public async Task ReportStarRatingAsync(string platform, string appVersion, int rating)
         {
