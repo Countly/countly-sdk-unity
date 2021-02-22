@@ -19,7 +19,7 @@ namespace Tests
         public void AssertConsentArray(Consents[] consents, bool expectedValue)
         {
             foreach (Consents consent in consents) {
-                Assert.AreEqual(expectedValue, Countly.Instance.Consents.CheckConsent(consent));
+                Assert.AreEqual(expectedValue, Countly.Instance.Consents.CheckConsentInternal(consent));
             }
         }
 
@@ -312,11 +312,11 @@ namespace Tests
             Assert.AreEqual(Countly.Instance.Location.Location, "29.634933,-95.220255");
 
             Assert.IsNotNull(Countly.Instance.Consents);
-            Assert.IsTrue(Countly.Instance.Consents.CheckConsent(Consents.Location));
+            Assert.IsTrue(Countly.Instance.Consents.CheckConsentInternal(Consents.Location));
 
             Countly.Instance.Consents.RemoveConsent(new Consents[] { Consents.Location });
 
-            Assert.IsFalse(Countly.Instance.Consents.CheckConsent(Consents.Location));
+            Assert.IsFalse(Countly.Instance.Consents.CheckConsentInternal(Consents.Location));
             Assert.IsNull(Countly.Instance.Location.City);
             Assert.IsNull(Countly.Instance.Location.Location);
             Assert.IsNull(Countly.Instance.Location.IPAddress);
@@ -335,7 +335,8 @@ namespace Tests
 
 
             ConsentTestHelperClass listener = new ConsentTestHelperClass();
-            ConsentCountlyService consentCountlyService = new ConsentCountlyService(configuration, null);
+            CountlyLogHelper logHelper = new CountlyLogHelper(configuration);
+            ConsentCountlyService consentCountlyService = new ConsentCountlyService(configuration, logHelper, null);
 
             consentCountlyService.Listeners = new List<AbstractBaseService> { listener };
 
@@ -358,7 +359,8 @@ namespace Tests
 
 
             ConsentTestHelperClass listener = new ConsentTestHelperClass();
-            ConsentCountlyService consentCountlyService = new ConsentCountlyService(configuration, null);
+            CountlyLogHelper logHelper = new CountlyLogHelper(configuration);
+            ConsentCountlyService consentCountlyService = new ConsentCountlyService(configuration, logHelper, null);
 
             consentCountlyService.Listeners = new List<AbstractBaseService> { listener };
 
@@ -390,7 +392,8 @@ namespace Tests
             configuration.CreateConsentGroup(groupA, new Consents[] { Consents.Clicks, Consents.Views });
 
             ConsentTestHelperClass listener = new ConsentTestHelperClass();
-            ConsentCountlyService consentCountlyService = new ConsentCountlyService(configuration, null);
+            CountlyLogHelper logHelper = new CountlyLogHelper(configuration);
+            ConsentCountlyService consentCountlyService = new ConsentCountlyService(configuration, logHelper, null);
 
             consentCountlyService.Listeners = new List<AbstractBaseService> { listener };
 
@@ -425,7 +428,8 @@ namespace Tests
             configuration.CreateConsentGroup(groupA, new Consents[] { Consents.Clicks, Consents.Views });
 
             ConsentTestHelperClass listener = new ConsentTestHelperClass();
-            ConsentCountlyService consentCountlyService = new ConsentCountlyService(configuration, null);
+            CountlyLogHelper logHelper = new CountlyLogHelper(configuration);
+            ConsentCountlyService consentCountlyService = new ConsentCountlyService(configuration, logHelper, null);
 
             consentCountlyService.Listeners = new List<AbstractBaseService> { listener };
 
@@ -451,7 +455,7 @@ namespace Tests
         private class ConsentTestHelperClass : AbstractBaseService
         {
             internal List<DeltaConsents> DeltaConsentsList { get; private set; }
-            internal ConsentTestHelperClass() : base(null)
+            internal ConsentTestHelperClass() : base(null, null)
             {
                 DeltaConsentsList = new List<DeltaConsents>();
             }

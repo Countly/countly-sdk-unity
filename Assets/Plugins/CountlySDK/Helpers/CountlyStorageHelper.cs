@@ -17,7 +17,7 @@ namespace Plugins.CountlySDK.Helpers
         private DB _db;
         private int _schemaVersion = 1;
         private const long _dbNumber = 3;
-        private CountlyConfiguration _configuration;
+        private CountlyLogHelper _logHelper;
 
         internal SegmentDao ViewSegmentDao { get; private set; }
         internal SegmentDao NonViewSegmentDao { get; private set; }
@@ -28,9 +28,9 @@ namespace Plugins.CountlySDK.Helpers
         internal Dao<EventEntity> NonViewEventDao { get; private set; }
         internal Dao<EventNumberInSameSessionEntity> EventNrInSameSessionDao { get; private set; }
 
-        internal CountlyStorageHelper(CountlyConfiguration configuration)
+        internal CountlyStorageHelper(CountlyLogHelper logHelper)
         {
-            _configuration = configuration;
+            _logHelper = logHelper;
         }
 
         /// <summary>
@@ -53,21 +53,21 @@ namespace Plugins.CountlySDK.Helpers
         }
 
         /// <summary>
-        /// Open database connection and initialize daos.
+        /// Open database connection and initialize data access objects.
         /// </summary>
         internal void OpenDB()
         {
             _db = BuildDatabase(_dbNumber);
             DB.AutoBox auto = _db.Open();
 
-            ViewSegmentDao = new SegmentDao(auto, EntityType.ViewEventSegments.ToString(), _configuration);
-            NonViewSegmentDao = new SegmentDao(auto, EntityType.NonViewEventSegments.ToString(), _configuration);
+            ViewSegmentDao = new SegmentDao(auto, EntityType.ViewEventSegments.ToString(), _logHelper);
+            NonViewSegmentDao = new SegmentDao(auto, EntityType.NonViewEventSegments.ToString(), _logHelper);
 
-            ConfigDao = new Dao<ConfigEntity>(auto, EntityType.Configs.ToString(), _configuration);
-            RequestDao = new Dao<RequestEntity>(auto, EntityType.Requests.ToString(), _configuration);
-            ViewEventDao = new Dao<EventEntity>(auto, EntityType.ViewEvents.ToString(), _configuration);
-            NonViewEventDao = new Dao<EventEntity>(auto, EntityType.NonViewEvents.ToString(), _configuration);
-            EventNrInSameSessionDao = new Dao<EventNumberInSameSessionEntity>(auto, EntityType.EventNumberInSameSessions.ToString(), _configuration);
+            ConfigDao = new Dao<ConfigEntity>(auto, EntityType.Configs.ToString(), _logHelper);
+            RequestDao = new Dao<RequestEntity>(auto, EntityType.Requests.ToString(), _logHelper);
+            ViewEventDao = new Dao<EventEntity>(auto, EntityType.ViewEvents.ToString(), _logHelper);
+            NonViewEventDao = new Dao<EventEntity>(auto, EntityType.NonViewEvents.ToString(), _logHelper);
+            EventNrInSameSessionDao = new Dao<EventNumberInSameSessionEntity>(auto, EntityType.EventNumberInSameSessions.ToString(), _logHelper);
 
         }
 

@@ -9,12 +9,12 @@ namespace Plugins.CountlySDK.Persistance.Repositories
     public abstract class Repository<TEntity, TModel> where TEntity : class, IEntity, new() where TModel : IModel
     {
         private readonly Dao<TEntity> _dao;
-        private readonly CountlyConfiguration _config;
+        private readonly CountlyLogHelper Log;
 
-        protected Repository(Dao<TEntity> dao, CountlyConfiguration config)
+        protected Repository(Dao<TEntity> dao, CountlyLogHelper log)
         {
             _dao = dao;
-            _config = config;
+            this.Log = log;
         }
 
         internal Queue<TModel> Models { get; } = new Queue<TModel>();
@@ -30,28 +30,29 @@ namespace Plugins.CountlySDK.Persistance.Repositories
                     continue;
                 }
 
-                if (_config.EnableConsoleLogging) {
-                    Debug.Log("Loaded model: " + model);
-                }
+                Log.Verbose("[Repository] Loaded model: " + model);
+
 
                 Models.Enqueue(model);
             }
-            if (_config.EnableConsoleLogging) {
-                Debug.Log("Loaded entities of type " + typeof(TEntity).Name + " from db:" + Count);
-            }
+
+            Log.Verbose("[Repository] Loaded entities of type " + typeof(TEntity).Name + " from db:" + Count);
+
         }
 
         public virtual bool Enqueue(TModel model)
         {
+            Log.Verbose("[Repository] Enqueue, TModel: " + model);
+
             if (!ValidateModelBeforeEnqueue(model)) {
                 return false;
             }
+
             Models.Enqueue(model);
             TEntity entity = ConvertModelToEntity(model);
             bool res = _dao.Save(entity);
-            if (!res && _config.EnableConsoleLogging) {
-                Debug.LogError("Request entity save failed, entity: " + entity);
-            }
+
+            Log.Verbose("[Repository] Request entity save failed, entity: " + entity);
 
             return res;
         }
@@ -59,7 +60,6 @@ namespace Plugins.CountlySDK.Persistance.Repositories
         public virtual TModel Dequeue()
         {
             TModel model = Models.Dequeue();
-            //            Debug.Log("Dequeue model " + typeof(TModel) + ", model: \n" + model);
             _dao.Remove(model.Id);
             return model;
         }

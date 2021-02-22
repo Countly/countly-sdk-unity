@@ -24,7 +24,6 @@ namespace Tests
                 EnablePost = true,
                 EnableTestMode = true,
                 EnableConsoleLogging = true,
-                EnableFirstAppLaunchSegment = true,
                 EnableAutomaticCrashReporting = false,
 
                 SessionDuration = 10,
@@ -75,7 +74,6 @@ namespace Tests
             Assert.AreEqual(Countly.Instance.Configuration.EnablePost, true);
             Assert.AreEqual(Countly.Instance.Configuration.EnableTestMode, true);
             Assert.AreEqual(Countly.Instance.Configuration.EnableConsoleLogging, true);
-            Assert.AreEqual(Countly.Instance.Configuration.EnableFirstAppLaunchSegment, true);
             Assert.AreEqual(Countly.Instance.Configuration.EnableAutomaticCrashReporting, false);
         }
 
@@ -101,7 +99,6 @@ namespace Tests
             Assert.AreEqual(Countly.Instance.Configuration.EnablePost, false);
             Assert.AreEqual(Countly.Instance.Configuration.EnableTestMode, false);
             Assert.AreEqual(Countly.Instance.Configuration.EnableConsoleLogging, false);
-            Assert.AreEqual(Countly.Instance.Configuration.EnableFirstAppLaunchSegment, false);
             Assert.AreEqual(Countly.Instance.Configuration.EnableAutomaticCrashReporting, true);
 
             Assert.AreEqual(Countly.Instance.Configuration.City, null);

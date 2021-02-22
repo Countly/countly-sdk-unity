@@ -10,16 +10,18 @@ namespace Plugins.CountlySDK.Services
     public class DeviceIdCountlyService : AbstractBaseService
     {
         private readonly CountlyUtils _countlyUtils;
-        private readonly CountlyConfiguration _config;
+        private readonly CountlyConfiguration _configuration;
         private readonly EventCountlyService _eventCountlyService;
         private readonly RequestCountlyHelper _requestCountlyHelper;
         private readonly SessionCountlyService _sessionCountlyService;
 
-        internal DeviceIdCountlyService(CountlyConfiguration config, SessionCountlyService sessionCountlyService,
-            RequestCountlyHelper requestCountlyHelper, EventCountlyService eventCountlyService, CountlyUtils countlyUtils, ConsentCountlyService consentService) : base(consentService)
+        internal DeviceIdCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, SessionCountlyService sessionCountlyService,
+            RequestCountlyHelper requestCountlyHelper, EventCountlyService eventCountlyService, CountlyUtils countlyUtils, ConsentCountlyService consentService) : base(logHelper, consentService)
         {
-            _config = config;
+            Log.Debug("[DeviceIdCountlyService] Initializing.");
+
             _countlyUtils = countlyUtils;
+            _configuration = configuration;
             _eventCountlyService = eventCountlyService;
             _requestCountlyHelper = requestCountlyHelper;
             _sessionCountlyService = sessionCountlyService;
@@ -69,8 +71,10 @@ namespace Plugins.CountlySDK.Services
         /// <param name="deviceId">new device id</param>
         public async Task ChangeDeviceIdAndEndCurrentSessionAsync(string deviceId)
         {
+            Log.Info("[DeviceIdCountlyService] ChangeDeviceIdAndEndCurrentSessionAsync: deviceId = " + deviceId);
+
             if (!_consentService.AnyConsentGiven()) {
-                Debug.Log("[Countly DeviceIdCountlyService] ChangeDeviceIdAndEndCurrentSessionAsync: Please set at least a single consent before calling this!");
+                Log.Debug("[DeviceIdCountlyService] ChangeDeviceIdAndEndCurrentSessionAsync: Please set at least a single consent before calling this!");
                 return;
             }
 
@@ -103,8 +107,10 @@ namespace Plugins.CountlySDK.Services
         /// <param name="deviceId">new device id</param>
         public async Task ChangeDeviceIdAndMergeSessionDataAsync(string deviceId)
         {
+            Log.Info("[DeviceIdCountlyService] ChangeDeviceIdAndMergeSessionDataAsync: deviceId = " + deviceId);
+
             if (!_consentService.AnyConsentGiven()) {
-                Debug.Log("[Countly DeviceIdCountlyService] ChangeDeviceIdAndMergeSessionDataAsync: Please set at least a single consent before calling this!");
+                Log.Debug("[DeviceIdCountlyService] ChangeDeviceIdAndMergeSessionDataAsync: Please set at least a single consent before calling this!");
                 return;
             }
 
@@ -141,6 +147,9 @@ namespace Plugins.CountlySDK.Services
 
             //Updating Cache
             PlayerPrefs.SetString(Constants.DeviceIDKey, DeviceId);
+
+            Log.Debug("[DeviceIdCountlyService] UpdateDeviceId: " + newDeviceId);
+
         }
 
         /// <summary>

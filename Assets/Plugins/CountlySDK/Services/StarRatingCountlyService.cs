@@ -8,11 +8,14 @@ namespace Plugins.CountlySDK.Services
 {
     public class StarRatingCountlyService : AbstractBaseService
     {
-
+        private readonly CountlyConfiguration _configuration;
         private readonly EventCountlyService _eventCountlyService;
 
-        internal StarRatingCountlyService(EventCountlyService eventCountlyService, ConsentCountlyService consentService) : base(consentService)
+        internal StarRatingCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, ConsentCountlyService consentService, EventCountlyService eventCountlyService) : base(logHelper, consentService)
         {
+            Log.Debug("[StarRatingCountlyService] Initializing.");
+
+            _configuration = configuration;
             _eventCountlyService = eventCountlyService;
         }
 
@@ -38,7 +41,9 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async Task ReportStarRatingAsync(string platform, string appVersion, int rating)
         {
-            if (!_consentService.CheckConsent(Consents.StarRating)) {
+            Log.Info("[StarRatingCountlyService] ReportStarRatingAsync");
+
+            if (!_consentService.CheckConsentInternal(Consents.StarRating)) {
                 return;
             }
 

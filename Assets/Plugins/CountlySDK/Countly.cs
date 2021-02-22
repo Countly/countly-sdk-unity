@@ -1,9 +1,7 @@
 using System;
 using System.Collections;
 using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
 using System.Collections.Generic;
-using CountlySDK.Input;
 using iBoxDB.LocalServer;
 using Notifications;
 using Notifications.Impls;
@@ -34,6 +32,7 @@ namespace Plugins.CountlySDK
         /// <returns>bool</returns>
         public bool IsSDKInitialized { get; private set; }
 
+        private CountlyLogHelper _logHelper;
         private static Countly _instance = null;
         private CountlyStorageHelper _storageHelper;
         private List<AbstractBaseService> _listeners = new List<AbstractBaseService>();
@@ -152,11 +151,17 @@ namespace Plugins.CountlySDK
 
         }
 
-        public async void Init(CountlyConfiguration configuration)
+        public void Init(CountlyConfiguration configuration)
         {
             if (IsSDKInitialized) {
                 return;
             }
+
+             Configuration = configuration;
+            _logHelper = new CountlyLogHelper(Configuration);
+
+            _logHelper.Info("[Init] Initializing Countly [SdkName: " + Constants.SdkName + " SdkVersion: " + Constants.SdkVersion + "]");
+
 
             if (configuration.Parent != null) {
                 transform.parent = configuration.Parent.transform;
@@ -174,14 +179,16 @@ namespace Plugins.CountlySDK
                 configuration.ServerUrl = configuration.ServerUrl.Remove(configuration.ServerUrl.Length - 1);
             }
 
-            Configuration = configuration;
+            if (Configuration.EnableFirstAppLaunchSegment) {
+                _logHelper.Warning("'EnableFirstAppLaunchSegment' has been deprecated and it's functionality has been removed. This variable is only left for compatability.");
+            }
 
-            _storageHelper = new CountlyStorageHelper(Configuration);
+            _storageHelper = new CountlyStorageHelper(_logHelper);
             _storageHelper.OpenDB();
 
-            _requestRepo = new RequestRepository(_storageHelper.RequestDao, Configuration);
-            _viewEventRepo = new ViewEventRepository(_storageHelper.ViewEventDao, _storageHelper.ViewSegmentDao, Configuration);
-            _nonViewEventRepo = new NonViewEventRepository(_storageHelper.NonViewEventDao, _storageHelper.NonViewSegmentDao, Configuration);
+            _requestRepo = new RequestRepository(_storageHelper.RequestDao, _logHelper);
+            _viewEventRepo = new ViewEventRepository(_storageHelper.ViewEventDao, _storageHelper.ViewSegmentDao, _logHelper);
+            _nonViewEventRepo = new NonViewEventRepository(_storageHelper.NonViewEventDao, _storageHelper.NonViewSegmentDao, _logHelper);
 
             _requestRepo.Initialize();
             _viewEventRepo.Initialize();
@@ -191,32 +198,35 @@ namespace Plugins.CountlySDK
 
             Device.InitDeviceId(configuration.DeviceId);
             OnInitialisationComplete();
+
+            _logHelper.Debug("[Countly] Finished Initializing SDK.");
+
         }
 
         private void Init(RequestRepository requestRepo, ViewEventRepository viewEventRepo,
             NonViewEventRepository nonViewEventRepo, Dao<ConfigEntity> configDao)
         {
             CountlyUtils countlyUtils = new CountlyUtils(this);
-            RequestCountlyHelper requests = new RequestCountlyHelper(Configuration, countlyUtils, requestRepo);
+            RequestCountlyHelper requests = new RequestCountlyHelper(Configuration, _logHelper, countlyUtils, requestRepo);
 
-            Consents = new ConsentCountlyService(Configuration, Consents);
-            Events = new EventCountlyService(Configuration, requests, viewEventRepo, nonViewEventRepo, Consents);
+            Consents = new ConsentCountlyService(Configuration, _logHelper, Consents);
+            Events = new EventCountlyService(Configuration, _logHelper, requests, viewEventRepo, nonViewEventRepo, Consents);
 
-            Location = new Services.LocationService(Configuration, requests, Consents);
-            OptionalParameters = new OptionalParametersCountlyService(Location, Configuration);
-            Notifications = new NotificationsCallbackService(Configuration);
-            ProxyNotificationsService notificationsService = new ProxyNotificationsService(transform, Configuration, InternalStartCoroutine, Events);
-            _push = new PushCountlyService(Configuration, Events, requests, notificationsService, Notifications, Consents);
-            Session = new SessionCountlyService(Configuration, Events, requests, Location, Consents);
+            Location = new Services.LocationService(Configuration, _logHelper, requests, Consents);
+            OptionalParameters = new OptionalParametersCountlyService(Location, Configuration, _logHelper, Consents);
+            Notifications = new NotificationsCallbackService(_logHelper);
+            ProxyNotificationsService notificationsService = new ProxyNotificationsService(transform, Configuration, _logHelper, InternalStartCoroutine, Events);
+            _push = new PushCountlyService(Configuration, _logHelper, requests, notificationsService, Notifications, Consents);
+            Session = new SessionCountlyService(Configuration, _logHelper, Events, requests, Location, Consents);
 
-            CrashReports = new CrashReportsCountlyService(Configuration, requests, Consents);
-            Initialization = new InitializationCountlyService(Configuration, _push, Location, Session, Consents);
-            RemoteConfigs = new RemoteConfigCountlyService(Configuration, requests, countlyUtils, configDao, Consents);
+            CrashReports = new CrashReportsCountlyService(Configuration, _logHelper, requests, Consents);
+            Initialization = new InitializationCountlyService(Configuration, _logHelper, Location, Session, Consents);
+            RemoteConfigs = new RemoteConfigCountlyService(Configuration, _logHelper, requests, countlyUtils, configDao, Consents);
 
-            StarRating = new StarRatingCountlyService(Events, Consents);
-            UserDetails = new UserDetailsCountlyService(requests, countlyUtils, Consents);
-            Views = new ViewCountlyService(Configuration, Events, Consents);
-            Device = new DeviceIdCountlyService(Configuration, Session, requests, Events, countlyUtils, Consents);
+            StarRating = new StarRatingCountlyService(Configuration, _logHelper, Consents, Events);
+            UserDetails = new UserDetailsCountlyService(Configuration, _logHelper, requests, countlyUtils, Consents);
+            Views = new ViewCountlyService(Configuration, _logHelper, Events, Consents);
+            Device = new DeviceIdCountlyService(Configuration, _logHelper, Session, requests, Events, countlyUtils, Consents);
 
             CreateListOfIBaseService();
             RegisterListenersToServices();
@@ -264,9 +274,7 @@ namespace Plugins.CountlySDK
                 return;
             }
 
-            if (Configuration.EnableConsoleLogging) {
-                Debug.Log("[Countly] OnApplicationQuit");
-            }
+            _logHelper.Debug("[Countly] OnApplicationQuit");
 
             _storageHelper.CloseDB();
         }
@@ -276,6 +284,8 @@ namespace Plugins.CountlySDK
             if (!IsSDKInitialized) {
                 return;
             }
+            _logHelper.Debug("[Countly] ClearStorage");
+
             _requestRepo.Clear();
             _viewEventRepo.Clear();
             _nonViewEventRepo.Clear();
@@ -289,9 +299,11 @@ namespace Plugins.CountlySDK
 
         private void OnApplicationFocus(bool hasFocus)
         {
-            if (Configuration.EnableConsoleLogging) {
-                Debug.Log("[Countly] OnApplicationFocus: " + hasFocus);
+            if (!IsSDKInitialized) {
+                return;
             }
+
+            _logHelper.Debug("[Countly] OnApplicationFocus: " + hasFocus);
 
             if (hasFocus) {
                 SubscribeAppLog();
@@ -302,9 +314,11 @@ namespace Plugins.CountlySDK
 
         private async void OnApplicationPause(bool pauseStatus)
         {
-            if (Configuration.EnableConsoleLogging) {
-                Debug.Log("[Countly] OnApplicationPause: " + pauseStatus);
+            if (!IsSDKInitialized) {
+                return;
             }
+
+            _logHelper.Debug("[Countly] OnApplicationPause: " + pauseStatus);
 
             if (CrashReports != null) {
                 CrashReports.IsApplicationInBackground = pauseStatus;

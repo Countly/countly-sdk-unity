@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Plugins.CountlySDK.Enums;
@@ -12,12 +13,15 @@ namespace Plugins.CountlySDK.Services
     {
         internal bool IsApplicationInBackground { get; set; }
         private readonly Queue<string> _crashBreadcrumbs = new Queue<string>();
-        private readonly CountlyConfiguration _configModel;
+
+        private readonly CountlyConfiguration _configuration;
         private readonly RequestCountlyHelper _requestCountlyHelper;
 
-        internal CrashReportsCountlyService(CountlyConfiguration configModel, RequestCountlyHelper requestCountlyHelper, ConsentCountlyService consentService) : base(consentService)
+        internal CrashReportsCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, RequestCountlyHelper requestCountlyHelper, ConsentCountlyService consentService) : base(logHelper, consentService)
         {
-            _configModel = configModel;
+            Log.Debug("[CrashReportsCountlyService] Initializing.");
+
+            _configuration = configuration;
             _requestCountlyHelper = requestCountlyHelper;
         }
 
@@ -28,15 +32,17 @@ namespace Plugins.CountlySDK.Services
         /// <param name="message">Exception Class</param>
         /// <param name="stackTrace">Stack Trace</param>
         /// <param name="type">The type of log message e.g error, warning, Exception etc</param>
+        [Obsolete("LogCallback is deprecated, this is going to be removed in the future.")]
         public async void LogCallback(string message, string stackTrace, LogType type)
         {
-            if (!_consentService.CheckConsent(Consents.Crashes)) {
+            //In future make this function internal
+            if (!_consentService.CheckConsentInternal(Consents.Crashes)) {
                 return;
             }
 
-            if (_configModel.EnableAutomaticCrashReporting
+            if (_configuration.EnableAutomaticCrashReporting
                 && (type == LogType.Error || type == LogType.Exception)) {
-                await SendCrashReportAsync(message, stackTrace, type, null, false);
+                await SendCrashReportInternal(message, stackTrace, type, null, false);
             }
         }
 
@@ -52,11 +58,23 @@ namespace Plugins.CountlySDK.Services
         public async Task SendCrashReportAsync(string message, string stackTrace, LogType type,
             IDictionary<string, object> segments = null, bool nonfatal = true)
         {
-            if (!_consentService.CheckConsent(Consents.Crashes)) {
+            Log.Info("[CrashReportsCountlyService] SendCrashReportAsync : message = " + message + ", stackTrace = " + stackTrace);
+
+            if (!_consentService.CheckConsentInternal(Consents.Crashes)) {
                 return;
             }
 
+            await SendCrashReportInternal(message, stackTrace, type, segments, nonfatal);
+
+        }
+
+        internal async Task SendCrashReportInternal(string message, string stackTrace, LogType type,
+            IDictionary<string, object> segments = null, bool nonfatal = true)
+        {
+
             CountlyExceptionDetailModel model = ExceptionDetailModel(message, stackTrace, nonfatal, segments);
+
+            Log.Debug("[CrashReportsCountlyService] SendCrashReportInternal : model = " + model.ToString());
 
             Dictionary<string, object> requestParams = new Dictionary<string, object>
             {
@@ -78,21 +96,19 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value">a bread crumb for the crash report</param>
         public void AddBreadcrumbs(string value)
         {
-            if (!_consentService.CheckConsent(Consents.Crashes)) {
+            Log.Info("[CrashReportsCountlyService] AddBreadcrumbs : " + value);
+
+            if (!_consentService.CheckConsentInternal(Consents.Crashes)) {
                 return;
             }
 
-            if (_configModel.EnableConsoleLogging) {
-                Debug.Log("[Countly] AddBreadcrumbs : " + value);
-            }
-
-            if (_configModel.EnableTestMode) {
+            if (_configuration.EnableTestMode) {
                 return;
             }
 
             string validBreadcrumb = value.Length > 1000 ? value.Substring(0, 1000) : value;
 
-            if (_crashBreadcrumbs.Count == _configModel.TotalBreadcrumbsAllowed) {
+            if (_crashBreadcrumbs.Count == _configuration.TotalBreadcrumbsAllowed) {
                 _crashBreadcrumbs.Dequeue();
             }
 
