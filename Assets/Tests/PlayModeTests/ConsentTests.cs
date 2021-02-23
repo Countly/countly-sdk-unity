@@ -455,7 +455,7 @@ namespace Tests
         private class ConsentTestHelperClass : AbstractBaseService
         {
             internal List<DeltaConsents> DeltaConsentsList { get; private set; }
-            internal ConsentTestHelperClass() : base(null, null)
+            internal ConsentTestHelperClass() : base(null, null, null)
             {
                 DeltaConsentsList = new List<DeltaConsents>();
             }

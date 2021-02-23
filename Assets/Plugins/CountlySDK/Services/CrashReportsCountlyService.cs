@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Plugins.CountlySDK.Enums;
@@ -13,14 +14,11 @@ namespace Plugins.CountlySDK.Services
         internal bool IsApplicationInBackground { get; set; }
         private readonly Queue<string> _crashBreadcrumbs = new Queue<string>();
 
-        private readonly CountlyConfiguration _configuration;
         private readonly RequestCountlyHelper _requestCountlyHelper;
 
-        internal CrashReportsCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, RequestCountlyHelper requestCountlyHelper, ConsentCountlyService consentService) : base(logHelper, consentService)
+        internal CrashReportsCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, RequestCountlyHelper requestCountlyHelper, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
         {
             Log.Debug("[CrashReportsCountlyService] Initializing.");
-
-            _configuration = configuration;
             _requestCountlyHelper = requestCountlyHelper;
         }
 
