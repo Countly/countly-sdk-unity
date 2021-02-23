@@ -16,6 +16,11 @@ namespace Tests
         private readonly string _appKey = "772c091355076ead703f987fee94490";
 
 
+        /// <summary>
+        /// Assert an array of consent against the expected value.
+        /// </summary>
+        /// <param name="expectedValue"> an expected values of consents</param>
+        /// <param name="consents"> an array consents</param>
         public void AssertConsentArray(Consents[] consents, bool expectedValue)
         {
             foreach (Consents consent in consents) {
@@ -23,12 +28,20 @@ namespace Tests
             }
         }
 
+        /// <summary>
+        /// Assert all consents against the expected value.
+        /// </summary>
+        /// <param name="expectedValue">an expected values of consents</param>
         public void AssertConsentAll(bool expectedValue)
         {
             Consents[] consents = System.Enum.GetValues(typeof(Consents)).Cast<Consents>().ToArray();
             AssertConsentArray(consents, expectedValue);
         }
 
+        /// <summary>
+        ///Case: if 'RequiresConsent' isn't set in the configuration during initialization.
+        ///Result: All features should work.
+        /// </summary>
         [Test]
         public void TestDefaultStateOfConsents()
         {
@@ -43,6 +56,10 @@ namespace Tests
             AssertConsentAll(expectedValue: true);
         }
 
+        /// <summary>
+        /// Case: if 'RequiresConsent' is set in the configuration and no consent is given during initialization.
+        /// Result: All features shouldn't work.
+        /// </summary>
         [Test]
         public void TestConsentDefaultValuesWithRequiresConsentTrue()
         {
@@ -59,6 +76,10 @@ namespace Tests
             AssertConsentAll(expectedValue: false);
         }
 
+        /// <summary>
+        /// Case: If 'RequiresConsent' isn't set in the configuration and consents change before and after initialization.
+        /// Result: All features should work.
+        /// </summary>
         [Test]
         public void TestConsentDefaultValuesWithRequiresConsentFalse()
         {
@@ -94,6 +115,10 @@ namespace Tests
 
         }
 
+        /// <summary>
+        /// Case: If 'RequiresConsent' is set in the configuration and consents are given to a consent group named 'GroupA" during initialization.
+        /// Result: Only Consents of group 'GroupA' should work.
+        /// </summary>
         [Test]
         public void TestConsentsGivenDuringInit()
         {
@@ -119,6 +144,9 @@ namespace Tests
 
         }
 
+        /// <summary>
+        /// Case: If 'RequiresConsent' is set in the configuration. Consents are given or removed using 'GiveConsentAll' and 'RemoveAllConsent' after initialization.
+        /// </summary>
         [Test]
         public void TestGiveAndRemoveAllConsent()
         {
@@ -131,20 +159,24 @@ namespace Tests
 
             Countly.Instance.Init(configuration);
 
+            /// All consent shouldn't work.
             Assert.IsNotNull(Countly.Instance.Consents);
             AssertConsentAll(expectedValue: false);
 
-
+            /// All consent should work.
             Countly.Instance.Consents.GiveConsentAll();
             AssertConsentAll(expectedValue: true);
 
-
+            /// All consents shouldn't work
             Countly.Instance.Consents.RemoveAllConsent();
             AssertConsentAll(expectedValue: false);
 
 
         }
 
+        /// <summary>
+        /// Case: If 'RequiresConsent' is set in the configuration and consents are given using multiple groups during initialization.
+        /// </summary>
         [Test]
         public void TestConfigGiveConsents()
         {
@@ -176,6 +208,9 @@ namespace Tests
 
         }
 
+        /// <summary>
+        /// Case: If 'RequiresConsent' is set in the configuration and individual consents are given to multiple features after initialization.
+        /// </summary>
         [Test]
         public void TestGiveIndividualConsents()
         {
@@ -190,16 +225,21 @@ namespace Tests
 
             Assert.IsNotNull(Countly.Instance.Consents);
 
+            // Only Events and Crashes features should work
             Countly.Instance.Consents.GiveConsent(new Consents[] { Consents.Events, Consents.Crashes });
             AssertConsentArray(new Consents[] { Consents.Events, Consents.Crashes }, true);
             AssertConsentArray(new Consents[] { Consents.Views, Consents.Users, Consents.Clicks, Consents.RemoteConfig, Consents.Sessions, Consents.Location, Consents.StarRating }, false);
 
+            // Only Events, Crashes, and StarRating features should work
             Countly.Instance.Consents.GiveConsent(new Consents[] { Consents.StarRating });
             AssertConsentArray(new Consents[] { Consents.Events, Consents.Crashes, Consents.StarRating }, true);
             AssertConsentArray(new Consents[] { Consents.Views, Consents.Users, Consents.Clicks, Consents.RemoteConfig, Consents.Sessions, Consents.Location }, false);
 
         }
 
+        /// <summary>
+        /// Case: If 'RequiresConsent' is set in the configuration and individual consents are given to multiple features during initialization and removed a few consents after initialization.
+        /// </summary>
         [Test]
         public void TestRemovalIndividualConsents()
         {
@@ -220,6 +260,9 @@ namespace Tests
             AssertConsentArray(new Consents[] { Consents.Clicks, Consents.RemoteConfig, Consents.Sessions, Consents.Location, Consents.Views, Consents.Users }, false);
         }
 
+        /// <summary>
+        /// Case: If 'RequiresConsent' is set in the configuration and consents are given to multiple groups during and after initialization.
+        /// </summary>
         [Test]
         public void TestGiveConsentToGroup()
         {
@@ -249,6 +292,9 @@ namespace Tests
             AssertConsentArray(new Consents[] { Consents.Views, Consents.Clicks, Consents.Events, Consents.Crashes, Consents.StarRating }, false);
         }
 
+        /// <summary>
+        /// Case: If 'RequiresConsent' is set in the configuration and consents are removed of multiple groups after initialization.
+        /// </summary>
         [Test]
         public void TestRemoveConsentOfGroup()
         {
@@ -282,6 +328,10 @@ namespace Tests
             AssertConsentArray(new Consents[] { Consents.Views, Consents.Clicks, Consents.Users, Consents.RemoteConfig }, false);
         }
 
+        /// <summary>
+        /// Case: If 'RequiresConsent' is set in the configuration, the user's location is given and the location consent is given during initialization, and location consent gets removed after initialization.
+        /// Result: User's location should reset to the default value.
+        /// </summary>
         [Test]
         public void TestLocationConsentChangedListener()
         {
@@ -324,6 +374,10 @@ namespace Tests
             Assert.IsFalse(Countly.Instance.Location.IsLocationDisabled);
         }
 
+        /// <summary>
+        /// Case: If 'RequiresConsent' is set in the configuration and consent of a specific feature is given multiple times after initialization.
+        /// Result: 'ConsentChanged' should call with distinct modified consents list on listeners. There shouldn't any duplicates entries.
+        /// </summary>
         [Test]
         public void TestListenerOnMultipleConsentOfSameFeature()
         {
@@ -348,6 +402,10 @@ namespace Tests
             Assert.IsTrue(listener.Validate(1, new Consents[] { Consents.Location, Consents.Events }, false));
         }
 
+        /// <summary>
+        /// Case: If 'RequiresConsent' is set in the configuration and individual consents are given and removed to multiple features after initialization. 
+        /// Result: 'ConsentChanged' should call with a modified consents list on listeners.
+        /// </summary>
         [Test]
         public void TestListenerOnConsentChanged()
         {
@@ -377,6 +435,10 @@ namespace Tests
             Assert.IsTrue(listener.Validate(3, new Consents[] { Consents.Events }, false));
         }
 
+        /// <summary>
+        /// Case: If 'RequiresConsent' is set in the configuration and consents are given and removed to multiple groups after initialization. 
+        /// Result: 'ConsentChanged' should call with a modified consents list on listeners.
+        /// </summary>
         [Test]
         public void TestListenerOnConsentGroups()
         {
@@ -414,6 +476,15 @@ namespace Tests
             Assert.IsTrue(listener.Validate(3, new Consents[] { Consents.Clicks }, true));
         }
 
+        /// <summary>
+        /// Case:
+        /// step 1: If 'RequiresConsent' is set in the configuration, consents are given to an individual group 'GroupA' after initialization. 
+        /// Result: 'ConsentChanged' should call with a modified consents list containing consents of 'GroupA' on listeners.
+        /// step 2: Remove consents of all features. 
+        /// Result: 'ConsentChanged' should call with a modified consents list containing consents of 'GroupA' on listeners.
+        /// step 2: Give consents to all features. 
+        /// Result: 'ConsentChanged' should call with a modified consents list containing all consents on listeners.
+        /// </summary>
         [Test]
         public void TestListenerOnAllConsentRemovalAndGiven()
         {
