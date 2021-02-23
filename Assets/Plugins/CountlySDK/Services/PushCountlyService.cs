@@ -13,16 +13,14 @@ namespace Plugins.CountlySDK.Services
         private string _token;
         private TestMode? _mode;
         private bool _isDeviceRegistered;
-        private readonly CountlyConfiguration _configuration;
         private readonly RequestCountlyHelper _requestCountlyHelper;
         private readonly INotificationsService _notificationsService;
         private readonly NotificationsCallbackService _notificationsCallbackService;
 
-        internal PushCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, RequestCountlyHelper requestCountlyHelper, INotificationsService notificationsService, NotificationsCallbackService notificationsCallbackService, ConsentCountlyService consentService) : base(logHelper, consentService)
+        internal PushCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, RequestCountlyHelper requestCountlyHelper, INotificationsService notificationsService, NotificationsCallbackService notificationsCallbackService, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
         {
             Log.Debug("[PushCountlyService] Initializing.");
 
-            _configuration = configuration;
             _requestCountlyHelper = requestCountlyHelper;
             _notificationsService = notificationsService;
             _notificationsCallbackService = notificationsCallbackService;

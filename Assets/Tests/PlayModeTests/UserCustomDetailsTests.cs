@@ -16,6 +16,9 @@ namespace Tests
         private readonly string _appKey = "772c091355076ead703f987fee94490";
 
 
+        /// <summary>
+        /// It validates user's custome property set via 'SetOnce'.
+        /// </summary>
         [Test]
         public void TestUserCustomeDetailModel()
         {

@@ -341,10 +341,10 @@ namespace Plugins.CountlySDK
 
             if (pauseStatus) {
                 HandleAppPauseOrFocus();
-                await Session?.ExecuteEndSessionAsync();
+                await Session?.EndSessionAsync();
             } else {
                 SubscribeAppLog();
-                await Session?.ExecuteBeginSessionAsync();
+                await Session?.BeginSessionAsync();
 
             }
         }

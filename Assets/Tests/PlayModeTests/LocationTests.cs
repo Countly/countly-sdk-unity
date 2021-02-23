@@ -15,6 +15,9 @@ namespace Tests
         private readonly string _serverUrl = "https://xyz.com/";
         private readonly string _appKey = "772c091355076ead703f987fee94490";
 
+        /// <summary>
+        /// It matches the user's location values set during configuration with location service values and, it also validates location default values after the location gets disable.
+        /// </summary>
         [Test]
         public void TestLocationValuesSetDuringInit()
         {

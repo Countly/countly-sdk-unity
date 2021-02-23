@@ -10,18 +10,16 @@ namespace Plugins.CountlySDK.Services
     public class DeviceIdCountlyService : AbstractBaseService
     {
         private readonly CountlyUtils _countlyUtils;
-        private readonly CountlyConfiguration _configuration;
         private readonly EventCountlyService _eventCountlyService;
         private readonly RequestCountlyHelper _requestCountlyHelper;
         private readonly SessionCountlyService _sessionCountlyService;
 
         internal DeviceIdCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, SessionCountlyService sessionCountlyService,
-            RequestCountlyHelper requestCountlyHelper, EventCountlyService eventCountlyService, CountlyUtils countlyUtils, ConsentCountlyService consentService) : base(logHelper, consentService)
+            RequestCountlyHelper requestCountlyHelper, EventCountlyService eventCountlyService, CountlyUtils countlyUtils, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
         {
             Log.Debug("[DeviceIdCountlyService] Initializing.");
 
             _countlyUtils = countlyUtils;
-            _configuration = configuration;
             _eventCountlyService = eventCountlyService;
             _requestCountlyHelper = requestCountlyHelper;
             _sessionCountlyService = sessionCountlyService;
@@ -88,14 +86,14 @@ namespace Plugins.CountlySDK.Services
 
             //Ends current session
             //Do not dispose timer object
-            await _sessionCountlyService.ExecuteEndSessionAsync(false);
+            await _sessionCountlyService.EndSessionAsync(false);
 
             //Update device id
             UpdateDeviceId(deviceId);
 
             //Begin new session with new device id
             //Do not initiate timer again, it is already initiated
-            await _sessionCountlyService.ExecuteBeginSessionAsync();
+            await _sessionCountlyService.BeginSessionAsync();
             NotifyListeners(false);
         }
 

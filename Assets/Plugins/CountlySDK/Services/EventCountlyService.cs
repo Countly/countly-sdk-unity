@@ -13,17 +13,15 @@ namespace Plugins.CountlySDK.Services
     public class EventCountlyService : AbstractBaseService
     {
         private readonly ViewEventRepository _viewEventRepo;
-        private readonly CountlyConfiguration _configuration;
         private readonly NonViewEventRepository _nonViewEventRepo;
         private readonly RequestCountlyHelper _requestCountlyHelper;
 
         internal EventCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, RequestCountlyHelper requestCountlyHelper,
-            ViewEventRepository viewEventRepo, NonViewEventRepository nonViewEventRepo, ConsentCountlyService consentService) : base(logHelper, consentService)
+            ViewEventRepository viewEventRepo, NonViewEventRepository nonViewEventRepo, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
         {
             Log.Debug("[EventCountlyService] Initializing.");
 
             _viewEventRepo = viewEventRepo;
-            _configuration = configuration;
             _nonViewEventRepo = nonViewEventRepo;
             _requestCountlyHelper = requestCountlyHelper;
         }
