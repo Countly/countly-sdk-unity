@@ -86,14 +86,14 @@ namespace Plugins.CountlySDK.Services
 
             //Ends current session
             //Do not dispose timer object
-            await _sessionCountlyService.ExecuteEndSessionAsync(false);
+            await _sessionCountlyService.EndSessionAsync(false);
 
             //Update device id
             UpdateDeviceId(deviceId);
 
             //Begin new session with new device id
             //Do not initiate timer again, it is already initiated
-            await _sessionCountlyService.ExecuteBeginSessionAsync();
+            await _sessionCountlyService.BeginSessionAsync();
             NotifyListeners(false);
         }
 
