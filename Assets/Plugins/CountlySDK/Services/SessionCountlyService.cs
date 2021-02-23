@@ -18,7 +18,7 @@ namespace Plugins.CountlySDK.Services
         /// Check if session has been initiated.
         /// </summary>
         /// <returns>bool</returns>
-        public bool IsSessionInitiated { get; private set; }
+        internal bool IsSessionInitiated { get; private set; }
 
         private readonly LocationService _locationService;
         private readonly EventCountlyService _eventService;
@@ -77,9 +77,9 @@ namespace Plugins.CountlySDK.Services
         /// <summary>
         /// Initiates a session
         /// </summary>
-        public async Task ExecuteBeginSessionAsync()
+        internal async Task ExecuteBeginSessionAsync()
         {
-            Log.Info("[SessionCountlyService] ExecuteBeginSessionAsync");
+            Log.Debug("[SessionCountlyService] ExecuteBeginSessionAsync");
 
             if (!_consentService.CheckConsentInternal(Consents.Sessions)) {
                 return;
@@ -138,9 +138,9 @@ namespace Plugins.CountlySDK.Services
         /// Ends a session
         /// </summary>
         /// <param name="disposeTimer">Set true to stop extend the session after session ends.</param>
-        public async Task ExecuteEndSessionAsync(bool disposeTimer = true)
+        internal async Task ExecuteEndSessionAsync(bool disposeTimer = true)
         {
-            Log.Info("[SessionCountlyService] ExecuteEndSessionAsync");
+            Log.Debug("[SessionCountlyService] ExecuteEndSessionAsync");
 
             if (!_consentService.CheckConsentInternal(Consents.Sessions)) {
                 return;
@@ -174,9 +174,9 @@ namespace Plugins.CountlySDK.Services
         /// <summary>
         /// Initiates a session
         /// </summary>
-        public async Task BeginSessionAsync()
+        internal async Task BeginSessionAsync()
         {
-            Log.Info("[SessionCountlyService] BeginSessionAsync");
+            Log.Debug("[SessionCountlyService] BeginSessionAsync");
 
             await ExecuteBeginSessionAsync();
         }
@@ -184,9 +184,9 @@ namespace Plugins.CountlySDK.Services
         /// <summary>
         /// Ends a session
         /// </summary>
-        public async Task EndSessionAsync()
+        internal async Task EndSessionAsync()
         {
-            Log.Info("[SessionCountlyService] ExtendSessionAsync");
+            Log.Debug("[SessionCountlyService] ExtendSessionAsync");
 
             if (!_consentService.CheckConsentInternal(Consents.Sessions)) {
                 return;
@@ -198,9 +198,9 @@ namespace Plugins.CountlySDK.Services
         /// <summary>
         /// Extends a session by another session duration provided in configuration. By default session duration is 60 seconds.
         /// </summary>
-        public async Task ExtendSessionAsync()
+        internal async Task ExtendSessionAsync()
         {
-            Log.Info("[SessionCountlyService] ExtendSessionAsync");
+            Log.Debug("[SessionCountlyService] ExtendSessionAsync");
 
             if (!_consentService.CheckConsentInternal(Consents.Sessions)) {
                 return;
