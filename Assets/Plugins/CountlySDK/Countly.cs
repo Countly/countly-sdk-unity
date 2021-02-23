@@ -156,7 +156,7 @@ namespace Plugins.CountlySDK
         public void Init(CountlyConfiguration configuration)
         {
             if (IsSDKInitialized) {
-                _logHelper.Error("SDK has already been initialized!");
+                _logHelper.Error("SDK has already been initialised, 'Init' should not be called a second time!");
                 return;
             }
 
@@ -297,7 +297,7 @@ namespace Plugins.CountlySDK
         internal void ClearStorage()
         {
             if (!IsSDKInitialized) {
-                _logHelper.Error("SDK must be initialised before calling ClearStorage");
+                _logHelper.Error("SDK must be initialised before calling [ClearStorage]");
                 return;
             }
             _logHelper.Debug("[Countly] ClearStorage");
