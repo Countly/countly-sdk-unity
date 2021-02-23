@@ -80,7 +80,10 @@ namespace Plugins.CountlySDK.Helpers
             RequestDao = new Dao<RequestEntity>(auto, EntityType.Requests.ToString(), _logHelper);
             ViewEventDao = new Dao<EventEntity>(auto, EntityType.ViewEvents.ToString(), _logHelper);
             NonViewEventDao = new Dao<EventEntity>(auto, EntityType.NonViewEvents.ToString(), _logHelper);
-            EventNrInSameSessionDao = new Dao<EventNumberInSameSessionEntity>(auto, EntityType.EventNumberInSameSessions.ToString(), _logHelper);
+
+            if (_currentVersion < _schemaVersion) {
+                EventNrInSameSessionDao = new Dao<EventNumberInSameSessionEntity>(auto, EntityType.EventNumberInSameSessions.ToString(), _logHelper);
+            }
 
         }
 
