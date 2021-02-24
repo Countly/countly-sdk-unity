@@ -56,7 +56,7 @@ namespace Plugins.CountlySDK.Helpers
             db.GetConfig().EnsureTable<SegmentEntity>(EntityType.ViewEventSegments.ToString(), "Id");
             db.GetConfig().EnsureTable<SegmentEntity>(EntityType.NonViewEventSegments.ToString(), "Id");
 
-            if (_currentVersion < _schemaVersion) {
+            if (_currentVersion == 0) {
                 db.GetConfig().EnsureTable<EventNumberInSameSessionEntity>(EntityType.EventNumberInSameSessions.ToString(), "Id");
             }
 
@@ -81,7 +81,7 @@ namespace Plugins.CountlySDK.Helpers
             ViewEventDao = new Dao<EventEntity>(auto, EntityType.ViewEvents.ToString(), _logHelper);
             NonViewEventDao = new Dao<EventEntity>(auto, EntityType.NonViewEvents.ToString(), _logHelper);
 
-            if (_currentVersion < _schemaVersion) {
+            if (_currentVersion == 0) {
                 EventNrInSameSessionDao = new Dao<EventNumberInSameSessionEntity>(auto, EntityType.EventNumberInSameSessions.ToString(), _logHelper);
             }
 
