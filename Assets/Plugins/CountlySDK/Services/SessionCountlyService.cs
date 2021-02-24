@@ -87,7 +87,6 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
 
-            FirstLaunchAppHelper.Process();
             _lastSessionRequestTime = DateTime.Now;
             //Session initiated
             IsSessionInitiated = true;

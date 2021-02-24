@@ -35,6 +35,7 @@ namespace Plugins.CountlySDK.Helpers
         public const string DeviceIDKey = "DeviceID";
 
 
+        public const string SchemaVersion = "Countly.SchemaVersion";
         public const string FirstAppLaunch = "Countly.FirstAppLaunch";
         public const string FirstAppLaunchSegment = "firstAppLaunch";
 
