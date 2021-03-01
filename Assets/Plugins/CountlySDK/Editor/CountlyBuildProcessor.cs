@@ -1,6 +1,6 @@
 ﻿#if ENABLE_VSTU
 
-#if !UNITY_ANDROID
+#if UNITY_ANDROID
 using System.IO;
 using UnityEngine;
 #endif
