@@ -1,18 +1,23 @@
 ﻿#if ENABLE_VSTU
-using UnityEditor.Build;
-using UnityEditor.Build.Reporting;
 
-#if UNITY_ANDROID
+#if !UNITY_ANDROID
 using System.IO;
 using UnityEngine;
 #endif
 
+#if UNITY_2017
+using UnityEditor;
+using UnityEditor.Build;
+#else
+using UnityEditor.Build.Reporting;
+#endif
+
 namespace Plugins.CountlySDK.Editor
 {
-    public class CountlyBuildProcessor : IPreprocessBuildWithReport
-    {
-        public int callbackOrder { get { return 0; } }
-        public void OnPreprocessBuild(BuildReport report)
+
+    public abstract class AbstractProcessBuild {
+
+        public virtual void CheckIfJarFileExist()
         {
 #if UNITY_ANDROID
             string directoryPath = "/Plugins/Android/Notifications/";
@@ -25,5 +30,27 @@ namespace Plugins.CountlySDK.Editor
 #endif
         }
     }
+
+#if UNITY_2017
+    public class CountlyBuildProcessor : AbstractProcessBuild, IPreprocessBuild
+    {
+        public int callbackOrder { get { return 0; } }
+        public void OnPreprocessBuild(BuildTarget target, string path)
+        {
+            CheckIfJarFileExist();
+        }
+    }
+#else
+  public class CountlyBuildProcessor : AbstractProcessBuild, IPreprocessBuildWithReport
+    {
+        public int callbackOrder { get { return 0; } }
+        public void OnPreprocessBuild(BuildReport report)
+        {
+            CheckIfJarFileExist();
+        }
+    }
+#endif
+
+
 }
 #endif
