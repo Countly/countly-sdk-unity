@@ -5,12 +5,11 @@ using System.IO;
 using UnityEngine;
 #endif
 
-#if UNITY_2017
-using UnityEditor;
-using UnityEditor.Build;
-#else
+#if !UNITY_2017
 using UnityEditor.Build.Reporting;
 #endif
+using UnityEditor;
+using UnityEditor.Build;
 
 namespace Plugins.CountlySDK.Editor
 {
