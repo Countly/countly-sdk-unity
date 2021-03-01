@@ -14,7 +14,7 @@ using UnityEditor.Build;
 namespace Plugins.CountlySDK.Editor
 {
 
-    public abstract class AbstractProcessBuild {
+    internal abstract class AbstractProcessBuild {
 
         public virtual void CheckIfJarFileExist()
         {
@@ -31,7 +31,7 @@ namespace Plugins.CountlySDK.Editor
     }
 
 #if UNITY_2017
-    public class CountlyBuildProcessor : AbstractProcessBuild, IPreprocessBuild
+    internal class CountlyBuildProcessor : AbstractProcessBuild, IPreprocessBuild
     {
         public int callbackOrder { get { return 0; } }
         public void OnPreprocessBuild(BuildTarget target, string path)
@@ -40,7 +40,7 @@ namespace Plugins.CountlySDK.Editor
         }
     }
 #else
-  public class CountlyBuildProcessor : AbstractProcessBuild, IPreprocessBuildWithReport
+  internal class CountlyBuildProcessor : AbstractProcessBuild, IPreprocessBuildWithReport
     {
         public int callbackOrder { get { return 0; } }
         public void OnPreprocessBuild(BuildReport report)
