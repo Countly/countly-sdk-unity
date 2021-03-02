@@ -14,10 +14,19 @@ using UnityEditor.Build;
 namespace Plugins.CountlySDK.Editor
 {
 
-    internal abstract class AbstractProcessBuild {
-
-        public virtual void CheckIfJarFileExist()
+#if UNITY_2017
+    internal class CountlyBuildProcessor : IPreprocessBuild
+    {
+        
+        public void OnPreprocessBuild(BuildTarget target, string path)
         {
+#else
+    internal class CountlyBuildProcessor : IPreprocessBuildWithReport
+    {
+        public void OnPreprocessBuild(BuildReport report)
+        {
+#endif
+
 #if UNITY_ANDROID
             string directoryPath = "/Plugins/Android/Notifications/";
             string filePath = "/Plugins/Android/Notifications/libs/countly_notifications.jar";
@@ -28,27 +37,8 @@ namespace Plugins.CountlySDK.Editor
             }
 #endif
         }
-    }
-
-#if UNITY_2017
-    internal class CountlyBuildProcessor : AbstractProcessBuild, IPreprocessBuild
-    {
         public int callbackOrder { get { return 0; } }
-        public void OnPreprocessBuild(BuildTarget target, string path)
-        {
-            CheckIfJarFileExist();
-        }
     }
-#else
-  internal class CountlyBuildProcessor : AbstractProcessBuild, IPreprocessBuildWithReport
-    {
-        public int callbackOrder { get { return 0; } }
-        public void OnPreprocessBuild(BuildReport report)
-        {
-            CheckIfJarFileExist();
-        }
-    }
-#endif
 
 
 }
