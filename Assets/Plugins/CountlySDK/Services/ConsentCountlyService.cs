@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Plugins.CountlySDK.Enums;
 using Plugins.CountlySDK.Models;
-using UnityEditor;
-using UnityEngine;
 
 namespace Plugins.CountlySDK.Services
 {
