@@ -190,29 +190,29 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
 
     public async void EventWithSum()
     {
-        await countly.Events.RecordEventAsync("Event With Sum", segmentation: null, sum: 23);
+        await countly.Events.ReportCustomEventAsync("Event With Sum", sum: 23);
     }
 
     public async void EventWithSegmentation()
     {
 
-        SegmentModel segment = new SegmentModel(new Dictionary<string, object>
+        Dictionary<string, object> segment = new Dictionary<string, object>
         {
             { "Time Spent", "60"},
             { "Retry Attempts", "10"}
-        });
+        };
 
-        await countly.Events.RecordEventAsync("Event With Segmentation", segmentation: segment);
+        await countly.Events.ReportCustomEventAsync("Event With Segmentation", segmentation: segment);
     }
 
     public async void EventWithSumAndSegmentation()
     {
-        SegmentModel segments = new SegmentModel(new Dictionary<string, object>{
+        Dictionary<string, object> segments = new Dictionary<string, object>{
             { "Time Spent", "1234455"},
             { "Retry Attempts", "10"}
-        });
+        };
 
-        await countly.Events.RecordEventAsync("Event With Sum And Segmentation", segmentation: segments, sum: 23);
+        await countly.Events.ReportCustomEventAsync("Event With Sum And Segmentation", segmentation: segments, sum: 23);
 
     }
 
@@ -226,7 +226,7 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
         long currentMillis = DateTime.UtcNow.Millisecond; // invalid data type
         DateTime date = DateTime.UtcNow; // invalid data type
 
-        SegmentModel segment = new SegmentModel(new Dictionary<string, object>
+        Dictionary<string, object> segment = new Dictionary<string, object>
         {
             { "name", name},
             { "moles", moles},
@@ -235,9 +235,9 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
             { "total amount", totalAmount},
             { "dob", date},
             { "Current Millis", currentMillis},
-        });
+        };
 
-        await countly.Events.RecordEventAsync("Event With Invalid Segmentation", segmentation: segment);
+        await countly.Events.ReportCustomEventAsync("Event With Invalid Segmentation", segmentation: segment);
     }
 
     public async void ReportViewMainScene()
