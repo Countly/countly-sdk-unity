@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -112,6 +113,7 @@ namespace Plugins.CountlySDK.Services
         /// <param name="sum">set sum if needed, default value is "0"</param>
         /// <param name="duration">set sum if needed, default value is "0"</param>
         /// <returns></returns>
+        [Obsolete("RecordEventAsync is deprecated, please use ReportCustomEventAsync method instead.")]
         public async Task RecordEventAsync(string key, SegmentModel segmentation,
             int? count = 1, double? sum = 0, double? duration = null)
         {
@@ -165,7 +167,7 @@ namespace Plugins.CountlySDK.Services
             if (events == null || events.Count == 0) {
                 return;
             }
-            
+
             Dictionary<string, object> requestParams =
                 new Dictionary<string, object>
                 {
@@ -188,8 +190,8 @@ namespace Plugins.CountlySDK.Services
         /// <param name="duration">set sum if needed, default value is "0"</param>
         /// <returns></returns>
         public async Task ReportCustomEventAsync(string key,
-            IDictionary<string, object> segmentation = null,
-            int? count = 1, double? sum = null, double? duration = null)
+                    IDictionary<string, object> segmentation = null,
+                    int? count = 1, double? sum = null, double? duration = null)
         {
             Log.Info("[EventCountlyService] ReportCustomEventAsync : key = " + key + ", segmentation = " + (segmentation != null) + ", count = " + count + ", sum = " + sum + ", duration = " + duration);
 
