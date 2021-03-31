@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Annotations;
+using Notifications;
 using Plugins.CountlySDK.Enums;
 using UnityEngine;
 
@@ -105,8 +106,9 @@ namespace Plugins.CountlySDK.Models
         public bool RequiresConsent = false;
 
         internal Consents[] GivenConsent { get; private set; }
-        internal Dictionary<string, Consents[]> ConsentGroups { get; private set; }
         internal string[] EnabledConsentGroups { get; private set; }
+        internal List<INotificationListener> NotificationEventListeners;
+        internal Dictionary<string, Consents[]> ConsentGroups { get; private set; }
 
         /// <summary>
         ///     Parent must be undestroyable
@@ -116,6 +118,7 @@ namespace Plugins.CountlySDK.Models
         public CountlyConfiguration()
         {
             ConsentGroups = new Dictionary<string, Consents[]>();
+            NotificationEventListeners = new List<INotificationListener>();
         }
 
         internal CountlyConfiguration(CountlyAuthModel authModel, CountlyConfigModel config)
@@ -198,6 +201,15 @@ namespace Plugins.CountlySDK.Models
         public void GiveConsentToGroup([NotNull] string[] groupName)
         {
             EnabledConsentGroups = groupName;
+        }
+
+        /// <summary>
+        /// Add Notification listener.
+        /// </summary>
+        /// <param name="listener"></param>
+        public void AddListener(INotificationListener listener)
+        {
+            NotificationEventListeners.Add(listener);
         }
     }
 }
