@@ -207,7 +207,7 @@ namespace Plugins.CountlySDK.Models
         /// Add Notification listener.
         /// </summary>
         /// <param name="listener"></param>
-        public void AddListener(INotificationListener listener)
+        public void AddNotificationListener(INotificationListener listener)
         {
             NotificationEventListeners.Add(listener);
         }
