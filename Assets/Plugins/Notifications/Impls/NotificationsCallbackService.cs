@@ -35,6 +35,10 @@ namespace Notifications
         /// <param name="listener"></param>
         public void RemoveListener(INotificationListener listener)
         {
+            if (!_listeners.Contains(listener)) {
+                return;
+            }
+
             _listeners.Remove(listener);
             Log.Debug("[NotificationsCallbackService] RemoveListener: " + listener);
 
