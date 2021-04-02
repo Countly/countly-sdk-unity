@@ -6,12 +6,14 @@ using UnityEngine;
 
 namespace Notifications
 {
-    public class NotificationsCallbackService : AbstractBaseService
+    public class NotificationsCallbackService
     {
+        CountlyLogHelper _logHelper;
         private readonly List<INotificationListener> _listeners;
-        internal NotificationsCallbackService(CountlyConfiguration configuration, CountlyLogHelper logHelper, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
+        internal NotificationsCallbackService(CountlyConfiguration configuration, CountlyLogHelper logHelper)
         {
-            Log.Debug("[NotificationsCallbackService] Initializing.");
+            _logHelper = logHelper;
+            _logHelper.Debug("[NotificationsCallbackService] Initializing.");
             _listeners = configuration.NotificationEventListeners.Distinct().ToList();
         }
 
@@ -27,7 +29,7 @@ namespace Notifications
 
             _listeners.Add(listener);
 
-            Log.Debug("[NotificationsCallbackService] AddListener: " + listener);
+            _logHelper.Debug("[NotificationsCallbackService] AddListener: " + listener);
         }
         /// <summary>
         /// Remove Notification listener.
@@ -40,7 +42,7 @@ namespace Notifications
             }
 
             _listeners.Remove(listener);
-            Log.Debug("[NotificationsCallbackService] RemoveListener: " + listener);
+            _logHelper.Debug("[NotificationsCallbackService] RemoveListener: " + listener);
 
         }
 
@@ -56,7 +58,7 @@ namespace Notifications
                 }
             }
 
-            Log.Debug("[NotificationsCallbackService] SendMessageToListeners: " + data);
+            _logHelper.Debug("[NotificationsCallbackService] SendMessageToListeners: " + data);
 
         }
 
@@ -73,7 +75,7 @@ namespace Notifications
                 }
             }
 
-            Log.Debug("[NotificationsCallbackService] SendMessageToListeners: " + data);
+            _logHelper.Debug("[NotificationsCallbackService] SendMessageToListeners: " + data);
         }
     }
 
