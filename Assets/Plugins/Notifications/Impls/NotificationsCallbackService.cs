@@ -1,16 +1,20 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
+using Plugins.CountlySDK.Models;
+using Plugins.CountlySDK.Services;
 using UnityEngine;
 
 namespace Notifications
 {
     public class NotificationsCallbackService
     {
-        private readonly CountlyLogHelper _logHelper;
+        CountlyLogHelper _logHelper;
         private readonly List<INotificationListener> _listeners;
-        internal NotificationsCallbackService(CountlyLogHelper logHelper)
+        internal NotificationsCallbackService(CountlyConfiguration configuration, CountlyLogHelper logHelper)
         {
             _logHelper = logHelper;
-            _listeners = new List<INotificationListener>();
+            _logHelper.Debug("[NotificationsCallbackService] Initializing.");
+            _listeners = configuration.NotificationEventListeners.Distinct().ToList();
         }
 
         /// <summary>
@@ -33,6 +37,10 @@ namespace Notifications
         /// <param name="listener"></param>
         public void RemoveListener(INotificationListener listener)
         {
+            if (!_listeners.Contains(listener)) {
+                return;
+            }
+
             _listeners.Remove(listener);
             _logHelper.Debug("[NotificationsCallbackService] RemoveListener: " + listener);
 

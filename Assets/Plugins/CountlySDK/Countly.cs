@@ -219,7 +219,7 @@ namespace Plugins.CountlySDK
 
             Location = new Services.LocationService(Configuration, _logHelper, requests, Consents);
             OptionalParameters = new OptionalParametersCountlyService(Location, Configuration, _logHelper, Consents);
-            Notifications = new NotificationsCallbackService(_logHelper);
+            Notifications = new NotificationsCallbackService(Configuration, _logHelper);
             ProxyNotificationsService notificationsService = new ProxyNotificationsService(transform, Configuration, _logHelper, InternalStartCoroutine, Events);
             _push = new PushCountlyService(Configuration, _logHelper, requests, notificationsService, Notifications, Consents);
             Session = new SessionCountlyService(Configuration, _logHelper, Events, requests, Location, Consents);

@@ -32,19 +32,15 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
 
         configuration.SetLocation(countryCode, city, latitude + "," + longitude, ipAddress);
         configuration.GiveConsent(new Consents[] { Consents.Crashes, Consents.Events, Consents.Clicks, Consents.StarRating, Consents.Views, Consents.Users, Consents.Sessions, Consents.Push, Consents.RemoteConfig, Consents.Location });
+        configuration.AddNotificationListener(this);
 
         Countly.Instance.Init(configuration);
         countly = Countly.Instance;
     }
 
-    private void Start()
+    private void OnDisable()
     {
-        countly.Notifications.AddListener(this);
-    }
-
-    private void Stop()
-    {
-        countly.Notifications.RemoveListener(this);
+        Countly.Instance.Notifications.RemoveListener(this);
     }
 
     public void TestWithMultipleThreads()
