@@ -3,6 +3,7 @@ using Plugins.CountlySDK.Helpers;
 using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK.Services;
 using System;
+using System.IO;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -34,9 +35,13 @@ namespace Notifications.Impls.Android
             _bridge = gameObject.AddComponent<AndroidBridge>();
             _bridge.Log = Log;
 
-            AndroidJavaClass countlyPushPlugin = new AndroidJavaClass(CountlyPushPluginPackageName);
-            countlyPushPlugin.CallStatic("setEnableLog", config.EnableConsoleLogging);
-
+            try {
+                AndroidJavaClass countlyPushPlugin = new AndroidJavaClass(CountlyPushPluginPackageName);
+                countlyPushPlugin.CallStatic("setEnableLog", config.EnableConsoleLogging);
+            } catch (Exception ex) {
+                Log.Error("[AndroidNotificationsService] Exception: " + ex.Message);
+                throw new FileNotFoundException(ex.Message);
+            }
         }
 
         public void GetToken(Action<string> result)
