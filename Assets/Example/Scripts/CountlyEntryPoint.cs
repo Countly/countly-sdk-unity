@@ -38,7 +38,7 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
         countly = Countly.Instance;
     }
 
-    private void OnDisable()
+    private void OnDetroy()
     {
         Countly.Instance.Notifications.RemoveListener(this);
     }
