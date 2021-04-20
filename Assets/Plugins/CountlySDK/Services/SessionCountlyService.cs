@@ -134,7 +134,6 @@ namespace Plugins.CountlySDK.Services
         /// <summary>
         /// Ends a session
         /// </summary>
-        /// <param name="disposeTimer">Set true to stop extend the session after session ends.</param>
         internal async Task EndSessionAsync()
         {
             Log.Debug("[SessionCountlyService] EndSessionAsync");
