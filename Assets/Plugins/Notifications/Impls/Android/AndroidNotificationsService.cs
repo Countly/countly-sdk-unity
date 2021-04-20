@@ -39,7 +39,7 @@ namespace Notifications.Impls.Android
                 AndroidJavaClass countlyPushPlugin = new AndroidJavaClass(CountlyPushPluginPackageName);
                 countlyPushPlugin.CallStatic("setEnableLog", config.EnableConsoleLogging);
             } catch (Exception ex) {
-                Log.Error("[AndroidNotificationsService] Exception: " + ex.Message);
+                Log.Error("[AndroidNotificationsService] Exception in initializing service: " + ex.Message);
                 throw new FileNotFoundException(ex.Message);
             }
         }
