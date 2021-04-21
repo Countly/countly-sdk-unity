@@ -20,7 +20,7 @@ namespace Tests
         /// It validates user's custome property set via 'SetOnce'.
         /// </summary>
         [Test]
-        public void TestUserCustomeDetailModel()
+        public void TestUserCustomeProperty_SetOnce()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 ServerUrl = _serverUrl,
@@ -32,9 +32,127 @@ namespace Tests
             Assert.AreNotEqual(Countly.Instance.UserDetails, null);
 
             Countly.Instance.UserDetails.SetOnce("Distance", "10KM");
-            Assert.AreEqual(Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Distance"), true);
+            Assert.AreEqual(true, Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Distance"));
             Dictionary<string, object> dic = Countly.Instance.UserDetails.CustomDataProperties["Distance"] as Dictionary<string, object>;
-            Assert.AreEqual(dic["$setOnce"], "10KM");
+            Assert.AreEqual("10KM", dic["$setOnce"]);
+        }
+
+        /// <summary>
+        /// It validates user's custome property set via 'IncrementBy'.
+        /// </summary>
+        [Test]
+        public void TestUserCustomeProperty_IncrementBy()
+        {
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                ServerUrl = _serverUrl,
+                AppKey = _appKey,
+            };
+
+            Countly.Instance.Init(configuration);
+
+            Assert.AreNotEqual(Countly.Instance.UserDetails, null);
+
+            Countly.Instance.UserDetails.IncrementBy("Distance", 5);
+            Assert.AreEqual(true, Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Distance"));
+            Dictionary<string, object> dic = Countly.Instance.UserDetails.CustomDataProperties["Distance"] as Dictionary<string, object>;
+            Assert.AreEqual(5, dic["$inc"]);
+        }
+
+        /// <summary>
+        /// It validates user's custome property set via 'Pull'.
+        /// </summary>
+        [Test]
+        public void TestUserCustomeProperty_Pull()
+        {
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                ServerUrl = _serverUrl,
+                AppKey = _appKey,
+            };
+
+            Countly.Instance.Init(configuration);
+
+            Assert.AreNotEqual(Countly.Instance.UserDetails, null);
+
+            Countly.Instance.UserDetails.Pull("Distance", new string[] { "5"});
+            Assert.AreEqual(true, Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Distance"));
+            Dictionary<string, object> dic = Countly.Instance.UserDetails.CustomDataProperties["Distance"] as Dictionary<string, object>;
+            Assert.AreEqual(new string[] { "5" }, dic["$pull"]);
+        }
+
+        /// <summary>
+        /// It validates user's custome property set via 'PushUnique'.
+        /// </summary>
+        [Test]
+        public void TestUserCustomeProperty_PushUnique()
+        {
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                ServerUrl = _serverUrl,
+                AppKey = _appKey,
+            };
+
+            Countly.Instance.Init(configuration);
+
+            Assert.AreNotEqual(Countly.Instance.UserDetails, null);
+
+            Countly.Instance.UserDetails.PushUnique("Age", new string[] { "29" });
+            Assert.AreEqual(true, Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Age"));
+            Dictionary<string, object> dic = Countly.Instance.UserDetails.CustomDataProperties["Age"] as Dictionary<string, object>;
+            Assert.AreEqual(new string[] { "29" }, dic["$addToSet"]);
+        }
+
+        /// <summary>
+        /// It validates user's custome property set via 'Min'.
+        /// </summary>
+        [Test]
+        public void TestUserCustomeProperty_Min()
+        {
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                ServerUrl = _serverUrl,
+                AppKey = _appKey,
+            };
+
+            Countly.Instance.Init(configuration);
+
+            Assert.AreNotEqual(Countly.Instance.UserDetails, null);
+
+            Countly.Instance.UserDetails.Min("Distance", 10.0);
+            Assert.AreEqual(true, Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Distance"));
+            Dictionary<string, object> dic = Countly.Instance.UserDetails.CustomDataProperties["Distance"] as Dictionary<string, object>;
+            Assert.AreEqual(10.0, dic["$min"]);
+        }
+
+        /// <summary>
+        /// It validates user's custome properties befor and after calling SaveAsync'.
+        /// </summary>
+        [Test]
+        public async void TestUserDetailService_SaveAsync()
+        {
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                ServerUrl = _serverUrl,
+                AppKey = _appKey,
+            };
+
+            Countly.Instance.Init(configuration);
+
+            Assert.AreNotEqual(Countly.Instance.UserDetails, null);
+
+            Countly.Instance.UserDetails.Multiply("Distance", 2);
+            Assert.AreEqual(true, Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Distance"));
+            Dictionary<string, object> dic = Countly.Instance.UserDetails.CustomDataProperties["Distance"] as Dictionary<string, object>;
+            Assert.AreEqual(2, dic["$mul"]);
+
+            Countly.Instance.UserDetails.Push("Age", new string[] { "29" });
+            Assert.AreEqual(true, Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Age"));
+            Dictionary<string, object> dic2 = Countly.Instance.UserDetails.CustomDataProperties["Age"] as Dictionary<string, object>;
+            Assert.AreEqual(new string[] { "29" }, dic2["$push"]);
+
+            await Countly.Instance.UserDetails.SaveAsync();
+
+            Assert.AreEqual(false, Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Age"));
+            Assert.AreEqual(false, Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Distance"));
+            Assert.AreEqual(0, Countly.Instance.UserDetails.CustomDataProperties.Count);
+
+
         }
 
         [TearDown]
