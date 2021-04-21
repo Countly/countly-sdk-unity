@@ -41,7 +41,7 @@ namespace Tests
         }
 
         /// <summary>
-        /// It validates limit the lenght of bread crumbs.
+        /// It validates the limit on bread crumbs lenght (limit = 1000).
         /// </summary>
         [Test]
         public void TestCrashBreadCrumbsLenght()
@@ -62,6 +62,42 @@ namespace Tests
 
             Assert.AreEqual(1, Countly.Instance.CrashReports._crashBreadcrumbs.Count);
            Assert.AreEqual(1000, Countly.Instance.CrashReports._crashBreadcrumbs.Dequeue().Length);
+
+        }
+
+        /// <summary>
+        /// It validates the limit of total allowed bread crumbs.
+        /// </summary>
+        [Test]
+        public void TestLimitOfAllowedBreadCrumbs()
+        {
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                ServerUrl = _serverUrl,
+                AppKey = _appKey,
+                TotalBreadcrumbsAllowed = 5
+            };
+
+            Countly.Instance.Init(configuration);
+
+            Assert.AreNotEqual(null, Countly.Instance.CrashReports);
+
+            Assert.AreEqual(0, Countly.Instance.CrashReports._crashBreadcrumbs.Count);
+
+            Countly.Instance.CrashReports.AddBreadcrumbs("bread_crumbs_1");
+            Countly.Instance.CrashReports.AddBreadcrumbs("bread_crumbs_2");
+            Countly.Instance.CrashReports.AddBreadcrumbs("bread_crumbs_3");
+            Assert.AreEqual(3, Countly.Instance.CrashReports._crashBreadcrumbs.Count);
+
+
+            Countly.Instance.CrashReports.AddBreadcrumbs("bread_crumbs_4");
+            Countly.Instance.CrashReports.AddBreadcrumbs("bread_crumbs_5");
+            Countly.Instance.CrashReports.AddBreadcrumbs("bread_crumbs_6");
+            Assert.AreEqual(5, Countly.Instance.CrashReports._crashBreadcrumbs.Count);
+
+            Countly.Instance.CrashReports.AddBreadcrumbs("bread_crumbs_7");
+            Countly.Instance.CrashReports.AddBreadcrumbs("bread_crumbs_8");
+            Countly.Instance.CrashReports.AddBreadcrumbs("bread_crumbs_9");
+            Assert.AreEqual(5, Countly.Instance.CrashReports._crashBreadcrumbs.Count);
 
         }
 
