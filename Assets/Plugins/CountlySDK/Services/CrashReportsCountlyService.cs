@@ -12,7 +12,7 @@ namespace Plugins.CountlySDK.Services
     public class CrashReportsCountlyService : AbstractBaseService
     {
         internal bool IsApplicationInBackground { get; set; }
-        private readonly Queue<string> _crashBreadcrumbs = new Queue<string>();
+        internal readonly Queue<string> _crashBreadcrumbs = new Queue<string>();
 
         private readonly RequestCountlyHelper _requestCountlyHelper;
 
@@ -109,7 +109,7 @@ namespace Plugins.CountlySDK.Services
                 _crashBreadcrumbs.Dequeue();
             }
 
-            _crashBreadcrumbs.Enqueue(value);
+            _crashBreadcrumbs.Enqueue(validBreadcrumb);
         }
 
         /// <summary>
