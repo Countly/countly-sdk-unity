@@ -17,10 +17,10 @@ namespace Tests
 
 
         /// <summary>
-        /// It validates user's custome property set via 'SetOnce'.
+        /// It validates the user's custom property set via 'SetOnce'.
         /// </summary>
         [Test]
-        public void TestUserCustomeProperty_SetOnce()
+        public void TestUserCustomProperty_SetOnce()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 ServerUrl = _serverUrl,
@@ -38,10 +38,10 @@ namespace Tests
         }
 
         /// <summary>
-        /// It validates user's custome property set via 'IncrementBy'.
+        /// It validates the user's custom property set via 'IncrementBy'.
         /// </summary>
         [Test]
-        public void TestUserCustomeProperty_IncrementBy()
+        public void TestUserCustomProperty_IncrementBy()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 ServerUrl = _serverUrl,
@@ -59,10 +59,10 @@ namespace Tests
         }
 
         /// <summary>
-        /// It validates user's custome property set via 'Pull'.
+        /// It validates the user's custom property set via 'Pull'.
         /// </summary>
         [Test]
-        public void TestUserCustomeProperty_Pull()
+        public void TestUserCustomProperty_Pull()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 ServerUrl = _serverUrl,
@@ -80,10 +80,10 @@ namespace Tests
         }
 
         /// <summary>
-        /// It validates user's custome property set via 'PushUnique'.
+        /// It validates the user's custom property set via 'PushUnique'.
         /// </summary>
         [Test]
-        public void TestUserCustomeProperty_PushUnique()
+        public void TestUserCustomProperty_PushUnique()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 ServerUrl = _serverUrl,
@@ -101,10 +101,10 @@ namespace Tests
         }
 
         /// <summary>
-        /// It validates user's custome property set via 'Min'.
+        /// It validates the user's custom property set via 'Min'.
         /// </summary>
         [Test]
-        public void TestUserCustomeProperty_Min()
+        public void TestUserCustomProperty_Min()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 ServerUrl = _serverUrl,
@@ -122,7 +122,7 @@ namespace Tests
         }
 
         /// <summary>
-        /// It validates user's custome properties befor and after calling SaveAsync'.
+        /// It validates the user's custom properties befor and after calling SaveAsync'.
         /// </summary>
         [Test]
         public async void TestUserDetailService_SaveAsync()
