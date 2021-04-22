@@ -15,7 +15,71 @@ namespace Tests
         private readonly string _serverUrl = "https://xyz.com/";
         private readonly string _appKey = "772c091355076ead703f987fee94490";
 
+        /// <summary>
+        /// It check the working of method 'SetUserDetailsAsync'.
+        /// </summary>
+        [Test]
+        public async void TestUserDetailMethod_SetUserDetailsAsync()
+        {
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                ServerUrl = _serverUrl,
+                AppKey = _appKey,
+            };
 
+            Countly.Instance.Init(configuration);
+
+            Assert.AreNotEqual(null, Countly.Instance.UserDetails);
+            Assert.AreNotEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
+
+            CountlyUserDetailsModel userDetails = null;
+
+            await Countly.Instance.UserDetails.SetUserDetailsAsync(userDetails);
+            Assert.AreNotEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
+
+            userDetails = new CountlyUserDetailsModel("Full Name", "username", "useremail@email.com", "Organization",
+                    "222-222-222",
+                    "http://webresizer.com/images2/bird1_after.jpg",
+                    "M", "1986",
+                    new Dictionary<string, object>{
+                        { "Hair", "Black" },
+                        { "Race", "Asian" },
+                    });
+            await Countly.Instance.UserDetails.SetUserDetailsAsync(userDetails);
+            Assert.AreNotEqual(1, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
+        }
+
+        /// <summary>
+        /// It check the working of method 'UserCustomDetailsAsync'.
+        /// </summary>
+        [Test]
+        public async void TestUserDetailMethod_UserCustomDetailsAsyncc()
+        {
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                ServerUrl = _serverUrl,
+                AppKey = _appKey,
+            };
+
+            Countly.Instance.Init(configuration);
+
+            Assert.AreNotEqual(null, Countly.Instance.UserDetails);
+            Assert.AreNotEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
+
+            CountlyUserDetailsModel InvalidUserDetails = null;
+            await Countly.Instance.UserDetails.UserCustomDetailsAsync(InvalidUserDetails);
+            Assert.AreNotEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
+
+            InvalidUserDetails = new CountlyUserDetailsModel(null);
+            await Countly.Instance.UserDetails.UserCustomDetailsAsync(InvalidUserDetails);
+            Assert.AreNotEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
+
+            Dictionary<string, object> customDetail = new Dictionary<string, object>{
+                { "Height", "5.8" },
+                { "Mole", "Lower Left Cheek" }
+            };
+            CountlyUserDetailsModel userDetails = new CountlyUserDetailsModel(customDetail);
+            await Countly.Instance.UserDetails.UserCustomDetailsAsync(userDetails);
+            Assert.AreNotEqual(1, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
+        }
         /// <summary>
         /// It validates the user's custom property set via 'SetOnce'.
         /// </summary>

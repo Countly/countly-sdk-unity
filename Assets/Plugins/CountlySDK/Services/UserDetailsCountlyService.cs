@@ -14,7 +14,7 @@ namespace Plugins.CountlySDK.Services
         internal Dictionary<string, object> CustomDataProperties { get; private set; }
 
         private readonly CountlyUtils _countlyUtils;
-        private readonly RequestCountlyHelper _requestCountlyHelper;
+        internal readonly RequestCountlyHelper _requestCountlyHelper;
         internal UserDetailsCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, RequestCountlyHelper requestCountlyHelper, CountlyUtils countlyUtils, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
         {
             Log.Debug("[UserDetailsCountlyService] Initializing.");
@@ -66,9 +66,13 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async Task SetUserDetailsAsync(CountlyUserDetailsModel userDetailsModel)
         {
-            Log.Info("[StarRatingCountlyService] SetUserDetailsAsync " + userDetailsModel.ToString());
+            Log.Info("[StarRatingCountlyService] SetUserDetailsAsync " + (userDetailsModel != null));
 
             if (!_consentService.CheckConsentInternal(Consents.Users)) {
+                return;
+            }
+
+            if (userDetailsModel == null) {
                 return;
             }
 
@@ -94,9 +98,17 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async Task SetCustomUserDetailsAsync(CountlyUserDetailsModel userDetailsModel)
         {
-            Log.Info("[StarRatingCountlyService] SetCustomUserDetailsAsync " + userDetailsModel);
+            Log.Info("[StarRatingCountlyService] SetCustomUserDetailsAsync " + (userDetailsModel != null));
 
             if (!_consentService.CheckConsentInternal(Consents.Users)) {
+                return;
+            }
+
+            if (userDetailsModel == null) {
+                return;
+            }
+
+            if (userDetailsModel.Custom == null || userDetailsModel.Custom.Count == 0) {
                 return;
             }
 
