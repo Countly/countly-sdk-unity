@@ -158,6 +158,92 @@ namespace Tests
             Assert.AreEqual("value2", model.Segmentation["key2"]);
         }
 
+        /// <summary>
+        /// It validates the data type of segment items.
+        /// </summary>
+        [Test]
+        public async void TestSegmentItemsDataTypesValidation()
+        {
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                ServerUrl = _serverUrl,
+                AppKey = _appKey,
+            };
+
+            Countly.Instance.Init(configuration);
+
+            Assert.AreNotEqual(null, Countly.Instance.Events);
+            Assert.AreEqual(0, Countly.Instance.Events._viewEventRepo.Count);
+            Assert.AreEqual(0, Countly.Instance.Events._nonViewEventRepo.Count);
+
+
+            Dictionary<string, object> segments = new Dictionary<string, object>{
+            { "key1", "value1"},
+            { "key2", 1},
+            { "key3", 10.0},
+            { "key4", true},
+            { "key5", null},// invalid
+            { "key6", Countly.Instance} // invalid
+            };
+
+            SegmentModel segmentModel = new SegmentModel(segments);
+
+            await Countly.Instance.Events.RecordEventAsync("test_event", segmentation: segmentModel, sum: 23, duration: 5);
+
+            CountlyEventModel model = Countly.Instance.Events._nonViewEventRepo.Dequeue();
+
+            Assert.AreEqual("test_event", model.Key);
+            Assert.AreEqual(23, model.Sum);
+            Assert.AreEqual(1, model.Count);
+            Assert.AreEqual(5, model.Duration);
+            Assert.AreEqual(4, model.Segmentation.Count);
+            Assert.AreEqual(true, model.Segmentation.ContainsKey("key1"));
+            Assert.AreEqual(true, model.Segmentation.ContainsKey("key2"));
+            Assert.AreEqual(true, model.Segmentation.ContainsKey("key3"));
+            Assert.AreEqual(true, model.Segmentation.ContainsKey("key4"));
+            Assert.AreEqual(false, model.Segmentation.ContainsKey("key5"));
+            Assert.AreEqual(false, model.Segmentation.ContainsKey("key6"));
+
+        }
+
+        /// <summary>
+        /// It validates the 'key' of events.
+        /// </summary>
+        [Test]
+        public async void TestEventsKey()
+        {
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                ServerUrl = _serverUrl,
+                AppKey = _appKey,
+            };
+
+            Countly.Instance.Init(configuration);
+
+            Assert.AreNotEqual(null, Countly.Instance.Events);
+            Assert.AreEqual(0, Countly.Instance.Events._viewEventRepo.Count);
+            Assert.AreEqual(0, Countly.Instance.Events._nonViewEventRepo.Count);
+
+
+            Dictionary<string, object> segments = new Dictionary<string, object>{
+            { "key1", "value1"},
+            { "key2", "value2"}
+            };
+
+            SegmentModel segmentModel = new SegmentModel(segments);
+
+
+            await Countly.Instance.Events.RecordEventAsync("", segmentation: segmentModel, sum: 23, duration: 5);
+            Assert.AreEqual(0, Countly.Instance.Events._nonViewEventRepo.Count);
+
+            await Countly.Instance.Events.RecordEventAsync("");
+            Assert.AreEqual(0, Countly.Instance.Events._nonViewEventRepo.Count);
+
+            await Countly.Instance.Events.RecordEventAsync(null, segmentation: segmentModel, sum: 23, duration: 5);
+            Assert.AreEqual(0, Countly.Instance.Events._nonViewEventRepo.Count);
+
+            await Countly.Instance.Events.RecordEventAsync(" ");
+            Assert.AreEqual(0, Countly.Instance.Events._nonViewEventRepo.Count);
+        }
+
         [TearDown]
         public void End()
         {

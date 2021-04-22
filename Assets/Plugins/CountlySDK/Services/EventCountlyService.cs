@@ -127,7 +127,7 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
 
-            if (string.IsNullOrEmpty(key) && string.IsNullOrWhiteSpace(key)) {
+            if (string.IsNullOrEmpty(key) || string.IsNullOrWhiteSpace(key)) {
                 return;
             }
 
@@ -135,11 +135,12 @@ namespace Plugins.CountlySDK.Services
                 List<string> toRemove = new List<string>();
 
                 foreach (KeyValuePair<string, object> item in segmentation) {
-                    bool isValidDataType = item.Value.GetType() == typeof(int)
+                    bool isValidDataType = item.Value != null
+                        && (item.Value.GetType() == typeof(int)
                         || item.Value.GetType() == typeof(bool)
                         || item.Value.GetType() == typeof(float)
                         || item.Value.GetType() == typeof(double)
-                        || item.Value.GetType() == typeof(string);
+                        || item.Value.GetType() == typeof(string));
 
                     if (!isValidDataType) {
                         toRemove.Add(item.Key);
