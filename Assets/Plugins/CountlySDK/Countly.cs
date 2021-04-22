@@ -131,9 +131,6 @@ namespace Plugins.CountlySDK
         private bool _logSubscribed;
         private PushCountlyService _push;
 
-        private RequestRepository _requestRepo;
-        private NonViewEventRepository _eventRepo;
-
 
         /// <summary>
         ///     Initialize SDK at the start of your app
@@ -190,21 +187,9 @@ namespace Plugins.CountlySDK
 
             _storageHelper.RunMigration();
 
-            _requestRepo = new RequestRepository(_storageHelper.RequestDao, _logHelper);
-            ViewEventRepository viewEventRepo = new ViewEventRepository(_storageHelper.ViewEventDao, _storageHelper.ViewSegmentDao, _logHelper);
-            _eventRepo = new NonViewEventRepository(_storageHelper.EventDao, _storageHelper.NonViewSegmentDao, _logHelper);
-
-            _eventRepo.Initialize();
-            _requestRepo.Initialize();
-            viewEventRepo.Initialize();
 
 
-            while (_eventRepo.Count > 0) {
-                _eventRepo.Enqueue(viewEventRepo.Dequeue());
-            }
-
-
-            Init(_requestRepo, _eventRepo, _storageHelper.ConfigDao);
+            Init(_storageHelper.RequestRepo, _storageHelper.EventRepo, _storageHelper.ConfigDao);
 
             Device.InitDeviceId(configuration.DeviceId);
             OnInitialisationComplete();
@@ -297,13 +282,8 @@ namespace Plugins.CountlySDK
 
             _logHelper.Debug("[Countly] ClearStorage");
 
-            _requestRepo.Clear();
-            _viewEventRepo.Clear();
-            _eventRepo.Clear();
-            _storageHelper.ConfigDao.RemoveAll();
-
-
             PlayerPrefs.DeleteAll();
+            _storageHelper.DeleteAllTablesData();
 
             _storageHelper.CloseDB();
         }
