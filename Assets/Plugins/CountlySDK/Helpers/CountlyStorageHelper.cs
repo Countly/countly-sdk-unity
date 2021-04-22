@@ -146,7 +146,7 @@ namespace Plugins.CountlySDK.Helpers
         /// </summary>
         private void Migration_CopyViewDataIntoEventData()
         {
-            while (EventRepo.Count > 0) {
+            while (ViewRepo.Count > 0) {
                 EventRepo.Enqueue(ViewRepo.Dequeue());
             }
             _logHelper.Verbose("[CountlyStorageHelper] Migration_CopyViewDataIntoEventData");
