@@ -134,12 +134,15 @@ namespace Plugins.CountlySDK.Services
         /// <summary>
         /// Ends a session
         /// </summary>
-        /// <param name="disposeTimer">Set true to stop extend the session after session ends.</param>
-        internal async Task EndSessionAsync(bool disposeTimer = true)
+        internal async Task EndSessionAsync()
         {
             Log.Debug("[SessionCountlyService] EndSessionAsync");
 
             if (!_consentService.CheckConsentInternal(Consents.Sessions)) {
+                return;
+            }
+
+            if (!IsSessionInitiated) {
                 return;
             }
 
@@ -159,12 +162,10 @@ namespace Plugins.CountlySDK.Services
 
             if (!_configuration.EnableManualSessionHandling) {
                 //Do not extend session after session ends
-                if (disposeTimer) {
-                    _sessionTimer.Stop();
-                    _sessionTimer.Dispose();
-                    _sessionTimer.Close();
-                    _sessionTimer = null;
-                }
+                _sessionTimer.Stop();
+                _sessionTimer.Dispose();
+                _sessionTimer.Close();
+                _sessionTimer = null;
             }
         }
 

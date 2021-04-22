@@ -13,8 +13,8 @@ namespace Plugins.CountlySDK.Services
 {
     public class EventCountlyService : AbstractBaseService
     {
-        private readonly ViewEventRepository _viewEventRepo;
-        private readonly NonViewEventRepository _nonViewEventRepo;
+        internal readonly ViewEventRepository _viewEventRepo;
+        internal readonly NonViewEventRepository _nonViewEventRepo;
         private readonly RequestCountlyHelper _requestCountlyHelper;
 
         internal EventCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, RequestCountlyHelper requestCountlyHelper,
