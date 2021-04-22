@@ -23,12 +23,10 @@ namespace Plugins.CountlySDK.Helpers
 
         private CountlyLogHelper _logHelper;
 
-        internal SegmentDao ViewSegmentDao { get; private set; }
         internal SegmentDao EventSegmentDao { get; private set; }
 
         internal Dao<ConfigEntity> ConfigDao { get; private set; }
         internal Dao<RequestEntity> RequestDao { get; private set; }
-        internal Dao<EventEntity> ViewDao { get; private set; }
         internal Dao<EventEntity> EventDao { get; private set; }
         internal Dao<EventNumberInSameSessionEntity> EventNrInSameSessionDao { get; private set; }
 
@@ -57,12 +55,12 @@ namespace Plugins.CountlySDK.Helpers
 
             db.GetConfig().EnsureTable<SegmentEntity>(EntityType.Configs.ToString(), "Id");
             db.GetConfig().EnsureTable<RequestEntity>(EntityType.Requests.ToString(), "Id");
-            db.GetConfig().EnsureTable<EventEntity>(EntityType.ViewEvents.ToString(), "Id");
             db.GetConfig().EnsureTable<EventEntity>(EntityType.NonViewEvents.ToString(), "Id");
-            db.GetConfig().EnsureTable<SegmentEntity>(EntityType.ViewEventSegments.ToString(), "Id");
             db.GetConfig().EnsureTable<SegmentEntity>(EntityType.NonViewEventSegments.ToString(), "Id");
 
             if (_currentVersion < 1) {
+                db.GetConfig().EnsureTable<EventEntity>(EntityType.ViewEvents.ToString(), "Id");
+                db.GetConfig().EnsureTable<SegmentEntity>(EntityType.ViewEventSegments.ToString(), "Id");
                 db.GetConfig().EnsureTable<EventNumberInSameSessionEntity>(EntityType.EventNumberInSameSessions.ToString(), "Id");
             }
 
@@ -88,10 +86,10 @@ namespace Plugins.CountlySDK.Helpers
             if (_currentVersion < 1) {
                 EventNrInSameSessionDao = new Dao<EventNumberInSameSessionEntity>(auto, EntityType.EventNumberInSameSessions.ToString(), _logHelper);
 
-                ViewDao = new Dao<EventEntity>(auto, EntityType.ViewEvents.ToString(), _logHelper);
-                ViewSegmentDao = new SegmentDao(auto, EntityType.ViewEventSegments.ToString(), _logHelper);
+                Dao<EventEntity> viewDao = new Dao<EventEntity>(auto, EntityType.ViewEvents.ToString(), _logHelper);
+                SegmentDao viewSegmentDao = new SegmentDao(auto, EntityType.ViewEventSegments.ToString(), _logHelper);
 
-                ViewRepo = new ViewEventRepository(ViewDao, ViewSegmentDao, _logHelper);
+                ViewRepo = new ViewEventRepository(viewDao, viewSegmentDao, _logHelper);
                 ViewRepo.Initialize();
             }
 
