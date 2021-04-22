@@ -132,8 +132,7 @@ namespace Plugins.CountlySDK
         private PushCountlyService _push;
 
         private RequestRepository _requestRepo;
-        private ViewEventRepository _viewEventRepo;
-        private NonViewEventRepository _nonViewEventRepo;
+        private NonViewEventRepository _eventRepo;
 
 
         /// <summary>
@@ -192,14 +191,20 @@ namespace Plugins.CountlySDK
             _storageHelper.RunMigration();
 
             _requestRepo = new RequestRepository(_storageHelper.RequestDao, _logHelper);
-            _viewEventRepo = new ViewEventRepository(_storageHelper.ViewEventDao, _storageHelper.ViewSegmentDao, _logHelper);
-            _nonViewEventRepo = new NonViewEventRepository(_storageHelper.NonViewEventDao, _storageHelper.NonViewSegmentDao, _logHelper);
+            ViewEventRepository viewEventRepo = new ViewEventRepository(_storageHelper.ViewEventDao, _storageHelper.ViewSegmentDao, _logHelper);
+            _eventRepo = new NonViewEventRepository(_storageHelper.EventDao, _storageHelper.NonViewSegmentDao, _logHelper);
 
+            _eventRepo.Initialize();
             _requestRepo.Initialize();
-            _viewEventRepo.Initialize();
-            _nonViewEventRepo.Initialize();
+            viewEventRepo.Initialize();
 
-            Init(_requestRepo, _viewEventRepo, _nonViewEventRepo, _storageHelper.ConfigDao);
+
+            while (_eventRepo.Count > 0) {
+                _eventRepo.Enqueue(viewEventRepo.Dequeue());
+            }
+
+
+            Init(_requestRepo, _eventRepo, _storageHelper.ConfigDao);
 
             Device.InitDeviceId(configuration.DeviceId);
             OnInitialisationComplete();
@@ -208,14 +213,14 @@ namespace Plugins.CountlySDK
 
         }
 
-        private void Init(RequestRepository requestRepo, ViewEventRepository viewEventRepo,
+        private void Init(RequestRepository requestRepo,
             NonViewEventRepository nonViewEventRepo, Dao<ConfigEntity> configDao)
         {
             CountlyUtils countlyUtils = new CountlyUtils(this);
             RequestCountlyHelper requests = new RequestCountlyHelper(Configuration, _logHelper, countlyUtils, requestRepo);
 
             Consents = new ConsentCountlyService(Configuration, _logHelper, Consents);
-            Events = new EventCountlyService(Configuration, _logHelper, requests, viewEventRepo, nonViewEventRepo, Consents);
+            Events = new EventCountlyService(Configuration, _logHelper, requests, nonViewEventRepo, Consents);
 
             Location = new Services.LocationService(Configuration, _logHelper, requests, Consents);
             OptionalParameters = new OptionalParametersCountlyService(Location, Configuration, _logHelper, Consents);
@@ -294,7 +299,7 @@ namespace Plugins.CountlySDK
 
             _requestRepo.Clear();
             _viewEventRepo.Clear();
-            _nonViewEventRepo.Clear();
+            _eventRepo.Clear();
             _storageHelper.ConfigDao.RemoveAll();
 
 

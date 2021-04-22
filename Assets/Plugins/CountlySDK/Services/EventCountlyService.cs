@@ -13,17 +13,14 @@ namespace Plugins.CountlySDK.Services
 {
     public class EventCountlyService : AbstractBaseService
     {
-        internal readonly ViewEventRepository _viewEventRepo;
-        internal readonly NonViewEventRepository _nonViewEventRepo;
+        internal readonly NonViewEventRepository _eventRepo;
         private readonly RequestCountlyHelper _requestCountlyHelper;
 
-        internal EventCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, RequestCountlyHelper requestCountlyHelper,
-            ViewEventRepository viewEventRepo, NonViewEventRepository nonViewEventRepo, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
+        internal EventCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, RequestCountlyHelper requestCountlyHelper,NonViewEventRepository nonViewEventRepo, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
         {
             Log.Debug("[EventCountlyService] Initializing.");
 
-            _viewEventRepo = viewEventRepo;
-            _nonViewEventRepo = nonViewEventRepo;
+            _eventRepo = nonViewEventRepo;
             _requestCountlyHelper = requestCountlyHelper;
         }
 
@@ -35,31 +32,24 @@ namespace Plugins.CountlySDK.Services
 
             Log.Debug("[EventCountlyService] AddEventsToRequestQueue");
 
-            if ((_viewEventRepo.Models.Count + _nonViewEventRepo.Models.Count) == 0) {
+            if (_eventRepo.Models.Count == 0) {
                 return;
             }
 
-            Queue result = new Queue();
-
-
-            while (_nonViewEventRepo.Count > 0) {
-                result.Enqueue(_nonViewEventRepo.Dequeue());
-            }
-            while (_viewEventRepo.Count > 0) {
-                result.Enqueue(_viewEventRepo.Dequeue());
-            }
-
+           
             //Send all at once
             Dictionary<string, object> requestParams =
                 new Dictionary<string, object>
                 {
                     {
-                        "events", JsonConvert.SerializeObject(result, Formatting.Indented,
+                        "events", JsonConvert.SerializeObject(_eventRepo, Formatting.Indented,
                             new JsonSerializerSettings {NullValueHandling = NullValueHandling.Ignore})
                     }
                 };
 
             await _requestCountlyHelper.GetResponseAsync(requestParams);
+
+            _eventRepo.Clear();
 
         }
 
@@ -77,13 +67,9 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
 
-            if (@event.Key.Equals(CountlyEventModel.ViewEvent)) {
-                _viewEventRepo.Enqueue(@event);
-            } else {
-                _nonViewEventRepo.Enqueue(@event);
-            }
+            _eventRepo.Enqueue(@event);
 
-            if ((_viewEventRepo.Count + _nonViewEventRepo.Count) >= _configuration.EventQueueThreshold) {
+            if (_eventRepo.Count >= _configuration.EventQueueThreshold) {
                 await AddEventsToRequestQueue();
             }
         }

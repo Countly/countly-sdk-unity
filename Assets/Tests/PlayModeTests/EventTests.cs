@@ -29,8 +29,7 @@ namespace Tests
             Countly.Instance.Init(configuration);
 
             Assert.AreNotEqual(null, Countly.Instance.Events);
-            Assert.AreEqual(0, Countly.Instance.Events._viewEventRepo.Count);
-            Assert.AreEqual(0, Countly.Instance.Events._nonViewEventRepo.Count);
+            Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
         }
 
@@ -49,14 +48,13 @@ namespace Tests
             Countly.Instance.Init(configuration);
 
             Assert.AreNotEqual(null, Countly.Instance.Events);
-            Assert.AreEqual(0, Countly.Instance.Events._viewEventRepo.Count);
-            Assert.AreEqual(0, Countly.Instance.Events._nonViewEventRepo.Count);
+            Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
             await Countly.Instance.Events.RecordEventAsync("test_event");
-            Assert.AreEqual(0, Countly.Instance.Events._nonViewEventRepo.Count);
+            Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
             await Countly.Instance.Events.ReportCustomEventAsync("test_event", segmentation: null, sum: 23, duration: 5);
-            Assert.AreEqual(0, Countly.Instance.Events._nonViewEventRepo.Count);
+            Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
 
         }
@@ -75,13 +73,12 @@ namespace Tests
             Countly.Instance.Init(configuration);
 
             Assert.AreNotEqual(null, Countly.Instance.Events);
-            Assert.AreEqual(0, Countly.Instance.Events._viewEventRepo.Count);
-            Assert.AreEqual(0, Countly.Instance.Events._nonViewEventRepo.Count);
+            Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
             await Countly.Instance.Events.RecordEventAsync("test_event");
-            Assert.AreEqual(1, Countly.Instance.Events._nonViewEventRepo.Count);
+            Assert.AreEqual(1, Countly.Instance.Events._eventRepo.Count);
 
-            CountlyEventModel model = Countly.Instance.Events._nonViewEventRepo.Dequeue();
+            CountlyEventModel model = Countly.Instance.Events._eventRepo.Dequeue();
 
             Assert.AreEqual("test_event", model.Key);
             Assert.AreEqual(0, model.Sum);
@@ -105,17 +102,16 @@ namespace Tests
             Countly.Instance.Init(configuration);
 
             Assert.AreNotEqual(null, Countly.Instance.Events);
-            Assert.AreEqual(0, Countly.Instance.Events._viewEventRepo.Count);
-            Assert.AreEqual(0, Countly.Instance.Events._nonViewEventRepo.Count);
+            Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
             await Countly.Instance.Events.RecordEventAsync("test_event_1");
-            Assert.AreEqual(1, Countly.Instance.Events._nonViewEventRepo.Count);
+            Assert.AreEqual(1, Countly.Instance.Events._eventRepo.Count);
 
             await Countly.Instance.Events.RecordEventAsync("test_event_2");
-            Assert.AreEqual(2, Countly.Instance.Events._nonViewEventRepo.Count);
+            Assert.AreEqual(2, Countly.Instance.Events._eventRepo.Count);
 
             await Countly.Instance.Events.RecordEventAsync("test_event_3");
-            Assert.AreEqual(0, Countly.Instance.Events._nonViewEventRepo.Count);
+            Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
 
         }
@@ -134,8 +130,7 @@ namespace Tests
             Countly.Instance.Init(configuration);
 
             Assert.AreNotEqual(null, Countly.Instance.Events);
-            Assert.AreEqual(0, Countly.Instance.Events._viewEventRepo.Count);
-            Assert.AreEqual(0, Countly.Instance.Events._nonViewEventRepo.Count);
+            Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
 
             Dictionary<string, object> segments = new Dictionary<string, object>{
@@ -147,7 +142,7 @@ namespace Tests
 
             await Countly.Instance.Events.RecordEventAsync("test_event", segmentation: segmentModel, sum: 23, duration: 5);
 
-            CountlyEventModel model = Countly.Instance.Events._nonViewEventRepo.Dequeue();
+            CountlyEventModel model = Countly.Instance.Events._eventRepo.Dequeue();
 
             Assert.AreEqual("test_event", model.Key);
             Assert.AreEqual(23, model.Sum);

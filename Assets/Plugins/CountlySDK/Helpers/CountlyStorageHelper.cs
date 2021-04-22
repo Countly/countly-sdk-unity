@@ -27,7 +27,7 @@ namespace Plugins.CountlySDK.Helpers
         internal Dao<ConfigEntity> ConfigDao { get; private set; }
         internal Dao<RequestEntity> RequestDao { get; private set; }
         internal Dao<EventEntity> ViewEventDao { get; private set; }
-        internal Dao<EventEntity> NonViewEventDao { get; private set; }
+        internal Dao<EventEntity> EventDao { get; private set; }
         internal Dao<EventNumberInSameSessionEntity> EventNrInSameSessionDao { get; private set; }
 
         internal CountlyStorageHelper(CountlyLogHelper logHelper)
@@ -79,7 +79,7 @@ namespace Plugins.CountlySDK.Helpers
             ConfigDao = new Dao<ConfigEntity>(auto, EntityType.Configs.ToString(), _logHelper);
             RequestDao = new Dao<RequestEntity>(auto, EntityType.Requests.ToString(), _logHelper);
             ViewEventDao = new Dao<EventEntity>(auto, EntityType.ViewEvents.ToString(), _logHelper);
-            NonViewEventDao = new Dao<EventEntity>(auto, EntityType.NonViewEvents.ToString(), _logHelper);
+            EventDao = new Dao<EventEntity>(auto, EntityType.NonViewEvents.ToString(), _logHelper);
 
             if (_currentVersion < 1) {
                 EventNrInSameSessionDao = new Dao<EventNumberInSameSessionEntity>(auto, EntityType.EventNumberInSameSessions.ToString(), _logHelper);
