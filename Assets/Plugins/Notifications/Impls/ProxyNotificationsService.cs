@@ -15,6 +15,7 @@ namespace Notifications.Impls
         private readonly CountlyLogHelper _logHelper;
         private readonly Transform _countlyGameObject;
         private readonly INotificationsService _service;
+        public bool IsInitializedWithoutError { get; set; }
 
         internal ProxyNotificationsService(Transform countlyGameObject, CountlyConfiguration config, CountlyLogHelper logHelper, Action<IEnumerator> startCoroutine, EventCountlyService eventCountlyService)
         {
@@ -26,18 +27,18 @@ namespace Notifications.Impls
             if (config.NotificationMode == TestMode.None) {
                 return;
             }
-            try {
+
 #if UNITY_ANDROID
-                _service = new Notifications.Impls.Android.AndroidNotificationsService(_countlyGameObject, config, logHelper, eventCountlyService);
+            _service = new Notifications.Impls.Android.AndroidNotificationsService(_countlyGameObject, config, logHelper, eventCountlyService);
 #elif UNITY_IOS
             _service = new Notifications.Impls.iOs.IOsNotificationsService(_countlyGameObject, config, logHelper, startCoroutine, eventCountlyService);
 #endif
-            } catch (FileNotFoundException ex) {
+            IsInitializedWithoutError = true;
+            if (!_service.IsInitializedWithoutError) {
                 _service = null;
-                _logHelper.Error("[ProxyNotificationsServiceountlyService] Exception in initializing service: " + ex.Message);
-            }
-            
+                IsInitializedWithoutError = false;
 
+            }
         }
 
         public void GetToken(Action<string> result)

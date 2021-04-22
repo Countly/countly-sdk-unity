@@ -21,6 +21,8 @@ namespace Notifications.Impls.Android
         private readonly AndroidBridge _bridge;
         private readonly EventCountlyService _eventCountlyService;
 
+        public bool IsInitializedWithoutError { get; set; }
+
         internal AndroidNotificationsService(Transform countlyGameObject, CountlyConfiguration config, CountlyLogHelper log, EventCountlyService eventCountlyService)
         {
             Log = log;
@@ -38,9 +40,10 @@ namespace Notifications.Impls.Android
             try {
                 AndroidJavaClass countlyPushPlugin = new AndroidJavaClass(CountlyPushPluginPackageName);
                 countlyPushPlugin.CallStatic("setEnableLog", config.EnableConsoleLogging);
+                IsInitializedWithoutError = true;
             } catch (Exception ex) {
                 Log.Error("[AndroidNotificationsService] Exception in initializing service: " + ex.Message);
-                throw new FileNotFoundException(ex.Message);
+                IsInitializedWithoutError = false;
             }
         }
 
