@@ -20,7 +20,7 @@ namespace Plugins.CountlySDK.Helpers
         private readonly CountlyLogHelper Log;
         private readonly CountlyUtils _countlyUtils;
         private readonly CountlyConfiguration _config;
-        private readonly RequestRepository _requestRepo;
+        internal readonly RequestRepository _requestRepo;
 
         internal RequestCountlyHelper(CountlyConfiguration config, CountlyLogHelper log, CountlyUtils countlyUtils, RequestRepository requestRepo)
         {

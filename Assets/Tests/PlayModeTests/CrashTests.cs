@@ -16,6 +16,35 @@ namespace Tests
         private readonly string _serverUrl = "https://xyz.com/";
         private readonly string _appKey = "772c091355076ead703f987fee94490";
 
+
+        /// <summary>
+        /// It checks the working of crash service if no 'Crash' consent is given.
+        /// </summary>
+        [Test]
+        public async void TestCrashConsent()
+        {
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                ServerUrl = _serverUrl,
+                AppKey = _appKey,
+                RequiresConsent = true
+            };
+
+            Countly.Instance.Init(configuration);
+            Countly.Instance.ClearStorage();
+            Assert.AreNotEqual(null, Countly.Instance.CrashReports);
+            Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
+
+            Dictionary<string, object> seg = new Dictionary<string, object>{
+                { "Time Spent", "1234455"},
+                { "Retry Attempts", "10"}
+            };
+
+            await Countly.Instance.CrashReports.SendCrashReportAsync("message", "StackTrace", LogType.Exception, seg);
+            Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
+
+
+        }
+
         /// <summary>
         /// It validates the functionality of 'AddBreadcrumbs'.
         /// </summary>
@@ -28,9 +57,7 @@ namespace Tests
             };
 
             Countly.Instance.Init(configuration);
-
             Assert.AreNotEqual(null, Countly.Instance.CrashReports);
-
             Assert.AreEqual(0, Countly.Instance.CrashReports._crashBreadcrumbs.Count);
 
             Countly.Instance.CrashReports.AddBreadcrumbs("bread_crumbs");
@@ -38,6 +65,42 @@ namespace Tests
             Assert.AreEqual(1, Countly.Instance.CrashReports._crashBreadcrumbs.Count);
             Assert.AreEqual("bread_crumbs", Countly.Instance.CrashReports._crashBreadcrumbs.Dequeue());
 
+        }
+
+        /// <summary>
+        /// It validates the functionality of 'SendCrashReportAsync'.
+        /// </summary>
+        [Test]
+        public async void TestMethod_SendCrashReportAsync()
+        {
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                ServerUrl = _serverUrl,
+                AppKey = _appKey,
+            };
+
+            Countly.Instance.Init(configuration);
+            Countly.Instance.ClearStorage();
+
+            Assert.AreNotEqual(null, Countly.Instance.CrashReports);
+            Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
+
+            await Countly.Instance.CrashReports.SendCrashReportAsync("", "StackTrace", LogType.Exception, null);
+            Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
+
+            await Countly.Instance.CrashReports.SendCrashReportAsync(null, "StackTrace", LogType.Exception, null);
+            Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
+
+            await Countly.Instance.CrashReports.SendCrashReportAsync(" ", "StackTrace", LogType.Exception, null);
+            Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
+
+
+            Dictionary<string, object> seg = new Dictionary<string, object>{
+                { "Time Spent", "1234455"},
+                { "Retry Attempts", "10"}
+            };
+
+            await Countly.Instance.CrashReports.SendCrashReportAsync("message", "StackTrace", LogType.Exception, seg);
+            Assert.AreEqual(1, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
         }
 
         /// <summary>

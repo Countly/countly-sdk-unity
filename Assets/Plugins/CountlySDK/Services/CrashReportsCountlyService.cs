@@ -14,7 +14,7 @@ namespace Plugins.CountlySDK.Services
         internal bool IsApplicationInBackground { get; set; }
         internal readonly Queue<string> _crashBreadcrumbs = new Queue<string>();
 
-        private readonly RequestCountlyHelper _requestCountlyHelper;
+        internal readonly RequestCountlyHelper _requestCountlyHelper;
 
         internal CrashReportsCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, RequestCountlyHelper requestCountlyHelper, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
         {
@@ -68,7 +68,9 @@ namespace Plugins.CountlySDK.Services
         internal async Task SendCrashReportInternal(string message, string stackTrace, LogType type,
             IDictionary<string, object> segments = null, bool nonfatal = true)
         {
-
+            if (string.IsNullOrEmpty(message) || string.IsNullOrWhiteSpace(message)) {
+                return;
+            }
             CountlyExceptionDetailModel model = ExceptionDetailModel(message, stackTrace, nonfatal, segments);
 
             Log.Debug("[CrashReportsCountlyService] SendCrashReportInternal : model = " + model.ToString());
