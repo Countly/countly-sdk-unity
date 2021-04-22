@@ -42,7 +42,7 @@ namespace Plugins.CountlySDK.Services
                 new Dictionary<string, object>
                 {
                     {
-                        "events", JsonConvert.SerializeObject(_eventRepo, Formatting.Indented,
+                        "events", JsonConvert.SerializeObject(_eventRepo.Models, Formatting.Indented,
                             new JsonSerializerSettings {NullValueHandling = NullValueHandling.Ignore})
                     }
                 };
