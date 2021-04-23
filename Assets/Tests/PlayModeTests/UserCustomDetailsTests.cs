@@ -27,14 +27,15 @@ namespace Tests
             };
 
             Countly.Instance.Init(configuration);
+            Countly.Instance.ClearStorage();
 
             Assert.AreNotEqual(null, Countly.Instance.UserDetails);
-            Assert.AreNotEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
+            Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
 
             CountlyUserDetailsModel userDetails = null;
 
             await Countly.Instance.UserDetails.SetUserDetailsAsync(userDetails);
-            Assert.AreNotEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
+            Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
 
             userDetails = new CountlyUserDetailsModel("Full Name", "username", "useremail@email.com", "Organization",
                     "222-222-222",
@@ -45,7 +46,7 @@ namespace Tests
                         { "Race", "Asian" },
                     });
             await Countly.Instance.UserDetails.SetUserDetailsAsync(userDetails);
-            Assert.AreNotEqual(1, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
+            Assert.AreEqual(1, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
         }
 
         /// <summary>
@@ -60,17 +61,18 @@ namespace Tests
             };
 
             Countly.Instance.Init(configuration);
+            Countly.Instance.ClearStorage();
 
             Assert.AreNotEqual(null, Countly.Instance.UserDetails);
-            Assert.AreNotEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
+            Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
 
             CountlyUserDetailsModel InvalidUserDetails = null;
             await Countly.Instance.UserDetails.UserCustomDetailsAsync(InvalidUserDetails);
-            Assert.AreNotEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
+            Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
 
             InvalidUserDetails = new CountlyUserDetailsModel(null);
             await Countly.Instance.UserDetails.UserCustomDetailsAsync(InvalidUserDetails);
-            Assert.AreNotEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
+            Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
 
             Dictionary<string, object> customDetail = new Dictionary<string, object>{
                 { "Height", "5.8" },
@@ -78,7 +80,7 @@ namespace Tests
             };
             CountlyUserDetailsModel userDetails = new CountlyUserDetailsModel(customDetail);
             await Countly.Instance.UserDetails.UserCustomDetailsAsync(userDetails);
-            Assert.AreNotEqual(1, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
+            Assert.AreEqual(1, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
         }
         /// <summary>
         /// It validates the user's custom property set via 'SetOnce'.
