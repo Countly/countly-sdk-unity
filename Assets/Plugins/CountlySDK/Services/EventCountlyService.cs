@@ -128,6 +128,8 @@ namespace Plugins.CountlySDK.Services
             }
 
             if (string.IsNullOrEmpty(key) || string.IsNullOrWhiteSpace(key)) {
+                Log.Warning("[EventCountlyService] RecordEventAsync : The event key '" + key + "'isn't valid.");
+
                 return;
             }
 
