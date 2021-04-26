@@ -28,35 +28,37 @@ namespace Plugins.CountlySDK.Services
         /// Modifies all user data. Custom data should be json string.
         /// Deletes an already defined custom property from the Countly server, if it is supplied with a NULL value
         /// </summary>
-        /// <param name="userDetails">User's detail object</param>
+        /// <param name="userDetailsModel">User's detail object</param>
         /// <returns></returns>
-        internal async Task UserDetailsAsync(CountlyUserDetailsModel userDetails)
+        internal async Task UserDetailsAsync(CountlyUserDetailsModel userDetailsModel)
         {
 
-            Log.Debug("[StarRatingCountlyService] UserDetailsAsync : userDetails = " + (userDetails != null));
+            Log.Debug("[StarRatingCountlyService] UserDetailsAsync : userDetails = " + (userDetailsModel != null));
 
-            if (userDetails == null) {
+            if (userDetailsModel == null) {
+                Log.Warning("[StarRatingCountlyService] UserDetailsAsync : The parameter 'userDetailsModel' can't be null.");
                 return;
             }
 
-            await SetUserDetailsAsync(userDetails);
+            await SetUserDetailsAsync(userDetailsModel);
         }
 
         /// <summary>
         /// Modifies custom user data only. Custom data should be json string.
         /// Deletes an already defined custom property from the Countly server, if it is supplied with a NULL value
         /// </summary>
-        /// <param name="userDetails">User's custom detail object</param>
+        /// <param name="userDetailsModel">User's custom detail object</param>
         /// <return></returns>
-        internal async Task UserCustomDetailsAsync(CountlyUserDetailsModel userDetails)
+        internal async Task UserCustomDetailsAsync(CountlyUserDetailsModel userDetailsModel)
         {
-            Log.Debug("[StarRatingCountlyService] UserCustomDetailsAsync " + (userDetails != null));
+            Log.Debug("[StarRatingCountlyService] UserCustomDetailsAsync " + (userDetailsModel != null));
 
-            if (userDetails == null) {
+            if (userDetailsModel == null) {
+                Log.Warning("[StarRatingCountlyService] UserCustomDetailsAsync : The parameter 'userDetailsModel' can't be null.");
                 return;
             }
 
-            await SetCustomUserDetailsAsync(userDetails);
+            await SetCustomUserDetailsAsync(userDetailsModel);
         }
 
         /// <summary>
@@ -73,6 +75,7 @@ namespace Plugins.CountlySDK.Services
             }
 
             if (userDetailsModel == null) {
+                Log.Warning("[StarRatingCountlyService] SetUserDetailsAsync : The parameter 'userDetailsModel' can't be null.");
                 return;
             }
 
@@ -105,10 +108,13 @@ namespace Plugins.CountlySDK.Services
             }
 
             if (userDetailsModel == null) {
+                Log.Warning("[StarRatingCountlyService] SetCustomUserDetailsAsync : The parameter 'userDetailsModel' can't be null.");
                 return;
             }
 
             if (userDetailsModel.Custom == null || userDetailsModel.Custom.Count == 0) {
+                Log.Warning("[StarRatingCountlyService] SetCustomUserDetailsAsync : The custom property 'userDetailsModel.Custom' can't be null or empty.");
+
                 return;
             }
 
