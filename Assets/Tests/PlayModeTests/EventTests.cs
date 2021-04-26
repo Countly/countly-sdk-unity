@@ -206,10 +206,10 @@ namespace Tests
         }
 
         /// <summary>
-        /// It validates the 'key' of events.
+        /// It validates the mandatory and optional parameters of events.
         /// </summary>
         [Test]
-        public async void TestEventsKey()
+        public async void TestEventsParameters()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 ServerUrl = _serverUrl,
@@ -242,6 +242,12 @@ namespace Tests
 
             await Countly.Instance.Events.RecordEventAsync(" ");
             Assert.AreEqual(0, Countly.Instance.Events._nonViewEventRepo.Count);
+
+            await Countly.Instance.Events.RecordEventAsync("key", segmentation: null, sum: 23, duration: 5);
+            Assert.AreEqual(1, Countly.Instance.Events._nonViewEventRepo.Count);
+
+            await Countly.Instance.Events.RecordEventAsync("key", segmentation: segmentModel, sum: 23, duration: null);
+            Assert.AreEqual(2, Countly.Instance.Events._nonViewEventRepo.Count);
         }
 
         [TearDown]
