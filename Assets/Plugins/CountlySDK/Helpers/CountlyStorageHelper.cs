@@ -118,7 +118,11 @@ namespace Plugins.CountlySDK.Helpers
         {
             _logHelper.Verbose("[CountlyStorageHelper] RunMigration : currentVersion = " + _currentVersion);
 
-            // _schemaVersion = 1 : deletion of the data in the “EventNumberInSameSessionEntity” table
+            /* 
+             * Schema Version = 1 :
+             * - Deletion of the data in the “EventNumberInSameSessionEntity” table
+             * - Copy data of 'Views Repository(Entity Dao, Segment Dao)' into Event Repository(Entity Dao, Segment Dao)'.
+            */
             if (_currentVersion == 0) {
                 Migration_EventNumberInSameSessionEntityDataRemoval();
                 Migration_CopyViewDataIntoEventData();
@@ -151,7 +155,7 @@ namespace Plugins.CountlySDK.Helpers
 
         }
 
-        internal void DeleteAllTablesData() {
+        internal void ClearDBData() {
             EventRepo.Clear();
             RequestRepo.Clear();
             ConfigDao.RemoveAll();
