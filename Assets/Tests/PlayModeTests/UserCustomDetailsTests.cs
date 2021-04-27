@@ -29,7 +29,7 @@ namespace Tests
 
             Countly.Instance.Init(configuration);
 
-            Assert.AreNotEqual(null, Countly.Instance.UserDetails);
+            Assert.IsNotNull(Countly.Instance.UserDetails);
 
             Countly.Instance.UserDetails.SetOnce("Distance", "10KM");
             Assert.AreEqual(true, Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Distance"));
@@ -50,7 +50,7 @@ namespace Tests
 
             Countly.Instance.Init(configuration);
 
-            Assert.AreNotEqual(null, Countly.Instance.UserDetails);
+            Assert.IsNotNull(Countly.Instance.UserDetails);
 
             Countly.Instance.UserDetails.IncrementBy("Distance", 5);
             Assert.AreEqual(true, Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Distance"));
@@ -71,7 +71,7 @@ namespace Tests
 
             Countly.Instance.Init(configuration);
 
-            Assert.AreNotEqual(null, Countly.Instance.UserDetails);
+            Assert.IsNotNull(Countly.Instance.UserDetails);
 
             Countly.Instance.UserDetails.Pull("Distance", new string[] { "5"});
             Assert.AreEqual(true, Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Distance"));
@@ -92,7 +92,7 @@ namespace Tests
 
             Countly.Instance.Init(configuration);
 
-            Assert.AreNotEqual(null, Countly.Instance.UserDetails);
+            Assert.IsNotNull(Countly.Instance.UserDetails);
 
             Countly.Instance.UserDetails.PushUnique("Age", new string[] { "29" });
             Assert.AreEqual(true, Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Age"));
@@ -113,7 +113,7 @@ namespace Tests
 
             Countly.Instance.Init(configuration);
 
-            Assert.AreNotEqual(null, Countly.Instance.UserDetails);
+            Assert.IsNotNull(Countly.Instance.UserDetails);
 
             Countly.Instance.UserDetails.Min("Distance", 10.0);
             Assert.AreEqual(true, Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Distance"));
@@ -134,7 +134,7 @@ namespace Tests
 
             Countly.Instance.Init(configuration);
 
-            Assert.AreNotEqual(null, Countly.Instance.UserDetails);
+            Assert.IsNotNull(Countly.Instance.UserDetails);
 
             Countly.Instance.UserDetails.Multiply("Distance", 2);
             Assert.AreEqual(true, Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Distance"));
