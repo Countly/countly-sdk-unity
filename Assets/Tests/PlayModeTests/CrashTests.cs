@@ -1,13 +1,9 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEngine;
-using UnityEngine.TestTools;
 using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK;
-using Plugins.CountlySDK.Enums;
-using System.Threading.Tasks;
-using System.Linq;
+using Newtonsoft.Json;
 
 namespace Tests
 {
@@ -31,7 +27,7 @@ namespace Tests
 
             Countly.Instance.Init(configuration);
             Countly.Instance.ClearStorage();
-            Assert.AreNotEqual(null, Countly.Instance.CrashReports);
+            Assert.IsNotNull(Countly.Instance.CrashReports);
             Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
 
             Dictionary<string, object> seg = new Dictionary<string, object>{
@@ -57,7 +53,7 @@ namespace Tests
             };
 
             Countly.Instance.Init(configuration);
-            Assert.AreNotEqual(null, Countly.Instance.CrashReports);
+            Assert.IsNotNull(Countly.Instance.CrashReports);
             Assert.AreEqual(0, Countly.Instance.CrashReports._crashBreadcrumbs.Count);
 
             Countly.Instance.CrashReports.AddBreadcrumbs("bread_crumbs");
@@ -81,7 +77,7 @@ namespace Tests
             Countly.Instance.Init(configuration);
             Countly.Instance.ClearStorage();
 
-            Assert.AreNotEqual(null, Countly.Instance.CrashReports);
+            Assert.IsNotNull(Countly.Instance.CrashReports);
             Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
 
             await Countly.Instance.CrashReports.SendCrashReportAsync("", "StackTrace", LogType.Exception, null);
@@ -99,8 +95,27 @@ namespace Tests
                 { "Retry Attempts", "10"}
             };
 
-            await Countly.Instance.CrashReports.SendCrashReportAsync("message", "StackTrace", LogType.Exception, seg);
+           
+            CountlyExceptionDetailModel model = Countly.Instance.CrashReports.ExceptionDetailModel("message", "StackTrace", true, seg);
+            await Countly.Instance.CrashReports.SendCrashReportInternal(model);
+
             Assert.AreEqual(1, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
+
+            CountlyRequestModel requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
+
+            Dictionary<string, object> requestParams = new Dictionary<string, object>
+            {
+                {
+                    "crash", JsonConvert.SerializeObject(model, Newtonsoft.Json.Formatting.Indented,
+                        new JsonSerializerSettings {NullValueHandling = NullValueHandling.Ignore})
+                }
+            };
+
+            string url = Countly.Instance.CrashReports._requestCountlyHelper.BuildGetRequest(requestParams);
+
+            int index = url.IndexOf("crash");
+
+            Assert.AreEqual(url.Substring(index), requestModel.RequestUrl.Substring(index));
         }
 
         /// <summary>
@@ -116,16 +131,20 @@ namespace Tests
 
             Countly.Instance.Init(configuration);
 
-            Assert.AreNotEqual(null, Countly.Instance.CrashReports);
+            Assert.IsNotNull(Countly.Instance.CrashReports);
 
             Assert.AreEqual(0, Countly.Instance.CrashReports._crashBreadcrumbs.Count);
 
-            string breadCrumbs = "12345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345";
+            string breadCrumbs = "12345123451234512345123451234512345112345123451234512345123451234512345112345123451234512345123451234512345112345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345";
             Countly.Instance.CrashReports.AddBreadcrumbs(breadCrumbs);
 
             Assert.AreEqual(1, Countly.Instance.CrashReports._crashBreadcrumbs.Count);
-           Assert.AreEqual(1000, Countly.Instance.CrashReports._crashBreadcrumbs.Dequeue().Length);
 
+            string qBreadCrumbs = Countly.Instance.CrashReports._crashBreadcrumbs.Dequeue();
+            Assert.AreEqual(1000, qBreadCrumbs.Length);
+
+            string validBreadcrumb = breadCrumbs.Length > 1000 ? breadCrumbs.Substring(0, 1000) : breadCrumbs;
+            Assert.AreEqual(validBreadcrumb, qBreadCrumbs); 
         }
 
         /// <summary>
@@ -142,7 +161,7 @@ namespace Tests
 
             Countly.Instance.Init(configuration);
 
-            Assert.AreNotEqual(null, Countly.Instance.CrashReports);
+            Assert.IsNotNull(Countly.Instance.CrashReports);
 
             Assert.AreEqual(0, Countly.Instance.CrashReports._crashBreadcrumbs.Count);
 
@@ -150,7 +169,6 @@ namespace Tests
             Countly.Instance.CrashReports.AddBreadcrumbs("bread_crumbs_2");
             Countly.Instance.CrashReports.AddBreadcrumbs("bread_crumbs_3");
             Assert.AreEqual(3, Countly.Instance.CrashReports._crashBreadcrumbs.Count);
-
 
             Countly.Instance.CrashReports.AddBreadcrumbs("bread_crumbs_4");
             Countly.Instance.CrashReports.AddBreadcrumbs("bread_crumbs_5");
@@ -162,6 +180,11 @@ namespace Tests
             Countly.Instance.CrashReports.AddBreadcrumbs("bread_crumbs_9");
             Assert.AreEqual(5, Countly.Instance.CrashReports._crashBreadcrumbs.Count);
 
+            Assert.AreEqual("bread_crumbs_5", Countly.Instance.CrashReports._crashBreadcrumbs.Dequeue());
+            Assert.AreEqual("bread_crumbs_6", Countly.Instance.CrashReports._crashBreadcrumbs.Dequeue());
+            Assert.AreEqual("bread_crumbs_7", Countly.Instance.CrashReports._crashBreadcrumbs.Dequeue());
+            Assert.AreEqual("bread_crumbs_8", Countly.Instance.CrashReports._crashBreadcrumbs.Dequeue());
+            Assert.AreEqual("bread_crumbs_9", Countly.Instance.CrashReports._crashBreadcrumbs.Dequeue());
         }
 
         [TearDown]
