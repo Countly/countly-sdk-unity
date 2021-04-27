@@ -111,7 +111,6 @@ namespace Tests
             CountlyConfiguration configuration = new CountlyConfiguration {
                 ServerUrl = _serverUrl,
                 AppKey = _appKey,
-                EnablePost = true,
             };
 
             Countly.Instance.Init(configuration);
@@ -140,13 +139,36 @@ namespace Tests
                 }
             };
 
-
-            string url = requestModel.IsRequestGetType ?
-                Countly.Instance.CrashReports._requestCountlyHelper.BuildGetRequest(requestParams) : Countly.Instance.CrashReports._requestCountlyHelper.BuildPostRequest(requestParams);
-
+            string url = 
+                Countly.Instance.CrashReports._requestCountlyHelper.BuildGetRequest(requestParams);
             int index = url.IndexOf("crash");
+            Assert.AreEqual(url.Substring(index), requestModel.RequestUrl.Substring(index));
 
-            Assert.AreEqual(url.Substring(index), requestModel.RequestData == null ? requestModel.RequestUrl.Substring(index) : requestModel.RequestData.Substring(index));
+            // Test Case for Post request
+            CountlyExceptionDetailModel model1 = Countly.Instance.CrashReports.ExceptionDetailModel("A very long message to test post request scenario.",
+                "StackTrace StackTrace StackTrace StackTrace StackTraceStackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTraceStackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTraceStackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTraceStackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTraceStackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTraceStackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTraceStackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTraceStackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTraceStackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTraceStackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTraceStackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTraceStackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTraceStackTrace", true, seg);
+            await Countly.Instance.CrashReports.SendCrashReportInternal(model1);
+
+            Assert.AreEqual(1, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
+
+            CountlyRequestModel requestModel1 = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
+
+            Dictionary<string, object> requestParams1 = new Dictionary<string, object>
+            {
+                {
+                    "crash", JsonConvert.SerializeObject(model1, Newtonsoft.Json.Formatting.Indented,
+                        new JsonSerializerSettings {NullValueHandling = NullValueHandling.Ignore})
+                }
+            };
+
+
+            string url1 = Countly.Instance.CrashReports._requestCountlyHelper.BuildPostRequest(requestParams1);
+
+
+            int index1 = url.IndexOf("crash");
+            Assert.AreEqual(url1.Substring(index1), requestModel1.RequestData.Substring(index1));
+
+
         }
 
         /// <summary>
