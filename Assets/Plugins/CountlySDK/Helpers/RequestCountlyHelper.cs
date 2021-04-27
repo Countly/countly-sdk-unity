@@ -129,7 +129,7 @@ namespace Plugins.CountlySDK.Helpers
         /// </summary>
         /// <param name="queryParams"></param>
         /// <returns></returns>
-        private string BuildPostRequest(Dictionary<string, object> queryParams)
+        internal string BuildPostRequest(Dictionary<string, object> queryParams)
         {
             Dictionary<string, object> baseParams = _countlyUtils.GetBaseParams();
             foreach (KeyValuePair<string, object> item in queryParams) {

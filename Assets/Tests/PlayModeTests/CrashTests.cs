@@ -100,6 +100,35 @@ namespace Tests
             await Countly.Instance.CrashReports.SendCrashReportInternal(model);
 
             Assert.AreEqual(1, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
+        }
+
+        /// <summary>
+        /// It validates the functionality of 'SendCrashReportInternal'.
+        /// </summary>
+        [Test]
+        public async void TestMethod_SendCrashReportInternal()
+        {
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                ServerUrl = _serverUrl,
+                AppKey = _appKey,
+                EnablePost = true,
+            };
+
+            Countly.Instance.Init(configuration);
+            Countly.Instance.ClearStorage();
+
+            Assert.IsNotNull(Countly.Instance.CrashReports);
+
+            Dictionary<string, object> seg = new Dictionary<string, object>{
+                { "Time Spent", "1234455"},
+                { "Retry Attempts", "10"}
+            };
+
+
+            CountlyExceptionDetailModel model = Countly.Instance.CrashReports.ExceptionDetailModel("message", "StackTrace", true, seg);
+            await Countly.Instance.CrashReports.SendCrashReportInternal(model);
+
+            Assert.AreEqual(1, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
 
             CountlyRequestModel requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
 
@@ -111,11 +140,13 @@ namespace Tests
                 }
             };
 
-            string url = Countly.Instance.CrashReports._requestCountlyHelper.BuildGetRequest(requestParams);
+
+            string url = requestModel.IsRequestGetType ?
+                Countly.Instance.CrashReports._requestCountlyHelper.BuildGetRequest(requestParams) : Countly.Instance.CrashReports._requestCountlyHelper.BuildPostRequest(requestParams);
 
             int index = url.IndexOf("crash");
 
-            Assert.AreEqual(url.Substring(index), requestModel.RequestUrl.Substring(index));
+            Assert.AreEqual(url.Substring(index), requestModel.RequestData == null ? requestModel.RequestUrl.Substring(index) : requestModel.RequestData.Substring(index));
         }
 
         /// <summary>
