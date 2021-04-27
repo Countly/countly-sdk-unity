@@ -28,7 +28,7 @@ namespace Tests
 
             Countly.Instance.Init(configuration);
 
-            Assert.AreNotEqual(null, Countly.Instance.Events);
+            Assert.IsNotNull(Countly.Instance.Events);
             Assert.AreEqual(0, Countly.Instance.Events._viewEventRepo.Count);
             Assert.AreEqual(0, Countly.Instance.Events._nonViewEventRepo.Count);
 
@@ -48,7 +48,7 @@ namespace Tests
 
             Countly.Instance.Init(configuration);
 
-            Assert.AreNotEqual(null, Countly.Instance.Events);
+            Assert.IsNotNull(Countly.Instance.Events);
             Assert.AreEqual(0, Countly.Instance.Events._viewEventRepo.Count);
             Assert.AreEqual(0, Countly.Instance.Events._nonViewEventRepo.Count);
 
@@ -74,7 +74,7 @@ namespace Tests
 
             Countly.Instance.Init(configuration);
 
-            Assert.AreNotEqual(null, Countly.Instance.Events);
+            Assert.IsNotNull(Countly.Instance.Events);
             Assert.AreEqual(0, Countly.Instance.Events._viewEventRepo.Count);
             Assert.AreEqual(0, Countly.Instance.Events._nonViewEventRepo.Count);
 
@@ -86,8 +86,8 @@ namespace Tests
             Assert.AreEqual("test_event", model.Key);
             Assert.AreEqual(0, model.Sum);
             Assert.AreEqual(1, model.Count);
-            Assert.AreEqual(null, model.Duration);
-            Assert.AreEqual(null, model.Segmentation);
+            Assert.IsNull( model.Duration);
+            Assert.IsNull(model.Segmentation);
         }
 
         /// <summary>
@@ -104,7 +104,7 @@ namespace Tests
 
             Countly.Instance.Init(configuration);
 
-            Assert.AreNotEqual(null, Countly.Instance.Events);
+            Assert.IsNotNull(Countly.Instance.Events);
             Assert.AreEqual(0, Countly.Instance.Events._viewEventRepo.Count);
             Assert.AreEqual(0, Countly.Instance.Events._nonViewEventRepo.Count);
 
@@ -133,7 +133,7 @@ namespace Tests
 
             Countly.Instance.Init(configuration);
 
-            Assert.AreNotEqual(null, Countly.Instance.Events);
+            Assert.IsNotNull(Countly.Instance.Events);
             Assert.AreEqual(0, Countly.Instance.Events._viewEventRepo.Count);
             Assert.AreEqual(0, Countly.Instance.Events._nonViewEventRepo.Count);
 
@@ -171,7 +171,7 @@ namespace Tests
 
             Countly.Instance.Init(configuration);
 
-            Assert.AreNotEqual(null, Countly.Instance.Events);
+            Assert.IsNotNull(Countly.Instance.Events);
             Assert.AreEqual(0, Countly.Instance.Events._viewEventRepo.Count);
             Assert.AreEqual(0, Countly.Instance.Events._nonViewEventRepo.Count);
 
@@ -218,7 +218,7 @@ namespace Tests
 
             Countly.Instance.Init(configuration);
 
-            Assert.AreNotEqual(null, Countly.Instance.Events);
+            Assert.IsNotNull(Countly.Instance.Events);
             Assert.AreEqual(0, Countly.Instance.Events._viewEventRepo.Count);
             Assert.AreEqual(0, Countly.Instance.Events._nonViewEventRepo.Count);
 
