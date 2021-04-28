@@ -56,6 +56,7 @@ namespace Plugins.CountlySDK.Models
         /// <summary>
         /// Set to true when you don't want to extend session.
         /// </summary
+        [Obsolete("IgnoreSessionCooldown is deprecated, this is going to be removed in the future.")]
         public bool IgnoreSessionCooldown = false;
 
         /// <summary>
@@ -134,7 +135,6 @@ namespace Plugins.CountlySDK.Models
             EnableFirstAppLaunchSegment = config.EnableFirstAppLaunchSegment;
             EnableTestMode = config.EnableTestMode;
             EnableConsoleLogging = config.EnableConsoleLogging;
-            IgnoreSessionCooldown = config.IgnoreSessionCooldown;
             NotificationMode = config.NotificationMode;
             SessionDuration = config.SessionDuration;
             EventQueueThreshold = config.EventQueueThreshold;

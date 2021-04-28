@@ -14,7 +14,6 @@ namespace Plugins.CountlySDK.Models
         public bool EnablePost;
         public bool EnableTestMode;
         public bool EnableConsoleLogging;
-        public bool IgnoreSessionCooldown;
         public TestMode NotificationMode;
         public readonly bool EnableManualSessionHandling;
         public int SessionDuration;
@@ -45,7 +44,6 @@ namespace Plugins.CountlySDK.Models
             EnablePost = enablePost;
             EnableTestMode = enableTestMode;
             EnableConsoleLogging = enableConsoleErrorLogging;
-            IgnoreSessionCooldown = ignoreSessionCooldown;
             NotificationMode = notificationMode;
             SessionDuration = sessionDuration;
             //EnableManualSessionHandling = enableManualSessionHandling;
@@ -58,7 +56,7 @@ namespace Plugins.CountlySDK.Models
 
         public override string ToString()
         {
-            return $"{nameof(Salt)}: {Salt}, {nameof(EnablePost)}: {EnablePost}, {nameof(EnableConsoleLogging)}: {EnableConsoleLogging}, {nameof(IgnoreSessionCooldown)}: {IgnoreSessionCooldown}, {nameof(NotificationMode)}: {NotificationMode}, {nameof(EnableManualSessionHandling)}: {EnableManualSessionHandling}, {nameof(SessionDuration)}: {SessionDuration}, {nameof(EventQueueThreshold)}: {EventQueueThreshold}, {nameof(StoredRequestLimit)}: {StoredRequestLimit}, {nameof(TotalBreadcrumbsAllowed)}: {TotalBreadcrumbsAllowed}, {nameof(EnableAutomaticCrashReporting)}: {EnableAutomaticCrashReporting}";
+            return $"{nameof(Salt)}: {Salt}, {nameof(EnablePost)}: {EnablePost}, {nameof(EnableConsoleLogging)}: {EnableConsoleLogging}, {nameof(NotificationMode)}: {NotificationMode}, {nameof(EnableManualSessionHandling)}: {EnableManualSessionHandling}, {nameof(SessionDuration)}: {SessionDuration}, {nameof(EventQueueThreshold)}: {EventQueueThreshold}, {nameof(StoredRequestLimit)}: {StoredRequestLimit}, {nameof(TotalBreadcrumbsAllowed)}: {TotalBreadcrumbsAllowed}, {nameof(EnableAutomaticCrashReporting)}: {EnableAutomaticCrashReporting}";
         }
     }
 }
