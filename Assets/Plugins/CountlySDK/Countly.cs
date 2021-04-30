@@ -283,7 +283,7 @@ namespace Plugins.CountlySDK
             _logHelper.Debug("[Countly] ClearStorage");
 
             PlayerPrefs.DeleteAll();
-            _storageHelper.DeleteAllTablesData();
+            _storageHelper.ClearDBData();
 
             _storageHelper.CloseDB();
         }
