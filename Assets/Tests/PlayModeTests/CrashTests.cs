@@ -4,6 +4,9 @@ using UnityEngine;
 using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK;
 using Newtonsoft.Json;
+using System.Web;
+using System.Collections.Specialized;
+using Newtonsoft.Json.Linq;
 
 namespace Tests
 {
@@ -91,15 +94,27 @@ namespace Tests
 
 
             Dictionary<string, object> seg = new Dictionary<string, object>{
-                { "Time Spent", "1234455"},
-                { "Retry Attempts", "10"}
+                { "timeSpent", "1234455"},
+                { "rtetryAttempts", "10"}
             };
 
-           
-            CountlyExceptionDetailModel model = Countly.Instance.CrashReports.ExceptionDetailModel("message", "StackTrace", true, seg);
-            await Countly.Instance.CrashReports.SendCrashReportInternal(model);
-
+            await Countly.Instance.CrashReports.SendCrashReportAsync("message", "StackTrace", LogType.Exception, seg);
             Assert.AreEqual(1, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
+
+            CountlyRequestModel requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
+            string myUri = requestModel.RequestUrl; ;
+            NameValueCollection value = HttpUtility.ParseQueryString(myUri);
+            string crash = HttpUtility.ParseQueryString(myUri).Get("crash");
+            JObject json = JObject.Parse(crash);
+            Assert.AreEqual("message", json.GetValue("_name").ToString());
+            Assert.AreEqual("True", json.GetValue("_nonfatal").ToString());
+            Assert.AreEqual("StackTrace", json.GetValue("_error").ToString());
+
+            JObject custom = json["_custom"].ToObject<JObject>();
+
+            Assert.AreEqual("1234455", custom.GetValue("timeSpent").ToString());
+            Assert.AreEqual("10", custom.GetValue("rtetryAttempts").ToString());
+
         }
 
         /// <summary>
@@ -167,7 +182,6 @@ namespace Tests
 
             int index1 = url.IndexOf("crash");
             Assert.AreEqual(url1.Substring(index1), requestModel1.RequestData.Substring(index1));
-
 
         }
 
