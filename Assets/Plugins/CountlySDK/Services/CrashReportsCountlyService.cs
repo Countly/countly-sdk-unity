@@ -38,7 +38,7 @@ namespace Plugins.CountlySDK.Services
             }
 
             if (string.IsNullOrEmpty(message) || string.IsNullOrWhiteSpace(message)) {
-                Log.Warning("[CrashReportsCountlyService] SendCrashReportInternal : The parameter 'message' can't be null or empty");
+                Log.Warning("[CrashReportsCountlyService] LogCallback : The parameter 'message' can't be null or empty");
                 return;
             }
             CountlyExceptionDetailModel model = ExceptionDetailModel(message, stackTrace, false, null);
@@ -68,7 +68,7 @@ namespace Plugins.CountlySDK.Services
             }
 
             if (string.IsNullOrEmpty(message) || string.IsNullOrWhiteSpace(message)) {
-                Log.Warning("[CrashReportsCountlyService] SendCrashReportInternal : The parameter 'message' can't be null or empty");
+                Log.Warning("[CrashReportsCountlyService] SendCrashReportAsync : The parameter 'message' can't be null or empty");
                 return;
             }
 
