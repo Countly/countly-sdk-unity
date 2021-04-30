@@ -132,6 +132,7 @@ namespace Plugins.CountlySDK.Models
             Salt = config.Salt;
             EnablePost = config.EnablePost;
             EnableManualSessionHandling = config.EnableManualSessionHandling;
+            IgnoreSessionCooldown = config.IgnoreSessionCooldown;
             EnableFirstAppLaunchSegment = config.EnableFirstAppLaunchSegment;
             EnableTestMode = config.EnableTestMode;
             EnableConsoleLogging = config.EnableConsoleLogging;
