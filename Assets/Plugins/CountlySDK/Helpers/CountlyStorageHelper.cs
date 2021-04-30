@@ -2,6 +2,8 @@ using iBoxDB.LocalServer;
 using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK.Persistance.Dao;
 using Plugins.CountlySDK.Persistance.Entities;
+using Plugins.CountlySDK.Persistance.Repositories;
+using Plugins.CountlySDK.Persistance.Repositories.Impls;
 using Plugins.iBoxDB;
 using UnityEngine;
 
@@ -21,14 +23,16 @@ namespace Plugins.CountlySDK.Helpers
 
         private CountlyLogHelper _logHelper;
 
-        internal SegmentDao ViewSegmentDao { get; private set; }
-        internal SegmentDao NonViewSegmentDao { get; private set; }
+        internal SegmentDao EventSegmentDao { get; private set; }
 
         internal Dao<ConfigEntity> ConfigDao { get; private set; }
         internal Dao<RequestEntity> RequestDao { get; private set; }
-        internal Dao<EventEntity> ViewEventDao { get; private set; }
-        internal Dao<EventEntity> NonViewEventDao { get; private set; }
+        internal Dao<EventEntity> EventDao { get; private set; }
         internal Dao<EventNumberInSameSessionEntity> EventNrInSameSessionDao { get; private set; }
+
+        internal RequestRepository RequestRepo { get; private set; }
+        internal NonViewEventRepository EventRepo { get; private set; }
+        internal ViewEventRepository ViewRepo { get; private set; }
 
         internal CountlyStorageHelper(CountlyLogHelper logHelper)
         {
@@ -51,12 +55,12 @@ namespace Plugins.CountlySDK.Helpers
 
             db.GetConfig().EnsureTable<SegmentEntity>(EntityType.Configs.ToString(), "Id");
             db.GetConfig().EnsureTable<RequestEntity>(EntityType.Requests.ToString(), "Id");
-            db.GetConfig().EnsureTable<EventEntity>(EntityType.ViewEvents.ToString(), "Id");
             db.GetConfig().EnsureTable<EventEntity>(EntityType.NonViewEvents.ToString(), "Id");
-            db.GetConfig().EnsureTable<SegmentEntity>(EntityType.ViewEventSegments.ToString(), "Id");
             db.GetConfig().EnsureTable<SegmentEntity>(EntityType.NonViewEventSegments.ToString(), "Id");
 
             if (_currentVersion < 1) {
+                db.GetConfig().EnsureTable<EventEntity>(EntityType.ViewEvents.ToString(), "Id");
+                db.GetConfig().EnsureTable<SegmentEntity>(EntityType.ViewEventSegments.ToString(), "Id");
                 db.GetConfig().EnsureTable<EventNumberInSameSessionEntity>(EntityType.EventNumberInSameSessions.ToString(), "Id");
             }
 
@@ -73,17 +77,27 @@ namespace Plugins.CountlySDK.Helpers
             _db = BuildDatabase(_dbNumber);
             DB.AutoBox auto = _db.Open();
 
-            ViewSegmentDao = new SegmentDao(auto, EntityType.ViewEventSegments.ToString(), _logHelper);
-            NonViewSegmentDao = new SegmentDao(auto, EntityType.NonViewEventSegments.ToString(), _logHelper);
+            EventSegmentDao = new SegmentDao(auto, EntityType.NonViewEventSegments.ToString(), _logHelper);
 
             ConfigDao = new Dao<ConfigEntity>(auto, EntityType.Configs.ToString(), _logHelper);
             RequestDao = new Dao<RequestEntity>(auto, EntityType.Requests.ToString(), _logHelper);
-            ViewEventDao = new Dao<EventEntity>(auto, EntityType.ViewEvents.ToString(), _logHelper);
-            NonViewEventDao = new Dao<EventEntity>(auto, EntityType.NonViewEvents.ToString(), _logHelper);
+            EventDao = new Dao<EventEntity>(auto, EntityType.NonViewEvents.ToString(), _logHelper);
 
             if (_currentVersion < 1) {
                 EventNrInSameSessionDao = new Dao<EventNumberInSameSessionEntity>(auto, EntityType.EventNumberInSameSessions.ToString(), _logHelper);
+
+                Dao<EventEntity> viewDao = new Dao<EventEntity>(auto, EntityType.ViewEvents.ToString(), _logHelper);
+                SegmentDao viewSegmentDao = new SegmentDao(auto, EntityType.ViewEventSegments.ToString(), _logHelper);
+
+                ViewRepo = new ViewEventRepository(viewDao, viewSegmentDao, _logHelper);
+                ViewRepo.Initialize();
             }
+
+            RequestRepo = new RequestRepository(RequestDao, _logHelper);
+            EventRepo = new NonViewEventRepository(EventDao, EventSegmentDao, _logHelper);
+
+            EventRepo.Initialize();
+            RequestRepo.Initialize();
 
         }
 
@@ -104,9 +118,17 @@ namespace Plugins.CountlySDK.Helpers
         {
             _logHelper.Verbose("[CountlyStorageHelper] RunMigration : currentVersion = " + _currentVersion);
 
-            // _schemaVersion = 1 : deletion of the data in the “EventNumberInSameSessionEntity” table
+            /* 
+             * Schema Version = 1 :
+             * - Deletion of the data in the “EventNumberInSameSessionEntity” table
+             * - Copy data of 'Views Repository(Entity Dao, Segment Dao)' into Event Repository(Entity Dao, Segment Dao)'.
+            */
             if (_currentVersion == 0) {
                 Migration_EventNumberInSameSessionEntityDataRemoval();
+                Migration_CopyViewDataIntoEventData();
+
+                PlayerPrefs.SetInt(Constants.SchemaVersion, 1);
+
             }
 
             PlayerPrefs.SetInt(Constants.SchemaVersion, _schemaVersion);
@@ -118,8 +140,25 @@ namespace Plugins.CountlySDK.Helpers
         private void Migration_EventNumberInSameSessionEntityDataRemoval()
         {
             EventNrInSameSessionDao.RemoveAll();
-            PlayerPrefs.SetInt(Constants.SchemaVersion, 1);
             _logHelper.Verbose("[CountlyStorageHelper] Migration_EventNumberInSameSessionEntityDataRemoval");
+        }
+
+        /// <summary>
+        /// Migration to version 1: Copy data of 'Views Repository(Entity Dao, Segment Dao)' into Event Repository(Entity Dao, Segment Dao)'.
+        /// </summary>
+        private void Migration_CopyViewDataIntoEventData()
+        {
+            while (ViewRepo.Count > 0) {
+                EventRepo.Enqueue(ViewRepo.Dequeue());
+            }
+            _logHelper.Verbose("[CountlyStorageHelper] Migration_CopyViewDataIntoEventData");
+
+        }
+
+        internal void ClearDBData() {
+            EventRepo.Clear();
+            RequestRepo.Clear();
+            ConfigDao.RemoveAll();
         }
     }
 }
