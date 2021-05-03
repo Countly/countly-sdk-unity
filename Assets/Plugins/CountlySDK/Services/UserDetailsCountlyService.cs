@@ -33,10 +33,10 @@ namespace Plugins.CountlySDK.Services
         internal async Task UserDetailsAsync(CountlyUserDetailsModel userDetailsModel)
         {
 
-            Log.Debug("[StarRatingCountlyService] UserDetailsAsync : userDetails = " + (userDetailsModel != null));
+            Log.Debug("[UserDetailsCountlyService] UserDetailsAsync : userDetails = " + (userDetailsModel != null));
 
             if (userDetailsModel == null) {
-                Log.Warning("[StarRatingCountlyService] UserDetailsAsync : The parameter 'userDetailsModel' can't be null.");
+                Log.Warning("[UserDetailsCountlyService] UserDetailsAsync : The parameter 'userDetailsModel' can't be null.");
                 return;
             }
 
@@ -51,10 +51,10 @@ namespace Plugins.CountlySDK.Services
         /// <return></returns>
         internal async Task UserCustomDetailsAsync(CountlyUserDetailsModel userDetailsModel)
         {
-            Log.Debug("[StarRatingCountlyService] UserCustomDetailsAsync " + (userDetailsModel != null));
+            Log.Debug("[UserDetailsCountlyService] UserCustomDetailsAsync " + (userDetailsModel != null));
 
             if (userDetailsModel == null) {
-                Log.Warning("[StarRatingCountlyService] UserCustomDetailsAsync : The parameter 'userDetailsModel' can't be null.");
+                Log.Warning("[UserDetailsCountlyService] UserCustomDetailsAsync : The parameter 'userDetailsModel' can't be null.");
                 return;
             }
 
@@ -68,14 +68,14 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async Task SetUserDetailsAsync(CountlyUserDetailsModel userDetailsModel)
         {
-            Log.Info("[StarRatingCountlyService] SetUserDetailsAsync " + (userDetailsModel != null));
+            Log.Info("[UserDetailsCountlyService] SetUserDetailsAsync " + (userDetailsModel != null));
 
             if (!_consentService.CheckConsentInternal(Consents.Users)) {
                 return;
             }
 
             if (userDetailsModel == null) {
-                Log.Warning("[StarRatingCountlyService] SetUserDetailsAsync : The parameter 'userDetailsModel' can't be null.");
+                Log.Warning("[UserDetailsCountlyService] SetUserDetailsAsync : The parameter 'userDetailsModel' can't be null.");
                 return;
             }
 
@@ -101,19 +101,19 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async Task SetCustomUserDetailsAsync(CountlyUserDetailsModel userDetailsModel)
         {
-            Log.Info("[StarRatingCountlyService] SetCustomUserDetailsAsync " + (userDetailsModel != null));
+            Log.Info("[UserDetailsCountlyService] SetCustomUserDetailsAsync " + (userDetailsModel != null));
 
             if (!_consentService.CheckConsentInternal(Consents.Users)) {
                 return;
             }
 
             if (userDetailsModel == null) {
-                Log.Warning("[StarRatingCountlyService] SetCustomUserDetailsAsync : The parameter 'userDetailsModel' can't be null.");
+                Log.Warning("[UserDetailsCountlyService] SetCustomUserDetailsAsync : The parameter 'userDetailsModel' can't be null.");
                 return;
             }
 
             if (userDetailsModel.Custom == null || userDetailsModel.Custom.Count == 0) {
-                Log.Warning("[StarRatingCountlyService] SetCustomUserDetailsAsync : The custom property 'userDetailsModel.Custom' can't be null or empty.");
+                Log.Warning("[UserDetailsCountlyService] SetCustomUserDetailsAsync : The custom property 'userDetailsModel.Custom' can't be null or empty.");
 
                 return;
             }
@@ -142,7 +142,7 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
 
-            Log.Info("[StarRatingCountlyService] SaveAsync");
+            Log.Info("[UserDetailsCountlyService] SaveAsync");
 
 
             CountlyUserDetailsModel model = new CountlyUserDetailsModel(CustomDataProperties);
@@ -281,7 +281,7 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value">property value</param>
         private void AddToCustomData(string key, object value)
         {
-            Log.Debug("[StarRatingCountlyService] AddToCustomData: " + key + ", " + value);
+            Log.Debug("[UserDetailsCountlyService] AddToCustomData: " + key + ", " + value);
 
             if (!_consentService.CheckConsentInternal(Consents.Users)) {
                 return;
