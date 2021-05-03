@@ -55,8 +55,6 @@ namespace Tests
 
             await Countly.Instance.Events.RecordEventAsync("test_event", segmentation: null, sum: 23, duration: 5);
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
-
-
         }
 
         /// <summary>
@@ -84,6 +82,17 @@ namespace Tests
             Assert.AreEqual(1, model.Count);
             Assert.IsNull( model.Duration);
             Assert.IsNull(model.Segmentation);
+
+            await Countly.Instance.Events.RecordEventAsync("test_event1", segmentation: null, count: 5, duration: null, sum: null);
+            Assert.AreEqual(1, Countly.Instance.Events._eventRepo.Count);
+
+            CountlyEventModel model1 = Countly.Instance.Events._eventRepo.Dequeue();
+
+            Assert.AreEqual("test_event1", model1.Key);
+            Assert.AreEqual(5, model1.Count);
+            Assert.IsNull(model1.Sum);
+            Assert.IsNull(model1.Duration);
+            Assert.IsNull(model1.Segmentation);
         }
 
         /// <summary>
@@ -178,9 +187,7 @@ namespace Tests
             { "key6", Countly.Instance} // invalid
             };
 
-            SegmentModel segmentModel = new SegmentModel(segments);
-
-            await Countly.Instance.Events.RecordEventAsync("test_event", segmentation: segmentModel, sum: 23, duration: 5);
+            await Countly.Instance.Events.RecordEventAsync("test_event", segmentation: segments, sum: 23, duration: 5);
 
             CountlyEventModel model = Countly.Instance.Events._eventRepo.Dequeue();
 
@@ -220,16 +227,14 @@ namespace Tests
             { "key2", "value2"}
             };
 
-            SegmentModel segmentModel = new SegmentModel(segments);
 
-
-            await Countly.Instance.Events.RecordEventAsync("", segmentation: segmentModel, sum: 23, duration: 5);
+            await Countly.Instance.Events.RecordEventAsync("", segmentation: segments, sum: 23, duration: 5);
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
             await Countly.Instance.Events.RecordEventAsync("");
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync(null, segmentation: segmentModel, sum: 23, duration: 5);
+            await Countly.Instance.Events.RecordEventAsync(null, segmentation: segments, sum: 23, duration: 5);
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
             await Countly.Instance.Events.RecordEventAsync(" ");
@@ -238,7 +243,7 @@ namespace Tests
             await Countly.Instance.Events.RecordEventAsync("key", segmentation: null, sum: 23, duration: 5);
             Assert.AreEqual(1, Countly.Instance.Events._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("key", segmentation: segmentModel, sum: 23, duration: null);
+            await Countly.Instance.Events.RecordEventAsync("key", segmentation: segments, sum: 23, duration: null);
             Assert.AreEqual(2, Countly.Instance.Events._eventRepo.Count);
         }
 
