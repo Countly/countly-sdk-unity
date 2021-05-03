@@ -148,6 +148,8 @@ namespace Plugins.CountlySDK.Services
 
             IsSessionInitiated = false;
 
+            await _eventService.AddEventsToRequestQueue();
+
             Dictionary<string, object> requestParams =
                 new Dictionary<string, object>
                 {

@@ -3,6 +3,7 @@ using Plugins.CountlySDK.Helpers;
 using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK.Services;
 using System;
+using System.IO;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -20,6 +21,8 @@ namespace Notifications.Impls.Android
         private readonly AndroidBridge _bridge;
         private readonly EventCountlyService _eventCountlyService;
 
+        public bool IsInitializedWithoutError { get; set; }
+
         internal AndroidNotificationsService(Transform countlyGameObject, CountlyConfiguration config, CountlyLogHelper log, EventCountlyService eventCountlyService)
         {
             Log = log;
@@ -34,9 +37,14 @@ namespace Notifications.Impls.Android
             _bridge = gameObject.AddComponent<AndroidBridge>();
             _bridge.Log = Log;
 
-            AndroidJavaClass countlyPushPlugin = new AndroidJavaClass(CountlyPushPluginPackageName);
-            countlyPushPlugin.CallStatic("setEnableLog", config.EnableConsoleLogging);
-
+            try {
+                AndroidJavaClass countlyPushPlugin = new AndroidJavaClass(CountlyPushPluginPackageName);
+                countlyPushPlugin.CallStatic("setEnableLog", config.EnableConsoleLogging);
+                IsInitializedWithoutError = true;
+            } catch (Exception ex) {
+                Log.Error("[AndroidNotificationsService] Exception in initializing service: " + ex.Message);
+                IsInitializedWithoutError = false;
+            }
         }
 
         public void GetToken(Action<string> result)
