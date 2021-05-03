@@ -103,7 +103,6 @@ namespace Tests
 
             CountlyRequestModel requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
             string myUri = requestModel.RequestUrl;
-            NameValueCollection value = HttpUtility.ParseQueryString(myUri);
             string crash = HttpUtility.ParseQueryString(myUri).Get("crash");
             JObject json = JObject.Parse(crash);
             Assert.AreEqual("message", json.GetValue("_name").ToString());
