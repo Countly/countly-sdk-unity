@@ -29,15 +29,15 @@ namespace Tests
             Countly.Instance.Init(configuration);
 
             Assert.IsNotNull(Countly.Instance.Views);
-            Assert.AreEqual(0, Countly.Instance.Views._eventService._viewEventRepo.Count);
+            Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
 
         }
 
         /// <summary>
-        /// It checks the working of event service if no event consent is given.
+        /// It checks the working of views service if no views consent is given.
         /// </summary>
         [Test]
-        public async void TestEventConsent()
+        public async void TestViewsConsent()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 ServerUrl = _serverUrl,
@@ -45,26 +45,27 @@ namespace Tests
                 RequiresConsent = true
             };
 
+
             Countly.Instance.Init(configuration);
 
+            Countly.Instance.ClearStorage();
             Assert.IsNotNull(Countly.Instance.Views);
-            Assert.AreEqual(0, Countly.Instance.Events._viewEventRepo.Count);
-            Assert.AreEqual(0, Countly.Instance.Events._nonViewEventRepo.Count);
+            Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("test_event");
-            Assert.AreEqual(0, Countly.Instance.Events._nonViewEventRepo.Count);
+            await Countly.Instance.Views.RecordCloseViewAsync("close_view");
+            Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
 
-            await Countly.Instance.Events.ReportCustomEventAsync("test_event", segmentation: null, sum: 23, duration: 5);
-            Assert.AreEqual(0, Countly.Instance.Events._nonViewEventRepo.Count);
+            await Countly.Instance.Views.RecordOpenViewAsync("open_view");
+            Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
 
 
         }
 
         /// <summary>
-        /// It validates functionality of method 'RecordEventAsync'.
+        /// It validates functionality of method 'RecordCloseViewAsync'.
         /// </summary>
         [Test]
-        public async void TestEventMethod_RecordEventAsync()
+        public async void TestViewMethod_RecordCloseViewAsync()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 ServerUrl = _serverUrl,
@@ -73,24 +74,65 @@ namespace Tests
 
             Countly.Instance.Init(configuration);
 
-            Assert.IsNotNull(Countly.Instance.Events);
-            Assert.AreEqual(0, Countly.Instance.Events._viewEventRepo.Count);
-            Assert.AreEqual(0, Countly.Instance.Events._nonViewEventRepo.Count);
+            Countly.Instance.ClearStorage();
+            Assert.IsNotNull(Countly.Instance.Views);
+            Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("test_event");
-            Assert.AreEqual(1, Countly.Instance.Events._nonViewEventRepo.Count);
+            await Countly.Instance.Views.RecordCloseViewAsync("close_view");
+            Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
 
-            CountlyEventModel model = Countly.Instance.Events._nonViewEventRepo.Dequeue();
+            CountlyEventModel model = Countly.Instance.Views._eventService._eventRepo.Dequeue();
 
-            Assert.AreEqual("test_event", model.Key);
-            Assert.AreEqual(0, model.Sum);
+            Assert.AreEqual(CountlyEventModel.ViewEvent, model.Key);
+            Assert.IsNull(model.Sum);
             Assert.AreEqual(1, model.Count);
             Assert.IsNull( model.Duration);
-            Assert.IsNull(model.Segmentation);
+            Assert.IsNotNull(model.Segmentation);
+            Assert.AreEqual("close_view", model.Segmentation["name"]);
+            Assert.AreEqual(1, model.Segmentation["exit"]);
+            Assert.AreEqual(0, model.Segmentation["bounce"]);
+            Assert.AreEqual(0, model.Segmentation["visit"]);
+            Assert.AreEqual(0, model.Segmentation["start"]);
+
         }
 
         /// <summary>
-        /// It validates the working of event service if 'EventQueueThreshold' limit reach.
+        /// It validates functionality of method 'RecordOpenViewAsync'.
+        /// </summary>
+        [Test]
+        public async void TestViewsMethod_RecordOpenViewAsync()
+        {
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                ServerUrl = _serverUrl,
+                AppKey = _appKey,
+            };
+
+            Countly.Instance.Init(configuration);
+
+            Countly.Instance.ClearStorage();
+            Assert.IsNotNull(Countly.Instance.Views);
+            Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
+
+            await Countly.Instance.Views.RecordOpenViewAsync("open_view");
+            Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
+
+            CountlyEventModel model = Countly.Instance.Views._eventService._eventRepo.Dequeue();
+
+            Assert.AreEqual(CountlyEventModel.ViewEvent, model.Key);
+            Assert.IsNull(model.Sum);
+            Assert.AreEqual(1, model.Count);
+            Assert.IsNull(model.Duration);
+            Assert.IsNotNull(model.Segmentation);
+            Assert.AreEqual("open_view", model.Segmentation["name"]);
+            Assert.AreEqual(0, model.Segmentation["exit"]);
+            Assert.AreEqual(0, model.Segmentation["bounce"]);
+            Assert.AreEqual(1, model.Segmentation["visit"]);
+            Assert.AreEqual(0, model.Segmentation["start"]);
+
+        }
+
+        /// <summary>
+        /// It validates 'EventQueueThreshold' limit.
         /// </summary>
         [Test]
         public async void TestEvent_EventQueueThreshold_Limit()
@@ -102,28 +144,28 @@ namespace Tests
             };
 
             Countly.Instance.Init(configuration);
+            Countly.Instance.ClearStorage();
 
-            Assert.IsNotNull(Countly.Instance.Events);
-            Assert.AreEqual(0, Countly.Instance.Events._viewEventRepo.Count);
-            Assert.AreEqual(0, Countly.Instance.Events._nonViewEventRepo.Count);
+            Assert.IsNotNull(Countly.Instance.Views);
+            Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("test_event_1");
-            Assert.AreEqual(1, Countly.Instance.Events._nonViewEventRepo.Count);
+            await Countly.Instance.Views.RecordCloseViewAsync("close_view");
+            Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("test_event_2");
-            Assert.AreEqual(2, Countly.Instance.Events._nonViewEventRepo.Count);
+            await Countly.Instance.Views.RecordOpenViewAsync("open_view");
+            Assert.AreEqual(2, Countly.Instance.Views._eventService._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("test_event_3");
-            Assert.AreEqual(0, Countly.Instance.Events._nonViewEventRepo.Count);
+            await Countly.Instance.Views.ReportActionAsync("action", 10, 10, 100, 100);
+            Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
 
 
         }
 
         /// <summary>
-        /// It validates functionality of method 'ReportCustomEventAsync'.
+        /// It validates functionality of method 'ReportActionAsync'.
         /// </summary>
         [Test]
-        public async void TestEventMethod_ReportCustomEventAsync()
+        public async void TestViewsMethod_ReportActionAsync()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 ServerUrl = _serverUrl,
@@ -132,121 +174,26 @@ namespace Tests
 
             Countly.Instance.Init(configuration);
 
-            Assert.IsNotNull(Countly.Instance.Events);
-            Assert.AreEqual(0, Countly.Instance.Events._viewEventRepo.Count);
-            Assert.AreEqual(0, Countly.Instance.Events._nonViewEventRepo.Count);
+            Countly.Instance.ClearStorage();
+            Assert.IsNotNull(Countly.Instance.Views);
+            Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
 
+            await Countly.Instance.Views.ReportActionAsync("action", 10, 20, 100, 100);
+            Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
 
-            Dictionary<string, object> segments = new Dictionary<string, object>{
-            { "key1", "value1"},
-            { "key2", "value2"}
-            };
+            CountlyEventModel model = Countly.Instance.Views._eventService._eventRepo.Dequeue();
 
-            SegmentModel segmentModel = new SegmentModel(segments);
-
-            await Countly.Instance.Events.RecordEventAsync("test_event", segmentation: segmentModel, sum: 23, duration: 5);
-
-            CountlyEventModel model = Countly.Instance.Events._nonViewEventRepo.Dequeue();
-
-            Assert.AreEqual("test_event", model.Key);
-            Assert.AreEqual(23, model.Sum);
+            Assert.AreEqual(CountlyEventModel.ViewActionEvent, model.Key);
+            Assert.IsNull(model.Sum);
             Assert.AreEqual(1, model.Count);
-            Assert.AreEqual(5, model.Duration);
-            Assert.AreEqual(2, model.Segmentation.Count);
-            Assert.AreEqual("value1", model.Segmentation["key1"]);
-            Assert.AreEqual("value2", model.Segmentation["key2"]);
-        }
+            Assert.IsNull(model.Duration);
+            Assert.IsNotNull(model.Segmentation);
 
-        /// <summary>
-        /// It validates the data type of segment items.
-        /// </summary>
-        [Test]
-        public async void TestSegmentItemsDataTypesValidation()
-        {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-            };
-
-            Countly.Instance.Init(configuration);
-
-            Assert.IsNotNull(Countly.Instance.Events);
-            Assert.AreEqual(0, Countly.Instance.Events._viewEventRepo.Count);
-            Assert.AreEqual(0, Countly.Instance.Events._nonViewEventRepo.Count);
-
-
-            Dictionary<string, object> segments = new Dictionary<string, object>{
-            { "key1", "value1"},
-            { "key2", 1},
-            { "key3", 10.0},
-            { "key4", true},
-            { "key5", null},// invalid
-            { "key6", Countly.Instance} // invalid
-            };
-
-            SegmentModel segmentModel = new SegmentModel(segments);
-
-            await Countly.Instance.Events.RecordEventAsync("test_event", segmentation: segmentModel, sum: 23, duration: 5);
-
-            CountlyEventModel model = Countly.Instance.Events._nonViewEventRepo.Dequeue();
-
-            Assert.AreEqual("test_event", model.Key);
-            Assert.AreEqual(23, model.Sum);
-            Assert.AreEqual(1, model.Count);
-            Assert.AreEqual(5, model.Duration);
-            Assert.AreEqual(4, model.Segmentation.Count);
-            Assert.AreEqual(true, model.Segmentation.ContainsKey("key1"));
-            Assert.AreEqual(true, model.Segmentation.ContainsKey("key2"));
-            Assert.AreEqual(true, model.Segmentation.ContainsKey("key3"));
-            Assert.AreEqual(true, model.Segmentation.ContainsKey("key4"));
-            Assert.AreEqual(false, model.Segmentation.ContainsKey("key5"));
-            Assert.AreEqual(false, model.Segmentation.ContainsKey("key6"));
-
-        }
-
-        /// <summary>
-        /// It validates the mandatory and optional parameters of events.
-        /// </summary>
-        [Test]
-        public async void TestEventsParameters()
-        {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-            };
-
-            Countly.Instance.Init(configuration);
-
-            Assert.IsNotNull(Countly.Instance.Events);
-            Assert.AreEqual(0, Countly.Instance.Events._viewEventRepo.Count);
-            Assert.AreEqual(0, Countly.Instance.Events._nonViewEventRepo.Count);
-
-
-            Dictionary<string, object> segments = new Dictionary<string, object>{
-            { "key1", "value1"},
-            { "key2", "value2"}
-            };
-
-            SegmentModel segmentModel = new SegmentModel(segments);
-
-
-            await Countly.Instance.Events.RecordEventAsync("", segmentation: segmentModel, sum: 23, duration: 5);
-            Assert.AreEqual(0, Countly.Instance.Events._nonViewEventRepo.Count);
-
-            await Countly.Instance.Events.RecordEventAsync("");
-            Assert.AreEqual(0, Countly.Instance.Events._nonViewEventRepo.Count);
-
-            await Countly.Instance.Events.RecordEventAsync(null, segmentation: segmentModel, sum: 23, duration: 5);
-            Assert.AreEqual(0, Countly.Instance.Events._nonViewEventRepo.Count);
-
-            await Countly.Instance.Events.RecordEventAsync(" ");
-            Assert.AreEqual(0, Countly.Instance.Events._nonViewEventRepo.Count);
-
-            await Countly.Instance.Events.RecordEventAsync("key", segmentation: null, sum: 23, duration: 5);
-            Assert.AreEqual(1, Countly.Instance.Events._nonViewEventRepo.Count);
-
-            await Countly.Instance.Events.RecordEventAsync("key", segmentation: segmentModel, sum: 23, duration: null);
-            Assert.AreEqual(2, Countly.Instance.Events._nonViewEventRepo.Count);
+            Assert.AreEqual("action", model.Segmentation["type"]);
+            Assert.AreEqual(10, model.Segmentation["x"]);
+            Assert.AreEqual(20, model.Segmentation["y"]);
+            Assert.AreEqual(100, model.Segmentation["width"]);
+            Assert.AreEqual(100, model.Segmentation["height"]);
         }
 
         [TearDown]
