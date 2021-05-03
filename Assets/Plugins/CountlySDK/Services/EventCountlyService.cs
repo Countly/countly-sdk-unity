@@ -99,8 +99,7 @@ namespace Plugins.CountlySDK.Services
         /// <param name="sum">set sum if needed, default value is "0"</param>
         /// <param name="duration">set sum if needed, default value is "0"</param>
         /// <returns></returns>
-        [Obsolete("RecordEventAsync is deprecated, please use ReportCustomEventAsync method instead.")]
-        public async Task RecordEventAsync(string key, SegmentModel segmentation,
+        public async Task RecordEventAsync(string key, IDictionary<string, object> segmentation = null,
             int? count = 1, double? sum = 0, double? duration = null)
         {
             Log.Info("[EventCountlyService] RecordEventAsync : key = " + key + ", segmentation = " + segmentation + ", count = " + count + ", sum = " + sum + ", duration = " + duration);
@@ -175,6 +174,7 @@ namespace Plugins.CountlySDK.Services
         /// <param name="sum">set sum if needed, default value is "0"</param>
         /// <param name="duration">set sum if needed, default value is "0"</param>
         /// <returns></returns>
+        [Obsolete("ReportCustomEventAsync is deprecated, please use RecordEventAsync method instead.")]
         public async Task ReportCustomEventAsync(string key,
                     IDictionary<string, object> segmentation = null,
                     int? count = 1, double? sum = null, double? duration = null)
