@@ -94,15 +94,15 @@ namespace Tests
 
 
             Dictionary<string, object> seg = new Dictionary<string, object>{
-                { "timeSpent", "1234455"},
-                { "rtetryAttempts", "10"}
+                { "Time Spent", "1234455"},
+                { "Retry Attempts", "10"}
             };
 
             await Countly.Instance.CrashReports.SendCrashReportAsync("message", "StackTrace", LogType.Exception, seg);
             Assert.AreEqual(1, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
 
             CountlyRequestModel requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
-            string myUri = requestModel.RequestUrl; ;
+            string myUri = requestModel.RequestUrl;
             NameValueCollection value = HttpUtility.ParseQueryString(myUri);
             string crash = HttpUtility.ParseQueryString(myUri).Get("crash");
             JObject json = JObject.Parse(crash);
@@ -112,8 +112,8 @@ namespace Tests
 
             JObject custom = json["_custom"].ToObject<JObject>();
 
-            Assert.AreEqual("1234455", custom.GetValue("timeSpent").ToString());
-            Assert.AreEqual("10", custom.GetValue("rtetryAttempts").ToString());
+            Assert.AreEqual("1234455", custom.GetValue("Time Spent").ToString());
+            Assert.AreEqual("10", custom.GetValue("Retry Attempts").ToString());
 
         }
 
