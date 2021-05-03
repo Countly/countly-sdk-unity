@@ -131,7 +131,7 @@ namespace Plugins.CountlySDK.Services
 
                     if (!isValidDataType) {
                         toRemove.Add(item.Key);
-                        Log.Warning("[EventCountlyService] RecordEventAsync : In segmentation Data type of item '" + item.Key + "'isn't valid.");
+                        Log.Warning("[EventCountlyService] ReportCustomEventAsync : In segmentation Data type '" + (item.Value?.GetType()) + "'  of item '" + item.Key + "' isn't valid.");
                     }
                 }
 
