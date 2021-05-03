@@ -14,6 +14,7 @@ namespace Notifications.Impls.iOs
         private readonly Transform _countlyGameObject;
         private readonly Action<IEnumerator> _startCoroutine;
         private readonly EventCountlyService _eventCountlyService;
+        public bool IsInitializedWithoutError { get; set; }
 
         private readonly IOSBridge _bridge;
         private const string BridgeName = "[iOS] Bridge";
@@ -30,6 +31,8 @@ namespace Notifications.Impls.iOs
 
             _bridge = gameObject.AddComponent<IOSBridge>();
             _bridge.Log = log;
+
+            IsInitializedWithoutError = true;
 
         }
 

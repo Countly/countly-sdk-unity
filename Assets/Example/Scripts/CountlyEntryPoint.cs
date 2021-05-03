@@ -38,7 +38,7 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
         countly = Countly.Instance;
     }
 
-    private void OnDisable()
+    private void OnApplicationQuit()
     {
         Countly.Instance.Notifications.RemoveListener(this);
     }
@@ -186,7 +186,7 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
 
     public async void EventWithSum()
     {
-        await countly.Events.ReportCustomEventAsync("Event With Sum", sum: 23);
+        await countly.Events.RecordEventAsync("Event With Sum", sum: 23);
     }
 
     public async void EventWithSegmentation()
@@ -198,7 +198,7 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
             { "Retry Attempts", "10"}
         };
 
-        await countly.Events.ReportCustomEventAsync("Event With Segmentation", segmentation: segment);
+        await countly.Events.RecordEventAsync("Event With Segmentation", segmentation: segment);
     }
 
     public async void EventWithSumAndSegmentation()
@@ -208,7 +208,7 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
             { "Retry Attempts", "10"}
         };
 
-        await countly.Events.ReportCustomEventAsync("Event With Sum And Segmentation", segmentation: segments, sum: 23);
+        await countly.Events.RecordEventAsync("Event With Sum And Segmentation", segmentation: segments, sum: 23);
 
     }
 
@@ -233,7 +233,7 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
             { "Current Millis", currentMillis},
         };
 
-        await countly.Events.ReportCustomEventAsync("Event With Invalid Segmentation", segmentation: segment);
+        await countly.Events.RecordEventAsync("Event With Invalid Segmentation", segmentation: segment);
     }
 
     public async void ReportViewMainScene()

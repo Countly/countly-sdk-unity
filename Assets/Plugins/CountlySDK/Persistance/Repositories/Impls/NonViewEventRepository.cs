@@ -13,7 +13,7 @@ namespace Plugins.CountlySDK.Persistance.Repositories.Impls
 
         protected override bool ValidateModelBeforeEnqueue(CountlyEventModel model)
         {
-            return !model.Key.Equals(CountlyEventModel.ViewEvent);
+            return true;
         }
     }
 }

@@ -131,10 +131,6 @@ namespace Plugins.CountlySDK
         private bool _logSubscribed;
         private PushCountlyService _push;
 
-        private RequestRepository _requestRepo;
-        private ViewEventRepository _viewEventRepo;
-        private NonViewEventRepository _nonViewEventRepo;
-
 
         /// <summary>
         ///     Initialize SDK at the start of your app
@@ -191,15 +187,9 @@ namespace Plugins.CountlySDK
 
             _storageHelper.RunMigration();
 
-            _requestRepo = new RequestRepository(_storageHelper.RequestDao, _logHelper);
-            _viewEventRepo = new ViewEventRepository(_storageHelper.ViewEventDao, _storageHelper.ViewSegmentDao, _logHelper);
-            _nonViewEventRepo = new NonViewEventRepository(_storageHelper.NonViewEventDao, _storageHelper.NonViewSegmentDao, _logHelper);
 
-            _requestRepo.Initialize();
-            _viewEventRepo.Initialize();
-            _nonViewEventRepo.Initialize();
 
-            Init(_requestRepo, _viewEventRepo, _nonViewEventRepo, _storageHelper.ConfigDao);
+            Init(_storageHelper.RequestRepo, _storageHelper.EventRepo, _storageHelper.ConfigDao);
 
             Device.InitDeviceId(configuration.DeviceId);
             OnInitialisationComplete();
@@ -208,14 +198,14 @@ namespace Plugins.CountlySDK
 
         }
 
-        private void Init(RequestRepository requestRepo, ViewEventRepository viewEventRepo,
+        private void Init(RequestRepository requestRepo,
             NonViewEventRepository nonViewEventRepo, Dao<ConfigEntity> configDao)
         {
             CountlyUtils countlyUtils = new CountlyUtils(this);
             RequestCountlyHelper requests = new RequestCountlyHelper(Configuration, _logHelper, countlyUtils, requestRepo);
 
             Consents = new ConsentCountlyService(Configuration, _logHelper, Consents);
-            Events = new EventCountlyService(Configuration, _logHelper, requests, viewEventRepo, nonViewEventRepo, Consents);
+            Events = new EventCountlyService(Configuration, _logHelper, requests, nonViewEventRepo, Consents);
 
             Location = new Services.LocationService(Configuration, _logHelper, requests, Consents);
             OptionalParameters = new OptionalParametersCountlyService(Location, Configuration, _logHelper, Consents);
@@ -292,13 +282,8 @@ namespace Plugins.CountlySDK
 
             _logHelper.Debug("[Countly] ClearStorage");
 
-            _requestRepo.Clear();
-            _viewEventRepo.Clear();
-            _nonViewEventRepo.Clear();
-            _storageHelper.ConfigDao.RemoveAll();
-
-
             PlayerPrefs.DeleteAll();
+            _storageHelper.ClearDBData();
 
             _storageHelper.CloseDB();
         }
