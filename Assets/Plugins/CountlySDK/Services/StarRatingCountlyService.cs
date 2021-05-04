@@ -56,9 +56,8 @@ namespace Plugins.CountlySDK.Services
                     Rating = rating,
                 };
 
-            await _eventCountlyService.ReportCustomEventAsync(
-                CountlyEventModel.StarRatingEvent, segment.ToDictionary(),
-                null, null, null);
+            CountlyEventModel eventModel = new CountlyEventModel(CountlyEventModel.StarRatingEvent, segment.ToDictionary(), null, null, null);
+            await _eventCountlyService.RecordEventAsync(eventModel);
         }
 
 
