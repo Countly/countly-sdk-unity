@@ -139,7 +139,7 @@ namespace Tests
             Assert.IsNotNull(Countly.Instance.Consents);
 
             AssertConsentArray(new Consents[] { Consents.Events, Consents.Crashes, Consents.Sessions, Consents.Location }, true);
-            AssertConsentArray(new Consents[] { Consents.Views, Consents.Users, Consents.Clicks, Consents.StarRating, Consents.RemoteConfig }, false);
+            AssertConsentArray(new Consents[] { Consents.Views, Consents.Users, Consents.Clicks, Consents.Star_Rating, Consents.Remote_Config }, false);
 
         }
 
@@ -193,8 +193,8 @@ namespace Tests
             configuration.GiveConsent(new Consents[] { Consents.Crashes, Consents.Events });
 
             configuration.CreateConsentGroup(groupA, new Consents[] { Consents.Sessions, Consents.Location });
-            configuration.CreateConsentGroup(groupB, new Consents[] { Consents.RemoteConfig, Consents.Users, Consents.Location });
-            configuration.CreateConsentGroup(groupC, new Consents[] { Consents.StarRating });
+            configuration.CreateConsentGroup(groupB, new Consents[] { Consents.Remote_Config, Consents.Users, Consents.Location });
+            configuration.CreateConsentGroup(groupC, new Consents[] { Consents.Star_Rating });
 
             configuration.GiveConsentToGroup(new string[] { groupA, groupC });
 
@@ -202,8 +202,8 @@ namespace Tests
 
             Assert.IsNotNull(Countly.Instance.Consents);
 
-            AssertConsentArray(new Consents[] { Consents.Events, Consents.Crashes, Consents.Sessions, Consents.Location, Consents.StarRating }, true);
-            AssertConsentArray(new Consents[] { Consents.Views, Consents.Users, Consents.Clicks, Consents.RemoteConfig }, false);
+            AssertConsentArray(new Consents[] { Consents.Events, Consents.Crashes, Consents.Sessions, Consents.Location, Consents.Star_Rating }, true);
+            AssertConsentArray(new Consents[] { Consents.Views, Consents.Users, Consents.Clicks, Consents.Remote_Config }, false);
 
         }
 
@@ -227,12 +227,12 @@ namespace Tests
             // Only Events and Crashes features should work
             Countly.Instance.Consents.GiveConsent(new Consents[] { Consents.Events, Consents.Crashes });
             AssertConsentArray(new Consents[] { Consents.Events, Consents.Crashes }, true);
-            AssertConsentArray(new Consents[] { Consents.Views, Consents.Users, Consents.Clicks, Consents.RemoteConfig, Consents.Sessions, Consents.Location, Consents.StarRating }, false);
+            AssertConsentArray(new Consents[] { Consents.Views, Consents.Users, Consents.Clicks, Consents.Remote_Config, Consents.Sessions, Consents.Location, Consents.Star_Rating }, false);
 
             // Only Events, Crashes, and StarRating features should work
-            Countly.Instance.Consents.GiveConsent(new Consents[] { Consents.StarRating });
-            AssertConsentArray(new Consents[] { Consents.Events, Consents.Crashes, Consents.StarRating }, true);
-            AssertConsentArray(new Consents[] { Consents.Views, Consents.Users, Consents.Clicks, Consents.RemoteConfig, Consents.Sessions, Consents.Location }, false);
+            Countly.Instance.Consents.GiveConsent(new Consents[] { Consents.Star_Rating });
+            AssertConsentArray(new Consents[] { Consents.Events, Consents.Crashes, Consents.Star_Rating }, true);
+            AssertConsentArray(new Consents[] { Consents.Views, Consents.Users, Consents.Clicks, Consents.Remote_Config, Consents.Sessions, Consents.Location }, false);
 
         }
 
@@ -248,15 +248,15 @@ namespace Tests
                 RequiresConsent = true,
             };
 
-            configuration.GiveConsent(new Consents[] { Consents.Crashes, Consents.Views, Consents.StarRating, Consents.Events, Consents.Users });
+            configuration.GiveConsent(new Consents[] { Consents.Crashes, Consents.Views, Consents.Star_Rating, Consents.Events, Consents.Users });
             Countly.Instance.Init(configuration);
 
-            AssertConsentArray(new Consents[] { Consents.Events, Consents.Crashes, Consents.StarRating, Consents.Views, Consents.Users }, true);
-            AssertConsentArray(new Consents[] { Consents.Clicks, Consents.RemoteConfig, Consents.Sessions, Consents.Location }, false);
+            AssertConsentArray(new Consents[] { Consents.Events, Consents.Crashes, Consents.Star_Rating, Consents.Views, Consents.Users }, true);
+            AssertConsentArray(new Consents[] { Consents.Clicks, Consents.Remote_Config, Consents.Sessions, Consents.Location }, false);
 
             Countly.Instance.Consents.RemoveConsent(new Consents[] { Consents.Views, Consents.Users });
-            AssertConsentArray(new Consents[] { Consents.Events, Consents.Crashes, Consents.StarRating }, true);
-            AssertConsentArray(new Consents[] { Consents.Clicks, Consents.RemoteConfig, Consents.Sessions, Consents.Location, Consents.Views, Consents.Users }, false);
+            AssertConsentArray(new Consents[] { Consents.Events, Consents.Crashes, Consents.Star_Rating }, true);
+            AssertConsentArray(new Consents[] { Consents.Clicks, Consents.Remote_Config, Consents.Sessions, Consents.Location, Consents.Views, Consents.Users }, false);
         }
 
         /// <summary>
@@ -275,7 +275,7 @@ namespace Tests
             string groupB = "GroupB";
 
             configuration.CreateConsentGroup(groupA, new Consents[] { Consents.Sessions, Consents.Location });
-            configuration.CreateConsentGroup(groupB, new Consents[] { Consents.RemoteConfig, Consents.Users });
+            configuration.CreateConsentGroup(groupB, new Consents[] { Consents.Remote_Config, Consents.Users });
 
             configuration.GiveConsentToGroup(new string[] { groupA });
 
@@ -283,12 +283,12 @@ namespace Tests
 
             Assert.IsNotNull(Countly.Instance.Consents);
             AssertConsentArray(new Consents[] { Consents.Sessions, Consents.Location }, true);
-            AssertConsentArray(new Consents[] { Consents.Views, Consents.Users, Consents.Clicks, Consents.RemoteConfig, Consents.Events, Consents.Crashes, Consents.StarRating }, false);
+            AssertConsentArray(new Consents[] { Consents.Views, Consents.Users, Consents.Clicks, Consents.Remote_Config, Consents.Events, Consents.Crashes, Consents.Star_Rating }, false);
 
 
             Countly.Instance.Consents.GiveConsentToGroup(new string[] { groupB });
-            AssertConsentArray(new Consents[] { Consents.Sessions, Consents.Location, Consents.Users, Consents.RemoteConfig, }, true);
-            AssertConsentArray(new Consents[] { Consents.Views, Consents.Clicks, Consents.Events, Consents.Crashes, Consents.StarRating }, false);
+            AssertConsentArray(new Consents[] { Consents.Sessions, Consents.Location, Consents.Users, Consents.Remote_Config, }, true);
+            AssertConsentArray(new Consents[] { Consents.Views, Consents.Clicks, Consents.Events, Consents.Crashes, Consents.Star_Rating }, false);
         }
 
         /// <summary>
@@ -307,7 +307,7 @@ namespace Tests
             string groupB = "GroupB";
 
             configuration.CreateConsentGroup(groupA, new Consents[] { Consents.Clicks, Consents.Views });
-            configuration.CreateConsentGroup(groupB, new Consents[] { Consents.RemoteConfig, Consents.Users });
+            configuration.CreateConsentGroup(groupB, new Consents[] { Consents.Remote_Config, Consents.Users });
 
 
             Countly.Instance.Init(configuration);
@@ -318,13 +318,13 @@ namespace Tests
             AssertConsentAll(expectedValue: true);
 
             Countly.Instance.Consents.RemoveConsentOfGroup(new string[] { groupA });
-            AssertConsentArray(new Consents[] { Consents.Sessions, Consents.Location, Consents.Users, Consents.RemoteConfig, Consents.Events, Consents.Crashes, Consents.StarRating }, true);
+            AssertConsentArray(new Consents[] { Consents.Sessions, Consents.Location, Consents.Users, Consents.Remote_Config, Consents.Events, Consents.Crashes, Consents.Star_Rating }, true);
             AssertConsentArray(new Consents[] { Consents.Views, Consents.Clicks }, false);
 
 
             Countly.Instance.Consents.RemoveConsentOfGroup(new string[] { groupB });
-            AssertConsentArray(new Consents[] { Consents.Sessions, Consents.Location, Consents.Events, Consents.Crashes, Consents.StarRating }, true);
-            AssertConsentArray(new Consents[] { Consents.Views, Consents.Clicks, Consents.Users, Consents.RemoteConfig }, false);
+            AssertConsentArray(new Consents[] { Consents.Sessions, Consents.Location, Consents.Events, Consents.Crashes, Consents.Star_Rating }, true);
+            AssertConsentArray(new Consents[] { Consents.Views, Consents.Clicks, Consents.Users, Consents.Remote_Config }, false);
         }
 
         /// <summary>
@@ -348,7 +348,7 @@ namespace Tests
 
             configuration.SetLocation(countryCode, city, latitude + "," + longitude, ipAddress);
 
-            configuration.GiveConsent(new Consents[] { Consents.Location, Consents.RemoteConfig });
+            configuration.GiveConsent(new Consents[] { Consents.Location, Consents.Remote_Config });
 
             Countly.Instance.Init(configuration);
 
@@ -389,14 +389,14 @@ namespace Tests
 
             ConsentTestHelperClass listener = new ConsentTestHelperClass();
             CountlyLogHelper logHelper = new CountlyLogHelper(configuration);
-            ConsentCountlyService consentCountlyService = new ConsentCountlyService(configuration, logHelper, null);
+            ConsentCountlyService consentCountlyService = new ConsentCountlyService(configuration, logHelper, null, null);
 
             consentCountlyService.Listeners = new List<AbstractBaseService> { listener };
 
-            consentCountlyService.GiveConsent(new Consents[] { Consents.Location, Consents.RemoteConfig, Consents.RemoteConfig, Consents.Events });
-            Assert.IsTrue(listener.Validate(0, new Consents[] { Consents.Location, Consents.RemoteConfig, Consents.Events }, true));
+            consentCountlyService.GiveConsent(new Consents[] { Consents.Location, Consents.Remote_Config, Consents.Remote_Config, Consents.Events });
+            Assert.IsTrue(listener.Validate(0, new Consents[] { Consents.Location, Consents.Remote_Config, Consents.Events }, true));
 
-            consentCountlyService.RemoveConsent(new Consents[] { Consents.Location, Consents.Location, Consents.StarRating, Consents.Events });
+            consentCountlyService.RemoveConsent(new Consents[] { Consents.Location, Consents.Location, Consents.Star_Rating, Consents.Events });
             Assert.AreEqual(2, listener.DeltaConsentsList[1].updatedConsents.Count);
             Assert.IsTrue(listener.Validate(1, new Consents[] { Consents.Location, Consents.Events }, false));
         }
@@ -417,20 +417,20 @@ namespace Tests
 
             ConsentTestHelperClass listener = new ConsentTestHelperClass();
             CountlyLogHelper logHelper = new CountlyLogHelper(configuration);
-            ConsentCountlyService consentCountlyService = new ConsentCountlyService(configuration, logHelper, null);
+            ConsentCountlyService consentCountlyService = new ConsentCountlyService(configuration, logHelper, null, null);
 
             consentCountlyService.Listeners = new List<AbstractBaseService> { listener };
 
-            consentCountlyService.GiveConsent(new Consents[] { Consents.Location, Consents.RemoteConfig, Consents.Events });
-            Assert.IsTrue(listener.Validate(0, new Consents[] { Consents.Location, Consents.RemoteConfig, Consents.Events }, true));
+            consentCountlyService.GiveConsent(new Consents[] { Consents.Location, Consents.Remote_Config, Consents.Events });
+            Assert.IsTrue(listener.Validate(0, new Consents[] { Consents.Location, Consents.Remote_Config, Consents.Events }, true));
 
-            consentCountlyService.GiveConsent(new Consents[] { Consents.Location, Consents.StarRating });
-            Assert.IsTrue(listener.Validate(1, new Consents[] { Consents.StarRating }, true));
+            consentCountlyService.GiveConsent(new Consents[] { Consents.Location, Consents.Star_Rating });
+            Assert.IsTrue(listener.Validate(1, new Consents[] { Consents.Star_Rating }, true));
 
-            consentCountlyService.RemoveConsent(new Consents[] { Consents.Location, Consents.StarRating });
-            Assert.IsTrue(listener.Validate(2, new Consents[] { Consents.Location, Consents.StarRating }, false));
+            consentCountlyService.RemoveConsent(new Consents[] { Consents.Location, Consents.Star_Rating });
+            Assert.IsTrue(listener.Validate(2, new Consents[] { Consents.Location, Consents.Star_Rating }, false));
 
-            consentCountlyService.RemoveConsent(new Consents[] { Consents.Events, Consents.StarRating });
+            consentCountlyService.RemoveConsent(new Consents[] { Consents.Events, Consents.Star_Rating });
             Assert.IsTrue(listener.Validate(3, new Consents[] { Consents.Events }, false));
         }
 
@@ -454,7 +454,7 @@ namespace Tests
 
             ConsentTestHelperClass listener = new ConsentTestHelperClass();
             CountlyLogHelper logHelper = new CountlyLogHelper(configuration);
-            ConsentCountlyService consentCountlyService = new ConsentCountlyService(configuration, logHelper, null);
+            ConsentCountlyService consentCountlyService = new ConsentCountlyService(configuration, logHelper, null, null);
 
             consentCountlyService.Listeners = new List<AbstractBaseService> { listener };
 
@@ -499,7 +499,7 @@ namespace Tests
 
             ConsentTestHelperClass listener = new ConsentTestHelperClass();
             CountlyLogHelper logHelper = new CountlyLogHelper(configuration);
-            ConsentCountlyService consentCountlyService = new ConsentCountlyService(configuration, logHelper, null);
+            ConsentCountlyService consentCountlyService = new ConsentCountlyService(configuration, logHelper, null, null);
 
             consentCountlyService.Listeners = new List<AbstractBaseService> { listener };
 

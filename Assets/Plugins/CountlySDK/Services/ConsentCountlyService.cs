@@ -1,22 +1,28 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Newtonsoft.Json.Linq;
 using Plugins.CountlySDK.Enums;
+using Plugins.CountlySDK.Helpers;
 using Plugins.CountlySDK.Models;
 
 namespace Plugins.CountlySDK.Services
 {
     public class ConsentCountlyService : AbstractBaseService
     {
+        
         internal bool RequiresConsent { get; private set; }
-        private readonly Dictionary<Consents, bool> _countlyConsents;
-        private Dictionary<string, Consents[]> _countlyConsentGroups;
 
-        internal ConsentCountlyService(CountlyConfiguration config, CountlyLogHelper logHelper, ConsentCountlyService consentService) : base(config, logHelper, consentService)
+        private bool _sendConsentOnChange;
+        private readonly RequestCountlyHelper _requestCountlyHelper;
+        private Dictionary<string, Consents[]> _countlyConsentGroups;
+        internal readonly Dictionary<Consents, bool> _countlyConsents;
+
+        internal ConsentCountlyService(CountlyConfiguration config, CountlyLogHelper logHelper, ConsentCountlyService consentService, RequestCountlyHelper requestCountlyHelper) : base(config, logHelper, consentService)
         {
             Log.Debug("[ConsentCountlyService] Initializing.");
+            _requestCountlyHelper = requestCountlyHelper;
             _countlyConsents = new Dictionary<Consents, bool>();
-
             RequiresConsent = _configuration.RequiresConsent;
             _countlyConsentGroups = new Dictionary<string, Consents[]>(_configuration.ConsentGroups);
 
@@ -206,6 +212,37 @@ namespace Plugins.CountlySDK.Services
         }
         #endregion
 
+        #region Internal Methods
+        /// <summary>
+        /// Internal method that send consent changes to server.
+        /// </summary>
+        /// <param name="consents">List of consent</param>
+        /// <param name="value">value to be set</param>
+        internal async void SendConsentChanges(List<Consents> consents, bool value)
+        {
+            _sendConsentOnChange = true;
+
+            if (!RequiresConsent || consents.Count == 0 ) {
+                return;
+            }
+
+            JObject jObj = new JObject();
+            foreach (Consents consent in consents) {
+                jObj.Add(consent.ToString().ToLower(), value);
+            }
+            
+            Dictionary<string, object> requestParams =
+                new Dictionary<string, object>
+                {
+                    {
+                        "consent", jObj
+                    }
+                };
+
+            await _requestCountlyHelper.GetResponseAsync(requestParams);
+        }
+        #endregion
+
         #region Helper Methods
         /// <summary>
         /// Private method that update selected consents.
@@ -236,6 +273,10 @@ namespace Plugins.CountlySDK.Services
             }
 
             NotifyListeners(updatedConsents, value);
+            if (_sendConsentOnChange) {
+                SendConsentChanges(updatedConsents, value);
+            }
+            
         }
 
         /// <summary>
@@ -252,6 +293,7 @@ namespace Plugins.CountlySDK.Services
             foreach (AbstractBaseService listener in Listeners) {
                 listener.ConsentChanged(updatedConsents, newConsentValue);
             }
+
         }
         #endregion
 
