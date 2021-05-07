@@ -14,7 +14,10 @@ namespace Plugins.CountlySDK.Models
         public bool EnablePost;
         public bool EnableTestMode;
         public bool EnableConsoleLogging;
+
+        [Obsolete("IgnoreSessionCooldown is deprecated, this is going to be removed in the future.")]
         public bool IgnoreSessionCooldown;
+
         public TestMode NotificationMode;
         public readonly bool EnableManualSessionHandling;
         public int SessionDuration;

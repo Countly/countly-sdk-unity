@@ -192,18 +192,30 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
 
-            CountlyEventModel evt = new CountlyEventModel(key, segmentation, count, sum, duration);
+            if (segmentation != null) {
+                List<string> toRemove = new List<string>();
 
-            Dictionary<string, object> requestParams =
-                new Dictionary<string, object>
-                {
-                    {
-                        "events", JsonConvert.SerializeObject(new List<CountlyEventModel> {evt}, Formatting.Indented,
-                            new JsonSerializerSettings {NullValueHandling = NullValueHandling.Ignore})
+                foreach (KeyValuePair<string, object> item in segmentation) {
+                    bool isValidDataType = item.Value.GetType() == typeof(int)
+                        || item.Value.GetType() == typeof(bool)
+                        || item.Value.GetType() == typeof(float)
+                        || item.Value.GetType() == typeof(double)
+                        || item.Value.GetType() == typeof(string);
+
+                    if (!isValidDataType) {
+                        toRemove.Add(item.Key);
+                        Log.Warning("[EventCountlyService] ReportCustomEventAsync : In segmentation Data type '" + (item.Value?.GetType()) + "'  of item '" + item.Key + "'isn't valid.");
                     }
-                };
+                }
 
-            await _requestCountlyHelper.GetResponseAsync(requestParams);
+                foreach (string k in toRemove) {
+                    segmentation.Remove(k);
+                }
+            }
+
+            CountlyEventModel @event = new CountlyEventModel(key, segmentation, count, sum, duration);
+
+            await RecordEventAsync(@event);
         }
 
         #region override Methods
