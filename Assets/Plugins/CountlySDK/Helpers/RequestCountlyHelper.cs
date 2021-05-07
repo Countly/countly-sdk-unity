@@ -20,7 +20,7 @@ namespace Plugins.CountlySDK.Helpers
         private readonly CountlyLogHelper Log;
         private readonly CountlyUtils _countlyUtils;
         private readonly CountlyConfiguration _config;
-        private readonly RequestRepository _requestRepo;
+        internal readonly RequestRepository _requestRepo;
 
         internal RequestCountlyHelper(CountlyConfiguration config, CountlyLogHelper log, CountlyUtils countlyUtils, RequestRepository requestRepo)
         {
@@ -92,7 +92,7 @@ namespace Plugins.CountlySDK.Helpers
         /// </summary>
         /// <param name="queryParams"></param>
         /// <returns></returns>
-        private string BuildGetRequest(Dictionary<string, object> queryParams)
+        internal string BuildGetRequest(Dictionary<string, object> queryParams)
         {
             StringBuilder requestStringBuilder = new StringBuilder();
             //Metrics added to each request
@@ -129,7 +129,7 @@ namespace Plugins.CountlySDK.Helpers
         /// </summary>
         /// <param name="queryParams"></param>
         /// <returns></returns>
-        private string BuildPostRequest(Dictionary<string, object> queryParams)
+        internal string BuildPostRequest(Dictionary<string, object> queryParams)
         {
             Dictionary<string, object> baseParams = _countlyUtils.GetBaseParams();
             foreach (KeyValuePair<string, object> item in queryParams) {
