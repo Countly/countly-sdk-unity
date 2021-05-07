@@ -45,7 +45,7 @@ namespace Tests
                     "M", "1986",
                     new Dictionary<string, object>{
                         { "Hair", "Black" },
-                        { "Race", "Asian" },
+                        { "Height", "5.9" },
                     });
             await Countly.Instance.UserDetails.SetUserDetailsAsync(userDetails);
             Assert.AreEqual(1, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
@@ -66,7 +66,7 @@ namespace Tests
             Assert.AreEqual("1986", userDetailJson["byear"].ToString());
 
             Assert.AreEqual("Black", userDetailJson["custom"]["Hair"].ToString());
-            Assert.AreEqual("Asian", userDetailJson["custom"]["Race"].ToString());
+            Assert.AreEqual("5.9", userDetailJson["custom"]["Height"].ToString());
         }
 
         /// <summary>
@@ -95,7 +95,7 @@ namespace Tests
             userDetails = new CountlyUserDetailsModel(
                     new Dictionary<string, object>{
                         { "Hair", "Black" },
-                        { "Race", "Asian" },
+                        { "Height", "5.9" },
                     });
             await Countly.Instance.UserDetails.SetCustomUserDetailsAsync(userDetails);
             Assert.AreEqual(1, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
@@ -109,7 +109,7 @@ namespace Tests
             JObject custom = JObject.Parse(userDetail);
 
             Assert.AreEqual("Black", custom["custom"]["Hair"].ToString());
-            Assert.AreEqual("Asian", custom["custom"]["Race"].ToString());
+            Assert.AreEqual("5.9", custom["custom"]["Height"].ToString());
 
         }
 
@@ -147,7 +147,7 @@ namespace Tests
             Assert.AreEqual(1, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
         }
         /// <summary>
-        /// It validates the user's custom property set via 'SetOnce'.
+        /// It validates the user's custom properties set via 'SetOnce' and 'Set' methods.
         /// </summary>
         [Test]
         public void TestUserCustomProperty_SetOnceAndSet()
@@ -173,7 +173,7 @@ namespace Tests
         }
 
         /// <summary>
-        /// It validates the user's custom property set via 'IncrementBy'.
+        /// It validates the user's custom properties set via 'IncrementBy' and 'Increment' methods.
         /// </summary>
         [Test]
         public void TestUserCustomProperty_IncrementBy()
@@ -220,7 +220,7 @@ namespace Tests
         }
 
         /// <summary>
-        /// It validates the user's custom property set via 'PushUnique'.
+        /// It validates the user's custom properties set via 'PushUnique' and 'Push' methods.
         /// </summary>
         [Test]
         public void TestUserCustomProperty_PushUniqueAndPush()
@@ -246,10 +246,10 @@ namespace Tests
         }
 
         /// <summary>
-        /// It validates the user's custom property set via 'Min'.
+        /// It validates the user's custom properties set via 'Min' and 'Max' methods.
         /// </summary>
         [Test]
-        public void TestUserCustomProperty_MinAndMin()
+        public void TestUserCustomProperty_MinAndMax()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 ServerUrl = _serverUrl,
