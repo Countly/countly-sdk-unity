@@ -154,9 +154,7 @@ namespace Plugins.CountlySDK.Services
                 new Dictionary<string, object>
                 {
                     {"end_session", 1},
-                    {"session_duration", (DateTime.Now - _lastSessionRequestTime).TotalSeconds},
-                    {"ignore_cooldown", _configuration.IgnoreSessionCooldown.ToString().ToLower()}
-                };
+                    {"session_duration", (DateTime.Now - _lastSessionRequestTime).TotalSeconds}                };
             requestParams.Add("metrics", JsonConvert.SerializeObject(CountlyMetricModel.Metrics, Formatting.Indented,
                 new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }));
 
@@ -189,8 +187,7 @@ namespace Plugins.CountlySDK.Services
                 {
                     {
                         "session_duration", _configuration.SessionDuration
-                    },
-                    {"ignore_cooldown", _configuration.IgnoreSessionCooldown.ToString().ToLower()}
+                    }
                 };
             requestParams.Add("metrics", JsonConvert.SerializeObject(CountlyMetricModel.Metrics, Formatting.Indented,
                 new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }));
