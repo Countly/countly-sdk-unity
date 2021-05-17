@@ -228,7 +228,8 @@ namespace Plugins.CountlySDK.Services
 
             JObject jObj = new JObject();
             foreach (Consents consent in consents) {
-                jObj.Add(consent.ToString().ToLower(), value);
+                string key = consent.ToString().ToLower().Replace('_', '-');
+                jObj.Add(key, value);
             }
             
             Dictionary<string, object> requestParams =

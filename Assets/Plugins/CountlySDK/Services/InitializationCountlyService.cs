@@ -20,8 +20,8 @@ namespace Plugins.CountlySDK.Services
 
         internal async Task OnInitialisationComplete()
         {
+            _consentService.SendConsentChanges(_consentService._countlyConsents.Keys.ToList(), true);
             await StartSession();
-           _consentService.SendConsentChanges(_consentService._countlyConsents.Keys.ToList(), true);
         }
 
         private async Task StartSession()
