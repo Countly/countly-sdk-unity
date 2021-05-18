@@ -228,8 +228,7 @@ namespace Plugins.CountlySDK.Services
 
             JObject jObj = new JObject();
             foreach (Consents consent in consents) {
-                string key = consent.ToString().ToLower().Replace('_', '-');
-                jObj.Add(key, value);
+                jObj.Add(GetConsentKey(consent), value);
             }
             
             Dictionary<string, object> requestParams =
@@ -246,11 +245,54 @@ namespace Plugins.CountlySDK.Services
 
         #region Helper Methods
         /// <summary>
-        /// Private method that update selected consents.
+        /// Private method that returns consent key.
         /// </summary>
-        /// <param name="consents">List of consent</param>
-        /// <param name="value">value to be set</param>
-        private void SetConsentInternal(Consents[] consents, bool value)
+        /// <param name="consent">a consent</param>
+        ///<returns>string</returns>
+        private string GetConsentKey(Consents consent)
+        {
+            string key = "";
+            switch (consent) {
+                case Consents.Clicks:
+                    key = "clicks";
+                    break;
+                case Consents.Crashes:
+                    key = "crashes";
+                    break;
+                case Consents.Events:
+                    key = "events";
+                    break;
+                case Consents.Location:
+                    key = "location";
+                    break;
+                case Consents.Push:
+                    key = "push";
+                    break;
+                case Consents.Remote_Config:
+                    key = "remote-config";
+                    break;
+                case Consents.Sessions:
+                    key = "sessions";
+                    break;
+                case Consents.Star_Rating:
+                    key = "star-rating";
+                    break;
+                case Consents.Users:
+                    key = "users";
+                    break;
+                case Consents.Views:
+                    key = "views";
+                    break;
+            }
+
+            return key;
+        }
+            /// <summary>
+            /// Private method that update selected consents.
+            /// </summary>
+            /// <param name="consents">List of consent</param>
+            /// <param name="value">value to be set</param>
+            private void SetConsentInternal(Consents[] consents, bool value)
         {
             if (consents == null) {
                 Log.Debug("[ConsentCountlyService] Calling SetConsentInternal with null consents list!");
