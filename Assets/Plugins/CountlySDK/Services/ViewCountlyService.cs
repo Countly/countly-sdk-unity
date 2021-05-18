@@ -26,9 +26,22 @@ namespace Plugins.CountlySDK.Services
         /// <param name="name">name of the view</param>
         /// <param name="hasSessionBegunWithView">set true if the session is beginning with this view</param>
         /// <returns></returns>
-        public async Task RecordOpenViewAsync(string name, bool hasSessionBegunWithView = false)
+        [Obsolete("RecordOpenViewAsync(string name, bool hasSessionBegunWithView) is deprecated, please use RecordOpenViewAsync(string name) instead.")]
+        public async Task RecordOpenViewAsync(string name, bool hasSessionBegunWithView)
         {
             Log.Info("[ViewCountlyService] RecordOpenViewAsync : name = " + name + ", hasSessionBegunWithView = " + hasSessionBegunWithView);
+
+            await RecordOpenViewAsync(name);
+        }
+
+        /// <summary>
+        /// Start tracking a view
+        /// </summary>
+        /// <param name="name">name of the view</param>
+        /// <returns></returns>
+        public async Task RecordOpenViewAsync(string name)
+        {
+            Log.Info("[ViewCountlyService] RecordOpenViewAsync : name = " + name);
 
             if (!_consentService.CheckConsentInternal(Consents.Views)) {
                 return;
@@ -44,9 +57,6 @@ namespace Plugins.CountlySDK.Services
                     Name = name,
                     Segment = Constants.UnityPlatform,
                     Visit = 1,
-                    Exit = 0,
-                    Bounce = 0,
-                    HasSessionBegunWithView = hasSessionBegunWithView
                 };
 
             if (!_viewToLastViewStartTime.ContainsKey(name)) {
@@ -63,8 +73,21 @@ namespace Plugins.CountlySDK.Services
         /// <param name="name of the view"></param>
         /// <param name="hasSessionBegunWithView">set true if the session is beginning with this view</param>
         /// <returns></returns>
-        public async Task RecordCloseViewAsync(string name, bool hasSessionBegunWithView = false)
+        [Obsolete("RecordCloseViewAsync(string name, bool hasSessionBegunWithView) is deprecated, please use RecordCloseViewAsync(string name) instead.")]
+        public async Task RecordCloseViewAsync(string name, bool hasSessionBegunWithView)
         {
+            Log.Info("[ViewCountlyService] RecordCloseViewAsync : name = " + name + ", hasSessionBegunWithView = " + hasSessionBegunWithView);
+
+            await RecordCloseViewAsync(name);
+
+        }
+
+        /// <summary>
+        /// Stop tracking a view
+        /// </summary>
+        /// <param name="name of the view"></param>
+        /// <returns></returns>
+        public async Task RecordCloseViewAsync(string name) {
             Log.Info("[ViewCountlyService] RecordCloseViewAsync : name = " + name);
 
             if (!_consentService.CheckConsentInternal(Consents.Views)) {
@@ -80,9 +103,6 @@ namespace Plugins.CountlySDK.Services
                     Name = name,
                     Segment = Constants.UnityPlatform,
                     Visit = 0,
-                    Exit = 1,
-                    Bounce = 0,
-                    HasSessionBegunWithView = hasSessionBegunWithView
                 };
 
             double? duration = null;
@@ -148,10 +168,6 @@ namespace Plugins.CountlySDK.Services
             public string Name { get; set; }
             public string Segment { get; set; }
             public int Visit { get; set; }
-            public int Exit { get; set; }
-            public int Bounce { get; set; }
-            public bool HasSessionBegunWithView { get; set; }
-            private int Start => HasSessionBegunWithView ? 1 : 0;
 
             public IDictionary<string, object> ToDictionary()
             {
@@ -159,10 +175,7 @@ namespace Plugins.CountlySDK.Services
                 {
                     {"name", Name},
                     {"segment", Segment},
-                    {"exit", Exit},
                     {"visit", Visit},
-                    {"start", Start},
-                    {"bounce", Bounce}
                 };
                 return dict;
             }
