@@ -103,7 +103,46 @@ namespace Plugins.CountlySDK.Services
             int? count = 1, double? sum = 0, double? duration = null)
         {
             Log.Info("[EventCountlyService] RecordEventAsync : key = " + key + ", segmentation = " + segmentation + ", count = " + count + ", sum = " + sum + ", duration = " + duration);
-            await ReportCustomEventAsync(key,segmentation, count, sum, duration);
+
+            if (!_consentService.CheckConsentInternal(Consents.Events)) {
+                return;
+            }
+
+            if (_configuration.EnableTestMode) {
+                return;
+            }
+
+            if (string.IsNullOrEmpty(key) || string.IsNullOrWhiteSpace(key)) {
+                Log.Warning("[EventCountlyService] RecordEventAsync : The event key '" + key + "'isn't valid.");
+
+                return;
+            }
+
+            if (segmentation != null) {
+                List<string> toRemove = new List<string>();
+
+                foreach (KeyValuePair<string, object> item in segmentation) {
+                    bool isValidDataType = item.Value != null
+                        && (item.Value.GetType() == typeof(int)
+                        || item.Value.GetType() == typeof(bool)
+                        || item.Value.GetType() == typeof(float)
+                        || item.Value.GetType() == typeof(double)
+                        || item.Value.GetType() == typeof(string));
+
+                    if (!isValidDataType) {
+                        toRemove.Add(item.Key);
+                        Log.Warning("[EventCountlyService] ReportCustomEventAsync : In segmentation Data type '" + (item.Value?.GetType()) + "'  of item '" + item.Key + "' isn't valid.");
+                    }
+                }
+
+                foreach (string k in toRemove) {
+                    segmentation.Remove(k);
+                }
+            }
+
+            CountlyEventModel @event = new CountlyEventModel(key, segmentation, count, sum, duration);
+
+            await RecordEventAsync(@event);
         }
 
         /// <summary>
@@ -165,7 +204,7 @@ namespace Plugins.CountlySDK.Services
 
                     if (!isValidDataType) {
                         toRemove.Add(item.Key);
-                        Log.Warning("[EventCountlyService] ReportCustomEventAsync : In segmentation Data type '" + (item.Value == null ? item : item.Value.GetType()) + "'  of item '" + item.Key + "'isn't valid.");
+                        Log.Warning("[EventCountlyService] ReportCustomEventAsync : In segmentation Data type '" + (item.Value?.GetType()) + "'  of item '" + item.Key + "'isn't valid.");
                     }
                 }
 
