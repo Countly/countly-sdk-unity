@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using Plugins.CountlySDK.Enums;
 using Plugins.CountlySDK.Helpers;
 using Plugins.CountlySDK.Models;
@@ -91,6 +92,9 @@ namespace Plugins.CountlySDK.Services
                 {
                     { "method", "fetch_remote_config" }
                 };
+
+            requestParams.Add("metrics", JsonConvert.SerializeObject(CountlyMetricModel.Metrics, Formatting.Indented,
+            new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }));
 
             string url = BuildGetRequest(requestParams);
 
