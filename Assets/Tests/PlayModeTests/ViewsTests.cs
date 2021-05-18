@@ -90,6 +90,7 @@ namespace Tests
             Assert.IsNotNull(model.Segmentation);
             Assert.AreEqual("close_view", model.Segmentation["name"]);
             Assert.AreEqual(0, model.Segmentation["visit"]);
+            Assert.AreEqual(0, model.Segmentation["start"]);
 
         }
 
@@ -122,6 +123,22 @@ namespace Tests
             Assert.IsNotNull(model.Segmentation);
             Assert.AreEqual("open_view", model.Segmentation["name"]);
             Assert.AreEqual(1, model.Segmentation["visit"]);
+            Assert.AreEqual(1, model.Segmentation["start"]);
+
+            await Countly.Instance.Views.RecordOpenViewAsync("open_view_2");
+            Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
+
+            model = Countly.Instance.Views._eventService._eventRepo.Dequeue();
+
+            Assert.AreEqual(CountlyEventModel.ViewEvent, model.Key);
+            Assert.IsNull(model.Sum);
+            Assert.AreEqual(1, model.Count);
+            Assert.IsNull(model.Duration);
+            Assert.IsNotNull(model.Segmentation);
+            Assert.AreEqual("open_view_2", model.Segmentation["name"]);
+            Assert.AreEqual(1, model.Segmentation["visit"]);
+            Assert.AreEqual(0, model.Segmentation["start"]);
+
         }
 
         /// <summary>
