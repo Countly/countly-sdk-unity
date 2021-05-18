@@ -87,7 +87,8 @@ namespace Plugins.CountlySDK.Services
         /// </summary>
         /// <param name="name of the view"></param>
         /// <returns></returns>
-        public async Task RecordCloseViewAsync(string name) {
+        public async Task RecordCloseViewAsync(string name)
+        {
             Log.Info("[ViewCountlyService] RecordCloseViewAsync : name = " + name);
 
             if (!_consentService.CheckConsentInternal(Consents.Views)) {
