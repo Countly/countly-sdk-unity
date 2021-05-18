@@ -11,6 +11,7 @@ namespace Plugins.CountlySDK.Services
 
     public class ViewCountlyService : AbstractBaseService
     {
+        private bool _isFirstView = true;
         internal readonly EventCountlyService _eventService;
         private readonly Dictionary<string, DateTime> _viewToLastViewStartTime = new Dictionary<string, DateTime>();
 
@@ -51,12 +52,12 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
 
-
             ViewSegment currentViewSegment =
                 new ViewSegment {
                     Name = name,
                     Segment = Constants.UnityPlatform,
                     Visit = 1,
+                    Start = _isFirstView ? 1 : 0
                 };
 
             if (!_viewToLastViewStartTime.ContainsKey(name)) {
@@ -65,6 +66,8 @@ namespace Plugins.CountlySDK.Services
 
             CountlyEventModel currentView = new CountlyEventModel(CountlyEventModel.ViewEvent, currentViewSegment.ToDictionary());
             await _eventService.RecordEventAsync(currentView);
+
+            _isFirstView = false;
         }
 
         /// <summary>
@@ -104,6 +107,7 @@ namespace Plugins.CountlySDK.Services
                     Name = name,
                     Segment = Constants.UnityPlatform,
                     Visit = 0,
+                    Start = 0
                 };
 
             double? duration = null;
@@ -169,6 +173,7 @@ namespace Plugins.CountlySDK.Services
             public string Name { get; set; }
             public string Segment { get; set; }
             public int Visit { get; set; }
+            public int Start { get; set; }
 
             public IDictionary<string, object> ToDictionary()
             {
@@ -177,6 +182,7 @@ namespace Plugins.CountlySDK.Services
                     {"name", Name},
                     {"segment", Segment},
                     {"visit", Visit},
+                    {"start", Start}
                 };
                 return dict;
             }
