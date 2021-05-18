@@ -12,9 +12,9 @@ namespace Plugins.CountlySDK.Services
     public class CrashReportsCountlyService : AbstractBaseService
     {
         internal bool IsApplicationInBackground { get; set; }
-        private readonly Queue<string> _crashBreadcrumbs = new Queue<string>();
+        internal readonly Queue<string> _crashBreadcrumbs = new Queue<string>();
 
-        private readonly RequestCountlyHelper _requestCountlyHelper;
+        internal readonly RequestCountlyHelper _requestCountlyHelper;
 
         internal CrashReportsCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, RequestCountlyHelper requestCountlyHelper, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
         {
@@ -37,9 +37,15 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
 
+            if (string.IsNullOrEmpty(message) || string.IsNullOrWhiteSpace(message)) {
+                Log.Warning("[CrashReportsCountlyService] LogCallback : The parameter 'message' can't be null or empty");
+                return;
+            }
+            CountlyExceptionDetailModel model = ExceptionDetailModel(message, stackTrace, false, null);
+
             if (_configuration.EnableAutomaticCrashReporting
                 && (type == LogType.Error || type == LogType.Exception)) {
-                await SendCrashReportInternal(message, stackTrace, type, null, false);
+                await SendCrashReportInternal(model);
             }
         }
 
@@ -61,16 +67,18 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
 
-            await SendCrashReportInternal(message, stackTrace, type, segments, nonfatal);
+            if (string.IsNullOrEmpty(message) || string.IsNullOrWhiteSpace(message)) {
+                Log.Warning("[CrashReportsCountlyService] SendCrashReportAsync : The parameter 'message' can't be null or empty");
+                return;
+            }
+
+            CountlyExceptionDetailModel model = ExceptionDetailModel(message, stackTrace, nonfatal, segments);
+            await SendCrashReportInternal(model);
 
         }
 
-        internal async Task SendCrashReportInternal(string message, string stackTrace, LogType type,
-            IDictionary<string, object> segments = null, bool nonfatal = true)
+        internal async Task SendCrashReportInternal(CountlyExceptionDetailModel model)
         {
-
-            CountlyExceptionDetailModel model = ExceptionDetailModel(message, stackTrace, nonfatal, segments);
-
             Log.Debug("[CrashReportsCountlyService] SendCrashReportInternal : model = " + model.ToString());
 
             Dictionary<string, object> requestParams = new Dictionary<string, object>
@@ -109,7 +117,7 @@ namespace Plugins.CountlySDK.Services
                 _crashBreadcrumbs.Dequeue();
             }
 
-            _crashBreadcrumbs.Enqueue(value);
+            _crashBreadcrumbs.Enqueue(validBreadcrumb);
         }
 
         /// <summary>
@@ -120,7 +128,7 @@ namespace Plugins.CountlySDK.Services
         /// <param name="nonfatal">for automatically captured errors, you should set to <code>false</code>, whereas on logged errors it should be <code>true</code></param>
         /// <param name="segments">custom key/values to be reported</param>
         /// <returns>CountlyExceptionDetailModel</returns>
-        private CountlyExceptionDetailModel ExceptionDetailModel(string message, string stackTrace, bool nonfatal, IDictionary<string, object> segments)
+        internal CountlyExceptionDetailModel ExceptionDetailModel(string message, string stackTrace, bool nonfatal, IDictionary<string, object> segments)
         {
             return new CountlyExceptionDetailModel {
                 OS = Constants.UnityPlatform,
