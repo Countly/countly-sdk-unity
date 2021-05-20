@@ -317,11 +317,14 @@ namespace Plugins.CountlySDK
 
             if (pauseStatus) {
                 HandleAppPauseOrFocus();
-                await Session?.EndSessionAsync();
+                if (!Configuration.EnableManualSessionHandling && !Configuration.IsAutomaticSessionTrackingDisabled) {
+                    await Session?.EndSessionAsync();
+                }
             } else {
                 SubscribeAppLog();
-                await Session?.BeginSessionAsync();
-
+                if (!Configuration.EnableManualSessionHandling && !Configuration.IsAutomaticSessionTrackingDisabled) {
+                    await Session?.BeginSessionAsync();
+                }
             }
         }
 
@@ -344,7 +347,9 @@ namespace Plugins.CountlySDK
 
         private void LogCallback(string condition, string stackTrace, LogType type)
         {
-            CrashReports?.LogCallback(condition, stackTrace, type);
+            if (type == LogType.Error || type == LogType.Exception) {
+                CrashReports?.LogCallback(condition, stackTrace, type);
+            }
         }
 
         private void SubscribeAppLog()

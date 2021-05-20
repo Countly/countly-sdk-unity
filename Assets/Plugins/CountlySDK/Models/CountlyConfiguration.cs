@@ -100,6 +100,8 @@ namespace Plugins.CountlySDK.Models
         internal string IPAddress = null;
         internal string CountryCode = null;
         internal bool IsLocationDisabled = false;
+        internal bool IsAutomaticSessionTrackingDisabled = false;
+
 
         /// <summary>
         /// Set if consent should be required.
@@ -148,6 +150,15 @@ namespace Plugins.CountlySDK.Models
         public override string ToString()
         {
             return $"{nameof(Salt)}: {Salt}, {nameof(EnablePost)}: {EnablePost}, {nameof(EnableConsoleLogging)}: {EnableConsoleLogging}, {nameof(IgnoreSessionCooldown)}: {IgnoreSessionCooldown}, {nameof(NotificationMode)}: {NotificationMode}, {nameof(EnableManualSessionHandling)}: {EnableManualSessionHandling}, {nameof(SessionDuration)}: {SessionDuration}, {nameof(EventQueueThreshold)}: {EventQueueThreshold}, {nameof(StoredRequestLimit)}: {StoredRequestLimit}, {nameof(TotalBreadcrumbsAllowed)}: {TotalBreadcrumbsAllowed}, {nameof(EnableAutomaticCrashReporting)}: {EnableAutomaticCrashReporting}";
+        }
+
+        /// <summary>
+        ///Disabled the automatic session tracking.
+        /// </summary>
+        public void DisableAutomaticSessionTracking()
+        {
+            IsAutomaticSessionTrackingDisabled = true;
+            Debug.Log("[Countly][CountlyConfiguration] Automatic session tracking disabled!");
         }
 
         /// <summary>
