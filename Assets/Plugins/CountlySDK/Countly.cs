@@ -270,7 +270,7 @@ namespace Plugins.CountlySDK
             }
 
             _logHelper.Debug("[Countly] OnApplicationQuit");
-
+            Session?._sessionTimer?.Dispose();
             _storageHelper.CloseDB();
         }
 
@@ -317,11 +317,13 @@ namespace Plugins.CountlySDK
 
             if (pauseStatus) {
                 HandleAppPauseOrFocus();
+                Session?._sessionTimer?.Stop();
                 if (!Configuration.EnableManualSessionHandling && !Configuration.IsAutomaticSessionTrackingDisabled) {
                     await Session?.EndSessionAsync();
                 }
             } else {
                 SubscribeAppLog();
+                Session?._sessionTimer?.Start();
                 if (!Configuration.EnableManualSessionHandling && !Configuration.IsAutomaticSessionTrackingDisabled) {
                     await Session?.BeginSessionAsync();
                 }

@@ -11,7 +11,7 @@ namespace Plugins.CountlySDK.Services
 {
     public class SessionCountlyService : AbstractBaseService
     {
-        private Timer _sessionTimer;
+        internal Timer _sessionTimer;
         private DateTime _lastSessionRequestTime;
 
         /// <summary>
