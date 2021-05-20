@@ -37,6 +37,7 @@ namespace Plugins.CountlySDK
         private CountlyLogHelper _logHelper;
         private static Countly _instance = null;
         private CountlyStorageHelper _storageHelper;
+        private RequestCountlyHelper _requestHelper;
         private List<AbstractBaseService> _listeners = new List<AbstractBaseService>();
 
         /// <summary>
@@ -204,26 +205,26 @@ namespace Plugins.CountlySDK
             NonViewEventRepository nonViewEventRepo, Dao<ConfigEntity> configDao)
         {
             CountlyUtils countlyUtils = new CountlyUtils(this);
-            RequestCountlyHelper requests = new RequestCountlyHelper(Configuration, _logHelper, countlyUtils, requestRepo);
+            _requestHelper = new RequestCountlyHelper(Configuration, _logHelper, countlyUtils, requestRepo);
 
             Consents = new ConsentCountlyService(Configuration, _logHelper, Consents);
-            Events = new EventCountlyService(Configuration, _logHelper, requests, nonViewEventRepo, Consents);
+            Events = new EventCountlyService(Configuration, _logHelper, _requestHelper, nonViewEventRepo, Consents);
 
-            Location = new Services.LocationService(Configuration, _logHelper, requests, Consents);
+            Location = new Services.LocationService(Configuration, _logHelper, _requestHelper, Consents);
             OptionalParameters = new OptionalParametersCountlyService(Location, Configuration, _logHelper, Consents);
             Notifications = new NotificationsCallbackService(Configuration, _logHelper);
             ProxyNotificationsService notificationsService = new ProxyNotificationsService(transform, Configuration, _logHelper, InternalStartCoroutine, Events);
-            _push = new PushCountlyService(Configuration, _logHelper, requests, notificationsService, Notifications, Consents);
-            Session = new SessionCountlyService(Configuration, _logHelper, Events, requests, Location, Consents);
+            _push = new PushCountlyService(Configuration, _logHelper, _requestHelper, notificationsService, Notifications, Consents);
+            Session = new SessionCountlyService(Configuration, _logHelper, Events, _requestHelper, Location, Consents);
 
-            CrashReports = new CrashReportsCountlyService(Configuration, _logHelper, requests, Consents);
+            CrashReports = new CrashReportsCountlyService(Configuration, _logHelper, _requestHelper, Consents);
             Initialization = new InitializationCountlyService(Configuration, _logHelper, Location, Session, Consents);
-            RemoteConfigs = new RemoteConfigCountlyService(Configuration, _logHelper, requests, countlyUtils, configDao, Consents);
+            RemoteConfigs = new RemoteConfigCountlyService(Configuration, _logHelper, _requestHelper, countlyUtils, configDao, Consents);
 
             StarRating = new StarRatingCountlyService(Configuration, _logHelper, Consents, Events);
-            UserDetails = new UserDetailsCountlyService(Configuration, _logHelper, requests, countlyUtils, Consents);
+            UserDetails = new UserDetailsCountlyService(Configuration, _logHelper, _requestHelper, countlyUtils, Consents);
             Views = new ViewCountlyService(Configuration, _logHelper, Events, Consents);
-            Device = new DeviceIdCountlyService(Configuration, _logHelper, Session, requests, Events, countlyUtils, Consents);
+            Device = new DeviceIdCountlyService(Configuration, _logHelper, Session, _requestHelper, Events, countlyUtils, Consents);
 
             CreateListOfIBaseService();
             RegisterListenersToServices();
@@ -272,6 +273,7 @@ namespace Plugins.CountlySDK
             }
 
             _logHelper.Debug("[Countly] OnApplicationQuit");
+            _requestHelper.StopRequestRepoOperations();
             //stop async method after in-editor game is stopped
 #if UNITY_EDITOR
             ConstructorInfo constructor = SynchronizationContext.Current.GetType().GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, new Type[] { typeof(int) }, null);

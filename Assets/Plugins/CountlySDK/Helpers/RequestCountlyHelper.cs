@@ -16,6 +16,7 @@ namespace Plugins.CountlySDK.Helpers
     public class RequestCountlyHelper
     {
         private bool isQueueBeingProcess = false;
+        private bool stopRequestRepoOperations = false;
 
         private readonly CountlyLogHelper Log;
         private readonly CountlyUtils _countlyUtils;
@@ -30,6 +31,10 @@ namespace Plugins.CountlySDK.Helpers
             _requestRepo = requestRepo;
         }
 
+        internal void StopRequestRepoOperations() {
+            stopRequestRepoOperations = true;
+        }
+
         private async Task AddRequestToQueue(CountlyRequestModel request)
         {
 
@@ -38,6 +43,10 @@ namespace Plugins.CountlySDK.Helpers
             if (_config.EnableTestMode) {
                 return;
             }
+
+            if (stopRequestRepoOperations) {
+                return;
+            } 
 
             if (_requestRepo.Count == _config.StoredRequestLimit) {
 
@@ -54,6 +63,10 @@ namespace Plugins.CountlySDK.Helpers
         internal async Task ProcessQueue()
         {
             if (isQueueBeingProcess) {
+                return;
+            }
+
+            if (stopRequestRepoOperations) {
                 return;
             }
 
