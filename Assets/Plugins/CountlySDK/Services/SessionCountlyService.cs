@@ -32,6 +32,10 @@ namespace Plugins.CountlySDK.Services
             _eventService = eventService;
             _locationService = locationService;
             _requestCountlyHelper = requestCountlyHelper;
+
+            if (_configuration.IsAutomaticSessionTrackingDisabled) {
+                Log.Verbose("[Countly][CountlyConfiguration] Automatic session tracking disabled!");
+            }
         }
 
         /// <summary>
@@ -55,10 +59,7 @@ namespace Plugins.CountlySDK.Services
                 if (!_configuration.IsAutomaticSessionTrackingDisabled) {
                     //Start Session
                     await BeginSessionAsync();
-                } else {
-                    Log.Verbose("[Countly][CountlyConfiguration] Automatic session tracking disabled!");
-                }
-
+                } 
             }
 
             InitSessionTimer();
