@@ -82,14 +82,14 @@ namespace Tests
             string myUri = requestModel.RequestUrl;
             string consents = HttpUtility.ParseQueryString(myUri).Get("consent");
             JObject json = JObject.Parse(consents);
-            Assert.AreEqual("True", json.GetValue("push").ToString());
-            Assert.AreEqual("True", json.GetValue("users").ToString());
-            Assert.AreEqual("True", json.GetValue("views").ToString());
-            Assert.AreEqual("True", json.GetValue("clicks").ToString());
-            Assert.AreEqual("True", json.GetValue("events").ToString());
-            Assert.AreEqual("True", json.GetValue("crashes").ToString());
-            Assert.AreEqual("True", json.GetValue("location").ToString());
-            Assert.AreEqual("True", json.GetValue("star-rating").ToString());
+            Assert.IsTrue(json.GetValue("push").ToObject<bool>());
+            Assert.IsTrue(json.GetValue("users").ToObject<bool>());
+            Assert.IsTrue(json.GetValue("views").ToObject<bool>());
+            Assert.IsTrue(json.GetValue("clicks").ToObject<bool>());
+            Assert.IsTrue(json.GetValue("events").ToObject<bool>());
+            Assert.IsTrue(json.GetValue("crashes").ToObject<bool>());
+            Assert.IsTrue(json.GetValue("location").ToObject<bool>());
+            Assert.IsTrue(json.GetValue("star-rating").ToObject<bool>());
             Assert.IsTrue(json.GetValue("remote-config").ToObject<bool>());
 
             Countly.Instance.Consents.GiveConsent(new Consents[] { Consents.Sessions });
