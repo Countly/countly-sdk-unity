@@ -389,12 +389,12 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
 
     }
 
-    public async Task RemoteConfigAsync()
+    public async void RemoteConfigAsync()
     {
         await countly.RemoteConfigs.Update();
 
         Dictionary<string, object> config = countly.RemoteConfigs.Configs;
-        Debug.Log("RemoteConfig: " + config.ToString());
+        Debug.Log("RemoteConfig: " + config?.ToString());
     }
 
     public void OnNotificationReceived(string message)
