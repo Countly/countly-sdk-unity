@@ -52,8 +52,6 @@ namespace Plugins.CountlySDK.Persistance.Repositories
             TEntity entity = ConvertModelToEntity(model);
             bool res = _dao.Save(entity);
 
-            Log.Verbose("[Repository] Request entity save failed, entity: " + entity);
-
             return res;
         }
 
