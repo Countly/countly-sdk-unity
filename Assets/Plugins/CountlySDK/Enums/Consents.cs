@@ -10,7 +10,7 @@
         Crashes,
         Location,
         Sessions,
-        Star_Rating,
-        Remote_Config
+        StarRating,
+        RemoteConfig
     }
 }

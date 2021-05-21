@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using Plugins.CountlySDK.Enums;
 using Plugins.CountlySDK.Helpers;
@@ -14,7 +15,7 @@ namespace Plugins.CountlySDK.Services
         internal bool RequiresConsent { get; private set; }
 
         private bool _sendConsentOnChange;
-        private readonly RequestCountlyHelper _requestCountlyHelper;
+        internal readonly RequestCountlyHelper _requestCountlyHelper;
         private Dictionary<string, Consents[]> _countlyConsentGroups;
         internal readonly Dictionary<Consents, bool> _countlyConsents;
 
@@ -218,7 +219,7 @@ namespace Plugins.CountlySDK.Services
         /// </summary>
         /// <param name="consents">List of consent</param>
         /// <param name="value">value to be set</param>
-        internal async void SendConsentChanges(List<Consents> consents, bool value)
+        internal async Task SendConsentChanges(List<Consents> consents, bool value)
         {
             _sendConsentOnChange = true;
 
@@ -268,13 +269,13 @@ namespace Plugins.CountlySDK.Services
                 case Consents.Push:
                     key = "push";
                     break;
-                case Consents.Remote_Config:
+                case Consents.RemoteConfig:
                     key = "remote-config";
                     break;
                 case Consents.Sessions:
                     key = "sessions";
                     break;
-                case Consents.Star_Rating:
+                case Consents.StarRating:
                     key = "star-rating";
                     break;
                 case Consents.Users:
@@ -292,7 +293,7 @@ namespace Plugins.CountlySDK.Services
             /// </summary>
             /// <param name="consents">List of consent</param>
             /// <param name="value">value to be set</param>
-            private void SetConsentInternal(Consents[] consents, bool value)
+            private async void SetConsentInternal(Consents[] consents, bool value)
         {
             if (consents == null) {
                 Log.Debug("[ConsentCountlyService] Calling SetConsentInternal with null consents list!");
@@ -317,7 +318,7 @@ namespace Plugins.CountlySDK.Services
 
             NotifyListeners(updatedConsents, value);
             if (_sendConsentOnChange) {
-                SendConsentChanges(updatedConsents, value);
+                await SendConsentChanges(updatedConsents, value);
             }
             
         }

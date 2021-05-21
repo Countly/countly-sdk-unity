@@ -41,7 +41,7 @@ namespace Plugins.CountlySDK.Services
         {
             Log.Info("[StarRatingCountlyService] ReportStarRatingAsync");
 
-            if (!_consentService.CheckConsentInternal(Consents.Star_Rating)) {
+            if (!_consentService.CheckConsentInternal(Consents.StarRating)) {
                 return;
             }
 
