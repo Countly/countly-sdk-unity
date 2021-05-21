@@ -86,7 +86,7 @@ namespace Plugins.CountlySDK.Services
 
             //Ends current session
             //Do not dispose timer object
-            if (!_configuration.EnableManualSessionHandling && !_configuration.IsAutomaticSessionTrackingDisabled) {
+            if (!_configuration.IsAutomaticSessionTrackingDisabled) {
                 await _sessionCountlyService.EndSessionAsync();
             }
 
@@ -95,7 +95,7 @@ namespace Plugins.CountlySDK.Services
 
             //Begin new session with new device id
             //Do not initiate timer again, it is already initiated
-            if (!_configuration.EnableManualSessionHandling && !_configuration.IsAutomaticSessionTrackingDisabled) {
+            if (!_configuration.IsAutomaticSessionTrackingDisabled) {
                 await _sessionCountlyService.BeginSessionAsync();
             }
 

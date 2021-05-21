@@ -51,9 +51,14 @@ namespace Plugins.CountlySDK.Services
                  */
                     await _locationService.SendIndependantLocationRequest();
                 }
-            } else if (!_configuration.EnableManualSessionHandling && !_configuration.IsAutomaticSessionTrackingDisabled) {
-                //Start Session
-                await BeginSessionAsync();
+            } else {
+                if (!_configuration.IsAutomaticSessionTrackingDisabled) {
+                    //Start Session
+                    await BeginSessionAsync();
+                } else {
+                    Log.Verbose("[Countly][CountlyConfiguration] Automatic session tracking disabled!");
+                }
+
             }
 
             InitSessionTimer();
@@ -77,13 +82,12 @@ namespace Plugins.CountlySDK.Services
         /// <param name="elapsedEventArgs"> Provides data for <code>Timer.Elapsed</code>event.</param>
         private async void SessionTimerOnElapsedAsync(object sender, ElapsedEventArgs elapsedEventArgs)
         {
-
             Log.Debug("[SessionCountlyService] SessionTimerOnElapsedAsync");
 
             await _eventService.AddEventsToRequestQueue();
             await _requestCountlyHelper.ProcessQueue();
 
-            if (!_configuration.EnableManualSessionHandling && !_configuration.IsAutomaticSessionTrackingDisabled) {
+            if (!_configuration.IsAutomaticSessionTrackingDisabled) {
                 await ExtendSessionAsync();
             }
         }
@@ -100,6 +104,7 @@ namespace Plugins.CountlySDK.Services
             }
 
             if (IsSessionInitiated) {
+                Log.Warning("[SessionCountlyService] BeginSessionAsync: The session has already started!");
                 return;
             }
 
@@ -153,6 +158,7 @@ namespace Plugins.CountlySDK.Services
             }
 
             if (!IsSessionInitiated) {
+                Log.Warning("[SessionCountlyService] EndSessionAsync: The session isn't started yet!");
                 return;
             }
 
@@ -184,6 +190,7 @@ namespace Plugins.CountlySDK.Services
             }
 
             if (!IsSessionInitiated) {
+                Log.Warning("[SessionCountlyService] ExtendSessionAsync: The session isn't started yet!");
                 return;
             }
 

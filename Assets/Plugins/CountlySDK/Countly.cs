@@ -317,14 +317,12 @@ namespace Plugins.CountlySDK
 
             if (pauseStatus) {
                 HandleAppPauseOrFocus();
-                Session?._sessionTimer?.Stop();
-                if (!Configuration.EnableManualSessionHandling && !Configuration.IsAutomaticSessionTrackingDisabled) {
+                if (!Configuration.IsAutomaticSessionTrackingDisabled) {
                     await Session?.EndSessionAsync();
                 }
             } else {
                 SubscribeAppLog();
-                Session?._sessionTimer?.Start();
-                if (!Configuration.EnableManualSessionHandling && !Configuration.IsAutomaticSessionTrackingDisabled) {
+                if (!Configuration.IsAutomaticSessionTrackingDisabled) {
                     await Session?.BeginSessionAsync();
                 }
             }

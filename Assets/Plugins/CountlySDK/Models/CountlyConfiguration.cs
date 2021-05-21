@@ -158,7 +158,6 @@ namespace Plugins.CountlySDK.Models
         public void DisableAutomaticSessionTracking()
         {
             IsAutomaticSessionTrackingDisabled = true;
-            Debug.Log("[Countly][CountlyConfiguration] Automatic session tracking disabled!");
         }
 
         /// <summary>
