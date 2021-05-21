@@ -34,10 +34,9 @@ namespace Notifications.Impls
             _service = new Notifications.Impls.iOs.IOsNotificationsService(_countlyGameObject, config, logHelper, startCoroutine, eventCountlyService);
 #endif
             IsInitializedWithoutError = true;
-            if (!_service.IsInitializedWithoutError) {
+            if (_service != null && !_service.IsInitializedWithoutError) {
                 _service = null;
                 IsInitializedWithoutError = false;
-
             }
         }
 
