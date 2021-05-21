@@ -41,8 +41,8 @@ namespace Tests
         }
 
         /// <summary>
-        ///Case: if 'RequiresConsent' isn't set in the configuration during initialization.
-        ///Result: All features should work.
+        /// Case: if 'RequiresConsent' isn't set in the configuration during initialization.
+        /// Result: All features should work.
         /// </summary>
         [Test]
         public void TestDefaultStateOfConsents()
@@ -56,6 +56,36 @@ namespace Tests
 
             Assert.IsNotNull(Countly.Instance.Consents);
             AssertConsentAll(expectedValue: true);
+        }
+
+        /// <summary>
+        /// Case: if 'RequiresConsent' isn't set in the configuration during initialization.
+        /// Result: Consent request should not send.
+        /// </summary>
+        [Test]
+        public void TestConsentsRequest_RequiresConsent_IsFalse()
+        {
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                AppKey = _appKey,
+                ServerUrl = _serverUrl,
+            };
+
+            Countly.Instance.Init(configuration);
+
+            Assert.IsNotNull(Countly.Instance.Consents);
+            Assert.AreEqual(1, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
+
+            CountlyRequestModel requestModel = Countly.Instance.Consents._requestCountlyHelper._requestRepo.Dequeue();
+            string myUri = requestModel.RequestUrl;
+            string consents = HttpUtility.ParseQueryString(myUri).Get("consent");
+            Assert.IsNull(consents);
+
+            Countly.Instance.Consents.GiveConsent(new Consents[] { Consents.Sessions });
+            Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
+
+            Countly.Instance.Consents.RemoveConsent(new Consents[] { Consents.Sessions });
+            Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
+
         }
 
         /// <summary>
@@ -74,8 +104,6 @@ namespace Tests
             Countly.Instance.Init(configuration);
 
             Assert.IsNotNull(Countly.Instance.Consents);
-
-            Task.Delay(1);
             Assert.AreEqual(1, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
 
             CountlyRequestModel requestModel = Countly.Instance.Consents._requestCountlyHelper._requestRepo.Dequeue();
