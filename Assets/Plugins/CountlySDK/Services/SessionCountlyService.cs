@@ -213,8 +213,13 @@ namespace Plugins.CountlySDK.Services
 
         }
 
-        internal override void ConsentChanged(List<Consents> updatedConsents, bool newConsentValue)
+        internal override async void ConsentChanged(List<Consents> updatedConsents, bool newConsentValue)
         {
+            if (updatedConsents.Contains(Consents.Sessions) && newConsentValue) {
+                if (!_configuration.IsAutomaticSessionTrackingDisabled && !IsSessionInitiated) {
+                    await BeginSessionAsync();
+                }
+            }
 
         }
         #endregion
