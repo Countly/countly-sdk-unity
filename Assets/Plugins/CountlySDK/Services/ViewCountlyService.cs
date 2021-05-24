@@ -64,7 +64,7 @@ namespace Plugins.CountlySDK.Services
                 _viewToLastViewStartTime.Add(name, DateTime.UtcNow);
             }
 
-            CountlyEventModel currentView = new CountlyEventModel(CountlyEventModel.ViewEvent, currentViewSegment.ToDictionary());
+            CountlyEventModel currentView = new CountlyEventModel(CountlyEventModel.ViewEvent, currentViewSegment.OpenViewDictionary());
             await _eventService.RecordEventAsync(currentView);
 
             _isFirstView = false;
@@ -118,7 +118,9 @@ namespace Plugins.CountlySDK.Services
                 _viewToLastViewStartTime.Remove(name);
             }
 
-            CountlyEventModel currentView = new CountlyEventModel(CountlyEventModel.ViewEvent, currentViewSegment.ToDictionary(), 1, null, duration);
+            IDictionary<string, object> segment = currentViewSegment.CloseViewDictionary();
+
+            CountlyEventModel currentView = new CountlyEventModel(CountlyEventModel.ViewEvent, segment, 1, null, duration);
             await _eventService.RecordEventAsync(currentView);
         }
 
@@ -155,7 +157,9 @@ namespace Plugins.CountlySDK.Services
         #region override Methods
         internal override void DeviceIdChanged(string deviceId, bool merged)
         {
-
+            if (!merged) {
+                _isFirstView = true;
+            }
         }
 
         internal override void ConsentChanged(List<Consents> updatedConsents, bool newConsentValue)
@@ -175,7 +179,7 @@ namespace Plugins.CountlySDK.Services
             public int Visit { get; set; }
             public int Start { get; set; }
 
-            public IDictionary<string, object> ToDictionary()
+            public IDictionary<string, object> OpenViewDictionary()
             {
                 Dictionary<string, object> dict = new Dictionary<string, object>
                 {
@@ -183,6 +187,16 @@ namespace Plugins.CountlySDK.Services
                     {"segment", Segment},
                     {"visit", Visit},
                     {"start", Start}
+                };
+                return dict;
+            }
+
+            public IDictionary<string, object> CloseViewDictionary()
+            {
+                Dictionary<string, object> dict = new Dictionary<string, object>
+                {
+                    {"name", Name},
+                    {"segment", Segment},
                 };
                 return dict;
             }
