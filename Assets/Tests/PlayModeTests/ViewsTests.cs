@@ -34,6 +34,51 @@ namespace Tests
         }
 
         /// <summary>
+        /// It validates the dependency of 'Event Consent'.
+        /// </summary>
+        [Test]
+        public async void TestViews_CheckEventConsentDependency()
+        {
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                ServerUrl = _serverUrl,
+                AppKey = _appKey,
+                RequiresConsent = true,
+            };
+
+            configuration.GiveConsent(new Consents[] { Consents.Views});
+
+            Countly.Instance.Init(configuration);
+
+            Countly.Instance.ClearStorage();
+            Assert.IsNotNull(Countly.Instance.Views);
+            Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
+
+            await Countly.Instance.Views.RecordOpenViewAsync("open_view");
+            Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
+
+            CountlyEventModel model = Countly.Instance.Views._eventService._eventRepo.Dequeue();
+
+            Assert.AreEqual(CountlyEventModel.ViewEvent, model.Key);
+            Assert.IsNull(model.Sum);
+            Assert.AreEqual(1, model.Count);
+            Assert.IsNull(model.Duration);
+            Assert.IsNotNull(model.Segmentation);
+            Assert.AreEqual("open_view", model.Segmentation["name"]);
+
+            await Countly.Instance.Views.RecordOpenViewAsync("close_view");
+            Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
+
+            model = Countly.Instance.Views._eventService._eventRepo.Dequeue();
+
+            Assert.AreEqual(CountlyEventModel.ViewEvent, model.Key);
+            Assert.IsNull(model.Sum);
+            Assert.AreEqual(1, model.Count);
+            Assert.IsNull(model.Duration);
+            Assert.IsNotNull(model.Segmentation);
+            Assert.AreEqual("close_view", model.Segmentation["name"]);
+        }
+
+        /// <summary>
         /// It checks the working of views service if no views consent is given.
         /// </summary>
         [Test]
