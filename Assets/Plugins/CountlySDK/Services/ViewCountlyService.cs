@@ -123,7 +123,7 @@ namespace Plugins.CountlySDK.Services
                     Height = height
                 };
 
-            CountlyEventModel currentView = new CountlyEventModel(CountlyEventModel.ViewActionEvent, segment.ToDictionary(), 1, null, null);
+            CountlyEventModel currentView = new CountlyEventModel(CountlyEventModel.ViewActionEvent, segment.ToDictionary());
             await _eventService.RecordEventAsync(currentView);
         }
 
