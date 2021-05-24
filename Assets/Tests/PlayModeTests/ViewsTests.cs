@@ -89,9 +89,6 @@ namespace Tests
             Assert.IsNull( model.Duration);
             Assert.IsNotNull(model.Segmentation);
             Assert.AreEqual("close_view", model.Segmentation["name"]);
-            Assert.AreEqual(0, model.Segmentation["visit"]);
-            Assert.AreEqual(0, model.Segmentation["start"]);
-
         }
 
         /// <summary>
