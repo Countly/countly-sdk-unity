@@ -16,3 +16,6 @@
 * Renamed Crash Reporting interface 
 
 * Fixed undesired request queue behaviour
+
+## 20.11.1
+* Fixed ID generation issue for iOS devices
