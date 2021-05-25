@@ -19,11 +19,7 @@ namespace Plugins.CountlySDK
 
         public string GetUniqueDeviceId()
         {
-#if UNITY_IOS
-            return UnityEngine.iOS.Device.advertisingIdentifier;
-#else
             return UnityEngine.SystemInfo.deviceUniqueIdentifier;
-#endif
         }
 
         /// <summary>
