@@ -1,3 +1,6 @@
+## 20.11.1
+* Fixed ID generation issue for iOS devices. Now SDK using 'SystemInfo.deviceUniqueIdentifier' instead 'Device.advertisingIdentifier'
+
 ## 20.11.0
 * Added Sample App
 * Added test mode feature 
