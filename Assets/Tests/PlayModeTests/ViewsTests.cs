@@ -257,8 +257,10 @@ namespace Tests
             CountlyConfiguration configuration = new CountlyConfiguration {
                 ServerUrl = _serverUrl,
                 AppKey = _appKey,
+                RequiresConsent = true
             };
 
+            configuration.GiveConsent(new Consents[] { Consents.Crashes, Consents.Events, Consents.Clicks, Consents.StarRating, Consents.Views, Consents.Users, Consents.Push, Consents.RemoteConfig, Consents.Location });
             Countly.Instance.Init(configuration);
 
             Countly.Instance.ClearStorage();
