@@ -110,6 +110,7 @@ namespace Tests
             string myUri = requestModel.RequestUrl;
             string consents = HttpUtility.ParseQueryString(myUri).Get("consent");
             JObject json = JObject.Parse(consents);
+            Assert.AreEqual(9, json.Count);
             Assert.IsTrue(json.GetValue("push").ToObject<bool>());
             Assert.IsTrue(json.GetValue("users").ToObject<bool>());
             Assert.IsTrue(json.GetValue("views").ToObject<bool>());
