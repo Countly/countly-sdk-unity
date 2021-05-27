@@ -8,7 +8,7 @@ namespace Plugins.CountlySDK.Services
 {
     public class StarRatingCountlyService : AbstractBaseService
     {
-        private readonly EventCountlyService _eventCountlyService;
+        internal readonly EventCountlyService _eventCountlyService;
 
         internal StarRatingCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, ConsentCountlyService consentService, EventCountlyService eventCountlyService) : base(configuration, logHelper, consentService)
         {
@@ -35,7 +35,7 @@ namespace Plugins.CountlySDK.Services
         /// </summary>
         /// <param name="platform">name of platform</param>
         /// <param name="appVersion">the current version of the app</param>
-        /// <param name="rating">value from 0 to 5 that will be set as the rating value</param>
+        /// <param name="rating">value from 1 to 5 that will be set as the rating value</param>
         /// <returns></returns>
         public async Task ReportStarRatingAsync(string platform, string appVersion, int rating)
         {
@@ -45,7 +45,18 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
 
+            if (string.IsNullOrEmpty(platform) || string.IsNullOrWhiteSpace(platform)) {
+                Log.Warning("[StarRatingCountlyService] ReportStarRatingAsync : The platform name'" + platform + "'isn't valid.");
+                return;
+            }
+
+            if (string.IsNullOrEmpty(appVersion) || string.IsNullOrWhiteSpace(appVersion)) {
+                Log.Warning("[StarRatingCountlyService] ReportStarRatingAsync : The appVersion '" + appVersion + "'isn't valid.");
+                return;
+            }
+
             if (rating < 1 || rating > 5) {
+                Log.Warning("[StarRatingCountlyService] ReportStarRatingAsync : The rating value'" + rating + "'isn't valid.");
                 return;
             }
 
@@ -56,9 +67,8 @@ namespace Plugins.CountlySDK.Services
                     Rating = rating,
                 };
 
-            await _eventCountlyService.ReportCustomEventAsync(
-                CountlyEventModel.StarRatingEvent, segment.ToDictionary(),
-                null, null, null);
+            CountlyEventModel eventModel = new CountlyEventModel(CountlyEventModel.StarRatingEvent, segment.ToDictionary(), null, null, null);
+            await _eventCountlyService.RecordEventAsync(eventModel);
         }
 
 
