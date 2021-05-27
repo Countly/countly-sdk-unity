@@ -11,7 +11,7 @@ namespace Plugins.CountlySDK.Services
 
     public class ViewCountlyService : AbstractBaseService
     {
-        private bool _isFirstView = true;
+        internal bool _isFirstView = true;
         internal readonly EventCountlyService _eventService;
         private readonly Dictionary<string, DateTime> _viewToLastViewStartTime = new Dictionary<string, DateTime>();
 
