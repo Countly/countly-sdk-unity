@@ -39,6 +39,11 @@ namespace Tests
             await Countly.Instance.Session.BeginSessionAsync();
             Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
 
+            await Countly.Instance.Session.ExtendSessionAsync();
+            Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
+
+            await Countly.Instance.Session.EndSessionAsync();
+            Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
 
         }
 
@@ -104,6 +109,7 @@ namespace Tests
                 AppKey = _appKey,
             };
 
+            configuration.DisableLocation();
             Countly.Instance.Init(configuration);
             Assert.IsNotNull(Countly.Instance.Session);
             Assert.AreEqual(1, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
@@ -164,7 +170,126 @@ namespace Tests
             Assert.AreEqual(0, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
         }
 
-      
+        /// <summary>
+        /// It validates the functionality of 'BeginSessionAsync' when session consent is given after init and automatic session tracking is disable.
+        /// </summary>
+        [Test]
+        public void TestSessionBegin_ConsentGivenAfterInitWithDisableTracking()
+        {
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                ServerUrl = _serverUrl,
+                AppKey = _appKey,
+                RequiresConsent = true
+            };
+
+            configuration.DisableAutomaticSessionTracking();
+            Countly.Instance.Init(configuration);
+            Assert.IsNotNull(Countly.Instance.Session);
+            Assert.AreEqual(1, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
+            Countly.Instance.Session._requestCountlyHelper._requestRepo.Clear();
+
+            Countly.Instance.Consents.GiveConsent(new Consents[] { Consents.Sessions });
+
+            Assert.AreEqual(0, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
+           
+        }
+
+        /// <summary>
+        /// It validates the functionality of 'BeginSessionAsync' when session consent is given after init and session had begun before.
+        /// </summary>
+        [Test]
+        public void TestSessionBegin_ConsentGivenAfterSessionBegin()
+        {
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                ServerUrl = _serverUrl,
+                AppKey = _appKey,
+                RequiresConsent = true
+            };
+
+            Countly.Instance.Init(configuration);
+            Assert.IsNotNull(Countly.Instance.Session);
+            Assert.AreEqual(1, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
+            Countly.Instance.Session._requestCountlyHelper._requestRepo.Clear();
+
+            Countly.Instance.Consents.GiveConsent(new Consents[] { Consents.Sessions });
+            Assert.AreEqual(1, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
+            Countly.Instance.Session._requestCountlyHelper._requestRepo.Clear();
+
+            Countly.Instance.Consents.RemoveConsent(new Consents[] { Consents.Sessions });
+            Assert.AreEqual(0, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
+
+            Countly.Instance.Consents.GiveConsent(new Consents[] { Consents.Sessions });
+            Assert.AreEqual(0, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
+
+        }
+
+        /// <summary>
+        /// It validates the request of 'ExtendSessionAsync'.
+        /// </summary>
+        [Test]
+        public async void TestSessionExtend()
+        {
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                ServerUrl = _serverUrl,
+                AppKey = _appKey,
+            };
+
+            Countly.Instance.Init(configuration);
+            Assert.IsNotNull(Countly.Instance.Session);
+            Assert.AreEqual(1, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
+
+            CountlyRequestModel requestModel = Countly.Instance.Session._requestCountlyHelper._requestRepo.Dequeue();
+            string myUri = requestModel.RequestUrl;
+            NameValueCollection values = HttpUtility.ParseQueryString(myUri);
+
+            Assert.AreEqual("1", values.Get("begin_session"));
+            Assert.IsNotNull(values.Get("metrics"));
+
+            await Countly.Instance.Session.ExtendSessionAsync();
+            Assert.AreEqual(1, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
+
+            requestModel = Countly.Instance.Session._requestCountlyHelper._requestRepo.Dequeue();
+            myUri = requestModel.RequestUrl;
+            values = HttpUtility.ParseQueryString(myUri);
+
+            Assert.IsNotNull(values.Get("session_duration"));
+            Assert.IsNull(values.Get("metrics"));
+        }
+
+        /// <summary>
+        /// It validates the request of 'EndSessionAsync'.
+        /// </summary>
+        [Test]
+        public async void TestSessionEnd()
+        {
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                ServerUrl = _serverUrl,
+                AppKey = _appKey,
+            };
+
+            Countly.Instance.Init(configuration);
+            Assert.IsNotNull(Countly.Instance.Session);
+            Assert.AreEqual(1, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
+
+            CountlyRequestModel requestModel = Countly.Instance.Session._requestCountlyHelper._requestRepo.Dequeue();
+            string myUri = requestModel.RequestUrl;
+            NameValueCollection values = HttpUtility.ParseQueryString(myUri);
+
+            Assert.AreEqual("1", values.Get("begin_session"));
+            Assert.IsNotNull(values.Get("metrics"));
+
+            await Countly.Instance.Session.EndSessionAsync();
+            Assert.AreEqual(1, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
+
+            requestModel = Countly.Instance.Session._requestCountlyHelper._requestRepo.Dequeue();
+            myUri = requestModel.RequestUrl;
+            values = HttpUtility.ParseQueryString(myUri);
+
+            Assert.AreEqual("1", values.Get("end_session"));
+            Assert.IsNotNull(values.Get("session_duration"));
+
+            Assert.IsNull(values.Get("metrics"));
+        }
 
         [TearDown]
         public void End()
