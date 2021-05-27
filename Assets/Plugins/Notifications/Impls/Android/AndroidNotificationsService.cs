@@ -113,8 +113,9 @@ namespace Notifications.Impls.Android
 
                     Log.Debug("[AndroidNotificationsService] ReportPushActionAsync key: " + CountlyEventModel.PushActionEvent + ", segments: " + segment);
 
-                    await _eventCountlyService.ReportCustomEventAsync(
-                        CountlyEventModel.PushActionEvent, segment.ToDictionary());
+
+                    CountlyEventModel eventModel = new CountlyEventModel(CountlyEventModel.PushActionEvent, segment.ToDictionary());
+                    await _eventCountlyService.RecordEventAsync(eventModel);
                 }
 
                 store.CallStatic("clearMessagesData");
