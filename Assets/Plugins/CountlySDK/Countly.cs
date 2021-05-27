@@ -120,7 +120,7 @@ namespace Plugins.CountlySDK
         /// <returns>ViewCountlyService</returns>
         public ViewCountlyService Views { get; private set; }
 
-        private SessionCountlyService Session { get; set; }
+        internal SessionCountlyService Session { get; set; }
 
         /// <summary>
         ///     Add callbacks to listen to push notification events for when a notification is received and when it is clicked.
