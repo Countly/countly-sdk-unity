@@ -57,8 +57,8 @@ namespace Notifications.Impls.iOs
 
                 Log.Debug("[IOsNotificationsService] ReportPushActionAsync key: " + CountlyEventModel.PushActionEvent + ", segments: " + segment);
 
-                await _eventCountlyService.ReportCustomEventAsync(
-                    CountlyEventModel.PushActionEvent, segment.ToDictionary());
+                CountlyEventModel eventModel = new CountlyEventModel(CountlyEventModel.PushActionEvent, segment.ToDictionary());
+                await _eventCountlyService.RecordEventAsync(eventModel);
             }
 
             _bridge.MessageId = null;
