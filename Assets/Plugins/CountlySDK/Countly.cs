@@ -204,7 +204,7 @@ namespace Plugins.CountlySDK
             CountlyUtils countlyUtils = new CountlyUtils(this);
             RequestCountlyHelper requests = new RequestCountlyHelper(Configuration, _logHelper, countlyUtils, requestRepo);
 
-            Consents = new ConsentCountlyService(Configuration, _logHelper, Consents);
+            Consents = new ConsentCountlyService(Configuration, _logHelper, Consents, requests);
             Events = new EventCountlyService(Configuration, _logHelper, requests, nonViewEventRepo, Consents);
 
             Location = new Services.LocationService(Configuration, _logHelper, requests, Consents);

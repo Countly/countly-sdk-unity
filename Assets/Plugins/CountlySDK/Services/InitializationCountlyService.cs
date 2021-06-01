@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Linq;
+using System.Threading.Tasks;
 using Plugins.CountlySDK.Enums;
 using Plugins.CountlySDK.Models;
 
@@ -19,6 +20,7 @@ namespace Plugins.CountlySDK.Services
 
         internal async Task OnInitialisationComplete()
         {
+            await _consentService.SendConsentChanges(_consentService._countlyConsents.Keys.ToList(), true);
             await StartSession();
         }
 
