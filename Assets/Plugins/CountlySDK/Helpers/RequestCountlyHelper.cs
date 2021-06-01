@@ -77,7 +77,7 @@ namespace Plugins.CountlySDK.Helpers
 
         private async Task<CountlyResponse> ProcessRequest(CountlyRequestModel model)
         {
-            Log.Verbose("[RequestCountlyHelper] Process request, request: " + model.ToString());
+            Log.Verbose("[RequestCountlyHelper] Process request, request: " + (model != null));
 
             if (model.IsRequestGetType) {
                 return await Task.Run(() => GetAsync(model.RequestUrl));
@@ -183,29 +183,18 @@ namespace Plugins.CountlySDK.Helpers
                 HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
                 using (HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync()) {
                     int code = (int)response.StatusCode;
-                    using (Stream stream = response.GetResponseStream())
+                    if (code >= 200 && code < 300) {
+                        using (Stream stream = response.GetResponseStream())
                         using (StreamReader reader = new StreamReader(stream)) {
-                        string res = await reader.ReadToEndAsync();
-                        countlyResponse.StatusCode = code;
-                        countlyResponse.IsSuccess = true;
-                        countlyResponse.Data = res;
+                            string res = await reader.ReadToEndAsync();
+                            countlyResponse.IsSuccess = !string.IsNullOrEmpty(res) && res.Contains("result");
+                            countlyResponse.Data = res;
+                        }
                     }
 
                 }
-            } catch (WebException ex) {
+            } catch (Exception ex) {
                 countlyResponse.ErrorMessage = ex.Message;
-                if (ex.Response != null) {
-                    HttpWebResponse response = (HttpWebResponse)ex.Response;
-                    int code = (int)response.StatusCode;
-                    using (Stream stream = ex.Response.GetResponseStream())
-                    using (StreamReader reader = new StreamReader(stream)) {
-                        string res = await reader.ReadToEndAsync();
-                        countlyResponse.StatusCode = code;
-                        countlyResponse.IsSuccess = true;
-                        countlyResponse.Data = res;
-                    }
-                }
-               
             }
 
             Log.Verbose("[RequestCountlyHelper] request: " + url + " response: " + countlyResponse.ToString());
@@ -238,30 +227,15 @@ namespace Plugins.CountlySDK.Helpers
                     await requestBody.WriteAsync(dataBytes, 0, dataBytes.Length);
                 }
 
-                using (HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync()) {
-                    int code = (int)response.StatusCode;
-                    using (Stream stream = response.GetResponseStream())
-                    using (StreamReader reader = new StreamReader(stream)) {
-                        string res = await reader.ReadToEndAsync();
-                        countlyResponse.StatusCode = code;
-                        countlyResponse.IsSuccess = true;
-                        countlyResponse.Data = res;
-                    }
+                using (HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync())
+                using (Stream stream = response.GetResponseStream())
+                using (StreamReader reader = new StreamReader(stream)) {
+                    string res = await reader.ReadToEndAsync();
+                    countlyResponse.IsSuccess = !string.IsNullOrEmpty(res);
+                    countlyResponse.Data = res;
                 }
-            } catch (WebException ex) {
+            } catch (Exception ex) {
                 countlyResponse.ErrorMessage = ex.Message;
-                if (ex.Response != null) {
-                    HttpWebResponse response = (HttpWebResponse)ex.Response;
-                    int code = (int)response.StatusCode;
-                    using (Stream stream = ex.Response.GetResponseStream())
-                    using (StreamReader reader = new StreamReader(stream)) {
-                        string res = await reader.ReadToEndAsync();
-                        countlyResponse.StatusCode = code;
-                        countlyResponse.IsSuccess = true;
-                        countlyResponse.Data = res;
-                    }
-                }
-
             }
 
             Log.Verbose("[RequestCountlyHelper] request: " + uri + " response: " + countlyResponse.ToString());
