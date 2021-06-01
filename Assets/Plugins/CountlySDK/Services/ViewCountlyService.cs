@@ -11,6 +11,7 @@ namespace Plugins.CountlySDK.Services
 
     public class ViewCountlyService : AbstractBaseService
     {
+        internal bool _isFirstView = true;
         internal readonly EventCountlyService _eventService;
         private readonly Dictionary<string, DateTime> _viewToLastViewStartTime = new Dictionary<string, DateTime>();
 
@@ -26,9 +27,22 @@ namespace Plugins.CountlySDK.Services
         /// <param name="name">name of the view</param>
         /// <param name="hasSessionBegunWithView">set true if the session is beginning with this view</param>
         /// <returns></returns>
-        public async Task RecordOpenViewAsync(string name, bool hasSessionBegunWithView = false)
+        [Obsolete("RecordOpenViewAsync(string name, bool hasSessionBegunWithView) is deprecated, please use RecordOpenViewAsync(string name) instead.")]
+        public async Task RecordOpenViewAsync(string name, bool hasSessionBegunWithView)
         {
             Log.Info("[ViewCountlyService] RecordOpenViewAsync : name = " + name + ", hasSessionBegunWithView = " + hasSessionBegunWithView);
+
+            await RecordOpenViewAsync(name);
+        }
+
+        /// <summary>
+        /// Start tracking a view
+        /// </summary>
+        /// <param name="name">name of the view</param>
+        /// <returns></returns>
+        public async Task RecordOpenViewAsync(string name)
+        {
+            Log.Info("[ViewCountlyService] RecordOpenViewAsync : name = " + name);
 
             if (!_consentService.CheckConsentInternal(Consents.Views)) {
                 return;
@@ -38,23 +52,22 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
 
-
             ViewSegment currentViewSegment =
                 new ViewSegment {
                     Name = name,
                     Segment = Constants.UnityPlatform,
                     Visit = 1,
-                    Exit = 0,
-                    Bounce = 0,
-                    HasSessionBegunWithView = hasSessionBegunWithView
+                    Start = _isFirstView ? 1 : 0
                 };
 
             if (!_viewToLastViewStartTime.ContainsKey(name)) {
                 _viewToLastViewStartTime.Add(name, DateTime.UtcNow);
             }
 
-            CountlyEventModel currentView = new CountlyEventModel(CountlyEventModel.ViewEvent, currentViewSegment.ToDictionary());
+            CountlyEventModel currentView = new CountlyEventModel(CountlyEventModel.ViewEvent, currentViewSegment.OpenViewDictionary());
             await _eventService.RecordEventAsync(currentView);
+
+            _isFirstView = false;
         }
 
         /// <summary>
@@ -63,7 +76,21 @@ namespace Plugins.CountlySDK.Services
         /// <param name="name of the view"></param>
         /// <param name="hasSessionBegunWithView">set true if the session is beginning with this view</param>
         /// <returns></returns>
-        public async Task RecordCloseViewAsync(string name, bool hasSessionBegunWithView = false)
+        [Obsolete("RecordCloseViewAsync(string name, bool hasSessionBegunWithView) is deprecated, please use RecordCloseViewAsync(string name) instead.")]
+        public async Task RecordCloseViewAsync(string name, bool hasSessionBegunWithView)
+        {
+            Log.Info("[ViewCountlyService] RecordCloseViewAsync : name = " + name + ", hasSessionBegunWithView = " + hasSessionBegunWithView);
+
+            await RecordCloseViewAsync(name);
+
+        }
+
+        /// <summary>
+        /// Stop tracking a view
+        /// </summary>
+        /// <param name="name of the view"></param>
+        /// <returns></returns>
+        public async Task RecordCloseViewAsync(string name)
         {
             Log.Info("[ViewCountlyService] RecordCloseViewAsync : name = " + name);
 
@@ -80,9 +107,7 @@ namespace Plugins.CountlySDK.Services
                     Name = name,
                     Segment = Constants.UnityPlatform,
                     Visit = 0,
-                    Exit = 1,
-                    Bounce = 0,
-                    HasSessionBegunWithView = hasSessionBegunWithView
+                    Start = 0
                 };
 
             double? duration = null;
@@ -93,7 +118,9 @@ namespace Plugins.CountlySDK.Services
                 _viewToLastViewStartTime.Remove(name);
             }
 
-            CountlyEventModel currentView = new CountlyEventModel(CountlyEventModel.ViewEvent, currentViewSegment.ToDictionary(), 1, null, duration);
+            IDictionary<string, object> segment = currentViewSegment.CloseViewDictionary();
+
+            CountlyEventModel currentView = new CountlyEventModel(CountlyEventModel.ViewEvent, segment, 1, null, duration);
             await _eventService.RecordEventAsync(currentView);
         }
 
@@ -130,7 +157,9 @@ namespace Plugins.CountlySDK.Services
         #region override Methods
         internal override void DeviceIdChanged(string deviceId, bool merged)
         {
-
+            if (!merged) {
+                _isFirstView = true;
+            }
         }
 
         internal override void ConsentChanged(List<Consents> updatedConsents, bool newConsentValue)
@@ -148,21 +177,26 @@ namespace Plugins.CountlySDK.Services
             public string Name { get; set; }
             public string Segment { get; set; }
             public int Visit { get; set; }
-            public int Exit { get; set; }
-            public int Bounce { get; set; }
-            public bool HasSessionBegunWithView { get; set; }
-            private int Start => HasSessionBegunWithView ? 1 : 0;
+            public int Start { get; set; }
 
-            public IDictionary<string, object> ToDictionary()
+            public IDictionary<string, object> OpenViewDictionary()
             {
                 Dictionary<string, object> dict = new Dictionary<string, object>
                 {
                     {"name", Name},
                     {"segment", Segment},
-                    {"exit", Exit},
                     {"visit", Visit},
-                    {"start", Start},
-                    {"bounce", Bounce}
+                    {"start", Start}
+                };
+                return dict;
+            }
+
+            public IDictionary<string, object> CloseViewDictionary()
+            {
+                Dictionary<string, object> dict = new Dictionary<string, object>
+                {
+                    {"name", Name},
+                    {"segment", Segment},
                 };
                 return dict;
             }
