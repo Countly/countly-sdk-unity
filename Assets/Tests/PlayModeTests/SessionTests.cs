@@ -154,7 +154,7 @@ namespace Tests
         }
 
         /// <summary>
-        /// It validates the of session service when autmatic session tracking is disable.
+        /// It validates the working of session service when automatic session tracking is disabled.
         /// </summary>
         [Test]
         public void TestSessionService_WithDisableTracking()
@@ -171,7 +171,7 @@ namespace Tests
         }
 
         /// <summary>
-        /// It validates the functionality of 'BeginSessionAsync' when session consent is given after init and automatic session tracking is disable.
+        /// It validates if 'BeginSessionAsync' does call when session consent is given after init and automatic session tracking is disabled.
         /// </summary>
         [Test]
         public void TestSessionBegin_ConsentGivenAfterInitWithDisableTracking()
@@ -195,7 +195,7 @@ namespace Tests
         }
 
         /// <summary>
-        /// It validates the functionality of 'BeginSessionAsync' when session consent is given after init and session had begun before.
+        /// It validates if 'BeginSessionAsync' does call when session consent is given after init and session had begun before.
         /// </summary>
         [Test]
         public void TestSessionBegin_ConsentGivenAfterSessionBegin()
