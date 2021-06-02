@@ -263,12 +263,13 @@ namespace Tests
             while ((System.DateTime.UtcNow - startTime).TotalSeconds < 2.0);
 
             Countly.Instance.Session.ExtendSessionAsync();
+            double duration = (System.DateTime.Now - sessionStartTime).TotalSeconds;
 
             startTime = System.DateTime.UtcNow;
             do {
                 yield return null;
             }
-            while ((System.DateTime.UtcNow - startTime).TotalSeconds < 2.0);
+            while ((System.DateTime.UtcNow - startTime).TotalSeconds < 0.4);
 
             Assert.AreEqual(1, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
 
@@ -276,7 +277,6 @@ namespace Tests
             myUri = requestModel.RequestUrl;
             values = HttpUtility.ParseQueryString(myUri);
 
-            double duration = (System.DateTime.Now - sessionStartTime).TotalSeconds;
             Assert.GreaterOrEqual(duration, System.Convert.ToDouble(values.Get("session_duration")));
             Assert.LessOrEqual(2.0, System.Convert.ToDouble(values.Get("session_duration")));
 
@@ -311,11 +311,13 @@ namespace Tests
 
             Countly.Instance.Session.EndSessionAsync();
 
+            double duration = (System.DateTime.Now - sessionStartTime).TotalSeconds;
+
             startTime = System.DateTime.UtcNow;
             do {
                 yield return null;
             }
-            while ((System.DateTime.UtcNow - startTime).TotalSeconds < 2.0);
+            while ((System.DateTime.UtcNow - startTime).TotalSeconds < 0.4);
 
             Assert.AreEqual(1, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
 
@@ -325,7 +327,6 @@ namespace Tests
 
           
             Assert.AreEqual("1", values.Get("end_session"));
-            double duration = (System.DateTime.Now - sessionStartTime).TotalSeconds;
             Assert.GreaterOrEqual(duration, System.Convert.ToDouble(values.Get("session_duration")));
             Assert.LessOrEqual(2.0, System.Convert.ToDouble(values.Get("session_duration")));
 
