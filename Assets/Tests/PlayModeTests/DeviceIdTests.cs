@@ -90,6 +90,7 @@ namespace Tests
             Countly.Instance.Init(configuration);
             Assert.IsNotNull(Countly.Instance.Consents);
 
+            string oldDeviceId = Countly.Instance.Device.DeviceId;
             Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
             await Countly.Instance.Device.ChangeDeviceIdWithoutMerge("new_device_id");
             //RQ will have begin session and end session requests
@@ -101,7 +102,7 @@ namespace Tests
             NameValueCollection values = HttpUtility.ParseQueryString(uri);
 
             Assert.AreEqual("1", values.Get("end_session"));
-            Assert.AreEqual("new_device_id", values.Get("device_id"));
+            Assert.AreEqual(oldDeviceId, values.Get("device_id"));
             Assert.IsNotNull(values.Get("session_duration"));
 
             requestModel = Countly.Instance.Device._requestCountlyHelper._requestRepo.Dequeue();
