@@ -195,7 +195,6 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
 
-            _lastSessionRequestTime = DateTime.Now;
             Dictionary<string, object> requestParams =
                 new Dictionary<string, object>
                 {
@@ -203,6 +202,8 @@ namespace Plugins.CountlySDK.Services
                         "session_duration", (DateTime.Now - _lastSessionRequestTime).TotalSeconds
                     }
                 };
+
+            _lastSessionRequestTime = DateTime.Now;
 
             await _requestCountlyHelper.GetResponseAsync(requestParams);
 
