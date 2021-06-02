@@ -17,7 +17,8 @@
 * "EnableFirstAppLaunchSegment" in SDK configuration has been deprecated and its functionality has been removed. This variable is going to be removed in the future.
 * "LogCallback" in "CrashReportsCountlyService" is deprecated, this is going to be removed in the future.
 * Changed the default Device ID generation mechanism for ios devices. Now it will use 'SystemInfo.deviceUniqueIdentifier' as it's source instead of 'iOS.Device.advertisingIdentifier'
-* "ChangeDeviceIdAndEndCurrentSessionAsync" and "ChangeDeviceIdAndMergeSessionDataAsync" in SDK Device module have been deprecated and it's functinality going to be removed in the future.
+* "ChangeDeviceIdAndEndCurrentSessionAsync" and "ChangeDeviceIdAndMergeSessionDataAsync" in the SDK Device module have been deprecated and this is going to be removed in the future.
+* "ReportCustomEventAsync" in the SDK Event module has been deprecated and this is going to be removed in the future.
 
 ## 20.11.1
 * Fixed ID generation issue for iOS devices. Now SDK using 'SystemInfo.deviceUniqueIdentifier' instead 'Device.advertisingIdentifier'
