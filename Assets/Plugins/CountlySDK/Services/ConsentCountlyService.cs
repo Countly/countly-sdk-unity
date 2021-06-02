@@ -1,22 +1,29 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
 using Plugins.CountlySDK.Enums;
+using Plugins.CountlySDK.Helpers;
 using Plugins.CountlySDK.Models;
 
 namespace Plugins.CountlySDK.Services
 {
     public class ConsentCountlyService : AbstractBaseService
     {
+        
         internal bool RequiresConsent { get; private set; }
-        private readonly Dictionary<Consents, bool> _countlyConsents;
-        private Dictionary<string, Consents[]> _countlyConsentGroups;
 
-        internal ConsentCountlyService(CountlyConfiguration config, CountlyLogHelper logHelper, ConsentCountlyService consentService) : base(config, logHelper, consentService)
+        private bool _sendConsentOnChange;
+        internal readonly RequestCountlyHelper _requestCountlyHelper;
+        private Dictionary<string, Consents[]> _countlyConsentGroups;
+        internal readonly Dictionary<Consents, bool> _countlyConsents;
+
+        internal ConsentCountlyService(CountlyConfiguration config, CountlyLogHelper logHelper, ConsentCountlyService consentService, RequestCountlyHelper requestCountlyHelper) : base(config, logHelper, consentService)
         {
             Log.Debug("[ConsentCountlyService] Initializing.");
+            _requestCountlyHelper = requestCountlyHelper;
             _countlyConsents = new Dictionary<Consents, bool>();
-
             RequiresConsent = _configuration.RequiresConsent;
             _countlyConsentGroups = new Dictionary<string, Consents[]>(_configuration.ConsentGroups);
 
@@ -206,13 +213,87 @@ namespace Plugins.CountlySDK.Services
         }
         #endregion
 
-        #region Helper Methods
+        #region Internal Methods
         /// <summary>
-        /// Private method that update selected consents.
+        /// Internal method that send consent changes to server.
         /// </summary>
         /// <param name="consents">List of consent</param>
         /// <param name="value">value to be set</param>
-        private void SetConsentInternal(Consents[] consents, bool value)
+        internal async Task SendConsentChanges(List<Consents> consents, bool value)
+        {
+            _sendConsentOnChange = true;
+
+            if (!RequiresConsent || consents.Count == 0 ) {
+                return;
+            }
+
+            JObject jObj = new JObject();
+            foreach (Consents consent in consents) {
+                jObj.Add(GetConsentKey(consent), value);
+            }
+            
+            Dictionary<string, object> requestParams =
+                new Dictionary<string, object>
+                {
+                    {
+                        "consent", jObj
+                    }
+                };
+
+            await _requestCountlyHelper.GetResponseAsync(requestParams);
+        }
+        #endregion
+
+        #region Helper Methods
+        /// <summary>
+        /// Private method that returns consent key.
+        /// </summary>
+        /// <param name="consent">a consent</param>
+        ///<returns>string</returns>
+        private string GetConsentKey(Consents consent)
+        {
+            string key = "";
+            switch (consent) {
+                case Consents.Clicks:
+                    key = "clicks";
+                    break;
+                case Consents.Crashes:
+                    key = "crashes";
+                    break;
+                case Consents.Events:
+                    key = "events";
+                    break;
+                case Consents.Location:
+                    key = "location";
+                    break;
+                case Consents.Push:
+                    key = "push";
+                    break;
+                case Consents.RemoteConfig:
+                    key = "remote-config";
+                    break;
+                case Consents.Sessions:
+                    key = "sessions";
+                    break;
+                case Consents.StarRating:
+                    key = "star-rating";
+                    break;
+                case Consents.Users:
+                    key = "users";
+                    break;
+                case Consents.Views:
+                    key = "views";
+                    break;
+            }
+
+            return key;
+        }
+            /// <summary>
+            /// Private method that update selected consents.
+            /// </summary>
+            /// <param name="consents">List of consent</param>
+            /// <param name="value">value to be set</param>
+            private async void SetConsentInternal(Consents[] consents, bool value)
         {
             if (consents == null) {
                 Log.Debug("[ConsentCountlyService] Calling SetConsentInternal with null consents list!");
@@ -236,6 +317,10 @@ namespace Plugins.CountlySDK.Services
             }
 
             NotifyListeners(updatedConsents, value);
+            if (_sendConsentOnChange) {
+                await SendConsentChanges(updatedConsents, value);
+            }
+            
         }
 
         /// <summary>
@@ -252,6 +337,7 @@ namespace Plugins.CountlySDK.Services
             foreach (AbstractBaseService listener in Listeners) {
                 listener.ConsentChanged(updatedConsents, newConsentValue);
             }
+
         }
         #endregion
 
