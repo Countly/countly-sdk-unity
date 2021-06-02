@@ -2,13 +2,11 @@
 * Added Consent feature
 * Added data type checking for segmentation
 * Added functionality to disable automatic session tracking
-* Added unit tests
 
-* Reworked automatic session handling and fixed session timmer issue.
+* Reworked automatic session handling and fixed session timer issue.
 * Reworked init, added a new way to init the SDK from code. That will be the mandatory method going further.
-* Reworked SDK logging module and added more logs
-* Reworked Event and Views queues and fixed issues.
 
+* Fixed potential issues with the internal event queue
 * Fixed potential issues in the request queue and reworked its behavior
 * Fixed issues with location handling and reworked some aspects of its behavior
 * Fixed potential issues by calculating Timestamp, dow, hours, and tz from the same time moment
