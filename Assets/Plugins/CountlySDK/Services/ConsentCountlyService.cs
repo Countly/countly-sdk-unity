@@ -97,6 +97,11 @@ namespace Plugins.CountlySDK.Services
         {
             Log.Info("[ConsentCountlyService] GiveConsent : consents = " + (consents != null));
 
+            if (!RequiresConsent) {
+                Log.Debug("[ConsentCountlyService] GiveConsent: Please set consent to be required before calling this!");
+                return;
+            }
+
             SetConsentInternal(consents, true);
         }
 
@@ -316,11 +321,10 @@ namespace Plugins.CountlySDK.Services
                 Log.Debug("[ConsentCountlyService] Setting consent for: [" + consent.ToString() + "] with value: [" + value + "]");
             }
 
-            NotifyListeners(updatedConsents, value);
             if (_sendConsentOnChange) {
                 await SendConsentChanges(updatedConsents, value);
             }
-            
+            NotifyListeners(updatedConsents, value);
         }
 
         /// <summary>
