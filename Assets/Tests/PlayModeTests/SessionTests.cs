@@ -252,7 +252,7 @@ namespace Tests
             myUri = requestModel.RequestUrl;
             values = HttpUtility.ParseQueryString(myUri);
 
-            Assert.IsNotNull(values.Get("session_duration"));
+            Assert.AreEqual(configuration.SessionDuration.ToString(), values.Get("session_duration"));
             Assert.IsNull(values.Get("metrics"));
         }
 
@@ -286,7 +286,9 @@ namespace Tests
             values = HttpUtility.ParseQueryString(myUri);
 
             Assert.AreEqual("1", values.Get("end_session"));
-            Assert.IsNotNull(values.Get("session_duration"));
+            double duration = (System.DateTime.Now - Countly.Instance.Session._lastSessionRequestTime).TotalSeconds;
+
+            Assert.GreaterOrEqual(duration, System.Convert.ToDouble(values.Get("session_duration")));
 
             Assert.IsNull(values.Get("metrics"));
         }

@@ -12,7 +12,7 @@ namespace Plugins.CountlySDK.Services
     public class SessionCountlyService : AbstractBaseService
     {
         internal Timer _sessionTimer;
-        private DateTime _lastSessionRequestTime;
+        internal DateTime _lastSessionRequestTime;
 
         /// <summary>
         /// Check if session has been initiated.
@@ -217,7 +217,8 @@ namespace Plugins.CountlySDK.Services
         internal override async void ConsentChanged(List<Consents> updatedConsents, bool newConsentValue)
         {
             if (updatedConsents.Contains(Consents.Sessions) && newConsentValue) {
-                if (!_configuration.IsAutomaticSessionTrackingDisabled && !IsSessionInitiated) {
+                if (!_configuration.IsAutomaticSessionTrackingDisabled) {
+                    IsSessionInitiated = false;
                     await BeginSessionAsync();
                 }
             }
