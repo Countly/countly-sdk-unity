@@ -219,7 +219,7 @@ namespace Tests
             Assert.AreEqual(0, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
 
             Countly.Instance.Consents.GiveConsent(new Consents[] { Consents.Sessions });
-            Assert.AreEqual(0, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
+            Assert.AreEqual(1, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
 
         }
 
