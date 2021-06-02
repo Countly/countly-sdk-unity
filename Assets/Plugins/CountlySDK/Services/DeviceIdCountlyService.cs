@@ -12,7 +12,7 @@ namespace Plugins.CountlySDK.Services
     {
         private readonly CountlyUtils _countlyUtils;
         private readonly EventCountlyService _eventCountlyService;
-        private readonly RequestCountlyHelper _requestCountlyHelper;
+        internal readonly RequestCountlyHelper _requestCountlyHelper;
         private readonly SessionCountlyService _sessionCountlyService;
 
         internal DeviceIdCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, SessionCountlyService sessionCountlyService,
