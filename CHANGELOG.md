@@ -2,18 +2,19 @@
 * Added Consent feature
 * Added data type checking for segmentation
 * Added functionality to disable automatic session tracking
+* Added unit tests
 
 * Reworked automatic session handling and fixed session timmer issue.
-* Reworked init, added a new way to init the SDK from code. That will be the mandatoy method going further.
+* Reworked init, added a new way to init the SDK from code. That will be the mandatory method going further.
 * Reworked SDK logging module and added more logs
 * Reworked Event and Views queues and fixed issues.
 
-* Fixed potential issues in request queue and reworked it's behaviour
-* Fixed issues with location handling and reworked some aspects of it's behaviour
-* Fixed potential issues by calculating Timestamp, dow, hours and tz from the same time moment
+* Fixed potential issues in the request queue and reworked its behavior
+* Fixed issues with location handling and reworked some aspects of its behavior
+* Fixed potential issues by calculating Timestamp, dow, hours, and tz from the same time moment
 * Fixed crashes that could happen on Application quit
 
-* "EnableFirstAppLaunchSegment" in SDK configuration has been deprecated and it's functinality has been removed. This variable is going to be removed in the future.
+* "EnableFirstAppLaunchSegment" in SDK configuration has been deprecated and its functionality has been removed. This variable is going to be removed in the future.
 * "LogCallback" in "CrashReportsCountlyService" is deprecated, this is going to be removed in the future.
 * Changed the default Device ID generation mechanism for ios devices. Now it will use 'SystemInfo.deviceUniqueIdentifier' as it's source instead of 'iOS.Device.advertisingIdentifier'
 * "ChangeDeviceIdAndEndCurrentSessionAsync" and "ChangeDeviceIdAndMergeSessionDataAsync" in SDK Device module have been deprecated and it's functinality going to be removed in the future.
@@ -38,4 +39,4 @@
 * Removed Unity Mobile Notifications Plugin
 * Renamed Crash Reporting interface 
 
-* Fixed undesired request queue behaviour
+* Fixed undesired request queue behavior
