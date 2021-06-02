@@ -240,6 +240,8 @@ namespace Tests
                 AppKey = _appKey,
             };
 
+            System.DateTime sessionStartTime = System.DateTime.Now;
+
             Countly.Instance.Init(configuration);
             Assert.IsNotNull(Countly.Instance.Session);
             Assert.AreEqual(1, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
@@ -258,7 +260,8 @@ namespace Tests
             myUri = requestModel.RequestUrl;
             values = HttpUtility.ParseQueryString(myUri);
 
-            Assert.AreEqual(configuration.SessionDuration.ToString(), values.Get("session_duration"));
+            double duration = (System.DateTime.Now - sessionStartTime).TotalSeconds;
+            Assert.GreaterOrEqual(duration, System.Convert.ToDouble(values.Get("session_duration")));
             Assert.IsNull(values.Get("metrics"));
         }
 
@@ -273,29 +276,24 @@ namespace Tests
                 AppKey = _appKey,
             };
 
+            System.DateTime sessionStartTime = System.DateTime.Now;
+
             Countly.Instance.Init(configuration);
             Assert.IsNotNull(Countly.Instance.Session);
+            Assert.AreEqual(1, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
+            Countly.Instance.Session._requestCountlyHelper._requestRepo.Clear();
+
+            await Countly.Instance.Session.EndSessionAsync();
             Assert.AreEqual(1, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
 
             CountlyRequestModel requestModel = Countly.Instance.Session._requestCountlyHelper._requestRepo.Dequeue();
             string myUri = requestModel.RequestUrl;
             NameValueCollection values = HttpUtility.ParseQueryString(myUri);
 
-            Assert.AreEqual("1", values.Get("begin_session"));
-            Assert.IsNotNull(values.Get("metrics"));
-
-            await Countly.Instance.Session.EndSessionAsync();
-            Assert.AreEqual(1, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
-
-            requestModel = Countly.Instance.Session._requestCountlyHelper._requestRepo.Dequeue();
-            myUri = requestModel.RequestUrl;
-            values = HttpUtility.ParseQueryString(myUri);
-
+          
             Assert.AreEqual("1", values.Get("end_session"));
-            double duration = (System.DateTime.Now - Countly.Instance.Session._lastSessionRequestTime).TotalSeconds;
-
+            double duration = (System.DateTime.Now - sessionStartTime).TotalSeconds;
             Assert.GreaterOrEqual(duration, System.Convert.ToDouble(values.Get("session_duration")));
-
             Assert.IsNull(values.Get("metrics"));
         }
 

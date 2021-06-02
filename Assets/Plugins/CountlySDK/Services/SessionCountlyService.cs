@@ -200,7 +200,7 @@ namespace Plugins.CountlySDK.Services
                 new Dictionary<string, object>
                 {
                     {
-                        "session_duration", _configuration.SessionDuration
+                        "session_duration", (DateTime.Now - _lastSessionRequestTime).TotalSeconds
                     }
                 };
 
