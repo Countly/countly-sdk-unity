@@ -11,8 +11,8 @@ namespace Plugins.CountlySDK.Services
 {
     public class SessionCountlyService : AbstractBaseService
     {
-        private Timer _sessionTimer;
-        private DateTime _lastSessionRequestTime;
+        internal Timer _sessionTimer;
+        internal DateTime _lastSessionRequestTime;
 
         /// <summary>
         /// Check if session has been initiated.
@@ -22,7 +22,7 @@ namespace Plugins.CountlySDK.Services
 
         private readonly LocationService _locationService;
         private readonly EventCountlyService _eventService;
-        private readonly RequestCountlyHelper _requestCountlyHelper;
+        internal readonly RequestCountlyHelper _requestCountlyHelper;
 
         internal SessionCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, EventCountlyService eventService,
             RequestCountlyHelper requestCountlyHelper, LocationService locationService, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
@@ -32,21 +32,48 @@ namespace Plugins.CountlySDK.Services
             _eventService = eventService;
             _locationService = locationService;
             _requestCountlyHelper = requestCountlyHelper;
+
+            if (_configuration.IsAutomaticSessionTrackingDisabled) {
+                Log.Verbose("[Countly][CountlyConfiguration] Automatic session tracking disabled!");
+            }
+        }
+
+        /// <summary>
+        /// Run session startup logic and start timer with the specified interval
+        /// </summary>
+        internal async Task StartSessionService()
+        {
+            if (!_consentService.CheckConsentInternal(Consents.Sessions)) {
+                /* If location is disabled in init
+                and no session consent is given. Send empty location as separate request.*/
+                if (_locationService.IsLocationDisabled || !_consentService.CheckConsentInternal(Consents.Location)) {
+                    await _locationService.SendRequestWithEmptyLocation();
+                } else {
+                    /*
+                 * If there is no session consent, 
+                 * location values set in init should be sent as a separate location request.
+                 */
+                    await _locationService.SendIndependantLocationRequest();
+                }
+            } else {
+                if (!_configuration.IsAutomaticSessionTrackingDisabled) {
+                    //Start Session
+                    await BeginSessionAsync();
+                } 
+            }
+
+            InitSessionTimer();
         }
 
         /// <summary>
         /// Initializes the timer for extending session with specified interval
         /// </summary>
-        /// <param name="sessionInterval">In milliseconds</param>
         private void InitSessionTimer()
         {
-            if (_configuration.EnableManualSessionHandling) {
-                return;
-            }
-
             _sessionTimer = new Timer { Interval = _configuration.SessionDuration * 1000 };
             _sessionTimer.Elapsed += SessionTimerOnElapsedAsync;
             _sessionTimer.AutoReset = true;
+            _sessionTimer.Start();
         }
 
         /// <summary>
@@ -56,18 +83,12 @@ namespace Plugins.CountlySDK.Services
         /// <param name="elapsedEventArgs"> Provides data for <code>Timer.Elapsed</code>event.</param>
         private async void SessionTimerOnElapsedAsync(object sender, ElapsedEventArgs elapsedEventArgs)
         {
-
             Log.Debug("[SessionCountlyService] SessionTimerOnElapsedAsync");
 
-            if (!IsSessionInitiated) {
-                return;
-            }
-
             await _eventService.AddEventsToRequestQueue();
-
             await _requestCountlyHelper.ProcessQueue();
 
-            if (!_configuration.EnableManualSessionHandling) {
+            if (!_configuration.IsAutomaticSessionTrackingDisabled) {
                 await ExtendSessionAsync();
             }
         }
@@ -84,6 +105,7 @@ namespace Plugins.CountlySDK.Services
             }
 
             if (IsSessionInitiated) {
+                Log.Warning("[SessionCountlyService] BeginSessionAsync: The session has already started!");
                 return;
             }
 
@@ -123,12 +145,6 @@ namespace Plugins.CountlySDK.Services
             new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }));
 
             await _requestCountlyHelper.GetResponseAsync(requestParams);
-
-            //Start session timer
-            if (!_configuration.EnableManualSessionHandling) {
-                InitSessionTimer();
-                _sessionTimer.Start();
-            }
         }
 
         /// <summary>
@@ -143,6 +159,7 @@ namespace Plugins.CountlySDK.Services
             }
 
             if (!IsSessionInitiated) {
+                Log.Warning("[SessionCountlyService] EndSessionAsync: The session isn't started yet!");
                 return;
             }
 
@@ -159,14 +176,6 @@ namespace Plugins.CountlySDK.Services
            
 
             await _requestCountlyHelper.GetResponseAsync(requestParams);
-
-            if (!_configuration.EnableManualSessionHandling) {
-                //Do not extend session after session ends
-                _sessionTimer.Stop();
-                _sessionTimer.Dispose();
-                _sessionTimer.Close();
-                _sessionTimer = null;
-            }
         }
 
 
@@ -181,14 +190,20 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
 
-            _lastSessionRequestTime = DateTime.Now;
+            if (!IsSessionInitiated) {
+                Log.Warning("[SessionCountlyService] ExtendSessionAsync: The session isn't started yet!");
+                return;
+            }
+
             Dictionary<string, object> requestParams =
                 new Dictionary<string, object>
                 {
                     {
-                        "session_duration", _configuration.SessionDuration
+                        "session_duration", (DateTime.Now - _lastSessionRequestTime).TotalSeconds
                     }
                 };
+
+            _lastSessionRequestTime = DateTime.Now;
 
             await _requestCountlyHelper.GetResponseAsync(requestParams);
 
@@ -200,8 +215,14 @@ namespace Plugins.CountlySDK.Services
 
         }
 
-        internal override void ConsentChanged(List<Consents> updatedConsents, bool newConsentValue)
+        internal override async void ConsentChanged(List<Consents> updatedConsents, bool newConsentValue)
         {
+            if (updatedConsents.Contains(Consents.Sessions) && newConsentValue) {
+                if (!_configuration.IsAutomaticSessionTrackingDisabled) {
+                    IsSessionInitiated = false;
+                    await BeginSessionAsync();
+                }
+            }
 
         }
         #endregion

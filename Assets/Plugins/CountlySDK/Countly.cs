@@ -120,7 +120,7 @@ namespace Plugins.CountlySDK
         /// <returns>ViewCountlyService</returns>
         public ViewCountlyService Views { get; private set; }
 
-        private SessionCountlyService Session { get; set; }
+        internal SessionCountlyService Session { get; set; }
 
         /// <summary>
         ///     Add callbacks to listen to push notification events for when a notification is received and when it is clicked.
@@ -270,7 +270,7 @@ namespace Plugins.CountlySDK
             }
 
             _logHelper.Debug("[Countly] OnApplicationQuit");
-
+            Session?._sessionTimer?.Dispose();
             _storageHelper.CloseDB();
         }
 
@@ -317,11 +317,14 @@ namespace Plugins.CountlySDK
 
             if (pauseStatus) {
                 HandleAppPauseOrFocus();
-                await Session?.EndSessionAsync();
+                if (!Configuration.IsAutomaticSessionTrackingDisabled) {
+                    await Session?.EndSessionAsync();
+                }
             } else {
                 SubscribeAppLog();
-                await Session?.BeginSessionAsync();
-
+                if (!Configuration.IsAutomaticSessionTrackingDisabled) {
+                    await Session?.BeginSessionAsync();
+                }
             }
         }
 
@@ -344,7 +347,9 @@ namespace Plugins.CountlySDK
 
         private void LogCallback(string condition, string stackTrace, LogType type)
         {
-            CrashReports?.LogCallback(condition, stackTrace, type);
+            if (type == LogType.Error || type == LogType.Exception) {
+                CrashReports?.LogCallback(condition, stackTrace, type);
+            }
         }
 
         private void SubscribeAppLog()

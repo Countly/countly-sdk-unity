@@ -43,6 +43,7 @@ namespace Tests
             string longitude = "-95.220255";
             string ipAddress = "10.2.33.12";
 
+            configuration.DisableAutomaticSessionTracking();
             configuration.SetLocation(countryCode, city, latitude + "," + longitude, ipAddress);
             Countly.Instance.Init(configuration);
 
@@ -78,6 +79,8 @@ namespace Tests
             Assert.AreEqual(Countly.Instance.Configuration.EnableTestMode, true);
             Assert.AreEqual(Countly.Instance.Configuration.EnableConsoleLogging, true);
             Assert.AreEqual(Countly.Instance.Configuration.EnableAutomaticCrashReporting, false);
+            Assert.AreEqual(Countly.Instance.Configuration.IsAutomaticSessionTrackingDisabled, true);
+
         }
 
         /// <summary>
@@ -105,6 +108,8 @@ namespace Tests
             Assert.AreEqual(Countly.Instance.Configuration.EnableTestMode, false);
             Assert.AreEqual(Countly.Instance.Configuration.EnableConsoleLogging, false);
             Assert.AreEqual(Countly.Instance.Configuration.EnableAutomaticCrashReporting, true);
+            Assert.AreEqual(Countly.Instance.Configuration.IsAutomaticSessionTrackingDisabled, false);
+
 
             Assert.AreEqual(Countly.Instance.Configuration.City, null);
             Assert.AreEqual(Countly.Instance.Configuration.Location, null);

@@ -80,9 +80,11 @@ namespace Tests
             string consents = HttpUtility.ParseQueryString(myUri).Get("consent");
             Assert.IsNull(consents);
 
+            Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
             Countly.Instance.Consents.GiveConsent(new Consents[] { Consents.Sessions });
             Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
 
+            Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
             Countly.Instance.Consents.RemoveConsent(new Consents[] { Consents.Sessions });
             Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
 
@@ -124,8 +126,9 @@ namespace Tests
             Countly.Instance.Consents.GiveConsent(new Consents[] { Consents.Crashes, Consents.Events });
             Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
 
+            // RQ will have Consent change request and Session begin request
             Countly.Instance.Consents.GiveConsent(new Consents[] { Consents.Sessions });
-            Assert.AreEqual(1, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
+            Assert.AreEqual(2, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
 
             requestModel = Countly.Instance.Consents._requestCountlyHelper._requestRepo.Dequeue();
             myUri = requestModel.RequestUrl;
@@ -134,6 +137,7 @@ namespace Tests
             Assert.AreEqual(1, json.Count);
             Assert.IsTrue(json.GetValue("sessions").ToObject<bool>());
 
+            Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
             Countly.Instance.Consents.RemoveConsent(new Consents[] { Consents.Crashes, Consents.Views });
             requestModel = Countly.Instance.Consents._requestCountlyHelper._requestRepo.Dequeue();
             myUri = requestModel.RequestUrl;
