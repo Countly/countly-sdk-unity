@@ -8,6 +8,9 @@ using System.Web;
 using System.Collections.Specialized;
 using Newtonsoft.Json.Linq;
 using Plugins.CountlySDK.Enums;
+using System.Threading.Tasks;
+using System.Collections;
+using UnityEngine.TestTools;
 
 namespace Tests
 {
@@ -232,8 +235,8 @@ namespace Tests
         /// <summary>
         /// It validates the request of 'ExtendSessionAsync'.
         /// </summary>
-        [Test]
-        public async void TestSessionExtend()
+        [UnityTest]
+        public IEnumerator TestSessionExtend()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 ServerUrl = _serverUrl,
@@ -253,7 +256,20 @@ namespace Tests
             Assert.AreEqual("1", values.Get("begin_session"));
             Assert.IsNotNull(values.Get("metrics"));
 
-            await Countly.Instance.Session.ExtendSessionAsync();
+            System.DateTime startTime = System.DateTime.UtcNow;
+            do {
+                yield return null;
+            }
+            while ((System.DateTime.UtcNow - startTime).TotalSeconds < 2.0);
+
+            Countly.Instance.Session.ExtendSessionAsync();
+
+            startTime = System.DateTime.UtcNow;
+            do {
+                yield return null;
+            }
+            while ((System.DateTime.UtcNow - startTime).TotalSeconds < 2.0);
+
             Assert.AreEqual(1, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
 
             requestModel = Countly.Instance.Session._requestCountlyHelper._requestRepo.Dequeue();
@@ -262,14 +278,16 @@ namespace Tests
 
             double duration = (System.DateTime.Now - sessionStartTime).TotalSeconds;
             Assert.GreaterOrEqual(duration, System.Convert.ToDouble(values.Get("session_duration")));
+            Assert.LessOrEqual(2.0, System.Convert.ToDouble(values.Get("session_duration")));
+
             Assert.IsNull(values.Get("metrics"));
         }
 
         /// <summary>
         /// It validates the request of 'EndSessionAsync'.
         /// </summary>
-        [Test]
-        public async void TestSessionEnd()
+        [UnityTest]
+        public IEnumerator TestSessionEnd()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 ServerUrl = _serverUrl,
@@ -283,7 +301,22 @@ namespace Tests
             Assert.AreEqual(1, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
             Countly.Instance.Session._requestCountlyHelper._requestRepo.Clear();
 
-            await Countly.Instance.Session.EndSessionAsync();
+
+
+            System.DateTime startTime = System.DateTime.UtcNow;
+            do {
+                yield return null;
+            }
+            while ((System.DateTime.UtcNow - startTime).TotalSeconds < 2.0);
+
+            Countly.Instance.Session.EndSessionAsync();
+
+            startTime = System.DateTime.UtcNow;
+            do {
+                yield return null;
+            }
+            while ((System.DateTime.UtcNow - startTime).TotalSeconds < 2.0);
+
             Assert.AreEqual(1, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
 
             CountlyRequestModel requestModel = Countly.Instance.Session._requestCountlyHelper._requestRepo.Dequeue();
@@ -294,6 +327,8 @@ namespace Tests
             Assert.AreEqual("1", values.Get("end_session"));
             double duration = (System.DateTime.Now - sessionStartTime).TotalSeconds;
             Assert.GreaterOrEqual(duration, System.Convert.ToDouble(values.Get("session_duration")));
+            Assert.LessOrEqual(2.0, System.Convert.ToDouble(values.Get("session_duration")));
+
             Assert.IsNull(values.Get("metrics"));
         }
 
