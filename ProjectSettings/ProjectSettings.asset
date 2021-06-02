@@ -683,11 +683,12 @@ PlayerSettings:
     Android: 6
     Standalone: 6
     WebGL: 6
+    Windows Store Apps: 6
     iPhone: 6
   m_RenderingPath: 1
   m_MobileRenderingPath: 1
-  metroPackageName: Template_2D
-  metroPackageVersion: 
+  metroPackageName: Template2D
+  metroPackageVersion: 1.0.0.0
   metroCertificatePath: 
   metroCertificatePassword: 
   metroCertificateSubject: 
