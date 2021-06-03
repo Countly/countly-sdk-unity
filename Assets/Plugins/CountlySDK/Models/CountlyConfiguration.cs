@@ -144,6 +144,7 @@ namespace Plugins.CountlySDK.Models
             StoredRequestLimit = config.StoredRequestLimit;
             TotalBreadcrumbsAllowed = config.TotalBreadcrumbsAllowed;
             EnableAutomaticCrashReporting = config.EnableAutomaticCrashReporting;
+            NotificationEventListeners = new List<INotificationListener>();
 
         }
 
