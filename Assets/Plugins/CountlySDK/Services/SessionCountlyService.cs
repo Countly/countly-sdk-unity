@@ -43,23 +43,21 @@ namespace Plugins.CountlySDK.Services
         /// </summary>
         internal async Task StartSessionService()
         {
-            if (!_consentService.CheckConsentInternal(Consents.Sessions)) {
+            if (_configuration.IsAutomaticSessionTrackingDisabled || !_consentService.CheckConsentInternal(Consents.Sessions)) {
                 /* If location is disabled in init
                 and no session consent is given. Send empty location as separate request.*/
                 if (_locationService.IsLocationDisabled || !_consentService.CheckConsentInternal(Consents.Location)) {
                     await _locationService.SendRequestWithEmptyLocation();
                 } else {
                     /*
-                 * If there is no session consent, 
+                 * If there is no session consent or automatic session tracking is disabled, 
                  * location values set in init should be sent as a separate location request.
                  */
                     await _locationService.SendIndependantLocationRequest();
                 }
             } else {
-                if (!_configuration.IsAutomaticSessionTrackingDisabled) {
-                    //Start Session
-                    await BeginSessionAsync();
-                } 
+                //Start Session
+                await BeginSessionAsync();
             }
 
             InitSessionTimer();
