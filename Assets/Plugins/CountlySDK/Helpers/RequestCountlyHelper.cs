@@ -30,7 +30,7 @@ namespace Plugins.CountlySDK.Helpers
             _requestRepo = requestRepo;
         }
 
-        private async Task AddRequestToQueue(CountlyRequestModel request)
+        private void AddRequestToQueue(CountlyRequestModel request)
         {
 
             Log.Verbose("[RequestCountlyHelper] AddRequestToQueue: " + request.ToString());
@@ -47,8 +47,6 @@ namespace Plugins.CountlySDK.Helpers
             }
 
             _requestRepo.Enqueue(request);
-
-            await ProcessQueue();
         }
 
         internal async Task ProcessQueue()
@@ -151,12 +149,10 @@ namespace Plugins.CountlySDK.Helpers
         }
 
         /// <summary>
-        ///     Uses GetAsync/PostAsync method to make request to the Countly server and returns the response.
+        ///  An internal function to add a request to request queue.
         /// </summary>
-        /// <param name="url"></param>
-        /// <param name="postData"></param>
-        /// <returns></returns>
-        internal async Task GetResponseAsync(Dictionary<string, object> queryParams)
+
+        internal void AddToRequestQueue(Dictionary<string, object> queryParams)
         {
             CountlyRequestModel requestModel;
             string data = BuildPostRequest(queryParams);
@@ -166,7 +162,7 @@ namespace Plugins.CountlySDK.Helpers
                 requestModel = new CountlyRequestModel(true, BuildGetRequest(queryParams), null, DateTime.UtcNow);
             }
 
-            await AddRequestToQueue(requestModel);
+            AddRequestToQueue(requestModel);
         }
 
         /// <summary>

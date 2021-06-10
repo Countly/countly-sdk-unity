@@ -104,7 +104,7 @@ namespace Plugins.CountlySDK.Services
             }
 
             //Add currently recorded events to request queue-----------------------------------
-            await _eventCountlyService.AddEventsToRequestQueue();
+            _eventCountlyService.AddEventsToRequestQueue();
 
             //Ends current session
             //Do not dispose timer object
@@ -122,6 +122,8 @@ namespace Plugins.CountlySDK.Services
             }
 
             NotifyListeners(false);
+
+            await _requestCountlyHelper.ProcessQueue();
         }
 
         /// <summary>
@@ -176,7 +178,8 @@ namespace Plugins.CountlySDK.Services
                         { "old_device_id", oldDeviceId }
                };
 
-            await _requestCountlyHelper.GetResponseAsync(requestParams);
+            _requestCountlyHelper.AddToRequestQueue(requestParams);
+            await _requestCountlyHelper.ProcessQueue();
             NotifyListeners(true);
         }
 

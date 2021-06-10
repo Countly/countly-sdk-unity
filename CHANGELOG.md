@@ -1,3 +1,6 @@
+## 20.11.3
+* Fixed potential timing issues in situations where events are combined into a request.
+
 ## 20.11.2
 * Added Consent feature
 * Added data type checking for segmentation

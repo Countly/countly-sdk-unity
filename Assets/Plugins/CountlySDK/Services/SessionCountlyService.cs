@@ -83,7 +83,7 @@ namespace Plugins.CountlySDK.Services
         {
             Log.Debug("[SessionCountlyService] SessionTimerOnElapsedAsync");
 
-            await _eventService.AddEventsToRequestQueue();
+            _eventService.AddEventsToRequestQueue();
             await _requestCountlyHelper.ProcessQueue();
 
             if (!_configuration.IsAutomaticSessionTrackingDisabled) {
@@ -142,7 +142,8 @@ namespace Plugins.CountlySDK.Services
             requestParams.Add("metrics", JsonConvert.SerializeObject(CountlyMetricModel.Metrics, Formatting.Indented,
             new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }));
 
-            await _requestCountlyHelper.GetResponseAsync(requestParams);
+            _requestCountlyHelper.AddToRequestQueue(requestParams);
+            await _requestCountlyHelper.ProcessQueue();
         }
 
         /// <summary>
@@ -163,7 +164,7 @@ namespace Plugins.CountlySDK.Services
 
             IsSessionInitiated = false;
 
-            await _eventService.AddEventsToRequestQueue();
+            _eventService.AddEventsToRequestQueue();
 
             Dictionary<string, object> requestParams =
                 new Dictionary<string, object>
@@ -171,9 +172,10 @@ namespace Plugins.CountlySDK.Services
                     {"end_session", 1},
                     {"session_duration", (DateTime.Now - _lastSessionRequestTime).TotalSeconds}
                 };
-           
 
-            await _requestCountlyHelper.GetResponseAsync(requestParams);
+
+            _requestCountlyHelper.AddToRequestQueue(requestParams);
+            await _requestCountlyHelper.ProcessQueue();
         }
 
 
@@ -203,7 +205,8 @@ namespace Plugins.CountlySDK.Services
 
             _lastSessionRequestTime = DateTime.Now;
 
-            await _requestCountlyHelper.GetResponseAsync(requestParams);
+            _requestCountlyHelper.AddToRequestQueue(requestParams);
+            await _requestCountlyHelper.ProcessQueue();
 
         }
 
