@@ -27,16 +27,16 @@ namespace Plugins.CountlySDK.Services
         /// <summary>
         ///     Add all recorded events to request queue
         /// </summary>
-        internal async Task AddEventsToRequestQueue()
+        internal void AddEventsToRequestQueue()
         {
 
-            Log.Debug("[EventCountlyService] AddEventsToRequestQueue");
+            Log.Debug("[EventCountlyService] AddEventsToRequestQueue Start");
 
             if (_eventRepo.Models.Count == 0) {
                 return;
             }
 
-           
+            int count = _eventRepo.Models.Count;
             //Send all at once
             Dictionary<string, object> requestParams =
                 new Dictionary<string, object>
@@ -47,10 +47,11 @@ namespace Plugins.CountlySDK.Services
                     }
                 };
 
-            await _requestCountlyHelper.GetResponseAsync(requestParams);
+            _requestCountlyHelper.AddToRequestQueue(requestParams);
 
-            _eventRepo.Clear();
-
+            for (int i = 0; i < count; ++i) {
+                _eventRepo.Dequeue();
+            }
         }
 
         /// <summary>
@@ -70,7 +71,8 @@ namespace Plugins.CountlySDK.Services
             _eventRepo.Enqueue(@event);
 
             if (_eventRepo.Count >= _configuration.EventQueueThreshold) {
-                await AddEventsToRequestQueue();
+                AddEventsToRequestQueue();
+                await _requestCountlyHelper.ProcessQueue();
             }
         }
 
@@ -143,29 +145,6 @@ namespace Plugins.CountlySDK.Services
             CountlyEventModel @event = new CountlyEventModel(key, segmentation, count, sum, duration);
 
             await RecordEventAsync(@event);
-        }
-
-        /// <summary>
-        ///     Sends multiple events to the countly server. It expects a list of events as input.
-        /// </summary>
-        /// <param name="events">a list of events</param>
-        /// <returns></returns>
-        internal async Task ReportMultipleEventsAsync(List<CountlyEventModel> events)
-        {
-            if (events == null || events.Count == 0) {
-                return;
-            }
-
-            Dictionary<string, object> requestParams =
-                new Dictionary<string, object>
-                {
-                    {
-                        "events", JsonConvert.SerializeObject(events, Formatting.Indented,
-                            new JsonSerializerSettings {NullValueHandling = NullValueHandling.Ignore})
-                    }
-                };
-
-            await _requestCountlyHelper.GetResponseAsync(requestParams);
         }
 
         /// <summary>

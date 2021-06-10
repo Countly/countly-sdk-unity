@@ -90,7 +90,8 @@ namespace Plugins.CountlySDK.Services
                         new JsonSerializerSettings{ NullValueHandling = NullValueHandling.Ignore }) },
                 };
 
-            await _requestCountlyHelper.GetResponseAsync(requestParams);
+            _requestCountlyHelper.AddToRequestQueue(requestParams);
+            await _requestCountlyHelper.ProcessQueue();
         }
 
         /// <summary>
@@ -129,7 +130,8 @@ namespace Plugins.CountlySDK.Services
                             })
                     }
                 };
-            await _requestCountlyHelper.GetResponseAsync(requestParams);
+            _requestCountlyHelper.AddToRequestQueue(requestParams);
+            await _requestCountlyHelper.ProcessQueue();
         }
 
         /// <summary>

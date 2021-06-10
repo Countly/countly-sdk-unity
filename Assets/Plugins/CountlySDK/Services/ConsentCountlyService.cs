@@ -245,7 +245,8 @@ namespace Plugins.CountlySDK.Services
                     }
                 };
 
-            await _requestCountlyHelper.GetResponseAsync(requestParams);
+            _requestCountlyHelper.AddToRequestQueue(requestParams);
+            await _requestCountlyHelper.ProcessQueue();
         }
         #endregion
 

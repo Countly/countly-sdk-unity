@@ -1,3 +1,6 @@
+## 20.11.3
+* Fixed potential issues while emptying event queue into the request queue.
+
 ## 20.11.2
 * Added Consent feature
 * Added data type checking for segmentation

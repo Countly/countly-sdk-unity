@@ -47,7 +47,8 @@ namespace Plugins.CountlySDK.Services
                    { "location", string.Empty }
                };
 
-            await _requestCountlyHelper.GetResponseAsync(requestParams);
+            _requestCountlyHelper.AddToRequestQueue(requestParams);
+            await _requestCountlyHelper.ProcessQueue();
         }
 
         /// <summary>
@@ -85,7 +86,8 @@ namespace Plugins.CountlySDK.Services
             }
 
             if (requestParams.Count > 0) {
-                await _requestCountlyHelper.GetResponseAsync(requestParams);
+                _requestCountlyHelper.AddToRequestQueue(requestParams);
+                await _requestCountlyHelper.ProcessQueue();
             }
         }
 
