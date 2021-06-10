@@ -1,5 +1,5 @@
 ## 20.11.3
-* Fixed potential issues while emptying event queue into the request queue.
+* Fixed potential timing issues when events are combined into a request.
 
 ## 20.11.2
 * Added Consent feature
