@@ -1,3 +1,7 @@
+## 20.11.4
+* Added "lock" checks for all public SDK methods.
+* Fixed race issue bug that occured when events are combined into a request.
+
 ## 20.11.3
 * Fixed potential timing issues in situations where events are combined into a request.
 

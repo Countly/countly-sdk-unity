@@ -35,6 +35,7 @@ namespace Plugins.CountlySDK
         private CountlyLogHelper _logHelper;
         private static Countly _instance = null;
         private CountlyStorageHelper _storageHelper;
+        internal readonly object lockObj = new object();
         private List<AbstractBaseService> _listeners = new List<AbstractBaseService>();
 
         /// <summary>
@@ -154,7 +155,7 @@ namespace Plugins.CountlySDK
                 return;
             }
 
-             Configuration = configuration;
+            Configuration = configuration;
             _logHelper = new CountlyLogHelper(Configuration);
 
             _logHelper.Info("[Init] Initializing Countly [SdkName: " + Constants.SdkName + " SdkVersion: " + Constants.SdkVersion + "]");
@@ -229,11 +230,14 @@ namespace Plugins.CountlySDK
 
         private async void OnInitialisationComplete()
         {
-            IsSDKInitialized = true;
-            await Initialization.OnInitialisationComplete();
-            foreach (AbstractBaseService listener in _listeners) {
-                listener.OnInitializationCompleted();
+            lock (lockObj) {
+                IsSDKInitialized = true;
+                _= Initialization.OnInitialisationComplete();
+                foreach (AbstractBaseService listener in _listeners) {
+                    listener.OnInitializationCompleted();
+                }
             }
+            
         }
 
         private void CreateListOfIBaseService()
@@ -258,6 +262,10 @@ namespace Plugins.CountlySDK
         {
             Device.Listeners = _listeners;
             Consents.Listeners = _listeners;
+
+            foreach (AbstractBaseService listener in _listeners) {
+                listener.LockObj = lockObj;
+            }
         }
 
         /// <summary>
@@ -303,27 +311,29 @@ namespace Plugins.CountlySDK
             }
         }
 
-        private async void OnApplicationPause(bool pauseStatus)
+        private void OnApplicationPause(bool pauseStatus)
         {
-            if (!IsSDKInitialized) {
-                return;
-            }
-
-            _logHelper.Debug("[Countly] OnApplicationPause: " + pauseStatus);
-
-            if (CrashReports != null) {
-                CrashReports.IsApplicationInBackground = pauseStatus;
-            }
-
-            if (pauseStatus) {
-                HandleAppPauseOrFocus();
-                if (!Configuration.IsAutomaticSessionTrackingDisabled) {
-                    await Session?.EndSessionAsync();
+            lock (lockObj) {
+                if (!IsSDKInitialized) {
+                    return;
                 }
-            } else {
-                SubscribeAppLog();
-                if (!Configuration.IsAutomaticSessionTrackingDisabled) {
-                    await Session?.BeginSessionAsync();
+
+                _logHelper.Debug("[Countly] OnApplicationPause: " + pauseStatus);
+
+                if (CrashReports != null) {
+                    CrashReports.IsApplicationInBackground = pauseStatus;
+                }
+
+                if (pauseStatus) {
+                    HandleAppPauseOrFocus();
+                    if (!Configuration.IsAutomaticSessionTrackingDisabled) {
+                        _= Session?.EndSessionAsync();
+                    }
+                } else {
+                    SubscribeAppLog();
+                    if (!Configuration.IsAutomaticSessionTrackingDisabled) {
+                        _= Session?.BeginSessionAsync();
+                    }
                 }
             }
         }

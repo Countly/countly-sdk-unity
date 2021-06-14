@@ -42,32 +42,34 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async Task RecordOpenViewAsync(string name)
         {
-            Log.Info("[ViewCountlyService] RecordOpenViewAsync : name = " + name);
+            lock (LockObj) {
+                Log.Info("[ViewCountlyService] RecordOpenViewAsync : name = " + name);
 
-            if (!_consentService.CheckConsentInternal(Consents.Views)) {
-                return;
+                if (!_consentService.CheckConsentInternal(Consents.Views)) {
+                    return;
+                }
+
+                if (string.IsNullOrEmpty(name)) {
+                    return;
+                }
+
+                ViewSegment currentViewSegment =
+                    new ViewSegment {
+                        Name = name,
+                        Segment = Constants.UnityPlatform,
+                        Visit = 1,
+                        Start = _isFirstView ? 1 : 0
+                    };
+
+                if (!_viewToLastViewStartTime.ContainsKey(name)) {
+                    _viewToLastViewStartTime.Add(name, DateTime.UtcNow);
+                }
+
+                CountlyEventModel currentView = new CountlyEventModel(CountlyEventModel.ViewEvent, currentViewSegment.OpenViewDictionary());
+                _=_eventService.RecordEventAsync(currentView);
+
+                _isFirstView = false;
             }
-
-            if (string.IsNullOrEmpty(name)) {
-                return;
-            }
-
-            ViewSegment currentViewSegment =
-                new ViewSegment {
-                    Name = name,
-                    Segment = Constants.UnityPlatform,
-                    Visit = 1,
-                    Start = _isFirstView ? 1 : 0
-                };
-
-            if (!_viewToLastViewStartTime.ContainsKey(name)) {
-                _viewToLastViewStartTime.Add(name, DateTime.UtcNow);
-            }
-
-            CountlyEventModel currentView = new CountlyEventModel(CountlyEventModel.ViewEvent, currentViewSegment.OpenViewDictionary());
-            await _eventService.RecordEventAsync(currentView);
-
-            _isFirstView = false;
         }
 
         /// <summary>
@@ -92,36 +94,38 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async Task RecordCloseViewAsync(string name)
         {
-            Log.Info("[ViewCountlyService] RecordCloseViewAsync : name = " + name);
+            lock (LockObj) {
+                Log.Info("[ViewCountlyService] RecordCloseViewAsync : name = " + name);
 
-            if (!_consentService.CheckConsentInternal(Consents.Views)) {
-                return;
+                if (!_consentService.CheckConsentInternal(Consents.Views)) {
+                    return;
+                }
+
+                if (string.IsNullOrEmpty(name)) {
+                    return;
+                }
+
+                ViewSegment currentViewSegment =
+                    new ViewSegment {
+                        Name = name,
+                        Segment = Constants.UnityPlatform,
+                        Visit = 0,
+                        Start = 0
+                    };
+
+                double? duration = null;
+                if (_viewToLastViewStartTime.ContainsKey(name)) {
+                    DateTime lastViewStartTime = _viewToLastViewStartTime[name];
+                    duration = (DateTime.UtcNow - lastViewStartTime).TotalSeconds;
+
+                    _viewToLastViewStartTime.Remove(name);
+                }
+
+                IDictionary<string, object> segment = currentViewSegment.CloseViewDictionary();
+
+                CountlyEventModel currentView = new CountlyEventModel(CountlyEventModel.ViewEvent, segment, 1, null, duration);
+                _=_eventService.RecordEventAsync(currentView);
             }
-
-            if (string.IsNullOrEmpty(name)) {
-                return;
-            }
-
-            ViewSegment currentViewSegment =
-                new ViewSegment {
-                    Name = name,
-                    Segment = Constants.UnityPlatform,
-                    Visit = 0,
-                    Start = 0
-                };
-
-            double? duration = null;
-            if (_viewToLastViewStartTime.ContainsKey(name)) {
-                DateTime lastViewStartTime = _viewToLastViewStartTime[name];
-                duration = (DateTime.UtcNow - lastViewStartTime).TotalSeconds;
-
-                _viewToLastViewStartTime.Remove(name);
-            }
-
-            IDictionary<string, object> segment = currentViewSegment.CloseViewDictionary();
-
-            CountlyEventModel currentView = new CountlyEventModel(CountlyEventModel.ViewEvent, segment, 1, null, duration);
-            await _eventService.RecordEventAsync(currentView);
         }
 
         /// <summary>
@@ -135,23 +139,25 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async Task ReportActionAsync(string type, int x, int y, int width, int height)
         {
-            Log.Info("[ViewCountlyService] ReportActionAsync : type = " + type + ", x = " + x + ", y = " + y + ", width = " + width + ", height = " + height);
+            lock (LockObj) {
+                Log.Info("[ViewCountlyService] ReportActionAsync : type = " + type + ", x = " + x + ", y = " + y + ", width = " + width + ", height = " + height);
 
-            if (!_consentService.CheckConsentInternal(Consents.Views)) {
-                return;
+                if (!_consentService.CheckConsentInternal(Consents.Views)) {
+                    return;
+                }
+
+                ActionSegment segment =
+                    new ActionSegment {
+                        Type = type,
+                        PositionX = x,
+                        PositionY = y,
+                        Width = width,
+                        Height = height
+                    };
+
+                CountlyEventModel currentView = new CountlyEventModel(CountlyEventModel.ViewActionEvent, segment.ToDictionary());
+                _=_eventService.RecordEventAsync(currentView);
             }
-
-            ActionSegment segment =
-                new ActionSegment {
-                    Type = type,
-                    PositionX = x,
-                    PositionY = y,
-                    Width = width,
-                    Height = height
-                };
-
-            CountlyEventModel currentView = new CountlyEventModel(CountlyEventModel.ViewActionEvent, segment.ToDictionary());
-            await _eventService.RecordEventAsync(currentView);
         }
 
         #region override Methods

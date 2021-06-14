@@ -81,13 +81,15 @@ namespace Plugins.CountlySDK.Services
         /// <param name="elapsedEventArgs"> Provides data for <code>Timer.Elapsed</code>event.</param>
         private async void SessionTimerOnElapsedAsync(object sender, ElapsedEventArgs elapsedEventArgs)
         {
-            Log.Debug("[SessionCountlyService] SessionTimerOnElapsedAsync");
+            lock (LockObj) {
+                Log.Debug("[SessionCountlyService] SessionTimerOnElapsedAsync");
 
-            _eventService.AddEventsToRequestQueue();
-            await _requestCountlyHelper.ProcessQueue();
+                _eventService.AddEventsToRequestQueue();
+                _= _requestCountlyHelper.ProcessQueue();
 
-            if (!_configuration.IsAutomaticSessionTrackingDisabled) {
-                await ExtendSessionAsync();
+                if (!_configuration.IsAutomaticSessionTrackingDisabled) {
+                    _= ExtendSessionAsync();
+                }
             }
         }
 

@@ -13,10 +13,11 @@ namespace Plugins.CountlySDK.Services
 {
     public class EventCountlyService : AbstractBaseService
     {
+        private bool isQueueBeingProcessed = false;
         internal readonly NonViewEventRepository _eventRepo;
         private readonly RequestCountlyHelper _requestCountlyHelper;
 
-        internal EventCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, RequestCountlyHelper requestCountlyHelper,NonViewEventRepository nonViewEventRepo, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
+        internal EventCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, RequestCountlyHelper requestCountlyHelper, NonViewEventRepository nonViewEventRepo, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
         {
             Log.Debug("[EventCountlyService] Initializing.");
 
@@ -30,12 +31,19 @@ namespace Plugins.CountlySDK.Services
         internal void AddEventsToRequestQueue()
         {
 
-            Log.Debug("[EventCountlyService] AddEventsToRequestQueue Start");
+            Log.Debug("[EventCountlyService] AddEventsToRequestQueue: Start");
 
             if (_eventRepo.Models.Count == 0) {
+                Log.Debug("[EventCountlyService] AddEventsToRequestQueue: Event queue is empty!");
                 return;
             }
 
+            if (isQueueBeingProcessed) {
+                Log.Verbose("[EventCountlyService] AddEventsToRequestQueue: Event queue being processed!");
+                return;
+            }
+            isQueueBeingProcessed = true;
+   
             int count = _eventRepo.Models.Count;
             //Send all at once
             Dictionary<string, object> requestParams =
@@ -49,9 +57,13 @@ namespace Plugins.CountlySDK.Services
 
             _requestCountlyHelper.AddToRequestQueue(requestParams);
 
+            Log.Debug("[EventCountlyService] AddEventsToRequestQueue: Remove events from event queue, count: " + count);
             for (int i = 0; i < count; ++i) {
                 _eventRepo.Dequeue();
             }
+
+            isQueueBeingProcessed = false;
+            Log.Debug("[EventCountlyService] AddEventsToRequestQueue: End");
         }
 
         /// <summary>
@@ -83,13 +95,16 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async Task RecordEventAsync(string key)
         {
-            Log.Info("[EventCountlyService] RecordEventAsync : key = " + key);
+            lock (LockObj) {
+                Log.Info("[EventCountlyService] RecordEventAsync : key = " + key);
 
-            if (!_consentService.CheckConsentInternal(Consents.Events)) {
-                return;
+                if (!_consentService.CheckConsentInternal(Consents.Events)) {
+                    return;
+                }
+
+                _ = RecordEventAsync(key, null);
             }
-
-            await RecordEventAsync(key, null);
+            
         }
 
         /// <summary>
@@ -104,47 +119,50 @@ namespace Plugins.CountlySDK.Services
         public async Task RecordEventAsync(string key, IDictionary<string, object> segmentation = null,
             int? count = 1, double? sum = 0, double? duration = null)
         {
-            Log.Info("[EventCountlyService] RecordEventAsync : key = " + key + ", segmentation = " + segmentation + ", count = " + count + ", sum = " + sum + ", duration = " + duration);
+            lock (LockObj) {
+                Log.Info("[EventCountlyService] RecordEventAsync : key = " + key + ", segmentation = " + segmentation + ", count = " + count + ", sum = " + sum + ", duration = " + duration);
 
-            if (!_consentService.CheckConsentInternal(Consents.Events)) {
-                return;
-            }
+                if (!_consentService.CheckConsentInternal(Consents.Events)) {
+                    return;
+                }
 
-            if (_configuration.EnableTestMode) {
-                return;
-            }
+                if (_configuration.EnableTestMode) {
+                    return;
+                }
 
-            if (string.IsNullOrEmpty(key) || string.IsNullOrWhiteSpace(key)) {
-                Log.Warning("[EventCountlyService] RecordEventAsync : The event key '" + key + "'isn't valid.");
+                if (string.IsNullOrEmpty(key) || string.IsNullOrWhiteSpace(key)) {
+                    Log.Warning("[EventCountlyService] RecordEventAsync : The event key '" + key + "'isn't valid.");
 
-                return;
-            }
+                    return;
+                }
 
-            if (segmentation != null) {
-                List<string> toRemove = new List<string>();
+                if (segmentation != null) {
+                    List<string> toRemove = new List<string>();
 
-                foreach (KeyValuePair<string, object> item in segmentation) {
-                    bool isValidDataType = item.Value != null
-                        && (item.Value.GetType() == typeof(int)
-                        || item.Value.GetType() == typeof(bool)
-                        || item.Value.GetType() == typeof(float)
-                        || item.Value.GetType() == typeof(double)
-                        || item.Value.GetType() == typeof(string));
+                    foreach (KeyValuePair<string, object> item in segmentation) {
+                        bool isValidDataType = item.Value != null
+                            && (item.Value.GetType() == typeof(int)
+                            || item.Value.GetType() == typeof(bool)
+                            || item.Value.GetType() == typeof(float)
+                            || item.Value.GetType() == typeof(double)
+                            || item.Value.GetType() == typeof(string));
 
-                    if (!isValidDataType) {
-                        toRemove.Add(item.Key);
-                        Log.Warning("[EventCountlyService] ReportCustomEventAsync : In segmentation Data type '" + (item.Value?.GetType()) + "'  of item '" + item.Key + "' isn't valid.");
+                        if (!isValidDataType) {
+                            toRemove.Add(item.Key);
+                            Log.Warning("[EventCountlyService] ReportCustomEventAsync : In segmentation Data type '" + (item.Value?.GetType()) + "'  of item '" + item.Key + "' isn't valid.");
+                        }
+                    }
+
+                    foreach (string k in toRemove) {
+                        segmentation.Remove(k);
                     }
                 }
 
-                foreach (string k in toRemove) {
-                    segmentation.Remove(k);
-                }
+                CountlyEventModel @event = new CountlyEventModel(key, segmentation, count, sum, duration);
+
+                _=RecordEventAsync(@event);
             }
-
-            CountlyEventModel @event = new CountlyEventModel(key, segmentation, count, sum, duration);
-
-            await RecordEventAsync(@event);
+            
         }
 
         /// <summary>
@@ -161,40 +179,42 @@ namespace Plugins.CountlySDK.Services
                     IDictionary<string, object> segmentation = null,
                     int? count = 1, double? sum = null, double? duration = null)
         {
-            Log.Info("[EventCountlyService] ReportCustomEventAsync : key = " + key + ", segmentation = " + (segmentation != null) + ", count = " + count + ", sum = " + sum + ", duration = " + duration);
+            lock (LockObj) {
+                Log.Info("[EventCountlyService] ReportCustomEventAsync : key = " + key + ", segmentation = " + (segmentation != null) + ", count = " + count + ", sum = " + sum + ", duration = " + duration);
 
-            if (!_consentService.CheckConsentInternal(Consents.Events)) {
-                return;
-            }
+                if (!_consentService.CheckConsentInternal(Consents.Events)) {
+                    return;
+                }
 
-            if (string.IsNullOrEmpty(key) && string.IsNullOrWhiteSpace(key)) {
-                return;
-            }
+                if (string.IsNullOrEmpty(key) && string.IsNullOrWhiteSpace(key)) {
+                    return;
+                }
 
-            if (segmentation != null) {
-                List<string> toRemove = new List<string>();
+                if (segmentation != null) {
+                    List<string> toRemove = new List<string>();
 
-                foreach (KeyValuePair<string, object> item in segmentation) {
-                    bool isValidDataType = item.Value.GetType() == typeof(int)
-                        || item.Value.GetType() == typeof(bool)
-                        || item.Value.GetType() == typeof(float)
-                        || item.Value.GetType() == typeof(double)
-                        || item.Value.GetType() == typeof(string);
+                    foreach (KeyValuePair<string, object> item in segmentation) {
+                        bool isValidDataType = item.Value.GetType() == typeof(int)
+                            || item.Value.GetType() == typeof(bool)
+                            || item.Value.GetType() == typeof(float)
+                            || item.Value.GetType() == typeof(double)
+                            || item.Value.GetType() == typeof(string);
 
-                    if (!isValidDataType) {
-                        toRemove.Add(item.Key);
-                        Log.Warning("[EventCountlyService] ReportCustomEventAsync : In segmentation Data type '" + (item.Value?.GetType()) + "'  of item '" + item.Key + "'isn't valid.");
+                        if (!isValidDataType) {
+                            toRemove.Add(item.Key);
+                            Log.Warning("[EventCountlyService] ReportCustomEventAsync : In segmentation Data type '" + (item.Value?.GetType()) + "'  of item '" + item.Key + "'isn't valid.");
+                        }
+                    }
+
+                    foreach (string k in toRemove) {
+                        segmentation.Remove(k);
                     }
                 }
 
-                foreach (string k in toRemove) {
-                    segmentation.Remove(k);
-                }
+                CountlyEventModel @event = new CountlyEventModel(key, segmentation, count, sum, duration);
+
+                _=RecordEventAsync(@event);
             }
-
-            CountlyEventModel @event = new CountlyEventModel(key, segmentation, count, sum, duration);
-
-            await RecordEventAsync(@event);
         }
 
         #region override Methods

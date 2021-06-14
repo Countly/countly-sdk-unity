@@ -91,39 +91,41 @@ namespace Plugins.CountlySDK.Services
         /// <param name="deviceId">new device id</param>
         public async Task ChangeDeviceIdWithoutMerge(string deviceId)
         {
-            Log.Info("[DeviceIdCountlyService] ChangeDeviceIdWithoutMerge: deviceId = " + deviceId);
+            lock (LockObj) {
+                Log.Info("[DeviceIdCountlyService] ChangeDeviceIdWithoutMerge: deviceId = " + deviceId);
 
-            if (!_consentService.AnyConsentGiven()) {
-                Log.Debug("[DeviceIdCountlyService] ChangeDeviceIdWithoutMerge: Please set at least a single consent before calling this!");
-                return;
+                if (!_consentService.AnyConsentGiven()) {
+                    Log.Debug("[DeviceIdCountlyService] ChangeDeviceIdWithoutMerge: Please set at least a single consent before calling this!");
+                    return;
+                }
+
+                //Ignore call if new and old device id are same
+                if (DeviceId == deviceId) {
+                    return;
+                }
+
+                //Add currently recorded events to request queue-----------------------------------
+                _eventCountlyService.AddEventsToRequestQueue();
+
+                //Ends current session
+                //Do not dispose timer object
+                if (!_configuration.IsAutomaticSessionTrackingDisabled) {
+                    _=_sessionCountlyService.EndSessionAsync();
+                }
+
+                //Update device id
+                UpdateDeviceId(deviceId);
+
+                //Begin new session with new device id
+                //Do not initiate timer again, it is already initiated
+                if (!_configuration.IsAutomaticSessionTrackingDisabled) {
+                    _=_sessionCountlyService.BeginSessionAsync();
+                }
+
+                NotifyListeners(false);
+
+                _=_requestCountlyHelper.ProcessQueue();
             }
-
-            //Ignore call if new and old device id are same
-            if (DeviceId == deviceId) {
-                return;
-            }
-
-            //Add currently recorded events to request queue-----------------------------------
-            _eventCountlyService.AddEventsToRequestQueue();
-
-            //Ends current session
-            //Do not dispose timer object
-            if (!_configuration.IsAutomaticSessionTrackingDisabled) {
-                await _sessionCountlyService.EndSessionAsync();
-            }
-
-            //Update device id
-            UpdateDeviceId(deviceId);
-
-            //Begin new session with new device id
-            //Do not initiate timer again, it is already initiated
-            if (!_configuration.IsAutomaticSessionTrackingDisabled) {
-                await _sessionCountlyService.BeginSessionAsync();
-            }
-
-            NotifyListeners(false);
-
-            await _requestCountlyHelper.ProcessQueue();
         }
 
         /// <summary>
@@ -153,34 +155,36 @@ namespace Plugins.CountlySDK.Services
         /// <param name="deviceId">new device id</param>
         public async Task ChangeDeviceIdWithMerge(string deviceId)
         {
-            Log.Info("[DeviceIdCountlyService] ChangeDeviceIdWithMerge: deviceId = " + deviceId);
+            lock (LockObj) {
+                Log.Info("[DeviceIdCountlyService] ChangeDeviceIdWithMerge: deviceId = " + deviceId);
 
-            if (!_consentService.AnyConsentGiven()) {
-                Log.Debug("[DeviceIdCountlyService] ChangeDeviceIdWithMerge: Please set at least a single consent before calling this!");
-                return;
-            }
+                if (!_consentService.AnyConsentGiven()) {
+                    Log.Debug("[DeviceIdCountlyService] ChangeDeviceIdWithMerge: Please set at least a single consent before calling this!");
+                    return;
+                }
 
-            //Ignore call if new and old device id are same
-            if (DeviceId == deviceId) {
-                return;
-            }
+                //Ignore call if new and old device id are same
+                if (DeviceId == deviceId) {
+                    return;
+                }
 
-            //Keep old device id
-            string oldDeviceId = DeviceId;
+                //Keep old device id
+                string oldDeviceId = DeviceId;
 
-            //Update device id
-            UpdateDeviceId(deviceId);
+                //Update device id
+                UpdateDeviceId(deviceId);
 
-            //Merge user data for old and new device
-            Dictionary<string, object> requestParams =
-               new Dictionary<string, object>
-               {
+                //Merge user data for old and new device
+                Dictionary<string, object> requestParams =
+                   new Dictionary<string, object>
+                   {
                         { "old_device_id", oldDeviceId }
-               };
+                   };
 
-            _requestCountlyHelper.AddToRequestQueue(requestParams);
-            await _requestCountlyHelper.ProcessQueue();
-            NotifyListeners(true);
+                _requestCountlyHelper.AddToRequestQueue(requestParams);
+                _=_requestCountlyHelper.ProcessQueue();
+                NotifyListeners(true);
+            }
         }
 
         /// <summary>
