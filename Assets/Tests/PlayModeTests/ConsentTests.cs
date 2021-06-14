@@ -549,7 +549,7 @@ namespace Tests
             ConsentTestHelperClass listener = new ConsentTestHelperClass();
             CountlyLogHelper logHelper = new CountlyLogHelper(configuration);
             ConsentCountlyService consentCountlyService = new ConsentCountlyService(configuration, logHelper, null, null);
-
+            consentCountlyService.LockObj = new object();
             consentCountlyService.Listeners = new List<AbstractBaseService> { listener };
 
             consentCountlyService.GiveConsent(new Consents[] { Consents.Location, Consents.RemoteConfig, Consents.RemoteConfig, Consents.Events });
@@ -577,7 +577,7 @@ namespace Tests
             ConsentTestHelperClass listener = new ConsentTestHelperClass();
             CountlyLogHelper logHelper = new CountlyLogHelper(configuration);
             ConsentCountlyService consentCountlyService = new ConsentCountlyService(configuration, logHelper, null, null);
-
+            consentCountlyService.LockObj = new object();
             consentCountlyService.Listeners = new List<AbstractBaseService> { listener };
 
             consentCountlyService.GiveConsent(new Consents[] { Consents.Location, Consents.RemoteConfig, Consents.Events });
@@ -614,7 +614,7 @@ namespace Tests
             ConsentTestHelperClass listener = new ConsentTestHelperClass();
             CountlyLogHelper logHelper = new CountlyLogHelper(configuration);
             ConsentCountlyService consentCountlyService = new ConsentCountlyService(configuration, logHelper, null, null);
-
+            consentCountlyService.LockObj = new object();
             consentCountlyService.Listeners = new List<AbstractBaseService> { listener };
 
             consentCountlyService.GiveConsentToGroup(new string[] { groupA });
@@ -659,6 +659,7 @@ namespace Tests
             ConsentTestHelperClass listener = new ConsentTestHelperClass();
             CountlyLogHelper logHelper = new CountlyLogHelper(configuration);
             ConsentCountlyService consentCountlyService = new ConsentCountlyService(configuration, logHelper, null, null);
+            consentCountlyService.LockObj = new object();
 
             consentCountlyService.Listeners = new List<AbstractBaseService> { listener };
 
