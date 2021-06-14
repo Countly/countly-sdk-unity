@@ -8,7 +8,7 @@ namespace Plugins.CountlySDK.Services
 {
     public abstract class AbstractBaseService
     {
-        internal static object LockObj { get; set; }
+        internal object LockObj { get; set; }
         internal List<AbstractBaseService> Listeners { get; set; }
 
         protected CountlyLogHelper Log { get; private set; }

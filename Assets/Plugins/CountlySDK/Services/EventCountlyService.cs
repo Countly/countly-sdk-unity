@@ -13,7 +13,7 @@ namespace Plugins.CountlySDK.Services
 {
     public class EventCountlyService : AbstractBaseService
     {
-        private bool isQueueBeingProcess = false;
+        private bool isQueueBeingProcessed = false;
         internal readonly NonViewEventRepository _eventRepo;
         private readonly RequestCountlyHelper _requestCountlyHelper;
 
@@ -31,23 +31,20 @@ namespace Plugins.CountlySDK.Services
         internal void AddEventsToRequestQueue()
         {
 
-            Log.Debug("[EventCountlyService] AddEventsToRequestQueue Start");
-
-            if (isQueueBeingProcess) {
-                Log.Verbose("[EventCountlyService] AddEventsToRequestQueue: Event queue being process!");
-                return;
-            }
-
-            Log.Debug("[EventCountlyService] AddEventsToRequestQueue 1");
-            isQueueBeingProcess = true;
-            Log.Debug("[EventCountlyService] AddEventsToRequestQueue 2");
+            Log.Debug("[EventCountlyService] AddEventsToRequestQueue: Start");
 
             if (_eventRepo.Models.Count == 0) {
+                Log.Debug("[EventCountlyService] AddEventsToRequestQueue: Event queue is empty!");
                 return;
             }
-            Log.Debug("[EventCountlyService] AddEventsToRequestQueue 3");
+
+            if (isQueueBeingProcessed) {
+                Log.Verbose("[EventCountlyService] AddEventsToRequestQueue: Event queue being processed!");
+                return;
+            }
+            isQueueBeingProcessed = true;
+   
             int count = _eventRepo.Models.Count;
-            Log.Debug("[EventCountlyService] AddEventsToRequestQueue 4");
             //Send all at once
             Dictionary<string, object> requestParams =
                 new Dictionary<string, object>
@@ -57,20 +54,13 @@ namespace Plugins.CountlySDK.Services
                             new JsonSerializerSettings {NullValueHandling = NullValueHandling.Ignore})
                     }
                 };
-            Log.Debug("[EventCountlyService] AddEventsToRequestQueue 5");
             _requestCountlyHelper.AddToRequestQueue(requestParams);
-            Log.Debug("[EventCountlyService] AddEventsToRequestQueue 6");
-
-            Log.Debug("[EventCountlyService] AddEventsToRequestQueue: Remove events from event queue, count: " + count);
             for (int i = 0; i < count; ++i) {
                 _eventRepo.Dequeue();
             }
 
-            Log.Debug("[EventCountlyService] AddEventsToRequestQueue 7");
-            isQueueBeingProcess = false;
-            Log.Debug("[EventCountlyService] AddEventsToRequestQueue 8");
-
-            Log.Debug("[EventCountlyService] AddEventsToRequestQueue End");
+            isQueueBeingProcessed = false;
+            Log.Debug("[EventCountlyService] AddEventsToRequestQueue: End");
         }
 
         /// <summary>

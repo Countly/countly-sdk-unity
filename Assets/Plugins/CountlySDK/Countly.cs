@@ -155,8 +155,7 @@ namespace Plugins.CountlySDK
                 return;
             }
 
-             Configuration = configuration;
-            AbstractBaseService.LockObj = lockObj;
+            Configuration = configuration;
             _logHelper = new CountlyLogHelper(Configuration);
 
             _logHelper.Info("[Init] Initializing Countly [SdkName: " + Constants.SdkName + " SdkVersion: " + Constants.SdkVersion + "]");
@@ -263,6 +262,10 @@ namespace Plugins.CountlySDK
         {
             Device.Listeners = _listeners;
             Consents.Listeners = _listeners;
+
+            foreach (AbstractBaseService listener in _listeners) {
+                listener.LockObj = lockObj;
+            }
         }
 
         /// <summary>
