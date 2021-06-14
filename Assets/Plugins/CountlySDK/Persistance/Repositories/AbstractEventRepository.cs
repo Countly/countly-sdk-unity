@@ -72,6 +72,8 @@ namespace Plugins.CountlySDK.Persistance.Repositories
                 SegmentModel segmentModel = Converter.ConvertSegmentEntityToSegmentModel(segmentEntity);
                 @event.Segmentation = segmentModel;
             }
+
+            Log.Debug("[" + GetType().Name + "] Event repo Dequeue: \n" + @event.ToString() + ", segment: " + @event.Segmentation?.ToString());
             return @event;
         }
 

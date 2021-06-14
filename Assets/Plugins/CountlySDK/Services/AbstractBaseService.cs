@@ -1,4 +1,5 @@
 ﻿
+using System;
 using System.Collections.Generic;
 using Plugins.CountlySDK.Enums;
 using Plugins.CountlySDK.Models;
@@ -7,6 +8,7 @@ namespace Plugins.CountlySDK.Services
 {
     public abstract class AbstractBaseService
     {
+        internal static object LockObj { get; set; }
         internal List<AbstractBaseService> Listeners { get; set; }
 
         protected CountlyLogHelper Log { get; private set; }

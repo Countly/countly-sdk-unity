@@ -68,30 +68,32 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async Task SetUserDetailsAsync(CountlyUserDetailsModel userDetailsModel)
         {
-            Log.Info("[UserDetailsCountlyService] SetUserDetailsAsync " + (userDetailsModel != null));
+            lock (LockObj) {
+                Log.Info("[UserDetailsCountlyService] SetUserDetailsAsync " + (userDetailsModel != null));
 
-            if (!_consentService.CheckConsentInternal(Consents.Users)) {
-                return;
-            }
+                if (!_consentService.CheckConsentInternal(Consents.Users)) {
+                    return;
+                }
 
-            if (userDetailsModel == null) {
-                Log.Warning("[UserDetailsCountlyService] SetUserDetailsAsync : The parameter 'userDetailsModel' can't be null.");
-                return;
-            }
+                if (userDetailsModel == null) {
+                    Log.Warning("[UserDetailsCountlyService] SetUserDetailsAsync : The parameter 'userDetailsModel' can't be null.");
+                    return;
+                }
 
-            if (!_countlyUtils.IsPictureValid(userDetailsModel.PictureUrl)) {
-                throw new Exception("Accepted picture formats are .png, .gif and .jpeg");
-            }
+                if (!_countlyUtils.IsPictureValid(userDetailsModel.PictureUrl)) {
+                    throw new Exception("Accepted picture formats are .png, .gif and .jpeg");
+                }
 
-            Dictionary<string, object> requestParams =
-                new Dictionary<string, object>
-                {
+                Dictionary<string, object> requestParams =
+                    new Dictionary<string, object>
+                    {
                     { "user_details", JsonConvert.SerializeObject(userDetailsModel, Formatting.Indented,
                         new JsonSerializerSettings{ NullValueHandling = NullValueHandling.Ignore }) },
-                };
+                    };
 
-            _requestCountlyHelper.AddToRequestQueue(requestParams);
-            await _requestCountlyHelper.ProcessQueue();
+                _requestCountlyHelper.AddToRequestQueue(requestParams);
+                _= _requestCountlyHelper.ProcessQueue();
+            }
         }
 
         /// <summary>
@@ -102,26 +104,27 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async Task SetCustomUserDetailsAsync(CountlyUserDetailsModel userDetailsModel)
         {
-            Log.Info("[UserDetailsCountlyService] SetCustomUserDetailsAsync " + (userDetailsModel != null));
+            lock (LockObj) {
+                Log.Info("[UserDetailsCountlyService] SetCustomUserDetailsAsync " + (userDetailsModel != null));
 
-            if (!_consentService.CheckConsentInternal(Consents.Users)) {
-                return;
-            }
+                if (!_consentService.CheckConsentInternal(Consents.Users)) {
+                    return;
+                }
 
-            if (userDetailsModel == null) {
-                Log.Warning("[UserDetailsCountlyService] SetCustomUserDetailsAsync : The parameter 'userDetailsModel' can't be null.");
-                return;
-            }
+                if (userDetailsModel == null) {
+                    Log.Warning("[UserDetailsCountlyService] SetCustomUserDetailsAsync : The parameter 'userDetailsModel' can't be null.");
+                    return;
+                }
 
-            if (userDetailsModel.Custom == null || userDetailsModel.Custom.Count == 0) {
-                Log.Warning("[UserDetailsCountlyService] SetCustomUserDetailsAsync : The custom property 'userDetailsModel.Custom' can't be null or empty.");
+                if (userDetailsModel.Custom == null || userDetailsModel.Custom.Count == 0) {
+                    Log.Warning("[UserDetailsCountlyService] SetCustomUserDetailsAsync : The custom property 'userDetailsModel.Custom' can't be null or empty.");
 
-                return;
-            }
+                    return;
+                }
 
-            Dictionary<string, object> requestParams =
-                new Dictionary<string, object>
-                {
+                Dictionary<string, object> requestParams =
+                    new Dictionary<string, object>
+                    {
                     { "user_details",
                         JsonConvert.SerializeObject(
                             new Dictionary<string, object>
@@ -129,9 +132,10 @@ namespace Plugins.CountlySDK.Services
                                 { "custom", userDetailsModel.Custom }
                             })
                     }
-                };
-            _requestCountlyHelper.AddToRequestQueue(requestParams);
-            await _requestCountlyHelper.ProcessQueue();
+                    };
+                _requestCountlyHelper.AddToRequestQueue(requestParams);
+                _= _requestCountlyHelper.ProcessQueue();
+            }
         }
 
         /// <summary>
@@ -140,17 +144,19 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async Task SaveAsync()
         {
-            if (!CustomDataProperties.Any()) {
-                return;
+            lock (LockObj) {
+                if (!CustomDataProperties.Any()) {
+                    return;
+                }
+
+                Log.Info("[UserDetailsCountlyService] SaveAsync");
+
+
+                CountlyUserDetailsModel model = new CountlyUserDetailsModel(CustomDataProperties);
+
+                CustomDataProperties = new Dictionary<string, object> { };
+                _= SetCustomUserDetailsAsync(model);
             }
-
-            Log.Info("[UserDetailsCountlyService] SaveAsync");
-
-
-            CountlyUserDetailsModel model = new CountlyUserDetailsModel(CustomDataProperties);
-
-            CustomDataProperties = new Dictionary<string, object> { };
-            await SetCustomUserDetailsAsync(model);
         }
 
 
