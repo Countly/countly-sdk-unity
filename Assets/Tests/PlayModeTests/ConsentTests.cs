@@ -147,7 +147,7 @@ namespace Tests
             Assert.IsFalse(json.GetValue("crashes").ToObject<bool>());
             Assert.IsFalse(json.GetValue("views").ToObject<bool>());
 
-            Countly.Instance.Consents.RemoveConsent(new Consents[] { Consents.Crashes});
+            Countly.Instance.Consents.RemoveConsent(new Consents[] { Consents.Crashes });
             Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
 
         }
@@ -189,9 +189,9 @@ namespace Tests
             Assert.AreEqual(1, json.Count);
             Assert.IsTrue(json.GetValue("views").ToObject<bool>());
 
-            Countly.Instance.Consents.GiveConsent(new Consents[] {Consents.Views });
+            Countly.Instance.Consents.GiveConsent(new Consents[] { Consents.Views });
             Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
-            
+
             Countly.Instance.Consents.RemoveConsent(new Consents[] { Consents.Crashes, Consents.Views });
             requestModel = Countly.Instance.Consents._requestCountlyHelper._requestRepo.Dequeue();
             myUri = requestModel.RequestUrl;
@@ -549,7 +549,7 @@ namespace Tests
             ConsentTestHelperClass listener = new ConsentTestHelperClass();
             CountlyLogHelper logHelper = new CountlyLogHelper(configuration);
             ConsentCountlyService consentCountlyService = new ConsentCountlyService(configuration, logHelper, null, null);
-
+            consentCountlyService.LockObj = new object();
             consentCountlyService.Listeners = new List<AbstractBaseService> { listener };
 
             consentCountlyService.GiveConsent(new Consents[] { Consents.Location, Consents.RemoteConfig, Consents.RemoteConfig, Consents.Events });
@@ -577,7 +577,7 @@ namespace Tests
             ConsentTestHelperClass listener = new ConsentTestHelperClass();
             CountlyLogHelper logHelper = new CountlyLogHelper(configuration);
             ConsentCountlyService consentCountlyService = new ConsentCountlyService(configuration, logHelper, null, null);
-
+            consentCountlyService.LockObj = new object();
             consentCountlyService.Listeners = new List<AbstractBaseService> { listener };
 
             consentCountlyService.GiveConsent(new Consents[] { Consents.Location, Consents.RemoteConfig, Consents.Events });
@@ -614,7 +614,7 @@ namespace Tests
             ConsentTestHelperClass listener = new ConsentTestHelperClass();
             CountlyLogHelper logHelper = new CountlyLogHelper(configuration);
             ConsentCountlyService consentCountlyService = new ConsentCountlyService(configuration, logHelper, null, null);
-
+            consentCountlyService.LockObj = new object();
             consentCountlyService.Listeners = new List<AbstractBaseService> { listener };
 
             consentCountlyService.GiveConsentToGroup(new string[] { groupA });
@@ -659,6 +659,7 @@ namespace Tests
             ConsentTestHelperClass listener = new ConsentTestHelperClass();
             CountlyLogHelper logHelper = new CountlyLogHelper(configuration);
             ConsentCountlyService consentCountlyService = new ConsentCountlyService(configuration, logHelper, null, null);
+            consentCountlyService.LockObj = new object();
 
             consentCountlyService.Listeners = new List<AbstractBaseService> { listener };
 
