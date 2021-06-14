@@ -167,9 +167,11 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value">string with value for the property</param>
         public void Set(string key, string value)
         {
-            Log.Info("[UserDetailsCountlyService] Set : key = " + key + ", value = " + value);
+            lock (LockObj) {
+                Log.Info("[UserDetailsCountlyService] Set : key = " + key + ", value = " + value);
 
-            AddToCustomData(key, value);
+                AddToCustomData(key, value);
+            }
         }
 
         /// <summary>
@@ -179,9 +181,11 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value">string value to set</param>
         public void SetOnce(string key, string value)
         {
-            Log.Info("[UserDetailsCountlyService] SetOnce : key = " + key + ", value = " + value);
+            lock (LockObj) {
+                Log.Info("[UserDetailsCountlyService] SetOnce : key = " + key + ", value = " + value);
 
-            AddToCustomData(key, new Dictionary<string, object> { { "$setOnce", value } });
+                AddToCustomData(key, new Dictionary<string, object> { { "$setOnce", value } });
+            }
         }
 
         /// <summary>
@@ -190,9 +194,11 @@ namespace Plugins.CountlySDK.Services
         /// <param name="key">string with property name to increment</param>
         public void Increment(string key)
         {
-            Log.Info("[UserDetailsCountlyService] Increment : key = " + key);
+            lock (LockObj) {
+                Log.Info("[UserDetailsCountlyService] Increment : key = " + key);
 
-            AddToCustomData(key, new Dictionary<string, object> { { "$inc", 1 } });
+                AddToCustomData(key, new Dictionary<string, object> { { "$inc", 1 } });
+            }
         }
 
         /// <summary>
@@ -202,9 +208,11 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value">double value by which to increment</param>
         public void IncrementBy(string key, double value)
         {
-            Log.Info("[UserDetailsCountlyService] IncrementBy : key = " + key + ", value = " + value);
+            lock (LockObj) {
+                Log.Info("[UserDetailsCountlyService] IncrementBy : key = " + key + ", value = " + value);
 
-            AddToCustomData(key, new Dictionary<string, object> { { "$inc", value } });
+                AddToCustomData(key, new Dictionary<string, object> { { "$inc", value } });
+            }
         }
 
         /// <summary>
@@ -214,9 +222,11 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value">double value by which to multiply</param>
         public void Multiply(string key, double value)
         {
-            Log.Info("[UserDetailsCountlyService] Multiply : key = " + key + ", value = " + value);
+            lock (LockObj) {
+                Log.Info("[UserDetailsCountlyService] Multiply : key = " + key + ", value = " + value);
 
-            AddToCustomData(key, new Dictionary<string, object> { { "$mul", value } });
+                AddToCustomData(key, new Dictionary<string, object> { { "$mul", value } });
+            }
         }
 
         /// <summary>
@@ -226,9 +236,11 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value">double value to check for max</param>
         public void Max(string key, double value)
         {
-            Log.Info("[UserDetailsCountlyService] Max : key = " + key + ", value = " + value);
+            lock (LockObj) {
+                Log.Info("[UserDetailsCountlyService] Max : key = " + key + ", value = " + value);
 
-            AddToCustomData(key, new Dictionary<string, object> { { "$max", value } });
+                AddToCustomData(key, new Dictionary<string, object> { { "$max", value } });
+            }
         }
 
         /// <summary>
@@ -238,9 +250,11 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value">double value to check for min</param>
         public void Min(string key, double value)
         {
-            Log.Info("[UserDetailsCountlyService] Min : key = " + key + ", value = " + value);
+            lock (LockObj) {
+                Log.Info("[UserDetailsCountlyService] Min : key = " + key + ", value = " + value);
 
-            AddToCustomData(key, new Dictionary<string, object> { { "$min", value } });
+                AddToCustomData(key, new Dictionary<string, object> { { "$min", value } });
+            }
         }
 
         /// <summary>
@@ -251,9 +265,11 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value">array with values to add</param>
         public void Push(string key, string[] value)
         {
-            Log.Info("[UserDetailsCountlyService] Push : key = " + key + ", value = " + value);
+            lock (LockObj) {
+                Log.Info("[UserDetailsCountlyService] Push : key = " + key + ", value = " + value);
 
-            AddToCustomData(key, new Dictionary<string, object> { { "$push", value } });
+                AddToCustomData(key, new Dictionary<string, object> { { "$push", value } });
+            }
         }
 
         /// <summary>
@@ -264,9 +280,11 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value">array with values to add</param>
         public void PushUnique(string key, string[] value)
         {
-            Log.Info("[UserDetailsCountlyService] PushUnique : key = " + key + ", value = " + value);
+            lock (LockObj) {
+                Log.Info("[UserDetailsCountlyService] PushUnique : key = " + key + ", value = " + value);
 
-            AddToCustomData(key, new Dictionary<string, object> { { "$addToSet", value } });
+                AddToCustomData(key, new Dictionary<string, object> { { "$addToSet", value } });
+            }
         }
 
         /// <summary>
@@ -276,9 +294,11 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value">array with values to remove from array</param>
         public void Pull(string key, string[] value)
         {
-            Log.Info("[UserDetailsCountlyService] Pull : key = " + key + ", value = " + value);
+            lock (LockObj) {
+                Log.Info("[UserDetailsCountlyService] Pull : key = " + key + ", value = " + value);
 
-            AddToCustomData(key, new Dictionary<string, object> { { "$pull", value } });
+                AddToCustomData(key, new Dictionary<string, object> { { "$pull", value } });
+            }
         }
 
 
