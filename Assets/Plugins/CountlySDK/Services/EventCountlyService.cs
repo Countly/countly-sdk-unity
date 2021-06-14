@@ -54,7 +54,10 @@ namespace Plugins.CountlySDK.Services
                             new JsonSerializerSettings {NullValueHandling = NullValueHandling.Ignore})
                     }
                 };
+
             _requestCountlyHelper.AddToRequestQueue(requestParams);
+
+            Log.Debug("[EventCountlyService] AddEventsToRequestQueue: Remove events from event queue, count: " + count);
             for (int i = 0; i < count; ++i) {
                 _eventRepo.Dequeue();
             }
