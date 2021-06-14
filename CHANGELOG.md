@@ -1,5 +1,5 @@
 ## 20.11.4
-* Added locks on public async methods.
+* Added locks inside public methods.
 * Fixed potential issue when events are combined into a request.
 
 ## 20.11.3
