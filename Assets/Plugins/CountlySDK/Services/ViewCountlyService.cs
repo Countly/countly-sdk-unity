@@ -53,6 +53,11 @@ namespace Plugins.CountlySDK.Services
                     return;
                 }
 
+                if (name.Length > _configuration.MaxKeyLength) {
+                    Log.Verbose("[ViewCountlyService] RecordOpenViewAsync : Max allowed key length is " + _configuration.MaxKeyLength);
+                    name = name.Substring(_configuration.MaxKeyLength);
+                }
+
                 ViewSegment currentViewSegment =
                     new ViewSegment {
                         Name = name,
@@ -103,6 +108,11 @@ namespace Plugins.CountlySDK.Services
 
                 if (string.IsNullOrEmpty(name)) {
                     return;
+                }
+
+                if (name.Length > _configuration.MaxKeyLength) {
+                    Log.Verbose("[ViewCountlyService] RecordCloseViewAsync : Max allowed key length is " + _configuration.MaxKeyLength);
+                    name = name.Substring(_configuration.MaxKeyLength);
                 }
 
                 ViewSegment currentViewSegment =

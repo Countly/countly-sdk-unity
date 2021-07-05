@@ -76,6 +76,16 @@ namespace Plugins.CountlySDK.Models
         public int SessionDuration = 60;
 
         /// <summary>
+        /// Sets the maximum size of all string keys
+        /// </summary>
+        public readonly int MaxKeyLength = 128;
+
+        /// <summary>
+        /// Sets the size of all values in our key-value pairs
+        /// </summary>
+        public readonly int MaxValueSize = 256;
+
+        /// <summary>
         /// Set threshold value for the number of events that can be stored locally.
         /// </summary>
         public int EventQueueThreshold = 100;
