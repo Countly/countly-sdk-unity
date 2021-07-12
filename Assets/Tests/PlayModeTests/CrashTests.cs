@@ -185,7 +185,7 @@ namespace Tests
         }
 
         /// <summary>
-        /// It validates the limit on bread crumbs lenght (limit = 1000).
+        /// It validates the limit on bread crumbs lenght (limit = 100).
         /// </summary>
         [Test]
         public void TestCrashBreadCrumbsLenght()
@@ -207,9 +207,9 @@ namespace Tests
             Assert.AreEqual(1, Countly.Instance.CrashReports._crashBreadcrumbs.Count);
 
             string qBreadCrumbs = Countly.Instance.CrashReports._crashBreadcrumbs.Dequeue();
-            Assert.AreEqual(1000, qBreadCrumbs.Length);
+            Assert.AreEqual(100, qBreadCrumbs.Length);
 
-            string validBreadcrumb = breadCrumbs.Length > 1000 ? breadCrumbs.Substring(0, 1000) : breadCrumbs;
+            string validBreadcrumb = breadCrumbs.Length > 100 ? breadCrumbs.Substring(0, 100) : breadCrumbs;
             Assert.AreEqual(validBreadcrumb, qBreadCrumbs); 
         }
 

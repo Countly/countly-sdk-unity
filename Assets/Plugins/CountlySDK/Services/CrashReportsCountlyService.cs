@@ -87,12 +87,12 @@ namespace Plugins.CountlySDK.Services
 
                         if (k.Length > _configuration.MaxKeyLength) {
                             Log.Verbose("[EventCountlyService] ReportCustomEventAsync : Max allowed key length is " + _configuration.MaxKeyLength);
-                            k = k.Substring(_configuration.MaxKeyLength);
+                            k = k.Substring(0, _configuration.MaxKeyLength);
                         }
 
                         if (v.GetType() == typeof(string) && ((string)v).Length > _configuration.MaxValueSize) {
                             Log.Verbose("[EventCountlyService] ReportCustomEventAsync : Max allowed value length is " + _configuration.MaxValueSize);
-                            v = ((string)v).Substring(_configuration.MaxValueSize);
+                            v = ((string)v).Substring(0, _configuration.MaxValueSize);
                         }
 
                         segmentation.Add(k, v);

@@ -138,7 +138,7 @@ namespace Plugins.CountlySDK.Services
 
                 if (key.Length > _configuration.MaxKeyLength) {
                     Log.Verbose("[EventCountlyService] RecordEventAsync : Max allowed key length is " + _configuration.MaxKeyLength);
-                    key = key.Substring(_configuration.MaxKeyLength);
+                    key = key.Substring(0, _configuration.MaxKeyLength);
                 }
                 IDictionary<string, object> segments = null;
                 if (segmentation != null) {
@@ -151,12 +151,12 @@ namespace Plugins.CountlySDK.Services
 
                         if (k.Length > _configuration.MaxKeyLength) {
                             Log.Verbose("[EventCountlyService] RecordEventAsync : Max allowed key length is " + _configuration.MaxKeyLength);
-                            k = k.Substring(_configuration.MaxKeyLength);
+                            k = k.Substring(0, _configuration.MaxKeyLength);
                         }
 
                         if (v.GetType() == typeof(string) && ((string)v).Length > _configuration.MaxValueSize) {
                             Log.Verbose("[EventCountlyService] RecordEventAsync : Max allowed value length is " + _configuration.MaxValueSize);
-                            v = ((string)v).Substring(_configuration.MaxValueSize);
+                            v = ((string)v).Substring(0, _configuration.MaxValueSize);
                         }
 
                         segments.Add(k, v);
@@ -216,7 +216,7 @@ namespace Plugins.CountlySDK.Services
 
                 if (key.Length > _configuration.MaxKeyLength) {
                     Log.Verbose("[EventCountlyService] ReportCustomEventAsync : Max allowed key length is " + _configuration.MaxKeyLength);
-                    key = key.Substring(_configuration.MaxKeyLength);
+                    key = key.Substring(0, _configuration.MaxKeyLength);
                 }
 
 
@@ -231,12 +231,12 @@ namespace Plugins.CountlySDK.Services
 
                         if (k.Length > _configuration.MaxKeyLength) {
                             Log.Verbose("[EventCountlyService] ReportCustomEventAsync : Max allowed key length is " + _configuration.MaxKeyLength);
-                            k = k.Substring(_configuration.MaxKeyLength);
+                            k = k.Substring(0, _configuration.MaxKeyLength);
                         }
 
                         if (v.GetType() == typeof(string) && ((string)v).Length > _configuration.MaxValueSize) {
                             Log.Verbose("[EventCountlyService] ReportCustomEventAsync : Max allowed value length is " + _configuration.MaxValueSize);
-                            v = ((string)v).Substring(_configuration.MaxValueSize);
+                            v = ((string)v).Substring(0, _configuration.MaxValueSize);
                         }
 
                         segments.Add(k, v);
