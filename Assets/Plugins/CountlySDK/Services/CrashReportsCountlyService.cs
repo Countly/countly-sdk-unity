@@ -116,7 +116,7 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
 
-            string validBreadcrumb = value.Length > 1000 ? value.Substring(0, 1000) : value;
+            string validBreadcrumb = value.Length > _configuration.MaxValueSize ? value.Substring(0, _configuration.MaxValueSize) : value;
 
             if (_crashBreadcrumbs.Count == _configuration.TotalBreadcrumbsAllowed) {
                 _crashBreadcrumbs.Dequeue();

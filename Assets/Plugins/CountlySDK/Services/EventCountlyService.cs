@@ -219,26 +219,49 @@ namespace Plugins.CountlySDK.Services
                     key = key.Substring(_configuration.MaxKeyLength);
                 }
 
+
+                IDictionary<string, object> segments = null;
                 if (segmentation != null) {
                     List<string> toRemove = new List<string>();
 
+                    segments = new Dictionary<string, object>();
                     foreach (KeyValuePair<string, object> item in segmentation) {
-                        bool isValidDataType = item.Value.GetType() == typeof(int)
+                        string k = item.Key;
+                        object v = item.Value;
+
+                        if (k.Length > _configuration.MaxKeyLength) {
+                            Log.Verbose("[EventCountlyService] ReportCustomEventAsync : Max allowed key length is " + _configuration.MaxKeyLength);
+                            k = k.Substring(_configuration.MaxKeyLength);
+                        }
+
+                        if (v.GetType() == typeof(string) && ((string)v).Length > _configuration.MaxValueSize) {
+                            Log.Verbose("[EventCountlyService] ReportCustomEventAsync : Max allowed value length is " + _configuration.MaxValueSize);
+                            v = ((string)v).Substring(_configuration.MaxValueSize);
+                        }
+
+                        segments.Add(k, v);
+                    }
+
+                    foreach (KeyValuePair<string, object> item in segments) {
+                        bool isValidDataType = item.Value != null
+                            && (item.Value.GetType() == typeof(int)
                             || item.Value.GetType() == typeof(bool)
                             || item.Value.GetType() == typeof(float)
                             || item.Value.GetType() == typeof(double)
-                            || item.Value.GetType() == typeof(string);
+                            || item.Value.GetType() == typeof(string));
+
 
                         if (!isValidDataType) {
                             toRemove.Add(item.Key);
-                            Log.Warning("[EventCountlyService] ReportCustomEventAsync : In segmentation Data type '" + (item.Value?.GetType()) + "'  of item '" + item.Key + "'isn't valid.");
+                            Log.Warning("[EventCountlyService] ReportCustomEventAsync : In segmentation Data type '" + (item.Value?.GetType()) + "'  of item '" + item.Key + "' isn't valid.");
                         }
                     }
 
                     foreach (string k in toRemove) {
-                        segmentation.Remove(k);
+                        segments.Remove(k);
                     }
                 }
+
 
                 CountlyEventModel @event = new CountlyEventModel(key, segmentation, count, sum, duration);
 

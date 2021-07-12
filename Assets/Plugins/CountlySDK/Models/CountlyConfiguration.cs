@@ -76,14 +76,29 @@ namespace Plugins.CountlySDK.Models
         public int SessionDuration = 60;
 
         /// <summary>
-        /// Sets the maximum size of all string keys
+        /// Maximum size of all string keys
         /// </summary>
-        public readonly int MaxKeyLength = 128;
+        public int MaxKeyLength = 128;
 
         /// <summary>
-        /// Sets the size of all values in our key-value pairs
+        /// Maximum size of all values in our key-value pairs
         /// </summary>
-        public readonly int MaxValueSize = 256;
+        public int MaxValueSize = 256;
+
+        /// <summary>
+        /// Max amount of custom (dev provided) segmentation in one event
+        /// </summary>
+        public int MaxSegmentationValues = 30;
+
+        /// <summary>
+        ///Limits how many stack trace lines would be recorded per thread
+        /// </summary>
+        public int MaxStackTraceLinesPerThread = 30;
+
+        /// <summary>
+        ///Limits how many characters are allowed per stack trace line
+        /// </summary>
+        public int MaxStackTraceLineLength = 200;
 
         /// <summary>
         /// Set threshold value for the number of events that can be stored locally.
