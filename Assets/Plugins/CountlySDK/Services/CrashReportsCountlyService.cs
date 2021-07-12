@@ -75,7 +75,31 @@ namespace Plugins.CountlySDK.Services
                     return;
                 }
 
-                CountlyExceptionDetailModel model = ExceptionDetailModel(message, stackTrace, nonfatal, segments);
+
+                IDictionary<string, object> segmentation = null;
+                if (segments != null) {
+                    List<string> toRemove = new List<string>();
+
+                    segmentation = new Dictionary<string, object>();
+                    foreach (KeyValuePair<string, object> item in segments) {
+                        string k = item.Key;
+                        object v = item.Value;
+
+                        if (k.Length > _configuration.MaxKeyLength) {
+                            Log.Verbose("[EventCountlyService] ReportCustomEventAsync : Max allowed key length is " + _configuration.MaxKeyLength);
+                            k = k.Substring(_configuration.MaxKeyLength);
+                        }
+
+                        if (v.GetType() == typeof(string) && ((string)v).Length > _configuration.MaxValueSize) {
+                            Log.Verbose("[EventCountlyService] ReportCustomEventAsync : Max allowed value length is " + _configuration.MaxValueSize);
+                            v = ((string)v).Substring(_configuration.MaxValueSize);
+                        }
+
+                        segmentation.Add(k, v);
+                    }
+                }
+
+                    CountlyExceptionDetailModel model = ExceptionDetailModel(message, stackTrace, nonfatal, segmentation);
                 _=SendCrashReportInternal(model);
             }
 

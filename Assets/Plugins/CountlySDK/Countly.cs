@@ -277,9 +277,9 @@ namespace Plugins.CountlySDK
                 return;
             }
 
-            _logHelper.Debug("[Countly] OnApplicationQuit");
+            _logHelper?.Debug("[Countly] OnApplicationQuit");
             Session?._sessionTimer?.Dispose();
-            _storageHelper.CloseDB();
+            _storageHelper?.CloseDB();
         }
 
         internal void ClearStorage()
@@ -302,7 +302,7 @@ namespace Plugins.CountlySDK
                 return;
             }
 
-            _logHelper.Debug("[Countly] OnApplicationFocus: " + hasFocus);
+            _logHelper?.Debug("[Countly] OnApplicationFocus: " + hasFocus);
 
             if (hasFocus) {
                 SubscribeAppLog();
@@ -318,7 +318,7 @@ namespace Plugins.CountlySDK
                     return;
                 }
 
-                _logHelper.Debug("[Countly] OnApplicationPause: " + pauseStatus);
+                _logHelper?.Debug("[Countly] OnApplicationPause: " + pauseStatus);
 
                 if (CrashReports != null) {
                     CrashReports.IsApplicationInBackground = pauseStatus;
