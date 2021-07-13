@@ -80,7 +80,7 @@ namespace Tests
             Assert.AreEqual("test_event", model.Key);
             Assert.AreEqual(0, model.Sum);
             Assert.AreEqual(1, model.Count);
-            Assert.IsNull( model.Duration);
+            Assert.IsNull(model.Duration);
             Assert.IsNull(model.Segmentation);
 
             await Countly.Instance.Events.RecordEventAsync("test_event1", segmentation: null, count: 5, duration: null, sum: null);
@@ -138,7 +138,7 @@ namespace Tests
             Countly.Instance.Init(configuration);
 
             Assert.IsNotNull(Countly.Instance.Events);
-           
+
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
 
@@ -154,6 +154,48 @@ namespace Tests
             CountlyEventModel model = Countly.Instance.Events._eventRepo.Dequeue();
 
             Assert.AreEqual("test_event", model.Key);
+            Assert.AreEqual(23, model.Sum);
+            Assert.AreEqual(1, model.Count);
+            Assert.AreEqual(5, model.Duration);
+            Assert.AreEqual(2, model.Segmentation.Count);
+            Assert.AreEqual("value1", model.Segmentation["key1"]);
+            Assert.AreEqual("value2", model.Segmentation["key2"]);
+        }
+
+        /// <summary>
+        /// It validates the the event limits.
+        /// </summary>
+        [Test]
+        public async void TestEventLimits()
+        {
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                ServerUrl = _serverUrl,
+                AppKey = _appKey,
+                MaxKeyLength = 4,
+                MaxValueSize = 6,
+                MaxSegmentationValues = 2
+            };
+
+            Countly.Instance.Init(configuration);
+
+            Assert.IsNotNull(Countly.Instance.Events);
+
+            Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
+
+
+            Dictionary<string, object> segments = new Dictionary<string, object>{
+            { "key1", "value1"},
+            { "key2_00", "value2_00"},
+            { "key3_00", "value3"}
+            };
+
+            SegmentModel segmentModel = new SegmentModel(segments);
+
+            await Countly.Instance.Events.RecordEventAsync("test_event", segmentation: segmentModel, sum: 23, duration: 5);
+
+            CountlyEventModel model = Countly.Instance.Events._eventRepo.Dequeue();
+
+            Assert.AreEqual("test", model.Key);
             Assert.AreEqual(23, model.Sum);
             Assert.AreEqual(1, model.Count);
             Assert.AreEqual(5, model.Duration);

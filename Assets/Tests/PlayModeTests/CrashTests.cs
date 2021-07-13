@@ -207,9 +207,9 @@ namespace Tests
             Assert.AreEqual(1, Countly.Instance.CrashReports._crashBreadcrumbs.Count);
 
             string qBreadCrumbs = Countly.Instance.CrashReports._crashBreadcrumbs.Dequeue();
-            Assert.AreEqual(100, qBreadCrumbs.Length);
+            Assert.AreEqual(256, qBreadCrumbs.Length);
 
-            string validBreadcrumb = breadCrumbs.Length > 100 ? breadCrumbs.Substring(0, 100) : breadCrumbs;
+            string validBreadcrumb = breadCrumbs.Length > 256 ? breadCrumbs.Substring(0, 256) : breadCrumbs;
             Assert.AreEqual(validBreadcrumb, qBreadCrumbs); 
         }
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Plugins.CountlySDK.Enums;
@@ -42,11 +43,26 @@ namespace Plugins.CountlySDK.Services
                     Log.Warning("[CrashReportsCountlyService] LogCallback : The parameter 'message' can't be null or empty");
                     return;
                 }
-                CountlyExceptionDetailModel model = ExceptionDetailModel(message, stackTrace, false, null);
+
+                string result = null;
+                if (!string.IsNullOrEmpty(stackTrace)) {
+                    string[] lines = stackTrace.Split('\n');
+                    int limit = lines.Length < _configuration.MaxStackTraceLinesPerThread ? lines.Length : _configuration.MaxStackTraceLinesPerThread;
+
+                    string newLine = "";
+                    for (int i = 0; i < limit; ++i) {
+                        string line = lines[i].Length > _configuration.MaxStackTraceLineLength ?
+                            lines[i].Substring(0, _configuration.MaxStackTraceLineLength) : lines[i];
+                        result += line + newLine;
+                        newLine = "\n";
+                    }
+                }
+
+                CountlyExceptionDetailModel model = ExceptionDetailModel(message, result, false, null);
 
                 if (_configuration.EnableAutomaticCrashReporting
                     && (type == LogType.Error || type == LogType.Exception)) {
-                    _=SendCrashReportInternal(model);
+                    _ = SendCrashReportInternal(model);
                 }
             }
         }
@@ -75,10 +91,43 @@ namespace Plugins.CountlySDK.Services
                     return;
                 }
 
+                string result = null;
+                if (!string.IsNullOrEmpty(stackTrace)) {
+                    string[] lines = stackTrace.Split('\n');
+                    int limit = lines.Length < _configuration.MaxStackTraceLinesPerThread ? lines.Length : _configuration.MaxStackTraceLinesPerThread;
+
+                    string newLine = "";
+                    for (int i = 0; i < limit; ++i) {
+                        string line = lines[i].Length > _configuration.MaxStackTraceLineLength ?
+                            lines[i].Substring(0, _configuration.MaxStackTraceLineLength) : lines[i];
+                        result += line + newLine;
+                        newLine = "\n";
+                    }
+                }
+
 
                 IDictionary<string, object> segmentation = null;
                 if (segments != null) {
                     List<string> toRemove = new List<string>();
+
+                    foreach (KeyValuePair<string, object> item in segments) {
+                        bool isValidDataType = item.Value != null
+                            && (item.Value.GetType() == typeof(int)
+                            || item.Value.GetType() == typeof(bool)
+                            || item.Value.GetType() == typeof(float)
+                            || item.Value.GetType() == typeof(double)
+                            || item.Value.GetType() == typeof(string));
+
+
+                        if (!isValidDataType) {
+                            toRemove.Add(item.Key);
+                            Log.Warning("[CrashReportsCountlyService] SendCrashReportAsync : In segmentation Data type '" + (item.Value?.GetType()) + "'  of item '" + item.Key + "' isn't valid.");
+                        }
+                    }
+
+                    foreach (string k in toRemove) {
+                        segments.Remove(k);
+                    }
 
                     segmentation = new Dictionary<string, object>();
                     foreach (KeyValuePair<string, object> item in segments) {
@@ -86,12 +135,12 @@ namespace Plugins.CountlySDK.Services
                         object v = item.Value;
 
                         if (k.Length > _configuration.MaxKeyLength) {
-                            Log.Verbose("[EventCountlyService] ReportCustomEventAsync : Max allowed key length is " + _configuration.MaxKeyLength);
+                            Log.Verbose("[CrashReportsCountlyService] SendCrashReportAsync : Max allowed key length is " + _configuration.MaxKeyLength);
                             k = k.Substring(0, _configuration.MaxKeyLength);
                         }
 
                         if (v.GetType() == typeof(string) && ((string)v).Length > _configuration.MaxValueSize) {
-                            Log.Verbose("[EventCountlyService] ReportCustomEventAsync : Max allowed value length is " + _configuration.MaxValueSize);
+                            Log.Verbose("[CrashReportsCountlyService] SendCrashReportAsync : Max allowed value length is " + _configuration.MaxValueSize);
                             v = ((string)v).Substring(0, _configuration.MaxValueSize);
                         }
 
@@ -99,8 +148,8 @@ namespace Plugins.CountlySDK.Services
                     }
                 }
 
-                    CountlyExceptionDetailModel model = ExceptionDetailModel(message, stackTrace, nonfatal, segmentation);
-                _=SendCrashReportInternal(model);
+                CountlyExceptionDetailModel model = ExceptionDetailModel(message, result, nonfatal, segmentation);
+                _ = SendCrashReportInternal(model);
             }
 
         }
