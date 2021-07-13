@@ -1,3 +1,8 @@
+## 20.11.5
+* Added new configuration fields.
+* Added SDK internal limits.
+* Reworked request logging.
+
 ## 20.11.4
 * Added "lock" checks for all public SDK methods.
 * Fixed race issue bug that occured when events are combined into a request.
