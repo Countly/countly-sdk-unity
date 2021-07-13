@@ -100,7 +100,7 @@ namespace Plugins.CountlySDK.Services
                     for (int i = 0; i < limit; ++i) {
                         string line = lines[i].Length > _configuration.MaxStackTraceLineLength ?
                             lines[i].Substring(0, _configuration.MaxStackTraceLineLength) : lines[i];
-                        result += line + newLine;
+                        result += newLine + line;
                         newLine = "\n";
                     }
                 }
@@ -110,7 +110,13 @@ namespace Plugins.CountlySDK.Services
                 if (segments != null) {
                     List<string> toRemove = new List<string>();
 
+                    int i = 0;
                     foreach (KeyValuePair<string, object> item in segments) {
+                        if (++i > _configuration.MaxSegmentationValues) {
+                            toRemove.Add(item.Key);
+                            continue;
+                        }
+
                         bool isValidDataType = item.Value != null
                             && (item.Value.GetType() == typeof(int)
                             || item.Value.GetType() == typeof(bool)

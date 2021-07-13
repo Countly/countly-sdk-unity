@@ -113,6 +113,53 @@ namespace Tests
 
         }
 
+
+        /// <summary>
+        /// It validate user detail segments limits.
+        /// </summary>
+        [Test]
+        public async void TestUserDetailSegmentLimits()
+        {
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                ServerUrl = _serverUrl,
+                AppKey = _appKey,
+                MaxKeyLength = 5,
+                MaxValueSize = 6,
+                EnablePost = true
+            };
+
+            Countly.Instance.Init(configuration);
+            Countly.Instance.ClearStorage();
+
+            Assert.IsNotNull(Countly.Instance.UserDetails);
+            Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
+
+            CountlyUserDetailsModel userDetails = null;
+
+            await Countly.Instance.UserDetails.SetCustomUserDetailsAsync(userDetails);
+            Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
+
+            userDetails = new CountlyUserDetailsModel(
+                    new Dictionary<string, object>{
+                        { "Hair", "Black_000" },
+                        { "Height", "5.9" },
+                    });
+            await Countly.Instance.UserDetails.SetCustomUserDetailsAsync(userDetails);
+            Assert.AreEqual(1, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
+
+            CountlyRequestModel requestModel = Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Dequeue();
+
+
+            string userDetailData = requestModel.RequestData;
+            JObject json = JObject.Parse(userDetailData);
+            string userDetail = json["user_details"].ToString();
+            JObject custom = JObject.Parse(userDetail);
+
+            Assert.AreEqual("Black_", custom["custom"]["Hair"].ToString());
+            Assert.AreEqual("5.9", custom["custom"]["Heigh"].ToString());
+
+        }
+
         /// <summary>
         /// It check the working of method 'UserCustomDetailsAsync'.
         /// </summary>
