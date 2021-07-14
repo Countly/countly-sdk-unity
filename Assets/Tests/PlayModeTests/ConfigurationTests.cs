@@ -34,6 +34,12 @@ namespace Tests
                 EventQueueThreshold = 150,
                 TotalBreadcrumbsAllowed = 200,
 
+                MaxValueSize = 5,
+                MaxKeyLength = 5,
+                MaxSegmentationValues = 2,
+                MaxStackTraceLineLength = 5,
+                MaxStackTraceLinesPerThread = 2,
+
                 NotificationMode = TestMode.AndroidTestToken
             };
 
@@ -72,6 +78,12 @@ namespace Tests
             Assert.AreEqual(Countly.Instance.Configuration.TotalBreadcrumbsAllowed, 200);
             Assert.AreEqual(Countly.Instance.Configuration.NotificationMode, TestMode.AndroidTestToken);
 
+            Assert.AreEqual(Countly.Instance.Configuration.MaxValueSize, 5);
+            Assert.AreEqual(Countly.Instance.Configuration.MaxKeyLength, 5);
+            Assert.AreEqual(Countly.Instance.Configuration.MaxSegmentationValues, 2);
+            Assert.AreEqual(Countly.Instance.Configuration.MaxStackTraceLineLength, 5);
+            Assert.AreEqual(Countly.Instance.Configuration.MaxStackTraceLinesPerThread, 2);
+
             Assert.AreEqual(Countly.Instance.Configuration.Salt, "091355076ead");
             Assert.AreEqual(Countly.Instance.Configuration.DeviceId, "device-xyz");
 
@@ -101,6 +113,13 @@ namespace Tests
             Assert.AreEqual(Countly.Instance.Configuration.EventQueueThreshold, 100);
             Assert.AreEqual(Countly.Instance.Configuration.TotalBreadcrumbsAllowed, 100);
             Assert.AreEqual(Countly.Instance.Configuration.NotificationMode, TestMode.None);
+
+            Assert.AreEqual(Countly.Instance.Configuration.MaxValueSize, 256);
+            Assert.AreEqual(Countly.Instance.Configuration.MaxKeyLength, 128);
+            Assert.AreEqual(Countly.Instance.Configuration.MaxSegmentationValues, 30);
+            Assert.AreEqual(Countly.Instance.Configuration.MaxStackTraceLineLength, 200);
+            Assert.AreEqual(Countly.Instance.Configuration.MaxStackTraceLinesPerThread, 30);
+
 
             Assert.AreEqual(Countly.Instance.Configuration.Salt, null);
             Assert.AreEqual(Countly.Instance.Configuration.DeviceId, null);
