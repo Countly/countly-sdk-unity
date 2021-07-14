@@ -51,11 +51,12 @@ namespace Plugins.CountlySDK.Helpers
         #endregion
 
         #region Unity System
-
-        public static string UnityPlatform =>
-            UnityEngine.Application.platform.ToString().ToLower() == "iphoneplayer"
-            ? "ios"
-            : UnityEngine.Application.platform.ToString().ToLower();
+        public static void ProcessPlatform()
+        {
+            string platform = UnityEngine.Application.platform.ToString().ToLower();
+            UnityPlatform = (platform == "iphoneplayer" || platform == "iosplayer") ? "ios" : platform;
+        }
+        public static string UnityPlatform { get; internal set; }
 
         #endregion
     }
