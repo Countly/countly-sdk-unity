@@ -181,14 +181,13 @@ namespace Plugins.CountlySDK
                 _logHelper.Warning("'EnableFirstAppLaunchSegment' has been deprecated and it's functionality has been removed. This variable is only left for compatability.");
             }
 
+            Constants.ProcessPlatform();
             FirstLaunchAppHelper.Process();
 
             _storageHelper = new CountlyStorageHelper(_logHelper);
             _storageHelper.OpenDB();
 
             _storageHelper.RunMigration();
-
-
 
             Init(_storageHelper.RequestRepo, _storageHelper.EventRepo, _storageHelper.ConfigDao);
 
@@ -232,12 +231,12 @@ namespace Plugins.CountlySDK
         {
             lock (lockObj) {
                 IsSDKInitialized = true;
-                _= Initialization.OnInitialisationComplete();
+                _ = Initialization.OnInitialisationComplete();
                 foreach (AbstractBaseService listener in _listeners) {
                     listener.OnInitializationCompleted();
                 }
             }
-            
+
         }
 
         private void CreateListOfIBaseService()
@@ -327,12 +326,12 @@ namespace Plugins.CountlySDK
                 if (pauseStatus) {
                     HandleAppPauseOrFocus();
                     if (!Configuration.IsAutomaticSessionTrackingDisabled) {
-                        _= Session?.EndSessionAsync();
+                        _ = Session?.EndSessionAsync();
                     }
                 } else {
                     SubscribeAppLog();
                     if (!Configuration.IsAutomaticSessionTrackingDisabled) {
-                        _= Session?.BeginSessionAsync();
+                        _ = Session?.BeginSessionAsync();
                     }
                 }
             }
