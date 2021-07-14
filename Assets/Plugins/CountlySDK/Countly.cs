@@ -278,7 +278,7 @@ namespace Plugins.CountlySDK
 
             _logHelper.Debug("[Countly] OnApplicationQuit");
             Session?._sessionTimer?.Dispose();
-            _storageHelper.CloseDB();
+            _storageHelper?.CloseDB();
         }
 
         internal void ClearStorage()
@@ -290,9 +290,9 @@ namespace Plugins.CountlySDK
             _logHelper.Debug("[Countly] ClearStorage");
 
             PlayerPrefs.DeleteAll();
-            _storageHelper.ClearDBData();
+            _storageHelper?.ClearDBData();
 
-            _storageHelper.CloseDB();
+            _storageHelper?.CloseDB();
         }
 
         private void OnApplicationFocus(bool hasFocus)
@@ -301,7 +301,7 @@ namespace Plugins.CountlySDK
                 return;
             }
 
-            _logHelper.Debug("[Countly] OnApplicationFocus: " + hasFocus);
+            _logHelper?.Debug("[Countly] OnApplicationFocus: " + hasFocus);
 
             if (hasFocus) {
                 SubscribeAppLog();
@@ -317,7 +317,7 @@ namespace Plugins.CountlySDK
                     return;
                 }
 
-                _logHelper.Debug("[Countly] OnApplicationPause: " + pauseStatus);
+                _logHelper?.Debug("[Countly] OnApplicationPause: " + pauseStatus);
 
                 if (CrashReports != null) {
                     CrashReports.IsApplicationInBackground = pauseStatus;
