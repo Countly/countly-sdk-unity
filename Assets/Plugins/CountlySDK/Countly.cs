@@ -15,6 +15,8 @@ using Plugins.CountlySDK.Persistance.Repositories.Impls;
 using Plugins.CountlySDK.Services;
 using Plugins.iBoxDB;
 using UnityEngine;
+using System.Reflection;
+using System.Threading;
 
 [assembly: InternalsVisibleTo("PlayModeTests")]
 namespace Plugins.CountlySDK
@@ -278,6 +280,13 @@ namespace Plugins.CountlySDK
             }
 
             _logHelper.Debug("[Countly] OnApplicationQuit");
+
+            //stop async method after in-editor game is stopped
+#if UNITY_EDITOR
+            ConstructorInfo constructor = SynchronizationContext.Current.GetType().GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, new Type[] { typeof(int) }, null);
+            object newContext = constructor.Invoke(new object[] { Thread.CurrentThread.ManagedThreadId });
+            SynchronizationContext.SetSynchronizationContext(newContext as SynchronizationContext);
+#endif
             Session?._sessionTimer?.Dispose();
             _storageHelper.CloseDB();
         }
