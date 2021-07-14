@@ -32,20 +32,22 @@ namespace Plugins.CountlySDK.Services
         [Obsolete("LogCallback is deprecated, this is going to be removed in the future.")]
         public async void LogCallback(string message, string stackTrace, LogType type)
         {
-            //In future make this function internal
-            if (!_consentService.CheckConsentInternal(Consents.Crashes)) {
-                return;
-            }
+            lock (LockObj) {
+                //In future make this function internal
+                if (!_consentService.CheckConsentInternal(Consents.Crashes)) {
+                    return;
+                }
 
-            if (string.IsNullOrEmpty(message) || string.IsNullOrWhiteSpace(message)) {
-                Log.Warning("[CrashReportsCountlyService] LogCallback : The parameter 'message' can't be null or empty");
-                return;
-            }
-            CountlyExceptionDetailModel model = ExceptionDetailModel(message, stackTrace, false, null);
+                if (string.IsNullOrEmpty(message) || string.IsNullOrWhiteSpace(message)) {
+                    Log.Warning("[CrashReportsCountlyService] LogCallback : The parameter 'message' can't be null or empty");
+                    return;
+                }
+                CountlyExceptionDetailModel model = ExceptionDetailModel(message, stackTrace, false, null);
 
-            if (_configuration.EnableAutomaticCrashReporting
-                && (type == LogType.Error || type == LogType.Exception)) {
-                await SendCrashReportInternal(model);
+                if (_configuration.EnableAutomaticCrashReporting
+                    && (type == LogType.Error || type == LogType.Exception)) {
+                    _=SendCrashReportInternal(model);
+                }
             }
         }
 
@@ -61,19 +63,21 @@ namespace Plugins.CountlySDK.Services
         public async Task SendCrashReportAsync(string message, string stackTrace, LogType type,
             IDictionary<string, object> segments = null, bool nonfatal = true)
         {
-            Log.Info("[CrashReportsCountlyService] SendCrashReportAsync : message = " + message + ", stackTrace = " + stackTrace);
+            lock (LockObj) {
+                Log.Info("[CrashReportsCountlyService] SendCrashReportAsync : message = " + message + ", stackTrace = " + stackTrace);
 
-            if (!_consentService.CheckConsentInternal(Consents.Crashes)) {
-                return;
+                if (!_consentService.CheckConsentInternal(Consents.Crashes)) {
+                    return;
+                }
+
+                if (string.IsNullOrEmpty(message) || string.IsNullOrWhiteSpace(message)) {
+                    Log.Warning("[CrashReportsCountlyService] SendCrashReportAsync : The parameter 'message' can't be null or empty");
+                    return;
+                }
+
+                CountlyExceptionDetailModel model = ExceptionDetailModel(message, stackTrace, nonfatal, segments);
+                _=SendCrashReportInternal(model);
             }
-
-            if (string.IsNullOrEmpty(message) || string.IsNullOrWhiteSpace(message)) {
-                Log.Warning("[CrashReportsCountlyService] SendCrashReportAsync : The parameter 'message' can't be null or empty");
-                return;
-            }
-
-            CountlyExceptionDetailModel model = ExceptionDetailModel(message, stackTrace, nonfatal, segments);
-            await SendCrashReportInternal(model);
 
         }
 
@@ -89,7 +93,8 @@ namespace Plugins.CountlySDK.Services
                 }
             };
 
-            await _requestCountlyHelper.GetResponseAsync(requestParams);
+            _requestCountlyHelper.AddToRequestQueue(requestParams);
+            await _requestCountlyHelper.ProcessQueue();
 
         }
 

@@ -47,7 +47,8 @@ namespace Plugins.CountlySDK.Services
                    { "location", string.Empty }
                };
 
-            await _requestCountlyHelper.GetResponseAsync(requestParams);
+            _requestCountlyHelper.AddToRequestQueue(requestParams);
+            await _requestCountlyHelper.ProcessQueue();
         }
 
         /// <summary>
@@ -85,7 +86,8 @@ namespace Plugins.CountlySDK.Services
             }
 
             if (requestParams.Count > 0) {
-                await _requestCountlyHelper.GetResponseAsync(requestParams);
+                _requestCountlyHelper.AddToRequestQueue(requestParams);
+                await _requestCountlyHelper.ProcessQueue();
             }
         }
 
@@ -96,24 +98,26 @@ namespace Plugins.CountlySDK.Services
         /// </summary>
         public async void DisableLocation()
         {
-            Log.Info("[LocationService] DisableLocation");
+            lock (LockObj) {
+                Log.Info("[LocationService] DisableLocation");
 
-            if (!_consentService.CheckConsentInternal(Consents.Location)) {
-                return;
+                if (!_consentService.CheckConsentInternal(Consents.Location)) {
+                    return;
+                }
+
+                IsLocationDisabled = true;
+                City = null;
+                Location = null;
+                IPAddress = null;
+                CountryCode = null;
+
+                /*
+                 *If the location feature gets disabled or location consent is removed,
+                 *the SDK sends a request with an empty "location". 
+                 */
+
+                _= SendRequestWithEmptyLocation();
             }
-
-            IsLocationDisabled = true;
-            City = null;
-            Location = null;
-            IPAddress = null;
-            CountryCode = null;
-
-            /*
-             *If the location feature gets disabled or location consent is removed,
-             *the SDK sends a request with an empty "location". 
-             */
-
-            await SendRequestWithEmptyLocation();
         }
 
         /// <summary>
@@ -126,32 +130,34 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async void SetLocation(string countryCode, string city, string gpsCoordinates, string ipAddress)
         {
-            Log.Info("[LocationService] SetLocation : countryCode = " + countryCode + ", city = " + city + ", gpsCoordinates = " + gpsCoordinates + ", ipAddress = " + ipAddress);
+            lock (LockObj) {
+                Log.Info("[LocationService] SetLocation : countryCode = " + countryCode + ", city = " + city + ", gpsCoordinates = " + gpsCoordinates + ", ipAddress = " + ipAddress);
 
-            if (!_consentService.CheckConsentInternal(Consents.Location)) {
-                return;
-            }
+                if (!_consentService.CheckConsentInternal(Consents.Location)) {
+                    return;
+                }
 
-            /*If city is not paired together with country,
-             * a warning should be printed that they should be set together.
-             */
-            if ((!string.IsNullOrEmpty(CountryCode) && string.IsNullOrEmpty(City))
-                || (!string.IsNullOrEmpty(City) && string.IsNullOrEmpty(CountryCode))) {
-                Log.Warning("[LocationService] In \"SetLocation\" both country code and city should be set together");
-            }
+                /*If city is not paired together with country,
+                 * a warning should be printed that they should be set together.
+                 */
+                if ((!string.IsNullOrEmpty(CountryCode) && string.IsNullOrEmpty(City))
+                    || (!string.IsNullOrEmpty(City) && string.IsNullOrEmpty(CountryCode))) {
+                    Log.Warning("[LocationService] In \"SetLocation\" both country code and city should be set together");
+                }
 
-            City = city;
-            IPAddress = ipAddress;
-            CountryCode = countryCode;
-            Location = gpsCoordinates;
+                City = city;
+                IPAddress = ipAddress;
+                CountryCode = countryCode;
+                Location = gpsCoordinates;
 
-            /*
-             * If location consent is given and location gets re-enabled (previously was disabled), 
-             * we send that set location information in a separate request and save it in the internal location cache.
-             */
-            if (countryCode != null || city != null || gpsCoordinates != null || ipAddress != null) {
-                IsLocationDisabled = false;
-                await SendIndependantLocationRequest();
+                /*
+                 * If location consent is given and location gets re-enabled (previously was disabled), 
+                 * we send that set location information in a separate request and save it in the internal location cache.
+                 */
+                if (countryCode != null || city != null || gpsCoordinates != null || ipAddress != null) {
+                    IsLocationDisabled = false;
+                    _=SendIndependantLocationRequest();
+                }
             }
         }
 

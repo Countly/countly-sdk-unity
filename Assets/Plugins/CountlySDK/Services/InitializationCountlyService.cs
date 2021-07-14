@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Linq;
+using System.Threading.Tasks;
 using Plugins.CountlySDK.Enums;
 using Plugins.CountlySDK.Models;
 
@@ -19,27 +20,8 @@ namespace Plugins.CountlySDK.Services
 
         internal async Task OnInitialisationComplete()
         {
-            await StartSession();
-        }
-
-        private async Task StartSession()
-        {
-            if (!_consentService.CheckConsentInternal(Consents.Sessions)) {
-                /* If location is disabled in init
-                and no session consent is given. Send empty location as separate request.*/
-                if (_locationService.IsLocationDisabled || !_consentService.CheckConsentInternal(Consents.Location)) {
-                    await _locationService.SendRequestWithEmptyLocation();
-                } else {
-                    /*
-                 * If there is no session consent, 
-                 * location values set in init should be sent as a separate location request.
-                 */
-                    await _locationService.SendIndependantLocationRequest();
-                }
-            } else if (!_configuration.EnableManualSessionHandling) {
-                //Start Session
-                await _sessionService.BeginSessionAsync();
-            }
+            await _consentService.SendConsentChanges(_consentService._countlyConsents.Keys.ToList(), true);
+            await _sessionService.StartSessionService();
         }
     }
 }

@@ -37,7 +37,9 @@ namespace Plugins.CountlySDK
         private CountlyLogHelper _logHelper;
         private static Countly _instance = null;
         private CountlyStorageHelper _storageHelper;
+
         private RequestCountlyHelper _requestHelper;
+        internal readonly object lockObj = new object();
         private List<AbstractBaseService> _listeners = new List<AbstractBaseService>();
 
         /// <summary>
@@ -123,7 +125,7 @@ namespace Plugins.CountlySDK
         /// <returns>ViewCountlyService</returns>
         public ViewCountlyService Views { get; private set; }
 
-        private SessionCountlyService Session { get; set; }
+        internal SessionCountlyService Session { get; set; }
 
         /// <summary>
         ///     Add callbacks to listen to push notification events for when a notification is received and when it is clicked.
@@ -157,7 +159,7 @@ namespace Plugins.CountlySDK
                 return;
             }
 
-             Configuration = configuration;
+            Configuration = configuration;
             _logHelper = new CountlyLogHelper(Configuration);
 
             _logHelper.Info("[Init] Initializing Countly [SdkName: " + Constants.SdkName + " SdkVersion: " + Constants.SdkVersion + "]");
@@ -207,8 +209,9 @@ namespace Plugins.CountlySDK
             CountlyUtils countlyUtils = new CountlyUtils(this);
             _requestHelper = new RequestCountlyHelper(Configuration, _logHelper, countlyUtils, requestRepo);
 
-            Consents = new ConsentCountlyService(Configuration, _logHelper, Consents);
+            Consents = new ConsentCountlyService(Configuration, _logHelper, Consents, _requestHelper);
             Events = new EventCountlyService(Configuration, _logHelper, _requestHelper, nonViewEventRepo, Consents);
+
 
             Location = new Services.LocationService(Configuration, _logHelper, _requestHelper, Consents);
             OptionalParameters = new OptionalParametersCountlyService(Location, Configuration, _logHelper, Consents);
@@ -232,11 +235,14 @@ namespace Plugins.CountlySDK
 
         private async void OnInitialisationComplete()
         {
-            IsSDKInitialized = true;
-            await Initialization.OnInitialisationComplete();
-            foreach (AbstractBaseService listener in _listeners) {
-                listener.OnInitializationCompleted();
+            lock (lockObj) {
+                IsSDKInitialized = true;
+                _= Initialization.OnInitialisationComplete();
+                foreach (AbstractBaseService listener in _listeners) {
+                    listener.OnInitializationCompleted();
+                }
             }
+            
         }
 
         private void CreateListOfIBaseService()
@@ -261,6 +267,10 @@ namespace Plugins.CountlySDK
         {
             Device.Listeners = _listeners;
             Consents.Listeners = _listeners;
+
+            foreach (AbstractBaseService listener in _listeners) {
+                listener.LockObj = lockObj;
+            }
         }
 
         /// <summary>
@@ -280,7 +290,7 @@ namespace Plugins.CountlySDK
             object newContext = constructor.Invoke(new object[] { Thread.CurrentThread.ManagedThreadId });
             SynchronizationContext.SetSynchronizationContext(newContext as SynchronizationContext);
 #endif
-
+            Session?._sessionTimer?.Dispose();
             _storageHelper.CloseDB();
         }
 
@@ -313,25 +323,30 @@ namespace Plugins.CountlySDK
             }
         }
 
-        private async void OnApplicationPause(bool pauseStatus)
+        private void OnApplicationPause(bool pauseStatus)
         {
-            if (!IsSDKInitialized) {
-                return;
-            }
+            lock (lockObj) {
+                if (!IsSDKInitialized) {
+                    return;
+                }
 
-            _logHelper.Debug("[Countly] OnApplicationPause: " + pauseStatus);
+                _logHelper.Debug("[Countly] OnApplicationPause: " + pauseStatus);
 
-            if (CrashReports != null) {
-                CrashReports.IsApplicationInBackground = pauseStatus;
-            }
+                if (CrashReports != null) {
+                    CrashReports.IsApplicationInBackground = pauseStatus;
+                }
 
-            if (pauseStatus) {
-                HandleAppPauseOrFocus();
-                await Session?.EndSessionAsync();
-            } else {
-                SubscribeAppLog();
-                await Session?.BeginSessionAsync();
-
+                if (pauseStatus) {
+                    HandleAppPauseOrFocus();
+                    if (!Configuration.IsAutomaticSessionTrackingDisabled) {
+                        _= Session?.EndSessionAsync();
+                    }
+                } else {
+                    SubscribeAppLog();
+                    if (!Configuration.IsAutomaticSessionTrackingDisabled) {
+                        _= Session?.BeginSessionAsync();
+                    }
+                }
             }
         }
 
@@ -354,7 +369,9 @@ namespace Plugins.CountlySDK
 
         private void LogCallback(string condition, string stackTrace, LogType type)
         {
-            CrashReports?.LogCallback(condition, stackTrace, type);
+            if (type == LogType.Error || type == LogType.Exception) {
+                CrashReports?.LogCallback(condition, stackTrace, type);
+            }
         }
 
         private void SubscribeAppLog()
