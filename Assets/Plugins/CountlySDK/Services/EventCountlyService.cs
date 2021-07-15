@@ -139,7 +139,10 @@ namespace Plugins.CountlySDK.Services
                     Log.Verbose("[EventCountlyService] RecordEventAsync : Max allowed key length is " + _configuration.MaxKeyLength);
                     key = key.Substring(0, _configuration.MaxKeyLength);
                 }
-                IDictionary<string, object> segments = MainpulateSegments(segmentation);
+
+                IDictionary<string, object> segments = RemoveSegmenInvalidetDataTypes(segmentation);
+                segments = FixSegmenKeysAndValues(segments);
+
                 CountlyEventModel @event = new CountlyEventModel(key, segments, count, sum, duration);
 
                 _ = RecordEventAsync(@event);
@@ -178,7 +181,9 @@ namespace Plugins.CountlySDK.Services
                 }
 
 
-                IDictionary<string, object> segments = MainpulateSegments(segmentation);
+                IDictionary<string, object> segments = RemoveSegmenInvalidetDataTypes(segmentation);
+                segments = FixSegmenKeysAndValues(segments);
+
                 CountlyEventModel @event = new CountlyEventModel(key, segments, count, sum, duration);
 
                 _ = RecordEventAsync(@event);

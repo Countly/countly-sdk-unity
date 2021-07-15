@@ -122,23 +122,7 @@ namespace Plugins.CountlySDK.Services
                     return;
                 }
 
-                IDictionary<string, object> customDetail = new Dictionary<string, object>();
-                foreach (KeyValuePair<string, object> item in userDetailsModel.Custom) {
-                    string k = item.Key;
-                    object v = item.Value;
-
-                    if (k.Length > _configuration.MaxKeyLength) {
-                        Log.Verbose("[EventCountlyService] RecordEventAsync : Max allowed key length is " + _configuration.MaxKeyLength);
-                        k = k.Substring(0, _configuration.MaxKeyLength);
-                    }
-
-                    if (v.GetType() == typeof(string) && ((string)v).Length > _configuration.MaxValueSize) {
-                        Log.Verbose("[EventCountlyService] RecordEventAsync : Max allowed value length is " + _configuration.MaxValueSize);
-                        v = ((string)v).Substring(0, _configuration.MaxValueSize);
-                    }
-
-                    customDetail.Add(k, v);
-                }
+                IDictionary<string, object> customDetail = FixSegmenKeysAndValues(userDetailsModel.Custom);
 
                 Dictionary<string, object> requestParams =
                     new Dictionary<string, object>
