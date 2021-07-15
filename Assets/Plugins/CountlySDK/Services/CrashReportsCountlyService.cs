@@ -23,6 +23,30 @@ namespace Plugins.CountlySDK.Services
             _requestCountlyHelper = requestCountlyHelper;
         }
 
+        #region Helper Methods
+        private string MainpulateStackTrace(string stackTrace)
+        {
+            string result = null;
+            if (!string.IsNullOrEmpty(stackTrace)) {
+                string[] lines = stackTrace.Split('\n');
+                int limit = lines.Length < _configuration.MaxStackTraceLinesPerThread ? lines.Length : _configuration.MaxStackTraceLinesPerThread;
+
+                for (int i = 0; i < limit; ++i) {
+                    string line = lines[i].Length > _configuration.MaxStackTraceLineLength ?
+                        lines[i].Substring(0, _configuration.MaxStackTraceLineLength) : lines[i];
+
+                    if (i + 1 != limit) {
+                        line += '\n';
+                    }
+
+                    result += line;
+                }
+            }
+
+            return result;
+        }
+        #endregion
+
 
         /// <summary>
         /// Called when there is an exception 
@@ -44,21 +68,7 @@ namespace Plugins.CountlySDK.Services
                     return;
                 }
 
-                string result = null;
-                if (!string.IsNullOrEmpty(stackTrace)) {
-                    string[] lines = stackTrace.Split('\n');
-                    int limit = lines.Length < _configuration.MaxStackTraceLinesPerThread ? lines.Length : _configuration.MaxStackTraceLinesPerThread;
-
-                    string newLine = "";
-                    for (int i = 0; i < limit; ++i) {
-                        string line = lines[i].Length > _configuration.MaxStackTraceLineLength ?
-                            lines[i].Substring(0, _configuration.MaxStackTraceLineLength) : lines[i];
-                        result += line + newLine;
-                        newLine = "\n";
-                    }
-                }
-
-                CountlyExceptionDetailModel model = ExceptionDetailModel(message, result, false, null);
+                CountlyExceptionDetailModel model = ExceptionDetailModel(message, MainpulateStackTrace(stackTrace), false, null);
 
                 if (_configuration.EnableAutomaticCrashReporting
                     && (type == LogType.Error || type == LogType.Exception)) {
@@ -91,70 +101,9 @@ namespace Plugins.CountlySDK.Services
                     return;
                 }
 
-                string result = null;
-                if (!string.IsNullOrEmpty(stackTrace)) {
-                    string[] lines = stackTrace.Split('\n');
-                    int limit = lines.Length < _configuration.MaxStackTraceLinesPerThread ? lines.Length : _configuration.MaxStackTraceLinesPerThread;
+                IDictionary<string, object> segmentation = MainpulateSegments(segments);
 
-                    string newLine = "";
-                    for (int i = 0; i < limit; ++i) {
-                        string line = lines[i].Length > _configuration.MaxStackTraceLineLength ?
-                            lines[i].Substring(0, _configuration.MaxStackTraceLineLength) : lines[i];
-                        result += newLine + line;
-                        newLine = "\n";
-                    }
-                }
-
-
-                IDictionary<string, object> segmentation = null;
-                if (segments != null) {
-                    List<string> toRemove = new List<string>();
-
-                    int i = 0;
-                    foreach (KeyValuePair<string, object> item in segments) {
-                        if (++i > _configuration.MaxSegmentationValues) {
-                            toRemove.Add(item.Key);
-                            continue;
-                        }
-
-                        bool isValidDataType = item.Value != null
-                            && (item.Value.GetType() == typeof(int)
-                            || item.Value.GetType() == typeof(bool)
-                            || item.Value.GetType() == typeof(float)
-                            || item.Value.GetType() == typeof(double)
-                            || item.Value.GetType() == typeof(string));
-
-
-                        if (!isValidDataType) {
-                            toRemove.Add(item.Key);
-                            Log.Warning("[CrashReportsCountlyService] SendCrashReportAsync : In segmentation Data type '" + (item.Value?.GetType()) + "'  of item '" + item.Key + "' isn't valid.");
-                        }
-                    }
-
-                    foreach (string k in toRemove) {
-                        segments.Remove(k);
-                    }
-
-                    segmentation = new Dictionary<string, object>();
-                    foreach (KeyValuePair<string, object> item in segments) {
-                        string k = item.Key;
-                        object v = item.Value;
-
-                        if (k.Length > _configuration.MaxKeyLength) {
-                            Log.Verbose("[CrashReportsCountlyService] SendCrashReportAsync : Max allowed key length is " + _configuration.MaxKeyLength);
-                            k = k.Substring(0, _configuration.MaxKeyLength);
-                        }
-
-                        if (v.GetType() == typeof(string) && ((string)v).Length > _configuration.MaxValueSize) {
-                            Log.Verbose("[CrashReportsCountlyService] SendCrashReportAsync : Max allowed value length is " + _configuration.MaxValueSize);
-                            v = ((string)v).Substring(0, _configuration.MaxValueSize);
-                        }
-
-                        segmentation.Add(k, v);
-                    }
-                }
-
-                CountlyExceptionDetailModel model = ExceptionDetailModel(message, result, nonfatal, segmentation);
+                CountlyExceptionDetailModel model = ExceptionDetailModel(message, MainpulateStackTrace(stackTrace), nonfatal, segmentation);
                 _ = SendCrashReportInternal(model);
             }
 

@@ -139,53 +139,7 @@ namespace Plugins.CountlySDK.Services
                     Log.Verbose("[EventCountlyService] RecordEventAsync : Max allowed key length is " + _configuration.MaxKeyLength);
                     key = key.Substring(0, _configuration.MaxKeyLength);
                 }
-                IDictionary<string, object> segments = null;
-                if (segmentation != null) {
-                    List<string> toRemove = new List<string>();
-                    int i = 0;
-                    foreach (KeyValuePair<string, object> item in segmentation) {
-                        if (++i > _configuration.MaxSegmentationValues) {
-                            toRemove.Add(item.Key);
-                            continue;
-                        }
-
-                        bool isValidDataType = item.Value != null
-                            && (item.Value.GetType() == typeof(int)
-                            || item.Value.GetType() == typeof(bool)
-                            || item.Value.GetType() == typeof(float)
-                            || item.Value.GetType() == typeof(double)
-                            || item.Value.GetType() == typeof(string));
-
-
-                        if (!isValidDataType) {
-                            toRemove.Add(item.Key);
-                            Log.Warning("[EventCountlyService] ReportCustomEventAsync : In segmentation Data type '" + (item.Value?.GetType()) + "'  of item '" + item.Key + "' isn't valid.");
-                        }
-                    }
-
-                    foreach (string k in toRemove) {
-                        segmentation.Remove(k);
-                    }
-
-                    segments = new Dictionary<string, object>();
-                    foreach (KeyValuePair<string, object> item in segmentation) {
-                        string k = item.Key;
-                        object v = item.Value;
-
-                        if (k.Length > _configuration.MaxKeyLength) {
-                            Log.Verbose("[EventCountlyService] RecordEventAsync : Max allowed key length is " + _configuration.MaxKeyLength);
-                            k = k.Substring(0, _configuration.MaxKeyLength);
-                        }
-
-                        if (v.GetType() == typeof(string) && ((string)v).Length > _configuration.MaxValueSize) {
-                            Log.Verbose("[EventCountlyService] RecordEventAsync : Max allowed value length is " + _configuration.MaxValueSize);
-                            v = ((string)v).Substring(0, _configuration.MaxValueSize);
-                        }
-
-                        segments.Add(k, v);
-                    }
-                }
-
+                IDictionary<string, object> segments = MainpulateSegments(segmentation);
                 CountlyEventModel @event = new CountlyEventModel(key, segments, count, sum, duration);
 
                 _ = RecordEventAsync(@event);
@@ -224,56 +178,7 @@ namespace Plugins.CountlySDK.Services
                 }
 
 
-                IDictionary<string, object> segments = null;
-                if (segmentation != null) {
-                    List<string> toRemove = new List<string>();
-                    int i = 0;
-                    foreach (KeyValuePair<string, object> item in segmentation) {
-
-                        if (++i > _configuration.MaxSegmentationValues) {
-                            toRemove.Add(item.Key);
-                            continue;
-                        }
-
-                        bool isValidDataType = item.Value != null
-                            && (item.Value.GetType() == typeof(int)
-                            || item.Value.GetType() == typeof(bool)
-                            || item.Value.GetType() == typeof(float)
-                            || item.Value.GetType() == typeof(double)
-                            || item.Value.GetType() == typeof(string));
-
-
-                        if (!isValidDataType) {
-                            toRemove.Add(item.Key);
-                            Log.Warning("[EventCountlyService] ReportCustomEventAsync : In segmentation Data type '" + (item.Value?.GetType()) + "'  of item '" + item.Key + "' isn't valid.");
-                        }
-                    }
-
-                    foreach (string k in toRemove) {
-                        segmentation.Remove(k);
-                    }
-
-                    segments = new Dictionary<string, object>();
-                    foreach (KeyValuePair<string, object> item in segmentation) {
-                        string k = item.Key;
-                        object v = item.Value;
-
-
-                        if (k.Length > _configuration.MaxKeyLength) {
-                            Log.Verbose("[EventCountlyService] ReportCustomEventAsync : Max allowed key length is " + _configuration.MaxKeyLength);
-                            k = k.Substring(0, _configuration.MaxKeyLength);
-                        }
-
-                        if (v.GetType() == typeof(string) && ((string)v).Length > _configuration.MaxValueSize) {
-                            Log.Verbose("[EventCountlyService] ReportCustomEventAsync : Max allowed value length is " + _configuration.MaxValueSize);
-                            v = ((string)v).Substring(0, _configuration.MaxValueSize);
-                        }
-
-                        segments.Add(k, v);
-                    }
-                }
-
-
+                IDictionary<string, object> segments = MainpulateSegments(segmentation);
                 CountlyEventModel @event = new CountlyEventModel(key, segments, count, sum, duration);
 
                 _ = RecordEventAsync(@event);
