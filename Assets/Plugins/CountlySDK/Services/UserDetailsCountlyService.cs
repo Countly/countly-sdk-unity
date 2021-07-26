@@ -62,6 +62,30 @@ namespace Plugins.CountlySDK.Services
         }
 
         /// <summary>
+        /// Add user custom detail to request queue.
+        /// </summary>
+        /// <returns></returns>
+        private void AddCustomDetailToRequestQueue(IDictionary<string, object> segments)
+        {
+
+            IDictionary<string, object> customDetail = FixSegmenKeysAndValues(segments);
+
+            Dictionary<string, object> requestParams =
+                new Dictionary<string, object>
+                {
+                    { "user_details",
+                        JsonConvert.SerializeObject(
+                            new Dictionary<string, object>
+                            {
+                                { "custom", customDetail }
+                            })
+                    }
+                };
+            _requestCountlyHelper.AddToRequestQueue(requestParams);
+            _ = _requestCountlyHelper.ProcessQueue();
+        }
+
+        /// <summary>
         /// Sets information about user.
         /// </summary>
         /// <param name="userDetailsModel">User Model with the specified params</param>
@@ -122,21 +146,7 @@ namespace Plugins.CountlySDK.Services
                     return;
                 }
 
-                IDictionary<string, object> customDetail = FixSegmenKeysAndValues(userDetailsModel.Custom);
-
-                Dictionary<string, object> requestParams =
-                    new Dictionary<string, object>
-                    {
-                    { "user_details",
-                        JsonConvert.SerializeObject(
-                            new Dictionary<string, object>
-                            {
-                                { "custom", customDetail }
-                            })
-                    }
-                    };
-                _requestCountlyHelper.AddToRequestQueue(requestParams);
-                _ = _requestCountlyHelper.ProcessQueue();
+                AddCustomDetailToRequestQueue(userDetailsModel.Custom);
             }
         }
 
@@ -157,7 +167,7 @@ namespace Plugins.CountlySDK.Services
                 CountlyUserDetailsModel model = new CountlyUserDetailsModel(CustomDataProperties);
 
                 CustomDataProperties = new Dictionary<string, object> { };
-                _ = SetCustomUserDetailsAsync(model);
+                AddCustomDetailToRequestQueue(CustomDataProperties);
             }
         }
 
@@ -185,7 +195,7 @@ namespace Plugins.CountlySDK.Services
             lock (LockObj) {
                 Log.Info("[UserDetailsCountlyService] Set : key = " + key + ", value = " + value);
 
-                AddToCustomData(key, value);
+                AddToCustomData(key, TrimValue(value));
             }
         }
 
@@ -211,7 +221,7 @@ namespace Plugins.CountlySDK.Services
             lock (LockObj) {
                 Log.Info("[UserDetailsCountlyService] SetOnce : key = " + key + ", value = " + value);
 
-                AddToCustomData(key, new Dictionary<string, object> { { "$setOnce", value } });
+                AddToCustomData(key, new Dictionary<string, object> { { "$setOnce", TrimValue(value) } });
             }
         }
 
@@ -336,7 +346,7 @@ namespace Plugins.CountlySDK.Services
             lock (LockObj) {
                 Log.Info("[UserDetailsCountlyService] Push : key = " + key + ", value = " + value);
 
-                AddToCustomData(key, new Dictionary<string, object> { { "$push", value } });
+                AddToCustomData(key, new Dictionary<string, object> { { "$push", TrimValues(value) } });
             }
         }
 
@@ -362,8 +372,7 @@ namespace Plugins.CountlySDK.Services
 
             lock (LockObj) {
                 Log.Info("[UserDetailsCountlyService] PushUnique : key = " + key + ", value = " + value);
-
-                AddToCustomData(key, new Dictionary<string, object> { { "$addToSet", value } });
+                AddToCustomData(key, new Dictionary<string, object> { { "$addToSet", TrimValues(value) } });
             }
         }
 
@@ -389,6 +398,7 @@ namespace Plugins.CountlySDK.Services
             lock (LockObj) {
                 Log.Info("[UserDetailsCountlyService] Pull : key = " + key + ", value = " + value);
 
+                value = TrimValues(value);
                 AddToCustomData(key, new Dictionary<string, object> { { "$pull", value } });
             }
         }
@@ -406,6 +416,8 @@ namespace Plugins.CountlySDK.Services
             if (!_consentService.CheckConsentInternal(Consents.Users)) {
                 return;
             }
+
+            key = TrimKey(key);
 
             if (CustomDataProperties.ContainsKey(key)) {
                 string item = CustomDataProperties.Select(x => x.Key).FirstOrDefault(x => x.Equals(key, StringComparison.OrdinalIgnoreCase));

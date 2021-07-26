@@ -24,7 +24,7 @@ namespace Plugins.CountlySDK.Services
             _consentService = consentService;
         }
 
-        protected IDictionary<string, object> RemoveSegmenInvalidetDataTypes(IDictionary<string, object> segments) {
+        protected IDictionary<string, object> RemoveSegmentInvalidetDataTypes(IDictionary<string, object> segments) {
 
             if (segments == null || segments.Count == 0) {
                 return segments;
@@ -48,7 +48,7 @@ namespace Plugins.CountlySDK.Services
 
                 if (!isValidDataType) {
                     toRemove.Add(item.Key);
-                    Log.Warning("[" + GetType().Name + "] MainpulateSegments: In segmentation Data type '" + (item.Value?.GetType()) + "'  of item '" + item.Key + "' isn't valid.");
+                    Log.Warning("[" + GetType().Name + "] RemoveSegmentInvalidetDataTypes: In segmentation Data type '" + (item.Value?.GetType()) + "'  of item '" + item.Key + "' isn't valid.");
                 }
             }
 
@@ -57,6 +57,39 @@ namespace Plugins.CountlySDK.Services
             }
 
             return segments;
+        }
+
+        protected string TrimKey(string k)
+        {
+            if (k.Length > _configuration.MaxKeyLength) {
+                Log.Verbose("[" + GetType().Name + "] TrimKey : Max allowed key length is " + _configuration.MaxKeyLength);
+                k = k.Substring(0, _configuration.MaxKeyLength);
+            }
+
+            return k;
+        }
+
+        protected string[] TrimValues(string[] values)
+        {
+            for (int i = 0; i < values.Length; ++i) {
+                if (values[i].Length > _configuration.MaxValueSize) {
+                    Log.Verbose("[" + GetType().Name + "] TrimKey : Max allowed key length is " + _configuration.MaxKeyLength);
+                    values[i] = values[i].Substring(0, _configuration.MaxValueSize);
+                }
+            }
+            
+
+            return values;
+        }
+
+        protected object TrimValue(object v)
+        {
+            if (v.GetType() == typeof(string) && ((string)v).Length > _configuration.MaxValueSize) {
+                Log.Verbose("[" + GetType().Name + "] TrimValue : Max allowed value length is " + _configuration.MaxValueSize);
+                v = ((string)v).Substring(0, _configuration.MaxValueSize);
+            }
+
+            return v;
         }
 
         protected IDictionary<string, object> FixSegmenKeysAndValues(IDictionary<string, object> segments) {
@@ -73,27 +106,8 @@ namespace Plugins.CountlySDK.Services
                     continue;
                 }
 
-                if (k.Length > _configuration.MaxKeyLength) {
-                    Log.Verbose("[" + GetType().Name + "] MainpulateSegments : Max allowed key length is " + _configuration.MaxKeyLength);
-                    k = k.Substring(0, _configuration.MaxKeyLength);
-                }
-
-                if (v.GetType() == typeof(string) && ((string)v).Length > _configuration.MaxValueSize) {
-                    Log.Verbose("[" + GetType().Name + "] MainpulateSegments : Max allowed value length is " + _configuration.MaxValueSize);
-                    v = ((string)v).Substring(0, _configuration.MaxValueSize);
-                } else if (v.GetType() == typeof(string[]) && ((string[])v).Length > 0) {
-                    string[] values = (string[])v;
-                    for (int i = 0; i < values.Length; ++i) {
-                        if (values[i].Length > _configuration.MaxValueSize) {
-                            values[i] = values[i].Substring(0, _configuration.MaxValueSize);
-                        }
-                    }
-
-                } else if (v.GetType() == typeof(IDictionary) && ((IDictionary)v).Count > 0) {
-                    v = FixSegmenKeysAndValues((IDictionary<string, object>)v);
-                }
-
-                segmentation.Add(k, v);
+          
+                segmentation.Add(TrimKey(k), TrimValue(v));
             }
 
             return segmentation;

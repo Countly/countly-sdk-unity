@@ -140,7 +140,7 @@ namespace Plugins.CountlySDK.Services
                     key = key.Substring(0, _configuration.MaxKeyLength);
                 }
 
-                IDictionary<string, object> segments = RemoveSegmenInvalidetDataTypes(segmentation);
+                IDictionary<string, object> segments = RemoveSegmentInvalidetDataTypes(segmentation);
                 segments = FixSegmenKeysAndValues(segments);
 
                 CountlyEventModel @event = new CountlyEventModel(key, segments, count, sum, duration);
@@ -181,7 +181,7 @@ namespace Plugins.CountlySDK.Services
                 }
 
 
-                IDictionary<string, object> segments = RemoveSegmenInvalidetDataTypes(segmentation);
+                IDictionary<string, object> segments = RemoveSegmentInvalidetDataTypes(segmentation);
                 segments = FixSegmenKeysAndValues(segments);
 
                 CountlyEventModel @event = new CountlyEventModel(key, segments, count, sum, duration);

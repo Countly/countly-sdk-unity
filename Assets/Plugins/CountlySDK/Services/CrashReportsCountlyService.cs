@@ -101,7 +101,7 @@ namespace Plugins.CountlySDK.Services
                     return;
                 }
 
-                IDictionary<string, object> segmentation = RemoveSegmenInvalidetDataTypes(segments);
+                IDictionary<string, object> segmentation = RemoveSegmentInvalidetDataTypes(segments);
                 segmentation = FixSegmenKeysAndValues(segments);
 
                 CountlyExceptionDetailModel model = ExceptionDetailModel(message, MainpulateStackTrace(stackTrace), nonfatal, segmentation);

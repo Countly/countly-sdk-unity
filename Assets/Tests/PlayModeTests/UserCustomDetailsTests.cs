@@ -163,86 +163,74 @@ namespace Tests
         /// <summary>
         /// It validate custom user detail segments key and value limits.
         /// </summary>
-        //[Test]
-        //public void TestCustomUserDetailSegmentLimits()
-        //{
-        //    CountlyConfiguration configuration = new CountlyConfiguration {
-        //        ServerUrl = _serverUrl,
-        //        AppKey = _appKey,
-        //        MaxKeyLength = 5,
-        //        MaxValueSize = 4,
-        //        EnablePost = true
-        //    };
+        [Test]
+        public void TestCustomUserDetailSegmentLimits()
+        {
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                ServerUrl = _serverUrl,
+                AppKey = _appKey,
+                MaxKeyLength = 5,
+                MaxValueSize = 4,
+                EnablePost = true
+            };
 
-        //    Countly.Instance.Init(configuration);
-        //    Countly.Instance.ClearStorage();
+            Countly.Instance.Init(configuration);
+            Countly.Instance.ClearStorage();
 
-        //    Assert.IsNotNull(Countly.Instance.UserDetails);
-        //    Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
-
-
-        //    Countly.Instance.UserDetails.IncrementBy("IncrementBy", 5);
-        //    Assert.IsTrue(Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("IncrementBy"));
-        //    Dictionary<string, object> dic = Countly.Instance.UserDetails.CustomDataProperties["IncrementBy"] as Dictionary<string, object>;
-        //    Assert.AreEqual(5, dic["$inc"]);
-
-        //    Countly.Instance.UserDetails.Increment("Increment");
-        //    Assert.IsTrue(Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Increment"));
-        //    dic = Countly.Instance.UserDetails.CustomDataProperties["Increment"] as Dictionary<string, object>;
-        //    Assert.AreEqual(1, dic["$inc"]);
-
-        //    Countly.Instance.UserDetails.SetOnce("SetOnce", "100KM");
-        //    Assert.IsTrue(Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("SetOnce"));
-        //    dic = Countly.Instance.UserDetails.CustomDataProperties["SetOnce"] as Dictionary<string, object>;
-        //    Assert.AreEqual("100KM", dic["$setOnce"]);
-
-        //    Countly.Instance.UserDetails.Set("Set", "60000");
-        //    Assert.IsTrue(Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Set"));
-        //    string height = (string)Countly.Instance.UserDetails.CustomDataProperties["Set"];
-        //    Assert.AreEqual("60000", height);
-
-        //    Countly.Instance.UserDetails.Pull("Pull", new string[] { "50KM", "100KM" });
-        //    Assert.IsTrue(Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Pull"));
-        //    dic = Countly.Instance.UserDetails.CustomDataProperties["Distance"] as Dictionary<string, object>;
-        //    Assert.AreEqual("50KM", ((string[])dic["$pull"])[0]);
-        //    Assert.AreEqual("100KM", ((string[])dic["$pull"])[1]);
-
-        //    Countly.Instance.UserDetails.PushUnique("PushUnique", new string[] { "29000" });
-        //    Assert.IsTrue(Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("PushUnique"));
-        //    dic = Countly.Instance.UserDetails.CustomDataProperties["PushUnique"] as Dictionary<string, object>;
-        //    Assert.AreEqual(new string[] { "29000" }, dic["$addToSet"]);
-        //    Countly.Instance.UserDetails.CustomDataProperties.Clear();
-
-        //    Countly.Instance.UserDetails.Push("Push", new string[] { "60000" });
-        //    Assert.IsTrue(Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Push"));
-        //    dic = Countly.Instance.UserDetails.CustomDataProperties["Height"] as Dictionary<string, object>;
-        //    Assert.AreEqual(new string[] { "60000" }, dic["$push"]);
-        //    Countly.Instance.UserDetails.CustomDataProperties.Clear();
-
-        //    Countly.Instance.UserDetails.Min("Min", 10.0);
-        //    Assert.IsTrue(Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Min"));
-        //    dic = Countly.Instance.UserDetails.CustomDataProperties["Min"] as Dictionary<string, object>;
-        //    Assert.AreEqual(10.0, dic["$min"]);
-        //    Countly.Instance.UserDetails.CustomDataProperties.Clear();
-
-        //    Countly.Instance.UserDetails.Max("Max", 10000.0);
-        //    Assert.IsTrue(Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Max"));
-        //    dic = Countly.Instance.UserDetails.CustomDataProperties["Max"] as Dictionary<string, object>;
-        //    Assert.AreEqual(10000.0, dic["$max"]);
-            
-
-        //    CountlyRequestModel requestModel = Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Dequeue();
+            Assert.IsNotNull(Countly.Instance.UserDetails);
+            Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
 
 
-        //    string userDetailData = requestModel.RequestData;
-        //    JObject json = JObject.Parse(userDetailData);
-        //    string userDetail = json["user_details"].ToString();
-        //    JObject custom = JObject.Parse(userDetail);
+            Countly.Instance.UserDetails.IncrementBy("IncrementBy", 5);
+            Assert.IsTrue(Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Incre"));
+            Dictionary<string, object> dic = Countly.Instance.UserDetails.CustomDataProperties["Incre"] as Dictionary<string, object>;
+            Assert.AreEqual(5, dic["$inc"]);
 
-        //    Assert.AreEqual("Black_", custom["custom"]["Hair"].ToString());
-        //    Assert.AreEqual("5.9", custom["custom"]["Heigh"].ToString());
+            Countly.Instance.UserDetails.Increment("Increment");
+            Assert.IsTrue(Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Incre"));
+            dic = Countly.Instance.UserDetails.CustomDataProperties["Incre"] as Dictionary<string, object>;
+            Assert.AreEqual(1, dic["$inc"]);
 
-        //}
+            Countly.Instance.UserDetails.SetOnce("SetOnce", "100KM");
+            Assert.IsTrue(Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("SetOn"));
+            dic = Countly.Instance.UserDetails.CustomDataProperties["SetOn"] as Dictionary<string, object>;
+            Assert.AreEqual("100K", dic["$setOnce"]);
+
+            Countly.Instance.UserDetails.Set("Set", "6000.0");
+            Assert.IsTrue(Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Set"));
+            string height = (string)Countly.Instance.UserDetails.CustomDataProperties["Set"];
+            Assert.AreEqual("6000", height);
+
+            Countly.Instance.UserDetails.Pull("Pull", new string[] { "50KM", "100KM" });
+            Assert.IsTrue(Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Pull"));
+            dic = Countly.Instance.UserDetails.CustomDataProperties["Pull"] as Dictionary<string, object>;
+            Assert.AreEqual("50KM", ((string[])dic["$pull"])[0]);
+            Assert.AreEqual("100K", ((string[])dic["$pull"])[1]);
+
+            Countly.Instance.UserDetails.PushUnique("PushUnique", new string[] { "2900.0" });
+            Assert.IsTrue(Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("PushU"));
+            dic = Countly.Instance.UserDetails.CustomDataProperties["PushU"] as Dictionary<string, object>;
+            Assert.AreEqual(new string[] { "2900" }, dic["$addToSet"]);
+            Countly.Instance.UserDetails.CustomDataProperties.Clear();
+
+            Countly.Instance.UserDetails.Push("Push", new string[] { "6000.0" });
+            Assert.IsTrue(Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Push"));
+            dic = Countly.Instance.UserDetails.CustomDataProperties["Push"] as Dictionary<string, object>;
+            Assert.AreEqual("6000", ((string[])dic["$push"])[0]);
+            Countly.Instance.UserDetails.CustomDataProperties.Clear();
+
+            Countly.Instance.UserDetails.Min("Min", 10.0);
+            Assert.IsTrue(Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Min"));
+            dic = Countly.Instance.UserDetails.CustomDataProperties["Min"] as Dictionary<string, object>;
+            Assert.AreEqual(10.0, dic["$min"]);
+            Countly.Instance.UserDetails.CustomDataProperties.Clear();
+
+            Countly.Instance.UserDetails.Max("Max", 10000.0);
+            Assert.IsTrue(Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Max"));
+            dic = Countly.Instance.UserDetails.CustomDataProperties["Max"] as Dictionary<string, object>;
+            Assert.AreEqual(10000.0, dic["$max"]);
+
+        }
 
         /// <summary>
         /// It check the working of method 'UserCustomDetailsAsync'.
@@ -281,7 +269,7 @@ namespace Tests
         /// It validates the user's custom properties set via 'SetOnce' and 'Set' methods.
         /// </summary>
         [Test]
-        public async void TestUserCustomProperty_SetOnceAndSet()
+        public void TestUserCustomProperty_SetOnceAndSet()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 ServerUrl = _serverUrl,
@@ -307,20 +295,6 @@ namespace Tests
             Assert.IsTrue(Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Height"));
             string height = (string)Countly.Instance.UserDetails.CustomDataProperties["Height"];
             Assert.AreEqual("5.9125", height);
-            await Countly.Instance.UserDetails.SaveAsync();
-            Assert.AreEqual(1, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
-
-            CountlyRequestModel requestModel = Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Dequeue();
-
-            string userDetailData = requestModel.RequestData;
-            JObject json = JObject.Parse(userDetailData);
-            string userDetail = json["user_details"].ToString();
-            JObject custom = JObject.Parse(userDetail);
-
-            Assert.AreEqual("100K", custom["custom"]["Dista"]["$setOnce"].ToString());
-            Assert.AreEqual("5.912", custom["custom"]["Heigh"].ToString());
-
-
         }
 
         /// <summary>
