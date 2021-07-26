@@ -169,6 +169,19 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value">string with value for the property</param>
         public void Set(string key, string value)
         {
+
+            if (string.IsNullOrEmpty(key)) {
+                Log.Warning("[UserDetailsCountlyService] Set : key '" + key + "'isn't valid.");
+
+                return;
+            }
+
+            if ( string.IsNullOrEmpty(value)) {
+                Log.Warning("[UserDetailsCountlyService] Set : value '" + value + "'isn't valid.");
+
+                return;
+            }
+
             lock (LockObj) {
                 Log.Info("[UserDetailsCountlyService] Set : key = " + key + ", value = " + value);
 
@@ -183,6 +196,18 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value">string value to set</param>
         public void SetOnce(string key, string value)
         {
+            if (string.IsNullOrEmpty(value)) {
+                Log.Warning("[UserDetailsCountlyService] SetOnce : key '" + key + "'isn't valid.");
+
+                return;
+            }
+
+            if (string.IsNullOrEmpty(value)) {
+                Log.Warning("[UserDetailsCountlyService] SetOnce : value '" + value + "'isn't valid.");
+
+                return;
+            }
+
             lock (LockObj) {
                 Log.Info("[UserDetailsCountlyService] SetOnce : key = " + key + ", value = " + value);
 
@@ -196,6 +221,12 @@ namespace Plugins.CountlySDK.Services
         /// <param name="key">string with property name to increment</param>
         public void Increment(string key)
         {
+            if (string.IsNullOrEmpty(key)) {
+                Log.Warning("[UserDetailsCountlyService] Increment : key '" + key + "'isn't valid.");
+
+                return;
+            }
+
             lock (LockObj) {
                 Log.Info("[UserDetailsCountlyService] Increment : key = " + key);
 
@@ -210,6 +241,11 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value">double value by which to increment</param>
         public void IncrementBy(string key, double value)
         {
+            if (string.IsNullOrEmpty(key)) {
+                Log.Warning("[UserDetailsCountlyService] IncrementBy : key '" + key + "'isn't valid.");
+
+                return;
+            }
             lock (LockObj) {
                 Log.Info("[UserDetailsCountlyService] IncrementBy : key = " + key + ", value = " + value);
 
@@ -224,6 +260,12 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value">double value by which to multiply</param>
         public void Multiply(string key, double value)
         {
+            if (string.IsNullOrEmpty(key)) {
+                Log.Warning("[UserDetailsCountlyService] Multiply : key '" + key + "'isn't valid.");
+
+                return;
+            }
+
             lock (LockObj) {
                 Log.Info("[UserDetailsCountlyService] Multiply : key = " + key + ", value = " + value);
 
@@ -238,6 +280,12 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value">double value to check for max</param>
         public void Max(string key, double value)
         {
+            if (string.IsNullOrEmpty(key)) {
+                Log.Warning("[UserDetailsCountlyService] Max : key '" + key + "'isn't valid.");
+
+                return;
+            }
+
             lock (LockObj) {
                 Log.Info("[UserDetailsCountlyService] Max : key = " + key + ", value = " + value);
 
@@ -252,6 +300,12 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value">double value to check for min</param>
         public void Min(string key, double value)
         {
+            if (string.IsNullOrEmpty(key)) {
+                Log.Warning("[UserDetailsCountlyService] Min : key '" + key + "'isn't valid.");
+
+                return;
+            }
+
             lock (LockObj) {
                 Log.Info("[UserDetailsCountlyService] Min : key = " + key + ", value = " + value);
 
@@ -267,6 +321,18 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value">array with values to add</param>
         public void Push(string key, string[] value)
         {
+            if (string.IsNullOrEmpty(key)) {
+                Log.Warning("[UserDetailsCountlyService] Push : key '" + key + "'isn't valid.");
+
+                return;
+            }
+
+            if (value == null) {
+                Log.Warning("[UserDetailsCountlyService] Push : value '" + value + "'isn't valid.");
+
+                return;
+            }
+
             lock (LockObj) {
                 Log.Info("[UserDetailsCountlyService] Push : key = " + key + ", value = " + value);
 
@@ -282,6 +348,18 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value">array with values to add</param>
         public void PushUnique(string key, string[] value)
         {
+            if (string.IsNullOrEmpty(key)) {
+                Log.Warning("[UserDetailsCountlyService] PushUnique : key '" + key + "'isn't valid.");
+
+                return;
+            }
+
+            if (value == null) {
+                Log.Warning("[UserDetailsCountlyService] PushUnique : value '" + value + "'isn't valid.");
+
+                return;
+            }
+
             lock (LockObj) {
                 Log.Info("[UserDetailsCountlyService] PushUnique : key = " + key + ", value = " + value);
 
@@ -296,6 +374,18 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value">array with values to remove from array</param>
         public void Pull(string key, string[] value)
         {
+            if (string.IsNullOrEmpty(key)) {
+                Log.Warning("[UserDetailsCountlyService] Pull : key '" + key + "'isn't valid.");
+
+                return;
+            }
+
+            if (value == null) {
+                Log.Warning("[UserDetailsCountlyService] Pull : value '" + value + "'isn't valid.");
+
+                return;
+            }
+
             lock (LockObj) {
                 Log.Info("[UserDetailsCountlyService] Pull : key = " + key + ", value = " + value);
 

@@ -69,6 +69,10 @@ namespace Plugins.CountlySDK.Services
                 string k = item.Key;
                 object v = item.Value;
 
+                if (k == null || v == null) {
+                    continue;
+                }
+
                 if (k.Length > _configuration.MaxKeyLength) {
                     Log.Verbose("[" + GetType().Name + "] MainpulateSegments : Max allowed key length is " + _configuration.MaxKeyLength);
                     k = k.Substring(0, _configuration.MaxKeyLength);
@@ -77,6 +81,16 @@ namespace Plugins.CountlySDK.Services
                 if (v.GetType() == typeof(string) && ((string)v).Length > _configuration.MaxValueSize) {
                     Log.Verbose("[" + GetType().Name + "] MainpulateSegments : Max allowed value length is " + _configuration.MaxValueSize);
                     v = ((string)v).Substring(0, _configuration.MaxValueSize);
+                } else if (v.GetType() == typeof(string[]) && ((string[])v).Length > 0) {
+                    string[] values = (string[])v;
+                    for (int i = 0; i < values.Length; ++i) {
+                        if (values[i].Length > _configuration.MaxValueSize) {
+                            values[i] = values[i].Substring(0, _configuration.MaxValueSize);
+                        }
+                    }
+
+                } else if (v.GetType() == typeof(IDictionary) && ((IDictionary)v).Count > 0) {
+                    v = FixSegmenKeysAndValues((IDictionary<string, object>)v);
                 }
 
                 segmentation.Add(k, v);
