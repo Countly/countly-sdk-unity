@@ -70,6 +70,60 @@ namespace Tests
         }
 
         /// <summary>
+        /// It validate user profile fields limits.
+        /// </summary>
+        [Test]
+        public async void TestUserProfileFieldsLimits()
+        {
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                ServerUrl = _serverUrl,
+                AppKey = _appKey,
+                MaxValueSize = 3,
+                EnablePost = true
+            };
+
+            Countly.Instance.Init(configuration);
+            Countly.Instance.ClearStorage();
+
+            Assert.IsNotNull(Countly.Instance.UserDetails);
+            Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
+
+            CountlyUserDetailsModel userDetails = null;
+
+            await Countly.Instance.UserDetails.SetUserDetailsAsync(userDetails);
+            Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
+
+            userDetails = new CountlyUserDetailsModel("Full Name", "username", "useremail@email.com", "Organization",
+                    "222-222-222",
+                    "http://webresizer.com/images2/bird1_after.jpg",
+                    "M", "1986",
+                    new Dictionary<string, object>{
+                        { "Hair", "Black" },
+                        { "Height", "5.9" },
+                    });
+            await Countly.Instance.UserDetails.SetUserDetailsAsync(userDetails);
+            Assert.AreEqual(1, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
+
+            CountlyRequestModel requestModel = Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Dequeue();
+
+            string userDetailData = requestModel.RequestData;
+            JObject json = JObject.Parse(userDetailData);
+            JObject userDetailJson = JObject.Parse(json["user_details"].ToString());
+
+            Assert.AreEqual("Ful", userDetailJson["name"].ToString());
+            Assert.AreEqual("use", userDetailJson["username"].ToString());
+            Assert.AreEqual("use", userDetailJson["email"].ToString());
+            Assert.AreEqual("Org", userDetailJson["organization"].ToString());
+            Assert.AreEqual("222", userDetailJson["phone"].ToString());
+            Assert.AreEqual("http://webresizer.com/images2/bird1_after.jpg", userDetailJson["picture"].ToString());
+            Assert.AreEqual("M", userDetailJson["gender"].ToString());
+            Assert.AreEqual("198", userDetailJson["byear"].ToString());
+
+            Assert.AreEqual("Bla", userDetailJson["custom"]["Hair"].ToString());
+            Assert.AreEqual("5.9", userDetailJson["custom"]["Height"].ToString());
+        }
+
+        /// <summary>
         /// It check the working of method 'SetUserDetailsAsync'.
         /// </summary>
         [Test]
@@ -250,11 +304,11 @@ namespace Tests
             Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
 
             CountlyUserDetailsModel InvalidUserDetails = null;
-            await Countly.Instance.UserDetails.UserCustomDetailsAsync(InvalidUserDetails);
+            await Countly.Instance.UserDetails.SetCustomUserDetailsAsync(InvalidUserDetails);
             Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
 
             InvalidUserDetails = new CountlyUserDetailsModel(null);
-            await Countly.Instance.UserDetails.UserCustomDetailsAsync(InvalidUserDetails);
+            await Countly.Instance.UserDetails.SetCustomUserDetailsAsync(InvalidUserDetails);
             Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
 
             Dictionary<string, object> customDetail = new Dictionary<string, object>{
@@ -262,7 +316,7 @@ namespace Tests
                 { "Mole", "Lower Left Cheek" }
             };
             CountlyUserDetailsModel userDetails = new CountlyUserDetailsModel(customDetail);
-            await Countly.Instance.UserDetails.UserCustomDetailsAsync(userDetails);
+            await Countly.Instance.UserDetails.SetCustomUserDetailsAsync(userDetails);
             Assert.AreEqual(1, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
         }
         /// <summary>
@@ -273,10 +327,7 @@ namespace Tests
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 ServerUrl = _serverUrl,
-                AppKey = _appKey,
-                MaxKeyLength = 5,
-                MaxValueSize = 4,
-                EnablePost = true
+                AppKey = _appKey
             };
 
             Countly.Instance.Init(configuration);

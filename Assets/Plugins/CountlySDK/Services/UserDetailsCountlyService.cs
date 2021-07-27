@@ -25,43 +25,6 @@ namespace Plugins.CountlySDK.Services
         }
 
         /// <summary>
-        /// Modifies all user data. Custom data should be json string.
-        /// Deletes an already defined custom property from the Countly server, if it is supplied with a NULL value
-        /// </summary>
-        /// <param name="userDetailsModel">User's detail object</param>
-        /// <returns></returns>
-        internal async Task UserDetailsAsync(CountlyUserDetailsModel userDetailsModel)
-        {
-
-            Log.Debug("[UserDetailsCountlyService] UserDetailsAsync : userDetails = " + (userDetailsModel != null));
-
-            if (userDetailsModel == null) {
-                Log.Warning("[UserDetailsCountlyService] UserDetailsAsync : The parameter 'userDetailsModel' can't be null.");
-                return;
-            }
-
-            await SetUserDetailsAsync(userDetailsModel);
-        }
-
-        /// <summary>
-        /// Modifies custom user data only. Custom data should be json string.
-        /// Deletes an already defined custom property from the Countly server, if it is supplied with a NULL value
-        /// </summary>
-        /// <param name="userDetailsModel">User's custom detail object</param>
-        /// <return></returns>
-        internal async Task UserCustomDetailsAsync(CountlyUserDetailsModel userDetailsModel)
-        {
-            Log.Debug("[UserDetailsCountlyService] UserCustomDetailsAsync " + (userDetailsModel != null));
-
-            if (userDetailsModel == null) {
-                Log.Warning("[UserDetailsCountlyService] UserCustomDetailsAsync : The parameter 'userDetailsModel' can't be null.");
-                return;
-            }
-
-            await SetCustomUserDetailsAsync(userDetailsModel);
-        }
-
-        /// <summary>
         /// Add user custom detail to request queue.
         /// </summary>
         /// <returns></returns>
@@ -108,6 +71,19 @@ namespace Plugins.CountlySDK.Services
                     throw new Exception("Accepted picture formats are .png, .gif and .jpeg");
                 }
 
+                userDetailsModel.Name = TrimValue(userDetailsModel.Name);
+                userDetailsModel.Phone = TrimValue(userDetailsModel.Phone);
+                userDetailsModel.Email = TrimValue(userDetailsModel.Email);
+                userDetailsModel.Gender = TrimValue(userDetailsModel.Gender);
+                userDetailsModel.Username = TrimValue(userDetailsModel.Username);
+                userDetailsModel.BirthYear = TrimValue(userDetailsModel.BirthYear);
+                userDetailsModel.Organization = TrimValue(userDetailsModel.Organization);
+
+                if (userDetailsModel.PictureUrl.Length > 4096) {
+                    userDetailsModel.PictureUrl = userDetailsModel.PictureUrl.Substring(0, 4096);
+                }
+
+                userDetailsModel.Custom = FixSegmenKeysAndValues(userDetailsModel.Custom); 
                 Dictionary<string, object> requestParams =
                     new Dictionary<string, object>
                     {

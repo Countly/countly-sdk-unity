@@ -82,11 +82,11 @@ namespace Plugins.CountlySDK.Services
             return values;
         }
 
-        protected object TrimValue(object v)
+        protected string TrimValue(string v)
         {
-            if (v.GetType() == typeof(string) && ((string)v).Length > _configuration.MaxValueSize) {
+            if (v.Length > _configuration.MaxValueSize) {
                 Log.Verbose("[" + GetType().Name + "] TrimValue : Max allowed value length is " + _configuration.MaxValueSize);
-                v = ((string)v).Substring(0, _configuration.MaxValueSize);
+                v = v.Substring(0, _configuration.MaxValueSize);
             }
 
             return v;
@@ -106,8 +106,13 @@ namespace Plugins.CountlySDK.Services
                     continue;
                 }
 
-          
-                segmentation.Add(TrimKey(k), TrimValue(v));
+                k = TrimKey(k);
+
+                if (v.GetType() == typeof(string)) {
+                    v = TrimValue((string)v);
+                }
+               
+                segmentation.Add(k, v);
             }
 
             return segmentation;
