@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using iBoxDB.LocalServer;
+using Plugins.CountlySDK.Helpers;
 using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK.Persistance.Entities;
 using UnityEngine;
@@ -22,70 +23,73 @@ namespace Plugins.iBoxDB
 
         public bool Save(TEntity entity)
         {
-            try {
-                return Auto.Insert(Table, entity);
-            } catch (Exception ex) {
-                Log.Error("[Dao] Save: Couldn't complete db operation, [" + ex.Message + "]");
+
+            if (!CountlyStorageHelper.IsDbOpen) {
+                Log.Warning("[Dao] Save: Couldn't complete db operation.");
+                return false;
             }
 
-            return false;
+            return Auto.Insert(Table, entity);
         }
 
         public bool Update(TEntity entity)
         {
-            try {
-                return Auto.Update(Table, entity);
-            } catch (Exception ex) {
-                Log.Error("[Dao] Update: Couldn't complete db operation, [" + ex.Message + "]");
+
+            if (!CountlyStorageHelper.IsDbOpen) {
+                Log.Warning("[Dao] Update: Couldn't complete db operation.");
+                return false;
             }
 
-            return false;
+            return Auto.Update(Table, entity);
         }
 
         public List<TEntity> LoadAll()
         {
             List<TEntity> result = new List<TEntity>();
-            try {
-                result = Auto.Select<TEntity>("from " + Table);
-            } catch (Exception ex) {
-                Log.Error("[Dao] LoadAll: Couldn't complete db operation, [" + ex.Message + "]");
+
+            if (!CountlyStorageHelper.IsDbOpen) {
+                Log.Warning("[Dao] LoadAll: Couldn't complete db operation.");
+                return result;
             }
+
+            result = Auto.Select<TEntity>("from " + Table);
 
             return result;
         }
 
         public void Remove(params object[] key)
         {
-            try {
-                Auto.Delete(Table, key);
-            } catch (Exception ex) {
-                Log.Error("[Dao] Remove: Couldn't complete db operation, [" + ex.Message + "]");
+            if (!CountlyStorageHelper.IsDbOpen) {
+                Log.Warning("[Dao] Remove: Couldn't complete db operation.");
+                return;
             }
+
+            Auto.Delete(Table, key);
         }
 
         public void RemoveAll()
         {
-            try {
-                List<TEntity> list = Auto.Select<TEntity>("from " + Table);
-                foreach (TEntity entity in list) {
-                    Auto.Delete(Table, entity.GetId());
-                }
-            } catch (Exception ex) {
-                Log.Error("[Dao] RemoveAll: Couldn't complete db operation, [" + ex.Message + "]");
+
+            if (!CountlyStorageHelper.IsDbOpen) {
+                Log.Warning("[Dao] RemoveAll: Couldn't complete db operation.");
+                return;
+            }
+
+            List<TEntity> list = Auto.Select<TEntity>("from " + Table);
+            foreach (TEntity entity in list) {
+                Auto.Delete(Table, entity.GetId());
             }
         }
 
         public long GenerateNewId()
         {
-            long result;
-            try {
-                result = Auto.NewId();
-            } catch (Exception ex) {
-                result = 0;
-                Log.Error("[Dao] GenerateNewId: Couldn't complete db operation, [" + ex.Message + "]");
+
+            if (!CountlyStorageHelper.IsDbOpen) {
+                Log.Warning("[Dao] GenerateNewId: Couldn't complete db operation.");
+                return 0;
             }
 
-            return result;
+            return Auto.NewId();
         }
     }
 }

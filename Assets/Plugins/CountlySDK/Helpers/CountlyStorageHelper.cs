@@ -22,6 +22,7 @@ namespace Plugins.CountlySDK.Helpers
         private const int _schemaVersion = 1;
 
         private CountlyLogHelper _logHelper;
+        internal static bool IsDbOpen { get; private set; }
 
         internal SegmentDao EventSegmentDao { get; private set; }
 
@@ -76,7 +77,8 @@ namespace Plugins.CountlySDK.Helpers
 
             _db = BuildDatabase(_dbNumber);
             DB.AutoBox auto = _db.Open();
-
+            IsDbOpen = true;
+            
             EventSegmentDao = new SegmentDao(auto, EntityType.NonViewEventSegments.ToString(), _logHelper);
 
             ConfigDao = new Dao<ConfigEntity>(auto, EntityType.Configs.ToString(), _logHelper);
@@ -109,6 +111,8 @@ namespace Plugins.CountlySDK.Helpers
             _logHelper.Debug("[CountlyStorageHelper] CloseDB");
 
             _db.Close();
+            _db.Dispose();
+            IsDbOpen = false;
         }
 
         /// <summary>
