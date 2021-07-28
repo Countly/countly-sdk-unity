@@ -168,11 +168,12 @@ namespace Plugins.CountlySDK.Services
 
             _eventService.AddEventsToRequestQueue();
 
+           
             Dictionary<string, object> requestParams =
                 new Dictionary<string, object>
                 {
                     {"end_session", 1},
-                    {"session_duration", (DateTime.Now - _lastSessionRequestTime).TotalSeconds}
+                    {"session_duration",  Convert.ToInt32((DateTime.Now - _lastSessionRequestTime).TotalSeconds)}
                 };
 
 
@@ -201,7 +202,7 @@ namespace Plugins.CountlySDK.Services
                 new Dictionary<string, object>
                 {
                     {
-                        "session_duration", (DateTime.Now - _lastSessionRequestTime).TotalSeconds
+                        "session_duration",  Convert.ToInt32((DateTime.Now - _lastSessionRequestTime).TotalSeconds)
                     }
                 };
 
