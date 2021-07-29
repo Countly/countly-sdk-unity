@@ -46,7 +46,7 @@ namespace Plugins.iBoxDB
         {
             List<TEntity> result = new List<TEntity>();
             try {
-                result = Auto.Select<TEntity>("from " + Table);
+                result = Auto.Select<TEntity>("from " + Table + " order by Id asc");
             } catch (Exception ex) {
                 Log.Error("[Dao] LoadAll: Couldn't complete db operation, [" + ex.Message + "]");
             }
