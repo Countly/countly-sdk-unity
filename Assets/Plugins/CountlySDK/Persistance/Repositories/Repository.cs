@@ -30,8 +30,7 @@ namespace Plugins.CountlySDK.Persistance.Repositories
                     continue;
                 }
 
-                Log.Verbose("[Repository] Loaded model: " + model.ToString());
-
+                // Log.Verbose("[Repository] Loaded model: " + model.ToString());
 
                 Models.Enqueue(model);
             }
