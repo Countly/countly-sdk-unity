@@ -43,7 +43,7 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
             isQueueBeingProcessed = true;
-   
+
             int count = _eventRepo.Models.Count;
             //Send all at once
             Dictionary<string, object> requestParams =
@@ -88,6 +88,21 @@ namespace Plugins.CountlySDK.Services
             }
         }
 
+        private bool CheckConsentOnKey(string key)
+        {
+
+            if (key.Equals(CountlyEventModel.ViewEvent)) {
+                return _consentService.CheckConsentInternal(Consents.Views);
+            } else if (key.Equals(CountlyEventModel.StarRatingEvent)) {
+                return _consentService.CheckConsentInternal(Consents.StarRating);
+            } else if (key.Equals(CountlyEventModel.PushActionEvent)) {
+                return _consentService.CheckConsentInternal(Consents.Push);
+            } else if (key.Equals(CountlyEventModel.ViewActionEvent)) {
+                return _consentService.CheckConsentInternal(Consents.Clicks);
+            } else { return _consentService.CheckConsentInternal(Consents.Events); }
+
+        }
+
         /// <summary>
         /// Report an event to the server.
         /// </summary>
@@ -98,13 +113,19 @@ namespace Plugins.CountlySDK.Services
             lock (LockObj) {
                 Log.Info("[EventCountlyService] RecordEventAsync : key = " + key);
 
-                if (!_consentService.CheckConsentInternal(Consents.Events)) {
+                if (string.IsNullOrEmpty(key) || string.IsNullOrWhiteSpace(key)) {
+                    Log.Warning("[EventCountlyService] RecordEventAsync : The event key '" + key + "'isn't valid.");
+
+                    return;
+                }
+
+                if (!CheckConsentOnKey(key)) {
                     return;
                 }
 
                 _ = RecordEventAsync(key, null);
             }
-            
+
         }
 
         /// <summary>
@@ -122,17 +143,17 @@ namespace Plugins.CountlySDK.Services
             lock (LockObj) {
                 Log.Info("[EventCountlyService] RecordEventAsync : key = " + key + ", segmentation = " + segmentation + ", count = " + count + ", sum = " + sum + ", duration = " + duration);
 
-                if (!_consentService.CheckConsentInternal(Consents.Events)) {
+                if (string.IsNullOrEmpty(key) || string.IsNullOrWhiteSpace(key)) {
+                    Log.Warning("[EventCountlyService] RecordEventAsync : The event key '" + key + "'isn't valid.");
+
+                    return;
+                }
+
+                if (!CheckConsentOnKey(key)) {
                     return;
                 }
 
                 if (_configuration.EnableTestMode) {
-                    return;
-                }
-
-                if (string.IsNullOrEmpty(key) || string.IsNullOrWhiteSpace(key)) {
-                    Log.Warning("[EventCountlyService] RecordEventAsync : The event key '" + key + "'isn't valid.");
-
                     return;
                 }
 
@@ -160,9 +181,9 @@ namespace Plugins.CountlySDK.Services
 
                 CountlyEventModel @event = new CountlyEventModel(key, segmentation, count, sum, duration);
 
-                _=RecordEventAsync(@event);
+                _ = RecordEventAsync(@event);
             }
-            
+
         }
 
         /// <summary>
@@ -182,13 +203,16 @@ namespace Plugins.CountlySDK.Services
             lock (LockObj) {
                 Log.Info("[EventCountlyService] ReportCustomEventAsync : key = " + key + ", segmentation = " + (segmentation != null) + ", count = " + count + ", sum = " + sum + ", duration = " + duration);
 
-                if (!_consentService.CheckConsentInternal(Consents.Events)) {
+                if (string.IsNullOrEmpty(key) || string.IsNullOrWhiteSpace(key)) {
+                    Log.Warning("[EventCountlyService] RecordEventAsync : The event key '" + key + "'isn't valid.");
+
                     return;
                 }
 
-                if (string.IsNullOrEmpty(key) && string.IsNullOrWhiteSpace(key)) {
+                if (CheckConsentOnKey(key)) {
                     return;
                 }
+
 
                 if (segmentation != null) {
                     List<string> toRemove = new List<string>();
@@ -213,7 +237,7 @@ namespace Plugins.CountlySDK.Services
 
                 CountlyEventModel @event = new CountlyEventModel(key, segmentation, count, sum, duration);
 
-                _=RecordEventAsync(@event);
+                _ = RecordEventAsync(@event);
             }
         }
 

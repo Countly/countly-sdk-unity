@@ -66,13 +66,13 @@ namespace Plugins.CountlySDK.Models
 
         #region Reserved Event Names
 
-        [JsonIgnore] internal const string ViewEvent = "[CLY]_view";
+        [JsonIgnore] public const string ViewEvent = "[CLY]_view";
 
-        [JsonIgnore] internal const string ViewActionEvent = "[CLY]_action";
+        [JsonIgnore] public const string ViewActionEvent = "[CLY]_action";
 
-        [JsonIgnore] internal const string StarRatingEvent = "[CLY]_star_rating";
+        [JsonIgnore] public const string StarRatingEvent = "[CLY]_star_rating";
 
-        [JsonIgnore] internal const string PushActionEvent = "[CLY]_push_action";
+        [JsonIgnore] public const string PushActionEvent = "[CLY]_push_action";
 
         #endregion
 
