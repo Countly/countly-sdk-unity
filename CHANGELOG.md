@@ -1,7 +1,6 @@
 ## 20.11.5
-* Added new configuration fields.
-* Added SDK internal limits.
-* Reworked request logging.
+* Added new configuration fields to manipulate internal SDK value and key limits.
+* Warning! This release will introduce configurable maximum size limits for values and keys throughout the SDK. If they would exceed the limits, they would be truncated.
 
 ## 20.11.4
 * Added "lock" checks for all public SDK methods.

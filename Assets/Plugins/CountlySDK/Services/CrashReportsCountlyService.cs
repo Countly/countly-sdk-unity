@@ -24,16 +24,24 @@ namespace Plugins.CountlySDK.Services
         }
 
         #region Helper Methods
-        private string MainpulateStackTrace(string stackTrace)
+        private string ManipulateStackTrace(string stackTrace)
         {
             string result = null;
             if (!string.IsNullOrEmpty(stackTrace)) {
                 string[] lines = stackTrace.Split('\n');
-                int limit = lines.Length < _configuration.MaxStackTraceLinesPerThread ? lines.Length : _configuration.MaxStackTraceLinesPerThread;
+
+                int limit = lines.Length;
+
+                if (limit > _configuration.MaxStackTraceLinesPerThread) {
+                    limit = _configuration.MaxStackTraceLinesPerThread;
+                }
 
                 for (int i = 0; i < limit; ++i) {
-                    string line = lines[i].Length > _configuration.MaxStackTraceLineLength ?
-                        lines[i].Substring(0, _configuration.MaxStackTraceLineLength) : lines[i];
+                    string line = lines[i];
+
+                    if (line.Length > _configuration.MaxStackTraceLineLength) {
+                        line = line.Substring(0, _configuration.MaxStackTraceLineLength);
+                    }
 
                     if (i + 1 != limit) {
                         line += '\n';
@@ -68,7 +76,7 @@ namespace Plugins.CountlySDK.Services
                     return;
                 }
 
-                CountlyExceptionDetailModel model = ExceptionDetailModel(message, MainpulateStackTrace(stackTrace), false, null);
+                CountlyExceptionDetailModel model = ExceptionDetailModel(message, ManipulateStackTrace(stackTrace), false, null);
 
                 if (_configuration.EnableAutomaticCrashReporting
                     && (type == LogType.Error || type == LogType.Exception)) {
@@ -101,10 +109,10 @@ namespace Plugins.CountlySDK.Services
                     return;
                 }
 
-                IDictionary<string, object> segmentation = RemoveSegmentInvalidetDataTypes(segments);
+                IDictionary<string, object> segmentation = RemoveSegmentInvalidDataTypes(segments);
                 segmentation = FixSegmenKeysAndValues(segments);
 
-                CountlyExceptionDetailModel model = ExceptionDetailModel(message, MainpulateStackTrace(stackTrace), nonfatal, segmentation);
+                CountlyExceptionDetailModel model = ExceptionDetailModel(message, ManipulateStackTrace(stackTrace), nonfatal, segmentation);
                 _ = SendCrashReportInternal(model);
             }
 
@@ -129,8 +137,6 @@ namespace Plugins.CountlySDK.Services
 
         /// <summary>
         /// Adds string value to a list which is later sent over as logs whenever a cash is reported by system.
-        /// The length of a breadcrumb is limited to 1000 characters. Only first 1000 characters will be accepted in case the length is more 
-        /// than 1000 characters.
         /// </summary>
         /// <param name="value">a bread crumb for the crash report</param>
         public void AddBreadcrumbs(string value)

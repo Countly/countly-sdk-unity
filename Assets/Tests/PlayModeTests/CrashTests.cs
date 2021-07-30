@@ -210,7 +210,7 @@ namespace Tests
                 }
             };
 
-            string url = 
+            string url =
                 Countly.Instance.CrashReports._requestCountlyHelper.BuildGetRequest(requestParams);
             int index = url.IndexOf("crash");
             Assert.AreEqual(url.Substring(index), requestModel.RequestUrl.Substring(index));
@@ -242,7 +242,7 @@ namespace Tests
         }
 
         /// <summary>
-        /// It validates the limit on bread crumbs lenght (limit = 100).
+        /// It validates the maximum size of a bread crumb.
         /// </summary>
         [Test]
         public void TestCrashBreadCrumbsLenght()
@@ -267,7 +267,7 @@ namespace Tests
             Assert.AreEqual(256, qBreadCrumbs.Length);
 
             string validBreadcrumb = breadCrumbs.Length > 256 ? breadCrumbs.Substring(0, 256) : breadCrumbs;
-            Assert.AreEqual(validBreadcrumb, qBreadCrumbs); 
+            Assert.AreEqual(validBreadcrumb, qBreadCrumbs);
         }
 
         /// <summary>

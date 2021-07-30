@@ -136,11 +136,11 @@ namespace Plugins.CountlySDK.Services
                 }
 
                 if (key.Length > _configuration.MaxKeyLength) {
-                    Log.Verbose("[EventCountlyService] RecordEventAsync : Max allowed key length is " + _configuration.MaxKeyLength);
+                    Log.Warning("[EventCountlyService] RecordEventAsync : Max allowed key length is " + _configuration.MaxKeyLength);
                     key = key.Substring(0, _configuration.MaxKeyLength);
                 }
 
-                IDictionary<string, object> segments = RemoveSegmentInvalidetDataTypes(segmentation);
+                IDictionary<string, object> segments = RemoveSegmentInvalidDataTypes(segmentation);
                 segments = FixSegmenKeysAndValues(segments);
 
                 CountlyEventModel @event = new CountlyEventModel(key, segments, count, sum, duration);
@@ -176,12 +176,12 @@ namespace Plugins.CountlySDK.Services
                 }
 
                 if (key.Length > _configuration.MaxKeyLength) {
-                    Log.Verbose("[EventCountlyService] ReportCustomEventAsync : Max allowed key length is " + _configuration.MaxKeyLength);
+                    Log.Warning("[EventCountlyService] ReportCustomEventAsync : Max allowed key length is " + _configuration.MaxKeyLength);
                     key = key.Substring(0, _configuration.MaxKeyLength);
                 }
 
 
-                IDictionary<string, object> segments = RemoveSegmentInvalidetDataTypes(segmentation);
+                IDictionary<string, object> segments = RemoveSegmentInvalidDataTypes(segmentation);
                 segments = FixSegmenKeysAndValues(segments);
 
                 CountlyEventModel @event = new CountlyEventModel(key, segments, count, sum, duration);

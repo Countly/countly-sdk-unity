@@ -71,19 +71,21 @@ namespace Plugins.CountlySDK.Services
                     throw new Exception("Accepted picture formats are .png, .gif and .jpeg");
                 }
 
-                userDetailsModel.Name = TrimValue(userDetailsModel.Name);
-                userDetailsModel.Phone = TrimValue(userDetailsModel.Phone);
-                userDetailsModel.Email = TrimValue(userDetailsModel.Email);
-                userDetailsModel.Gender = TrimValue(userDetailsModel.Gender);
-                userDetailsModel.Username = TrimValue(userDetailsModel.Username);
-                userDetailsModel.BirthYear = TrimValue(userDetailsModel.BirthYear);
-                userDetailsModel.Organization = TrimValue(userDetailsModel.Organization);
+
+                userDetailsModel.Name = TrimValue(" '" + nameof(userDetailsModel.Name) + "' ", userDetailsModel.Name);
+                userDetailsModel.Phone = TrimValue(" '" + nameof(userDetailsModel.Name) + "' ", userDetailsModel.Phone);
+                userDetailsModel.Email = TrimValue(" '" + nameof(userDetailsModel.Name) + "' ", userDetailsModel.Email);
+                userDetailsModel.Gender = TrimValue(" '" + nameof(userDetailsModel.Name) + "' ", userDetailsModel.Gender);
+                userDetailsModel.Username = TrimValue(" '" + nameof(userDetailsModel.Name) + "' ", userDetailsModel.Username);
+                userDetailsModel.BirthYear = TrimValue(" '" + nameof(userDetailsModel.Name) + "' ", userDetailsModel.BirthYear);
+                userDetailsModel.Organization = TrimValue(" '" + nameof(userDetailsModel.Name) + "' ", userDetailsModel.Organization);
 
                 if (userDetailsModel.PictureUrl.Length > 4096) {
+                    Log.Warning("[" + GetType().Name + "] TrimValue : Max allowed length of 'PictureUrl' is " + _configuration.MaxValueSize);
                     userDetailsModel.PictureUrl = userDetailsModel.PictureUrl.Substring(0, 4096);
                 }
 
-                userDetailsModel.Custom = FixSegmenKeysAndValues(userDetailsModel.Custom); 
+                userDetailsModel.Custom = FixSegmenKeysAndValues(userDetailsModel.Custom);
                 Dictionary<string, object> requestParams =
                     new Dictionary<string, object>
                     {
@@ -162,7 +164,7 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
 
-            if ( string.IsNullOrEmpty(value)) {
+            if (string.IsNullOrEmpty(value)) {
                 Log.Warning("[UserDetailsCountlyService] Set : value '" + value + "'isn't valid.");
 
                 return;
@@ -171,7 +173,7 @@ namespace Plugins.CountlySDK.Services
             lock (LockObj) {
                 Log.Info("[UserDetailsCountlyService] Set : key = " + key + ", value = " + value);
 
-                AddToCustomData(key, TrimValue(value));
+                AddToCustomData(key, TrimValue(" '" + key + "' ", value));
             }
         }
 
@@ -197,7 +199,7 @@ namespace Plugins.CountlySDK.Services
             lock (LockObj) {
                 Log.Info("[UserDetailsCountlyService] SetOnce : key = " + key + ", value = " + value);
 
-                AddToCustomData(key, new Dictionary<string, object> { { "$setOnce", TrimValue(value) } });
+                AddToCustomData(key, new Dictionary<string, object> { { "$setOnce", TrimValue(" '" + key + "' ", value) } });
             }
         }
 
