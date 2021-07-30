@@ -39,7 +39,7 @@ namespace Plugins.CountlySDK.Services
                     toRemove.Add(item.Key);
                     continue;
                 }
-                Type type = item.Value.GetType();
+                Type type = item.Value?.GetType();
                 bool isValidDataType = item.Value != null
                     && (type == typeof(int)
                     || type == typeof(bool)
