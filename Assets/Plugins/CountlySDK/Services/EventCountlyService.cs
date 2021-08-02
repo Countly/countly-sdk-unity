@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -7,7 +6,6 @@ using Plugins.CountlySDK.Enums;
 using Plugins.CountlySDK.Helpers;
 using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK.Persistance.Repositories.Impls;
-using UnityEngine;
 
 namespace Plugins.CountlySDK.Services
 {
@@ -99,6 +97,12 @@ namespace Plugins.CountlySDK.Services
                 return _consentService.CheckConsentInternal(Consents.Push);
             } else if (key.Equals(CountlyEventModel.ViewActionEvent)) {
                 return _consentService.CheckConsentInternal(Consents.Clicks);
+            } else if (key.Equals(CountlyEventModel.NPSEvent)) {
+                return _consentService.CheckConsentInternal(Consents.Feedback);
+            } else if (key.Equals(CountlyEventModel.SurveyEvent)) {
+                return _consentService.CheckConsentInternal(Consents.Feedback);
+            } else if (key.Equals(CountlyEventModel.OrientationEvent)) {
+                return _consentService.CheckConsentInternal(Consents.Users);
             } else { return _consentService.CheckConsentInternal(Consents.Events); }
 
         }

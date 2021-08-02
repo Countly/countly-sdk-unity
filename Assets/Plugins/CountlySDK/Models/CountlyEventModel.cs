@@ -66,13 +66,21 @@ namespace Plugins.CountlySDK.Models
 
         #region Reserved Event Names
 
+        [JsonIgnore] public const string NPSEvent = "[CLY]_nps";
+
         [JsonIgnore] public const string ViewEvent = "[CLY]_view";
+
+        [JsonIgnore] public const string SurveyEvent = "[CLY]_survey";
 
         [JsonIgnore] public const string ViewActionEvent = "[CLY]_action";
 
         [JsonIgnore] public const string StarRatingEvent = "[CLY]_star_rating";
 
         [JsonIgnore] public const string PushActionEvent = "[CLY]_push_action";
+
+        [JsonIgnore] public const string OrientationEvent = "[CLY]_orientation";
+
+        
 
         #endregion
 
