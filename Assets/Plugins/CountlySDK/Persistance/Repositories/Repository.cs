@@ -30,13 +30,12 @@ namespace Plugins.CountlySDK.Persistance.Repositories
                     continue;
                 }
 
-                Log.Verbose("[Repository] Loaded model: " + model);
-
+                // Log.Verbose("[Repository] Loaded model: " + model.ToString());
 
                 Models.Enqueue(model);
             }
 
-            Log.Verbose("[Repository] Loaded entities of type " + typeof(TEntity).Name + " from db:" + Count);
+            Log.Verbose("[Repository] Loaded entities of type " + typeof(TEntity).Name + " from db:" + entities.Count);
 
         }
 
@@ -59,6 +58,8 @@ namespace Plugins.CountlySDK.Persistance.Repositories
         {
             TModel model = Models.Dequeue();
             _dao.Remove(model.Id);
+
+            Log.Verbose("[Repository] Dequeue, TModel: " + model.ToString());
             return model;
         }
 
