@@ -6,80 +6,109 @@ using Newtonsoft.Json;
 using Plugins.CountlySDK.Enums;
 using Plugins.CountlySDK.Helpers;
 using Plugins.CountlySDK.Models;
-using UnityEngine;
 
 namespace Plugins.CountlySDK.Services
 {
-    public class SessionCountlyService : IBaseService
+    public class SessionCountlyService : AbstractBaseService
     {
-        private Timer _sessionTimer;
-        private DateTime _lastSessionRequestTime;
-        public bool IsSessionInitiated { get; private set; }
+        internal Timer _sessionTimer;
+        internal DateTime _lastSessionRequestTime;
+
+        /// <summary>
+        /// Check if session has been initiated.
+        /// </summary>
+        /// <returns>bool</returns>
+        internal bool IsSessionInitiated { get; private set; }
 
         private readonly LocationService _locationService;
-        private readonly CountlyConfiguration _configModel;
         private readonly EventCountlyService _eventService;
-        private readonly ConsentCountlyService _consentService;
-        private readonly PushCountlyService _pushCountlyService;
-        private readonly RequestCountlyHelper _requestCountlyHelper;
+        internal readonly RequestCountlyHelper _requestCountlyHelper;
 
-        internal SessionCountlyService(CountlyConfiguration configModel, EventCountlyService eventService, PushCountlyService pushCountlyService,
-            RequestCountlyHelper requestCountlyHelper, LocationService locationService, ConsentCountlyService consentService)
+        internal SessionCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, EventCountlyService eventService,
+            RequestCountlyHelper requestCountlyHelper, LocationService locationService, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
         {
-            _configModel = configModel;
+            Log.Debug("[SessionCountlyService] Initializing.");
+
             _eventService = eventService;
-            _consentService = consentService;
             _locationService = locationService;
-            _pushCountlyService = pushCountlyService;
             _requestCountlyHelper = requestCountlyHelper;
+
+            if (_configuration.IsAutomaticSessionTrackingDisabled) {
+                Log.Verbose("[Countly][CountlyConfiguration] Automatic session tracking disabled!");
+            }
+        }
+
+        /// <summary>
+        /// Run session startup logic and start timer with the specified interval
+        /// </summary>
+        internal async Task StartSessionService()
+        {
+            if (_configuration.IsAutomaticSessionTrackingDisabled || !_consentService.CheckConsentInternal(Consents.Sessions)) {
+                /* If location is disabled in init
+                and no session consent is given. Send empty location as separate request.*/
+                if (_locationService.IsLocationDisabled || !_consentService.CheckConsentInternal(Consents.Location)) {
+                    await _locationService.SendRequestWithEmptyLocation();
+                } else {
+                    /*
+                 * If there is no session consent or automatic session tracking is disabled, 
+                 * location values set in init should be sent as a separate location request.
+                 */
+                    await _locationService.SendIndependantLocationRequest();
+                }
+            } else {
+                //Start Session
+                await BeginSessionAsync();
+            }
+
+            InitSessionTimer();
         }
 
         /// <summary>
         /// Initializes the timer for extending session with specified interval
         /// </summary>
-        /// <param name="sessionInterval">In milliseconds</param>
         private void InitSessionTimer()
         {
-            if (_configModel.EnableManualSessionHandling) {
-                return;
-            }
-
-            _sessionTimer = new Timer { Interval = _configModel.SessionDuration * 1000 };
+            _sessionTimer = new Timer { Interval = _configuration.SessionDuration * 1000 };
             _sessionTimer.Elapsed += SessionTimerOnElapsedAsync;
             _sessionTimer.AutoReset = true;
+            _sessionTimer.Start();
         }
 
         /// <summary>
         /// Extends the session after the session duration is elapsed
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="elapsedEventArgs"></param>
+        /// <param name="sender">reference of caller</param>
+        /// <param name="elapsedEventArgs"> Provides data for <code>Timer.Elapsed</code>event.</param>
         private async void SessionTimerOnElapsedAsync(object sender, ElapsedEventArgs elapsedEventArgs)
         {
-            if (!IsSessionInitiated) {
-                return;
-            }
+            lock (LockObj) {
+                Log.Debug("[SessionCountlyService] SessionTimerOnElapsedAsync");
 
-            await _eventService.AddEventsToRequestQueue();
+                _eventService.AddEventsToRequestQueue();
+                _= _requestCountlyHelper.ProcessQueue();
 
-            await _requestCountlyHelper.ProcessQueue();
-
-            if (!_configModel.EnableManualSessionHandling) {
-                await ExtendSessionAsync();
+                if (!_configuration.IsAutomaticSessionTrackingDisabled) {
+                    _= ExtendSessionAsync();
+                }
             }
         }
 
-        public async Task ExecuteBeginSessionAsync()
+        /// <summary>
+        /// Initiates a session
+        /// </summary>
+        internal async Task BeginSessionAsync()
         {
-            if (IsSessionInitiated) {
+            Log.Debug("[SessionCountlyService] BeginSessionAsync");
+
+            if (!_consentService.CheckConsentInternal(Consents.Sessions)) {
                 return;
             }
 
-            if (_configModel.EnableConsoleLogging) {
-                Debug.Log("[Countly] SessionCountlyService: ExecuteBeginSessionAsync");
+            if (IsSessionInitiated) {
+                Log.Warning("[SessionCountlyService] BeginSessionAsync: The session has already started!");
+                return;
             }
 
-            FirstLaunchAppHelper.Process();
             _lastSessionRequestTime = DateTime.Now;
             //Session initiated
             IsSessionInitiated = true;
@@ -87,144 +116,118 @@ namespace Plugins.CountlySDK.Services
             Dictionary<string, object> requestParams =
                 new Dictionary<string, object>();
 
-            if (_consentService.CheckConsent(Features.Sessions)) {
-                requestParams.Add("begin_session", 1);
 
-                /* If location is disabled or no location consent is given,
-				the SDK adds an empty location entry to every "begin_session" request. */
-                if (_locationService.IsLocationDisabled || !_consentService.CheckConsent(Features.Location)) {
-                    requestParams.Add("location", string.Empty);
-                } else {
-                    if (!string.IsNullOrEmpty(_locationService.IPAddress)) {
-                        requestParams.Add("ip_address", _locationService.IPAddress);
-                    }
+            requestParams.Add("begin_session", 1);
 
-                    if (!string.IsNullOrEmpty(_locationService.CountryCode)) {
-                        requestParams.Add("country_code", _locationService.CountryCode);
-                    }
-
-                    if (!string.IsNullOrEmpty(_locationService.City)) {
-                        requestParams.Add("city", _locationService.City);
-                    }
-
-                    if (!string.IsNullOrEmpty(_locationService.Location)) {
-                        requestParams.Add("location", _locationService.Location);
-                    }
+            /* If location is disabled or no location consent is given,
+            the SDK adds an empty location entry to every "begin_session" request. */
+            if (_locationService.IsLocationDisabled || !_consentService.CheckConsentInternal(Consents.Location)) {
+                requestParams.Add("location", string.Empty);
+            } else {
+                if (!string.IsNullOrEmpty(_locationService.IPAddress)) {
+                    requestParams.Add("ip_address", _locationService.IPAddress);
                 }
 
-                requestParams.Add("metrics", JsonConvert.SerializeObject(CountlyMetricModel.Metrics, Formatting.Indented,
-                new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }));
+                if (!string.IsNullOrEmpty(_locationService.CountryCode)) {
+                    requestParams.Add("country_code", _locationService.CountryCode);
+                }
 
-                await _requestCountlyHelper.GetResponseAsync(requestParams);
+                if (!string.IsNullOrEmpty(_locationService.City)) {
+                    requestParams.Add("city", _locationService.City);
+                }
+
+                if (!string.IsNullOrEmpty(_locationService.Location)) {
+                    requestParams.Add("location", _locationService.Location);
+                }
             }
 
-            //Start session timer
-            if (!_configModel.EnableManualSessionHandling) {
-                InitSessionTimer();
-                _sessionTimer.Start();
-            }
+            requestParams.Add("metrics", JsonConvert.SerializeObject(CountlyMetricModel.Metrics, Formatting.Indented,
+            new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }));
+
+            _requestCountlyHelper.AddToRequestQueue(requestParams);
+            await _requestCountlyHelper.ProcessQueue();
         }
 
-        public async Task ExecuteEndSessionAsync(bool disposeTimer = true)
+        /// <summary>
+        /// Ends a session
+        /// </summary>
+        internal async Task EndSessionAsync()
         {
+            Log.Debug("[SessionCountlyService] EndSessionAsync");
+
+            if (!_consentService.CheckConsentInternal(Consents.Sessions)) {
+                return;
+            }
+
+            if (!IsSessionInitiated) {
+                Log.Warning("[SessionCountlyService] EndSessionAsync: The session isn't started yet!");
+                return;
+            }
+
             IsSessionInitiated = false;
+
+            _eventService.AddEventsToRequestQueue();
 
             Dictionary<string, object> requestParams =
                 new Dictionary<string, object>
                 {
                     {"end_session", 1},
-                    {"session_duration", (DateTime.Now - _lastSessionRequestTime).TotalSeconds},
-                    {"ignore_cooldown", _configModel.IgnoreSessionCooldown.ToString().ToLower()}
+                    {"session_duration", (DateTime.Now - _lastSessionRequestTime).TotalSeconds}
                 };
-            requestParams.Add("metrics", JsonConvert.SerializeObject(CountlyMetricModel.Metrics, Formatting.Indented,
-                new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }));
 
-            await _requestCountlyHelper.GetResponseAsync(requestParams);
 
-            if (!_configModel.EnableManualSessionHandling) {
-                //Do not extend session after session ends
-                if (disposeTimer) {
-                    _sessionTimer.Stop();
-                    _sessionTimer.Dispose();
-                    _sessionTimer.Close();
-                    _sessionTimer = null;
-                }
-            }
+            _requestCountlyHelper.AddToRequestQueue(requestParams);
+            await _requestCountlyHelper.ProcessQueue();
         }
 
 
         /// <summary>
-        /// Initiates a session by setting begin_session
+        /// Extends a session by another session duration provided in configuration. By default session duration is 60 seconds.
         /// </summary>
-        public async Task BeginSessionAsync()
+        internal async Task ExtendSessionAsync()
         {
-            await ExecuteBeginSessionAsync();
+            Log.Debug("[SessionCountlyService] ExtendSessionAsync");
 
-            if (_configModel.EnableTestMode) {
+            if (!_consentService.CheckConsentInternal(Consents.Sessions)) {
                 return;
             }
 
-            //Enables push notification on start
-            if (_configModel.NotificationMode != TestMode.None) {
-                _pushCountlyService.EnablePushNotificationAsync(_configModel.NotificationMode);
-            }
-        }
-
-        /// <summary>
-        /// Ends a session by setting end_session
-        /// </summary>
-        public async Task EndSessionAsync()
-        {
-            if (_configModel.EnableConsoleLogging) {
-                Debug.Log("[Countly] SessionCountlyService: ExtendSessionAsync");
+            if (!IsSessionInitiated) {
+                Log.Warning("[SessionCountlyService] ExtendSessionAsync: The session isn't started yet!");
+                return;
             }
 
-            await ExecuteEndSessionAsync();
-        }
-
-        /// <summary>
-        /// Extends a session by another 60 seconds
-        /// </summary>
-        public async Task ExtendSessionAsync()
-        {
-            _lastSessionRequestTime = DateTime.Now;
             Dictionary<string, object> requestParams =
                 new Dictionary<string, object>
                 {
                     {
-                        "session_duration", _configModel.SessionDuration
-                    },
-                    {"ignore_cooldown", _configModel.IgnoreSessionCooldown.ToString().ToLower()}
+                        "session_duration", (DateTime.Now - _lastSessionRequestTime).TotalSeconds
+                    }
                 };
-            requestParams.Add("metrics", JsonConvert.SerializeObject(CountlyMetricModel.Metrics, Formatting.Indented,
-                new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }));
 
-            await _requestCountlyHelper.GetResponseAsync(requestParams);
+            _lastSessionRequestTime = DateTime.Now;
+
+            _requestCountlyHelper.AddToRequestQueue(requestParams);
+            await _requestCountlyHelper.ProcessQueue();
 
         }
 
-        public void DeviceIdChanged(string deviceId, bool merged)
+        #region override Methods
+        internal override void DeviceIdChanged(string deviceId, bool merged)
         {
 
         }
 
+        internal override async void ConsentChanged(List<Consents> updatedConsents, bool newConsentValue)
+        {
+            if (updatedConsents.Contains(Consents.Sessions) && newConsentValue) {
+                if (!_configuration.IsAutomaticSessionTrackingDisabled) {
+                    IsSessionInitiated = false;
+                    await BeginSessionAsync();
+                }
+            }
 
-        #region Unused Code
-
-        ///// <summary>
-        ///// The method must be used only when Manual Session Handling is disabled.
-        ///// Sets the session duration. Session will be extended each time this interval elapses. The interval value must be in seconds.
-        ///// </summary>
-        ///// <param name="interval"></param>
-        //private static void SetSessionDuration(int interval)
-        //{
-        //    if (!IsManualSessionHandlingEnabled)
-        //    {
-        //        _extendSessionInterval = interval;
-        //        _sessionTimer.Interval = _extendSessionInterval * 1000;
-        //    }
-        //}
-
+        }
         #endregion
     }
 }

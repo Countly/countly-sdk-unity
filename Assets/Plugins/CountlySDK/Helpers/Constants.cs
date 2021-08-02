@@ -3,7 +3,7 @@ namespace Plugins.CountlySDK.Helpers
 {
     internal class Constants
     {
-        public const string SdkVersion = "20.11.0";
+        public const string SdkVersion = "20.11.4";
 
 #if UNITY_EDITOR
         public const string SdkName = "csharp-unity-editor";
@@ -35,6 +35,7 @@ namespace Plugins.CountlySDK.Helpers
         public const string DeviceIDKey = "DeviceID";
 
 
+        public const string SchemaVersion = "Countly.SchemaVersion";
         public const string FirstAppLaunch = "Countly.FirstAppLaunch";
         public const string FirstAppLaunchSegment = "firstAppLaunch";
 
@@ -50,11 +51,12 @@ namespace Plugins.CountlySDK.Helpers
         #endregion
 
         #region Unity System
-
-        public static string UnityPlatform =>
-            UnityEngine.Application.platform.ToString().ToLower() == "iphoneplayer"
-            ? "ios"
-            : UnityEngine.Application.platform.ToString().ToLower();
+        public static void ProcessPlatform()
+        {
+            string platform = UnityEngine.Application.platform.ToString().ToLower();
+            UnityPlatform = (platform == "iphoneplayer" || platform == "iosplayer") ? "ios" : platform;
+        }
+        public static string UnityPlatform { get; internal set; }
 
         #endregion
     }

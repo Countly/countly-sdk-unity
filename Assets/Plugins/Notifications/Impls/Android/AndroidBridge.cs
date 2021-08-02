@@ -11,7 +11,7 @@ namespace Notifications.Impls.Android
         private Action<string> _OnNotificationReceiveResult;
         private Action<string, int> _OnNotificationClickResult;
 
-        public CountlyConfiguration Config { get; set; }
+        public CountlyLogHelper Log { get; set; }
 
         public void ListenTokenResult(Action<string> result) => _onTokenResult = result;
         public void ListenReceiveResult(Action<string> result) => _OnNotificationReceiveResult = result;
@@ -26,18 +26,15 @@ namespace Notifications.Impls.Android
         public void OnTokenResult(string token)
         {
             _onTokenResult?.Invoke(token);
-            if (Config.EnableConsoleLogging) {
-                Debug.Log("[Countly] AndroidBridge Firebase token: " + token);
-            }
+            Log.Debug("[AndroidBridge] AndroidBridge Firebase token: " + token);
 
         }
 
         public void OnNotificationReceived(string data)
         {
             _OnNotificationReceiveResult?.Invoke(data);
-            if (Config.EnableConsoleLogging) {
-                Debug.Log("[CountlyAndroidBridge] onMessageReceived");
-            }
+            Log.Debug("[AndroidBridge] onMessageReceived");
+
         }
 
         public void OnNotificationClicked(string data)
@@ -50,9 +47,7 @@ namespace Notifications.Impls.Android
                 index = (int)jObject.GetValue("click_index");
             }
             _OnNotificationClickResult?.Invoke(data, index);
-            if (Config.EnableConsoleLogging) {
-                Debug.Log("[CountlyAndroidBridge] OnNotificationClicked");
-            }
+            Log.Debug("[AndroidBridge] OnNotificationClicked");
         }
     }
 }

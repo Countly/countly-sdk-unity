@@ -4,32 +4,54 @@ using System.Threading.Tasks;
 using Notifications;
 using Plugins.CountlySDK.Enums;
 using Plugins.CountlySDK.Helpers;
+using Plugins.CountlySDK.Models;
+
 namespace Plugins.CountlySDK.Services
 {
-    public class PushCountlyService : IBaseService
+    public class PushCountlyService : AbstractBaseService
     {
         private string _token;
         private TestMode? _mode;
-        private readonly EventCountlyService _eventCountlyService;
+        private bool _isDeviceRegistered;
         private readonly RequestCountlyHelper _requestCountlyHelper;
         private readonly INotificationsService _notificationsService;
         private readonly NotificationsCallbackService _notificationsCallbackService;
 
-        internal PushCountlyService(EventCountlyService eventCountlyService, RequestCountlyHelper requestCountlyHelper, INotificationsService notificationsService, NotificationsCallbackService notificationsCallbackService)
+        internal PushCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, RequestCountlyHelper requestCountlyHelper, INotificationsService notificationsService, NotificationsCallbackService notificationsCallbackService, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
         {
-            _eventCountlyService = eventCountlyService;
+            Log.Debug("[PushCountlyService] Initializing.");
+
             _requestCountlyHelper = requestCountlyHelper;
             _notificationsService = notificationsService;
             _notificationsCallbackService = notificationsCallbackService;
         }
 
         /// <summary>
+        /// A private method to register device for receiving Push Notifications.
+        /// </summary>
+        private void EnableNotification()
+        {
+            Log.Debug("[PushCountlyService] EnableNotification");
+
+            //Enables push notification on start
+            if (_configuration.EnableTestMode || !_consentService.CheckConsentInternal(Consents.Push) || _configuration.NotificationMode == TestMode.None) {
+                return;
+            }
+
+
+            EnablePushNotificationAsync(_configuration.NotificationMode);
+        }
+
+        /// <summary>
         /// Registers device for receiving Push Notifications
         /// </summary>
         /// <param name="mode">Application mode</param>
-        internal void EnablePushNotificationAsync(TestMode mode)
+        private void EnablePushNotificationAsync(TestMode mode)
         {
+            Log.Debug("[PushCountlyService] EnablePushNotificationAsync : mode = " + mode);
+
             _mode = mode;
+            _isDeviceRegistered = true;
             _notificationsService.GetToken(async result => {
                 _token = result;
                 /*
@@ -57,7 +79,9 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         private async Task PostToCountlyAsync(TestMode? mode, string token)
         {
-            if (!_mode.HasValue) {
+            Log.Debug("[PushCountlyService] PostToCountlyAsync : token = " + token);
+
+            if (!_mode.HasValue || !_consentService.CheckConsentInternal(Consents.Push)) {
                 return;
             }
 
@@ -69,7 +93,8 @@ namespace Plugins.CountlySDK.Services
                     { $"{Constants.UnityPlatform}_token", token },
                 };
 
-            await _requestCountlyHelper.GetResponseAsync(requestParams);
+            _requestCountlyHelper.AddToRequestQueue(requestParams);
+            await _requestCountlyHelper.ProcessQueue();
         }
 
         /// <summary>
@@ -77,13 +102,34 @@ namespace Plugins.CountlySDK.Services
         /// </summary>
         private async Task<CountlyResponse> ReportPushActionAsync()
         {
+            Log.Debug("[PushCountlyService] ReportPushActionAsync");
+
+            if (!_consentService.CheckConsentInternal(Consents.Push)) {
+                return new CountlyResponse { IsSuccess = false};
+            }
+
+
             return await _notificationsService.ReportPushActionAsync();
         }
 
-        public void DeviceIdChanged(string deviceId, bool merged)
+        #region override Methods
+        internal override void OnInitializationCompleted()
         {
-            
+            EnableNotification();
         }
+
+        internal override void DeviceIdChanged(string deviceId, bool merged)
+        {
+
+        }
+
+        internal override void ConsentChanged(List<Consents> updatedConsents, bool newConsentValue)
+        {
+            if (updatedConsents.Contains(Consents.Push) && newConsentValue && !_isDeviceRegistered) {
+                EnableNotification();
+            }
+        }
+        #endregion
 
         [Serializable]
         public struct PushActionSegment

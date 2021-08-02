@@ -20,6 +20,7 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
             ServerUrl = "https://try.count.ly/",
             AppKey = "YOUR_APP_KEY",
             EnableConsoleLogging = true,
+            RequiresConsent = true,
             NotificationMode = TestMode.AndroidTestToken
         };
 
@@ -30,27 +31,23 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
         string ipAddress = "10.2.33.12";
 
         configuration.SetLocation(countryCode, city, latitude + "," + longitude, ipAddress);
-
+        configuration.GiveConsent(new Consents[] { Consents.Crashes, Consents.Events, Consents.Clicks, Consents.StarRating, Consents.Views, Consents.Users, Consents.Sessions, Consents.Push, Consents.RemoteConfig, Consents.Location });
+        configuration.AddNotificationListener(this);
 
         Countly.Instance.Init(configuration);
         countly = Countly.Instance;
     }
 
-    private void Start()
+    private void OnApplicationQuit()
     {
-        countly.Notifications.AddListener(this);
-    }
-
-    private void Stop()
-    {
-        countly.Notifications.RemoveListener(this);
+        Countly.Instance?.Notifications?.RemoveListener(this);
     }
 
     public void TestWithMultipleThreads()
     {
 
         int participants = 13;
-        Barrier barrier = new Barrier(participantCount: participants, (bar) => {
+        Barrier barrier = new Barrier(participantCount: participants, postPhaseAction: (bar) => {
             Debug.Log("All threads reached the barrier at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
         });
 
@@ -189,27 +186,27 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
 
     public async void EventWithSum()
     {
-        await countly.Events.RecordEventAsync("Event With Sum", segmentation: null, sum: 23);
+        await countly.Events.RecordEventAsync("Event With Sum", sum: 23);
     }
 
     public async void EventWithSegmentation()
     {
 
-        SegmentModel segment = new SegmentModel(new Dictionary<string, object>
+        Dictionary<string, object> segment = new Dictionary<string, object>
         {
             { "Time Spent", "60"},
             { "Retry Attempts", "10"}
-        });
+        };
 
         await countly.Events.RecordEventAsync("Event With Segmentation", segmentation: segment);
     }
 
     public async void EventWithSumAndSegmentation()
     {
-        SegmentModel segments = new SegmentModel(new Dictionary<string, object>{
+        Dictionary<string, object> segments = new Dictionary<string, object>{
             { "Time Spent", "1234455"},
             { "Retry Attempts", "10"}
-        });
+        };
 
         await countly.Events.RecordEventAsync("Event With Sum And Segmentation", segmentation: segments, sum: 23);
 
@@ -225,7 +222,7 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
         long currentMillis = DateTime.UtcNow.Millisecond; // invalid data type
         DateTime date = DateTime.UtcNow; // invalid data type
 
-        SegmentModel segment = new SegmentModel(new Dictionary<string, object>
+        Dictionary<string, object> segment = new Dictionary<string, object>
         {
             { "name", name},
             { "moles", moles},
@@ -234,7 +231,7 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
             { "total amount", totalAmount},
             { "dob", date},
             { "Current Millis", currentMillis},
-        });
+        };
 
         await countly.Events.RecordEventAsync("Event With Invalid Segmentation", segmentation: segment);
     }
@@ -274,7 +271,11 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
 
             throw new DivideByZeroException();
         } catch (Exception ex) {
-            await countly.CrashReports.SendCrashReportAsync(ex.Message, ex.StackTrace, LogType.Exception);
+            Dictionary<string, object> seg = new Dictionary<string, object>{
+                { "Time Spent", "1234455"},
+                { "Retry Attempts", "10"}
+            };
+            await countly.CrashReports.SendCrashReportAsync(ex.Message, ex.StackTrace, LogType.Exception, seg);
         }
 
     }
@@ -388,21 +389,21 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
 
     }
 
-    public async Task RemoteConfigAsync()
+    public async void RemoteConfigAsync()
     {
         await countly.RemoteConfigs.Update();
 
         Dictionary<string, object> config = countly.RemoteConfigs.Configs;
-        Debug.Log("RemoteConfig: " + config.ToString());
+        Debug.Log("RemoteConfig: " + config?.ToString());
     }
 
     public void OnNotificationReceived(string message)
     {
-        Debug.Log("[Countly Example] OnNotificationReceived: " + message);
+        Debug.Log("[Example] OnNotificationReceived: " + message);
     }
 
     public void OnNotificationClicked(string message, int index)
     {
-        Debug.Log("[Countly Example] OnNoticicationClicked: " + message + ", index: " + index);
+        Debug.Log("[Example] OnNoticicationClicked: " + message + ", index: " + index);
     }
 }

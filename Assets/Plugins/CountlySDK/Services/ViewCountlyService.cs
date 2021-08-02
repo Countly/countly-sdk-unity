@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Plugins.CountlySDK.Enums;
 using Plugins.CountlySDK.Helpers;
 using Plugins.CountlySDK.Models;
 using UnityEngine;
@@ -8,121 +9,170 @@ using UnityEngine;
 namespace Plugins.CountlySDK.Services
 {
 
-    public class ViewCountlyService : IBaseService
+    public class ViewCountlyService : AbstractBaseService
     {
-        private readonly CountlyConfiguration _config;
+        internal bool _isFirstView = true;
+        internal readonly EventCountlyService _eventService;
         private readonly Dictionary<string, DateTime> _viewToLastViewStartTime = new Dictionary<string, DateTime>();
 
-        private readonly EventCountlyService _eventService;
-
-        internal ViewCountlyService(CountlyConfiguration config, EventCountlyService eventService)
+        internal ViewCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, EventCountlyService eventService, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
         {
-            _config = config;
+            Log.Debug("[ViewCountlyService] Initializing.");
+
             _eventService = eventService;
         }
         /// <summary>
         /// Start tracking a view
         /// </summary>
-        /// <param name="name"></param>
-        /// <param name="hasSessionBegunWithView"></param>
+        /// <param name="name">name of the view</param>
+        /// <param name="hasSessionBegunWithView">set true if the session is beginning with this view</param>
         /// <returns></returns>
-        public async Task RecordOpenViewAsync(string name, bool hasSessionBegunWithView = false)
+        [Obsolete("RecordOpenViewAsync(string name, bool hasSessionBegunWithView) is deprecated, please use RecordOpenViewAsync(string name) instead.")]
+        public async Task RecordOpenViewAsync(string name, bool hasSessionBegunWithView)
         {
-            if (string.IsNullOrEmpty(name)) {
-                return;
+            Log.Info("[ViewCountlyService] RecordOpenViewAsync : name = " + name + ", hasSessionBegunWithView = " + hasSessionBegunWithView);
+
+            await RecordOpenViewAsync(name);
+        }
+
+        /// <summary>
+        /// Start tracking a view
+        /// </summary>
+        /// <param name="name">name of the view</param>
+        /// <returns></returns>
+        public async Task RecordOpenViewAsync(string name)
+        {
+            lock (LockObj) {
+                Log.Info("[ViewCountlyService] RecordOpenViewAsync : name = " + name);
+
+                if (!_consentService.CheckConsentInternal(Consents.Views)) {
+                    return;
+                }
+
+                if (string.IsNullOrEmpty(name)) {
+                    return;
+                }
+
+                ViewSegment currentViewSegment =
+                    new ViewSegment {
+                        Name = name,
+                        Segment = Constants.UnityPlatform,
+                        Visit = 1,
+                        Start = _isFirstView ? 1 : 0
+                    };
+
+                if (!_viewToLastViewStartTime.ContainsKey(name)) {
+                    _viewToLastViewStartTime.Add(name, DateTime.UtcNow);
+                }
+
+                CountlyEventModel currentView = new CountlyEventModel(CountlyEventModel.ViewEvent, currentViewSegment.OpenViewDictionary());
+                _=_eventService.RecordEventAsync(currentView);
+
+                _isFirstView = false;
             }
-
-            ViewSegment currentViewSegment =
-                new ViewSegment {
-                    Name = name,
-                    Segment = Constants.UnityPlatform,
-                    Visit = 1,
-                    Exit = 0,
-                    Bounce = 0,
-                    HasSessionBegunWithView = hasSessionBegunWithView
-                };
-
-            if (!_viewToLastViewStartTime.ContainsKey(name)) {
-                _viewToLastViewStartTime.Add(name, DateTime.UtcNow);
-            }
-
-            if (_config.EnableConsoleLogging) {
-                Debug.Log("[ViewCountlyService] RecordOpenViewAsync: " + name);
-            }
-
-            CountlyEventModel currentView = new CountlyEventModel(CountlyEventModel.ViewEvent, currentViewSegment.ToDictionary());
-            await _eventService.RecordEventAsync(currentView);
         }
 
         /// <summary>
         /// Stop tracking a view
         /// </summary>
-        /// <param name="name"></param>
-        /// <param name="hasSessionBegunWithView"></param>
+        /// <param name="name of the view"></param>
+        /// <param name="hasSessionBegunWithView">set true if the session is beginning with this view</param>
         /// <returns></returns>
-        public async Task RecordCloseViewAsync(string name, bool hasSessionBegunWithView = false)
+        [Obsolete("RecordCloseViewAsync(string name, bool hasSessionBegunWithView) is deprecated, please use RecordCloseViewAsync(string name) instead.")]
+        public async Task RecordCloseViewAsync(string name, bool hasSessionBegunWithView)
         {
-            if (string.IsNullOrEmpty(name)) {
-                return;
-            }
+            Log.Info("[ViewCountlyService] RecordCloseViewAsync : name = " + name + ", hasSessionBegunWithView = " + hasSessionBegunWithView);
 
-            ViewSegment currentViewSegment =
-                new ViewSegment {
-                    Name = name,
-                    Segment = Constants.UnityPlatform,
-                    Visit = 0,
-                    Exit = 1,
-                    Bounce = 0,
-                    HasSessionBegunWithView = hasSessionBegunWithView
-                };
+            await RecordCloseViewAsync(name);
 
-            double? duration = null;
-            if (_viewToLastViewStartTime.ContainsKey(name)) {
-                DateTime lastViewStartTime = _viewToLastViewStartTime[name];
-                duration = (DateTime.UtcNow - lastViewStartTime).TotalSeconds;
-
-                _viewToLastViewStartTime.Remove(name);
-            }
-
-            if (_config.EnableConsoleLogging) {
-                Debug.Log("[ViewCountlyService] RecordCloseViewAsync: " + name + ", duration: " + duration);
-            }
-
-            CountlyEventModel currentView = new CountlyEventModel(CountlyEventModel.ViewEvent, currentViewSegment.ToDictionary(), 1, null, duration);
-            await _eventService.RecordEventAsync(currentView);
         }
 
+        /// <summary>
+        /// Stop tracking a view
+        /// </summary>
+        /// <param name="name of the view"></param>
+        /// <returns></returns>
+        public async Task RecordCloseViewAsync(string name)
+        {
+            lock (LockObj) {
+                Log.Info("[ViewCountlyService] RecordCloseViewAsync : name = " + name);
 
+                if (!_consentService.CheckConsentInternal(Consents.Views)) {
+                    return;
+                }
 
+                if (string.IsNullOrEmpty(name)) {
+                    return;
+                }
 
+                ViewSegment currentViewSegment =
+                    new ViewSegment {
+                        Name = name,
+                        Segment = Constants.UnityPlatform,
+                        Visit = 0,
+                        Start = 0
+                    };
+
+                double? duration = null;
+                if (_viewToLastViewStartTime.ContainsKey(name)) {
+                    DateTime lastViewStartTime = _viewToLastViewStartTime[name];
+                    duration = (DateTime.UtcNow - lastViewStartTime).TotalSeconds;
+
+                    _viewToLastViewStartTime.Remove(name);
+                }
+
+                IDictionary<string, object> segment = currentViewSegment.CloseViewDictionary();
+
+                CountlyEventModel currentView = new CountlyEventModel(CountlyEventModel.ViewEvent, segment, 1, null, duration);
+                _=_eventService.RecordEventAsync(currentView);
+            }
+        }
 
         /// <summary>
         /// Reports a particular action with the specified details
         /// </summary>
-        /// <param name="type"></param>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
-        /// <param name="width"></param>
-        /// <param name="height"></param>
+        /// <param name="type"> type of action</param>
+        /// <param name="x">x-coordinate</param>
+        /// <param name="y">y-coordinate</param>
+        /// <param name="width">width of screen</param>
+        /// <param name="height">height of screen</param>
         /// <returns></returns>
         public async Task ReportActionAsync(string type, int x, int y, int width, int height)
         {
-            ActionSegment segment =
-                new ActionSegment {
-                    Type = type,
-                    PositionX = x,
-                    PositionY = y,
-                    Width = width,
-                    Height = height
-                };
+            lock (LockObj) {
+                Log.Info("[ViewCountlyService] ReportActionAsync : type = " + type + ", x = " + x + ", y = " + y + ", width = " + width + ", height = " + height);
 
-            await _eventService.ReportCustomEventAsync(CountlyEventModel.ViewActionEvent, segment.ToDictionary());
+                if (!_consentService.CheckConsentInternal(Consents.Views)) {
+                    return;
+                }
+
+                ActionSegment segment =
+                    new ActionSegment {
+                        Type = type,
+                        PositionX = x,
+                        PositionY = y,
+                        Width = width,
+                        Height = height
+                    };
+
+                CountlyEventModel currentView = new CountlyEventModel(CountlyEventModel.ViewActionEvent, segment.ToDictionary());
+                _=_eventService.RecordEventAsync(currentView);
+            }
         }
 
-        public void DeviceIdChanged(string deviceId, bool merged)
+        #region override Methods
+        internal override void DeviceIdChanged(string deviceId, bool merged)
         {
-            
+            if (!merged) {
+                _isFirstView = true;
+            }
         }
+
+        internal override void ConsentChanged(List<Consents> updatedConsents, bool newConsentValue)
+        {
+
+        }
+        #endregion
 
         /// <summary>
         /// Custom Segmentation for Views related events.
@@ -133,21 +183,26 @@ namespace Plugins.CountlySDK.Services
             public string Name { get; set; }
             public string Segment { get; set; }
             public int Visit { get; set; }
-            public int Exit { get; set; }
-            public int Bounce { get; set; }
-            public bool HasSessionBegunWithView { get; set; }
-            private int Start => HasSessionBegunWithView ? 1 : 0;
+            public int Start { get; set; }
 
-            public IDictionary<string, object> ToDictionary()
+            public IDictionary<string, object> OpenViewDictionary()
             {
                 Dictionary<string, object> dict = new Dictionary<string, object>
                 {
                     {"name", Name},
                     {"segment", Segment},
-                    {"exit", Exit},
                     {"visit", Visit},
-                    {"start", Start},
-                    {"bounce", Bounce}
+                    {"start", Start}
+                };
+                return dict;
+            }
+
+            public IDictionary<string, object> CloseViewDictionary()
+            {
+                Dictionary<string, object> dict = new Dictionary<string, object>
+                {
+                    {"name", Name},
+                    {"segment", Segment},
                 };
                 return dict;
             }

@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
+using Plugins.CountlySDK.Enums;
 using Plugins.CountlySDK.Helpers;
 using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK.Persistance.Entities;
@@ -11,62 +13,88 @@ using UnityEngine.Networking;
 
 namespace Plugins.CountlySDK.Services
 {
-    public class RemoteConfigCountlyService : IBaseService
+    public class RemoteConfigCountlyService : AbstractBaseService
     {
-        private readonly CountlyConfiguration _config;
         private readonly CountlyUtils _countlyUtils;
         private readonly Dao<ConfigEntity> _configDao;
         private readonly RequestCountlyHelper _requestCountlyHelper;
 
+        /// <summary>
+        /// Get the remote config values.
+        /// </summary>
         public Dictionary<string, object> Configs { private set; get; }
 
         private readonly StringBuilder _requestStringBuilder = new StringBuilder();
 
-        internal RemoteConfigCountlyService(CountlyConfiguration config, RequestCountlyHelper requestCountlyHelper, CountlyUtils countlyUtils, Dao<ConfigEntity> configDao)
+        internal RemoteConfigCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, RequestCountlyHelper requestCountlyHelper, CountlyUtils countlyUtils, Dao<ConfigEntity> configDao, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
         {
-            _config = config;
+            Log.Debug("[RemoteConfigCountlyService] Initializing.");
+
             _configDao = configDao;
             _countlyUtils = countlyUtils;
             _requestCountlyHelper = requestCountlyHelper;
 
-            Configs = FetchConfigFromDB();
+            if (_consentService.CheckConsentInternal(Consents.RemoteConfig)) {
+                Configs = FetchConfigFromDB();
+            } else {
+                _configDao.RemoveAll();
+            }
+
         }
 
+        /// <summary>
+        ///     Fetch fresh remote config values from server and initialize <code>Configs</code>
+        /// </summary>
         internal async Task<CountlyResponse> InitConfig()
         {
-            if (_config.EnableTestMode) {
+            Log.Debug("[RemoteConfigCountlyService] InitConfig");
+
+            if (_configuration.EnableTestMode) {
                 return new CountlyResponse { IsSuccess = true };
             }
 
             return await Update();
         }
 
+        /// <summary>
+        ///     Fetch locally stored remote config values.
+        /// </summary>
+        /// <returns>Stored Remote config</returns>
         private Dictionary<string, object> FetchConfigFromDB()
         {
             Dictionary<string, object> config = null;
             List<ConfigEntity> allConfigs = _configDao.LoadAll();
             if (allConfigs != null && allConfigs.Count > 0) {
                 config = Converter.ConvertJsonToDictionary(allConfigs[0].Json);
-
-                if (_config.EnableConsoleLogging) {
-                    Debug.Log("Configs: " + config.ToString());
-                }
             }
+
+            Log.Debug("[RemoteConfigCountlyService] FetchConfigFromDB : Configs = " + config);
 
             return config;
         }
 
         /// <summary>
-        ///     Fetch fresh remote config from server and store locally.
+        ///     Fetch fresh remote config values from server and store locally.
         /// </summary>
         /// <returns></returns>
         public async Task<CountlyResponse> Update()
         {
+            Log.Info("[RemoteConfigCountlyService] Update");
+
+            if (!_consentService.CheckConsentInternal(Consents.RemoteConfig)) {
+                return new CountlyResponse {
+                    IsSuccess = false
+                };
+            }
+
             Dictionary<string, object> requestParams =
                 new Dictionary<string, object>
                 {
                     { "method", "fetch_remote_config" }
                 };
+
+            requestParams.Add("metrics", JsonConvert.SerializeObject(CountlyMetricModel.Metrics, Formatting.Indented,
+            new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }));
 
             string url = BuildGetRequest(requestParams);
 
@@ -81,9 +109,8 @@ namespace Plugins.CountlySDK.Services
                 _configDao.Save(configEntity);
                 Configs = Converter.ConvertJsonToDictionary(response.Data);
 
-                if (_config.EnableConsoleLogging) {
-                    Debug.Log("[Countly] RemoteConfigCountlyService UpdateConfig: " + response.ToString());
-                }
+                Log.Debug("[RemoteConfigCountlyService] UpdateConfig: " + response.ToString());
+
             }
 
             return response;
@@ -93,7 +120,7 @@ namespace Plugins.CountlySDK.Services
         ///     Builds request URL using ServerUrl, AppKey, DeviceID and supplied queryParams parameters.
         ///     The data is appended in the URL.
         /// </summary>
-        /// <param name="queryParams"></param>
+        /// <param name="queryParams">request's parameters</param>
         /// <returns></returns>
         private string BuildGetRequest(Dictionary<string, object> queryParams)
         {
@@ -113,26 +140,23 @@ namespace Plugins.CountlySDK.Services
                 }
             }
 
-            //Not sure if we need checksum here
-
-            //            if (!string.IsNullOrEmpty(_config.Salt))
-            //            {
-            //                // Create a SHA256   
-            //                using (var sha256Hash = SHA256.Create())
-            //                {
-            //                    var data = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(_requestStringBuilder + _config.Salt));
-            //                    _requestStringBuilder.Insert(0, _countly.GetBaseUrl());
-            //                    return _requestStringBuilder.AppendFormat("&checksum256={0}", Impl.Countly.GetStringFromBytes(data)).ToString();
-            //                }
-            //            }
-
             _requestStringBuilder.Insert(0, _countlyUtils.ServerOutputUrl);
             return _requestStringBuilder.ToString();
         }
 
-        public void DeviceIdChanged(string deviceId, bool merged)
+        #region override Methods
+        internal override void DeviceIdChanged(string deviceId, bool merged)
         {
-            
+
         }
+
+        internal override void ConsentChanged(List<Consents> updatedConsents, bool newConsentValue)
+        {
+            if (updatedConsents.Contains(Consents.RemoteConfig) && !newConsentValue) {
+                Configs = null;
+                _configDao.RemoveAll();
+            }
+        }
+        #endregion
     }
 }

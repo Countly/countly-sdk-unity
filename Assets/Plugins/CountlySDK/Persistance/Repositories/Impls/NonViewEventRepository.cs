@@ -7,13 +7,13 @@ namespace Plugins.CountlySDK.Persistance.Repositories.Impls
 {
     public class NonViewEventRepository : AbstractEventRepository
     {
-        public NonViewEventRepository(Dao<EventEntity> dao, SegmentDao segmentDao, CountlyConfiguration config) : base(dao, segmentDao, config)
+        public NonViewEventRepository(Dao<EventEntity> dao, SegmentDao segmentDao, CountlyLogHelper log) : base(dao, segmentDao, log)
         {
         }
 
         protected override bool ValidateModelBeforeEnqueue(CountlyEventModel model)
         {
-            return !model.Key.Equals(CountlyEventModel.ViewEvent);
+            return true;
         }
     }
 }

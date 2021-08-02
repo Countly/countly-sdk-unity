@@ -3,6 +3,7 @@ using Plugins.CountlySDK.Helpers;
 using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK.Services;
 using System;
+using System.IO;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -16,47 +17,68 @@ namespace Notifications.Impls.Android
         private const string CountlyPushPluginPackageName = "ly.count.unity.push_fcm.CountlyPushPlugin";
         private const string NotficationServicePackageName = "ly.count.unity.push_fcm.RemoteNotificationsService";
 
+        private readonly CountlyLogHelper Log;
         private readonly AndroidBridge _bridge;
-        private readonly CountlyConfiguration _config;
         private readonly EventCountlyService _eventCountlyService;
 
-        internal AndroidNotificationsService(Transform countlyGameObject, CountlyConfiguration config, EventCountlyService eventCountlyService)
+        public bool IsInitializedWithoutError { get; set; }
+
+        internal AndroidNotificationsService(Transform countlyGameObject, CountlyConfiguration config, CountlyLogHelper log, EventCountlyService eventCountlyService)
         {
-            _config = config;
+            Log = log;
+
+            Log.Debug("[AndroidNotificationsService] Initializing.");
+
             _countlyGameObject = countlyGameObject;
             _eventCountlyService = eventCountlyService;
 
             GameObject gameObject = new GameObject(BridgeName);
             gameObject.transform.parent = _countlyGameObject;
             _bridge = gameObject.AddComponent<AndroidBridge>();
-            _bridge.Config = _config;
+            _bridge.Log = Log;
 
-            AndroidJavaClass countlyPushPlugin = new AndroidJavaClass(CountlyPushPluginPackageName);
-            countlyPushPlugin.CallStatic("setEnableLog", config.EnableConsoleLogging);
-
+            try {
+                AndroidJavaClass countlyPushPlugin = new AndroidJavaClass(CountlyPushPluginPackageName);
+                countlyPushPlugin.CallStatic("setEnableLog", config.EnableConsoleLogging);
+                IsInitializedWithoutError = true;
+            } catch (Exception ex) {
+                Log.Error("[AndroidNotificationsService] Exception in initializing service: " + ex.Message);
+                IsInitializedWithoutError = false;
+            }
         }
 
         public void GetToken(Action<string> result)
         {
+
+            Log.Debug("[AndroidNotificationsService] GetToken");
+
+#if !UNITY_EDITOR
             _bridge.ListenTokenResult(result);
 
             using (AndroidJavaObject jc = new AndroidJavaObject(NotficationServicePackageName)) {
                 jc.Call("getToken");
             }
+#endif
         }
 
         public void OnNotificationClicked(Action<string, int> result)
         {
+            Log.Debug("[AndroidNotificationsService] OnNotificationClicked");
+
             _bridge.ListenClickResult(result);
         }
 
         public void OnNotificationReceived(Action<string> result)
         {
+            Log.Debug("[AndroidNotificationsService] OnNotificationReceived");
+
             _bridge.ListenReceiveResult(result);
         }
 
         public async Task<CountlyResponse> ReportPushActionAsync()
         {
+            Log.Debug("[AndroidNotificationsService] ReportPushActionAsync");
+
             AndroidJavaClass store = new AndroidJavaClass(StorePackageName);
 
             bool isInitialized = store.CallStatic<bool>("isInitialized");
@@ -89,12 +111,11 @@ namespace Notifications.Impls.Android
                         Identifier = identifier
                     };
 
-                    if (_config.EnableConsoleLogging) {
-                        Debug.Log("[Countly] ReportPushActionAsync key: " + CountlyEventModel.PushActionEvent + ", segments: " + segment);
-                    }
+                    Log.Debug("[AndroidNotificationsService] ReportPushActionAsync key: " + CountlyEventModel.PushActionEvent + ", segments: " + segment);
 
-                    await _eventCountlyService.ReportCustomEventAsync(
-                        CountlyEventModel.PushActionEvent, segment.ToDictionary());
+
+                    CountlyEventModel eventModel = new CountlyEventModel(CountlyEventModel.PushActionEvent, segment.ToDictionary());
+                    await _eventCountlyService.RecordEventAsync(eventModel);
                 }
 
                 store.CallStatic("clearMessagesData");

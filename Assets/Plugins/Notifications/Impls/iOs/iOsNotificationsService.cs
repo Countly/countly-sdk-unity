@@ -10,17 +10,18 @@ namespace Notifications.Impls.iOs
 {
     public class IOsNotificationsService : INotificationsService
     {
+        private readonly CountlyLogHelper Log;
         private readonly Transform _countlyGameObject;
-        private readonly CountlyConfiguration _config;
         private readonly Action<IEnumerator> _startCoroutine;
         private readonly EventCountlyService _eventCountlyService;
+        public bool IsInitializedWithoutError { get; set; }
 
-        private readonly IOSBridage _bridge;
+        private readonly IOSBridge _bridge;
         private const string BridgeName = "[iOS] Bridge";
 
-        internal IOsNotificationsService(Transform countlyGameObject, CountlyConfiguration config, Action<IEnumerator> startCoroutine, EventCountlyService eventCountlyService)
+        internal IOsNotificationsService(Transform countlyGameObject, CountlyConfiguration configuration, CountlyLogHelper log, Action<IEnumerator> startCoroutine, EventCountlyService eventCountlyService)
         {
-            _config = config;
+            Log = log;
             _startCoroutine = startCoroutine;
             _countlyGameObject = countlyGameObject;
             _eventCountlyService = eventCountlyService;
@@ -28,8 +29,10 @@ namespace Notifications.Impls.iOs
             GameObject gameObject = new GameObject(BridgeName);
             gameObject.transform.parent = _countlyGameObject;
 
-            _bridge = gameObject.AddComponent<IOSBridage>();
-            _bridge.Config = _config;
+            _bridge = gameObject.AddComponent<IOSBridge>();
+            _bridge.Log = log;
+
+            IsInitializedWithoutError = true;
 
         }
 
@@ -52,12 +55,10 @@ namespace Notifications.Impls.iOs
                         Identifier = identifier
                     };
 
-                if (_config.EnableConsoleLogging) {
-                    Debug.Log("[Countly] ReportPushActionAsync key: " + CountlyEventModel.PushActionEvent + ", segments: " + segment);
-                }
+                Log.Debug("[IOsNotificationsService] ReportPushActionAsync key: " + CountlyEventModel.PushActionEvent + ", segments: " + segment);
 
-                await _eventCountlyService.ReportCustomEventAsync(
-                    CountlyEventModel.PushActionEvent, segment.ToDictionary());
+                CountlyEventModel eventModel = new CountlyEventModel(CountlyEventModel.PushActionEvent, segment.ToDictionary());
+                await _eventCountlyService.RecordEventAsync(eventModel);
             }
 
             _bridge.MessageId = null;
@@ -70,9 +71,7 @@ namespace Notifications.Impls.iOs
 
         public void OnNotificationClicked(Action<string, int> result)
         {
-            if (_config.EnableConsoleLogging) {
-                Debug.Log("[Countly] OnNotificationClicked register");
-            }
+            Log.Debug("[IOsNotificationsService] OnNotificationClicked register");
 
             _bridge.ListenClickResult(result);
 
@@ -80,14 +79,9 @@ namespace Notifications.Impls.iOs
 
         public void OnNotificationReceived(Action<string> result)
         {
-            if (_config.EnableConsoleLogging) {
-                Debug.Log("[Countly] OnNotificationReceived register");
-            }
-
+            Log.Debug("[IOsNotificationsService] OnNotificationReceived register");
             _bridge.ListenReceiveResult(result);
 
         }
-
-
     }
 }

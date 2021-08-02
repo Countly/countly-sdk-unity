@@ -11,6 +11,9 @@ namespace Tests
         private readonly string _serverUrl = "https://xyz.com/";
         private readonly string _appKey = "772c091355076ead703f987fee94490";
 
+        /// <summary>
+        /// It validates configuration values provided during init and URL sanitation.
+        /// </summary>
         [Test]
         public void TestSDKInitParams()
         {
@@ -24,7 +27,6 @@ namespace Tests
                 EnablePost = true,
                 EnableTestMode = true,
                 EnableConsoleLogging = true,
-                EnableFirstAppLaunchSegment = true,
                 EnableAutomaticCrashReporting = false,
 
                 SessionDuration = 10,
@@ -41,6 +43,7 @@ namespace Tests
             string longitude = "-95.220255";
             string ipAddress = "10.2.33.12";
 
+            configuration.DisableAutomaticSessionTracking();
             configuration.SetLocation(countryCode, city, latitude + "," + longitude, ipAddress);
             Countly.Instance.Init(configuration);
 
@@ -75,10 +78,14 @@ namespace Tests
             Assert.AreEqual(Countly.Instance.Configuration.EnablePost, true);
             Assert.AreEqual(Countly.Instance.Configuration.EnableTestMode, true);
             Assert.AreEqual(Countly.Instance.Configuration.EnableConsoleLogging, true);
-            Assert.AreEqual(Countly.Instance.Configuration.EnableFirstAppLaunchSegment, true);
             Assert.AreEqual(Countly.Instance.Configuration.EnableAutomaticCrashReporting, false);
+            Assert.AreEqual(Countly.Instance.Configuration.IsAutomaticSessionTrackingDisabled, true);
+
         }
 
+        /// <summary>
+        /// It validates the configuration's default values.
+        /// </summary>
         [Test]
         public void TestDefaultConfigValues()
         {
@@ -101,8 +108,9 @@ namespace Tests
             Assert.AreEqual(Countly.Instance.Configuration.EnablePost, false);
             Assert.AreEqual(Countly.Instance.Configuration.EnableTestMode, false);
             Assert.AreEqual(Countly.Instance.Configuration.EnableConsoleLogging, false);
-            Assert.AreEqual(Countly.Instance.Configuration.EnableFirstAppLaunchSegment, false);
             Assert.AreEqual(Countly.Instance.Configuration.EnableAutomaticCrashReporting, true);
+            Assert.AreEqual(Countly.Instance.Configuration.IsAutomaticSessionTrackingDisabled, false);
+
 
             Assert.AreEqual(Countly.Instance.Configuration.City, null);
             Assert.AreEqual(Countly.Instance.Configuration.Location, null);

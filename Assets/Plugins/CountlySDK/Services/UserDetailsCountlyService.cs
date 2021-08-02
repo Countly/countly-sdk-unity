@@ -3,85 +3,128 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Plugins.CountlySDK.Enums;
 using Plugins.CountlySDK.Helpers;
 using Plugins.CountlySDK.Models;
 
 namespace Plugins.CountlySDK.Services
 {
-    public class UserDetailsCountlyService : IBaseService
+    public class UserDetailsCountlyService : AbstractBaseService
     {
-        internal Dictionary<string, object> CustomeDataProperties { get; private set; }
+        internal Dictionary<string, object> CustomDataProperties { get; private set; }
 
-
-        private readonly RequestCountlyHelper _requestCountlyHelper;
         private readonly CountlyUtils _countlyUtils;
-
-        internal UserDetailsCountlyService(RequestCountlyHelper requestCountlyHelper, CountlyUtils countlyUtils)
+        internal readonly RequestCountlyHelper _requestCountlyHelper;
+        internal UserDetailsCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, RequestCountlyHelper requestCountlyHelper, CountlyUtils countlyUtils, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
         {
-            _requestCountlyHelper = requestCountlyHelper;
+            Log.Debug("[UserDetailsCountlyService] Initializing.");
+
             _countlyUtils = countlyUtils;
-            CustomeDataProperties = new Dictionary<string, object>();
+            _requestCountlyHelper = requestCountlyHelper;
+            CustomDataProperties = new Dictionary<string, object>();
         }
 
         /// <summary>
         /// Modifies all user data. Custom data should be json string.
         /// Deletes an already defined custom property from the Countly server, if it is supplied with a NULL value
         /// </summary>
-        /// <param name="userDetails"></param>
+        /// <param name="userDetailsModel">User's detail object</param>
         /// <returns></returns>
-        internal async Task UserDetailsAsync(CountlyUserDetailsModel userDetails)
+        internal async Task UserDetailsAsync(CountlyUserDetailsModel userDetailsModel)
         {
-            if (userDetails == null) {
+
+            Log.Debug("[UserDetailsCountlyService] UserDetailsAsync : userDetails = " + (userDetailsModel != null));
+
+            if (userDetailsModel == null) {
+                Log.Warning("[UserDetailsCountlyService] UserDetailsAsync : The parameter 'userDetailsModel' can't be null.");
                 return;
             }
 
-            await SetUserDetailsAsync(userDetails);
+            await SetUserDetailsAsync(userDetailsModel);
         }
 
         /// <summary>
         /// Modifies custom user data only. Custom data should be json string.
         /// Deletes an already defined custom property from the Countly server, if it is supplied with a NULL value
         /// </summary>
-        /// <param name="userDetails"></param>
+        /// <param name="userDetailsModel">User's custom detail object</param>
         /// <return></returns>
-        internal async Task UserCustomDetailsAsync(CountlyUserDetailsModel userDetails)
+        internal async Task UserCustomDetailsAsync(CountlyUserDetailsModel userDetailsModel)
         {
-            if (userDetails == null) {
+            Log.Debug("[UserDetailsCountlyService] UserCustomDetailsAsync " + (userDetailsModel != null));
+
+            if (userDetailsModel == null) {
+                Log.Warning("[UserDetailsCountlyService] UserCustomDetailsAsync : The parameter 'userDetailsModel' can't be null.");
                 return;
             }
 
-            await SetCustomUserDetailsAsync(userDetails);
+            await SetCustomUserDetailsAsync(userDetailsModel);
         }
 
         /// <summary>
-        /// Uploads all user details
+        /// Sets information about user.
         /// </summary>
+        /// <param name="userDetailsModel">User Model with the specified params</param>
         /// <returns></returns>
         public async Task SetUserDetailsAsync(CountlyUserDetailsModel userDetailsModel)
         {
-            if (!_countlyUtils.IsPictureValid(userDetailsModel.PictureUrl)) {
-                throw new Exception("Accepted picture formats are .png, .gif and .jpeg");
-            }
+            lock (LockObj) {
+                Log.Info("[UserDetailsCountlyService] SetUserDetailsAsync " + (userDetailsModel != null));
 
-            Dictionary<string, object> requestParams =
-                new Dictionary<string, object>
-                {
+                if (!_consentService.CheckConsentInternal(Consents.Users)) {
+                    return;
+                }
+
+                if (userDetailsModel == null) {
+                    Log.Warning("[UserDetailsCountlyService] SetUserDetailsAsync : The parameter 'userDetailsModel' can't be null.");
+                    return;
+                }
+
+                if (!_countlyUtils.IsPictureValid(userDetailsModel.PictureUrl)) {
+                    throw new Exception("Accepted picture formats are .png, .gif and .jpeg");
+                }
+
+                Dictionary<string, object> requestParams =
+                    new Dictionary<string, object>
+                    {
                     { "user_details", JsonConvert.SerializeObject(userDetailsModel, Formatting.Indented,
                         new JsonSerializerSettings{ NullValueHandling = NullValueHandling.Ignore }) },
-                };
+                    };
 
-            await _requestCountlyHelper.GetResponseAsync(requestParams);
+                _requestCountlyHelper.AddToRequestQueue(requestParams);
+                _= _requestCountlyHelper.ProcessQueue();
+            }
         }
 
         /// <summary>
-        /// Uploads only custom data. Doesn't update any other property except Custom Data.
+        /// Sets information about user with custom properties.
+        /// In custom properties you can provide any string key values to be stored with user.
         /// </summary>
+        /// <param name="userDetailsModel">User Detail Model with the custom properties</param>
         /// <returns></returns>
         public async Task SetCustomUserDetailsAsync(CountlyUserDetailsModel userDetailsModel)
         {
-            Dictionary<string, object> requestParams =
-                new Dictionary<string, object>
-                {
+            lock (LockObj) {
+                Log.Info("[UserDetailsCountlyService] SetCustomUserDetailsAsync " + (userDetailsModel != null));
+
+                if (!_consentService.CheckConsentInternal(Consents.Users)) {
+                    return;
+                }
+
+                if (userDetailsModel == null) {
+                    Log.Warning("[UserDetailsCountlyService] SetCustomUserDetailsAsync : The parameter 'userDetailsModel' can't be null.");
+                    return;
+                }
+
+                if (userDetailsModel.Custom == null || userDetailsModel.Custom.Count == 0) {
+                    Log.Warning("[UserDetailsCountlyService] SetCustomUserDetailsAsync : The custom property 'userDetailsModel.Custom' can't be null or empty.");
+
+                    return;
+                }
+
+                Dictionary<string, object> requestParams =
+                    new Dictionary<string, object>
+                    {
                     { "user_details",
                         JsonConvert.SerializeObject(
                             new Dictionary<string, object>
@@ -89,152 +132,209 @@ namespace Plugins.CountlySDK.Services
                                 { "custom", userDetailsModel.Custom }
                             })
                     }
-                };
-            await _requestCountlyHelper.GetResponseAsync(requestParams);
+                    };
+                _requestCountlyHelper.AddToRequestQueue(requestParams);
+                _= _requestCountlyHelper.ProcessQueue();
+            }
         }
 
         /// <summary>
-        /// Saves all custom user data updates done since the last save request.
+        /// Send provided values to server.
         /// </summary>
         /// <returns></returns>
         public async Task SaveAsync()
         {
-            if (!CustomeDataProperties.Any()) {
+            lock (LockObj) {
+                if (!CustomDataProperties.Any()) {
+                    return;
+                }
+
+                Log.Info("[UserDetailsCountlyService] SaveAsync");
+
+
+                CountlyUserDetailsModel model = new CountlyUserDetailsModel(CustomDataProperties);
+
+                CustomDataProperties = new Dictionary<string, object> { };
+                _= SetCustomUserDetailsAsync(model);
+            }
+        }
+
+
+        /// <summary>
+        /// Sets custom provide key/value as custom property.
+        /// </summary>
+        /// <param name="key">string with key for the property</param>
+        /// <param name="value">string with value for the property</param>
+        public void Set(string key, string value)
+        {
+            lock (LockObj) {
+                Log.Info("[UserDetailsCountlyService] Set : key = " + key + ", value = " + value);
+
+                AddToCustomData(key, value);
+            }
+        }
+
+        /// <summary>
+        /// Set value only if property does not exist yet.
+        /// </summary>
+        /// <param name="key">string with property name to set</param>
+        /// <param name="value">string value to set</param>
+        public void SetOnce(string key, string value)
+        {
+            lock (LockObj) {
+                Log.Info("[UserDetailsCountlyService] SetOnce : key = " + key + ", value = " + value);
+
+                AddToCustomData(key, new Dictionary<string, object> { { "$setOnce", value } });
+            }
+        }
+
+        /// <summary>
+        /// Increment custom property value by 1.
+        /// </summary>
+        /// <param name="key">string with property name to increment</param>
+        public void Increment(string key)
+        {
+            lock (LockObj) {
+                Log.Info("[UserDetailsCountlyService] Increment : key = " + key);
+
+                AddToCustomData(key, new Dictionary<string, object> { { "$inc", 1 } });
+            }
+        }
+
+        /// <summary>
+        /// Increment custom property value by provided value.
+        /// </summary>
+        /// <param name="key">string with property name to increment</param>
+        /// <param name="value">double value by which to increment</param>
+        public void IncrementBy(string key, double value)
+        {
+            lock (LockObj) {
+                Log.Info("[UserDetailsCountlyService] IncrementBy : key = " + key + ", value = " + value);
+
+                AddToCustomData(key, new Dictionary<string, object> { { "$inc", value } });
+            }
+        }
+
+        /// <summary>
+        /// Multiply custom property value by provided value.
+        /// </summary>
+        /// <param name="key">string with property name to multiply</param>
+        /// <param name="value">double value by which to multiply</param>
+        public void Multiply(string key, double value)
+        {
+            lock (LockObj) {
+                Log.Info("[UserDetailsCountlyService] Multiply : key = " + key + ", value = " + value);
+
+                AddToCustomData(key, new Dictionary<string, object> { { "$mul", value } });
+            }
+        }
+
+        /// <summary>
+        /// Save maximal value between existing and provided.
+        /// </summary>
+        /// <param name="key">String with property name to check for max</param>
+        /// <param name="value">double value to check for max</param>
+        public void Max(string key, double value)
+        {
+            lock (LockObj) {
+                Log.Info("[UserDetailsCountlyService] Max : key = " + key + ", value = " + value);
+
+                AddToCustomData(key, new Dictionary<string, object> { { "$max", value } });
+            }
+        }
+
+        /// <summary>
+        /// Save minimal value between existing and provided.
+        /// </summary>
+        /// <param name="key">string with property name to check for min</param>
+        /// <param name="value">double value to check for min</param>
+        public void Min(string key, double value)
+        {
+            lock (LockObj) {
+                Log.Info("[UserDetailsCountlyService] Min : key = " + key + ", value = " + value);
+
+                AddToCustomData(key, new Dictionary<string, object> { { "$min", value } });
+            }
+        }
+
+        /// <summary>
+        /// Create array property, if property does not exist and add value to array
+        /// You can only use it on array properties or properties that do not exist yet.
+        /// </summary>
+        /// <param name="key">string with property name for array property</param>
+        /// <param name="value">array with values to add</param>
+        public void Push(string key, string[] value)
+        {
+            lock (LockObj) {
+                Log.Info("[UserDetailsCountlyService] Push : key = " + key + ", value = " + value);
+
+                AddToCustomData(key, new Dictionary<string, object> { { "$push", value } });
+            }
+        }
+
+        /// <summary>
+        /// Create array property, if property does not exist and add value to array, only if value is not yet in the array
+        /// You can only use it on array properties or properties that do not exist yet.
+        /// </summary>
+        /// <param name="key">string with property name for array property</param>
+        /// <param name="value">array with values to add</param>
+        public void PushUnique(string key, string[] value)
+        {
+            lock (LockObj) {
+                Log.Info("[UserDetailsCountlyService] PushUnique : key = " + key + ", value = " + value);
+
+                AddToCustomData(key, new Dictionary<string, object> { { "$addToSet", value } });
+            }
+        }
+
+        /// <summary>
+        /// Create array property, if property does not exist and remove value from array.
+        /// </summary>
+        /// <param name="key">String with property name for array property</param>
+        /// <param name="value">array with values to remove from array</param>
+        public void Pull(string key, string[] value)
+        {
+            lock (LockObj) {
+                Log.Info("[UserDetailsCountlyService] Pull : key = " + key + ", value = " + value);
+
+                AddToCustomData(key, new Dictionary<string, object> { { "$pull", value } });
+            }
+        }
+
+
+        /// <summary>
+        /// Create a property
+        /// </summary>
+        /// <param name="key">property name</param>
+        /// <param name="value">property value</param>
+        private void AddToCustomData(string key, object value)
+        {
+            Log.Debug("[UserDetailsCountlyService] AddToCustomData: " + key + ", " + value);
+
+            if (!_consentService.CheckConsentInternal(Consents.Users)) {
                 return;
             }
 
-            CountlyUserDetailsModel model = new CountlyUserDetailsModel(CustomeDataProperties);
-
-            CustomeDataProperties = new Dictionary<string, object> { };
-            await SetCustomUserDetailsAsync(model);
-        }
-
-
-        /// <summary>
-        /// Sets value to key.
-        /// Doesn't report it to the server until save is called.
-        /// </summary>
-        /// <param name="key"></param>
-        /// <param name="value"></param>
-        public void Set(string key, string value)
-        {
-            AddToCustomData(key, value);
-        }
-
-        /// <summary>
-        /// Sets value to key, only if property was not defined before for this user.
-        /// Doesn't report it to the server until save is called.
-        /// </summary>
-        /// <param name="key"></param>
-        /// <param name="value"></param>
-        public void SetOnce(string key, string value)
-        {
-            AddToCustomData(key, new Dictionary<string, object> { { "$setOnce", value } });
-        }
-
-        /// <summary>
-        /// To increment value, for the specified key, on the server by 1.
-        /// Doesn't report it to the server until save is called.
-        /// </summary>
-        /// <param name="key"></param>
-        public void Increment(string key)
-        {
-            AddToCustomData(key, new Dictionary<string, object> { { "$inc", 1 } });
-        }
-
-        /// <summary>
-        /// To increment value on server by provided value (if no value on server, assumes it is 0).
-        /// Doesn't report it to the server until save is called.
-        /// </summary>
-        /// <param name="key"></param>
-        /// <param name="value"></param>
-        public void IncrementBy(string key, double value)
-        {
-            AddToCustomData(key, new Dictionary<string, object> { { "$inc", value } });
-        }
-
-        /// <summary>
-        /// To multiply value on server by provided value (if no value on server, assumes it is 0).
-        /// Doesn't report it to the server until save is called.
-        /// </summary>
-        /// <param name="key"></param>
-        /// <param name="value"></param>
-        public void Multiply(string key, double value)
-        {
-            AddToCustomData(key, new Dictionary<string, object> { { "$mul", value } });
-        }
-
-        /// <summary>
-        /// To store maximal value from the one on server and provided value (if no value on server, uses provided value).
-        /// Doesn't report it to the server until save is called.
-        /// </summary>
-        /// <param name="key"></param>
-        /// <param name="value"></param>
-        public void Max(string key, double value)
-        {
-            AddToCustomData(key, new Dictionary<string, object> { { "$max", value } });
-        }
-
-        /// <summary>
-        /// To store minimal value from the one on server and provided value (if no value on server, uses provided value).
-        /// Doesn't report it to the server until save is called.
-        /// </summary>
-        /// <param name="key"></param>
-        /// <param name="value"></param>
-        public void Min(string key, double value)
-        {
-            AddToCustomData(key, new Dictionary<string, object> { { "$min", value } });
-        }
-
-        /// <summary>
-        /// Add one or many values to array property (can have multiple same values, if property is not array, converts it to array).
-        /// Doesn't report it to the server until save is called.
-        /// </summary>
-        /// <param name="key"></param>
-        /// <param name="value"></param>
-        public void Push(string key, string[] value)
-        {
-            AddToCustomData(key, new Dictionary<string, object> { { "$push", value } });
-        }
-
-        /// <summary>
-        /// Add one or many values to array property (will only store unique values in array, if property is not array, converts it to array).
-        /// Doesn't report it to the server until save is called.
-        /// </summary>
-        /// <param name="key"></param>
-        /// <param name="value"></param>
-        public void PushUnique(string key, string[] value)
-        {
-            AddToCustomData(key, new Dictionary<string, object> { { "$addToSet", value } });
-        }
-
-        /// <summary>
-        /// Remove one or many values from array property (only removes value from array properties).
-        /// Doesn't report it to the server until save is called.
-        /// </summary>
-        /// <param name="key"></param>
-        /// <param name="value"></param>
-        public void Pull(string key, string[] value)
-        {
-            AddToCustomData(key, new Dictionary<string, object> { { "$pull", value } });
-        }
-
-
-        public void AddToCustomData(string key, object value)
-        {
-            if (CustomeDataProperties.ContainsKey(key)) {
-                string item = CustomeDataProperties.Select(x => x.Key).FirstOrDefault(x => x.Equals(key, StringComparison.OrdinalIgnoreCase));
+            if (CustomDataProperties.ContainsKey(key)) {
+                string item = CustomDataProperties.Select(x => x.Key).FirstOrDefault(x => x.Equals(key, StringComparison.OrdinalIgnoreCase));
                 if (item != null) {
-                    CustomeDataProperties.Remove(item);
+                    CustomDataProperties.Remove(item);
                 }
             }
 
-            CustomeDataProperties.Add(key, value);
+            CustomDataProperties.Add(key, value);
         }
 
-        public void DeviceIdChanged(string deviceId, bool merged)
+        #region override Methods
+        internal override void DeviceIdChanged(string deviceId, bool merged)
         {
-            
+
         }
+
+        internal override void ConsentChanged(List<Consents> updatedConsents, bool newConsentValue)
+        {
+
+        }
+        #endregion
     }
 }

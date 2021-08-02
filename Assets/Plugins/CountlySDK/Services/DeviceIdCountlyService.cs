@@ -1,41 +1,39 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Plugins.CountlySDK.Enums;
 using Plugins.CountlySDK.Helpers;
 using Plugins.CountlySDK.Models;
 using UnityEngine;
 
 namespace Plugins.CountlySDK.Services
 {
-    public class DeviceIdCountlyService
+    public class DeviceIdCountlyService : AbstractBaseService
     {
-        private List<IBaseService> _listeners;
         private readonly CountlyUtils _countlyUtils;
-        private readonly CountlyConfiguration _config;
-        private readonly SessionCountlyService _sessionCountlyService;
-        private readonly RequestCountlyHelper _requestCountlyHelper;
         private readonly EventCountlyService _eventCountlyService;
+        internal readonly RequestCountlyHelper _requestCountlyHelper;
+        private readonly SessionCountlyService _sessionCountlyService;
 
-
-        internal DeviceIdCountlyService(CountlyConfiguration config, SessionCountlyService sessionCountlyService,
-            RequestCountlyHelper requestCountlyHelper, EventCountlyService eventCountlyService, CountlyUtils countlyUtils)
+        internal DeviceIdCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, SessionCountlyService sessionCountlyService,
+            RequestCountlyHelper requestCountlyHelper, EventCountlyService eventCountlyService, CountlyUtils countlyUtils, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
         {
-            _config = config;
+            Log.Debug("[DeviceIdCountlyService] Initializing.");
+
             _countlyUtils = countlyUtils;
             _eventCountlyService = eventCountlyService;
             _requestCountlyHelper = requestCountlyHelper;
             _sessionCountlyService = sessionCountlyService;
         }
-
+        /// <summary>
+        /// Returns the Device ID that is currently used by the SDK
+        /// </summary>
         public string DeviceId { get; private set; }
 
-        internal void AddListeners(List<IBaseService> listeners)
-        {
-            _listeners = listeners;
-            if (_config.EnableConsoleLogging) {
-                Debug.Log("[Countly DeviceIdCountlyService] AddListeners");
-            }
-        }
-
+        /// <summary>
+        /// Initialize <code>DeviceId</code> field with device id provided in configuration or with Randome generated Id and Cache it.
+        /// </summary>
+        /// <param name="deviceId">new device id provided in configuration</param>
         internal void InitDeviceId(string deviceId = null)
         {
             //**Priority is**
@@ -69,28 +67,65 @@ namespace Plugins.CountlySDK.Services
         /// Ends current session with old Device Id.
         /// Begins a new session with new Device Id
         /// </summary>
-        /// <param name="deviceId"></param>
+        /// <param name="deviceId">new device id</param>
+        [Obsolete("ChangeDeviceIdAndEndCurrentSessionAsync is deprecated, please use ChangeDeviceIdWithoutMerge method instead.")]
         public async Task ChangeDeviceIdAndEndCurrentSessionAsync(string deviceId)
         {
-            //Ignore call if new and old device id are same
-            if (DeviceId == deviceId) {
+            Log.Info("[DeviceIdCountlyService] ChangeDeviceIdAndEndCurrentSessionAsync: deviceId = " + deviceId);
+
+            if (!_consentService.AnyConsentGiven()) {
+                Log.Debug("[DeviceIdCountlyService] ChangeDeviceIdAndEndCurrentSessionAsync: Please set at least a single consent before calling this!");
                 return;
             }
 
-            //Add currently recorded events to request queue-----------------------------------
-            await _eventCountlyService.AddEventsToRequestQueue();
+            await ChangeDeviceIdWithoutMerge(deviceId);
+        }
 
-            //Ends current session
-            //Do not dispose timer object
-            await _sessionCountlyService.ExecuteEndSessionAsync(false);
+        /// <summary>
+        /// Changes Device Id.
+        /// Adds currently recorded but not queued events to request queue.
+        /// Clears all started timed-events
+        /// Ends current session with old Device Id.
+        /// Begins a new session with new Device Id
+        /// </summary>
+        /// <param name="deviceId">new device id</param>
+        public async Task ChangeDeviceIdWithoutMerge(string deviceId)
+        {
+            lock (LockObj) {
+                Log.Info("[DeviceIdCountlyService] ChangeDeviceIdWithoutMerge: deviceId = " + deviceId);
 
-            //Update device id
-            UpdateDeviceId(deviceId);
+                if (!_consentService.AnyConsentGiven()) {
+                    Log.Debug("[DeviceIdCountlyService] ChangeDeviceIdWithoutMerge: Please set at least a single consent before calling this!");
+                    return;
+                }
 
-            //Begin new session with new device id
-            //Do not initiate timer again, it is already initiated
-            await _sessionCountlyService.ExecuteBeginSessionAsync();
-            NotifyListeners(false);
+                //Ignore call if new and old device id are same
+                if (DeviceId == deviceId) {
+                    return;
+                }
+
+                //Add currently recorded events to request queue-----------------------------------
+                _eventCountlyService.AddEventsToRequestQueue();
+
+                //Ends current session
+                //Do not dispose timer object
+                if (!_configuration.IsAutomaticSessionTrackingDisabled) {
+                    _=_sessionCountlyService.EndSessionAsync();
+                }
+
+                //Update device id
+                UpdateDeviceId(deviceId);
+
+                //Begin new session with new device id
+                //Do not initiate timer again, it is already initiated
+                if (!_configuration.IsAutomaticSessionTrackingDisabled) {
+                    _=_sessionCountlyService.BeginSessionAsync();
+                }
+
+                NotifyListeners(false);
+
+                _=_requestCountlyHelper.ProcessQueue();
+            }
         }
 
         /// <summary>
@@ -98,35 +133,64 @@ namespace Plugins.CountlySDK.Services
         /// Continues with the current session.
         /// Merges data for old and new Device Id. 
         /// </summary>
-        /// <param name="deviceId"></param>
+        /// <param name="deviceId">new device id</param>
+        [Obsolete("ChangeDeviceIdAndMergeSessionDataAsync is deprecated, please use ChangeDeviceIdWithMerge method instead.")]
         public async Task ChangeDeviceIdAndMergeSessionDataAsync(string deviceId)
         {
-            //Ignore call if new and old device id are same
-            if (DeviceId == deviceId) {
+            Log.Info("[DeviceIdCountlyService] ChangeDeviceIdAndMergeSessionDataAsync: deviceId = " + deviceId);
+
+            if (!_consentService.AnyConsentGiven()) {
+                Log.Debug("[DeviceIdCountlyService] ChangeDeviceIdAndMergeSessionDataAsync: Please set at least a single consent before calling this!");
                 return;
             }
 
-            //Keep old device id
-            string oldDeviceId = DeviceId;
+            await ChangeDeviceIdWithMerge(deviceId);
+        }
 
-            //Update device id
-            UpdateDeviceId(deviceId);
+        /// <summary>
+        /// Changes DeviceId. 
+        /// Continues with the current session.
+        /// Merges data for old and new Device Id. 
+        /// </summary>
+        /// <param name="deviceId">new device id</param>
+        public async Task ChangeDeviceIdWithMerge(string deviceId)
+        {
+            lock (LockObj) {
+                Log.Info("[DeviceIdCountlyService] ChangeDeviceIdWithMerge: deviceId = " + deviceId);
 
-            //Merge user data for old and new device
-            Dictionary<string, object> requestParams =
-               new Dictionary<string, object>
-               {
+                if (!_consentService.AnyConsentGiven()) {
+                    Log.Debug("[DeviceIdCountlyService] ChangeDeviceIdWithMerge: Please set at least a single consent before calling this!");
+                    return;
+                }
+
+                //Ignore call if new and old device id are same
+                if (DeviceId == deviceId) {
+                    return;
+                }
+
+                //Keep old device id
+                string oldDeviceId = DeviceId;
+
+                //Update device id
+                UpdateDeviceId(deviceId);
+
+                //Merge user data for old and new device
+                Dictionary<string, object> requestParams =
+                   new Dictionary<string, object>
+                   {
                         { "old_device_id", oldDeviceId }
-               };
+                   };
 
-            await _requestCountlyHelper.GetResponseAsync(requestParams);
-            NotifyListeners(true);
+                _requestCountlyHelper.AddToRequestQueue(requestParams);
+                _=_requestCountlyHelper.ProcessQueue();
+                NotifyListeners(true);
+            }
         }
 
         /// <summary>
         /// Updates Device ID both in app and in cache
         /// </summary>
-        /// <param name="newDeviceId"></param>
+        /// <param name="newDeviceId">new device id</param>
         private void UpdateDeviceId(string newDeviceId)
         {
             //Change device id
@@ -134,17 +198,37 @@ namespace Plugins.CountlySDK.Services
 
             //Updating Cache
             PlayerPrefs.SetString(Constants.DeviceIDKey, DeviceId);
+
+            Log.Debug("[DeviceIdCountlyService] UpdateDeviceId: " + newDeviceId);
+
         }
 
+        /// <summary>
+        /// Call <code>DeviceIdChanged</code> on all listeners.
+        /// </summary>
+        /// <param name="merged">If passed "true" if will perform a device ID merge serverside of the old and new device ID. This will merge their data</param>
         private void NotifyListeners(bool merged)
         {
-            if (_listeners == null) {
+            if (Listeners == null) {
                 return;
             }
 
-            foreach (IBaseService listener in _listeners) {
+            foreach (AbstractBaseService listener in Listeners) {
                 listener.DeviceIdChanged(DeviceId, merged);
             }
         }
+
+        #region override Methods
+
+        internal override void DeviceIdChanged(string deviceId, bool merged)
+        {
+
+        }
+
+        internal override void ConsentChanged(List<Consents> updatedConsents, bool newConsentValue)
+        {
+
+        }
+        #endregion
     }
 }

@@ -1,19 +1,22 @@
 {
     "name": "PlayModeTests",
     "references": [
+        "PluginAssembly",
         "UnityEngine.TestRunner",
-        "UnityEditor.TestRunner",
-        "PluginAssembly"
+        "UnityEditor.TestRunner"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": true,
     "precompiledReferences": [
-        "nunit.framework.dll"
+        "nunit.framework.dll",
+        "nunit.framework.dll",
+        "Newtonsoft.Json.dll"
     ],
     "autoReferenced": false,
     "defineConstraints": [
+        "UNITY_INCLUDE_TESTS",
         "UNITY_INCLUDE_TESTS"
     ],
     "versionDefines": [],
