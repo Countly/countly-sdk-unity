@@ -1,4 +1,6 @@
 ﻿
+using UnityEngine;
+
 namespace Plugins.CountlySDK.Helpers
 {
     internal class Constants
@@ -53,8 +55,8 @@ namespace Plugins.CountlySDK.Helpers
         #region Unity System
         public static void ProcessPlatform()
         {
-            string platform = UnityEngine.Application.platform.ToString().ToLower();
-            UnityPlatform = (platform == "iphoneplayer" || platform == "iosplayer") ? "ios" : platform;
+            string platform = Application.platform.ToString().ToLower();
+            UnityPlatform = (Application.platform == RuntimePlatform.IPhonePlayer) ? "iOS" : platform;
         }
         public static string UnityPlatform { get; internal set; }
 
