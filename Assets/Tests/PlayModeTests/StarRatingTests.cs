@@ -45,7 +45,9 @@ namespace Tests
 
             Countly.Instance.Init(configuration);
 
-            Countly.Instance.ClearStorage();
+            Countly.Instance.StarRating._eventCountlyService._eventRepo.Clear();
+            Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
+
             Assert.IsNotNull(Countly.Instance.StarRating);
             Assert.AreEqual(0, Countly.Instance.StarRating._eventCountlyService._eventRepo.Count);
 
@@ -80,7 +82,9 @@ namespace Tests
 
             Countly.Instance.Init(configuration);
 
-            Countly.Instance.ClearStorage();
+            Countly.Instance.StarRating._eventCountlyService._eventRepo.Clear();
+            Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
+
             Assert.IsNotNull(Countly.Instance.StarRating);
             Assert.AreEqual(0, Countly.Instance.StarRating._eventCountlyService._eventRepo.Count);
 
@@ -101,7 +105,9 @@ namespace Tests
 
             Countly.Instance.Init(configuration);
 
-            Countly.Instance.ClearStorage();
+            Countly.Instance.StarRating._eventCountlyService._eventRepo.Clear();
+            Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
+
             Assert.IsNotNull(Countly.Instance.StarRating);
             await Countly.Instance.StarRating.ReportStarRatingAsync("android", "0.1", 5);
             Assert.AreEqual(1, Countly.Instance.StarRating._eventCountlyService._eventRepo.Count);
@@ -131,7 +137,8 @@ namespace Tests
             };
 
             Countly.Instance.Init(configuration);
-            Countly.Instance.ClearStorage();
+            Countly.Instance.StarRating._eventCountlyService._eventRepo.Clear();
+            Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
 
             Assert.IsNotNull(Countly.Instance.StarRating);
             Assert.AreEqual(0, Countly.Instance.StarRating._eventCountlyService._eventRepo.Count);
@@ -173,7 +180,8 @@ namespace Tests
             };
 
             Countly.Instance.Init(configuration);
-            Countly.Instance.ClearStorage();
+            Countly.Instance.StarRating._eventCountlyService._eventRepo.Clear();
+            Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
 
             Assert.IsNotNull(Countly.Instance.StarRating);
             Assert.AreEqual(0, Countly.Instance.StarRating._eventCountlyService._eventRepo.Count);

@@ -123,7 +123,9 @@ namespace Plugins.CountlySDK.Services
                     return;
                 }
 
-                _ = RecordEventAsync(key, null);
+                CountlyEventModel @event = new CountlyEventModel(key, null, 1, 0, null);
+
+                _ = RecordEventAsync(@event);
             }
 
         }

@@ -49,7 +49,9 @@ namespace Tests
 
             Countly.Instance.Init(configuration);
 
-            Countly.Instance.ClearStorage();
+            Countly.Instance.Views._eventService._eventRepo.Clear();
+            Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
+
             Assert.IsNotNull(Countly.Instance.Views);
             Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
 
@@ -93,7 +95,9 @@ namespace Tests
 
             Countly.Instance.Init(configuration);
 
-            Countly.Instance.ClearStorage();
+            Countly.Instance.Views._eventService._eventRepo.Clear();
+            Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
+
             Assert.IsNotNull(Countly.Instance.Views);
             Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
 
@@ -119,7 +123,9 @@ namespace Tests
 
             Countly.Instance.Init(configuration);
 
-            Countly.Instance.ClearStorage();
+            Countly.Instance.Views._eventService._eventRepo.Clear();
+            Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
+
             Assert.IsNotNull(Countly.Instance.Views);
             Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
 
@@ -149,7 +155,10 @@ namespace Tests
 
             Countly.Instance.Init(configuration);
 
-            Countly.Instance.ClearStorage();
+
+            Countly.Instance.Views._eventService._eventRepo.Clear();
+            Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
+
             Assert.IsNotNull(Countly.Instance.Views);
             Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
 
@@ -196,7 +205,9 @@ namespace Tests
             };
 
             Countly.Instance.Init(configuration);
-            Countly.Instance.ClearStorage();
+
+            Countly.Instance.Views._eventService._eventRepo.Clear();
+            Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
 
             Assert.IsNotNull(Countly.Instance.Views);
             Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
@@ -226,7 +237,9 @@ namespace Tests
 
             Countly.Instance.Init(configuration);
 
-            Countly.Instance.ClearStorage();
+            Countly.Instance.Views._eventService._eventRepo.Clear();
+            Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
+
             Assert.IsNotNull(Countly.Instance.Views);
             Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
 
@@ -263,7 +276,9 @@ namespace Tests
             configuration.GiveConsent(new Consents[] { Consents.Crashes, Consents.Events, Consents.Clicks, Consents.StarRating, Consents.Views, Consents.Users, Consents.Push, Consents.RemoteConfig, Consents.Location });
             Countly.Instance.Init(configuration);
 
-            Countly.Instance.ClearStorage();
+            Countly.Instance.Views._eventService._eventRepo.Clear();
+            Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
+
             Assert.IsNotNull(Countly.Instance.Views);
             Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
             Assert.IsTrue(Countly.Instance.Views._isFirstView);

@@ -168,7 +168,7 @@ namespace Tests
 
             Assert.IsNotNull(Countly.Instance.Consents);
 
-            Countly.Instance.ClearStorage();
+            Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
             Countly.Instance.Consents.GiveConsent(new Consents[] { Consents.Crashes, Consents.Events });
             Assert.AreEqual(1, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
 

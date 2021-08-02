@@ -247,6 +247,195 @@ namespace Tests
             Assert.AreEqual(2, Countly.Instance.Events._eventRepo.Count);
         }
 
+
+        /// <summary>
+        /// It validates 'recordEvent' against specific keys.
+        /// </summary>
+        [Test]
+        public async void TestEventMethod_RecordEventAsyncWithSpecificKeys()
+        {
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                ServerUrl = _serverUrl,
+                AppKey = _appKey,
+                RequiresConsent = true,
+            };
+
+            Countly.Instance.Init(configuration);
+
+            Assert.IsNotNull(Countly.Instance.Events);
+            Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
+
+            await Countly.Instance.Events.RecordEventAsync("event");
+            Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
+
+            await Countly.Instance.Events.RecordEventAsync("[CLY]_view");
+            Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
+
+            await Countly.Instance.Events.RecordEventAsync("[CLY]_action"); 
+            Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
+
+            await Countly.Instance.Events.RecordEventAsync("[CLY]_push_action");
+            Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
+
+
+            //[CLY]_view
+            Countly.Instance.Consents.GiveConsent(new Consents[] { Consents.Views });
+
+            await Countly.Instance.Events.RecordEventAsync("event");
+            Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
+
+            await Countly.Instance.Events.RecordEventAsync(null, null);
+            Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
+
+            await Countly.Instance.Events.RecordEventAsync("[CLY]_action");
+            Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
+
+            await Countly.Instance.Events.RecordEventAsync("[CLY]_push_action");
+            Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
+
+            await Countly.Instance.Events.RecordEventAsync("[CLY]_VIEW");
+            Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
+
+            await Countly.Instance.Events.RecordEventAsync("[CLY]_view");
+            Assert.AreEqual(1, Countly.Instance.Events._eventRepo.Count);
+
+            CountlyEventModel model = Countly.Instance.Events._eventRepo.Dequeue();
+
+            Assert.AreEqual("[CLY]_view", model.Key);
+            Assert.AreEqual(0, model.Sum);
+            Assert.AreEqual(1, model.Count);
+            Assert.IsNull(model.Duration);
+            Assert.IsNull(model.Segmentation);
+
+            await Countly.Instance.Events.RecordEventAsync("[CLY]_view", segmentation: null, count: 5, duration: null, sum: 1);
+            Assert.AreEqual(1, Countly.Instance.Events._eventRepo.Count);
+
+            model = Countly.Instance.Events._eventRepo.Dequeue();
+
+            Assert.AreEqual("[CLY]_view", model.Key);
+            Assert.AreEqual(1, model.Sum);
+            Assert.AreEqual(5, model.Count);
+            Assert.IsNull(model.Duration);
+            Assert.IsNull(model.Segmentation);
+
+            //[CLY]_action
+            Countly.Instance.Consents.RemoveConsent(new Consents[] { Consents.Views });
+            Countly.Instance.Consents.GiveConsent(new Consents[] { Consents.Clicks });
+
+            await Countly.Instance.Events.RecordEventAsync("event");
+            Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
+
+            await Countly.Instance.Events.RecordEventAsync("[CLY]_view");
+            Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
+
+            await Countly.Instance.Events.RecordEventAsync("[CLY]_push_action");
+            Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
+
+
+            await Countly.Instance.Events.RecordEventAsync("[CLY]_Action");
+            Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
+
+            await Countly.Instance.Events.RecordEventAsync("[CLY]_action");
+            Assert.AreEqual(1, Countly.Instance.Events._eventRepo.Count);
+
+            model = Countly.Instance.Events._eventRepo.Dequeue();
+
+            Assert.AreEqual("[CLY]_action", model.Key);
+            Assert.AreEqual(0, model.Sum);
+            Assert.AreEqual(1, model.Count);
+            Assert.IsNull(model.Duration);
+            Assert.IsNull(model.Segmentation);
+
+            await Countly.Instance.Events.RecordEventAsync("[CLY]_action", segmentation: null, count: 5, duration: null, sum: 1);
+            Assert.AreEqual(1, Countly.Instance.Events._eventRepo.Count);
+
+            model = Countly.Instance.Events._eventRepo.Dequeue();
+
+            Assert.AreEqual("[CLY]_action", model.Key);
+            Assert.AreEqual(1, model.Sum);
+            Assert.AreEqual(5, model.Count);
+            Assert.IsNull(model.Duration);
+            Assert.IsNull(model.Segmentation);
+
+
+            //[CLY]_push_action
+            Countly.Instance.Consents.RemoveConsent(new Consents[] { Consents.Clicks });
+            Countly.Instance.Consents.GiveConsent(new Consents[] { Consents.Push });
+
+            await Countly.Instance.Events.RecordEventAsync("event");
+            Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
+
+            await Countly.Instance.Events.RecordEventAsync("[CLY]_view");
+            Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
+
+            await Countly.Instance.Events.RecordEventAsync("[CLY]_action");
+            Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
+
+            await Countly.Instance.Events.RecordEventAsync("[CLY]_Push_Action");
+            Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
+
+            await Countly.Instance.Events.RecordEventAsync("[CLY]_push_action");
+            Assert.AreEqual(1, Countly.Instance.Events._eventRepo.Count);
+
+            model = Countly.Instance.Events._eventRepo.Dequeue();
+
+            Assert.AreEqual("[CLY]_push_action", model.Key);
+            Assert.AreEqual(0, model.Sum);
+            Assert.AreEqual(1, model.Count);
+            Assert.IsNull(model.Duration);
+            Assert.IsNull(model.Segmentation);
+
+            await Countly.Instance.Events.RecordEventAsync("[CLY]_push_action", segmentation: null, count: 5, duration: null, sum: 1);
+            Assert.AreEqual(1, Countly.Instance.Events._eventRepo.Count);
+
+            model = Countly.Instance.Events._eventRepo.Dequeue();
+
+            Assert.AreEqual("[CLY]_push_action", model.Key);
+            Assert.AreEqual(1, model.Sum);
+            Assert.AreEqual(5, model.Count);
+            Assert.IsNull(model.Duration);
+            Assert.IsNull(model.Segmentation);
+
+
+            //Event
+            Countly.Instance.Consents.RemoveConsent(new Consents[] { Consents.Push });
+            Countly.Instance.Consents.GiveConsent(new Consents[] { Consents.Events });
+
+
+            await Countly.Instance.Events.RecordEventAsync("[CLY]_view");
+            Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
+
+            await Countly.Instance.Events.RecordEventAsync("[CLY]_action");
+            Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
+
+
+            await Countly.Instance.Events.RecordEventAsync("[CLY]_push_action");
+            Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
+
+            await Countly.Instance.Events.RecordEventAsync("event");
+            Assert.AreEqual(1, Countly.Instance.Events._eventRepo.Count);
+
+            model = Countly.Instance.Events._eventRepo.Dequeue();
+
+            Assert.AreEqual("event", model.Key);
+            Assert.AreEqual(0, model.Sum);
+            Assert.AreEqual(1, model.Count);
+            Assert.IsNull(model.Duration);
+            Assert.IsNull(model.Segmentation);
+
+            await Countly.Instance.Events.RecordEventAsync("event", segmentation: null, count: 5, duration: null, sum: 1);
+            Assert.AreEqual(1, Countly.Instance.Events._eventRepo.Count);
+
+            model = Countly.Instance.Events._eventRepo.Dequeue();
+
+            Assert.AreEqual("event", model.Key);
+            Assert.AreEqual(1, model.Sum);
+            Assert.AreEqual(5, model.Count);
+            Assert.IsNull(model.Duration);
+            Assert.IsNull(model.Segmentation);
+
+        }
+
         [TearDown]
         public void End()
         {

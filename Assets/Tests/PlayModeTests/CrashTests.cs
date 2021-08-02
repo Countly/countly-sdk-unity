@@ -29,7 +29,8 @@ namespace Tests
             };
 
             Countly.Instance.Init(configuration);
-            Countly.Instance.ClearStorage();
+            Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
+
             Assert.IsNotNull(Countly.Instance.CrashReports);
             Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
 
@@ -78,7 +79,7 @@ namespace Tests
             };
 
             Countly.Instance.Init(configuration);
-            Countly.Instance.ClearStorage();
+            Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
 
             Assert.IsNotNull(Countly.Instance.CrashReports);
             Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
@@ -128,7 +129,7 @@ namespace Tests
             };
 
             Countly.Instance.Init(configuration);
-            Countly.Instance.ClearStorage();
+            Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
 
             Assert.IsNotNull(Countly.Instance.CrashReports);
 
