@@ -102,11 +102,11 @@ namespace Tests
                 RequiresConsent = true,
             };
 
-            configuration.GiveConsent(new Consents[] { Consents.Crashes, Consents.Events, Consents.Clicks, Consents.StarRating, Consents.Views, Consents.Users, Consents.Push, Consents.RemoteConfig, Consents.Location });
+            configuration.GiveConsent(new Consents[] { Consents.Crashes, Consents.Events, Consents.Clicks, Consents.StarRating, Consents.Views, Consents.Users, Consents.Push, Consents.RemoteConfig, Consents.Location, Consents.Feedback });
             Countly.Instance.Init(configuration);
 
             Assert.IsNotNull(Countly.Instance.Consents);
-            Assert.AreEqual(1, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
+            Assert.AreEqual(1, Countly.Instance.Consents._requestCountlyHelper._requestRepo.Count);
 
             CountlyRequestModel requestModel = Countly.Instance.Consents._requestCountlyHelper._requestRepo.Dequeue();
             string myUri = requestModel.RequestUrl;
@@ -120,6 +120,7 @@ namespace Tests
             Assert.IsTrue(json.GetValue("events").ToObject<bool>());
             Assert.IsTrue(json.GetValue("crashes").ToObject<bool>());
             Assert.IsTrue(json.GetValue("location").ToObject<bool>());
+            Assert.IsTrue(json.GetValue("feedback").ToObject<bool>());
             Assert.IsTrue(json.GetValue("star-rating").ToObject<bool>());
             Assert.IsTrue(json.GetValue("remote-config").ToObject<bool>());
 
