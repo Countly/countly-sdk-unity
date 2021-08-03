@@ -40,7 +40,7 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
 
     private void OnApplicationQuit()
     {
-        Countly.Instance.Notifications?.RemoveListener(this);
+        Countly.Instance?.Notifications?.RemoveListener(this);
     }
 
     public void TestWithMultipleThreads()
