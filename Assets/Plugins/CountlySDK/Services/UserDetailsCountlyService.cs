@@ -31,7 +31,7 @@ namespace Plugins.CountlySDK.Services
         private void AddCustomDetailToRequestQueue(IDictionary<string, object> segments)
         {
 
-            IDictionary<string, object> customDetail = FixSegmenKeysAndValues(segments);
+            IDictionary<string, object> customDetail = FixSegmentKeysAndValues(segments);
 
             Dictionary<string, object> requestParams =
                 new Dictionary<string, object>
@@ -72,20 +72,20 @@ namespace Plugins.CountlySDK.Services
                 }
 
 
-                userDetailsModel.Name = TrimValue(" '" + nameof(userDetailsModel.Name) + "' ", userDetailsModel.Name);
-                userDetailsModel.Phone = TrimValue(" '" + nameof(userDetailsModel.Name) + "' ", userDetailsModel.Phone);
-                userDetailsModel.Email = TrimValue(" '" + nameof(userDetailsModel.Name) + "' ", userDetailsModel.Email);
-                userDetailsModel.Gender = TrimValue(" '" + nameof(userDetailsModel.Name) + "' ", userDetailsModel.Gender);
-                userDetailsModel.Username = TrimValue(" '" + nameof(userDetailsModel.Name) + "' ", userDetailsModel.Username);
-                userDetailsModel.BirthYear = TrimValue(" '" + nameof(userDetailsModel.Name) + "' ", userDetailsModel.BirthYear);
-                userDetailsModel.Organization = TrimValue(" '" + nameof(userDetailsModel.Name) + "' ", userDetailsModel.Organization);
+                userDetailsModel.Name = TrimValue("Name", userDetailsModel.Name);
+                userDetailsModel.Phone = TrimValue("Phone", userDetailsModel.Phone);
+                userDetailsModel.Email = TrimValue("Email", userDetailsModel.Email);
+                userDetailsModel.Gender = TrimValue("Gender", userDetailsModel.Gender);
+                userDetailsModel.Username = TrimValue("Username", userDetailsModel.Username);
+                userDetailsModel.BirthYear = TrimValue("BirthYear", userDetailsModel.BirthYear);
+                userDetailsModel.Organization = TrimValue("Organization", userDetailsModel.Organization);
 
                 if (userDetailsModel.PictureUrl.Length > 4096) {
                     Log.Warning("[" + GetType().Name + "] TrimValue : Max allowed length of 'PictureUrl' is " + _configuration.MaxValueSize);
                     userDetailsModel.PictureUrl = userDetailsModel.PictureUrl.Substring(0, 4096);
                 }
 
-                userDetailsModel.Custom = FixSegmenKeysAndValues(userDetailsModel.Custom);
+                userDetailsModel.Custom = FixSegmentKeysAndValues(userDetailsModel.Custom);
                 Dictionary<string, object> requestParams =
                     new Dictionary<string, object>
                     {
@@ -173,7 +173,7 @@ namespace Plugins.CountlySDK.Services
             lock (LockObj) {
                 Log.Info("[UserDetailsCountlyService] Set : key = " + key + ", value = " + value);
 
-                AddToCustomData(key, TrimValue(" '" + key + "' ", value));
+                AddToCustomData(key, TrimValue(key, value));
             }
         }
 
@@ -199,7 +199,7 @@ namespace Plugins.CountlySDK.Services
             lock (LockObj) {
                 Log.Info("[UserDetailsCountlyService] SetOnce : key = " + key + ", value = " + value);
 
-                AddToCustomData(key, new Dictionary<string, object> { { "$setOnce", TrimValue(" '" + key + "' ", value) } });
+                AddToCustomData(key, new Dictionary<string, object> { { "$setOnce", TrimValue(key, value) } });
             }
         }
 

@@ -141,7 +141,7 @@ namespace Plugins.CountlySDK.Services
                 }
 
                 IDictionary<string, object> segments = RemoveSegmentInvalidDataTypes(segmentation);
-                segments = FixSegmenKeysAndValues(segments);
+                segments = FixSegmentKeysAndValues(segments);
 
                 CountlyEventModel @event = new CountlyEventModel(key, segments, count, sum, duration);
 
@@ -182,7 +182,7 @@ namespace Plugins.CountlySDK.Services
 
 
                 IDictionary<string, object> segments = RemoveSegmentInvalidDataTypes(segmentation);
-                segments = FixSegmenKeysAndValues(segments);
+                segments = FixSegmentKeysAndValues(segments);
 
                 CountlyEventModel @event = new CountlyEventModel(key, segments, count, sum, duration);
 

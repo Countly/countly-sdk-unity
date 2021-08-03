@@ -84,17 +84,17 @@ namespace Plugins.CountlySDK.Services
             return values;
         }
 
-        protected string TrimValue(string nameOf, string v)
+        protected string TrimValue(string fieldName, string v)
         {
             if (v.Length > _configuration.MaxValueSize) {
-                Log.Warning("[" + GetType().Name + "] TrimValue : Max allowed" + nameOf + "length is " + _configuration.MaxValueSize + ". " + v + " will be truncated.");
+                Log.Warning("[" + GetType().Name + "] TrimValue : Max allowed '" + fieldName + "' length is " + _configuration.MaxValueSize + ". " + v + " will be truncated.");
                 v = v.Substring(0, _configuration.MaxValueSize);
             }
 
             return v;
         }
 
-        protected IDictionary<string, object> FixSegmenKeysAndValues(IDictionary<string, object> segments)
+        protected IDictionary<string, object> FixSegmentKeysAndValues(IDictionary<string, object> segments)
         {
             if (segments == null || segments.Count == 0) {
                 return segments;
@@ -112,7 +112,7 @@ namespace Plugins.CountlySDK.Services
                 k = TrimKey(k);
 
                 if (v.GetType() == typeof(string)) {
-                    v = TrimValue(" value ", (string)v);
+                    v = TrimValue(k, (string)v);
                 }
 
                 segmentation.Add(k, v);
