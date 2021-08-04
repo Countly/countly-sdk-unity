@@ -71,7 +71,6 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         internal async Task RecordEventAsync(CountlyEventModel @event)
         {
-
             Log.Debug("[EventCountlyService] RecordEventAsync : " + @event.ToString());
 
             if (_configuration.EnableTestMode) {
@@ -163,29 +162,15 @@ namespace Plugins.CountlySDK.Services
                     return;
                 }
 
-                if (segmentation != null) {
-                    List<string> toRemove = new List<string>();
-
-                    foreach (KeyValuePair<string, object> item in segmentation) {
-                        bool isValidDataType = item.Value != null
-                            && (item.Value.GetType() == typeof(int)
-                            || item.Value.GetType() == typeof(bool)
-                            || item.Value.GetType() == typeof(float)
-                            || item.Value.GetType() == typeof(double)
-                            || item.Value.GetType() == typeof(string));
-
-                        if (!isValidDataType) {
-                            toRemove.Add(item.Key);
-                            Log.Warning("[EventCountlyService] ReportCustomEventAsync : In segmentation Data type '" + (item.Value?.GetType()) + "'  of item '" + item.Key + "' isn't valid.");
-                        }
-                    }
-
-                    foreach (string k in toRemove) {
-                        segmentation.Remove(k);
-                    }
+                if (key.Length > _configuration.MaxKeyLength) {
+                    Log.Warning("[EventCountlyService] RecordEventAsync : Max allowed key length is " + _configuration.MaxKeyLength);
+                    key = key.Substring(0, _configuration.MaxKeyLength);
                 }
 
-                CountlyEventModel @event = new CountlyEventModel(key, segmentation, count, sum, duration);
+                IDictionary<string, object> segments = RemoveSegmentInvalidDataTypes(segmentation);
+                segments = FixSegmentKeysAndValues(segments);
+
+                CountlyEventModel @event = new CountlyEventModel(key, segments, count, sum, duration);
 
                 _ = RecordEventAsync(@event);
             }
@@ -219,29 +204,16 @@ namespace Plugins.CountlySDK.Services
                     return;
                 }
 
-
-                if (segmentation != null) {
-                    List<string> toRemove = new List<string>();
-
-                    foreach (KeyValuePair<string, object> item in segmentation) {
-                        bool isValidDataType = item.Value.GetType() == typeof(int)
-                            || item.Value.GetType() == typeof(bool)
-                            || item.Value.GetType() == typeof(float)
-                            || item.Value.GetType() == typeof(double)
-                            || item.Value.GetType() == typeof(string);
-
-                        if (!isValidDataType) {
-                            toRemove.Add(item.Key);
-                            Log.Warning("[EventCountlyService] ReportCustomEventAsync : In segmentation Data type '" + (item.Value?.GetType()) + "'  of item '" + item.Key + "'isn't valid.");
-                        }
-                    }
-
-                    foreach (string k in toRemove) {
-                        segmentation.Remove(k);
-                    }
+                if (key.Length > _configuration.MaxKeyLength) {
+                    Log.Warning("[EventCountlyService] ReportCustomEventAsync : Max allowed key length is " + _configuration.MaxKeyLength);
+                    key = key.Substring(0, _configuration.MaxKeyLength);
                 }
 
-                CountlyEventModel @event = new CountlyEventModel(key, segmentation, count, sum, duration);
+
+                IDictionary<string, object> segments = RemoveSegmentInvalidDataTypes(segmentation);
+                segments = FixSegmentKeysAndValues(segments);
+
+                CountlyEventModel @event = new CountlyEventModel(key, segments, count, sum, duration);
 
                 _ = RecordEventAsync(@event);
             }

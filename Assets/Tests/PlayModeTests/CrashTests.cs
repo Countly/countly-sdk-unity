@@ -68,6 +68,63 @@ namespace Tests
         }
 
         /// <summary>
+        /// It validates the crash limits.
+        /// </summary>
+        [Test]
+        public async void TestCrashLimits()
+        {
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                ServerUrl = _serverUrl,
+                AppKey = _appKey,
+                MaxValueSize = 5,
+                MaxKeyLength = 5,
+                MaxSegmentationValues = 2,
+                MaxStackTraceLineLength = 5,
+                MaxStackTraceLinesPerThread = 2
+            };
+
+            Countly.Instance.Init(configuration);
+            Countly.Instance.ClearStorage();
+
+            Assert.IsNotNull(Countly.Instance.CrashReports);
+            Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
+
+            await Countly.Instance.CrashReports.SendCrashReportAsync("", "StackTrace", LogType.Exception, null);
+            Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
+
+            await Countly.Instance.CrashReports.SendCrashReportAsync(null, "StackTrace", LogType.Exception, null);
+            Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
+
+            await Countly.Instance.CrashReports.SendCrashReportAsync(" ", "StackTrace", LogType.Exception, null);
+            Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
+
+
+            Dictionary<string, object> seg = new Dictionary<string, object>{
+                { "Time", "1234455"},
+                { "Retry Attempts", "10"},
+                { "Temp", "100"}
+            };
+
+            await Countly.Instance.CrashReports.SendCrashReportAsync("message", "StackTrace_1\nStackTrace_2\nStackTrace_3", LogType.Exception, seg);
+            Assert.AreEqual(1, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
+
+            CountlyRequestModel requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
+            string myUri = requestModel.RequestUrl;
+            string crash = HttpUtility.ParseQueryString(myUri).Get("crash");
+            JObject json = JObject.Parse(crash);
+            Assert.AreEqual("message", json.GetValue("_name").ToString());
+            Assert.AreEqual("True", json.GetValue("_nonfatal").ToString());
+            Assert.AreEqual("Stack\nStack", json.GetValue("_error").ToString());
+
+            JObject custom = json["_custom"].ToObject<JObject>();
+
+            Assert.AreEqual(2, custom.Count);
+            Assert.AreEqual("12344", custom.GetValue("Time").ToString());
+            Assert.AreEqual("10", custom.GetValue("Retry").ToString());
+
+        }
+
+        /// <summary>
         /// It validates the functionality of 'SendCrashReportAsync'.
         /// </summary>
         [Test]
@@ -154,7 +211,7 @@ namespace Tests
                 }
             };
 
-            string url = 
+            string url =
                 Countly.Instance.CrashReports._requestCountlyHelper.BuildGetRequest(requestParams);
             int index = url.IndexOf("crash");
             Assert.AreEqual(url.Substring(index), requestModel.RequestUrl.Substring(index));
@@ -233,7 +290,7 @@ namespace Tests
         }
 
         /// <summary>
-        /// It validates the limit on bread crumbs length (limit = 1000).
+        /// It validates the maximum size of a bread crumb.
         /// </summary>
         [Test]
         public void TestCrashBreadCrumbsLength()
@@ -255,10 +312,10 @@ namespace Tests
             Assert.AreEqual(1, Countly.Instance.CrashReports._crashBreadcrumbs.Count);
 
             string qBreadCrumbs = Countly.Instance.CrashReports._crashBreadcrumbs.Dequeue();
-            Assert.AreEqual(1000, qBreadCrumbs.Length);
+            Assert.AreEqual(256, qBreadCrumbs.Length);
 
-            string validBreadcrumb = breadCrumbs.Length > 1000 ? breadCrumbs.Substring(0, 1000) : breadCrumbs;
-            Assert.AreEqual(validBreadcrumb, qBreadCrumbs); 
+            string validBreadcrumb = breadCrumbs.Length > 256 ? breadCrumbs.Substring(0, 256) : breadCrumbs;
+            Assert.AreEqual(validBreadcrumb, qBreadCrumbs);
         }
 
         /// <summary>

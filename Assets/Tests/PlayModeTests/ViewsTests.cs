@@ -111,6 +111,47 @@ namespace Tests
         }
 
         /// <summary>
+        /// It validates the limit of the view's name size.
+        /// </summary>
+        [Test]
+        public async void TestViewNameLimit()
+        {
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                ServerUrl = _serverUrl,
+                AppKey = _appKey,
+                MaxKeyLength = 5
+            };
+
+            Countly.Instance.Init(configuration);
+
+            Countly.Instance.ClearStorage();
+            Assert.IsNotNull(Countly.Instance.Views);
+            Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
+
+            await Countly.Instance.Views.RecordCloseViewAsync("open_view");
+            await Countly.Instance.Views.RecordCloseViewAsync("close_view");
+            Assert.AreEqual(2, Countly.Instance.Views._eventService._eventRepo.Count);
+
+            CountlyEventModel model = Countly.Instance.Views._eventService._eventRepo.Dequeue();
+
+            Assert.AreEqual(CountlyEventModel.ViewEvent, model.Key);
+            Assert.IsNull(model.Sum);
+            Assert.AreEqual(1, model.Count);
+            Assert.IsNull(model.Duration);
+            Assert.IsNotNull(model.Segmentation);
+            Assert.AreEqual("open_", model.Segmentation["name"]);
+
+            model = Countly.Instance.Views._eventService._eventRepo.Dequeue();
+
+            Assert.AreEqual(CountlyEventModel.ViewEvent, model.Key);
+            Assert.IsNull(model.Sum);
+            Assert.AreEqual(1, model.Count);
+            Assert.IsNull(model.Duration);
+            Assert.IsNotNull(model.Segmentation);
+            Assert.AreEqual("close", model.Segmentation["name"]);
+        }
+
+        /// <summary>
         /// It validates functionality of method 'RecordCloseViewAsync'.
         /// </summary>
         [Test]
