@@ -29,7 +29,8 @@ namespace Tests
             };
 
             Countly.Instance.Init(configuration);
-            Countly.Instance.ClearStorage();
+            Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
+
             Assert.IsNotNull(Countly.Instance.CrashReports);
             Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
 
@@ -78,7 +79,7 @@ namespace Tests
             };
 
             Countly.Instance.Init(configuration);
-            Countly.Instance.ClearStorage();
+            Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
 
             Assert.IsNotNull(Countly.Instance.CrashReports);
             Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
@@ -117,10 +118,10 @@ namespace Tests
         }
 
         /// <summary>
-        /// It validates the functionality of 'SendCrashReportInternal'.
+        /// It validates the functionality of 'SendCrashReportInternal' with GET method.
         /// </summary>
         [Test]
-        public async void TestMethod_SendCrashReportInternal()
+        public async void TestMethod_SendCrashReportInternalGetMethod()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 ServerUrl = _serverUrl,
@@ -128,7 +129,7 @@ namespace Tests
             };
 
             Countly.Instance.Init(configuration);
-            Countly.Instance.ClearStorage();
+            Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
 
             Assert.IsNotNull(Countly.Instance.CrashReports);
 
@@ -184,11 +185,58 @@ namespace Tests
 
         }
 
+
         /// <summary>
-        /// It validates the limit on bread crumbs lenght (limit = 1000).
+        /// It validates the functionality of 'SendCrashReportInternal' with POST method.
         /// </summary>
         [Test]
-        public void TestCrashBreadCrumbsLenght()
+        public async void TestMethod_SendCrashReportInternalPostMethod()
+        {
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                ServerUrl = _serverUrl,
+                AppKey = _appKey,
+            };
+
+            Countly.Instance.Init(configuration);
+            Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
+
+            Assert.IsNotNull(Countly.Instance.CrashReports);
+
+            Dictionary<string, object> seg = new Dictionary<string, object>{
+                { "Time Spent", "1234455"},
+                { "Retry Attempts", "10"}
+            };
+
+            CountlyExceptionDetailModel model1 = Countly.Instance.CrashReports.ExceptionDetailModel("A very long message to test post request scenario.",
+                "StackTrace StackTrace StackTrace StackTrace StackTraceStackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTraceStackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTraceStackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTraceStackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTraceStackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTraceStackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTraceStackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTraceStackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTraceStackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTraceStackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTraceStackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTraceStackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTraceStackTrace", true, seg);
+            await Countly.Instance.CrashReports.SendCrashReportInternal(model1);
+
+            Assert.AreEqual(1, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
+
+            CountlyRequestModel requestModel1 = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
+
+            Dictionary<string, object> requestParams1 = new Dictionary<string, object>
+            {
+                {
+                    "crash", JsonConvert.SerializeObject(model1, Newtonsoft.Json.Formatting.Indented,
+                        new JsonSerializerSettings {NullValueHandling = NullValueHandling.Ignore})
+                }
+            };
+
+
+            string url1 = Countly.Instance.CrashReports._requestCountlyHelper.BuildPostRequest(requestParams1);
+
+
+            int index1 = url1.IndexOf("crash");
+            Assert.AreEqual(url1.Substring(index1), requestModel1.RequestData.Substring(index1));
+
+        }
+
+        /// <summary>
+        /// It validates the limit on bread crumbs length (limit = 1000).
+        /// </summary>
+        [Test]
+        public void TestCrashBreadCrumbsLength()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 ServerUrl = _serverUrl,
