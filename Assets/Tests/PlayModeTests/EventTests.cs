@@ -286,6 +286,9 @@ namespace Tests
             await Countly.Instance.Events.RecordEventAsync("[CLY]_orientation");
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
+            await Countly.Instance.Events.RecordEventAsync("[CLY]_star_rating");
+            Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
+
         }
 
         /// <summary>
@@ -327,6 +330,9 @@ namespace Tests
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
             await Countly.Instance.Events.RecordEventAsync("[CLY]_survey");
+            Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
+
+            await Countly.Instance.Events.RecordEventAsync("[CLY]_star_rating");
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
             await Countly.Instance.Events.RecordEventAsync("[CLY]_view");
@@ -391,6 +397,9 @@ namespace Tests
             await Countly.Instance.Events.RecordEventAsync("[CLY]_view");
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
+            await Countly.Instance.Events.RecordEventAsync("[CLY]_star_rating");
+            Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
+
             await Countly.Instance.Events.RecordEventAsync("[CLY]_action");
             Assert.AreEqual(1, Countly.Instance.Events._eventRepo.Count);
 
@@ -415,7 +424,71 @@ namespace Tests
         }
 
         /// <summary>
-        /// It validates 'recordEvent' against push specific key '[CLY]_action'.
+        /// It validates 'recordEvent' against action specific key '[CLY]_star_rating'.
+        /// </summary>
+        [Test]
+        public async void TestEventMethod_RecordEventAgaisntStarRatingKey()
+        {
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                ServerUrl = _serverUrl,
+                AppKey = _appKey,
+                RequiresConsent = true,
+            };
+
+            Countly.Instance.Init(configuration);
+
+            Assert.IsNotNull(Countly.Instance.Events);
+            Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
+
+            Countly.Instance.Consents.GiveConsent(new Consents[] { Consents.StarRating });
+
+            await Countly.Instance.Events.RecordEventAsync("event");
+            Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
+
+            await Countly.Instance.Events.RecordEventAsync("[CLY]_push_action");
+            Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
+
+
+            await Countly.Instance.Events.RecordEventAsync("[CLY]_nps");
+            Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
+
+            await Countly.Instance.Events.RecordEventAsync("[CLY]_orientation");
+            Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
+
+            await Countly.Instance.Events.RecordEventAsync("[CLY]_survey");
+            Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
+
+            await Countly.Instance.Events.RecordEventAsync("[CLY]_view");
+            Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
+
+            await Countly.Instance.Events.RecordEventAsync("[CLY]_action");
+            Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
+
+            await Countly.Instance.Events.RecordEventAsync("[CLY]_star_rating");
+            Assert.AreEqual(1, Countly.Instance.Events._eventRepo.Count);
+
+            CountlyEventModel model = Countly.Instance.Events._eventRepo.Dequeue();
+
+            Assert.AreEqual("[CLY]_star_rating", model.Key);
+            Assert.AreEqual(0, model.Sum);
+            Assert.AreEqual(1, model.Count);
+            Assert.IsNull(model.Duration);
+            Assert.IsNull(model.Segmentation);
+
+            await Countly.Instance.Events.RecordEventAsync("[CLY]_star_rating", segmentation: null, count: 5, duration: null, sum: 1);
+            Assert.AreEqual(1, Countly.Instance.Events._eventRepo.Count);
+
+            model = Countly.Instance.Events._eventRepo.Dequeue();
+
+            Assert.AreEqual("[CLY]_star_rating", model.Key);
+            Assert.AreEqual(1, model.Sum);
+            Assert.AreEqual(5, model.Count);
+            Assert.IsNull(model.Duration);
+            Assert.IsNull(model.Segmentation);
+        }
+
+        /// <summary>
+        /// It validates 'recordEvent' against push specific key '[CLY]_push_action'.
         /// </summary>
         [Test]
         public async void TestEventMethod_RecordEventAgaisntPushActionKey()
@@ -432,7 +505,6 @@ namespace Tests
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
             //[CLY]_push_action
-            Countly.Instance.Consents.RemoveConsent(new Consents[] { Consents.Clicks });
             Countly.Instance.Consents.GiveConsent(new Consents[] { Consents.Push });
 
             await Countly.Instance.Events.RecordEventAsync("event");
@@ -448,6 +520,9 @@ namespace Tests
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
             await Countly.Instance.Events.RecordEventAsync("[CLY]_view");
+            Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
+
+            await Countly.Instance.Events.RecordEventAsync("[CLY]_star_rating");
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
             await Countly.Instance.Events.RecordEventAsync("[CLY]_action");
@@ -476,7 +551,7 @@ namespace Tests
             Assert.IsNull(model.Segmentation);
         }
         /// <summary>
-        /// It validates 'recordEvent' against push specific key '[CLY]_action'.
+        /// It validates 'recordEvent' against push specific key '[CLY]_orientation'.
         /// </summary>
         [Test]
         public async void TestEventMethod_RecordEventAgaisntOrientationKey()
@@ -507,6 +582,9 @@ namespace Tests
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
             await Countly.Instance.Events.RecordEventAsync("[CLY]_push_action");
+            Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
+
+            await Countly.Instance.Events.RecordEventAsync("[CLY]_star_rating");
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
             await Countly.Instance.Events.RecordEventAsync("[CLY]_survey");
@@ -568,6 +646,9 @@ namespace Tests
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
             await Countly.Instance.Events.RecordEventAsync("[CLY]_push_action");
+            Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
+
+            await Countly.Instance.Events.RecordEventAsync("[CLY]_star_rating");
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
             await Countly.Instance.Events.RecordEventAsync("[CLY]_orientation");
@@ -649,6 +730,9 @@ namespace Tests
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
             await Countly.Instance.Events.RecordEventAsync("[CLY]_orientation");
+            Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
+
+            await Countly.Instance.Events.RecordEventAsync("[CLY]_star_rating");
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
 

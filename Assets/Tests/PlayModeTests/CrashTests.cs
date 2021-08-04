@@ -186,7 +186,7 @@ namespace Tests
         }
 
         /// <summary>
-        /// It validates the limit on bread crumbs lenght (limit = 1000).
+        /// It validates the limit on bread crumbs length (limit = 1000).
         /// </summary>
         [Test]
         public void TestCrashBreadCrumbsLenght()
