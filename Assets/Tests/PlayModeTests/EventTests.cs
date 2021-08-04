@@ -295,7 +295,7 @@ namespace Tests
         /// It validates 'recordEvent' against view specific key '[CLY]_view'.
         /// </summary>
         [Test]
-        public async void TestEventMethod_RecordEventAgaisntViewKey()
+        public async void TestEventMethod_RecordEventAgainstViewKey()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 ServerUrl = _serverUrl,
@@ -363,7 +363,7 @@ namespace Tests
         /// It validates 'recordEvent' against action specific key '[CLY]_action'.
         /// </summary>
         [Test]
-        public async void TestEventMethod_RecordEventAgaisntActionKey()
+        public async void TestEventMethod_RecordEventAgainstActionKey()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 ServerUrl = _serverUrl,
@@ -427,7 +427,7 @@ namespace Tests
         /// It validates 'recordEvent' against action specific key '[CLY]_star_rating'.
         /// </summary>
         [Test]
-        public async void TestEventMethod_RecordEventAgaisntStarRatingKey()
+        public async void TestEventMethod_RecordEventAgainstStarRatingKey()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 ServerUrl = _serverUrl,
@@ -491,7 +491,7 @@ namespace Tests
         /// It validates 'recordEvent' against push specific key '[CLY]_push_action'.
         /// </summary>
         [Test]
-        public async void TestEventMethod_RecordEventAgaisntPushActionKey()
+        public async void TestEventMethod_RecordEventAgainstPushActionKey()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 ServerUrl = _serverUrl,
@@ -554,7 +554,7 @@ namespace Tests
         /// It validates 'recordEvent' against push specific key '[CLY]_orientation'.
         /// </summary>
         [Test]
-        public async void TestEventMethod_RecordEventAgaisntOrientationKey()
+        public async void TestEventMethod_RecordEventAgainstOrientationKey()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 ServerUrl = _serverUrl,
