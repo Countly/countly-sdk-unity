@@ -102,7 +102,7 @@ namespace Tests
                 RequiresConsent = true,
             };
 
-            configuration.GiveConsent(new Consents[] { Consents.Crashes, Consents.Events, Consents.Clicks, Consents.StarRating, Consents.Views, Consents.Users, Consents.Push, Consents.RemoteConfig, Consents.Location, Consents.Feedback });
+            configuration.GiveConsent(new Consents[] { Consents.Crashes, Consents.Events, Consents.Clicks, Consents.StarRating, Consents.Views, Consents.Users, Consents.Push, Consents.RemoteConfig, Consents.Location, Consents.Feedback, Consents.Sessions });
             Countly.Instance.Init(configuration);
 
             Assert.IsNotNull(Countly.Instance.Consents);
@@ -119,37 +119,11 @@ namespace Tests
             Assert.IsTrue(json.GetValue("clicks").ToObject<bool>());
             Assert.IsTrue(json.GetValue("events").ToObject<bool>());
             Assert.IsTrue(json.GetValue("crashes").ToObject<bool>());
+            Assert.IsTrue(json.GetValue("sessions").ToObject<bool>());
             Assert.IsTrue(json.GetValue("location").ToObject<bool>());
             Assert.IsTrue(json.GetValue("feedback").ToObject<bool>());
             Assert.IsTrue(json.GetValue("star-rating").ToObject<bool>());
             Assert.IsTrue(json.GetValue("remote-config").ToObject<bool>());
-
-            Countly.Instance.Consents.GiveConsent(new Consents[] { Consents.Crashes, Consents.Events });
-            Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
-
-            // RQ will have Consent change request and Session begin request
-            Countly.Instance.Consents.GiveConsent(new Consents[] { Consents.Sessions });
-            Assert.AreEqual(2, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
-
-            requestModel = Countly.Instance.Consents._requestCountlyHelper._requestRepo.Dequeue();
-            myUri = requestModel.RequestUrl;
-            consents = HttpUtility.ParseQueryString(myUri).Get("consent");
-            json = JObject.Parse(consents);
-            Assert.AreEqual(1, json.Count);
-            Assert.IsTrue(json.GetValue("sessions").ToObject<bool>());
-
-            Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
-            Countly.Instance.Consents.RemoveConsent(new Consents[] { Consents.Crashes, Consents.Views });
-            requestModel = Countly.Instance.Consents._requestCountlyHelper._requestRepo.Dequeue();
-            myUri = requestModel.RequestUrl;
-            consents = HttpUtility.ParseQueryString(myUri).Get("consent");
-            json = JObject.Parse(consents);
-            Assert.AreEqual(2, json.Count);
-            Assert.IsFalse(json.GetValue("crashes").ToObject<bool>());
-            Assert.IsFalse(json.GetValue("views").ToObject<bool>());
-
-            Countly.Instance.Consents.RemoveConsent(new Consents[] { Consents.Crashes });
-            Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
 
         }
 
