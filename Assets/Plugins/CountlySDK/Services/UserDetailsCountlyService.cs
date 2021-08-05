@@ -25,40 +25,27 @@ namespace Plugins.CountlySDK.Services
         }
 
         /// <summary>
-        /// Modifies all user data. Custom data should be json string.
-        /// Deletes an already defined custom property from the Countly server, if it is supplied with a NULL value
+        /// Add user custom detail to request queue.
         /// </summary>
-        /// <param name="userDetailsModel">User's detail object</param>
         /// <returns></returns>
-        internal async Task UserDetailsAsync(CountlyUserDetailsModel userDetailsModel)
+        private void AddCustomDetailToRequestQueue(IDictionary<string, object> segments)
         {
 
-            Log.Debug("[UserDetailsCountlyService] UserDetailsAsync : userDetails = " + (userDetailsModel != null));
+            IDictionary<string, object> customDetail = FixSegmentKeysAndValues(segments);
 
-            if (userDetailsModel == null) {
-                Log.Warning("[UserDetailsCountlyService] UserDetailsAsync : The parameter 'userDetailsModel' can't be null.");
-                return;
-            }
-
-            await SetUserDetailsAsync(userDetailsModel);
-        }
-
-        /// <summary>
-        /// Modifies custom user data only. Custom data should be json string.
-        /// Deletes an already defined custom property from the Countly server, if it is supplied with a NULL value
-        /// </summary>
-        /// <param name="userDetailsModel">User's custom detail object</param>
-        /// <return></returns>
-        internal async Task UserCustomDetailsAsync(CountlyUserDetailsModel userDetailsModel)
-        {
-            Log.Debug("[UserDetailsCountlyService] UserCustomDetailsAsync " + (userDetailsModel != null));
-
-            if (userDetailsModel == null) {
-                Log.Warning("[UserDetailsCountlyService] UserCustomDetailsAsync : The parameter 'userDetailsModel' can't be null.");
-                return;
-            }
-
-            await SetCustomUserDetailsAsync(userDetailsModel);
+            Dictionary<string, object> requestParams =
+                new Dictionary<string, object>
+                {
+                    { "user_details",
+                        JsonConvert.SerializeObject(
+                            new Dictionary<string, object>
+                            {
+                                { "custom", customDetail }
+                            })
+                    }
+                };
+            _requestCountlyHelper.AddToRequestQueue(requestParams);
+            _ = _requestCountlyHelper.ProcessQueue();
         }
 
         /// <summary>
@@ -84,6 +71,21 @@ namespace Plugins.CountlySDK.Services
                     throw new Exception("Accepted picture formats are .png, .gif and .jpeg");
                 }
 
+
+                userDetailsModel.Name = TrimValue("Name", userDetailsModel.Name);
+                userDetailsModel.Phone = TrimValue("Phone", userDetailsModel.Phone);
+                userDetailsModel.Email = TrimValue("Email", userDetailsModel.Email);
+                userDetailsModel.Gender = TrimValue("Gender", userDetailsModel.Gender);
+                userDetailsModel.Username = TrimValue("Username", userDetailsModel.Username);
+                userDetailsModel.BirthYear = TrimValue("BirthYear", userDetailsModel.BirthYear);
+                userDetailsModel.Organization = TrimValue("Organization", userDetailsModel.Organization);
+
+                if (userDetailsModel.PictureUrl.Length > 4096) {
+                    Log.Warning("[" + GetType().Name + "] TrimValue : Max allowed length of 'PictureUrl' is " + _configuration.MaxValueSize);
+                    userDetailsModel.PictureUrl = userDetailsModel.PictureUrl.Substring(0, 4096);
+                }
+
+                userDetailsModel.Custom = FixSegmentKeysAndValues(userDetailsModel.Custom);
                 Dictionary<string, object> requestParams =
                     new Dictionary<string, object>
                     {
@@ -92,7 +94,7 @@ namespace Plugins.CountlySDK.Services
                     };
 
                 _requestCountlyHelper.AddToRequestQueue(requestParams);
-                _= _requestCountlyHelper.ProcessQueue();
+                _ = _requestCountlyHelper.ProcessQueue();
             }
         }
 
@@ -122,19 +124,7 @@ namespace Plugins.CountlySDK.Services
                     return;
                 }
 
-                Dictionary<string, object> requestParams =
-                    new Dictionary<string, object>
-                    {
-                    { "user_details",
-                        JsonConvert.SerializeObject(
-                            new Dictionary<string, object>
-                            {
-                                { "custom", userDetailsModel.Custom }
-                            })
-                    }
-                    };
-                _requestCountlyHelper.AddToRequestQueue(requestParams);
-                _= _requestCountlyHelper.ProcessQueue();
+                AddCustomDetailToRequestQueue(userDetailsModel.Custom);
             }
         }
 
@@ -155,7 +145,7 @@ namespace Plugins.CountlySDK.Services
                 CountlyUserDetailsModel model = new CountlyUserDetailsModel(CustomDataProperties);
 
                 CustomDataProperties = new Dictionary<string, object> { };
-                _= SetCustomUserDetailsAsync(model);
+                AddCustomDetailToRequestQueue(CustomDataProperties);
             }
         }
 
@@ -167,10 +157,23 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value">string with value for the property</param>
         public void Set(string key, string value)
         {
+
+            if (string.IsNullOrEmpty(key)) {
+                Log.Warning("[UserDetailsCountlyService] Set : key '" + key + "'isn't valid.");
+
+                return;
+            }
+
+            if (string.IsNullOrEmpty(value)) {
+                Log.Warning("[UserDetailsCountlyService] Set : value '" + value + "'isn't valid.");
+
+                return;
+            }
+
             lock (LockObj) {
                 Log.Info("[UserDetailsCountlyService] Set : key = " + key + ", value = " + value);
 
-                AddToCustomData(key, value);
+                AddToCustomData(key, TrimValue(key, value));
             }
         }
 
@@ -181,10 +184,22 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value">string value to set</param>
         public void SetOnce(string key, string value)
         {
+            if (string.IsNullOrEmpty(value)) {
+                Log.Warning("[UserDetailsCountlyService] SetOnce : key '" + key + "'isn't valid.");
+
+                return;
+            }
+
+            if (string.IsNullOrEmpty(value)) {
+                Log.Warning("[UserDetailsCountlyService] SetOnce : value '" + value + "'isn't valid.");
+
+                return;
+            }
+
             lock (LockObj) {
                 Log.Info("[UserDetailsCountlyService] SetOnce : key = " + key + ", value = " + value);
 
-                AddToCustomData(key, new Dictionary<string, object> { { "$setOnce", value } });
+                AddToCustomData(key, new Dictionary<string, object> { { "$setOnce", TrimValue(key, value) } });
             }
         }
 
@@ -194,6 +209,12 @@ namespace Plugins.CountlySDK.Services
         /// <param name="key">string with property name to increment</param>
         public void Increment(string key)
         {
+            if (string.IsNullOrEmpty(key)) {
+                Log.Warning("[UserDetailsCountlyService] Increment : key '" + key + "'isn't valid.");
+
+                return;
+            }
+
             lock (LockObj) {
                 Log.Info("[UserDetailsCountlyService] Increment : key = " + key);
 
@@ -208,6 +229,11 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value">double value by which to increment</param>
         public void IncrementBy(string key, double value)
         {
+            if (string.IsNullOrEmpty(key)) {
+                Log.Warning("[UserDetailsCountlyService] IncrementBy : key '" + key + "'isn't valid.");
+
+                return;
+            }
             lock (LockObj) {
                 Log.Info("[UserDetailsCountlyService] IncrementBy : key = " + key + ", value = " + value);
 
@@ -222,6 +248,12 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value">double value by which to multiply</param>
         public void Multiply(string key, double value)
         {
+            if (string.IsNullOrEmpty(key)) {
+                Log.Warning("[UserDetailsCountlyService] Multiply : key '" + key + "'isn't valid.");
+
+                return;
+            }
+
             lock (LockObj) {
                 Log.Info("[UserDetailsCountlyService] Multiply : key = " + key + ", value = " + value);
 
@@ -236,6 +268,12 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value">double value to check for max</param>
         public void Max(string key, double value)
         {
+            if (string.IsNullOrEmpty(key)) {
+                Log.Warning("[UserDetailsCountlyService] Max : key '" + key + "'isn't valid.");
+
+                return;
+            }
+
             lock (LockObj) {
                 Log.Info("[UserDetailsCountlyService] Max : key = " + key + ", value = " + value);
 
@@ -250,6 +288,12 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value">double value to check for min</param>
         public void Min(string key, double value)
         {
+            if (string.IsNullOrEmpty(key)) {
+                Log.Warning("[UserDetailsCountlyService] Min : key '" + key + "'isn't valid.");
+
+                return;
+            }
+
             lock (LockObj) {
                 Log.Info("[UserDetailsCountlyService] Min : key = " + key + ", value = " + value);
 
@@ -265,10 +309,22 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value">array with values to add</param>
         public void Push(string key, string[] value)
         {
+            if (string.IsNullOrEmpty(key)) {
+                Log.Warning("[UserDetailsCountlyService] Push : key '" + key + "'isn't valid.");
+
+                return;
+            }
+
+            if (value == null) {
+                Log.Warning("[UserDetailsCountlyService] Push : value '" + value + "'isn't valid.");
+
+                return;
+            }
+
             lock (LockObj) {
                 Log.Info("[UserDetailsCountlyService] Push : key = " + key + ", value = " + value);
 
-                AddToCustomData(key, new Dictionary<string, object> { { "$push", value } });
+                AddToCustomData(key, new Dictionary<string, object> { { "$push", TrimValues(value) } });
             }
         }
 
@@ -280,10 +336,21 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value">array with values to add</param>
         public void PushUnique(string key, string[] value)
         {
+            if (string.IsNullOrEmpty(key)) {
+                Log.Warning("[UserDetailsCountlyService] PushUnique : key '" + key + "'isn't valid.");
+
+                return;
+            }
+
+            if (value == null) {
+                Log.Warning("[UserDetailsCountlyService] PushUnique : value '" + value + "'isn't valid.");
+
+                return;
+            }
+
             lock (LockObj) {
                 Log.Info("[UserDetailsCountlyService] PushUnique : key = " + key + ", value = " + value);
-
-                AddToCustomData(key, new Dictionary<string, object> { { "$addToSet", value } });
+                AddToCustomData(key, new Dictionary<string, object> { { "$addToSet", TrimValues(value) } });
             }
         }
 
@@ -294,9 +361,22 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value">array with values to remove from array</param>
         public void Pull(string key, string[] value)
         {
+            if (string.IsNullOrEmpty(key)) {
+                Log.Warning("[UserDetailsCountlyService] Pull : key '" + key + "'isn't valid.");
+
+                return;
+            }
+
+            if (value == null) {
+                Log.Warning("[UserDetailsCountlyService] Pull : value '" + value + "'isn't valid.");
+
+                return;
+            }
+
             lock (LockObj) {
                 Log.Info("[UserDetailsCountlyService] Pull : key = " + key + ", value = " + value);
 
+                value = TrimValues(value);
                 AddToCustomData(key, new Dictionary<string, object> { { "$pull", value } });
             }
         }
@@ -314,6 +394,8 @@ namespace Plugins.CountlySDK.Services
             if (!_consentService.CheckConsentInternal(Consents.Users)) {
                 return;
             }
+
+            key = TrimKey(key);
 
             if (CustomDataProperties.ContainsKey(key)) {
                 string item = CustomDataProperties.Select(x => x.Key).FirstOrDefault(x => x.Equals(key, StringComparison.OrdinalIgnoreCase));
