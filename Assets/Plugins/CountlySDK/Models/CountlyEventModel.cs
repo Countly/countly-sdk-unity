@@ -84,44 +84,6 @@ namespace Plugins.CountlySDK.Models
 
         #endregion
 
-        protected bool Equals(CountlyEventModel other)
-        {
-            return Id == other.Id && string.Equals(Key, other.Key) && Count == other.Count && Sum.Equals(other.Sum) && Duration.Equals(other.Duration) && Equals(Segmentation, other.Segmentation) && Timestamp == other.Timestamp && Hour == other.Hour && DayOfWeek == other.DayOfWeek && Timezone.Equals(other.Timezone);
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (obj == null) {
-                return false;
-            }
-
-            if (ReferenceEquals(this, obj)) {
-                return true;
-            }
-
-            if (obj.GetType() != GetType()) {
-                return false;
-            }
-
-            return Equals((CountlyEventModel)obj);
-        }
-
-        public override int GetHashCode()
-        {
-            unchecked {
-                int hashCode = Id.GetHashCode();
-                hashCode = (hashCode * 397) ^ (Key != null ? Key.GetHashCode() : 0);
-                hashCode = (hashCode * 397) ^ Count.GetHashCode();
-                hashCode = (hashCode * 397) ^ Sum.GetHashCode();
-                hashCode = (hashCode * 397) ^ Duration.GetHashCode();
-                hashCode = (hashCode * 397) ^ (Segmentation != null ? Segmentation.GetHashCode() : 0);
-                hashCode = (hashCode * 397) ^ Timestamp.GetHashCode();
-                hashCode = (hashCode * 397) ^ Hour;
-                hashCode = (hashCode * 397) ^ DayOfWeek;
-                hashCode = (hashCode * 397) ^ Timezone.GetHashCode();
-                return hashCode;
-            }
-        }
 
         public override string ToString()
         {
