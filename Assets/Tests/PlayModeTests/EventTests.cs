@@ -163,7 +163,7 @@ namespace Tests
         }
 
         /// <summary>
-        /// It validates the the event limits.
+        /// It validates the event limits.
         /// </summary>
         [Test]
         public async void TestEventLimits()
