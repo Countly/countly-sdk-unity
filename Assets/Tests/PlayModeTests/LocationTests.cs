@@ -53,7 +53,7 @@ namespace Tests
         /// It matches the user's location values set during configuration with optional location service values and, it also validates location default values after the location gets disable.
         /// </summary>
         [Test]
-        public void TestLocationValuesSetDuringInitOnOptionalLocationServcie()
+        public void TestLocationValuesSetDuringInitOnOptionalLocationService()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 ServerUrl = _serverUrl,
