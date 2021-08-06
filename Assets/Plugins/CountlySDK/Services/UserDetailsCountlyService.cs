@@ -164,12 +164,6 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
 
-            if (string.IsNullOrEmpty(value)) {
-                Log.Warning("[UserDetailsCountlyService] Set : value '" + value + "'isn't valid.");
-
-                return;
-            }
-
             lock (LockObj) {
                 Log.Info("[UserDetailsCountlyService] Set : key = " + key + ", value = " + value);
 
@@ -184,14 +178,8 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value">string value to set</param>
         public void SetOnce(string key, string value)
         {
-            if (string.IsNullOrEmpty(value)) {
+            if (string.IsNullOrEmpty(key)) {
                 Log.Warning("[UserDetailsCountlyService] SetOnce : key '" + key + "'isn't valid.");
-
-                return;
-            }
-
-            if (string.IsNullOrEmpty(value)) {
-                Log.Warning("[UserDetailsCountlyService] SetOnce : value '" + value + "'isn't valid.");
 
                 return;
             }
@@ -315,11 +303,6 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
 
-            if (value == null) {
-                Log.Warning("[UserDetailsCountlyService] Push : value '" + value + "'isn't valid.");
-
-                return;
-            }
 
             lock (LockObj) {
                 Log.Info("[UserDetailsCountlyService] Push : key = " + key + ", value = " + value);
@@ -342,11 +325,6 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
 
-            if (value == null) {
-                Log.Warning("[UserDetailsCountlyService] PushUnique : value '" + value + "'isn't valid.");
-
-                return;
-            }
 
             lock (LockObj) {
                 Log.Info("[UserDetailsCountlyService] PushUnique : key = " + key + ", value = " + value);
@@ -363,12 +341,6 @@ namespace Plugins.CountlySDK.Services
         {
             if (string.IsNullOrEmpty(key)) {
                 Log.Warning("[UserDetailsCountlyService] Pull : key '" + key + "'isn't valid.");
-
-                return;
-            }
-
-            if (value == null) {
-                Log.Warning("[UserDetailsCountlyService] Pull : value '" + value + "'isn't valid.");
 
                 return;
             }

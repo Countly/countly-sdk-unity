@@ -128,8 +128,8 @@ namespace Tests
             Assert.IsNotNull(Countly.Instance.Views);
             Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
 
-            await Countly.Instance.Views.RecordCloseViewAsync("open_view");
-            await Countly.Instance.Views.RecordCloseViewAsync("close_view");
+            await Countly.Instance.Views.RecordOpenViewAsync("open_view", false);
+            await Countly.Instance.Views.RecordCloseViewAsync("close_view", false);
             Assert.AreEqual(2, Countly.Instance.Views._eventService._eventRepo.Count);
 
             CountlyEventModel model = Countly.Instance.Views._eventService._eventRepo.Dequeue();
@@ -253,10 +253,10 @@ namespace Tests
             Assert.IsNotNull(Countly.Instance.Views);
             Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
 
-            await Countly.Instance.Views.RecordCloseViewAsync("close_view");
+            await Countly.Instance.Views.RecordOpenViewAsync("open_view");
             Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
 
-            await Countly.Instance.Views.RecordOpenViewAsync("open_view");
+            await Countly.Instance.Views.RecordCloseViewAsync("open_view");
             Assert.AreEqual(2, Countly.Instance.Views._eventService._eventRepo.Count);
 
             await Countly.Instance.Views.ReportActionAsync("action", 10, 10, 100, 100);

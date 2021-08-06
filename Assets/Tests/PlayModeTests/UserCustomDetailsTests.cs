@@ -299,6 +299,59 @@ namespace Tests
         }
 
         /// <summary>
+        /// It validate custom user detail invalid keys.
+        /// </summary>
+        [Test]
+        public async void TestCustomUserDetailInvalidKeys()
+        {
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                ServerUrl = _serverUrl,
+                AppKey = _appKey,
+                MaxKeyLength = 5,
+                MaxValueSize = 4,
+                EnablePost = true
+            };
+
+            Countly.Instance.Init(configuration);
+            Countly.Instance.ClearStorage();
+            Countly.Instance.UserDetails.CustomDataProperties.Clear();
+            Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Clear();
+
+            Assert.IsNotNull(Countly.Instance.UserDetails);
+            Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
+
+
+            Countly.Instance.UserDetails.IncrementBy("", 5);
+            Countly.Instance.UserDetails.Increment("");
+            Countly.Instance.UserDetails.SetOnce("", "100KM");
+            Countly.Instance.UserDetails.Set("", "6000.0");
+            Countly.Instance.UserDetails.Pull("", new string[] { "50KM", "100KM" });
+            Countly.Instance.UserDetails.PushUnique("", new string[] { "2900.0" });
+            Countly.Instance.UserDetails.Push("", new string[] { "6000.0" });
+            Countly.Instance.UserDetails.Min("", 10.0);
+            Countly.Instance.UserDetails.Max("", 10000.0);
+            Countly.Instance.UserDetails.Multiply("", 10.0);
+
+            Countly.Instance.UserDetails.IncrementBy(null, 5);
+            Countly.Instance.UserDetails.Increment(null);
+            Countly.Instance.UserDetails.SetOnce(null, "100KM");
+            Countly.Instance.UserDetails.Set(null, "6000.0");
+            Countly.Instance.UserDetails.Pull(null, new string[] { "50KM", "100KM" });
+            Countly.Instance.UserDetails.PushUnique(null, new string[] { "2900.0" });
+            Countly.Instance.UserDetails.Push(null, new string[] { "6000.0" });
+            Countly.Instance.UserDetails.Min(null, 10.0);
+            Countly.Instance.UserDetails.Max(null, 10000.0);
+            Countly.Instance.UserDetails.Multiply(null, 10.0);
+
+            Assert.AreEqual(0, Countly.Instance.UserDetails.CustomDataProperties.Count);
+
+            await Countly.Instance.UserDetails.SaveAsync();
+            Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
+
+
+        }
+
+        /// <summary>
         /// It check the working of method 'UserCustomDetailsAsync'.
         /// </summary>
         [Test]
