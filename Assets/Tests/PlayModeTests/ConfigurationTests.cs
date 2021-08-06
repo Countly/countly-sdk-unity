@@ -142,9 +142,9 @@ namespace Tests
         [Test]
         public void TestNewConfigurationAndOldConfiguration()
         {
-            Object countlyPrefb = AssetDatabase.LoadAssetAtPath("Assets/Plugins/CountlySDK/Prefabs/Countly.prefab", typeof(GameObject));
+            Object countlyPrefab = AssetDatabase.LoadAssetAtPath("Assets/Plugins/CountlySDK/Prefabs/Countly.prefab", typeof(GameObject));
 
-            Object.Instantiate(countlyPrefb);
+            Object.Instantiate(countlyPrefab);
 
 
             Assert.IsNotNull(Countly.Instance);
@@ -170,10 +170,10 @@ namespace Tests
             Assert.AreEqual(200, Countly.Instance.Configuration.MaxStackTraceLineLength);
             Assert.AreEqual(30, Countly.Instance.Configuration.MaxStackTraceLinesPerThread);
 
-            Assert.IsNull(Countly.Instance.Configuration.City, null);
-            Assert.IsNull(Countly.Instance.Configuration.Location, null);
-            Assert.IsNull(Countly.Instance.Configuration.IPAddress, null);
-            Assert.IsNull(Countly.Instance.Configuration.CountryCode, null);
+            Assert.IsNull(Countly.Instance.Configuration.City);
+            Assert.IsNull(Countly.Instance.Configuration.Location);
+            Assert.IsNull(Countly.Instance.Configuration.IPAddress);
+            Assert.IsNull(Countly.Instance.Configuration.CountryCode);
             Assert.IsFalse(Countly.Instance.Configuration.IsLocationDisabled);
         }
 

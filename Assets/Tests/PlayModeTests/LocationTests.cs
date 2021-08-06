@@ -83,7 +83,7 @@ namespace Tests
 
 
         /// <summary>
-        /// It matches the user's location values set after init with optional location servcie.
+        /// It matches the user's location values set after init with optional location service
         /// </summary>
         [Test]
         public void TestOptionalLocationValuesSetAfterInit()
