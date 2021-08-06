@@ -28,7 +28,7 @@ namespace Plugins.CountlySDK.Models
 
         [JsonProperty("custom")]
         //dots (.) and dollar signs ($) in key names will be stripped out.
-        internal Dictionary<string, object> Custom { get; set; }
+        internal IDictionary<string, object> Custom { get; set; }
 
         /// <summary>
         /// Initializes a new instance of User Model with the specified params

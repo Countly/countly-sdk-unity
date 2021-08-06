@@ -33,7 +33,7 @@ namespace Tests
             };
 
             Countly.Instance.Init(configuration);
-            Countly.Instance.ClearStorage();
+            Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
             Assert.IsNotNull(Countly.Instance.Session);
             Assert.AreEqual(0, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
 

@@ -10,6 +10,7 @@
         Crashes,
         Location,
         Sessions,
+        Feedback,
         StarRating,
         RemoteConfig
     }
