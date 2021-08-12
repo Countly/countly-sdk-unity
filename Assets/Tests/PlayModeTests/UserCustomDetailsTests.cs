@@ -30,7 +30,8 @@ namespace Tests
             };
 
             Countly.Instance.Init(configuration);
-            Countly.Instance.ClearStorage();
+
+            Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
 
             Assert.IsNotNull(Countly.Instance.UserDetails);
             Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
@@ -71,6 +72,65 @@ namespace Tests
         }
 
         /// <summary>
+        /// It validate user profile fields limits.
+        /// </summary>
+        [Test]
+        public async void TestUserProfileFieldsLimits()
+        {
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                ServerUrl = _serverUrl,
+                AppKey = _appKey,
+                MaxValueSize = 3,
+                EnablePost = true
+            };
+
+            Countly.Instance.Init(configuration);
+            Countly.Instance.ClearStorage();
+
+            Assert.IsNotNull(Countly.Instance.UserDetails);
+            Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
+
+            CountlyUserDetailsModel userDetails = null;
+
+            await Countly.Instance.UserDetails.SetUserDetailsAsync(userDetails);
+            Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
+
+            userDetails = new CountlyUserDetailsModel("Full Name", "username", "useremail@email.com", "Organization",
+                    "222-222-222",
+                    "12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890" +
+                    "12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890" +
+                    "12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890" +
+                    "12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890" +
+                    "12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890" +
+                    "12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890.png",
+                    "M", "1986",
+                    new Dictionary<string, object>{
+                        { "Hair", "Black" },
+                        { "Height", "5.9" },
+                    });
+            await Countly.Instance.UserDetails.SetUserDetailsAsync(userDetails);
+            Assert.AreEqual(1, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
+
+            CountlyRequestModel requestModel = Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Dequeue();
+
+            string userDetailData = requestModel.RequestData;
+            JObject json = JObject.Parse(userDetailData);
+            JObject userDetailJson = JObject.Parse(json["user_details"].ToString());
+
+            Assert.AreEqual("Ful", userDetailJson["name"].ToString());
+            Assert.AreEqual("use", userDetailJson["username"].ToString());
+            Assert.AreEqual("use", userDetailJson["email"].ToString());
+            Assert.AreEqual("Org", userDetailJson["organization"].ToString());
+            Assert.AreEqual("222", userDetailJson["phone"].ToString());
+            Assert.AreEqual(4096, userDetailJson["picture"].ToString().Length);
+            Assert.AreEqual("M", userDetailJson["gender"].ToString());
+            Assert.AreEqual("198", userDetailJson["byear"].ToString());
+
+            Assert.AreEqual("Bla", userDetailJson["custom"]["Hair"].ToString());
+            Assert.AreEqual("5.9", userDetailJson["custom"]["Height"].ToString());
+        }
+
+        /// <summary>
         /// It check the working of method 'SetUserDetailsAsync'.
         /// </summary>
         [Test]
@@ -83,7 +143,7 @@ namespace Tests
             };
 
             Countly.Instance.Init(configuration);
-            Countly.Instance.ClearStorage();
+            Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
 
             Assert.IsNotNull(Countly.Instance.UserDetails);
             Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
@@ -114,6 +174,184 @@ namespace Tests
 
         }
 
+
+        /// <summary>
+        /// It validate user detail segments limits.
+        /// </summary>
+        [Test]
+        public async void TestUserDetailSegmentLimits()
+        {
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                ServerUrl = _serverUrl,
+                AppKey = _appKey,
+                MaxKeyLength = 5,
+                MaxValueSize = 6,
+                EnablePost = true
+            };
+
+            Countly.Instance.Init(configuration);
+            Countly.Instance.ClearStorage();
+
+            Assert.IsNotNull(Countly.Instance.UserDetails);
+            Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
+
+            CountlyUserDetailsModel userDetails = null;
+
+            await Countly.Instance.UserDetails.SetCustomUserDetailsAsync(userDetails);
+            Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
+
+            userDetails = new CountlyUserDetailsModel(
+                    new Dictionary<string, object>{
+                        { "Hair", "Black_000" },
+                        { "Height", "5.9" },
+                    });
+            await Countly.Instance.UserDetails.SetCustomUserDetailsAsync(userDetails);
+            Assert.AreEqual(1, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
+
+            CountlyRequestModel requestModel = Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Dequeue();
+
+
+            string userDetailData = requestModel.RequestData;
+            JObject json = JObject.Parse(userDetailData);
+            string userDetail = json["user_details"].ToString();
+            JObject custom = JObject.Parse(userDetail);
+
+            Assert.AreEqual("Black_", custom["custom"]["Hair"].ToString());
+            Assert.AreEqual("5.9", custom["custom"]["Heigh"].ToString());
+
+        }
+
+        /// <summary>
+        /// It validate custom user detail segments key and value limits.
+        /// </summary>
+        [Test]
+        public void TestCustomUserDetailSegmentLimits()
+        {
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                ServerUrl = _serverUrl,
+                AppKey = _appKey,
+                MaxKeyLength = 5,
+                MaxValueSize = 4,
+                EnablePost = true
+            };
+
+            Countly.Instance.Init(configuration);
+            Countly.Instance.ClearStorage();
+
+            Assert.IsNotNull(Countly.Instance.UserDetails);
+            Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
+
+
+            Countly.Instance.UserDetails.IncrementBy("IncrementBy", 5);
+            Assert.IsTrue(Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Incre"));
+            Dictionary<string, object> dic = Countly.Instance.UserDetails.CustomDataProperties["Incre"] as Dictionary<string, object>;
+            Assert.AreEqual(5, dic["$inc"]);
+
+            Countly.Instance.UserDetails.Increment("Increment");
+            Assert.IsTrue(Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Incre"));
+            dic = Countly.Instance.UserDetails.CustomDataProperties["Incre"] as Dictionary<string, object>;
+            Assert.AreEqual(1, dic["$inc"]);
+
+            Countly.Instance.UserDetails.SetOnce("SetOnce", "100KM");
+            Assert.IsTrue(Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("SetOn"));
+            dic = Countly.Instance.UserDetails.CustomDataProperties["SetOn"] as Dictionary<string, object>;
+            Assert.AreEqual("100K", dic["$setOnce"]);
+
+            Countly.Instance.UserDetails.Set("Set", "6000.0");
+            Assert.IsTrue(Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Set"));
+            string height = (string)Countly.Instance.UserDetails.CustomDataProperties["Set"];
+            Assert.AreEqual("6000", height);
+
+            Countly.Instance.UserDetails.Pull("Pull", new string[] { "50KM", "100KM" });
+            Assert.IsTrue(Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Pull"));
+            dic = Countly.Instance.UserDetails.CustomDataProperties["Pull"] as Dictionary<string, object>;
+            Assert.AreEqual("50KM", ((string[])dic["$pull"])[0]);
+            Assert.AreEqual("100K", ((string[])dic["$pull"])[1]);
+
+            Countly.Instance.UserDetails.PushUnique("PushUnique", new string[] { "2900.0" });
+            Assert.IsTrue(Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("PushU"));
+            dic = Countly.Instance.UserDetails.CustomDataProperties["PushU"] as Dictionary<string, object>;
+            Assert.AreEqual(new string[] { "2900" }, dic["$addToSet"]);
+            Countly.Instance.UserDetails.CustomDataProperties.Clear();
+
+            Countly.Instance.UserDetails.Push("Push", new string[] { "6000.0" });
+            Assert.IsTrue(Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Push"));
+            dic = Countly.Instance.UserDetails.CustomDataProperties["Push"] as Dictionary<string, object>;
+            Assert.AreEqual("6000", ((string[])dic["$push"])[0]);
+            Countly.Instance.UserDetails.CustomDataProperties.Clear();
+
+            Countly.Instance.UserDetails.Min("Min", 10.0);
+            Assert.IsTrue(Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Min"));
+            dic = Countly.Instance.UserDetails.CustomDataProperties["Min"] as Dictionary<string, object>;
+            Assert.AreEqual(10.0, dic["$min"]);
+            Countly.Instance.UserDetails.CustomDataProperties.Clear();
+
+            Countly.Instance.UserDetails.Max("Max", 10000.0);
+            Assert.IsTrue(Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Max"));
+            dic = Countly.Instance.UserDetails.CustomDataProperties["Max"] as Dictionary<string, object>;
+            Assert.AreEqual(10000.0, dic["$max"]);
+
+            Countly.Instance.UserDetails.Multiply("Multiply", 10.0);
+            Assert.IsTrue(Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Multi"));
+            dic = Countly.Instance.UserDetails.CustomDataProperties["Multi"] as Dictionary<string, object>;
+            Assert.AreEqual(10.0, dic["$mul"]);
+            Countly.Instance.UserDetails.CustomDataProperties.Clear();
+
+        }
+
+        /// <summary>
+        /// It validate custom user detail invalid keys.
+        /// </summary>
+        [Test]
+        public async void TestCustomUserDetailInvalidKeys()
+        {
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                ServerUrl = _serverUrl,
+                AppKey = _appKey,
+                MaxKeyLength = 5,
+                MaxValueSize = 4,
+                EnablePost = true
+            };
+
+            Countly.Instance.Init(configuration);
+            Countly.Instance.ClearStorage();
+            Countly.Instance.UserDetails.CustomDataProperties.Clear();
+            Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Clear();
+
+            Assert.IsNotNull(Countly.Instance.UserDetails);
+            Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
+
+
+            Countly.Instance.UserDetails.IncrementBy("", 5);
+            Countly.Instance.UserDetails.Increment("");
+            Countly.Instance.UserDetails.SetOnce("", "100KM");
+            Countly.Instance.UserDetails.Set("", "6000.0");
+            Countly.Instance.UserDetails.Pull("", new string[] { "50KM", "100KM" });
+            Countly.Instance.UserDetails.PushUnique("", new string[] { "2900.0" });
+            Countly.Instance.UserDetails.Push("", new string[] { "6000.0" });
+            Countly.Instance.UserDetails.Min("", 10.0);
+            Countly.Instance.UserDetails.Max("", 10000.0);
+            Countly.Instance.UserDetails.Multiply("", 10.0);
+
+            Countly.Instance.UserDetails.IncrementBy(null, 5);
+            Countly.Instance.UserDetails.Increment(null);
+            Countly.Instance.UserDetails.SetOnce(null, "100KM");
+            Countly.Instance.UserDetails.Set(null, "6000.0");
+            Countly.Instance.UserDetails.Pull(null, new string[] { "50KM", "100KM" });
+            Countly.Instance.UserDetails.PushUnique(null, new string[] { "2900.0" });
+            Countly.Instance.UserDetails.Push(null, new string[] { "6000.0" });
+            Countly.Instance.UserDetails.Min(null, 10.0);
+            Countly.Instance.UserDetails.Max(null, 10000.0);
+            Countly.Instance.UserDetails.Multiply(null, 10.0);
+
+            Assert.AreEqual(0, Countly.Instance.UserDetails.CustomDataProperties.Count);
+
+            await Countly.Instance.UserDetails.SaveAsync();
+            Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
+
+
+        }
+
         /// <summary>
         /// It check the working of method 'UserCustomDetailsAsync'.
         /// </summary>
@@ -126,17 +364,17 @@ namespace Tests
             };
 
             Countly.Instance.Init(configuration);
-            Countly.Instance.ClearStorage();
+            Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
 
             Assert.IsNotNull(Countly.Instance.UserDetails);
             Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
 
             CountlyUserDetailsModel InvalidUserDetails = null;
-            await Countly.Instance.UserDetails.UserCustomDetailsAsync(InvalidUserDetails);
+            await Countly.Instance.UserDetails.SetCustomUserDetailsAsync(InvalidUserDetails);
             Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
 
             InvalidUserDetails = new CountlyUserDetailsModel(null);
-            await Countly.Instance.UserDetails.UserCustomDetailsAsync(InvalidUserDetails);
+            await Countly.Instance.UserDetails.SetCustomUserDetailsAsync(InvalidUserDetails);
             Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
 
             Dictionary<string, object> customDetail = new Dictionary<string, object>{
@@ -144,7 +382,7 @@ namespace Tests
                 { "Mole", "Lower Left Cheek" }
             };
             CountlyUserDetailsModel userDetails = new CountlyUserDetailsModel(customDetail);
-            await Countly.Instance.UserDetails.UserCustomDetailsAsync(userDetails);
+            await Countly.Instance.UserDetails.SetCustomUserDetailsAsync(userDetails);
             Assert.AreEqual(1, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
         }
         /// <summary>
@@ -155,22 +393,25 @@ namespace Tests
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 ServerUrl = _serverUrl,
-                AppKey = _appKey,
+                AppKey = _appKey
             };
 
             Countly.Instance.Init(configuration);
+            Countly.Instance.ClearStorage();
 
             Assert.IsNotNull(Countly.Instance.UserDetails);
+            Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
 
-            Countly.Instance.UserDetails.SetOnce("Distance", "10KM");
+
+            Countly.Instance.UserDetails.SetOnce("Distance", "100KM");
             Assert.IsTrue(Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Distance"));
             Dictionary<string, object> dic = Countly.Instance.UserDetails.CustomDataProperties["Distance"] as Dictionary<string, object>;
-            Assert.AreEqual("10KM", dic["$setOnce"]);
+            Assert.AreEqual("100KM", dic["$setOnce"]);
 
-            Countly.Instance.UserDetails.Set("Height", "6");
+            Countly.Instance.UserDetails.Set("Height", "5.9125");
             Assert.IsTrue(Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Height"));
             string height = (string)Countly.Instance.UserDetails.CustomDataProperties["Height"];
-            Assert.AreEqual("6", height);
+            Assert.AreEqual("5.9125", height);
         }
 
         /// <summary>

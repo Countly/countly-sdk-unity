@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Plugins.CountlySDK.Enums;
@@ -22,6 +23,38 @@ namespace Plugins.CountlySDK.Services
             _requestCountlyHelper = requestCountlyHelper;
         }
 
+        #region Helper Methods
+        private string ManipulateStackTrace(string stackTrace)
+        {
+            string result = null;
+            if (!string.IsNullOrEmpty(stackTrace)) {
+                string[] lines = stackTrace.Split('\n');
+
+                int limit = lines.Length;
+
+                if (limit > _configuration.MaxStackTraceLinesPerThread) {
+                    limit = _configuration.MaxStackTraceLinesPerThread;
+                }
+
+                for (int i = 0; i < limit; ++i) {
+                    string line = lines[i];
+
+                    if (line.Length > _configuration.MaxStackTraceLineLength) {
+                        line = line.Substring(0, _configuration.MaxStackTraceLineLength);
+                    }
+
+                    if (i + 1 != limit) {
+                        line += '\n';
+                    }
+
+                    result += line;
+                }
+            }
+
+            return result;
+        }
+        #endregion
+
 
         /// <summary>
         /// Called when there is an exception 
@@ -42,11 +75,12 @@ namespace Plugins.CountlySDK.Services
                     Log.Warning("[CrashReportsCountlyService] LogCallback : The parameter 'message' can't be null or empty");
                     return;
                 }
-                CountlyExceptionDetailModel model = ExceptionDetailModel(message, stackTrace, false, null);
+
+                CountlyExceptionDetailModel model = ExceptionDetailModel(message, ManipulateStackTrace(stackTrace), false, null);
 
                 if (_configuration.EnableAutomaticCrashReporting
                     && (type == LogType.Error || type == LogType.Exception)) {
-                    _=SendCrashReportInternal(model);
+                    _ = SendCrashReportInternal(model);
                 }
             }
         }
@@ -75,8 +109,11 @@ namespace Plugins.CountlySDK.Services
                     return;
                 }
 
-                CountlyExceptionDetailModel model = ExceptionDetailModel(message, stackTrace, nonfatal, segments);
-                _=SendCrashReportInternal(model);
+                IDictionary<string, object> segmentation = RemoveSegmentInvalidDataTypes(segments);
+                segmentation = FixSegmentKeysAndValues(segments);
+
+                CountlyExceptionDetailModel model = ExceptionDetailModel(message, ManipulateStackTrace(stackTrace), nonfatal, segmentation);
+                _ = SendCrashReportInternal(model);
             }
 
         }
@@ -100,8 +137,6 @@ namespace Plugins.CountlySDK.Services
 
         /// <summary>
         /// Adds string value to a list which is later sent over as logs whenever a cash is reported by system.
-        /// The length of a breadcrumb is limited to 1000 characters. Only first 1000 characters will be accepted in case the length is more 
-        /// than 1000 characters.
         /// </summary>
         /// <param name="value">a bread crumb for the crash report</param>
         public void AddBreadcrumbs(string value)
@@ -116,7 +151,7 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
 
-            string validBreadcrumb = value.Length > 1000 ? value.Substring(0, 1000) : value;
+            string validBreadcrumb = value.Length > _configuration.MaxValueSize ? value.Substring(0, _configuration.MaxValueSize) : value;
 
             if (_crashBreadcrumbs.Count == _configuration.TotalBreadcrumbsAllowed) {
                 _crashBreadcrumbs.Dequeue();

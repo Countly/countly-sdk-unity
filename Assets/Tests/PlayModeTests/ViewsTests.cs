@@ -49,7 +49,9 @@ namespace Tests
 
             Countly.Instance.Init(configuration);
 
-            Countly.Instance.ClearStorage();
+            Countly.Instance.Views._eventService._eventRepo.Clear();
+            Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
+
             Assert.IsNotNull(Countly.Instance.Views);
             Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
 
@@ -93,7 +95,9 @@ namespace Tests
 
             Countly.Instance.Init(configuration);
 
-            Countly.Instance.ClearStorage();
+            Countly.Instance.Views._eventService._eventRepo.Clear();
+            Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
+
             Assert.IsNotNull(Countly.Instance.Views);
             Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
 
@@ -102,8 +106,47 @@ namespace Tests
 
             await Countly.Instance.Views.RecordOpenViewAsync("open_view");
             Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
+        }
 
+        /// <summary>
+        /// It validates the limit of the view's name size.
+        /// </summary>
+        [Test]
+        public async void TestViewNameLimit()
+        {
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                ServerUrl = _serverUrl,
+                AppKey = _appKey,
+                MaxKeyLength = 5
+            };
 
+            Countly.Instance.Init(configuration);
+
+            Countly.Instance.ClearStorage();
+            Assert.IsNotNull(Countly.Instance.Views);
+            Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
+
+            await Countly.Instance.Views.RecordOpenViewAsync("open_view", false);
+            await Countly.Instance.Views.RecordCloseViewAsync("close_view", false);
+            Assert.AreEqual(2, Countly.Instance.Views._eventService._eventRepo.Count);
+
+            CountlyEventModel model = Countly.Instance.Views._eventService._eventRepo.Dequeue();
+
+            Assert.AreEqual(CountlyEventModel.ViewEvent, model.Key);
+            Assert.IsNull(model.Sum);
+            Assert.AreEqual(1, model.Count);
+            Assert.IsNull(model.Duration);
+            Assert.IsNotNull(model.Segmentation);
+            Assert.AreEqual("open_", model.Segmentation["name"]);
+
+            model = Countly.Instance.Views._eventService._eventRepo.Dequeue();
+
+            Assert.AreEqual(CountlyEventModel.ViewEvent, model.Key);
+            Assert.IsNull(model.Sum);
+            Assert.AreEqual(1, model.Count);
+            Assert.IsNull(model.Duration);
+            Assert.IsNotNull(model.Segmentation);
+            Assert.AreEqual("close", model.Segmentation["name"]);
         }
 
         /// <summary>
@@ -119,7 +162,9 @@ namespace Tests
 
             Countly.Instance.Init(configuration);
 
-            Countly.Instance.ClearStorage();
+            Countly.Instance.Views._eventService._eventRepo.Clear();
+            Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
+
             Assert.IsNotNull(Countly.Instance.Views);
             Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
 
@@ -149,7 +194,10 @@ namespace Tests
 
             Countly.Instance.Init(configuration);
 
-            Countly.Instance.ClearStorage();
+
+            Countly.Instance.Views._eventService._eventRepo.Clear();
+            Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
+
             Assert.IsNotNull(Countly.Instance.Views);
             Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
 
@@ -196,15 +244,17 @@ namespace Tests
             };
 
             Countly.Instance.Init(configuration);
-            Countly.Instance.ClearStorage();
+
+            Countly.Instance.Views._eventService._eventRepo.Clear();
+            Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
 
             Assert.IsNotNull(Countly.Instance.Views);
             Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
 
-            await Countly.Instance.Views.RecordCloseViewAsync("close_view");
+            await Countly.Instance.Views.RecordOpenViewAsync("open_view");
             Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
 
-            await Countly.Instance.Views.RecordOpenViewAsync("open_view");
+            await Countly.Instance.Views.RecordCloseViewAsync("open_view");
             Assert.AreEqual(2, Countly.Instance.Views._eventService._eventRepo.Count);
 
             await Countly.Instance.Views.ReportActionAsync("action", 10, 10, 100, 100);
@@ -226,7 +276,9 @@ namespace Tests
 
             Countly.Instance.Init(configuration);
 
-            Countly.Instance.ClearStorage();
+            Countly.Instance.Views._eventService._eventRepo.Clear();
+            Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
+
             Assert.IsNotNull(Countly.Instance.Views);
             Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
 
@@ -249,7 +301,7 @@ namespace Tests
         }
 
         /// <summary>
-        /// It validates the presence of field 'start' in the first view and after device id change without merge.
+        /// It validates the presence of field 'start' in the first view.
         /// </summary>
         [Test]
         public async void TestStartField()
@@ -263,7 +315,9 @@ namespace Tests
             configuration.GiveConsent(new Consents[] { Consents.Crashes, Consents.Events, Consents.Clicks, Consents.StarRating, Consents.Views, Consents.Users, Consents.Push, Consents.RemoteConfig, Consents.Location });
             Countly.Instance.Init(configuration);
 
-            Countly.Instance.ClearStorage();
+            Countly.Instance.Views._eventService._eventRepo.Clear();
+            Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
+
             Assert.IsNotNull(Countly.Instance.Views);
             Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
             Assert.IsTrue(Countly.Instance.Views._isFirstView);
@@ -282,8 +336,35 @@ namespace Tests
             Assert.AreEqual("first_view", model.Segmentation["name"]);
             Assert.AreEqual(1, model.Segmentation["visit"]);
             Assert.AreEqual(1, model.Segmentation["start"]);
+        }
 
-            await Countly.Instance.Device.ChangeDeviceIdAndEndCurrentSessionAsync("new device id");
+        /// <summary>
+        /// It validates the presence of field 'start' in the first view after device id change without merge.
+        /// </summary>
+        [Test]
+        public async void TestStartField_AfterDeviceIdChangeWithoutMerge()
+        {
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                ServerUrl = _serverUrl,
+                AppKey = _appKey,
+                RequiresConsent = true
+            };
+
+            configuration.GiveConsent(new Consents[] { Consents.Crashes, Consents.Events, Consents.Clicks, Consents.StarRating, Consents.Views, Consents.Users, Consents.Push, Consents.RemoteConfig, Consents.Location });
+            Countly.Instance.Init(configuration);
+
+            Countly.Instance.Views._eventService._eventRepo.Clear();
+            Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
+
+            Assert.IsNotNull(Countly.Instance.Views);
+            Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
+            Assert.IsTrue(Countly.Instance.Views._isFirstView);
+
+            await Countly.Instance.Views.RecordOpenViewAsync("first_view");
+            Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
+            Assert.IsFalse(Countly.Instance.Views._isFirstView);
+
+            await Countly.Instance.Device.ChangeDeviceIdWithoutMerge("new device id");
             Countly.Instance.Views._eventService._eventRepo.Clear();
 
             Assert.IsTrue(Countly.Instance.Views._isFirstView);
@@ -291,7 +372,7 @@ namespace Tests
             Assert.IsFalse(Countly.Instance.Views._isFirstView);
             Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
 
-            model = Countly.Instance.Views._eventService._eventRepo.Dequeue();
+            CountlyEventModel model = Countly.Instance.Views._eventService._eventRepo.Dequeue();
 
             Assert.AreEqual(CountlyEventModel.ViewEvent, model.Key);
             Assert.IsNull(model.Sum);

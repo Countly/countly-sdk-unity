@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -7,7 +6,6 @@ using Plugins.CountlySDK.Enums;
 using Plugins.CountlySDK.Helpers;
 using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK.Persistance.Repositories.Impls;
-using UnityEngine;
 
 namespace Plugins.CountlySDK.Services
 {
@@ -43,7 +41,7 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
             isQueueBeingProcessed = true;
-   
+
             int count = _eventRepo.Models.Count;
             //Send all at once
             Dictionary<string, object> requestParams =
@@ -73,7 +71,6 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         internal async Task RecordEventAsync(CountlyEventModel @event)
         {
-
             Log.Debug("[EventCountlyService] RecordEventAsync : " + @event.ToString());
 
             if (_configuration.EnableTestMode) {
@@ -88,6 +85,27 @@ namespace Plugins.CountlySDK.Services
             }
         }
 
+        private bool CheckConsentOnKey(string key)
+        {
+
+            if (key.Equals(CountlyEventModel.ViewEvent)) {
+                return _consentService.CheckConsentInternal(Consents.Views);
+            } else if (key.Equals(CountlyEventModel.StarRatingEvent)) {
+                return _consentService.CheckConsentInternal(Consents.StarRating);
+            } else if (key.Equals(CountlyEventModel.PushActionEvent)) {
+                return _consentService.CheckConsentInternal(Consents.Push);
+            } else if (key.Equals(CountlyEventModel.ViewActionEvent)) {
+                return _consentService.CheckConsentInternal(Consents.Clicks);
+            } else if (key.Equals(CountlyEventModel.NPSEvent)) {
+                return _consentService.CheckConsentInternal(Consents.Feedback);
+            } else if (key.Equals(CountlyEventModel.SurveyEvent)) {
+                return _consentService.CheckConsentInternal(Consents.Feedback);
+            } else if (key.Equals(CountlyEventModel.OrientationEvent)) {
+                return _consentService.CheckConsentInternal(Consents.Users);
+            } else { return _consentService.CheckConsentInternal(Consents.Events); }
+
+        }
+
         /// <summary>
         /// Report an event to the server.
         /// </summary>
@@ -98,13 +116,21 @@ namespace Plugins.CountlySDK.Services
             lock (LockObj) {
                 Log.Info("[EventCountlyService] RecordEventAsync : key = " + key);
 
-                if (!_consentService.CheckConsentInternal(Consents.Events)) {
+                if (string.IsNullOrEmpty(key) || string.IsNullOrWhiteSpace(key)) {
+                    Log.Warning("[EventCountlyService] RecordEventAsync : The event key '" + key + "'isn't valid.");
+
                     return;
                 }
 
-                _ = RecordEventAsync(key, null);
+                if (!CheckConsentOnKey(key)) {
+                    return;
+                }
+
+                CountlyEventModel @event = new CountlyEventModel(key, null, 1, 0, null);
+
+                _ = RecordEventAsync(@event);
             }
-            
+
         }
 
         /// <summary>
@@ -122,7 +148,13 @@ namespace Plugins.CountlySDK.Services
             lock (LockObj) {
                 Log.Info("[EventCountlyService] RecordEventAsync : key = " + key + ", segmentation = " + segmentation + ", count = " + count + ", sum = " + sum + ", duration = " + duration);
 
-                if (!_consentService.CheckConsentInternal(Consents.Events)) {
+                if (string.IsNullOrEmpty(key) || string.IsNullOrWhiteSpace(key)) {
+                    Log.Warning("[EventCountlyService] RecordEventAsync : The event key '" + key + "'isn't valid.");
+
+                    return;
+                }
+
+                if (!CheckConsentOnKey(key)) {
                     return;
                 }
 
@@ -130,39 +162,19 @@ namespace Plugins.CountlySDK.Services
                     return;
                 }
 
-                if (string.IsNullOrEmpty(key) || string.IsNullOrWhiteSpace(key)) {
-                    Log.Warning("[EventCountlyService] RecordEventAsync : The event key '" + key + "'isn't valid.");
-
-                    return;
+                if (key.Length > _configuration.MaxKeyLength) {
+                    Log.Warning("[EventCountlyService] RecordEventAsync : Max allowed key length is " + _configuration.MaxKeyLength);
+                    key = key.Substring(0, _configuration.MaxKeyLength);
                 }
 
-                if (segmentation != null) {
-                    List<string> toRemove = new List<string>();
+                IDictionary<string, object> segments = RemoveSegmentInvalidDataTypes(segmentation);
+                segments = FixSegmentKeysAndValues(segments);
 
-                    foreach (KeyValuePair<string, object> item in segmentation) {
-                        bool isValidDataType = item.Value != null
-                            && (item.Value.GetType() == typeof(int)
-                            || item.Value.GetType() == typeof(bool)
-                            || item.Value.GetType() == typeof(float)
-                            || item.Value.GetType() == typeof(double)
-                            || item.Value.GetType() == typeof(string));
+                CountlyEventModel @event = new CountlyEventModel(key, segments, count, sum, duration);
 
-                        if (!isValidDataType) {
-                            toRemove.Add(item.Key);
-                            Log.Warning("[EventCountlyService] ReportCustomEventAsync : In segmentation Data type '" + (item.Value?.GetType()) + "'  of item '" + item.Key + "' isn't valid.");
-                        }
-                    }
-
-                    foreach (string k in toRemove) {
-                        segmentation.Remove(k);
-                    }
-                }
-
-                CountlyEventModel @event = new CountlyEventModel(key, segmentation, count, sum, duration);
-
-                _=RecordEventAsync(@event);
+                _ = RecordEventAsync(@event);
             }
-            
+
         }
 
         /// <summary>
@@ -182,38 +194,28 @@ namespace Plugins.CountlySDK.Services
             lock (LockObj) {
                 Log.Info("[EventCountlyService] ReportCustomEventAsync : key = " + key + ", segmentation = " + (segmentation != null) + ", count = " + count + ", sum = " + sum + ", duration = " + duration);
 
-                if (!_consentService.CheckConsentInternal(Consents.Events)) {
+                if (string.IsNullOrEmpty(key) || string.IsNullOrWhiteSpace(key)) {
+                    Log.Warning("[EventCountlyService] RecordEventAsync : The event key '" + key + "'isn't valid.");
+
                     return;
                 }
 
-                if (string.IsNullOrEmpty(key) && string.IsNullOrWhiteSpace(key)) {
+                if (CheckConsentOnKey(key)) {
                     return;
                 }
 
-                if (segmentation != null) {
-                    List<string> toRemove = new List<string>();
-
-                    foreach (KeyValuePair<string, object> item in segmentation) {
-                        bool isValidDataType = item.Value.GetType() == typeof(int)
-                            || item.Value.GetType() == typeof(bool)
-                            || item.Value.GetType() == typeof(float)
-                            || item.Value.GetType() == typeof(double)
-                            || item.Value.GetType() == typeof(string);
-
-                        if (!isValidDataType) {
-                            toRemove.Add(item.Key);
-                            Log.Warning("[EventCountlyService] ReportCustomEventAsync : In segmentation Data type '" + (item.Value?.GetType()) + "'  of item '" + item.Key + "'isn't valid.");
-                        }
-                    }
-
-                    foreach (string k in toRemove) {
-                        segmentation.Remove(k);
-                    }
+                if (key.Length > _configuration.MaxKeyLength) {
+                    Log.Warning("[EventCountlyService] ReportCustomEventAsync : Max allowed key length is " + _configuration.MaxKeyLength);
+                    key = key.Substring(0, _configuration.MaxKeyLength);
                 }
 
-                CountlyEventModel @event = new CountlyEventModel(key, segmentation, count, sum, duration);
 
-                _=RecordEventAsync(@event);
+                IDictionary<string, object> segments = RemoveSegmentInvalidDataTypes(segmentation);
+                segments = FixSegmentKeysAndValues(segments);
+
+                CountlyEventModel @event = new CountlyEventModel(key, segments, count, sum, duration);
+
+                _ = RecordEventAsync(@event);
             }
         }
 
