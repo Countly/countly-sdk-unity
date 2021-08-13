@@ -31,7 +31,7 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
         string ipAddress = "10.2.33.12";
 
         configuration.SetLocation(countryCode, city, latitude + "," + longitude, ipAddress);
-        configuration.GiveConsent(new Consents[] { Consents.Crashes, Consents.Events, Consents.Clicks, Consents.StarRating, Consents.Views, Consents.Users, Consents.Sessions, Consents.Push, Consents.RemoteConfig, Consents.Location });
+        configuration.GiveConsent(new Consents[] { Consents.Crashes, Consents.Events, Consents.Clicks, Consents.StarRating, Consents.Views, Consents.Users, Consents.Sessions, Consents.Push, Consents.RemoteConfig, Consents.Location, Consents.Feedback });
         configuration.AddNotificationListener(this);
 
         Countly.Instance.Init(configuration);
@@ -40,7 +40,7 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
 
     private void OnApplicationQuit()
     {
-        Countly.Instance.Notifications.RemoveListener(this);
+        Countly.Instance?.Notifications?.RemoveListener(this);
     }
 
     public void TestWithMultipleThreads()

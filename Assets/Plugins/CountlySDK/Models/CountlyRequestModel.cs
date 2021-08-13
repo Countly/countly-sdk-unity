@@ -14,10 +14,6 @@ namespace Plugins.CountlySDK.Models
             RequestDateTime = requestDateTime;
         }
 
-        public CountlyRequestModel()
-        {
-        }
-
         public bool IsRequestGetType { get; set; }
         public string RequestUrl { get; set; }
         public string RequestData { get; set; }

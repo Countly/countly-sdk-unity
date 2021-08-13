@@ -304,6 +304,9 @@ namespace Plugins.CountlySDK.Services
                 case Consents.Views:
                     key = "views";
                     break;
+                case Consents.Feedback:
+                    key = "feedback";
+                    break;
             }
 
             return key;

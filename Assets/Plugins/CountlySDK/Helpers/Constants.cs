@@ -1,9 +1,11 @@
 ﻿
+using UnityEngine;
+
 namespace Plugins.CountlySDK.Helpers
 {
     internal class Constants
     {
-        public const string SdkVersion = "20.11.4";
+        public const string SdkVersion = "20.11.5";
 
 #if UNITY_EDITOR
         public const string SdkName = "csharp-unity-editor";
@@ -51,11 +53,12 @@ namespace Plugins.CountlySDK.Helpers
         #endregion
 
         #region Unity System
-
-        public static string UnityPlatform =>
-            UnityEngine.Application.platform.ToString().ToLower() == "iphoneplayer"
-            ? "ios"
-            : UnityEngine.Application.platform.ToString().ToLower();
+        public static void ProcessPlatform()
+        {
+            string platform = Application.platform.ToString().ToLower();
+            UnityPlatform = (Application.platform == RuntimePlatform.IPhonePlayer) ? "iOS" : platform;
+        }
+        public static string UnityPlatform { get; internal set; }
 
         #endregion
     }
