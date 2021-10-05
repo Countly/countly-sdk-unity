@@ -6,6 +6,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK.Persistance.Repositories;
 using UnityEngine;
@@ -110,7 +111,7 @@ namespace Plugins.CountlySDK.Helpers
 
 
             if (!string.IsNullOrEmpty(_config.Salt)) {
-                // Create a SHA256   
+                // Create a SHA256
                 using (SHA256 sha256Hash = SHA256.Create()) {
                     byte[] data = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(requestStringBuilder + _config.Salt));
                     requestStringBuilder.Insert(0, _countlyUtils.ServerInputUrl);
@@ -137,7 +138,7 @@ namespace Plugins.CountlySDK.Helpers
 
             string data = JsonConvert.SerializeObject(baseParams);
             if (!string.IsNullOrEmpty(_config.Salt)) {
-                // Create a SHA256   
+                // Create a SHA256
                 using (SHA256 sha256Hash = SHA256.Create()) {
                     byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(data + _config.Salt));
                     baseParams.Add("checksum256", bytes);
@@ -182,9 +183,13 @@ namespace Plugins.CountlySDK.Helpers
                     using (Stream stream = response.GetResponseStream())
                         using (StreamReader reader = new StreamReader(stream)) {
                         string res = await reader.ReadToEndAsync();
-                        countlyResponse.StatusCode = code;
-                        countlyResponse.IsSuccess = true;
+
+                        JObject body = JObject.Parse(res);
+
                         countlyResponse.Data = res;
+                        countlyResponse.StatusCode = code;
+                        countlyResponse.IsSuccess = body.ContainsKey("result");
+
                     }
 
                 }
@@ -201,7 +206,7 @@ namespace Plugins.CountlySDK.Helpers
                         countlyResponse.Data = res;
                     }
                 }
-               
+
             }
 
             Log.Verbose("[RequestCountlyHelper] GetAsync request: " + url + " response: " + countlyResponse.ToString());
@@ -239,9 +244,12 @@ namespace Plugins.CountlySDK.Helpers
                     using (Stream stream = response.GetResponseStream())
                     using (StreamReader reader = new StreamReader(stream)) {
                         string res = await reader.ReadToEndAsync();
-                        countlyResponse.StatusCode = code;
-                        countlyResponse.IsSuccess = true;
+
+                        JObject body = JObject.Parse(res);
+
                         countlyResponse.Data = res;
+                        countlyResponse.StatusCode = code;
+                        countlyResponse.IsSuccess = body.ContainsKey("result");
                     }
                 }
             } catch (WebException ex) {
