@@ -110,11 +110,10 @@ namespace Plugins.CountlySDK.Helpers
 
 
             if (!string.IsNullOrEmpty(_config.Salt)) {
-                // Create a SHA256   
+                // Create a SHA256
                 using (SHA256 sha256Hash = SHA256.Create()) {
-                    byte[] data = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(requestStringBuilder + _config.Salt));
-                    requestStringBuilder.Insert(0, _countlyUtils.ServerInputUrl);
-                    return requestStringBuilder.AppendFormat("&checksum256={0}", _countlyUtils.GetStringFromBytes(data)).ToString();
+                    byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(requestStringBuilder + _config.Salt));
+                    requestStringBuilder.AppendFormat("&checksum256={0}", _countlyUtils.GetStringFromBytes(bytes));
                 }
             }
 
@@ -137,15 +136,15 @@ namespace Plugins.CountlySDK.Helpers
 
             string data = JsonConvert.SerializeObject(baseParams);
             if (!string.IsNullOrEmpty(_config.Salt)) {
-                // Create a SHA256   
+                // Create a SHA256
                 using (SHA256 sha256Hash = SHA256.Create()) {
                     byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(data + _config.Salt));
-                    baseParams.Add("checksum256", bytes);
-                    return JsonConvert.SerializeObject(baseParams);
+                    baseParams.Add("checksum256", _countlyUtils.GetStringFromBytes(bytes));
+                   // return JsonConvert.SerializeObject(baseParams);
                 }
             }
 
-            return data;
+            return JsonConvert.SerializeObject(baseParams);
         }
 
         /// <summary>
@@ -201,7 +200,7 @@ namespace Plugins.CountlySDK.Helpers
                         countlyResponse.Data = res;
                     }
                 }
-               
+
             }
 
             Log.Verbose("[RequestCountlyHelper] GetAsync request: " + url + " response: " + countlyResponse.ToString());

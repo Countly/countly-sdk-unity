@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -137,6 +138,15 @@ namespace Plugins.CountlySDK.Services
                 if (!string.IsNullOrEmpty(item.Key) && item.Value != null) {
                     _requestStringBuilder.AppendFormat("&{0}={1}", UnityWebRequest.EscapeURL(item.Key),
                         UnityWebRequest.EscapeURL(Convert.ToString(item.Value)));
+                }
+            }
+
+            if (!string.IsNullOrEmpty(_configuration.Salt)) {
+                // Create a SHA256
+                using (SHA256 sha256Hash = SHA256.Create()) {
+                    byte[] data = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(_requestStringBuilder + _configuration.Salt));
+                    _requestStringBuilder.Insert(0, _countlyUtils.ServerInputUrl);
+                    return _requestStringBuilder.AppendFormat("&checksum256={0}", _countlyUtils.GetStringFromBytes(data)).ToString();
                 }
             }
 
