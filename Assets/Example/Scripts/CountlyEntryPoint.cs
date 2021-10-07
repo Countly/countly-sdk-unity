@@ -17,9 +17,11 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
     private void Awake()
     {
         CountlyConfiguration configuration = new CountlyConfiguration {
-            ServerUrl = "https://try.count.ly/",
-            AppKey = "YOUR_APP_KEY",
+            ServerUrl = "https://master.count.ly/",
+            AppKey = "8c1d653f8f474be24958b282d5e9b4c4209ee552",
             EnableConsoleLogging = true,
+            Salt = "test-salt-checksum",
+            EnablePost = true,
             RequiresConsent = true,
             NotificationMode = TestMode.AndroidTestToken
         };

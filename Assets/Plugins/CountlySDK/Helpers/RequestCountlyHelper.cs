@@ -113,7 +113,10 @@ namespace Plugins.CountlySDK.Helpers
                 // Create a SHA256
                 using (SHA256 sha256Hash = SHA256.Create()) {
                     byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(requestStringBuilder + _config.Salt));
-                    requestStringBuilder.AppendFormat("&checksum256={0}", _countlyUtils.GetStringFromBytes(bytes));
+                    string hex = _countlyUtils.GetStringFromBytes(bytes);
+                    Log.Debug("BuildGetRequest: query = " + requestStringBuilder + ", checksum256 = " + hex);
+
+                    requestStringBuilder.AppendFormat("&checksum256={0}", hex);
                 }
             }
 
@@ -128,23 +131,43 @@ namespace Plugins.CountlySDK.Helpers
         /// <returns></returns>
         internal string BuildPostRequest(Dictionary<string, object> queryParams)
         {
-            Dictionary<string, object> baseParams = _countlyUtils.GetBaseParams();
-            foreach (KeyValuePair<string, object> item in queryParams) {
-                baseParams.Add(UnityWebRequest.EscapeURL(item.Key), item.Value);
+            Dictionary<string, object> payload = new Dictionary<string, object>();
+            StringBuilder requestStringBuilder = new StringBuilder();
+            //Metrics added to each request
+            foreach (KeyValuePair<string, object> item in _countlyUtils.GetBaseParams()) {
+                String key = UnityWebRequest.EscapeURL(item.Key);
+                String value = UnityWebRequest.EscapeURL(Convert.ToString(item.Value));
+                requestStringBuilder.AppendFormat((item.Key != "app_key" ? "&" : string.Empty) + "{0}={1}",
+                    key, value);
+
+                payload.Add(item.Key, item.Value);
             }
 
 
-            string data = JsonConvert.SerializeObject(baseParams);
-            if (!string.IsNullOrEmpty(_config.Salt)) {
-                // Create a SHA256
-                using (SHA256 sha256Hash = SHA256.Create()) {
-                    byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(data + _config.Salt));
-                    baseParams.Add("checksum256", _countlyUtils.GetStringFromBytes(bytes));
-                   // return JsonConvert.SerializeObject(baseParams);
+            //Query params supplied for creating request
+            foreach (KeyValuePair<string, object> item in queryParams) {
+                if (!string.IsNullOrEmpty(item.Key) && item.Value != null) {
+                    String key = UnityWebRequest.EscapeURL(item.Key);
+                    String value = UnityWebRequest.EscapeURL(Convert.ToString(item.Value));
+                    requestStringBuilder.AppendFormat("&{0}={1}", key, value);
+                    payload.Add(item.Key, item.Value);
+
                 }
             }
 
-            return JsonConvert.SerializeObject(baseParams);
+            if (!string.IsNullOrEmpty(_config.Salt)) {
+                // Create a SHA256
+                using (SHA256 sha256Hash = SHA256.Create()) {
+                    byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(requestStringBuilder + _config.Salt));
+                    string hex = _countlyUtils.GetStringFromBytes(bytes);
+                    requestStringBuilder.AppendFormat("&checksum256={0}", hex);
+                    Log.Debug("BuildPostRequest: query = " + requestStringBuilder);
+                    payload.Add("checksum256", hex);
+                }
+            }
+            String data = JsonConvert.SerializeObject(payload);
+            Log.Debug("BuildPostRequest: payload = " + data);
+            return data;
         }
 
         /// <summary>
