@@ -234,7 +234,7 @@ namespace Tests
             };
 
 
-            string url1 = Countly.Instance.CrashReports._requestCountlyHelper.BuildPostRequest(requestParams1);
+            string url1 = Countly.Instance.CrashReports._requestCountlyHelper.BuildGetRequest(requestParams1);
 
 
             int index1 = url.IndexOf("crash");
@@ -281,7 +281,7 @@ namespace Tests
             };
 
 
-            string url1 = Countly.Instance.CrashReports._requestCountlyHelper.BuildPostRequest(requestParams1);
+            string url1 = Countly.Instance.CrashReports._requestCountlyHelper.BuildGetRequest(requestParams1);
 
 
             int index1 = url1.IndexOf("crash");

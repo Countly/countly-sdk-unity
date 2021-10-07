@@ -120,54 +120,7 @@ namespace Plugins.CountlySDK.Helpers
                 }
             }
 
-            requestStringBuilder.Insert(0, _countlyUtils.ServerInputUrl);
             return requestStringBuilder.ToString();
-        }
-
-        /// <summary>
-        ///     Serializes the post data (base params required for a request, and the supplied queryParams) in a string.
-        /// </summary>
-        /// <param name="queryParams"></param>
-        /// <returns></returns>
-        internal string BuildPostRequest(Dictionary<string, object> queryParams)
-        {
-            Dictionary<string, object> payload = new Dictionary<string, object>();
-            StringBuilder requestStringBuilder = new StringBuilder();
-            //Metrics added to each request
-            foreach (KeyValuePair<string, object> item in _countlyUtils.GetBaseParams()) {
-                String key = UnityWebRequest.EscapeURL(item.Key);
-                String value = UnityWebRequest.EscapeURL(Convert.ToString(item.Value));
-                requestStringBuilder.AppendFormat((item.Key != "app_key" ? "&" : string.Empty) + "{0}={1}",
-                    key, value);
-
-                payload.Add(item.Key, item.Value);
-            }
-
-
-            //Query params supplied for creating request
-            foreach (KeyValuePair<string, object> item in queryParams) {
-                if (!string.IsNullOrEmpty(item.Key) && item.Value != null) {
-                    String key = UnityWebRequest.EscapeURL(item.Key);
-                    String value = UnityWebRequest.EscapeURL(Convert.ToString(item.Value));
-                    requestStringBuilder.AppendFormat("&{0}={1}", key, value);
-                    payload.Add(item.Key, item.Value);
-
-                }
-            }
-
-            if (!string.IsNullOrEmpty(_config.Salt)) {
-                // Create a SHA256
-                using (SHA256 sha256Hash = SHA256.Create()) {
-                    byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(requestStringBuilder + _config.Salt));
-                    string hex = _countlyUtils.GetStringFromBytes(bytes);
-                    requestStringBuilder.AppendFormat("&checksum256={0}", hex);
-                    Log.Debug("BuildPostRequest: query = " + requestStringBuilder);
-                    payload.Add("checksum256", hex);
-                }
-            }
-            String data = JsonConvert.SerializeObject(payload);
-            Log.Debug("BuildPostRequest: payload = " + data);
-            return data;
         }
 
         /// <summary>
@@ -177,11 +130,11 @@ namespace Plugins.CountlySDK.Helpers
         internal void AddToRequestQueue(Dictionary<string, object> queryParams)
         {
             CountlyRequestModel requestModel;
-            string data = BuildPostRequest(queryParams);
+            string data = BuildGetRequest(queryParams);
             if (_config.EnablePost || data.Length > 1800) {
-                requestModel = new CountlyRequestModel(false, _countlyUtils.ServerInputUrl, BuildPostRequest(queryParams), DateTime.UtcNow);
+                requestModel = new CountlyRequestModel(false, _countlyUtils.ServerInputUrl, data, DateTime.UtcNow);
             } else {
-                requestModel = new CountlyRequestModel(true, BuildGetRequest(queryParams), null, DateTime.UtcNow);
+                requestModel = new CountlyRequestModel(true, _countlyUtils.ServerInputUrl + data, null, DateTime.UtcNow);
             }
 
             AddRequestToQueue(requestModel);
@@ -244,11 +197,11 @@ namespace Plugins.CountlySDK.Helpers
             CountlyResponse countlyResponse = new CountlyResponse();
 
             try {
-                byte[] dataBytes = Encoding.UTF8.GetBytes(data);
+                byte[] dataBytes = Encoding.ASCII.GetBytes(data);
 
                 HttpWebRequest request = (HttpWebRequest)WebRequest.Create(uri);
                 request.ContentLength = dataBytes.Length;
-                request.ContentType = "application/json";
+                request.ContentType = "application/x-www-form-urlencoded";
                 request.Method = "POST";
 
 
