@@ -8,8 +8,8 @@ namespace Plugins.CountlySDK.Persistance.Repositories
 {
     public abstract class Repository<TEntity, TModel> where TEntity : class, IEntity, new() where TModel : IModel
     {
-        private readonly Dao<TEntity> _dao;
-        private readonly CountlyLogHelper Log;
+        public readonly Dao<TEntity> _dao;
+        public readonly CountlyLogHelper Log;
 
         protected Repository(Dao<TEntity> dao, CountlyLogHelper log)
         {
@@ -63,7 +63,7 @@ namespace Plugins.CountlySDK.Persistance.Repositories
             return model;
         }
 
-        public bool Update(TModel model)
+        public virtual bool Update(TModel model)
         {
             TEntity entity = ConvertModelToEntity(model);
             return _dao.Update(entity);

@@ -51,7 +51,7 @@ namespace Plugins.CountlySDK.Helpers
 
         internal async Task ProcessQueue()
         {
-            if (isQueueBeingProcess || true) {
+            if (isQueueBeingProcess) {
                 return;
             }
 
@@ -91,8 +91,9 @@ namespace Plugins.CountlySDK.Helpers
         /// </summary>
         /// <param name="queryParams"></param>
         /// <returns></returns>
-        internal string BuildGetRequest(Dictionary<string, object> queryParams)
+        internal string BuildGetRequest()
         {
+            Dictionary<string, object> queryParams = Json
             StringBuilder requestStringBuilder = new StringBuilder();
             //Metrics added to each request
             foreach (KeyValuePair<string, object> item in _countlyUtils.GetBaseParams()) {
@@ -192,6 +193,7 @@ namespace Plugins.CountlySDK.Helpers
             CountlyResponse countlyResponse = new CountlyResponse();
 
             try {
+                BuildGetRequest();
                 byte[] dataBytes = Encoding.ASCII.GetBytes(data);
 
                 HttpWebRequest request = (HttpWebRequest)WebRequest.Create(uri);
