@@ -183,6 +183,7 @@ namespace Plugins.CountlySDK.Helpers
                     NameValueCollection collection =  HttpUtility.ParseQueryString(uri);
 
                     Dictionary<string, string>  queryParams = collection.AllKeys.ToDictionary(t => t, t => collection[t]);
+                    queryParams.Remove("checksum256");
                     string data = JsonConvert.SerializeObject(queryParams);
 
                     request.RequestUrl = null;

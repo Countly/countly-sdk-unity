@@ -105,7 +105,6 @@ namespace Tests
             Assert.AreEqual(oldDeviceId, obj.GetValue("device_id").ToObject<string>());
             Assert.IsTrue(obj.ContainsKey("session_duration"));
 
-
             requestModel = Countly.Instance.Device._requestCountlyHelper._requestRepo.Dequeue();
             obj = JObject.Parse(requestModel.RequestData);
 
