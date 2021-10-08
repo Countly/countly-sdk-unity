@@ -6,6 +6,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK.Persistance.Repositories;
 using UnityEngine;
@@ -80,7 +81,7 @@ namespace Plugins.CountlySDK.Helpers
             if (_config.EnablePost || model.RequestData.Length > 1800) {
                 return await Task.Run(() => PostAsync(_countlyUtils.ServerInputUrl, model.RequestData));
             } else {
-                return await Task.Run(() => GetAsync(_countlyUtils + model.RequestUrl));
+                return await Task.Run(() => GetAsync(_countlyUtils.ServerInputUrl ,model.RequestUrl));
 
             }
         }
@@ -91,15 +92,15 @@ namespace Plugins.CountlySDK.Helpers
         /// </summary>
         /// <param name="queryParams"></param>
         /// <returns></returns>
-        internal string BuildGetRequest()
+        internal string BuildRequest(string data)
         {
-            Dictionary<string, object> queryParams = Json
+            Dictionary<string, object> queryParams = JsonConvert.DeserializeObject<Dictionary<string, object>>(data);
             StringBuilder requestStringBuilder = new StringBuilder();
-            //Metrics added to each request
-            foreach (KeyValuePair<string, object> item in _countlyUtils.GetBaseParams()) {
-                requestStringBuilder.AppendFormat((item.Key != "app_key" ? "&" : string.Empty) + "{0}={1}",
-                    UnityWebRequest.EscapeURL(item.Key), UnityWebRequest.EscapeURL(Convert.ToString(item.Value)));
-            }
+            // //Metrics added to each request
+            // foreach (KeyValuePair<string, object> item in _countlyUtils.GetBaseParams()) {
+            //     requestStringBuilder.AppendFormat((item.Key != "app_key" ? "&" : string.Empty) + "{0}={1}",
+            //         UnityWebRequest.EscapeURL(item.Key), UnityWebRequest.EscapeURL(Convert.ToString(item.Value)));
+            // }
 
 
             //Query params supplied for creating request
@@ -130,6 +131,11 @@ namespace Plugins.CountlySDK.Helpers
         /// </summary>
         internal void AddToRequestQueue(Dictionary<string, object> queryParams)
         {
+            //Metrics added to each request
+            foreach (KeyValuePair<string, object> item in _countlyUtils.GetBaseParams()) {
+               queryParams.Add(item.Key, item.Value);
+            }
+
             string data = JsonConvert.SerializeObject(queryParams);
             CountlyRequestModel requestModel = new CountlyRequestModel(null,  data);
 
@@ -142,12 +148,12 @@ namespace Plugins.CountlySDK.Helpers
         /// <param name="url"></param>
         /// <param name="addToRequestQueue"></param>
         /// <returns></returns>
-        internal async Task<CountlyResponse> GetAsync(string url)
+        internal async Task<CountlyResponse> GetAsync(string url, string data)
         {
             CountlyResponse countlyResponse = new CountlyResponse();
-
+            string query = BuildRequest(data);
             try {
-                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url + query);
                 using (HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync()) {
                     int code = (int)response.StatusCode;
                     using (Stream stream = response.GetResponseStream())
@@ -193,8 +199,8 @@ namespace Plugins.CountlySDK.Helpers
             CountlyResponse countlyResponse = new CountlyResponse();
 
             try {
-                BuildGetRequest();
-                byte[] dataBytes = Encoding.ASCII.GetBytes(data);
+                string query = BuildRequest(data);
+                byte[] dataBytes = Encoding.ASCII.GetBytes(query);
 
                 HttpWebRequest request = (HttpWebRequest)WebRequest.Create(uri);
                 request.ContentLength = dataBytes.Length;

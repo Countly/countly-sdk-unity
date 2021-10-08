@@ -97,10 +97,10 @@ namespace Plugins.CountlySDK.Services
             requestParams.Add("metrics", JsonConvert.SerializeObject(CountlyMetricModel.Metrics, Formatting.Indented,
             new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }));
 
-            string url = BuildGetRequest(requestParams);
+            string query = BuildGetRequest(requestParams);
 
 
-            CountlyResponse response = await Task.Run(() => _requestCountlyHelper.GetAsync(url));
+            CountlyResponse response = await Task.Run(() => _requestCountlyHelper.GetAsync(_countlyUtils.ServerInputUrl, query));
             if (response.IsSuccess) {
                 _configDao.RemoveAll();
                 ConfigEntity configEntity = new ConfigEntity {
