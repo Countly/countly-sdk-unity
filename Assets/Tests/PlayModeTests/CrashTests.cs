@@ -109,14 +109,13 @@ namespace Tests
             Assert.AreEqual(1, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
 
             CountlyRequestModel requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
-            string myUri = requestModel.RequestUrl;
-            string crash = HttpUtility.ParseQueryString(myUri).Get("crash");
-            JObject json = JObject.Parse(crash);
-            Assert.AreEqual("message", json.GetValue("_name").ToString());
-            Assert.AreEqual("True", json.GetValue("_nonfatal").ToString());
-            Assert.AreEqual("Stack\nStack", json.GetValue("_error").ToString());
+            JObject json = JObject.Parse(requestModel.RequestData);
+            JObject crashObj = JObject.Parse(json["crash"].ToString());
+            Assert.AreEqual("message", crashObj.GetValue("_name").ToString());
+            Assert.AreEqual("True", crashObj.GetValue("_nonfatal").ToString());
+            Assert.AreEqual("Stack\nStack", crashObj.GetValue("_error").ToString());
 
-            JObject custom = json["_custom"].ToObject<JObject>();
+            JObject custom = crashObj["_custom"].ToObject<JObject>();
 
             Assert.AreEqual(2, custom.Count);
             Assert.AreEqual("12344", custom.GetValue("Time").ToString());
