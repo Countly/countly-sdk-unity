@@ -1,4 +1,11 @@
+using System;
+using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.Data;
+using System.Linq;
+using System.Web;
 using iBoxDB.LocalServer;
+using Newtonsoft.Json;
 using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK.Persistance.Dao;
 using Plugins.CountlySDK.Persistance.Entities;
@@ -118,7 +125,7 @@ namespace Plugins.CountlySDK.Helpers
         {
             _logHelper.Verbose("[CountlyStorageHelper] RunMigration : currentVersion = " + _currentVersion);
 
-            /* 
+            /*
              * Schema Version = 1 :
              * - Deletion of the data in the “EventNumberInSameSessionEntity” table
              * - Copy data of 'Views Repository(Entity Dao, Segment Dao)' into Event Repository(Entity Dao, Segment Dao)'.
@@ -127,8 +134,15 @@ namespace Plugins.CountlySDK.Helpers
                 Migration_EventNumberInSameSessionEntityDataRemoval();
                 Migration_CopyViewDataIntoEventData();
 
-                PlayerPrefs.SetInt(Constants.SchemaVersion, 1);
+                _currentVersion = 1;
+                PlayerPrefs.SetInt(Constants.SchemaVersion, _currentVersion);
 
+            }
+
+            if (_currentVersion == 1) {
+                Migration_MigrateOldRequests();
+                _currentVersion = 2;
+                PlayerPrefs.SetInt(Constants.SchemaVersion, _currentVersion);
             }
 
             PlayerPrefs.SetInt(Constants.SchemaVersion, _schemaVersion);
@@ -152,6 +166,36 @@ namespace Plugins.CountlySDK.Helpers
                 EventRepo.Enqueue(ViewRepo.Dequeue());
             }
             _logHelper.Verbose("[CountlyStorageHelper] Migration_CopyViewDataIntoEventData");
+
+        }
+
+        /// <summary>
+        /// Migration to version 1: Copy data of 'Views Repository(Entity Dao, Segment Dao)' into Event Repository(Entity Dao, Segment Dao)'.
+        /// </summary>
+        private void Migration_MigrateOldRequests()
+        {
+            CountlyRequestModel[] requestModels =  RequestRepo.Models.ToArray();
+            foreach (CountlyRequestModel request in requestModels) {
+                if (request.RequestUrl != null) {
+
+                    int index = request.RequestUrl.IndexOf('?');
+                    string uri = request.RequestUrl.Substring(index);
+                    NameValueCollection collection =  HttpUtility.ParseQueryString(uri);
+
+                    Dictionary<string, string>  queryParams = collection.AllKeys.ToDictionary(t => t, t => collection[t]);
+                    string data = JsonConvert.SerializeObject(queryParams);
+
+                    request.RequestUrl = null;
+                    request.RequestData = data;
+
+                   bool result = RequestRepo.Update(request);
+                   if (!result) {
+                       throw new DataException();
+                   }
+                }
+
+            }
+            _logHelper.Verbose("[CountlyStorageHelper] Migration_MigrateOldRequests");
 
         }
 

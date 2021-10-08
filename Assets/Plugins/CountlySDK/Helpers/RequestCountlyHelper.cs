@@ -51,7 +51,7 @@ namespace Plugins.CountlySDK.Helpers
 
         internal async Task ProcessQueue()
         {
-            if (isQueueBeingProcess) {
+            if (isQueueBeingProcess || true) {
                 return;
             }
 
@@ -75,12 +75,13 @@ namespace Plugins.CountlySDK.Helpers
 
         private async Task<CountlyResponse> ProcessRequest(CountlyRequestModel model)
         {
-            Log.Verbose("[RequestCountlyHelper] Process request, request: " + model.ToString());
+            Log.Verbose("[RequestCountlyHelper] Process request, request: " + model);
 
-            if (model.IsRequestGetType) {
-                return await Task.Run(() => GetAsync(model.RequestUrl));
+            if (_config.EnablePost || model.RequestData.Length > 1800) {
+                return await Task.Run(() => PostAsync(_countlyUtils.ServerInputUrl, model.RequestData));
             } else {
-                return await Task.Run(() => PostAsync(model.RequestUrl, model.RequestData));
+                return await Task.Run(() => GetAsync(_countlyUtils + model.RequestUrl));
+
             }
         }
 
@@ -126,16 +127,10 @@ namespace Plugins.CountlySDK.Helpers
         /// <summary>
         ///  An internal function to add a request to request queue.
         /// </summary>
-
         internal void AddToRequestQueue(Dictionary<string, object> queryParams)
         {
-            CountlyRequestModel requestModel;
-            string data = BuildGetRequest(queryParams);
-            if (_config.EnablePost || data.Length > 1800) {
-                requestModel = new CountlyRequestModel(false, _countlyUtils.ServerInputUrl, data, DateTime.UtcNow);
-            } else {
-                requestModel = new CountlyRequestModel(true, _countlyUtils.ServerInputUrl + data, null, DateTime.UtcNow);
-            }
+            string data = JsonConvert.SerializeObject(queryParams);
+            CountlyRequestModel requestModel = new CountlyRequestModel(null,  data);
 
             AddRequestToQueue(requestModel);
         }
