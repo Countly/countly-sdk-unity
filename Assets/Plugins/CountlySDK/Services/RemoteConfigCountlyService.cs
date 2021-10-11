@@ -88,11 +88,9 @@ namespace Plugins.CountlySDK.Services
                 };
             }
 
-            Dictionary<string, object> requestParams =
-                new Dictionary<string, object>
-                {
-                    { "method", "fetch_remote_config" }
-                };
+            Dictionary<string, object> requestParams = _countlyUtils.GetBaseParams();
+
+            requestParams.Add("method", "fetch_remote_config");
 
             requestParams.Add("metrics", JsonConvert.SerializeObject(CountlyMetricModel.Metrics, Formatting.Indented,
             new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }));
