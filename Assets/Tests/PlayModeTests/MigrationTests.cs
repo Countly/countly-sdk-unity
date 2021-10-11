@@ -19,7 +19,7 @@ namespace Tests
 
 
         /// <summary>
-        /// It checks the working of crash service if no 'Crash' consent is given.
+        /// It validates the request after migrating old request to new request format.
         /// </summary>
         [Test]
         public void TestStoreRequestsAfterMigrationOldRequest()
