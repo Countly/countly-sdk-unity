@@ -97,10 +97,15 @@ namespace Plugins.CountlySDK.Services
             requestParams.Add("metrics", JsonConvert.SerializeObject(CountlyMetricModel.Metrics, Formatting.Indented,
             new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }));
 
-            string query = BuildGetRequest(requestParams);
+            string data = JsonConvert.SerializeObject(requestParams);
 
+            CountlyResponse response;
+            if (_configuration.EnablePost) {
+                response = await Task.Run(() => _requestCountlyHelper.PostAsync(_countlyUtils.ServerInputUrl, data));
+            } else {
+                response = await Task.Run(() => _requestCountlyHelper.GetAsync(_countlyUtils.ServerInputUrl, data));
 
-            CountlyResponse response = await Task.Run(() => _requestCountlyHelper.GetAsync(_countlyUtils.ServerInputUrl, query));
+            }
             if (response.IsSuccess) {
                 _configDao.RemoveAll();
                 ConfigEntity configEntity = new ConfigEntity {
@@ -115,43 +120,6 @@ namespace Plugins.CountlySDK.Services
             }
 
             return response;
-        }
-
-        /// <summary>
-        ///     Builds request URL using ServerUrl, AppKey, DeviceID and supplied queryParams parameters.
-        ///     The data is appended in the URL.
-        /// </summary>
-        /// <param name="queryParams">request's parameters</param>
-        /// <returns></returns>
-        private string BuildGetRequest(Dictionary<string, object> queryParams)
-        {
-            _requestStringBuilder.Clear();
-            //Metrics added to each request
-            foreach (KeyValuePair<string, object> item in _countlyUtils.GetAppKeyAndDeviceIdParams()) {
-                _requestStringBuilder.AppendFormat((item.Key != "app_key" ? "&" : string.Empty) + "{0}={1}",
-                    UnityWebRequest.EscapeURL(item.Key), UnityWebRequest.EscapeURL(Convert.ToString(item.Value)));
-            }
-
-
-            //Query params supplied for creating request
-            foreach (KeyValuePair<string, object> item in queryParams) {
-                if (!string.IsNullOrEmpty(item.Key) && item.Value != null) {
-                    _requestStringBuilder.AppendFormat("&{0}={1}", UnityWebRequest.EscapeURL(item.Key),
-                        UnityWebRequest.EscapeURL(Convert.ToString(item.Value)));
-                }
-            }
-
-            if (!string.IsNullOrEmpty(_configuration.Salt)) {
-                // Create a SHA256
-                using (SHA256 sha256Hash = SHA256.Create()) {
-                    byte[] data = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(_requestStringBuilder + _configuration.Salt));
-                    _requestStringBuilder.Insert(0, _countlyUtils.ServerInputUrl);
-                    return _requestStringBuilder.AppendFormat("&checksum256={0}", _countlyUtils.GetStringFromBytes(data)).ToString();
-                }
-            }
-
-            _requestStringBuilder.Insert(0, _countlyUtils.ServerOutputUrl);
-            return _requestStringBuilder.ToString();
         }
 
         #region override Methods
