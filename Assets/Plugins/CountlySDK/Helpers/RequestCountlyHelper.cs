@@ -31,7 +31,7 @@ namespace Plugins.CountlySDK.Helpers
             _requestRepo = requestRepo;
         }
 
-        private void AddRequestToQueue(CountlyRequestModel request)
+        internal void AddRequestToQueue(CountlyRequestModel request)
         {
 
             Log.Verbose("[RequestCountlyHelper] AddRequestToQueue: " + request.ToString());
