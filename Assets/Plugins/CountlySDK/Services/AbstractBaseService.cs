@@ -86,7 +86,7 @@ namespace Plugins.CountlySDK.Services
 
         protected string TrimValue(string fieldName, string v)
         {
-            if (v.Length > _configuration.MaxValueSize) {
+            if (v != null && v.Length > _configuration.MaxValueSize) {
                 Log.Warning("[" + GetType().Name + "] TrimValue : Max allowed '" + fieldName + "' length is " + _configuration.MaxValueSize + ". " + v + " will be truncated.");
                 v = v.Substring(0, _configuration.MaxValueSize);
             }
