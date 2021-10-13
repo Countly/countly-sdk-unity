@@ -41,7 +41,7 @@ namespace Plugins.CountlySDK.Services
             //Static DeviceID (only when the app is running or in the background)
             //User provided DeviceID
             //Generate Random DeviceID
-            string storedDeviceId = PlayerPrefs.GetString("DeviceID");
+            string storedDeviceId = PlayerPrefs.GetString(Constants.DeviceIDKey);
             if (!_countlyUtils.IsNullEmptyOrWhitespace(storedDeviceId)) {
                 DeviceId = storedDeviceId;
             } else {
@@ -129,9 +129,9 @@ namespace Plugins.CountlySDK.Services
         }
 
         /// <summary>
-        /// Changes DeviceId. 
+        /// Changes DeviceId.
         /// Continues with the current session.
-        /// Merges data for old and new Device Id. 
+        /// Merges data for old and new Device Id.
         /// </summary>
         /// <param name="deviceId">new device id</param>
         [Obsolete("ChangeDeviceIdAndMergeSessionDataAsync is deprecated, please use ChangeDeviceIdWithMerge method instead.")]
@@ -148,9 +148,9 @@ namespace Plugins.CountlySDK.Services
         }
 
         /// <summary>
-        /// Changes DeviceId. 
+        /// Changes DeviceId.
         /// Continues with the current session.
-        /// Merges data for old and new Device Id. 
+        /// Merges data for old and new Device Id.
         /// </summary>
         /// <param name="deviceId">new device id</param>
         public async Task ChangeDeviceIdWithMerge(string deviceId)

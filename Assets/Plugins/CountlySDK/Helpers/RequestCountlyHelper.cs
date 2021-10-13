@@ -154,7 +154,7 @@ namespace Plugins.CountlySDK.Helpers
             string query = BuildRequest(data);
             string url = uri + query;
             try {
-                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url + query);
+                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
                 using (HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync()) {
                     int code = (int)response.StatusCode;
                     using (Stream stream = response.GetResponseStream())
