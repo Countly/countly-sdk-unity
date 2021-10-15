@@ -88,11 +88,11 @@ namespace Plugins.CountlySDK
 
         public string GetStringFromBytes(byte[] bytes)
         {
-            for (int i = 0; i < bytes.Length; i++) {
-                Builder.Append(bytes[i].ToString("x2"));
+            StringBuilder hex = new StringBuilder(bytes.Length * 2);
+            foreach (byte b in bytes) {
+                hex.AppendFormat("{0:x2}", b);
             }
-
-            return Builder.ToString();
+            return hex.ToString();
         }
     }
 }

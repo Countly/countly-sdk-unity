@@ -76,9 +76,9 @@ namespace Tests
             Assert.AreEqual(1, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
 
             CountlyRequestModel requestModel = Countly.Instance.Consents._requestCountlyHelper._requestRepo.Dequeue();
-            string myUri = requestModel.RequestUrl;
-            string consents = HttpUtility.ParseQueryString(myUri).Get("consent");
-            Assert.IsNull(consents);
+            JObject obj = JObject.Parse(requestModel.RequestData);
+
+            Assert.IsFalse(obj.ContainsKey("consents"));
 
             Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
             Countly.Instance.Consents.GiveConsent(new Consents[] { Consents.Sessions });
@@ -109,21 +109,22 @@ namespace Tests
             Assert.AreEqual(1, Countly.Instance.Consents._requestCountlyHelper._requestRepo.Count);
 
             CountlyRequestModel requestModel = Countly.Instance.Consents._requestCountlyHelper._requestRepo.Dequeue();
-            string myUri = requestModel.RequestUrl;
-            string consents = HttpUtility.ParseQueryString(myUri).Get("consent");
-            JObject json = JObject.Parse(consents);
-            Assert.AreEqual(11, json.Count);
-            Assert.IsTrue(json.GetValue("push").ToObject<bool>());
-            Assert.IsTrue(json.GetValue("users").ToObject<bool>());
-            Assert.IsTrue(json.GetValue("views").ToObject<bool>());
-            Assert.IsTrue(json.GetValue("clicks").ToObject<bool>());
-            Assert.IsTrue(json.GetValue("events").ToObject<bool>());
-            Assert.IsTrue(json.GetValue("crashes").ToObject<bool>());
-            Assert.IsTrue(json.GetValue("sessions").ToObject<bool>());
-            Assert.IsTrue(json.GetValue("location").ToObject<bool>());
-            Assert.IsTrue(json.GetValue("feedback").ToObject<bool>());
-            Assert.IsTrue(json.GetValue("star-rating").ToObject<bool>());
-            Assert.IsTrue(json.GetValue("remote-config").ToObject<bool>());
+
+            JObject obj = JObject.Parse(requestModel.RequestData);
+            JObject consentObj = JObject.Parse(obj["consent"].ToString());
+
+            Assert.AreEqual(11, consentObj.Count);
+            Assert.IsTrue(consentObj.GetValue("push").ToObject<bool>());
+            Assert.IsTrue(consentObj.GetValue("users").ToObject<bool>());
+            Assert.IsTrue(consentObj.GetValue("views").ToObject<bool>());
+            Assert.IsTrue(consentObj.GetValue("clicks").ToObject<bool>());
+            Assert.IsTrue(consentObj.GetValue("events").ToObject<bool>());
+            Assert.IsTrue(consentObj.GetValue("crashes").ToObject<bool>());
+            Assert.IsTrue(consentObj.GetValue("sessions").ToObject<bool>());
+            Assert.IsTrue(consentObj.GetValue("location").ToObject<bool>());
+            Assert.IsTrue(consentObj.GetValue("feedback").ToObject<bool>());
+            Assert.IsTrue(consentObj.GetValue("star-rating").ToObject<bool>());
+            Assert.IsTrue(consentObj.GetValue("remote-config").ToObject<bool>());
 
         }
 
@@ -148,9 +149,9 @@ namespace Tests
             Assert.AreEqual(1, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
 
             CountlyRequestModel requestModel = Countly.Instance.Consents._requestCountlyHelper._requestRepo.Dequeue();
-            string myUri = requestModel.RequestUrl;
-            string consents = HttpUtility.ParseQueryString(myUri).Get("consent");
-            JObject json = JObject.Parse(consents);
+            JObject obj = JObject.Parse(requestModel.RequestData);
+            JObject json = JObject.Parse(obj["consent"].ToString());
+
             Assert.AreEqual(2, json.Count);
             Assert.IsTrue(json.GetValue("crashes").ToObject<bool>());
             Assert.IsTrue(json.GetValue("events").ToObject<bool>());
@@ -158,9 +159,10 @@ namespace Tests
             Countly.Instance.Consents.GiveConsent(new Consents[] { Consents.Crashes, Consents.Views });
             Assert.AreEqual(1, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
             requestModel = Countly.Instance.Consents._requestCountlyHelper._requestRepo.Dequeue();
-            myUri = requestModel.RequestUrl;
-            consents = HttpUtility.ParseQueryString(myUri).Get("consent");
-            json = JObject.Parse(consents);
+
+            obj = JObject.Parse(requestModel.RequestData);
+            json = JObject.Parse(obj["consent"].ToString());
+
             Assert.AreEqual(1, json.Count);
             Assert.IsTrue(json.GetValue("views").ToObject<bool>());
 
@@ -169,18 +171,20 @@ namespace Tests
 
             Countly.Instance.Consents.RemoveConsent(new Consents[] { Consents.Crashes, Consents.Views });
             requestModel = Countly.Instance.Consents._requestCountlyHelper._requestRepo.Dequeue();
-            myUri = requestModel.RequestUrl;
-            consents = HttpUtility.ParseQueryString(myUri).Get("consent");
-            json = JObject.Parse(consents);
+
+            obj = JObject.Parse(requestModel.RequestData);
+            json = JObject.Parse(obj["consent"].ToString());
+
             Assert.AreEqual(2, json.Count);
             Assert.IsFalse(json.GetValue("crashes").ToObject<bool>());
             Assert.IsFalse(json.GetValue("views").ToObject<bool>());
 
             Countly.Instance.Consents.RemoveConsent(new Consents[] { Consents.Events, Consents.Views });
             requestModel = Countly.Instance.Consents._requestCountlyHelper._requestRepo.Dequeue();
-            myUri = requestModel.RequestUrl;
-            consents = HttpUtility.ParseQueryString(myUri).Get("consent");
-            json = JObject.Parse(consents);
+
+            obj = JObject.Parse(requestModel.RequestData);
+            json = JObject.Parse(obj["consent"].ToString());
+
             Assert.AreEqual(1, json.Count);
             Assert.IsFalse(json.GetValue("events").ToObject<bool>());
 
@@ -536,7 +540,7 @@ namespace Tests
         }
 
         /// <summary>
-        /// Case: If 'RequiresConsent' is set in the configuration and individual consents are given and removed to multiple features after initialization. 
+        /// Case: If 'RequiresConsent' is set in the configuration and individual consents are given and removed to multiple features after initialization.
         /// Result: 'ConsentChanged' should call with a modified consents list on listeners.
         /// </summary>
         [Test]
@@ -569,7 +573,7 @@ namespace Tests
         }
 
         /// <summary>
-        /// Case: If 'RequiresConsent' is set in the configuration and consents are given and removed to multiple groups after initialization. 
+        /// Case: If 'RequiresConsent' is set in the configuration and consents are given and removed to multiple groups after initialization.
         /// Result: 'ConsentChanged' should call with a modified consents list on listeners.
         /// </summary>
         [Test]
@@ -611,11 +615,11 @@ namespace Tests
 
         /// <summary>
         /// Case:
-        /// step 1: If 'RequiresConsent' is set in the configuration, consents are given to an individual group 'GroupA' after initialization. 
+        /// step 1: If 'RequiresConsent' is set in the configuration, consents are given to an individual group 'GroupA' after initialization.
         /// Result: 'ConsentChanged' should call with a modified consents list containing consents of 'GroupA' on listeners.
-        /// step 2: Remove consents of all features. 
+        /// step 2: Remove consents of all features.
         /// Result: 'ConsentChanged' should call with a modified consents list containing consents of 'GroupA' on listeners.
-        /// step 2: Give consents to all features. 
+        /// step 2: Give consents to all features.
         /// Result: 'ConsentChanged' should call with a modified consents list containing all consents on listeners.
         /// </summary>
         [Test]

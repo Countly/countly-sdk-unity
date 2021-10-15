@@ -37,7 +37,7 @@ namespace Tests
             Assert.IsNotNull(Countly.Instance.Session);
             Assert.AreEqual(0, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
 
-           
+
 
             await Countly.Instance.Session.BeginSessionAsync();
             Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
@@ -66,11 +66,12 @@ namespace Tests
             Assert.AreEqual(1, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
 
             CountlyRequestModel requestModel = Countly.Instance.Session._requestCountlyHelper._requestRepo.Dequeue();
-            string myUri = requestModel.RequestUrl;
-            NameValueCollection values = HttpUtility.ParseQueryString(myUri);
+            JObject obj = JObject.Parse(requestModel.RequestData);
 
-            Assert.AreEqual("1", values.Get("begin_session"));
-            Assert.IsNotNull(values.Get("metrics"));
+
+            Assert.AreEqual(1, obj.GetValue("begin_session").ToObject<int>());
+
+            Assert.IsTrue(obj.ContainsKey("metrics"));
         }
 
         /// <summary>
@@ -90,15 +91,14 @@ namespace Tests
             Assert.AreEqual(1, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
 
             CountlyRequestModel requestModel = Countly.Instance.Session._requestCountlyHelper._requestRepo.Dequeue();
-            string myUri = requestModel.RequestUrl;
-            NameValueCollection values = HttpUtility.ParseQueryString(myUri);
+            JObject obj = JObject.Parse(requestModel.RequestData);
 
-            Assert.AreEqual("1", values.Get("begin_session"));
-            Assert.AreEqual("192.168.100.51", values.Get("ip_address"));
-            Assert.AreEqual("PK", values.Get("country_code"));
-            Assert.AreEqual("Lahore", values.Get("city"));
-            Assert.AreEqual("10.0 , 10.0", values.Get("location"));
-            Assert.IsNotNull(values.Get("metrics"));
+            Assert.AreEqual(1, obj.GetValue("begin_session").ToObject<int>());
+            Assert.AreEqual("192.168.100.51", obj.GetValue("ip_address").ToObject<string>());
+            Assert.AreEqual("PK", obj.GetValue("country_code").ToObject<string>());
+            Assert.AreEqual("Lahore", obj.GetValue("city").ToObject<string>());
+            Assert.AreEqual("10.0 , 10.0", obj.GetValue("location").ToObject<string>());
+            Assert.IsTrue(obj.ContainsKey("metrics"));
         }
 
         /// <summary>
@@ -118,13 +118,12 @@ namespace Tests
             Assert.AreEqual(1, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
 
             CountlyRequestModel requestModel = Countly.Instance.Session._requestCountlyHelper._requestRepo.Dequeue();
-            string myUri = requestModel.RequestUrl;
-            NameValueCollection values = HttpUtility.ParseQueryString(myUri);
+            JObject obj = JObject.Parse(requestModel.RequestData);
 
+            Assert.AreEqual(1, obj.GetValue("begin_session").ToObject<int>());
+            Assert.AreEqual(string.Empty, obj.GetValue("location").ToObject<string>());
+            Assert.IsTrue(obj.ContainsKey("metrics"));
 
-            Assert.AreEqual("1", values.Get("begin_session"));
-            Assert.AreEqual(string.Empty, values.Get("location"));
-            Assert.IsNotNull(values.Get("metrics"));
         }
 
         /// <summary>
@@ -149,12 +148,12 @@ namespace Tests
             Assert.AreEqual(2, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
             Countly.Instance.Session._requestCountlyHelper._requestRepo.Dequeue(); // Remove consent Request
             CountlyRequestModel requestModel = Countly.Instance.Session._requestCountlyHelper._requestRepo.Dequeue();
-            string myUri = requestModel.RequestUrl;
-            NameValueCollection values = HttpUtility.ParseQueryString(myUri);
+
+            JObject obj = JObject.Parse(requestModel.RequestData);
 
 
-            Assert.AreEqual("1", values.Get("begin_session"));
-            Assert.IsNotNull(values.Get("metrics"));
+            Assert.AreEqual(1, obj.GetValue("begin_session").ToObject<int>());
+            Assert.IsTrue(obj.ContainsKey("metrics"));
         }
 
         /// <summary>
@@ -195,7 +194,7 @@ namespace Tests
             Countly.Instance.Consents.GiveConsent(new Consents[] { Consents.Sessions });
             //RQ will have consent change request
             Assert.AreEqual(1, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
-           
+
         }
 
         /// <summary>
@@ -250,11 +249,10 @@ namespace Tests
             Assert.AreEqual(1, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
 
             CountlyRequestModel requestModel = Countly.Instance.Session._requestCountlyHelper._requestRepo.Dequeue();
-            string myUri = requestModel.RequestUrl;
-            NameValueCollection values = HttpUtility.ParseQueryString(myUri);
+            JObject obj = JObject.Parse(requestModel.RequestData);
 
-            Assert.AreEqual("1", values.Get("begin_session"));
-            Assert.IsNotNull(values.Get("metrics"));
+            Assert.AreEqual(1, obj.GetValue("begin_session").ToObject<int>());
+            Assert.IsTrue(obj.ContainsKey("metrics"));
 
             System.DateTime startTime = System.DateTime.UtcNow;
             do {
@@ -274,13 +272,11 @@ namespace Tests
             Assert.AreEqual(1, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
 
             requestModel = Countly.Instance.Session._requestCountlyHelper._requestRepo.Dequeue();
-            myUri = requestModel.RequestUrl;
-            values = HttpUtility.ParseQueryString(myUri);
-
-            Assert.GreaterOrEqual(duration, System.Convert.ToDouble(values.Get("session_duration")));
-            Assert.LessOrEqual(2.0, System.Convert.ToDouble(values.Get("session_duration")));
-
-            Assert.IsNull(values.Get("metrics"));
+            obj = JObject.Parse(requestModel.RequestData);
+            
+            Assert.IsFalse(obj.ContainsKey("metrics"));
+            Assert.AreEqual(2.0, obj.GetValue("session_duration").ToObject<double>());
+            Assert.GreaterOrEqual(duration, obj.GetValue("session_duration").ToObject<double>());
         }
 
         /// <summary>
@@ -322,15 +318,12 @@ namespace Tests
             Assert.AreEqual(1, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
 
             CountlyRequestModel requestModel = Countly.Instance.Session._requestCountlyHelper._requestRepo.Dequeue();
-            string myUri = requestModel.RequestUrl;
-            NameValueCollection values = HttpUtility.ParseQueryString(myUri);
+            JObject obj = JObject.Parse(requestModel.RequestData);
 
-          
-            Assert.AreEqual("1", values.Get("end_session"));
-            Assert.GreaterOrEqual(duration, System.Convert.ToDouble(values.Get("session_duration")));
-            Assert.LessOrEqual(2.0, System.Convert.ToDouble(values.Get("session_duration")));
-
-            Assert.IsNull(values.Get("metrics"));
+            Assert.AreEqual(1, obj.GetValue("end_session").ToObject<int>());
+            Assert.AreEqual(2.0, obj.GetValue("session_duration").ToObject<double>());
+            Assert.GreaterOrEqual(duration, obj.GetValue("session_duration").ToObject<double>());
+            Assert.IsFalse(obj.ContainsKey("metrics"));
         }
 
         [TearDown]

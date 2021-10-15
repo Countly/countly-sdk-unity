@@ -6,6 +6,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK.Persistance.Repositories;
 using UnityEngine;
@@ -15,7 +16,7 @@ namespace Plugins.CountlySDK.Helpers
 {
     public class RequestCountlyHelper
     {
-        private bool isQueueBeingProcess = false;
+        private bool _isQueueBeingProcess;
 
         private readonly CountlyLogHelper Log;
         private readonly CountlyUtils _countlyUtils;
@@ -30,7 +31,7 @@ namespace Plugins.CountlySDK.Helpers
             _requestRepo = requestRepo;
         }
 
-        private void AddRequestToQueue(CountlyRequestModel request)
+        internal void AddRequestToQueue(CountlyRequestModel request)
         {
 
             Log.Verbose("[RequestCountlyHelper] AddRequestToQueue: " + request.ToString());
@@ -51,11 +52,11 @@ namespace Plugins.CountlySDK.Helpers
 
         internal async Task ProcessQueue()
         {
-            if (isQueueBeingProcess) {
+            if (_isQueueBeingProcess) {
                 return;
             }
 
-            isQueueBeingProcess = true;
+            _isQueueBeingProcess = true;
             CountlyRequestModel[] requests = _requestRepo.Models.ToArray();
 
             Log.Verbose("[RequestCountlyHelper] Process queue, requests: " + requests.Length);
@@ -70,18 +71,18 @@ namespace Plugins.CountlySDK.Helpers
 
                 _requestRepo.Dequeue();
             }
-            isQueueBeingProcess = false;
+
+            _isQueueBeingProcess = false;
         }
 
         private async Task<CountlyResponse> ProcessRequest(CountlyRequestModel model)
         {
-            Log.Verbose("[RequestCountlyHelper] Process request, request: " + model.ToString());
+            Log.Verbose("[RequestCountlyHelper] Process request, request: " + model);
 
-            if (model.IsRequestGetType) {
-                return await Task.Run(() => GetAsync(model.RequestUrl));
-            } else {
-                return await Task.Run(() => PostAsync(model.RequestUrl, model.RequestData));
+            if (_config.EnablePost || model.RequestData.Length > 1800) {
+                return await Task.Run(() => PostAsync(_countlyUtils.ServerInputUrl, model.RequestData));
             }
+            return await Task.Run(() => GetAsync(_countlyUtils.ServerInputUrl ,model.RequestData));
         }
 
         /// <summary>
@@ -90,16 +91,10 @@ namespace Plugins.CountlySDK.Helpers
         /// </summary>
         /// <param name="queryParams"></param>
         /// <returns></returns>
-        internal string BuildGetRequest(Dictionary<string, object> queryParams)
+        internal string BuildRequest(string data)
         {
+            Dictionary<string, object> queryParams = JsonConvert.DeserializeObject<Dictionary<string, object>>(data);
             StringBuilder requestStringBuilder = new StringBuilder();
-            //Metrics added to each request
-            foreach (KeyValuePair<string, object> item in _countlyUtils.GetBaseParams()) {
-                requestStringBuilder.AppendFormat((item.Key != "app_key" ? "&" : string.Empty) + "{0}={1}",
-                    UnityWebRequest.EscapeURL(item.Key), UnityWebRequest.EscapeURL(Convert.ToString(item.Value)));
-            }
-
-
             //Query params supplied for creating request
             foreach (KeyValuePair<string, object> item in queryParams) {
                 if (!string.IsNullOrEmpty(item.Key) && item.Value != null) {
@@ -108,59 +103,38 @@ namespace Plugins.CountlySDK.Helpers
                 }
             }
 
+            String query = requestStringBuilder.ToString();
+            string result = query.Remove(0, 1); //remove extra '&'
 
             if (!string.IsNullOrEmpty(_config.Salt)) {
-                // Create a SHA256   
+                // Create a SHA256
                 using (SHA256 sha256Hash = SHA256.Create()) {
-                    byte[] data = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(requestStringBuilder + _config.Salt));
-                    requestStringBuilder.Insert(0, _countlyUtils.ServerInputUrl);
-                    return requestStringBuilder.AppendFormat("&checksum256={0}", _countlyUtils.GetStringFromBytes(data)).ToString();
+                    byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(result + _config.Salt));
+                    string hex = _countlyUtils.GetStringFromBytes(bytes);
+                    Log.Debug("BuildGetRequest: query = " + result + ", checksum256 = " + hex);
+
+                    result += "&checksum256=" + hex;
                 }
             }
 
-            requestStringBuilder.Insert(0, _countlyUtils.ServerInputUrl);
-            return requestStringBuilder.ToString();
-        }
-
-        /// <summary>
-        ///     Serializes the post data (base params required for a request, and the supplied queryParams) in a string.
-        /// </summary>
-        /// <param name="queryParams"></param>
-        /// <returns></returns>
-        internal string BuildPostRequest(Dictionary<string, object> queryParams)
-        {
-            Dictionary<string, object> baseParams = _countlyUtils.GetBaseParams();
-            foreach (KeyValuePair<string, object> item in queryParams) {
-                baseParams.Add(UnityWebRequest.EscapeURL(item.Key), item.Value);
-            }
 
 
-            string data = JsonConvert.SerializeObject(baseParams);
-            if (!string.IsNullOrEmpty(_config.Salt)) {
-                // Create a SHA256   
-                using (SHA256 sha256Hash = SHA256.Create()) {
-                    byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(data + _config.Salt));
-                    baseParams.Add("checksum256", bytes);
-                    return JsonConvert.SerializeObject(baseParams);
-                }
-            }
-
-            return data;
+            return result;
         }
 
         /// <summary>
         ///  An internal function to add a request to request queue.
         /// </summary>
-
         internal void AddToRequestQueue(Dictionary<string, object> queryParams)
         {
-            CountlyRequestModel requestModel;
-            string data = BuildPostRequest(queryParams);
-            if (_config.EnablePost || data.Length > 1800) {
-                requestModel = new CountlyRequestModel(false, _countlyUtils.ServerInputUrl, BuildPostRequest(queryParams), DateTime.UtcNow);
-            } else {
-                requestModel = new CountlyRequestModel(true, BuildGetRequest(queryParams), null, DateTime.UtcNow);
+            //Metrics added to each request
+            Dictionary<string, object> requestData = _countlyUtils.GetBaseParams();
+            foreach (KeyValuePair<string, object> item in queryParams) {
+                requestData.Add(item.Key, item.Value);
             }
+
+            string data = JsonConvert.SerializeObject(requestData);
+            CountlyRequestModel requestModel = new CountlyRequestModel(null,  data);
 
             AddRequestToQueue(requestModel);
         }
@@ -171,10 +145,14 @@ namespace Plugins.CountlySDK.Helpers
         /// <param name="url"></param>
         /// <param name="addToRequestQueue"></param>
         /// <returns></returns>
-        internal async Task<CountlyResponse> GetAsync(string url)
+        internal async Task<CountlyResponse> GetAsync(string uri, string data)
         {
-            CountlyResponse countlyResponse = new CountlyResponse();
 
+            Log.Verbose("[RequestCountlyHelper] GetAsync request: " + uri + " params: " + data);
+
+            CountlyResponse countlyResponse = new CountlyResponse();
+            string query = BuildRequest(data);
+            string url = uri + query;
             try {
                 HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
                 using (HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync()) {
@@ -201,10 +179,10 @@ namespace Plugins.CountlySDK.Helpers
                         countlyResponse.Data = res;
                     }
                 }
-               
+
             }
 
-            Log.Verbose("[RequestCountlyHelper] GetAsync request: " + url + " response: " + countlyResponse.ToString());
+            Log.Verbose("[RequestCountlyHelper] GetAsync request: " + url + " params: " + query + " response: " + countlyResponse.ToString());
 
             return countlyResponse;
         }
@@ -217,16 +195,17 @@ namespace Plugins.CountlySDK.Helpers
         /// <param name="contentType"></param>
         /// <param name="addToRequestQueue"></param>
         /// <returns></returns>
-        private async Task<CountlyResponse> PostAsync(string uri, string data)
+        internal async Task<CountlyResponse> PostAsync(string uri, string data)
         {
             CountlyResponse countlyResponse = new CountlyResponse();
 
             try {
-                byte[] dataBytes = Encoding.UTF8.GetBytes(data);
+                string query = BuildRequest(data);
+                byte[] dataBytes = Encoding.ASCII.GetBytes(query);
 
                 HttpWebRequest request = (HttpWebRequest)WebRequest.Create(uri);
                 request.ContentLength = dataBytes.Length;
-                request.ContentType = "application/json";
+                request.ContentType = "application/x-www-form-urlencoded";
                 request.Method = "POST";
 
 
@@ -260,7 +239,7 @@ namespace Plugins.CountlySDK.Helpers
 
             }
 
-            Log.Verbose("[RequestCountlyHelper] PostAsync request: " + uri + " response: " + countlyResponse.ToString());
+            Log.Verbose("[RequestCountlyHelper] PostAsync request: " + uri + " body: " + data + " response: " + countlyResponse.ToString());
 
             return countlyResponse;
         }

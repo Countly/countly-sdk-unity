@@ -1,4 +1,11 @@
+using System;
+using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.Data;
+using System.Linq;
+using System.Web;
 using iBoxDB.LocalServer;
+using Newtonsoft.Json;
 using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK.Persistance.Dao;
 using Plugins.CountlySDK.Persistance.Entities;
@@ -17,9 +24,9 @@ namespace Plugins.CountlySDK.Helpers
     internal class CountlyStorageHelper
     {
         private DB _db;
-        private int _currentVersion = 0;
+        internal int CurrentVersion = 0;
         private const long _dbNumber = 3;
-        private const int _schemaVersion = 1;
+        internal readonly int SchemaVersion = 2;
 
         private CountlyLogHelper _logHelper;
 
@@ -39,9 +46,9 @@ namespace Plugins.CountlySDK.Helpers
             _logHelper = logHelper;
 
             if (FirstLaunchAppHelper.IsFirstLaunchApp) {
-                _currentVersion = _schemaVersion;
+                CurrentVersion = SchemaVersion;
             } else {
-                _currentVersion = PlayerPrefs.GetInt(Constants.SchemaVersion, 0);
+                CurrentVersion = PlayerPrefs.GetInt(Constants.SchemaVersion, 0);
             }
         }
 
@@ -58,7 +65,7 @@ namespace Plugins.CountlySDK.Helpers
             db.GetConfig().EnsureTable<EventEntity>(EntityType.NonViewEvents.ToString(), "Id");
             db.GetConfig().EnsureTable<SegmentEntity>(EntityType.NonViewEventSegments.ToString(), "Id");
 
-            if (_currentVersion < 1) {
+            if (CurrentVersion < 1) {
                 db.GetConfig().EnsureTable<EventEntity>(EntityType.ViewEvents.ToString(), "Id");
                 db.GetConfig().EnsureTable<SegmentEntity>(EntityType.ViewEventSegments.ToString(), "Id");
                 db.GetConfig().EnsureTable<EventNumberInSameSessionEntity>(EntityType.EventNumberInSameSessions.ToString(), "Id");
@@ -83,7 +90,7 @@ namespace Plugins.CountlySDK.Helpers
             RequestDao = new Dao<RequestEntity>(auto, EntityType.Requests.ToString(), _logHelper);
             EventDao = new Dao<EventEntity>(auto, EntityType.NonViewEvents.ToString(), _logHelper);
 
-            if (_currentVersion < 1) {
+            if (CurrentVersion < 1) {
                 EventNrInSameSessionDao = new Dao<EventNumberInSameSessionEntity>(auto, EntityType.EventNumberInSameSessions.ToString(), _logHelper);
 
                 Dao<EventEntity> viewDao = new Dao<EventEntity>(auto, EntityType.ViewEvents.ToString(), _logHelper);
@@ -116,22 +123,27 @@ namespace Plugins.CountlySDK.Helpers
         /// </summary>
         internal void RunMigration()
         {
-            _logHelper.Verbose("[CountlyStorageHelper] RunMigration : currentVersion = " + _currentVersion);
+            _logHelper.Verbose("[CountlyStorageHelper] RunMigration : currentVersion = " + CurrentVersion);
 
-            /* 
+            /*
              * Schema Version = 1 :
              * - Deletion of the data in the “EventNumberInSameSessionEntity” table
              * - Copy data of 'Views Repository(Entity Dao, Segment Dao)' into Event Repository(Entity Dao, Segment Dao)'.
             */
-            if (_currentVersion == 0) {
+            if (CurrentVersion == 0) {
                 Migration_EventNumberInSameSessionEntityDataRemoval();
                 Migration_CopyViewDataIntoEventData();
 
-                PlayerPrefs.SetInt(Constants.SchemaVersion, 1);
+                CurrentVersion = 1;
+                PlayerPrefs.SetInt(Constants.SchemaVersion, CurrentVersion);
 
             }
 
-            PlayerPrefs.SetInt(Constants.SchemaVersion, _schemaVersion);
+            if (CurrentVersion == 1) {
+                Migration_MigrateOldRequests();
+                CurrentVersion = 2;
+                PlayerPrefs.SetInt(Constants.SchemaVersion, CurrentVersion);
+            }
         }
 
         /// <summary>
@@ -155,8 +167,38 @@ namespace Plugins.CountlySDK.Helpers
 
         }
 
-        internal void ClearDBData()
+        /// <summary>
+        /// Migration to version 1: Copy data of 'Views Repository(Entity Dao, Segment Dao)' into Event Repository(Entity Dao, Segment Dao)'.
+        /// </summary>
+        private void Migration_MigrateOldRequests()
         {
+            CountlyRequestModel[] requestModels =  RequestRepo.Models.ToArray();
+            foreach (CountlyRequestModel request in requestModels) {
+                if (request.RequestUrl != null) {
+
+                    int index = request.RequestUrl.IndexOf('?');
+                    string uri = request.RequestUrl.Substring(index);
+                    NameValueCollection collection =  HttpUtility.ParseQueryString(uri);
+
+                    Dictionary<string, string>  queryParams = collection.AllKeys.ToDictionary(t => t, t => collection[t]);
+                    queryParams.Remove("checksum256");
+                    string data = JsonConvert.SerializeObject(queryParams);
+
+                    request.RequestUrl = null;
+                    request.RequestData = data;
+
+                   bool result = RequestRepo.Update(request);
+                   if (!result) {
+                       throw new DataException();
+                   }
+                }
+
+            }
+            _logHelper.Verbose("[CountlyStorageHelper] Migration_MigrateOldRequests");
+
+        }
+
+        internal void ClearDBData() {
             EventRepo.Clear();
             RequestRepo.Clear();
             ConfigDao.RemoveAll();

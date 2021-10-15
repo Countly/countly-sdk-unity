@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -87,19 +88,22 @@ namespace Plugins.CountlySDK.Services
                 };
             }
 
-            Dictionary<string, object> requestParams =
-                new Dictionary<string, object>
-                {
-                    { "method", "fetch_remote_config" }
-                };
+            Dictionary<string, object> requestParams = _countlyUtils.GetBaseParams();
+
+            requestParams.Add("method", "fetch_remote_config");
 
             requestParams.Add("metrics", JsonConvert.SerializeObject(CountlyMetricModel.Metrics, Formatting.Indented,
             new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }));
 
-            string url = BuildGetRequest(requestParams);
+            string data = JsonConvert.SerializeObject(requestParams);
 
+            CountlyResponse response;
+            if (_configuration.EnablePost) {
+                response = await Task.Run(() => _requestCountlyHelper.PostAsync(_countlyUtils.ServerInputUrl, data));
+            } else {
+                response = await Task.Run(() => _requestCountlyHelper.GetAsync(_countlyUtils.ServerInputUrl, data));
 
-            CountlyResponse response = await Task.Run(() => _requestCountlyHelper.GetAsync(url));
+            }
             if (response.IsSuccess) {
                 _configDao.RemoveAll();
                 ConfigEntity configEntity = new ConfigEntity {
@@ -114,34 +118,6 @@ namespace Plugins.CountlySDK.Services
             }
 
             return response;
-        }
-
-        /// <summary>
-        ///     Builds request URL using ServerUrl, AppKey, DeviceID and supplied queryParams parameters.
-        ///     The data is appended in the URL.
-        /// </summary>
-        /// <param name="queryParams">request's parameters</param>
-        /// <returns></returns>
-        private string BuildGetRequest(Dictionary<string, object> queryParams)
-        {
-            _requestStringBuilder.Clear();
-            //Metrics added to each request
-            foreach (KeyValuePair<string, object> item in _countlyUtils.GetAppKeyAndDeviceIdParams()) {
-                _requestStringBuilder.AppendFormat((item.Key != "app_key" ? "&" : string.Empty) + "{0}={1}",
-                    UnityWebRequest.EscapeURL(item.Key), UnityWebRequest.EscapeURL(Convert.ToString(item.Value)));
-            }
-
-
-            //Query params supplied for creating request
-            foreach (KeyValuePair<string, object> item in queryParams) {
-                if (!string.IsNullOrEmpty(item.Key) && item.Value != null) {
-                    _requestStringBuilder.AppendFormat("&{0}={1}", UnityWebRequest.EscapeURL(item.Key),
-                        UnityWebRequest.EscapeURL(Convert.ToString(item.Value)));
-                }
-            }
-
-            _requestStringBuilder.Insert(0, _countlyUtils.ServerOutputUrl);
-            return _requestStringBuilder.ToString();
         }
 
         #region override Methods

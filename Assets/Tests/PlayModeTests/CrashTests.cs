@@ -109,14 +109,13 @@ namespace Tests
             Assert.AreEqual(1, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
 
             CountlyRequestModel requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
-            string myUri = requestModel.RequestUrl;
-            string crash = HttpUtility.ParseQueryString(myUri).Get("crash");
-            JObject json = JObject.Parse(crash);
-            Assert.AreEqual("message", json.GetValue("_name").ToString());
-            Assert.AreEqual("True", json.GetValue("_nonfatal").ToString());
-            Assert.AreEqual("Stack\nStack", json.GetValue("_error").ToString());
+            JObject json = JObject.Parse(requestModel.RequestData);
+            JObject crashObj = JObject.Parse(json["crash"].ToString());
+            Assert.AreEqual("message", crashObj.GetValue("_name").ToString());
+            Assert.AreEqual("True", crashObj.GetValue("_nonfatal").ToString());
+            Assert.AreEqual("Stack\nStack", crashObj.GetValue("_error").ToString());
 
-            JObject custom = json["_custom"].ToObject<JObject>();
+            JObject custom = crashObj["_custom"].ToObject<JObject>();
 
             Assert.AreEqual(2, custom.Count);
             Assert.AreEqual("12344", custom.GetValue("Time").ToString());
@@ -160,132 +159,16 @@ namespace Tests
             Assert.AreEqual(1, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
 
             CountlyRequestModel requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
-            string myUri = requestModel.RequestUrl;
-            string crash = HttpUtility.ParseQueryString(myUri).Get("crash");
-            JObject json = JObject.Parse(crash);
-            Assert.AreEqual("message", json.GetValue("_name").ToString());
-            Assert.AreEqual("True", json.GetValue("_nonfatal").ToString());
-            Assert.AreEqual("StackTrace", json.GetValue("_error").ToString());
+            JObject json = JObject.Parse(requestModel.RequestData);
+            JObject crashObj = JObject.Parse(json["crash"].ToString());
+            Assert.AreEqual("message", crashObj.GetValue("_name").ToString());
+            Assert.AreEqual("True", crashObj.GetValue("_nonfatal").ToString());
+            Assert.AreEqual("StackTrace", crashObj.GetValue("_error").ToString());
 
-            JObject custom = json["_custom"].ToObject<JObject>();
+            JObject custom = crashObj["_custom"].ToObject<JObject>();
 
             Assert.AreEqual("1234455", custom.GetValue("Time Spent").ToString());
             Assert.AreEqual("10", custom.GetValue("Retry Attempts").ToString());
-
-        }
-
-        /// <summary>
-        /// It validates the functionality of 'SendCrashReportInternal' with GET method.
-        /// </summary>
-        [Test]
-        public async void TestMethod_SendCrashReportInternalGetMethod()
-        {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-            };
-
-            Countly.Instance.Init(configuration);
-            Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
-
-            Assert.IsNotNull(Countly.Instance.CrashReports);
-
-            Dictionary<string, object> seg = new Dictionary<string, object>{
-                { "Time Spent", "1234455"},
-                { "Retry Attempts", "10"}
-            };
-
-
-            CountlyExceptionDetailModel model = Countly.Instance.CrashReports.ExceptionDetailModel("message", "StackTrace", true, seg);
-            await Countly.Instance.CrashReports.SendCrashReportInternal(model);
-
-            Assert.AreEqual(1, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
-
-            CountlyRequestModel requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
-
-            Dictionary<string, object> requestParams = new Dictionary<string, object>
-            {
-                {
-                    "crash", JsonConvert.SerializeObject(model, Newtonsoft.Json.Formatting.Indented,
-                        new JsonSerializerSettings {NullValueHandling = NullValueHandling.Ignore})
-                }
-            };
-
-            string url =
-                Countly.Instance.CrashReports._requestCountlyHelper.BuildGetRequest(requestParams);
-            int index = url.IndexOf("crash");
-            Assert.AreEqual(url.Substring(index), requestModel.RequestUrl.Substring(index));
-
-            // Test Case for Post request
-            CountlyExceptionDetailModel model1 = Countly.Instance.CrashReports.ExceptionDetailModel("A very long message to test post request scenario.",
-                "StackTrace StackTrace StackTrace StackTrace StackTraceStackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTraceStackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTraceStackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTraceStackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTraceStackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTraceStackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTraceStackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTraceStackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTraceStackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTraceStackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTraceStackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTraceStackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTraceStackTrace", true, seg);
-            await Countly.Instance.CrashReports.SendCrashReportInternal(model1);
-
-            Assert.AreEqual(1, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
-
-            CountlyRequestModel requestModel1 = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
-
-            Dictionary<string, object> requestParams1 = new Dictionary<string, object>
-            {
-                {
-                    "crash", JsonConvert.SerializeObject(model1, Newtonsoft.Json.Formatting.Indented,
-                        new JsonSerializerSettings {NullValueHandling = NullValueHandling.Ignore})
-                }
-            };
-
-
-            string url1 = Countly.Instance.CrashReports._requestCountlyHelper.BuildPostRequest(requestParams1);
-
-
-            int index1 = url.IndexOf("crash");
-            Assert.AreEqual(url1.Substring(index1), requestModel1.RequestData.Substring(index1));
-
-        }
-
-
-        /// <summary>
-        /// It validates the functionality of 'SendCrashReportInternal' with POST method.
-        /// </summary>
-        [Test]
-        public async void TestMethod_SendCrashReportInternalPostMethod()
-        {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-            };
-
-            Countly.Instance.Init(configuration);
-            Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
-
-            Assert.IsNotNull(Countly.Instance.CrashReports);
-
-            Dictionary<string, object> seg = new Dictionary<string, object>{
-                { "Time Spent", "1234455"},
-                { "Retry Attempts", "10"}
-            };
-
-            CountlyExceptionDetailModel model1 = Countly.Instance.CrashReports.ExceptionDetailModel("A very long message to test post request scenario.",
-                "StackTrace StackTrace StackTrace StackTrace StackTraceStackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTraceStackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTraceStackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTraceStackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTraceStackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTraceStackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTraceStackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTraceStackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTraceStackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTraceStackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTraceStackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTraceStackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTrace StackTraceStackTrace", true, seg);
-            await Countly.Instance.CrashReports.SendCrashReportInternal(model1);
-
-            Assert.AreEqual(1, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
-
-            CountlyRequestModel requestModel1 = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
-
-            Dictionary<string, object> requestParams1 = new Dictionary<string, object>
-            {
-                {
-                    "crash", JsonConvert.SerializeObject(model1, Newtonsoft.Json.Formatting.Indented,
-                        new JsonSerializerSettings {NullValueHandling = NullValueHandling.Ignore})
-                }
-            };
-
-
-            string url1 = Countly.Instance.CrashReports._requestCountlyHelper.BuildPostRequest(requestParams1);
-
-
-            int index1 = url1.IndexOf("crash");
-            Assert.AreEqual(url1.Substring(index1), requestModel1.RequestData.Substring(index1));
 
         }
 
