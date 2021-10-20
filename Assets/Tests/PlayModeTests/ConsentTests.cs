@@ -106,7 +106,6 @@ namespace Tests
             Countly.Instance.Init(configuration);
 
             Assert.IsNotNull(Countly.Instance.Consents);
-            Assert.AreEqual(1, Countly.Instance.Consents._requestCountlyHelper._requestRepo.Count);
 
             CountlyRequestModel requestModel = Countly.Instance.Consents._requestCountlyHelper._requestRepo.Dequeue();
 

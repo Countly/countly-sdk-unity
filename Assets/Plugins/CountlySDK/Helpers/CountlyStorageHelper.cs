@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Data;
 using System.Linq;
-using System.Web;
 using iBoxDB.LocalServer;
 using Newtonsoft.Json;
 using Plugins.CountlySDK.Models;
@@ -13,6 +12,7 @@ using Plugins.CountlySDK.Persistance.Repositories;
 using Plugins.CountlySDK.Persistance.Repositories.Impls;
 using Plugins.iBoxDB;
 using UnityEngine;
+using System.Web;
 
 namespace Plugins.CountlySDK.Helpers
 {
@@ -174,7 +174,7 @@ namespace Plugins.CountlySDK.Helpers
         {
             CountlyRequestModel[] requestModels =  RequestRepo.Models.ToArray();
             foreach (CountlyRequestModel request in requestModels) {
-                if (request.RequestUrl != null) {
+                if (request.RequestData == null) {
 
                     int index = request.RequestUrl.IndexOf('?');
                     string uri = request.RequestUrl.Substring(index);
@@ -186,13 +186,18 @@ namespace Plugins.CountlySDK.Helpers
 
                     request.RequestUrl = null;
                     request.RequestData = data;
+                } else {
+                    Dictionary<string, object> requestData = JsonConvert.DeserializeObject<Dictionary<string, object>>(request.RequestData);
+                    requestData.Remove("checksum256");
 
-                   bool result = RequestRepo.Update(request);
-                   if (!result) {
-                       throw new DataException();
-                   }
+                    request.RequestUrl = null;
+                    request.RequestData = JsonConvert.SerializeObject(requestData);
                 }
 
+                bool result = RequestRepo.Update(request);
+                if (!result) {
+                    throw new DataException();
+                }
             }
             _logHelper.Verbose("[CountlyStorageHelper] Migration_MigrateOldRequests");
 
