@@ -117,8 +117,6 @@ namespace Plugins.CountlySDK.Helpers
                 }
             }
 
-
-
             return result;
         }
 
@@ -160,9 +158,13 @@ namespace Plugins.CountlySDK.Helpers
                     using (Stream stream = response.GetResponseStream())
                         using (StreamReader reader = new StreamReader(stream)) {
                         string res = await reader.ReadToEndAsync();
-                        countlyResponse.StatusCode = code;
-                        countlyResponse.IsSuccess = true;
+
+                        JObject body = JObject.Parse(res);
+
                         countlyResponse.Data = res;
+                        countlyResponse.StatusCode = code;
+                        countlyResponse.IsSuccess = body.ContainsKey("result");
+
                     }
 
                 }
@@ -218,9 +220,12 @@ namespace Plugins.CountlySDK.Helpers
                     using (Stream stream = response.GetResponseStream())
                     using (StreamReader reader = new StreamReader(stream)) {
                         string res = await reader.ReadToEndAsync();
-                        countlyResponse.StatusCode = code;
-                        countlyResponse.IsSuccess = true;
+
+                        JObject body = JObject.Parse(res);
+
                         countlyResponse.Data = res;
+                        countlyResponse.StatusCode = code;
+                        countlyResponse.IsSuccess = body.ContainsKey("result");
                     }
                 }
             } catch (WebException ex) {
