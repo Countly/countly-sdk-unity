@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Plugins.CountlySDK.Persistance;
 
 namespace Plugins.CountlySDK.Models

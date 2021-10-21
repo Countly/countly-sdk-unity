@@ -1,4 +1,4 @@
-﻿using Plugins.CountlySDK.Helpers;
+using Plugins.CountlySDK.Helpers;
 using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK.Persistance.Entities;
 using Plugins.iBoxDB;
