@@ -11,19 +11,19 @@ namespace Plugins.CountlySDK.Services
 {
     public class ConsentCountlyService : AbstractBaseService
     {
-        
+
         internal bool RequiresConsent { get; private set; }
 
         private bool _sendConsentOnChange;
         internal readonly RequestCountlyHelper _requestCountlyHelper;
         private Dictionary<string, Consents[]> _countlyConsentGroups;
-        internal readonly Dictionary<Consents, bool> _countlyConsents;
+        internal readonly Dictionary<Consents, bool> CountlyConsents;
 
         internal ConsentCountlyService(CountlyConfiguration config, CountlyLogHelper logHelper, ConsentCountlyService consentService, RequestCountlyHelper requestCountlyHelper) : base(config, logHelper, consentService)
         {
             Log.Debug("[ConsentCountlyService] Initializing.");
             _requestCountlyHelper = requestCountlyHelper;
-            _countlyConsents = new Dictionary<Consents, bool>();
+            CountlyConsents = new Dictionary<Consents, bool>();
             RequiresConsent = _configuration.RequiresConsent;
             _countlyConsentGroups = new Dictionary<string, Consents[]>(_configuration.ConsentGroups);
 
@@ -39,7 +39,6 @@ namespace Plugins.CountlySDK.Services
         }
 
         #region Public Methods
-
         /// <summary>
         ///  Check if consent for the specific feature has been given
         /// </summary>
@@ -60,7 +59,7 @@ namespace Plugins.CountlySDK.Services
         /// <returns>Returns "true" if the consent for the checked feature has been provided</returns>
         internal bool CheckConsentInternal(Consents consent)
         {
-            bool result = !RequiresConsent || (_countlyConsents.ContainsKey(consent) && _countlyConsents[consent]);
+            bool result = !RequiresConsent || (CountlyConsents.ContainsKey(consent) && CountlyConsents[consent]);
             Log.Verbose("[ConsentCountlyService] CheckConsent : consent = " + consent.ToString() + ", result = " + result);
             return result;
         }
@@ -78,7 +77,7 @@ namespace Plugins.CountlySDK.Services
                 return result;
             }
 
-            foreach (KeyValuePair<Consents, bool> entry in _countlyConsents) {
+            foreach (KeyValuePair<Consents, bool> entry in CountlyConsents) {
                 if (entry.Value) {
                     result = true;
                     break;
@@ -169,7 +168,7 @@ namespace Plugins.CountlySDK.Services
                     return;
                 }
 
-                SetConsentInternal(_countlyConsents.Keys.ToArray(), false);
+                SetConsentInternal(CountlyConsents.Keys.ToArray(), false);
             }
         }
 
@@ -242,7 +241,7 @@ namespace Plugins.CountlySDK.Services
         {
             _sendConsentOnChange = true;
 
-            if (!RequiresConsent || consents.Count == 0 ) {
+            if (!RequiresConsent || consents.Count == 0) {
                 return;
             }
 
@@ -250,14 +249,9 @@ namespace Plugins.CountlySDK.Services
             foreach (Consents consent in consents) {
                 jObj.Add(GetConsentKey(consent), value);
             }
-            
+
             Dictionary<string, object> requestParams =
-                new Dictionary<string, object>
-                {
-                    {
-                        "consent", jObj
-                    }
-                };
+                new Dictionary<string, object> { { "consent", jObj } };
 
             _requestCountlyHelper.AddToRequestQueue(requestParams);
             await _requestCountlyHelper.ProcessQueue();
@@ -311,12 +305,12 @@ namespace Plugins.CountlySDK.Services
 
             return key;
         }
-            /// <summary>
-            /// Private method that update selected consents.
-            /// </summary>
-            /// <param name="consents">List of consent</param>
-            /// <param name="value">value to be set</param>
-            private async void SetConsentInternal(Consents[] consents, bool value)
+        /// <summary>
+        /// Private method that update selected consents.
+        /// </summary>
+        /// <param name="consents">List of consent</param>
+        /// <param name="value">value to be set</param>
+        internal async void SetConsentInternal(Consents[] consents, bool value)
         {
             if (consents == null) {
                 Log.Debug("[ConsentCountlyService] Calling SetConsentInternal with null consents list!");
@@ -325,16 +319,16 @@ namespace Plugins.CountlySDK.Services
 
             List<Consents> updatedConsents = new List<Consents>(consents.Length);
             foreach (Consents consent in consents) {
-                if (_countlyConsents.ContainsKey(consent) && _countlyConsents[consent] == value) {
+                if (CountlyConsents.ContainsKey(consent) && CountlyConsents[consent] == value) {
                     continue;
                 }
 
-                if (!_countlyConsents.ContainsKey(consent) && !value) {
+                if (!CountlyConsents.ContainsKey(consent) && !value) {
                     continue;
                 }
 
                 updatedConsents.Add(consent);
-                _countlyConsents[consent] = value;
+                CountlyConsents[consent] = value;
 
                 Log.Debug("[ConsentCountlyService] Setting consent for: [" + consent.ToString() + "] with value: [" + value + "]");
             }
