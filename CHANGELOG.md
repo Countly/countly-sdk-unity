@@ -1,3 +1,5 @@
+## 21.10.0
+* Fixed parameters tampering protection issue while calculating checksum.
 ## 20.11.5
 * Added new configuration fields to manipulate internal SDK value and key limits.
 * Warning! This release will introduce configurable maximum size limits for values and keys throughout the SDK. If they would exceed the limits, they would be truncated.
