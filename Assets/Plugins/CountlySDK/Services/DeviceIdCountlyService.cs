@@ -125,11 +125,11 @@ namespace Plugins.CountlySDK.Services
 
                 NotifyListeners(false);
 
-                _ = _requestCountlyHelper.ProcessQueue();
-
                 if (_consentService.RequiresConsent) {
                     _consentService.SetConsentInternal(_consentService.CountlyConsents.Keys.ToArray(), false);
                 }
+
+                _ = _requestCountlyHelper.ProcessQueue();
             }
         }
 
