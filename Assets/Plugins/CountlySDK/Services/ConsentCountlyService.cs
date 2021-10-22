@@ -14,7 +14,7 @@ namespace Plugins.CountlySDK.Services
 
         internal bool RequiresConsent { get; private set; }
 
-        private bool _sendConsentOnChange;
+        internal bool SendConsentOnChange;
         internal readonly RequestCountlyHelper _requestCountlyHelper;
         private Dictionary<string, Consents[]> _countlyConsentGroups;
         internal readonly Dictionary<Consents, bool> CountlyConsents;
@@ -239,7 +239,7 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value">value to be set</param>
         internal async Task SendConsentChanges(List<Consents> consents, bool value)
         {
-            _sendConsentOnChange = true;
+            SendConsentOnChange = true;
 
             if (!RequiresConsent || consents.Count == 0) {
                 return;
@@ -333,7 +333,7 @@ namespace Plugins.CountlySDK.Services
                 Log.Debug("[ConsentCountlyService] Setting consent for: [" + consent.ToString() + "] with value: [" + value + "]");
             }
 
-            if (_sendConsentOnChange) {
+            if (SendConsentOnChange) {
                 await SendConsentChanges(updatedConsents, value);
             }
             NotifyListeners(updatedConsents, value);

@@ -95,11 +95,6 @@ namespace Plugins.CountlySDK.Services
             lock (LockObj) {
                 Log.Info("[DeviceIdCountlyService] ChangeDeviceIdWithoutMerge: deviceId = " + deviceId);
 
-                if (!_consentService.AnyConsentGiven()) {
-                    Log.Debug("[DeviceIdCountlyService] ChangeDeviceIdWithoutMerge: Please set at least a single consent before calling this!");
-                    return;
-                }
-
                 //Ignore call if new and old device id are same
                 if (DeviceId == deviceId) {
                     return;
@@ -126,6 +121,7 @@ namespace Plugins.CountlySDK.Services
                 NotifyListeners(false);
 
                 if (_consentService.RequiresConsent) {
+                    _consentService.SendConsentOnChange = false;
                     _consentService.SetConsentInternal(_consentService.CountlyConsents.Keys.ToArray(), false);
                 }
 
@@ -162,11 +158,6 @@ namespace Plugins.CountlySDK.Services
         {
             lock (LockObj) {
                 Log.Info("[DeviceIdCountlyService] ChangeDeviceIdWithMerge: deviceId = " + deviceId);
-
-                if (!_consentService.AnyConsentGiven()) {
-                    Log.Debug("[DeviceIdCountlyService] ChangeDeviceIdWithMerge: Please set at least a single consent before calling this!");
-                    return;
-                }
 
                 //Ignore call if new and old device id are same
                 if (DeviceId == deviceId) {
