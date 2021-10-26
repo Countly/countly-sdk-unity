@@ -67,7 +67,6 @@ namespace Plugins.CountlySDK.Persistance.Repositories
         {
             TEntity entity = ConvertModelToEntity(model);
             return _dao.Update(entity);
-
         }
 
 

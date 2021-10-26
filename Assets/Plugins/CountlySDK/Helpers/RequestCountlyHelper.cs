@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Security.Cryptography;
 using System.Text;
@@ -82,7 +83,7 @@ namespace Plugins.CountlySDK.Helpers
             if (_config.EnablePost || model.RequestData.Length > 1800) {
                 return await Task.Run(() => PostAsync(_countlyUtils.ServerInputUrl, model.RequestData));
             }
-            return await Task.Run(() => GetAsync(_countlyUtils.ServerInputUrl ,model.RequestData));
+            return await Task.Run(() => GetAsync(_countlyUtils.ServerInputUrl, model.RequestData));
         }
 
         /// <summary>
@@ -95,25 +96,25 @@ namespace Plugins.CountlySDK.Helpers
         {
             Dictionary<string, object> queryParams = JsonConvert.DeserializeObject<Dictionary<string, object>>(data);
             StringBuilder requestStringBuilder = new StringBuilder();
+
             //Query params supplied for creating request
             foreach (KeyValuePair<string, object> item in queryParams) {
                 if (!string.IsNullOrEmpty(item.Key) && item.Value != null) {
-                    requestStringBuilder.AppendFormat("&{0}={1}", UnityWebRequest.EscapeURL(item.Key),
-                        UnityWebRequest.EscapeURL(Convert.ToString(item.Value)));
+                    requestStringBuilder.AppendFormat(requestStringBuilder.Length == 0 ? "{0}={1}" : "&{0}={1}", UnityWebRequest.EscapeURL(item.Key),
+                      UnityWebRequest.EscapeURL(Convert.ToString(item.Value)));
                 }
             }
 
-            String query = requestStringBuilder.ToString();
-            string result = query.Remove(0, 1); //remove extra '&'
+            string result = requestStringBuilder.ToString();
 
             if (!string.IsNullOrEmpty(_config.Salt)) {
                 // Create a SHA256
                 using (SHA256 sha256Hash = SHA256.Create()) {
                     byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(result + _config.Salt));
                     string hex = _countlyUtils.GetStringFromBytes(bytes);
-                    Log.Debug("BuildGetRequest: query = " + result + ", checksum256 = " + hex);
 
                     result += "&checksum256=" + hex;
+                    Log.Debug("BuildGetRequest: query = " + result);
                 }
             }
 
@@ -132,7 +133,7 @@ namespace Plugins.CountlySDK.Helpers
             }
 
             string data = JsonConvert.SerializeObject(requestData);
-            CountlyRequestModel requestModel = new CountlyRequestModel(null,  data);
+            CountlyRequestModel requestModel = new CountlyRequestModel(null, data);
 
             AddRequestToQueue(requestModel);
         }
@@ -156,7 +157,7 @@ namespace Plugins.CountlySDK.Helpers
                 using (HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync()) {
                     int code = (int)response.StatusCode;
                     using (Stream stream = response.GetResponseStream())
-                        using (StreamReader reader = new StreamReader(stream)) {
+                    using (StreamReader reader = new StreamReader(stream)) {
                         string res = await reader.ReadToEndAsync();
 
                         JObject body = JObject.Parse(res);

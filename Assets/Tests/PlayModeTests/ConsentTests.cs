@@ -78,7 +78,7 @@ namespace Tests
             CountlyRequestModel requestModel = Countly.Instance.Consents._requestCountlyHelper._requestRepo.Dequeue();
             JObject obj = JObject.Parse(requestModel.RequestData);
 
-            Assert.IsFalse(obj.ContainsKey("consents"));
+            Assert.IsFalse(obj.ContainsKey("consent"));
 
             Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
             Countly.Instance.Consents.GiveConsent(new Consents[] { Consents.Sessions });
