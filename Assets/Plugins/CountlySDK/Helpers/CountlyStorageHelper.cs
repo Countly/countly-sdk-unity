@@ -13,6 +13,8 @@ using Plugins.CountlySDK.Persistance.Repositories.Impls;
 using Plugins.iBoxDB;
 using UnityEngine;
 using System.Web;
+using System.Text;
+using UnityEngine.Networking;
 
 namespace Plugins.CountlySDK.Helpers
 {
@@ -29,7 +31,6 @@ namespace Plugins.CountlySDK.Helpers
         internal readonly int SchemaVersion = 2;
 
         private CountlyLogHelper _logHelper;
-
         internal SegmentDao EventSegmentDao { get; private set; }
 
         internal Dao<ConfigEntity> ConfigDao { get; private set; }
@@ -180,9 +181,9 @@ namespace Plugins.CountlySDK.Helpers
                     string uri = request.RequestUrl.Substring(index);
                     NameValueCollection collection =  HttpUtility.ParseQueryString(uri);
 
-                    Dictionary<string, string>  queryParams = collection.AllKeys.ToDictionary(t => t, t => collection[t]);
+                    Dictionary<string, object>  queryParams = collection.AllKeys.ToDictionary(t => t, t => (object)collection[t]);
                     queryParams.Remove("checksum256");
-                    string data = JsonConvert.SerializeObject(queryParams);
+                    string data = BuildRequest(queryParams);//JsonConvert.SerializeObject(queryParams);
 
                     request.RequestUrl = null;
                     request.RequestData = data;
@@ -191,7 +192,8 @@ namespace Plugins.CountlySDK.Helpers
                     requestData.Remove("checksum256");
 
                     request.RequestUrl = null;
-                    request.RequestData = JsonConvert.SerializeObject(requestData);
+                    request.RequestData = BuildRequest(requestData);
+                    //JsonConvert.SerializeObject(requestData);
                 }
 
                 bool result = RequestRepo.Update(request);
@@ -201,6 +203,22 @@ namespace Plugins.CountlySDK.Helpers
             }
             _logHelper.Verbose("[CountlyStorageHelper] Migration_MigrateOldRequests");
 
+        }
+
+        private string BuildRequest(IDictionary<string, object> queryParams)
+        {
+            //  Dictionary<string, object> queryParams = JsonConvert.DeserializeObject<Dictionary<string, object>>(data);
+            StringBuilder requestStringBuilder = new StringBuilder();
+
+            //Query params supplied for creating request
+            foreach (KeyValuePair<string, object> item in queryParams) {
+                if (!string.IsNullOrEmpty(item.Key) && item.Value != null) {
+                    requestStringBuilder.AppendFormat(requestStringBuilder.Length == 0 ? "{0}={1}" : "&{0}={1}", UnityWebRequest.EscapeURL(item.Key),
+                      UnityWebRequest.EscapeURL(Convert.ToString(item.Value)));
+                }
+            }
+
+            return requestStringBuilder.ToString();
         }
 
         internal void ClearDBData() {

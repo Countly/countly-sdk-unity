@@ -9,6 +9,7 @@ using System.Linq;
 using System.Web;
 using Newtonsoft.Json.Linq;
 using System.Threading.Tasks;
+using System.Collections.Specialized;
 
 namespace Tests
 {
@@ -76,7 +77,10 @@ namespace Tests
             Assert.AreEqual(1, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
 
             CountlyRequestModel requestModel = Countly.Instance.Consents._requestCountlyHelper._requestRepo.Dequeue();
-            JObject obj = JObject.Parse(requestModel.RequestData);
+            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            Dictionary<string, string> queryParams = collection.AllKeys.ToDictionary(t => t, t => collection[t]);
+
+            JObject obj = JObject.FromObject(queryParams);
 
             Assert.IsFalse(obj.ContainsKey("consent"));
 
@@ -109,7 +113,10 @@ namespace Tests
 
             CountlyRequestModel requestModel = Countly.Instance.Consents._requestCountlyHelper._requestRepo.Dequeue();
 
-            JObject obj = JObject.Parse(requestModel.RequestData);
+            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            Dictionary<string, string> queryParams = collection.AllKeys.ToDictionary(t => t, t => collection[t]);
+
+            JObject obj = JObject.FromObject(queryParams);
             JObject consentObj = JObject.Parse(obj["consent"].ToString());
 
             Assert.AreEqual(11, consentObj.Count);
@@ -148,7 +155,10 @@ namespace Tests
             Assert.AreEqual(1, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
 
             CountlyRequestModel requestModel = Countly.Instance.Consents._requestCountlyHelper._requestRepo.Dequeue();
-            JObject obj = JObject.Parse(requestModel.RequestData);
+            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            Dictionary<string, string> queryParams = collection.AllKeys.ToDictionary(t => t, t => collection[t]);
+
+            JObject obj = JObject.FromObject(queryParams);
             JObject json = JObject.Parse(obj["consent"].ToString());
 
             Assert.AreEqual(2, json.Count);
@@ -159,7 +169,10 @@ namespace Tests
             Assert.AreEqual(1, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
             requestModel = Countly.Instance.Consents._requestCountlyHelper._requestRepo.Dequeue();
 
-            obj = JObject.Parse(requestModel.RequestData);
+            collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            queryParams = collection.AllKeys.ToDictionary(t => t, t => collection[t]);
+
+            obj = JObject.FromObject(queryParams);
             json = JObject.Parse(obj["consent"].ToString());
 
             Assert.AreEqual(1, json.Count);
@@ -171,7 +184,10 @@ namespace Tests
             Countly.Instance.Consents.RemoveConsent(new Consents[] { Consents.Crashes, Consents.Views });
             requestModel = Countly.Instance.Consents._requestCountlyHelper._requestRepo.Dequeue();
 
-            obj = JObject.Parse(requestModel.RequestData);
+            collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            queryParams = collection.AllKeys.ToDictionary(t => t, t => collection[t]);
+
+            obj = JObject.FromObject(queryParams);
             json = JObject.Parse(obj["consent"].ToString());
 
             Assert.AreEqual(2, json.Count);
@@ -181,7 +197,10 @@ namespace Tests
             Countly.Instance.Consents.RemoveConsent(new Consents[] { Consents.Events, Consents.Views });
             requestModel = Countly.Instance.Consents._requestCountlyHelper._requestRepo.Dequeue();
 
-            obj = JObject.Parse(requestModel.RequestData);
+            collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            queryParams = collection.AllKeys.ToDictionary(t => t, t => collection[t]);
+
+            obj = JObject.FromObject(queryParams);
             json = JObject.Parse(obj["consent"].ToString());
 
             Assert.AreEqual(1, json.Count);

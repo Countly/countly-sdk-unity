@@ -11,6 +11,7 @@ using Plugins.CountlySDK.Enums;
 using System.Threading.Tasks;
 using System.Collections;
 using UnityEngine.TestTools;
+using System.Linq;
 
 namespace Tests
 {
@@ -66,7 +67,10 @@ namespace Tests
             Assert.AreEqual(1, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
 
             CountlyRequestModel requestModel = Countly.Instance.Session._requestCountlyHelper._requestRepo.Dequeue();
-            JObject obj = JObject.Parse(requestModel.RequestData);
+            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            Dictionary<string, string> queryParams = collection.AllKeys.ToDictionary(t => t, t => collection[t]);
+
+            JObject obj = JObject.FromObject(queryParams);
 
 
             Assert.AreEqual(1, obj.GetValue("begin_session").ToObject<int>());
@@ -91,7 +95,10 @@ namespace Tests
             Assert.AreEqual(1, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
 
             CountlyRequestModel requestModel = Countly.Instance.Session._requestCountlyHelper._requestRepo.Dequeue();
-            JObject obj = JObject.Parse(requestModel.RequestData);
+            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            Dictionary<string, string> queryParams = collection.AllKeys.ToDictionary(t => t, t => collection[t]);
+
+            JObject obj = JObject.FromObject(queryParams);
 
             Assert.AreEqual(1, obj.GetValue("begin_session").ToObject<int>());
             Assert.AreEqual("192.168.100.51", obj.GetValue("ip_address").ToObject<string>());
@@ -118,7 +125,10 @@ namespace Tests
             Assert.AreEqual(1, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
 
             CountlyRequestModel requestModel = Countly.Instance.Session._requestCountlyHelper._requestRepo.Dequeue();
-            JObject obj = JObject.Parse(requestModel.RequestData);
+            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            Dictionary<string, string> queryParams = collection.AllKeys.ToDictionary(t => t, t => collection[t]);
+
+            JObject obj = JObject.FromObject(queryParams);
 
             Assert.AreEqual(1, obj.GetValue("begin_session").ToObject<int>());
             Assert.AreEqual(string.Empty, obj.GetValue("location").ToObject<string>());
@@ -149,7 +159,10 @@ namespace Tests
             Countly.Instance.Session._requestCountlyHelper._requestRepo.Dequeue(); // Remove consent Request
             CountlyRequestModel requestModel = Countly.Instance.Session._requestCountlyHelper._requestRepo.Dequeue();
 
-            JObject obj = JObject.Parse(requestModel.RequestData);
+            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            Dictionary<string, string> queryParams = collection.AllKeys.ToDictionary(t => t, t => collection[t]);
+
+            JObject obj = JObject.FromObject(queryParams);
 
 
             Assert.AreEqual(1, obj.GetValue("begin_session").ToObject<int>());
@@ -249,7 +262,10 @@ namespace Tests
             Assert.AreEqual(1, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
 
             CountlyRequestModel requestModel = Countly.Instance.Session._requestCountlyHelper._requestRepo.Dequeue();
-            JObject obj = JObject.Parse(requestModel.RequestData);
+            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            Dictionary<string, string> queryParams = collection.AllKeys.ToDictionary(t => t, t => collection[t]);
+
+            JObject obj = JObject.FromObject(queryParams);
 
             Assert.AreEqual(1, obj.GetValue("begin_session").ToObject<int>());
             Assert.IsTrue(obj.ContainsKey("metrics"));
@@ -272,8 +288,11 @@ namespace Tests
             Assert.AreEqual(1, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
 
             requestModel = Countly.Instance.Session._requestCountlyHelper._requestRepo.Dequeue();
-            obj = JObject.Parse(requestModel.RequestData);
-            
+            collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            queryParams = collection.AllKeys.ToDictionary(t => t, t => collection[t]);
+
+            obj = JObject.FromObject(queryParams);
+
             Assert.IsFalse(obj.ContainsKey("metrics"));
             Assert.AreEqual(2.0, obj.GetValue("session_duration").ToObject<double>());
             Assert.GreaterOrEqual(duration, obj.GetValue("session_duration").ToObject<double>());
@@ -318,7 +337,10 @@ namespace Tests
             Assert.AreEqual(1, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
 
             CountlyRequestModel requestModel = Countly.Instance.Session._requestCountlyHelper._requestRepo.Dequeue();
-            JObject obj = JObject.Parse(requestModel.RequestData);
+            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            Dictionary<string, string> queryParams = collection.AllKeys.ToDictionary(t => t, t => collection[t]);
+
+            JObject obj = JObject.FromObject(queryParams);
 
             Assert.AreEqual(1, obj.GetValue("end_session").ToObject<int>());
             Assert.AreEqual(2.0, obj.GetValue("session_duration").ToObject<double>());

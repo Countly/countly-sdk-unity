@@ -7,6 +7,7 @@ using Newtonsoft.Json;
 using System.Web;
 using System.Collections.Specialized;
 using Newtonsoft.Json.Linq;
+using System.Linq;
 
 namespace Tests
 {
@@ -109,7 +110,10 @@ namespace Tests
             Assert.AreEqual(1, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
 
             CountlyRequestModel requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
-            JObject json = JObject.Parse(requestModel.RequestData);
+            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            Dictionary<string, string> queryParams = collection.AllKeys.ToDictionary(t => t, t => collection[t]);
+
+            JObject json = JObject.FromObject(queryParams);
             JObject crashObj = JObject.Parse(json["crash"].ToString());
             Assert.AreEqual("message", crashObj.GetValue("_name").ToString());
             Assert.AreEqual("True", crashObj.GetValue("_nonfatal").ToString());
@@ -159,7 +163,10 @@ namespace Tests
             Assert.AreEqual(1, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
 
             CountlyRequestModel requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
-            JObject json = JObject.Parse(requestModel.RequestData);
+            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            Dictionary<string, string> queryParams = collection.AllKeys.ToDictionary(t => t, t => collection[t]);
+
+            JObject json = JObject.FromObject(queryParams);
             JObject crashObj = JObject.Parse(json["crash"].ToString());
             Assert.AreEqual("message", crashObj.GetValue("_name").ToString());
             Assert.AreEqual("True", crashObj.GetValue("_nonfatal").ToString());

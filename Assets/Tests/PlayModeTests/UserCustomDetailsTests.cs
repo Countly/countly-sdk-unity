@@ -8,6 +8,9 @@ using Plugins.CountlySDK;
 using Plugins.CountlySDK.Enums;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
+using System.Collections.Specialized;
+using System.Web;
+using System.Linq;
 
 namespace Tests
 {
@@ -54,7 +57,10 @@ namespace Tests
             CountlyRequestModel requestModel = Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Dequeue();
 
             string userDetailData = requestModel.RequestData;
-            JObject json = JObject.Parse(userDetailData);
+            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            Dictionary<string, string> queryParams = collection.AllKeys.ToDictionary(t => t, t => collection[t]);
+
+            JObject json = JObject.FromObject(queryParams);
             JObject userDetailJson = JObject.Parse(json["user_details"].ToString());
 
             Assert.AreEqual("Full Name", userDetailJson["name"].ToString());
@@ -113,7 +119,10 @@ namespace Tests
             CountlyRequestModel requestModel = Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Dequeue();
 
             string userDetailData = requestModel.RequestData;
-            JObject json = JObject.Parse(userDetailData);
+            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            Dictionary<string, string> queryParams = collection.AllKeys.ToDictionary(t => t, t => collection[t]);
+
+            JObject json = JObject.FromObject(queryParams);
             JObject userDetailJson = JObject.Parse(json["user_details"].ToString());
 
             Assert.AreEqual("Ful", userDetailJson["name"].ToString());
@@ -164,7 +173,10 @@ namespace Tests
 
           
             string userDetailData = requestModel.RequestData;
-            JObject json = JObject.Parse(userDetailData);
+            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            Dictionary<string, string> queryParams = collection.AllKeys.ToDictionary(t => t, t => collection[t]);
+
+            JObject json = JObject.FromObject(queryParams);
             string userDetail = json["user_details"].ToString();
             JObject custom = JObject.Parse(userDetail);
 
@@ -211,7 +223,10 @@ namespace Tests
 
 
             string userDetailData = requestModel.RequestData;
-            JObject json = JObject.Parse(userDetailData);
+            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            Dictionary<string, string> queryParams = collection.AllKeys.ToDictionary(t => t, t => collection[t]);
+
+            JObject json = JObject.FromObject(queryParams);
             string userDetail = json["user_details"].ToString();
             JObject custom = JObject.Parse(userDetail);
 
