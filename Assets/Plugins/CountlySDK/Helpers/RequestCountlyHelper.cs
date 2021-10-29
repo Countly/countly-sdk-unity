@@ -101,14 +101,14 @@ namespace Plugins.CountlySDK.Helpers
             //Query params supplied for creating request
             foreach (KeyValuePair<string, object> item in queryParams) {
                 if (!string.IsNullOrEmpty(item.Key) && item.Value != null) {
-                    requestStringBuilder.AppendFormat(requestStringBuilder.Length == 0 ? "{0}={1}" : "&{0}={1}", System.Uri.EscapeDataString(item.Key),
-                      System.Uri.EscapeDataString(Convert.ToString(item.Value)));
+                    requestStringBuilder.AppendFormat(requestStringBuilder.Length == 0 ? "{0}={1}" : "&{0}={1}", item.Key,
+                      Convert.ToString(item.Value));
                 }
             }
 
-            
+            string result = requestStringBuilder.ToString();
 
-            return requestStringBuilder.ToString();
+            return Uri.EscapeUriString(result);
         }
 
         /// <summary>
