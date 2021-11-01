@@ -147,22 +147,21 @@ namespace Tests
             Assert.IsNotNull(Countly.Instance.UserDetails);
             Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
 
-            CountlyUserDetailsModel userDetails = null;
+            Dictionary<string, object> userCustomDetail = null;
 
-            await Countly.Instance.UserDetails.SetCustomUserDetailsAsync(userDetails);
+            Countly.Instance.UserDetails.SetCustomUserDetails(userCustomDetail);
             Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
 
-            userDetails = new CountlyUserDetailsModel(
-                    new Dictionary<string, object>{
+            userCustomDetail = new Dictionary<string, object> {
                         { "Hair", "Black" },
                         { "Height", "5.9" },
-                    });
-            await Countly.Instance.UserDetails.SetCustomUserDetailsAsync(userDetails);
+            };
+            Countly.Instance.UserDetails.SetCustomUserDetails(userCustomDetail);
             Assert.AreEqual(1, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
 
             CountlyRequestModel requestModel = Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Dequeue();
 
-          
+
             string userDetailData = requestModel.RequestData;
             JObject json = JObject.Parse(userDetailData);
             string userDetail = json["user_details"].ToString();
@@ -194,17 +193,16 @@ namespace Tests
             Assert.IsNotNull(Countly.Instance.UserDetails);
             Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
 
-            CountlyUserDetailsModel userDetails = null;
-
-            await Countly.Instance.UserDetails.SetCustomUserDetailsAsync(userDetails);
+            Dictionary<string, object> userCustomDetail = null;
+            Countly.Instance.UserDetails.SetCustomUserDetails(userCustomDetail);
             Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
 
-            userDetails = new CountlyUserDetailsModel(
-                    new Dictionary<string, object>{
-                        { "Hair", "Black_000" },
+            userCustomDetail = userCustomDetail = new Dictionary<string, object> {
+                        { "Hair", "Black_1" },
                         { "Height", "5.9" },
-                    });
-            await Countly.Instance.UserDetails.SetCustomUserDetailsAsync(userDetails);
+            };
+
+            Countly.Instance.UserDetails.SetCustomUserDetails(userCustomDetail);
             Assert.AreEqual(1, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
 
             CountlyRequestModel requestModel = Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Dequeue();
@@ -368,20 +366,16 @@ namespace Tests
             Assert.IsNotNull(Countly.Instance.UserDetails);
             Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
 
-            CountlyUserDetailsModel InvalidUserDetails = null;
-            await Countly.Instance.UserDetails.SetCustomUserDetailsAsync(InvalidUserDetails);
-            Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
-
-            InvalidUserDetails = new CountlyUserDetailsModel(null);
-            await Countly.Instance.UserDetails.SetCustomUserDetailsAsync(InvalidUserDetails);
+            Dictionary<string, object> InvalidUserDetails = null;
+            Countly.Instance.UserDetails.SetCustomUserDetails(InvalidUserDetails);
             Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
 
             Dictionary<string, object> customDetail = new Dictionary<string, object>{
                 { "Height", "5.8" },
                 { "Mole", "Lower Left Cheek" }
             };
-            CountlyUserDetailsModel userDetails = new CountlyUserDetailsModel(customDetail);
-            await Countly.Instance.UserDetails.SetCustomUserDetailsAsync(userDetails);
+           
+            Countly.Instance.UserDetails.SetCustomUserDetails(customDetail);
             Assert.AreEqual(1, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
         }
         /// <summary>
@@ -429,12 +423,12 @@ namespace Tests
             Assert.IsNotNull(Countly.Instance.UserDetails);
 
             Countly.Instance.UserDetails.IncrementBy("Distance", 5);
-            Assert.IsTrue( Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Distance"));
+            Assert.IsTrue(Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Distance"));
             Dictionary<string, object> dic = Countly.Instance.UserDetails.CustomDataProperties["Distance"] as Dictionary<string, object>;
             Assert.AreEqual(5, dic["$inc"]);
 
             Countly.Instance.UserDetails.Increment("Height");
-            Assert.IsTrue( Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Height"));
+            Assert.IsTrue(Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Height"));
             Dictionary<string, object> dic1 = Countly.Instance.UserDetails.CustomDataProperties["Height"] as Dictionary<string, object>;
             Assert.AreEqual(1, dic1["$inc"]);
         }
@@ -454,8 +448,8 @@ namespace Tests
 
             Assert.IsNotNull(Countly.Instance.UserDetails);
 
-            Countly.Instance.UserDetails.Pull("Distance", new string[] { "5"});
-            Assert.IsTrue( Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Distance"));
+            Countly.Instance.UserDetails.Pull("Distance", new string[] { "5" });
+            Assert.IsTrue(Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Distance"));
             Dictionary<string, object> dic = Countly.Instance.UserDetails.CustomDataProperties["Distance"] as Dictionary<string, object>;
             Assert.AreEqual(new string[] { "5" }, dic["$pull"]);
         }
@@ -476,7 +470,7 @@ namespace Tests
             Assert.IsNotNull(Countly.Instance.UserDetails);
 
             Countly.Instance.UserDetails.PushUnique("Age", new string[] { "29" });
-            Assert.IsTrue( Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Age"));
+            Assert.IsTrue(Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Age"));
             Dictionary<string, object> dic = Countly.Instance.UserDetails.CustomDataProperties["Age"] as Dictionary<string, object>;
             Assert.AreEqual(new string[] { "29" }, dic["$addToSet"]);
 
@@ -502,7 +496,7 @@ namespace Tests
             Assert.IsNotNull(Countly.Instance.UserDetails);
 
             Countly.Instance.UserDetails.Min("Distance", 10.0);
-            Assert.IsTrue( Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Distance"));
+            Assert.IsTrue(Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Distance"));
             Dictionary<string, object> dic = Countly.Instance.UserDetails.CustomDataProperties["Distance"] as Dictionary<string, object>;
             Assert.AreEqual(10.0, dic["$min"]);
 
@@ -528,12 +522,12 @@ namespace Tests
             Assert.IsNotNull(Countly.Instance.UserDetails);
 
             Countly.Instance.UserDetails.Multiply("Distance", 2);
-            Assert.IsTrue( Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Distance"));
+            Assert.IsTrue(Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Distance"));
             Dictionary<string, object> dic = Countly.Instance.UserDetails.CustomDataProperties["Distance"] as Dictionary<string, object>;
             Assert.AreEqual(2, dic["$mul"]);
 
             Countly.Instance.UserDetails.Push("Age", new string[] { "29" });
-            Assert.IsTrue( Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Age"));
+            Assert.IsTrue(Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Age"));
             Dictionary<string, object> dic2 = Countly.Instance.UserDetails.CustomDataProperties["Age"] as Dictionary<string, object>;
             Assert.AreEqual(new string[] { "29" }, dic2["$push"]);
 
