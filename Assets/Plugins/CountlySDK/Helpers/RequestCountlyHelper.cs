@@ -108,7 +108,7 @@ namespace Plugins.CountlySDK.Helpers
 
             string result = requestStringBuilder.ToString();
 
-            return Uri.EscapeUriString(result);
+            return Uri.EscapeDataString(result);
         }
 
         /// <summary>
@@ -118,9 +118,10 @@ namespace Plugins.CountlySDK.Helpers
         {
             //Metrics added to each request
             Dictionary<string, object> requestData = _countlyUtils.GetBaseParams();
-            foreach (KeyValuePair<string, object> item in queryParams) {
-                requestData.Add(item.Key, item.Value);
-            }
+            requestData.Add("p", "Böston’ 墨尔本 . and :");
+            //foreach (KeyValuePair<string, object> item in queryParams) {
+            //    requestData.Add(item.Key, item.Value);
+            //}
 
             string data = BuildRequest(requestData); //JsonConvert.SerializeObject(requestData);
             CountlyRequestModel requestModel = new CountlyRequestModel(null, data);

@@ -17,17 +17,18 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
     private void Awake()
     {
         CountlyConfiguration configuration = new CountlyConfiguration {
-            ServerUrl = "https://try.count.ly/",
-            AppKey = "YOUR_APP_KEY",
+            ServerUrl = "https://master.count.ly/",
+            AppKey = "8c1d653f8f474be24958b282d5e9b4c4209ee552",
             EnableConsoleLogging = true,
             Salt = "test-salt-checksum",
-            EnablePost = true,
+            EnablePost = false,
             RequiresConsent = true,
+            EventQueueThreshold = 1,
             NotificationMode = TestMode.AndroidTestToken
         };
 
         string countryCode = "us";
-        string city = "Houston";
+        string city = "Böston’ 墨尔本";
         string latitude = "29.634933";
         string longitude = "-95.220255";
         string ipAddress = "10.2.33.12";
@@ -183,7 +184,7 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
 
     public async void BasicEvent()
     {
-        await countly.Events.RecordEventAsync("Basic Event");
+        await countly.Events.RecordEventAsync("Sample App’ event");
     }
 
     public async void EventWithSum()
@@ -252,7 +253,7 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
     public void SetLocation()
     {
         string countryCode = "us";
-        string city = "Houston";
+        string city = "Böston’ 墨尔本";
         string latitude = "29.634933";
         string longitude = "-95.220255";
         string ipAddress = null;

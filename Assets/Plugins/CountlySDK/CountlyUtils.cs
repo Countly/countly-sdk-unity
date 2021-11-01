@@ -38,9 +38,9 @@ namespace Plugins.CountlySDK
             Dictionary<string, object> baseParams = new Dictionary<string, object>
             {
                 {"app_key", _countly.Configuration.AppKey},
-                {"device_id", _countly.Device.DeviceId},
-                {"sdk_name", Constants.SdkName},
-                {"sdk_version", Constants.SdkVersion}
+                {"device_id", "a" }//_countly.Device.DeviceId},
+                //{"sdk_name", Constants.SdkName},
+                //{"sdk_version", Constants.SdkVersion}
             };
 
             foreach (KeyValuePair<string, object> item in TimeMetricModel.GetTimeMetricModel()) {
