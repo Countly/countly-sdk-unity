@@ -5,6 +5,8 @@ using Plugins.CountlySDK;
 using System.Threading.Tasks;
 using System.Web;
 using System.Collections.Specialized;
+using Plugins.CountlySDK.Enums;
+using System.Linq;
 
 namespace Tests
 {
@@ -116,10 +118,47 @@ namespace Tests
         }
 
         /// <summary>
+        /// It validates the consent removal after changing the device id without merging.
+        /// </summary>
+        [Test]
+        public async void TestConsentRemoval_ChangeDeviceIdWithoutMerge()
+        {
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                AppKey = _appKey,
+                ServerUrl = _serverUrl,
+                RequiresConsent = true,
+            };
+
+            configuration.GiveConsent(new Consents[] { Consents.Crashes, Consents.Events, Consents.Clicks, Consents.StarRating, Consents.Views, Consents.Users, Consents.Sessions, Consents.Push, Consents.RemoteConfig, Consents.Location, Consents.Feedback });
+
+            Countly.Instance.Init(configuration);
+            Assert.IsNotNull(Countly.Instance.Consents);
+
+            string oldDeviceId = Countly.Instance.Device.DeviceId;
+            Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
+            await Countly.Instance.Device.ChangeDeviceIdWithoutMerge("new_device_id_1");
+            //RQ will have begin session and end session requests
+            Assert.AreEqual(2, Countly.Instance.Device._requestCountlyHelper._requestRepo.Count);
+
+
+            CountlyRequestModel requestModel = Countly.Instance.Device._requestCountlyHelper._requestRepo.Dequeue();
+            string uri = requestModel.RequestUrl;
+
+            Assert.IsTrue(Countly.Instance.Consents.RequiresConsent);
+
+            Consents[] consents = System.Enum.GetValues(typeof(Consents)).Cast<Consents>().ToArray();
+            foreach (Consents consent in consents) {
+                Assert.IsFalse(Countly.Instance.Consents.CheckConsentInternal(consent));
+            }
+
+
+        }
+
+        /// <summary>
         /// It validates functionality of method 'ChangeDeviceIdWithMerge'.
         /// </summary>
         [Test]
-        public async void TestDeviceServiceMethod_ChangeDeviceIdWithMerge()
+        public async void TestConset_ChangeDeviceIdWithMerge()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 AppKey = _appKey,
