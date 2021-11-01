@@ -186,9 +186,8 @@ namespace Plugins.CountlySDK
             FirstLaunchAppHelper.Process();
 
             StorageHelper = new CountlyStorageHelper(_logHelper);
-            
             StorageHelper.OpenDB();
-            StorageHelper.ClearDBData();
+
             StorageHelper.RunMigration();
 
             Init(StorageHelper.RequestRepo, StorageHelper.EventRepo, StorageHelper.ConfigDao);
