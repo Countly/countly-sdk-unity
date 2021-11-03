@@ -13,8 +13,6 @@ namespace Plugins.CountlySDK.Services
     {
 
         internal bool RequiresConsent { get; private set; }
-
-        internal bool SendConsentOnChange;
         internal readonly RequestCountlyHelper _requestCountlyHelper;
         private Dictionary<string, Consents[]> _countlyConsentGroups;
         internal readonly Dictionary<Consents, bool> CountlyConsents;
@@ -30,12 +28,12 @@ namespace Plugins.CountlySDK.Services
             if (_configuration.EnabledConsentGroups != null) {
                 foreach (KeyValuePair<string, Consents[]> entry in _countlyConsentGroups) {
                     if (_configuration.EnabledConsentGroups.Contains(entry.Key)) {
-                        SetConsentInternal(entry.Value, true);
+                        SetConsentInternal(entry.Value, true, sendRequest: false);
                     }
                 }
             }
 
-            SetConsentInternal(_configuration.GivenConsent, true);
+            SetConsentInternal(_configuration.GivenConsent, true, sendRequest: false);
         }
 
         #region Public Methods
@@ -104,7 +102,7 @@ namespace Plugins.CountlySDK.Services
                     return;
                 }
 
-                SetConsentInternal(consents, true);
+                SetConsentInternal(consents, true, sendRequest: true);
             }
         }
 
@@ -123,7 +121,7 @@ namespace Plugins.CountlySDK.Services
                 }
 
                 Consents[] consents = Enum.GetValues(typeof(Consents)).Cast<Consents>().ToArray();
-                SetConsentInternal(consents, true);
+                SetConsentInternal(consents, true, sendRequest: true);
             }
         }
 
@@ -149,7 +147,7 @@ namespace Plugins.CountlySDK.Services
                 //Remove Duplicates entries
                 consents = consents.Distinct().ToArray();
 
-                SetConsentInternal(consents, false);
+                SetConsentInternal(consents, false, sendRequest: true);
             }
 
         }
@@ -168,7 +166,7 @@ namespace Plugins.CountlySDK.Services
                     return;
                 }
 
-                SetConsentInternal(CountlyConsents.Keys.ToArray(), false);
+                SetConsentInternal(CountlyConsents.Keys.ToArray(), false, sendRequest: true);
             }
         }
 
@@ -195,7 +193,7 @@ namespace Plugins.CountlySDK.Services
                 foreach (string name in groupName) {
                     if (_countlyConsentGroups.ContainsKey(name)) {
                         Consents[] consents = _countlyConsentGroups[name];
-                        SetConsentInternal(consents, true);
+                        SetConsentInternal(consents, true, sendRequest: true);
                     }
                 }
             }
@@ -224,7 +222,7 @@ namespace Plugins.CountlySDK.Services
                 foreach (string name in groupName) {
                     if (_countlyConsentGroups.ContainsKey(name)) {
                         Consents[] consents = _countlyConsentGroups[name];
-                        SetConsentInternal(consents, false);
+                        SetConsentInternal(consents, false, sendRequest: true);
                     }
                 }
             }
@@ -239,7 +237,6 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value">value to be set</param>
         internal async Task SendConsentChanges(List<Consents> consents, bool value)
         {
-            SendConsentOnChange = true;
 
             if (!RequiresConsent || consents.Count == 0) {
                 return;
@@ -310,7 +307,7 @@ namespace Plugins.CountlySDK.Services
         /// </summary>
         /// <param name="consents">List of consent</param>
         /// <param name="value">value to be set</param>
-        internal async void SetConsentInternal(Consents[] consents, bool value)
+        internal async void SetConsentInternal(Consents[] consents, bool value, bool sendRequest = false)
         {
             if (consents == null) {
                 Log.Debug("[ConsentCountlyService] Calling SetConsentInternal with null consents list!");
@@ -333,7 +330,7 @@ namespace Plugins.CountlySDK.Services
                 Log.Debug("[ConsentCountlyService] Setting consent for: [" + consent.ToString() + "] with value: [" + value + "]");
             }
 
-            if (SendConsentOnChange) {
+            if (sendRequest) {
                 await SendConsentChanges(updatedConsents, value);
             }
             NotifyListeners(updatedConsents, value);

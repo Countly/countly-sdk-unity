@@ -121,8 +121,8 @@ namespace Plugins.CountlySDK.Services
                 NotifyListeners(false);
 
                 if (_consentService.RequiresConsent) {
-                    _consentService.SendConsentOnChange = false;
-                    _consentService.SetConsentInternal(_consentService.CountlyConsents.Keys.ToArray(), false);
+
+                    _consentService.SetConsentInternal(_consentService.CountlyConsents.Keys.ToArray(), false, sendRequest: false);
                 }
 
                 _ = _requestCountlyHelper.ProcessQueue();
