@@ -133,7 +133,7 @@ namespace Tests
         /// It check the working of method 'SetUserDetailsAsync'.
         /// </summary>
         [Test]
-        public async void TestUserDetailMethod_SetCustomUserDetailsAsync()
+        public void TestUserDetailMethod_SetCustomUserDetailsAsync()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 ServerUrl = _serverUrl,
@@ -177,7 +177,7 @@ namespace Tests
         /// It validate user detail segments limits.
         /// </summary>
         [Test]
-        public async void TestUserDetailSegmentLimits()
+        public void TestUserDetailSegmentLimits()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 ServerUrl = _serverUrl,
@@ -197,7 +197,7 @@ namespace Tests
             Countly.Instance.UserDetails.SetCustomUserDetails(userCustomDetail);
             Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
 
-            userCustomDetail = userCustomDetail = new Dictionary<string, object> {
+            userCustomDetail = new Dictionary<string, object> {
                         { "Hair", "Black_1" },
                         { "Height", "5.9" },
             };
@@ -350,14 +350,15 @@ namespace Tests
         }
 
         /// <summary>
-        /// It check the working of method 'UserCustomDetailsAsync'.
+        /// It check the working of method 'UserCustomDetails'.
         /// </summary>
         [Test]
-        public async void TestUserDetailMethod_UserCustomDetailsAsync()
+        public void TestUserDetailMethod_UserCustomDetails()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 ServerUrl = _serverUrl,
                 AppKey = _appKey,
+                EnablePost = true,
             };
 
             Countly.Instance.Init(configuration);
@@ -370,13 +371,66 @@ namespace Tests
             Countly.Instance.UserDetails.SetCustomUserDetails(InvalidUserDetails);
             Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
 
-            Dictionary<string, object> customDetail = new Dictionary<string, object>{
-                { "Height", "5.8" },
-                { "Mole", "Lower Left Cheek" }
+            Dictionary<string, object> userCustomDetail = new Dictionary<string, object> {
+                        { "Hair", "Black" },
+                        { "Height", "5.9" },
             };
-           
-            Countly.Instance.UserDetails.SetCustomUserDetails(customDetail);
+
+            Countly.Instance.UserDetails.SetCustomUserDetails(userCustomDetail);
             Assert.AreEqual(1, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
+
+            CountlyRequestModel requestModel = Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Dequeue();
+
+
+            string userDetailData = requestModel.RequestData;
+            JObject json = JObject.Parse(userDetailData);
+            string userDetail = json["user_details"].ToString();
+            JObject custom = JObject.Parse(userDetail);
+
+            Assert.AreEqual("Black", custom["custom"]["Hair"].ToString());
+            Assert.AreEqual("5.9", custom["custom"]["Height"].ToString());
+        }
+
+        /// <summary>
+        /// It check the working of method 'UserCustomDetailsAsync'.
+        /// </summary>
+        [Test]
+        public async void TestUserDetailMethod_UserCustomDetailsAsync()
+        {
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                ServerUrl = _serverUrl,
+                AppKey = _appKey,
+                EnablePost = true,
+            };
+
+            Countly.Instance.Init(configuration);
+            Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
+
+            Assert.IsNotNull(Countly.Instance.UserDetails);
+            Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
+
+            CountlyUserDetailsModel userDetails = null;
+
+            await Countly.Instance.UserDetails.SetCustomUserDetailsAsync(userDetails);
+            Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
+
+            userDetails = new CountlyUserDetailsModel(
+                  new Dictionary<string, object>{
+                        { "Hair", "Black" },
+                        { "Height", "5.9" },
+                  });
+
+            Countly.Instance.UserDetails.SetCustomUserDetailsAsync(userDetails);
+            Assert.AreEqual(1, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
+
+            CountlyRequestModel requestModel = Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Dequeue();
+            string userDetailData = requestModel.RequestData;
+            JObject json = JObject.Parse(userDetailData);
+            string userDetail = json["user_details"].ToString();
+            JObject custom = JObject.Parse(userDetail);
+
+            Assert.AreEqual("Black", custom["custom"]["Hair"].ToString());
+            Assert.AreEqual("5.9", custom["custom"]["Height"].ToString());
         }
         /// <summary>
         /// It validates the user's custom properties set via 'SetOnce' and 'Set' methods.
