@@ -9,6 +9,7 @@ using System.Collections.Specialized;
 using Newtonsoft.Json.Linq;
 using Plugins.CountlySDK.Helpers;
 using UnityEditor.PackageManager.Requests;
+using System.Linq;
 
 namespace Tests
 {
@@ -16,7 +17,6 @@ namespace Tests
     {
         private readonly string _serverUrl = "https://xyz.com/";
         private readonly string _appKey = "772c091355076ead703f987fee94490";
-
 
         /// <summary>
         /// It validates the request migration on empty request repo.
@@ -69,7 +69,11 @@ namespace Tests
             Assert.AreEqual(1, Countly.Instance.RequestHelper._requestRepo.Count);
 
             CountlyRequestModel requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
-            JObject json = JObject.Parse(requestModel.RequestData);
+
+            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            Dictionary<string, string> queryParams = collection.AllKeys.ToDictionary(t => t, t => collection[t]);
+
+            JObject json = JObject.FromObject(queryParams);
 
             int schemaVersion = PlayerPrefs.GetInt(Constants.SchemaVersion);
             Assert.AreEqual(2, schemaVersion);
@@ -123,8 +127,15 @@ namespace Tests
             Assert.AreEqual(2, Countly.Instance.StorageHelper.CurrentVersion);
             Assert.AreEqual(Countly.Instance.StorageHelper.SchemaVersion, Countly.Instance.StorageHelper.CurrentVersion);
 
+
+
             CountlyRequestModel requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
-            JObject json = JObject.Parse(requestModel.RequestData);
+
+            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            Dictionary<string, string> queryParams = collection.AllKeys.ToDictionary(t => t, t => collection[t]);
+
+            JObject json = JObject.FromObject(queryParams);
+            
 
             Assert.AreEqual("772c091355076ead703f987fee94490", json.GetValue("app_key").ToObject<string>());
             Assert.AreEqual("57049b51faf44804a10967f54d8f8420", json.GetValue("device_id").ToObject<string>());
@@ -135,7 +146,10 @@ namespace Tests
             Assert.IsNull(requestModel.RequestUrl);
 
             requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
-            json = JObject.Parse(requestModel.RequestData);
+            collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            queryParams = collection.AllKeys.ToDictionary(t => t, t => collection[t]);
+
+            json = JObject.FromObject(queryParams);
 
             Assert.AreEqual("772c091355076ead703f987fee94490", json.GetValue("app_key").ToObject<string>());
             Assert.AreEqual("57049b51faf44804a10967f54d8f8420", json.GetValue("device_id").ToObject<string>());
@@ -146,7 +160,10 @@ namespace Tests
             Assert.IsNull(requestModel.RequestUrl);
 
             requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
-            json = JObject.Parse(requestModel.RequestData);
+            collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            queryParams = collection.AllKeys.ToDictionary(t => t, t => collection[t]);
+
+            json = JObject.FromObject(queryParams);
 
             Assert.AreEqual("772c091355076ead703f987fee94490", json.GetValue("app_key").ToObject<string>());
             Assert.AreEqual("57049b51faf44804a10967f54d8f8420", json.GetValue("device_id").ToObject<string>());
@@ -195,7 +212,10 @@ namespace Tests
             Assert.AreEqual(3, Countly.Instance.RequestHelper._requestRepo.Count);
 
             CountlyRequestModel requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
-            JObject json = JObject.Parse(requestModel.RequestData);
+            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            Dictionary<string, string> queryParams = collection.AllKeys.ToDictionary(t => t, t => collection[t]);
+
+            JObject json = JObject.FromObject(queryParams);
 
             Assert.AreEqual("772c091355076ead703f987fee94490", json.GetValue("app_key").ToObject<string>());
             Assert.AreEqual("57049b51faf44874a10967f54d8f8420", json.GetValue("device_id").ToObject<string>());
@@ -206,8 +226,10 @@ namespace Tests
             Assert.IsNull(requestModel.RequestUrl);
 
             requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
-            json = JObject.Parse(requestModel.RequestData);
+            collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            queryParams = collection.AllKeys.ToDictionary(t => t, t => collection[t]);
 
+            json = JObject.FromObject(queryParams);
             Assert.AreEqual("772c091355076ead703f987fee94490", json.GetValue("app_key").ToObject<string>());
             Assert.AreEqual("57049b51faf44874a10967f54d8f8420", json.GetValue("device_id").ToObject<string>());
             Assert.AreEqual("csharp-unity-editor", json.GetValue("sdk_name").ToObject<string>());
@@ -217,7 +239,10 @@ namespace Tests
             Assert.IsNull(requestModel.RequestUrl);
 
             requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
-            json = JObject.Parse(requestModel.RequestData);
+            collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            queryParams = collection.AllKeys.ToDictionary(t => t, t => collection[t]);
+
+            json = JObject.FromObject(queryParams);
 
             Assert.AreEqual("772c091355076ead703f987fee94490", json.GetValue("app_key").ToObject<string>());
             Assert.AreEqual("57049b51faf44874a10967f54d8f8420", json.GetValue("device_id").ToObject<string>());
@@ -252,7 +277,10 @@ namespace Tests
             Assert.AreEqual(1, Countly.Instance.RequestHelper._requestRepo.Count);
 
             CountlyRequestModel requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
-            JObject json = JObject.Parse(requestModel.RequestData);
+            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            Dictionary<string, string> queryParams = collection.AllKeys.ToDictionary(t => t, t => collection[t]);
+
+            JObject json = JObject.FromObject(queryParams);
 
             int schemaVersion = PlayerPrefs.GetInt(Constants.SchemaVersion);
             Assert.AreEqual(2, schemaVersion);
@@ -301,6 +329,7 @@ namespace Tests
             Countly.Instance.RequestHelper.AddRequestToQueue(request);
 
             data = "{\"app_key\":\"772c091355076ead703f987fee94490\",\"device_id\":\"57049b51faf44874a10967f54d8f8420\",\"sdk_name\":\"csharp-unity-editor\",\"sdk_version\":\"20.11.1\",\"timestamp\":1633595280409,\"hour\":13,\"dow\":4,\"tz\":\"300\",\"consent\":{\"crashes\":true,\"events\":true,\"clicks\":true,\"star-rating\":true,\"views\":true,\"users\":true,\"sessions\":true,\"push\":true,\"remote-config\":true,\"location\":true,\"feedback\":true},\"checksum256\":\"a3c63ddd0fa788eb05c75752533fdb8083960c4c35fb0ed5a689b631d2beb194\"}";
+
             request = new CountlyRequestModel(_serverUrl,  data);
             Countly.Instance.RequestHelper.AddRequestToQueue(request);
 
@@ -319,7 +348,10 @@ namespace Tests
             Assert.AreEqual(6, Countly.Instance.RequestHelper._requestRepo.Count);
 
             CountlyRequestModel requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
-            JObject json = JObject.Parse(requestModel.RequestData);
+            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            Dictionary<string, string> queryParams = collection.AllKeys.ToDictionary(t => t, t => collection[t]);
+
+            JObject json = JObject.FromObject(queryParams);
 
             Assert.AreEqual("772c091355076ead703f987fee94490", json.GetValue("app_key").ToObject<string>());
             Assert.AreEqual("57049b51faf44874a10967f54d8f8420", json.GetValue("device_id").ToObject<string>());
@@ -330,8 +362,10 @@ namespace Tests
             Assert.IsNull(requestModel.RequestUrl);
 
             requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
-            json = JObject.Parse(requestModel.RequestData);
+            collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            queryParams = collection.AllKeys.ToDictionary(t => t, t => collection[t]);
 
+            json = JObject.FromObject(queryParams);
             Assert.AreEqual("772c091355076ead703f987fee94490", json.GetValue("app_key").ToObject<string>());
             Assert.AreEqual("57049b51faf44874a10967f54d8f8420", json.GetValue("device_id").ToObject<string>());
             Assert.AreEqual("csharp-unity-editor", json.GetValue("sdk_name").ToObject<string>());
@@ -341,8 +375,10 @@ namespace Tests
             Assert.IsNull(requestModel.RequestUrl);
 
             requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
-            json = JObject.Parse(requestModel.RequestData);
+            collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            queryParams = collection.AllKeys.ToDictionary(t => t, t => collection[t]);
 
+            json = JObject.FromObject(queryParams);
             Assert.AreEqual("772c091355076ead703f987fee94490", json.GetValue("app_key").ToObject<string>());
             Assert.AreEqual("57049b51faf44874a10967f54d8f8420", json.GetValue("device_id").ToObject<string>());
             Assert.AreEqual("csharp-unity-editor", json.GetValue("sdk_name").ToObject<string>());
@@ -352,8 +388,10 @@ namespace Tests
             Assert.IsNull(requestModel.RequestUrl);
 
             requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
-            json = JObject.Parse(requestModel.RequestData);
+            collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            queryParams = collection.AllKeys.ToDictionary(t => t, t => collection[t]);
 
+            json = JObject.FromObject(queryParams);
             Assert.AreEqual("772c091355076ead703f987fee94490", json.GetValue("app_key").ToObject<string>());
             Assert.AreEqual("57049b51faf44874a10967f54d8f8420", json.GetValue("device_id").ToObject<string>());
             Assert.AreEqual("csharp-unity-editor", json.GetValue("sdk_name").ToObject<string>());
@@ -364,8 +402,10 @@ namespace Tests
 
 
             requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
-            json = JObject.Parse(requestModel.RequestData);
+            collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            queryParams = collection.AllKeys.ToDictionary(t => t, t => collection[t]);
 
+            json = JObject.FromObject(queryParams);
             Assert.AreEqual("772c091355076ead703f987fee94490", json.GetValue("app_key").ToObject<string>());
             Assert.AreEqual("57049b51faf44874a10967f54d8f8420", json.GetValue("device_id").ToObject<string>());
             Assert.AreEqual("csharp-unity-editor", json.GetValue("sdk_name").ToObject<string>());
@@ -375,8 +415,10 @@ namespace Tests
             Assert.IsNull(requestModel.RequestUrl);
 
             requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
-            json = JObject.Parse(requestModel.RequestData);
+            collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            queryParams = collection.AllKeys.ToDictionary(t => t, t => collection[t]);
 
+            json = JObject.FromObject(queryParams);
             Assert.AreEqual("772c091355076ead703f987fee94490", json.GetValue("app_key").ToObject<string>());
             Assert.AreEqual("57049b51faf44874a10967f54d8f8420", json.GetValue("device_id").ToObject<string>());
             Assert.AreEqual("csharp-unity-editor", json.GetValue("sdk_name").ToObject<string>());

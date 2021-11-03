@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Security.Cryptography;
 using System.Text;
@@ -82,7 +83,8 @@ namespace Plugins.CountlySDK.Helpers
             if (_config.EnablePost || model.RequestData.Length > 1800) {
                 return await Task.Run(() => PostAsync(_countlyUtils.ServerInputUrl, model.RequestData));
             }
-            return await Task.Run(() => GetAsync(_countlyUtils.ServerInputUrl ,model.RequestData));
+
+            return await Task.Run(() => GetAsync(_countlyUtils.ServerInputUrl, model.RequestData));
         }
 
         /// <summary>
@@ -91,33 +93,22 @@ namespace Plugins.CountlySDK.Helpers
         /// </summary>
         /// <param name="queryParams"></param>
         /// <returns></returns>
-        internal string BuildRequest(string data)
+        internal string BuildRequest(IDictionary<string, object> queryParams)
         {
-            Dictionary<string, object> queryParams = JsonConvert.DeserializeObject<Dictionary<string, object>>(data);
+          //  Dictionary<string, object> queryParams = JsonConvert.DeserializeObject<Dictionary<string, object>>(data);
             StringBuilder requestStringBuilder = new StringBuilder();
+
             //Query params supplied for creating request
             foreach (KeyValuePair<string, object> item in queryParams) {
                 if (!string.IsNullOrEmpty(item.Key) && item.Value != null) {
-                    requestStringBuilder.AppendFormat("&{0}={1}", UnityWebRequest.EscapeURL(item.Key),
-                        UnityWebRequest.EscapeURL(Convert.ToString(item.Value)));
+                    requestStringBuilder.AppendFormat(requestStringBuilder.Length == 0 ? "{0}={1}" : "&{0}={1}", item.Key,
+                      Convert.ToString(item.Value));
                 }
             }
 
-            String query = requestStringBuilder.ToString();
-            string result = query.Remove(0, 1); //remove extra '&'
+            string result = requestStringBuilder.ToString();
 
-            if (!string.IsNullOrEmpty(_config.Salt)) {
-                // Create a SHA256
-                using (SHA256 sha256Hash = SHA256.Create()) {
-                    byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(result + _config.Salt));
-                    string hex = _countlyUtils.GetStringFromBytes(bytes);
-                    Log.Debug("BuildGetRequest: query = " + result + ", checksum256 = " + hex);
-
-                    result += "&checksum256=" + hex;
-                }
-            }
-
-            return result;
+            return Uri.EscapeUriString(result);
         }
 
         /// <summary>
@@ -131,10 +122,26 @@ namespace Plugins.CountlySDK.Helpers
                 requestData.Add(item.Key, item.Value);
             }
 
-            string data = JsonConvert.SerializeObject(requestData);
-            CountlyRequestModel requestModel = new CountlyRequestModel(null,  data);
+            string data = BuildRequest(requestData); //JsonConvert.SerializeObject(requestData);
+            CountlyRequestModel requestModel = new CountlyRequestModel(null, data);
 
             AddRequestToQueue(requestModel);
+        }
+
+        private string AddChecksum(string query)
+        {
+            if (!string.IsNullOrEmpty(_config.Salt)) {
+                // Create a SHA256
+                using (SHA256 sha256Hash = SHA256.Create()) {
+                    byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(query + _config.Salt));
+                    string hex = _countlyUtils.GetStringFromBytes(bytes);
+
+                    query += "&checksum256=" + hex;
+                    Log.Debug("BuildGetRequest: query = " + query);
+                }
+            }
+
+            return query;
         }
 
         /// <summary>
@@ -149,14 +156,14 @@ namespace Plugins.CountlySDK.Helpers
             Log.Verbose("[RequestCountlyHelper] GetAsync request: " + uri + " params: " + data);
 
             CountlyResponse countlyResponse = new CountlyResponse();
-            string query = BuildRequest(data);
+            string query = AddChecksum(data);
             string url = uri + query;
             try {
                 HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
                 using (HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync()) {
                     int code = (int)response.StatusCode;
                     using (Stream stream = response.GetResponseStream())
-                        using (StreamReader reader = new StreamReader(stream)) {
+                    using (StreamReader reader = new StreamReader(stream)) {
                         string res = await reader.ReadToEndAsync();
 
                         JObject body = JObject.Parse(res);
@@ -202,7 +209,7 @@ namespace Plugins.CountlySDK.Helpers
             CountlyResponse countlyResponse = new CountlyResponse();
 
             try {
-                string query = BuildRequest(data);
+                string query = AddChecksum(data);
                 byte[] dataBytes = Encoding.ASCII.GetBytes(query);
 
                 HttpWebRequest request = (HttpWebRequest)WebRequest.Create(uri);
