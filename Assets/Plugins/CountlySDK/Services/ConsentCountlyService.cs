@@ -238,7 +238,7 @@ namespace Plugins.CountlySDK.Services
         internal async Task SendConsentChanges(List<Consents> consents, bool value)
         {
 
-            if (!RequiresConsent || consents.Count == 0) {
+            if (!RequiresConsent || consents.Count == 0 || _requestCountlyHelper == null) {
                 return;
             }
 
