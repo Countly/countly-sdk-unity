@@ -173,15 +173,15 @@ namespace Plugins.CountlySDK.Helpers
         /// </summary>
         private void Migration_MigrateOldRequests()
         {
-            CountlyRequestModel[] requestModels =  RequestRepo.Models.ToArray();
+            CountlyRequestModel[] requestModels = RequestRepo.Models.ToArray();
             foreach (CountlyRequestModel request in requestModels) {
                 if (request.RequestData == null) {
 
                     int index = request.RequestUrl.IndexOf('?');
                     string uri = request.RequestUrl.Substring(index);
-                    NameValueCollection collection =  HttpUtility.ParseQueryString(uri);
+                    NameValueCollection collection = HttpUtility.ParseQueryString(uri);
 
-                    Dictionary<string, object>  queryParams = collection.AllKeys.ToDictionary(t => t, t => (object)collection[t]);
+                    Dictionary<string, object> queryParams = collection.AllKeys.ToDictionary(t => t, t => (object)collection[t]);
                     queryParams.Remove("checksum256");
                     string data = BuildRequest(queryParams);//JsonConvert.SerializeObject(queryParams);
 
@@ -213,15 +213,18 @@ namespace Plugins.CountlySDK.Helpers
             //Query params supplied for creating request
             foreach (KeyValuePair<string, object> item in queryParams) {
                 if (!string.IsNullOrEmpty(item.Key) && item.Value != null) {
-                    requestStringBuilder.AppendFormat(requestStringBuilder.Length == 0 ? "{0}={1}" : "&{0}={1}", UnityWebRequest.EscapeURL(item.Key),
-                      UnityWebRequest.EscapeURL(Convert.ToString(item.Value)));
+                    requestStringBuilder.AppendFormat(requestStringBuilder.Length == 0 ? "{0}={1}" : "&{0}={1}", item.Key,
+                      Convert.ToString(item.Value));
                 }
             }
 
-            return requestStringBuilder.ToString();
+            string result = requestStringBuilder.ToString();
+
+            return Uri.EscapeUriString(result);
         }
 
-        internal void ClearDBData() {
+        internal void ClearDBData()
+        {
             EventRepo.Clear();
             RequestRepo.Clear();
             ConfigDao.RemoveAll();
