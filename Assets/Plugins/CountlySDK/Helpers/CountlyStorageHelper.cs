@@ -31,6 +31,7 @@ namespace Plugins.CountlySDK.Helpers
         internal readonly int SchemaVersion = 2;
 
         private CountlyLogHelper _logHelper;
+        private readonly RequestBuilder _requestBuilder;
         internal SegmentDao EventSegmentDao { get; private set; }
 
         internal Dao<ConfigEntity> ConfigDao { get; private set; }
@@ -42,9 +43,10 @@ namespace Plugins.CountlySDK.Helpers
         internal NonViewEventRepository EventRepo { get; private set; }
         internal ViewEventRepository ViewRepo { get; private set; }
 
-        internal CountlyStorageHelper(CountlyLogHelper logHelper)
+        internal CountlyStorageHelper(CountlyLogHelper logHelper, RequestBuilder requestBuilder)
         {
             _logHelper = logHelper;
+            _requestBuilder = requestBuilder;
 
             if (FirstLaunchAppHelper.IsFirstLaunchApp) {
                 CurrentVersion = SchemaVersion;
@@ -185,7 +187,7 @@ namespace Plugins.CountlySDK.Helpers
 
                     Dictionary<string, object> queryParams = collection.AllKeys.ToDictionary(t => t, t => (object)collection[t]);
                     queryParams.Remove("checksum256");
-                    string data = BuildRequest(queryParams);//JsonConvert.SerializeObject(queryParams);
+                    string data = _requestBuilder.BuildQueryString(queryParams);//JsonConvert.SerializeObject(queryParams);
 
                     request.RequestUrl = null;
                     request.RequestData = data;
@@ -194,7 +196,7 @@ namespace Plugins.CountlySDK.Helpers
                     requestData.Remove("checksum256");
 
                     request.RequestUrl = null;
-                    request.RequestData = BuildRequest(requestData);
+                    request.RequestData = _requestBuilder.BuildQueryString(requestData);
                     //JsonConvert.SerializeObject(requestData);
                 }
 
@@ -205,24 +207,6 @@ namespace Plugins.CountlySDK.Helpers
             }
             _logHelper.Verbose("[CountlyStorageHelper] Migration_MigrateOldRequests");
 
-        }
-
-        private string BuildRequest(IDictionary<string, object> queryParams)
-        {
-            //  Dictionary<string, object> queryParams = JsonConvert.DeserializeObject<Dictionary<string, object>>(data);
-            StringBuilder requestStringBuilder = new StringBuilder();
-
-            //Query params supplied for creating request
-            foreach (KeyValuePair<string, object> item in queryParams) {
-                if (!string.IsNullOrEmpty(item.Key) && item.Value != null) {
-                    requestStringBuilder.AppendFormat(requestStringBuilder.Length == 0 ? "{0}={1}" : "&{0}={1}", item.Key,
-                      Convert.ToString(item.Value));
-                }
-            }
-
-            string result = requestStringBuilder.ToString();
-
-            return Uri.EscapeUriString(result);
         }
 
         internal void ClearDBData()

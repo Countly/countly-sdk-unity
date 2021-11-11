@@ -8,7 +8,6 @@ namespace Plugins.CountlySDK
 {
     public class CountlyUtils
     {
-        private static readonly StringBuilder Builder = new StringBuilder();
 
         private readonly Countly _countly;
 

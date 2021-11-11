@@ -185,12 +185,13 @@ namespace Plugins.CountlySDK
             Constants.ProcessPlatform();
             FirstLaunchAppHelper.Process();
 
-            StorageHelper = new CountlyStorageHelper(_logHelper);
+            RequestBuilder requestBuilder = new RequestBuilder();
+            StorageHelper = new CountlyStorageHelper(_logHelper, requestBuilder);
             StorageHelper.OpenDB();
 
             StorageHelper.RunMigration();
 
-            Init(StorageHelper.RequestRepo, StorageHelper.EventRepo, StorageHelper.ConfigDao);
+            Init(requestBuilder, StorageHelper.RequestRepo, StorageHelper.EventRepo, StorageHelper.ConfigDao);
 
             Device.InitDeviceId(configuration.DeviceId);
             OnInitialisationComplete();
@@ -199,11 +200,11 @@ namespace Plugins.CountlySDK
 
         }
 
-        private void Init(RequestRepository requestRepo,
+        private void Init(RequestBuilder requestBuilder, RequestRepository requestRepo,
             NonViewEventRepository nonViewEventRepo, Dao<ConfigEntity> configDao)
         {
             CountlyUtils countlyUtils = new CountlyUtils(this);
-            RequestHelper = new RequestCountlyHelper(Configuration, _logHelper, countlyUtils, requestRepo);
+            RequestHelper = new RequestCountlyHelper(Configuration, _logHelper, countlyUtils, requestBuilder, requestRepo);
 
             Consents = new ConsentCountlyService(Configuration, _logHelper, Consents, RequestHelper);
             Events = new EventCountlyService(Configuration, _logHelper, RequestHelper, nonViewEventRepo, Consents);

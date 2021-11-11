@@ -22,14 +22,17 @@ namespace Plugins.CountlySDK.Helpers
         private readonly CountlyLogHelper Log;
         private readonly CountlyUtils _countlyUtils;
         private readonly CountlyConfiguration _config;
+        private readonly RequestBuilder _requestBuilder;
         internal readonly RequestRepository _requestRepo;
 
-        internal RequestCountlyHelper(CountlyConfiguration config, CountlyLogHelper log, CountlyUtils countlyUtils, RequestRepository requestRepo)
+        internal RequestCountlyHelper(CountlyConfiguration config, CountlyLogHelper log, CountlyUtils countlyUtils, RequestBuilder requestBuilder, RequestRepository requestRepo)
         {
             Log = log;
             _config = config;
-            _countlyUtils = countlyUtils;
             _requestRepo = requestRepo;
+            _countlyUtils = countlyUtils;
+            _requestBuilder = requestBuilder;
+
         }
 
         internal void AddRequestToQueue(CountlyRequestModel request)
@@ -88,42 +91,11 @@ namespace Plugins.CountlySDK.Helpers
         }
 
         /// <summary>
-        ///     Builds request URL using ServerUrl, AppKey, DeviceID and supplied queryParams parameters.
-        ///     The data is appended in the URL.
-        /// </summary>
-        /// <param name="queryParams"></param>
-        /// <returns></returns>
-        internal string BuildRequest(IDictionary<string, object> queryParams)
-        {
-          //  Dictionary<string, object> queryParams = JsonConvert.DeserializeObject<Dictionary<string, object>>(data);
-            StringBuilder requestStringBuilder = new StringBuilder();
-
-            //Query params supplied for creating request
-            foreach (KeyValuePair<string, object> item in queryParams) {
-                if (!string.IsNullOrEmpty(item.Key) && item.Value != null) {
-                    requestStringBuilder.AppendFormat(requestStringBuilder.Length == 0 ? "{0}={1}" : "&{0}={1}", item.Key,
-                      Convert.ToString(item.Value));
-                }
-            }
-
-            string result = requestStringBuilder.ToString();
-
-            return Uri.EscapeUriString(result);
-        }
-
-        /// <summary>
         ///  An internal function to add a request to request queue.
         /// </summary>
         internal void AddToRequestQueue(Dictionary<string, object> queryParams)
         {
-            //Metrics added to each request
-            Dictionary<string, object> requestData = _countlyUtils.GetBaseParams();
-            foreach (KeyValuePair<string, object> item in queryParams) {
-                requestData.Add(item.Key, item.Value);
-            }
-
-            string data = BuildRequest(requestData); //JsonConvert.SerializeObject(requestData);
-            CountlyRequestModel requestModel = new CountlyRequestModel(null, data);
+            CountlyRequestModel requestModel = _requestBuilder.BuildRequest(_countlyUtils.GetBaseParams(), queryParams);
 
             AddRequestToQueue(requestModel);
         }
