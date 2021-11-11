@@ -85,6 +85,8 @@ namespace Plugins.CountlySDK.Helpers
             _db = BuildDatabase(_dbNumber);
             DB.AutoBox auto = _db.Open();
 
+            _logHelper.Debug("[CountlyStorageHelper] OpenDB path: " + Application.persistentDataPath + "/db3.box");
+
             EventSegmentDao = new SegmentDao(auto, EntityType.NonViewEventSegments.ToString(), _logHelper);
 
             ConfigDao = new Dao<ConfigEntity>(auto, EntityType.Configs.ToString(), _logHelper);
