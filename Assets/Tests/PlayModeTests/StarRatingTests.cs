@@ -41,7 +41,7 @@ namespace Tests
                 RequiresConsent = true,
             };
 
-            configuration.GiveConsent(new Consents[] { Consents.StarRating});
+            configuration.GiveConsent(new Consents[] { Consents.StarRating });
 
             Countly.Instance.Init(configuration);
 

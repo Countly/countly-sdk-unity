@@ -46,7 +46,7 @@ namespace Tests
 
         }
 
-         /// <summary>
+        /// <summary>
         /// It validates the request after migrating old GET request to new GET request format.
         /// </summary>
         [Test]
@@ -61,7 +61,7 @@ namespace Tests
             Countly.Instance.RequestHelper._requestRepo.Clear();
 
             string url = "https://xyz.com/i?app_key=772c091355076ead703f987fee94490&device_id=57049b51faf44804a10967f54d8f8420&sdk_name=csharp-unity-editor&sdk_version=20.11.5&timestamp=1633595280409&hour=13&dow=4&tz=300&consent=%7b%0a++%22crashes%22%3a+true%2c%0a++%22events%22%3a+true%2c%0a++%22clicks%22%3a+true%2c%0a++%22star-rating%22%3a+true%2c%0a++%22views%22%3a+true%2c%0a++%22users%22%3a+true%2c%0a++%22sessions%22%3a+true%2c%0a++%22push%22%3a+true%2c%0a++%22remote-config%22%3a+true%2c%0a++%22location%22%3a+true%2c%0a++%22feedback%22%3a+true%0a%7d&checksum256=a3c63ddd0fa788eb05c75752533fdb8083960c4c35fb0ed5a689b631d2beb194";
-            CountlyRequestModel request = new CountlyRequestModel(url,  null);
+            CountlyRequestModel request = new CountlyRequestModel(url, null);
             Countly.Instance.RequestHelper.AddRequestToQueue(request);
             Countly.Instance.StorageHelper.CurrentVersion = 1;
             Countly.Instance.StorageHelper.RunMigration();
@@ -106,15 +106,15 @@ namespace Tests
             Countly.Instance.RequestHelper._requestRepo.Clear();
 
             string url = "https://xyz.com/i?app_key=772c091355076ead703f987fee94490&device_id=57049b51faf44804a10967f54d8f8420&sdk_name=csharp-unity-editor&sdk_version=20.11.5&timestamp=1633595280409&hour=13&dow=4&tz=300&consent=%7b%0a++%22crashes%22%3a+true%2c%0a++%22events%22%3a+true%2c%0a++%22clicks%22%3a+true%2c%0a++%22star-rating%22%3a+true%2c%0a++%22views%22%3a+true%2c%0a++%22users%22%3a+true%2c%0a++%22sessions%22%3a+true%2c%0a++%22push%22%3a+true%2c%0a++%22remote-config%22%3a+true%2c%0a++%22location%22%3a+true%2c%0a++%22feedback%22%3a+true%0a%7d&checksum256=a3c63ddd0fa788eb05c75752533fdb8083960c4c35fb0ed5a689b631d2beb194";
-            CountlyRequestModel request = new CountlyRequestModel(url,  null);
+            CountlyRequestModel request = new CountlyRequestModel(url, null);
             Countly.Instance.RequestHelper.AddRequestToQueue(request);
 
             url = "https://xyz.com/i?app_key=772c091355076ead703f987fee94490&device_id=57049b51faf44804a10967f54d8f8420&sdk_name=csharp-unity-editor&sdk_version=20.11.4&timestamp=1633595280409&hour=13&dow=4&tz=300&consent=%7b%0a++%22crashes%22%3a+true%2c%0a++%22events%22%3a+true%2c%0a++%22clicks%22%3a+true%2c%0a++%22star-rating%22%3a+true%2c%0a++%22views%22%3a+true%2c%0a++%22users%22%3a+true%2c%0a++%22sessions%22%3a+true%2c%0a++%22push%22%3a+true%2c%0a++%22remote-config%22%3a+true%2c%0a++%22location%22%3a+true%2c%0a++%22feedback%22%3a+true%0a%7d";
-            request = new CountlyRequestModel(url,  null);
+            request = new CountlyRequestModel(url, null);
             Countly.Instance.RequestHelper.AddRequestToQueue(request);
 
             url = "https://xyz.com/i?app_key=772c091355076ead703f987fee94490&device_id=57049b51faf44804a10967f54d8f8420&sdk_name=csharp-unity-editor&sdk_version=20.11.3&timestamp=1633595280409&hour=13&dow=4&tz=300&consent=%7b%0a++%22crashes%22%3a+true%2c%0a++%22events%22%3a+true%2c%0a++%22clicks%22%3a+true%2c%0a++%22star-rating%22%3a+true%2c%0a++%22views%22%3a+true%2c%0a++%22users%22%3a+true%2c%0a++%22sessions%22%3a+true%2c%0a++%22push%22%3a+true%2c%0a++%22remote-config%22%3a+true%2c%0a++%22location%22%3a+true%2c%0a++%22feedback%22%3a+true%0a%7d&checksum256=a3c63ddd0fa788eb05c75752533fdb8083960c4c35fb0ed5a689b631d2beb194";
-            request = new CountlyRequestModel(url,  null);
+            request = new CountlyRequestModel(url, null);
             Countly.Instance.RequestHelper.AddRequestToQueue(request);
 
             Countly.Instance.StorageHelper.CurrentVersion = 1;
@@ -135,7 +135,7 @@ namespace Tests
             Dictionary<string, string> queryParams = collection.AllKeys.ToDictionary(t => t, t => collection[t]);
 
             JObject json = JObject.FromObject(queryParams);
-            
+
 
             Assert.AreEqual("772c091355076ead703f987fee94490", json.GetValue("app_key").ToObject<string>());
             Assert.AreEqual("57049b51faf44804a10967f54d8f8420", json.GetValue("device_id").ToObject<string>());
@@ -175,7 +175,7 @@ namespace Tests
 
         }
 
-         /// <summary>
+        /// <summary>
         /// It validates the order and format of requests after migrating old POST requests to new POST request format.
         /// </summary>
         [Test]
@@ -190,15 +190,15 @@ namespace Tests
             Countly.Instance.RequestHelper._requestRepo.Clear();
 
             string data = "{\"app_key\":\"772c091355076ead703f987fee94490\",\"device_id\":\"57049b51faf44874a10967f54d8f8420\",\"sdk_name\":\"csharp-unity-editor\",\"sdk_version\":\"20.11.5\",\"timestamp\":1633595280409,\"hour\":13,\"dow\":4,\"tz\":\"300\",\"consent\":{\"crashes\":true,\"events\":true,\"clicks\":true,\"star-rating\":true,\"views\":true,\"users\":true,\"sessions\":true,\"push\":true,\"remote-config\":true,\"location\":true,\"feedback\":true},\"checksum256\":\"a3c63ddd0fa788eb05c75752533fdb8083960c4c35fb0ed5a689b631d2beb194\"}";
-            CountlyRequestModel request = new CountlyRequestModel(_serverUrl,  data);
+            CountlyRequestModel request = new CountlyRequestModel(_serverUrl, data);
             Countly.Instance.RequestHelper.AddRequestToQueue(request);
 
             data = "{\"app_key\":\"772c091355076ead703f987fee94490\",\"device_id\":\"57049b51faf44874a10967f54d8f8420\",\"sdk_name\":\"csharp-unity-editor\",\"sdk_version\":\"20.11.4\",\"timestamp\":1633595280409,\"hour\":13,\"dow\":4,\"tz\":\"300\",\"consent\":{\"crashes\":true,\"events\":true,\"clicks\":true,\"star-rating\":true,\"views\":true,\"users\":true,\"sessions\":true,\"push\":true,\"remote-config\":true,\"location\":true,\"feedback\":true},\"checksum256\":\"a3c63ddd0fa788eb05c75752533fdb8083960c4c35fb0ed5a689b631d2beb194\"}";
-             request = new CountlyRequestModel(_serverUrl,  data);
+            request = new CountlyRequestModel(_serverUrl, data);
             Countly.Instance.RequestHelper.AddRequestToQueue(request);
 
             data = "{\"app_key\":\"772c091355076ead703f987fee94490\",\"device_id\":\"57049b51faf44874a10967f54d8f8420\",\"sdk_name\":\"csharp-unity-editor\",\"sdk_version\":\"20.11.3\",\"timestamp\":1633595280409,\"hour\":13,\"dow\":4,\"tz\":\"300\",\"consent\":{\"crashes\":true,\"events\":true,\"clicks\":true,\"star-rating\":true,\"views\":true,\"users\":true,\"sessions\":true,\"push\":true,\"remote-config\":true,\"location\":true,\"feedback\":true},\"checksum256\":\"a3c63ddd0fa788eb05c75752533fdb8083960c4c35fb0ed5a689b631d2beb194\"}";
-            request = new CountlyRequestModel(_serverUrl,  data);
+            request = new CountlyRequestModel(_serverUrl, data);
             Countly.Instance.RequestHelper.AddRequestToQueue(request);
 
             Countly.Instance.StorageHelper.CurrentVersion = 1;
@@ -254,7 +254,7 @@ namespace Tests
 
         }
 
-           /// <summary>
+        /// <summary>
         /// It validates the request after migrating old POST request to new POST request format.
         /// </summary>
         [Test]
@@ -269,7 +269,7 @@ namespace Tests
             Countly.Instance.RequestHelper._requestRepo.Clear();
 
             string data = "{\"app_key\":\"772c091355076ead703f987fee94490\",\"device_id\":\"57049b51faf44874a10967f54d8f8420\",\"sdk_name\":\"csharp-unity-editor\",\"sdk_version\":\"20.11.5\",\"timestamp\":1633595280409,\"hour\":13,\"dow\":4,\"tz\":\"300\",\"consent\":{\"crashes\":true,\"events\":true,\"clicks\":true,\"star-rating\":true,\"views\":true,\"users\":true,\"sessions\":true,\"push\":true,\"remote-config\":true,\"location\":true,\"feedback\":true},\"checksum256\":\"a3c63ddd0fa788eb05c75752533fdb8083960c4c35fb0ed5a689b631d2beb194\"}";
-            CountlyRequestModel request = new CountlyRequestModel(_serverUrl,  data);
+            CountlyRequestModel request = new CountlyRequestModel(_serverUrl, data);
             Countly.Instance.RequestHelper.AddRequestToQueue(request);
             Countly.Instance.StorageHelper.CurrentVersion = 1;
             Countly.Instance.StorageHelper.RunMigration();
@@ -298,7 +298,7 @@ namespace Tests
         }
 
 
-              /// <summary>
+        /// <summary>
         /// It validates the order and format of requests after migrating old POST and GET requests to new request format.
         /// </summary>
         [Test]
@@ -313,28 +313,28 @@ namespace Tests
             Countly.Instance.RequestHelper._requestRepo.Clear();
 
             string url = "https://xyz.com/i?app_key=772c091355076ead703f987fee94490&device_id=57049b51faf44874a10967f54d8f8420&sdk_name=csharp-unity-editor&sdk_version=20.11.5&timestamp=1633595280409&hour=13&dow=4&tz=300&consent=%7b%0a++%22crashes%22%3a+true%2c%0a++%22events%22%3a+true%2c%0a++%22clicks%22%3a+true%2c%0a++%22star-rating%22%3a+true%2c%0a++%22views%22%3a+true%2c%0a++%22users%22%3a+true%2c%0a++%22sessions%22%3a+true%2c%0a++%22push%22%3a+true%2c%0a++%22remote-config%22%3a+true%2c%0a++%22location%22%3a+true%2c%0a++%22feedback%22%3a+true%0a%7d&checksum256=a3c63ddd0fa788eb05c75752533fdb8083960c4c35fb0ed5a689b631d2beb194";
-            CountlyRequestModel request = new CountlyRequestModel(url,  null);
+            CountlyRequestModel request = new CountlyRequestModel(url, null);
             Countly.Instance.RequestHelper.AddRequestToQueue(request);
 
             string data = "{\"app_key\":\"772c091355076ead703f987fee94490\",\"device_id\":\"57049b51faf44874a10967f54d8f8420\",\"sdk_name\":\"csharp-unity-editor\",\"sdk_version\":\"20.11.4\",\"timestamp\":1633595280409,\"hour\":13,\"dow\":4,\"tz\":\"300\",\"consent\":{\"crashes\":true,\"events\":true,\"clicks\":true,\"star-rating\":true,\"views\":true,\"users\":true,\"sessions\":true,\"push\":true,\"remote-config\":true,\"location\":true,\"feedback\":true},\"checksum256\":\"a3c63ddd0fa788eb05c75752533fdb8083960c4c35fb0ed5a689b631d2beb194\"}";
-            request = new CountlyRequestModel(_serverUrl,  data);
+            request = new CountlyRequestModel(_serverUrl, data);
             Countly.Instance.RequestHelper.AddRequestToQueue(request);
 
             url = "https://xyz.com/i?app_key=772c091355076ead703f987fee94490&device_id=57049b51faf44874a10967f54d8f8420&sdk_name=csharp-unity-editor&sdk_version=20.11.3&timestamp=1633595280409&hour=13&dow=4&tz=300&consent=%7b%0a++%22crashes%22%3a+true%2c%0a++%22events%22%3a+true%2c%0a++%22clicks%22%3a+true%2c%0a++%22star-rating%22%3a+true%2c%0a++%22views%22%3a+true%2c%0a++%22users%22%3a+true%2c%0a++%22sessions%22%3a+true%2c%0a++%22push%22%3a+true%2c%0a++%22remote-config%22%3a+true%2c%0a++%22location%22%3a+true%2c%0a++%22feedback%22%3a+true%0a%7d&checksum256=a3c63ddd0fa788eb05c75752533fdb8083960c4c35fb0ed5a689b631d2beb194";
-            request = new CountlyRequestModel(url,  null);
+            request = new CountlyRequestModel(url, null);
             Countly.Instance.RequestHelper.AddRequestToQueue(request);
 
             url = "https://xyz.com/i?app_key=772c091355076ead703f987fee94490&device_id=57049b51faf44874a10967f54d8f8420&sdk_name=csharp-unity-editor&sdk_version=20.11.2&timestamp=1633595280409&hour=13&dow=4&tz=300&consent=%7b%0a++%22crashes%22%3a+true%2c%0a++%22events%22%3a+true%2c%0a++%22clicks%22%3a+true%2c%0a++%22star-rating%22%3a+true%2c%0a++%22views%22%3a+true%2c%0a++%22users%22%3a+true%2c%0a++%22sessions%22%3a+true%2c%0a++%22push%22%3a+true%2c%0a++%22remote-config%22%3a+true%2c%0a++%22location%22%3a+true%2c%0a++%22feedback%22%3a+true%0a%7d";
-            request = new CountlyRequestModel(url,  null);
+            request = new CountlyRequestModel(url, null);
             Countly.Instance.RequestHelper.AddRequestToQueue(request);
 
             data = "{\"app_key\":\"772c091355076ead703f987fee94490\",\"device_id\":\"57049b51faf44874a10967f54d8f8420\",\"sdk_name\":\"csharp-unity-editor\",\"sdk_version\":\"20.11.1\",\"timestamp\":1633595280409,\"hour\":13,\"dow\":4,\"tz\":\"300\",\"consent\":{\"crashes\":true,\"events\":true,\"clicks\":true,\"star-rating\":true,\"views\":true,\"users\":true,\"sessions\":true,\"push\":true,\"remote-config\":true,\"location\":true,\"feedback\":true},\"checksum256\":\"a3c63ddd0fa788eb05c75752533fdb8083960c4c35fb0ed5a689b631d2beb194\"}";
 
-            request = new CountlyRequestModel(_serverUrl,  data);
+            request = new CountlyRequestModel(_serverUrl, data);
             Countly.Instance.RequestHelper.AddRequestToQueue(request);
 
             data = "{\"app_key\":\"772c091355076ead703f987fee94490\",\"device_id\":\"57049b51faf44874a10967f54d8f8420\",\"sdk_name\":\"csharp-unity-editor\",\"sdk_version\":\"20.11.0\",\"timestamp\":1633595280409,\"hour\":13,\"dow\":4,\"tz\":\"300\",\"consent\":{\"crashes\":true,\"events\":true,\"clicks\":true,\"star-rating\":true,\"views\":true,\"users\":true,\"sessions\":true,\"push\":true,\"remote-config\":true,\"location\":true,\"feedback\":true},\"checksum256\":\"a3c63ddd0fa788eb05c75752533fdb8083960c4c35fb0ed5a689b631d2beb194\"}";
-            request = new CountlyRequestModel(_serverUrl,  data);
+            request = new CountlyRequestModel(_serverUrl, data);
             Countly.Instance.RequestHelper.AddRequestToQueue(request);
 
             Countly.Instance.StorageHelper.CurrentVersion = 1;

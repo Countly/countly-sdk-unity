@@ -11,7 +11,7 @@ namespace Plugins.CountlySDK.Services
 {
     public class ConsentCountlyService : AbstractBaseService
     {
-        
+
         internal bool RequiresConsent { get; private set; }
 
         private bool _sendConsentOnChange;
@@ -242,7 +242,7 @@ namespace Plugins.CountlySDK.Services
         {
             _sendConsentOnChange = true;
 
-            if (!RequiresConsent || consents.Count == 0 ) {
+            if (!RequiresConsent || consents.Count == 0) {
                 return;
             }
 
@@ -250,7 +250,7 @@ namespace Plugins.CountlySDK.Services
             foreach (Consents consent in consents) {
                 jObj.Add(GetConsentKey(consent), value);
             }
-            
+
             Dictionary<string, object> requestParams =
                 new Dictionary<string, object>
                 {
@@ -311,12 +311,12 @@ namespace Plugins.CountlySDK.Services
 
             return key;
         }
-            /// <summary>
-            /// Private method that update selected consents.
-            /// </summary>
-            /// <param name="consents">List of consent</param>
-            /// <param name="value">value to be set</param>
-            private async void SetConsentInternal(Consents[] consents, bool value)
+        /// <summary>
+        /// Private method that update selected consents.
+        /// </summary>
+        /// <param name="consents">List of consent</param>
+        /// <param name="value">value to be set</param>
+        private async void SetConsentInternal(Consents[] consents, bool value)
         {
             if (consents == null) {
                 Log.Debug("[ConsentCountlyService] Calling SetConsentInternal with null consents list!");

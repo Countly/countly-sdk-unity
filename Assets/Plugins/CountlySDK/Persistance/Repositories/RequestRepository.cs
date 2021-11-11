@@ -18,7 +18,7 @@ namespace Plugins.CountlySDK.Persistance.Repositories
 
         protected override RequestEntity ConvertModelToEntity(CountlyRequestModel model)
         {
-            return Converter.ConvertRequestModelToRequestEntity(model, model.Id > 0? model.Id :GenerateNewId());
+            return Converter.ConvertRequestModelToRequestEntity(model, model.Id > 0 ? model.Id : GenerateNewId());
         }
 
         protected override bool ValidateModelBeforeEnqueue(CountlyRequestModel model)

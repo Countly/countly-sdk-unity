@@ -110,7 +110,7 @@ namespace Plugins.CountlySDK.Services
                 //Ends current session
                 //Do not dispose timer object
                 if (!_configuration.IsAutomaticSessionTrackingDisabled) {
-                    _=_sessionCountlyService.EndSessionAsync();
+                    _ = _sessionCountlyService.EndSessionAsync();
                 }
 
                 //Update device id
@@ -119,12 +119,12 @@ namespace Plugins.CountlySDK.Services
                 //Begin new session with new device id
                 //Do not initiate timer again, it is already initiated
                 if (!_configuration.IsAutomaticSessionTrackingDisabled) {
-                    _=_sessionCountlyService.BeginSessionAsync();
+                    _ = _sessionCountlyService.BeginSessionAsync();
                 }
 
                 NotifyListeners(false);
 
-                _=_requestCountlyHelper.ProcessQueue();
+                _ = _requestCountlyHelper.ProcessQueue();
             }
         }
 
@@ -182,7 +182,7 @@ namespace Plugins.CountlySDK.Services
                    };
 
                 _requestCountlyHelper.AddToRequestQueue(requestParams);
-                _=_requestCountlyHelper.ProcessQueue();
+                _ = _requestCountlyHelper.ProcessQueue();
                 NotifyListeners(true);
             }
         }

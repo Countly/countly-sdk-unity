@@ -116,7 +116,7 @@ namespace Plugins.CountlySDK.Services
                  *the SDK sends a request with an empty "location". 
                  */
 
-                _= SendRequestWithEmptyLocation();
+                _ = SendRequestWithEmptyLocation();
             }
         }
 
@@ -156,7 +156,7 @@ namespace Plugins.CountlySDK.Services
                  */
                 if (countryCode != null || city != null || gpsCoordinates != null || ipAddress != null) {
                     IsLocationDisabled = false;
-                    _=SendIndependantLocationRequest();
+                    _ = SendIndependantLocationRequest();
                 }
             }
         }

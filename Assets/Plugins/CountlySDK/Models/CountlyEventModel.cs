@@ -80,7 +80,7 @@ namespace Plugins.CountlySDK.Models
 
         [JsonIgnore] public const string OrientationEvent = "[CLY]_orientation";
 
-        
+
 
         #endregion
 

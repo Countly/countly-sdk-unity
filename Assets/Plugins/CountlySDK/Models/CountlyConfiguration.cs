@@ -225,7 +225,7 @@ namespace Plugins.CountlySDK.Models
         /// <param name="groupName">name of the consent group that will be created</param>
         /// <param name="consents">array of consent to be added to the consent group</param>
         /// <returns></returns>
-        public void  CreateConsentGroup([NotNull] string groupName, [NotNull] Consents[] consents)
+        public void CreateConsentGroup([NotNull] string groupName, [NotNull] Consents[] consents)
         {
             ConsentGroups[groupName] = consents;
         }

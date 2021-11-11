@@ -45,7 +45,7 @@ namespace Tests
                 RequiresConsent = true,
             };
 
-            configuration.GiveConsent(new Consents[] { Consents.Views});
+            configuration.GiveConsent(new Consents[] { Consents.Views });
 
             Countly.Instance.Init(configuration);
 
@@ -176,7 +176,7 @@ namespace Tests
             Assert.AreEqual(CountlyEventModel.ViewEvent, model.Key);
             Assert.IsNull(model.Sum);
             Assert.AreEqual(1, model.Count);
-            Assert.IsNull( model.Duration);
+            Assert.IsNull(model.Duration);
             Assert.IsNotNull(model.Segmentation);
             Assert.AreEqual("close_view", model.Segmentation["name"]);
         }
