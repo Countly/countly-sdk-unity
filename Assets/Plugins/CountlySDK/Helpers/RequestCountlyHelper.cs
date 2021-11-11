@@ -83,7 +83,7 @@ namespace Plugins.CountlySDK.Helpers
         {
             Log.Verbose("[RequestCountlyHelper] Process request, request: " + model);
 
-            if (_config.EnablePost || model.RequestData.Length > 1800) {
+            if (_config.EnablePost || model.RequestData.Length > 2000) {
                 return await Task.Run(() => PostAsync(_countlyUtils.ServerInputUrl, model.RequestData));
             }
 

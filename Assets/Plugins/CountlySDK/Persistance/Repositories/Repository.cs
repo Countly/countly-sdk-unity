@@ -8,8 +8,8 @@ namespace Plugins.CountlySDK.Persistance.Repositories
 {
     public abstract class Repository<TEntity, TModel> where TEntity : class, IEntity, new() where TModel : IModel
     {
-        public readonly Dao<TEntity> _dao;
-        public readonly CountlyLogHelper Log;
+        private readonly Dao<TEntity> _dao;
+        private readonly CountlyLogHelper Log;
 
         protected Repository(Dao<TEntity> dao, CountlyLogHelper log)
         {
