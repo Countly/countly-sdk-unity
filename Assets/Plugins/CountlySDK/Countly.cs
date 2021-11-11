@@ -218,7 +218,7 @@ namespace Plugins.CountlySDK
 
             CrashReports = new CrashReportsCountlyService(Configuration, _logHelper, RequestHelper, Consents);
             Initialization = new InitializationCountlyService(Configuration, _logHelper, Location, Session, Consents);
-            RemoteConfigs = new RemoteConfigCountlyService(Configuration, _logHelper, RequestHelper, countlyUtils, configDao, Consents);
+            RemoteConfigs = new RemoteConfigCountlyService(Configuration, _logHelper, RequestHelper, countlyUtils, configDao, Consents, requestBuilder);
 
             StarRating = new StarRatingCountlyService(Configuration, _logHelper, Consents, Events);
             UserDetails = new UserDetailsCountlyService(Configuration, _logHelper, RequestHelper, countlyUtils, Consents);

@@ -18,6 +18,7 @@ namespace Plugins.CountlySDK.Services
     {
         private readonly CountlyUtils _countlyUtils;
         private readonly Dao<ConfigEntity> _configDao;
+        private readonly RequestBuilder _requestBuilder;
         private readonly RequestCountlyHelper _requestCountlyHelper;
 
         /// <summary>
@@ -27,12 +28,13 @@ namespace Plugins.CountlySDK.Services
 
         private readonly StringBuilder _requestStringBuilder = new StringBuilder();
 
-        internal RemoteConfigCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, RequestCountlyHelper requestCountlyHelper, CountlyUtils countlyUtils, Dao<ConfigEntity> configDao, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
+        internal RemoteConfigCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, RequestCountlyHelper requestCountlyHelper, CountlyUtils countlyUtils, Dao<ConfigEntity> configDao, ConsentCountlyService consentService, RequestBuilder requestBuilder) : base(configuration, logHelper, consentService)
         {
             Log.Debug("[RemoteConfigCountlyService] Initializing.");
 
             _configDao = configDao;
             _countlyUtils = countlyUtils;
+            _requestBuilder = requestBuilder;
             _requestCountlyHelper = requestCountlyHelper;
 
             if (_consentService.CheckConsentInternal(Consents.RemoteConfig)) {
@@ -95,7 +97,7 @@ namespace Plugins.CountlySDK.Services
             requestParams.Add("metrics", JsonConvert.SerializeObject(CountlyMetricModel.Metrics, Formatting.Indented,
             new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }));
 
-            string data = JsonConvert.SerializeObject(requestParams);
+            string data = _requestBuilder.BuildQueryString(requestParams);
 
             CountlyResponse response;
             if (_configuration.EnablePost) {
