@@ -56,12 +56,8 @@ namespace Tests
 
             CountlyRequestModel requestModel = Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Dequeue();
 
-            string userDetailData = requestModel.RequestData;
             NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
-            Dictionary<string, string> queryParams = collection.AllKeys.ToDictionary(t => t, t => collection[t]);
-
-            JObject json = JObject.FromObject(queryParams);
-            JObject userDetailJson = JObject.Parse(json["user_details"].ToString());
+            JObject userDetailJson = JObject.Parse(collection["user_details"]);
 
             Assert.AreEqual("Full Name", userDetailJson["name"].ToString());
             Assert.AreEqual("username", userDetailJson["username"].ToString());
@@ -118,12 +114,9 @@ namespace Tests
 
             CountlyRequestModel requestModel = Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Dequeue();
 
-            string userDetailData = requestModel.RequestData;
-            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
-            Dictionary<string, string> queryParams = collection.AllKeys.ToDictionary(t => t, t => collection[t]);
 
-            JObject json = JObject.FromObject(queryParams);
-            JObject userDetailJson = JObject.Parse(json["user_details"].ToString());
+            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            JObject userDetailJson = JObject.Parse(collection["user_details"]);
 
             Assert.AreEqual("Ful", userDetailJson["name"].ToString());
             Assert.AreEqual("use", userDetailJson["username"].ToString());
@@ -170,19 +163,12 @@ namespace Tests
             Assert.AreEqual(1, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
 
             CountlyRequestModel requestModel = Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Dequeue();
-
-
-            string userDetailData = requestModel.RequestData;
             NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
-            Dictionary<string, string> queryParams = collection.AllKeys.ToDictionary(t => t, t => collection[t]);
 
-            JObject json = JObject.FromObject(queryParams);
-            string userDetail = json["user_details"].ToString();
-            JObject custom = JObject.Parse(userDetail);
+            JObject custom = JObject.Parse(collection["user_details"]);
 
             Assert.AreEqual("Black", custom["custom"]["Hair"].ToString());
             Assert.AreEqual("5.9", custom["custom"]["Height"].ToString());
-
         }
 
 
@@ -220,19 +206,11 @@ namespace Tests
             Assert.AreEqual(1, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
 
             CountlyRequestModel requestModel = Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Dequeue();
-
-
-            string userDetailData = requestModel.RequestData;
             NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
-            Dictionary<string, string> queryParams = collection.AllKeys.ToDictionary(t => t, t => collection[t]);
-
-            JObject json = JObject.FromObject(queryParams);
-            string userDetail = json["user_details"].ToString();
-            JObject custom = JObject.Parse(userDetail);
+            JObject custom = JObject.Parse(collection["user_details"]);
 
             Assert.AreEqual("Black_", custom["custom"]["Hair"].ToString());
             Assert.AreEqual("5.9", custom["custom"]["Heigh"].ToString());
-
         }
 
         /// <summary>

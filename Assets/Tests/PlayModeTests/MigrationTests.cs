@@ -71,21 +71,17 @@ namespace Tests
             CountlyRequestModel requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
 
             NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
-            Dictionary<string, string> queryParams = collection.AllKeys.ToDictionary(t => t, t => collection[t]);
-
-            JObject json = JObject.FromObject(queryParams);
-
             int schemaVersion = PlayerPrefs.GetInt(Constants.SchemaVersion);
             Assert.AreEqual(2, schemaVersion);
             Assert.AreEqual(2, Countly.Instance.StorageHelper.CurrentVersion);
             Assert.AreEqual(Countly.Instance.StorageHelper.SchemaVersion, Countly.Instance.StorageHelper.CurrentVersion);
 
-            Assert.AreEqual("772c091355076ead703f987fee94490", json.GetValue("app_key").ToObject<string>());
-            Assert.AreEqual("57049b51faf44804a10967f54d8f8420", json.GetValue("device_id").ToObject<string>());
-            Assert.AreEqual("csharp-unity-editor", json.GetValue("sdk_name").ToObject<string>());
-            Assert.AreEqual("20.11.5", json.GetValue("sdk_version").ToObject<string>());
-            Assert.IsTrue(json.ContainsKey("consent"));
-            Assert.IsFalse(json.ContainsKey("checksum256"));
+            Assert.AreEqual("772c091355076ead703f987fee94490", collection.Get("app_key"));
+            Assert.AreEqual("57049b51faf44804a10967f54d8f8420", collection.Get("device_id"));
+            Assert.AreEqual("csharp-unity-editor", collection.Get("sdk_name"));
+            Assert.AreEqual("20.11.5", collection.Get("sdk_version"));
+            Assert.IsNotNull(collection["consent"]);
+            Assert.IsNull(collection["checksum256"]);
             Assert.IsNull(requestModel.RequestUrl);
 
         }
@@ -130,47 +126,36 @@ namespace Tests
 
 
             CountlyRequestModel requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
-
             NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
-            Dictionary<string, string> queryParams = collection.AllKeys.ToDictionary(t => t, t => collection[t]);
 
-            JObject json = JObject.FromObject(queryParams);
-
-
-            Assert.AreEqual("772c091355076ead703f987fee94490", json.GetValue("app_key").ToObject<string>());
-            Assert.AreEqual("57049b51faf44804a10967f54d8f8420", json.GetValue("device_id").ToObject<string>());
-            Assert.AreEqual("csharp-unity-editor", json.GetValue("sdk_name").ToObject<string>());
-            Assert.AreEqual("20.11.5", json.GetValue("sdk_version").ToObject<string>());
-            Assert.IsTrue(json.ContainsKey("consent"));
-            Assert.IsFalse(json.ContainsKey("checksum256"));
+            Assert.AreEqual("772c091355076ead703f987fee94490", collection.Get("app_key"));
+            Assert.AreEqual("57049b51faf44804a10967f54d8f8420", collection.Get("device_id"));
+            Assert.AreEqual("csharp-unity-editor", collection.Get("sdk_name"));
+            Assert.AreEqual("20.11.5", collection.Get("sdk_version"));
+            Assert.IsNotNull(collection["consent"]);
+            Assert.IsNull(collection["checksum256"]);
             Assert.IsNull(requestModel.RequestUrl);
 
             requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
             collection = HttpUtility.ParseQueryString(requestModel.RequestData);
-            queryParams = collection.AllKeys.ToDictionary(t => t, t => collection[t]);
 
-            json = JObject.FromObject(queryParams);
-
-            Assert.AreEqual("772c091355076ead703f987fee94490", json.GetValue("app_key").ToObject<string>());
-            Assert.AreEqual("57049b51faf44804a10967f54d8f8420", json.GetValue("device_id").ToObject<string>());
-            Assert.AreEqual("csharp-unity-editor", json.GetValue("sdk_name").ToObject<string>());
-            Assert.AreEqual("20.11.4", json.GetValue("sdk_version").ToObject<string>());
-            Assert.IsTrue(json.ContainsKey("consent"));
-            Assert.IsFalse(json.ContainsKey("checksum256"));
+            Assert.AreEqual("772c091355076ead703f987fee94490", collection.Get("app_key"));
+            Assert.AreEqual("57049b51faf44804a10967f54d8f8420", collection.Get("device_id"));
+            Assert.AreEqual("csharp-unity-editor", collection.Get("sdk_name"));
+            Assert.AreEqual("20.11.4", collection.Get("sdk_version"));
+            Assert.IsNotNull(collection["consent"]);
+            Assert.IsNull(collection["checksum256"]);
             Assert.IsNull(requestModel.RequestUrl);
 
             requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
             collection = HttpUtility.ParseQueryString(requestModel.RequestData);
-            queryParams = collection.AllKeys.ToDictionary(t => t, t => collection[t]);
 
-            json = JObject.FromObject(queryParams);
-
-            Assert.AreEqual("772c091355076ead703f987fee94490", json.GetValue("app_key").ToObject<string>());
-            Assert.AreEqual("57049b51faf44804a10967f54d8f8420", json.GetValue("device_id").ToObject<string>());
-            Assert.AreEqual("csharp-unity-editor", json.GetValue("sdk_name").ToObject<string>());
-            Assert.AreEqual("20.11.3", json.GetValue("sdk_version").ToObject<string>());
-            Assert.IsTrue(json.ContainsKey("consent"));
-            Assert.IsFalse(json.ContainsKey("checksum256"));
+            Assert.AreEqual("772c091355076ead703f987fee94490", collection.Get("app_key"));
+            Assert.AreEqual("57049b51faf44804a10967f54d8f8420", collection.Get("device_id"));
+            Assert.AreEqual("csharp-unity-editor", collection.Get("sdk_name"));
+            Assert.AreEqual("20.11.3", collection.Get("sdk_version"));
+            Assert.IsNotNull(collection["consent"]);
+            Assert.IsNull(collection["checksum256"]);
             Assert.IsNull(requestModel.RequestUrl);
 
         }
@@ -213,43 +198,35 @@ namespace Tests
 
             CountlyRequestModel requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
             NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
-            Dictionary<string, string> queryParams = collection.AllKeys.ToDictionary(t => t, t => collection[t]);
 
-            JObject json = JObject.FromObject(queryParams);
-
-            Assert.AreEqual("772c091355076ead703f987fee94490", json.GetValue("app_key").ToObject<string>());
-            Assert.AreEqual("57049b51faf44874a10967f54d8f8420", json.GetValue("device_id").ToObject<string>());
-            Assert.AreEqual("csharp-unity-editor", json.GetValue("sdk_name").ToObject<string>());
-            Assert.AreEqual("20.11.5", json.GetValue("sdk_version").ToObject<string>());
-            Assert.IsTrue(json.ContainsKey("consent"));
-            Assert.IsFalse(json.ContainsKey("checksum256"));
+            Assert.AreEqual("772c091355076ead703f987fee94490", collection.Get("app_key"));
+            Assert.AreEqual("57049b51faf44874a10967f54d8f8420", collection.Get("device_id"));
+            Assert.AreEqual("csharp-unity-editor", collection.Get("sdk_name"));
+            Assert.AreEqual("20.11.5", collection.Get("sdk_version"));
+            Assert.IsNotNull(collection["consent"]);
+            Assert.IsNull(collection["checksum256"]);
             Assert.IsNull(requestModel.RequestUrl);
 
             requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
             collection = HttpUtility.ParseQueryString(requestModel.RequestData);
-            queryParams = collection.AllKeys.ToDictionary(t => t, t => collection[t]);
 
-            json = JObject.FromObject(queryParams);
-            Assert.AreEqual("772c091355076ead703f987fee94490", json.GetValue("app_key").ToObject<string>());
-            Assert.AreEqual("57049b51faf44874a10967f54d8f8420", json.GetValue("device_id").ToObject<string>());
-            Assert.AreEqual("csharp-unity-editor", json.GetValue("sdk_name").ToObject<string>());
-            Assert.AreEqual("20.11.4", json.GetValue("sdk_version").ToObject<string>());
-            Assert.IsTrue(json.ContainsKey("consent"));
-            Assert.IsFalse(json.ContainsKey("checksum256"));
+            Assert.AreEqual("772c091355076ead703f987fee94490", collection.Get("app_key"));
+            Assert.AreEqual("57049b51faf44874a10967f54d8f8420", collection.Get("device_id"));
+            Assert.AreEqual("csharp-unity-editor", collection.Get("sdk_name"));
+            Assert.AreEqual("20.11.4", collection.Get("sdk_version"));
+            Assert.IsNotNull(collection["consent"]);
+            Assert.IsNull(collection["checksum256"]);
             Assert.IsNull(requestModel.RequestUrl);
 
             requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
             collection = HttpUtility.ParseQueryString(requestModel.RequestData);
-            queryParams = collection.AllKeys.ToDictionary(t => t, t => collection[t]);
 
-            json = JObject.FromObject(queryParams);
-
-            Assert.AreEqual("772c091355076ead703f987fee94490", json.GetValue("app_key").ToObject<string>());
-            Assert.AreEqual("57049b51faf44874a10967f54d8f8420", json.GetValue("device_id").ToObject<string>());
-            Assert.AreEqual("csharp-unity-editor", json.GetValue("sdk_name").ToObject<string>());
-            Assert.AreEqual("20.11.3", json.GetValue("sdk_version").ToObject<string>());
-            Assert.IsTrue(json.ContainsKey("consent"));
-            Assert.IsFalse(json.ContainsKey("checksum256"));
+            Assert.AreEqual("772c091355076ead703f987fee94490", collection.Get("app_key"));
+            Assert.AreEqual("57049b51faf44874a10967f54d8f8420", collection.Get("device_id"));
+            Assert.AreEqual("csharp-unity-editor", collection.Get("sdk_name"));
+            Assert.AreEqual("20.11.3", collection.Get("sdk_version"));
+            Assert.IsNotNull(collection["consent"]);
+            Assert.IsNull(collection["checksum256"]);
             Assert.IsNull(requestModel.RequestUrl);
 
         }
@@ -278,21 +255,18 @@ namespace Tests
 
             CountlyRequestModel requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
             NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
-            Dictionary<string, string> queryParams = collection.AllKeys.ToDictionary(t => t, t => collection[t]);
-
-            JObject json = JObject.FromObject(queryParams);
 
             int schemaVersion = PlayerPrefs.GetInt(Constants.SchemaVersion);
             Assert.AreEqual(2, schemaVersion);
             Assert.AreEqual(2, Countly.Instance.StorageHelper.CurrentVersion);
             Assert.AreEqual(Countly.Instance.StorageHelper.SchemaVersion, Countly.Instance.StorageHelper.CurrentVersion);
 
-            Assert.AreEqual("772c091355076ead703f987fee94490", json.GetValue("app_key").ToObject<string>());
-            Assert.AreEqual("57049b51faf44874a10967f54d8f8420", json.GetValue("device_id").ToObject<string>());
-            Assert.AreEqual("csharp-unity-editor", json.GetValue("sdk_name").ToObject<string>());
-            Assert.AreEqual("20.11.5", json.GetValue("sdk_version").ToObject<string>());
-            Assert.IsTrue(json.ContainsKey("consent"));
-            Assert.IsFalse(json.ContainsKey("checksum256"));
+            Assert.AreEqual("772c091355076ead703f987fee94490", collection.Get("app_key"));
+            Assert.AreEqual("57049b51faf44874a10967f54d8f8420", collection.Get("device_id"));
+            Assert.AreEqual("csharp-unity-editor", collection.Get("sdk_name"));
+            Assert.AreEqual("20.11.5", collection.Get("sdk_version"));
+            Assert.IsNotNull(collection["consent"]);
+            Assert.IsNull(collection["checksum256"]);
             Assert.IsNull(requestModel.RequestUrl);
 
         }
@@ -349,82 +323,69 @@ namespace Tests
 
             CountlyRequestModel requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
             NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
-            Dictionary<string, string> queryParams = collection.AllKeys.ToDictionary(t => t, t => collection[t]);
 
-            JObject json = JObject.FromObject(queryParams);
-
-            Assert.AreEqual("772c091355076ead703f987fee94490", json.GetValue("app_key").ToObject<string>());
-            Assert.AreEqual("57049b51faf44874a10967f54d8f8420", json.GetValue("device_id").ToObject<string>());
-            Assert.AreEqual("csharp-unity-editor", json.GetValue("sdk_name").ToObject<string>());
-            Assert.AreEqual("20.11.5", json.GetValue("sdk_version").ToObject<string>());
-            Assert.IsTrue(json.ContainsKey("consent"));
-            Assert.IsFalse(json.ContainsKey("checksum256"));
+            Assert.AreEqual("772c091355076ead703f987fee94490", collection.Get("app_key"));
+            Assert.AreEqual("57049b51faf44874a10967f54d8f8420", collection.Get("device_id"));
+            Assert.AreEqual("csharp-unity-editor", collection.Get("sdk_name"));
+            Assert.AreEqual("20.11.5", collection.Get("sdk_version"));
+            Assert.IsNotNull(collection["consent"]);
+            Assert.IsNull(collection["checksum256"]);
             Assert.IsNull(requestModel.RequestUrl);
 
             requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
             collection = HttpUtility.ParseQueryString(requestModel.RequestData);
-            queryParams = collection.AllKeys.ToDictionary(t => t, t => collection[t]);
 
-            json = JObject.FromObject(queryParams);
-            Assert.AreEqual("772c091355076ead703f987fee94490", json.GetValue("app_key").ToObject<string>());
-            Assert.AreEqual("57049b51faf44874a10967f54d8f8420", json.GetValue("device_id").ToObject<string>());
-            Assert.AreEqual("csharp-unity-editor", json.GetValue("sdk_name").ToObject<string>());
-            Assert.AreEqual("20.11.4", json.GetValue("sdk_version").ToObject<string>());
-            Assert.IsTrue(json.ContainsKey("consent"));
-            Assert.IsFalse(json.ContainsKey("checksum256"));
+            Assert.AreEqual("772c091355076ead703f987fee94490", collection.Get("app_key"));
+            Assert.AreEqual("57049b51faf44874a10967f54d8f8420", collection.Get("device_id"));
+            Assert.AreEqual("csharp-unity-editor", collection.Get("sdk_name"));
+            Assert.AreEqual("20.11.4", collection.Get("sdk_version"));
+            Assert.IsNotNull(collection["consent"]);
+            Assert.IsNull(collection["checksum256"]);
             Assert.IsNull(requestModel.RequestUrl);
 
             requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
             collection = HttpUtility.ParseQueryString(requestModel.RequestData);
-            queryParams = collection.AllKeys.ToDictionary(t => t, t => collection[t]);
 
-            json = JObject.FromObject(queryParams);
-            Assert.AreEqual("772c091355076ead703f987fee94490", json.GetValue("app_key").ToObject<string>());
-            Assert.AreEqual("57049b51faf44874a10967f54d8f8420", json.GetValue("device_id").ToObject<string>());
-            Assert.AreEqual("csharp-unity-editor", json.GetValue("sdk_name").ToObject<string>());
-            Assert.AreEqual("20.11.3", json.GetValue("sdk_version").ToObject<string>());
-            Assert.IsTrue(json.ContainsKey("consent"));
-            Assert.IsFalse(json.ContainsKey("checksum256"));
+            Assert.AreEqual("772c091355076ead703f987fee94490", collection.Get("app_key"));
+            Assert.AreEqual("57049b51faf44874a10967f54d8f8420", collection.Get("device_id"));
+            Assert.AreEqual("csharp-unity-editor", collection.Get("sdk_name"));
+            Assert.AreEqual("20.11.3", collection.Get("sdk_version"));
+            Assert.IsNotNull(collection["consent"]);
+            Assert.IsNull(collection["checksum256"]);
             Assert.IsNull(requestModel.RequestUrl);
 
             requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
             collection = HttpUtility.ParseQueryString(requestModel.RequestData);
-            queryParams = collection.AllKeys.ToDictionary(t => t, t => collection[t]);
 
-            json = JObject.FromObject(queryParams);
-            Assert.AreEqual("772c091355076ead703f987fee94490", json.GetValue("app_key").ToObject<string>());
-            Assert.AreEqual("57049b51faf44874a10967f54d8f8420", json.GetValue("device_id").ToObject<string>());
-            Assert.AreEqual("csharp-unity-editor", json.GetValue("sdk_name").ToObject<string>());
-            Assert.AreEqual("20.11.2", json.GetValue("sdk_version").ToObject<string>());
-            Assert.IsTrue(json.ContainsKey("consent"));
-            Assert.IsFalse(json.ContainsKey("checksum256"));
+            Assert.AreEqual("772c091355076ead703f987fee94490", collection.Get("app_key"));
+            Assert.AreEqual("57049b51faf44874a10967f54d8f8420", collection.Get("device_id"));
+            Assert.AreEqual("csharp-unity-editor", collection.Get("sdk_name"));
+            Assert.AreEqual("20.11.2", collection.Get("sdk_version"));
+            Assert.IsNotNull(collection["consent"]);
+            Assert.IsNull(collection["checksum256"]);
             Assert.IsNull(requestModel.RequestUrl);
 
 
             requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
             collection = HttpUtility.ParseQueryString(requestModel.RequestData);
-            queryParams = collection.AllKeys.ToDictionary(t => t, t => collection[t]);
 
-            json = JObject.FromObject(queryParams);
-            Assert.AreEqual("772c091355076ead703f987fee94490", json.GetValue("app_key").ToObject<string>());
-            Assert.AreEqual("57049b51faf44874a10967f54d8f8420", json.GetValue("device_id").ToObject<string>());
-            Assert.AreEqual("csharp-unity-editor", json.GetValue("sdk_name").ToObject<string>());
-            Assert.AreEqual("20.11.1", json.GetValue("sdk_version").ToObject<string>());
-            Assert.IsTrue(json.ContainsKey("consent"));
-            Assert.IsFalse(json.ContainsKey("checksum256"));
+            Assert.AreEqual("772c091355076ead703f987fee94490", collection.Get("app_key"));
+            Assert.AreEqual("57049b51faf44874a10967f54d8f8420", collection.Get("device_id"));
+            Assert.AreEqual("csharp-unity-editor", collection.Get("sdk_name"));
+            Assert.AreEqual("20.11.1", collection.Get("sdk_version"));
+            Assert.IsNotNull(collection["consent"]);
+            Assert.IsNull(collection["checksum256"]);
             Assert.IsNull(requestModel.RequestUrl);
 
             requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
             collection = HttpUtility.ParseQueryString(requestModel.RequestData);
-            queryParams = collection.AllKeys.ToDictionary(t => t, t => collection[t]);
 
-            json = JObject.FromObject(queryParams);
-            Assert.AreEqual("772c091355076ead703f987fee94490", json.GetValue("app_key").ToObject<string>());
-            Assert.AreEqual("57049b51faf44874a10967f54d8f8420", json.GetValue("device_id").ToObject<string>());
-            Assert.AreEqual("csharp-unity-editor", json.GetValue("sdk_name").ToObject<string>());
-            Assert.AreEqual("20.11.0", json.GetValue("sdk_version").ToObject<string>());
-            Assert.IsTrue(json.ContainsKey("consent"));
-            Assert.IsFalse(json.ContainsKey("checksum256"));
+            Assert.AreEqual("772c091355076ead703f987fee94490", collection.Get("app_key"));
+            Assert.AreEqual("57049b51faf44874a10967f54d8f8420", collection.Get("device_id"));
+            Assert.AreEqual("csharp-unity-editor", collection.Get("sdk_name"));
+            Assert.AreEqual("20.11.0", collection.Get("sdk_version"));
+            Assert.IsNotNull(collection["consent"]);
+            Assert.IsNull(collection["checksum256"]);
             Assert.IsNull(requestModel.RequestUrl);
 
         }

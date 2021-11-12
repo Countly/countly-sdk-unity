@@ -78,11 +78,8 @@ namespace Tests
 
             CountlyRequestModel requestModel = Countly.Instance.Consents._requestCountlyHelper._requestRepo.Dequeue();
             NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
-            Dictionary<string, string> queryParams = collection.AllKeys.ToDictionary(t => t, t => collection[t]);
 
-            JObject obj = JObject.FromObject(queryParams);
-
-            Assert.IsFalse(obj.ContainsKey("consent"));
+            Assert.IsNull(collection["consent"]);
 
             Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
             Countly.Instance.Consents.GiveConsent(new Consents[] { Consents.Sessions });
@@ -114,10 +111,7 @@ namespace Tests
             CountlyRequestModel requestModel = Countly.Instance.Consents._requestCountlyHelper._requestRepo.Dequeue();
 
             NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
-            Dictionary<string, string> queryParams = collection.AllKeys.ToDictionary(t => t, t => collection[t]);
-
-            JObject obj = JObject.FromObject(queryParams);
-            JObject consentObj = JObject.Parse(obj["consent"].ToString());
+            JObject consentObj = JObject.Parse(collection.Get("consent"));
 
             Assert.AreEqual(11, consentObj.Count);
             Assert.IsTrue(consentObj.GetValue("push").ToObject<bool>());
@@ -156,10 +150,7 @@ namespace Tests
 
             CountlyRequestModel requestModel = Countly.Instance.Consents._requestCountlyHelper._requestRepo.Dequeue();
             NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
-            Dictionary<string, string> queryParams = collection.AllKeys.ToDictionary(t => t, t => collection[t]);
-
-            JObject obj = JObject.FromObject(queryParams);
-            JObject json = JObject.Parse(obj["consent"].ToString());
+            JObject json = JObject.Parse(collection["consent"]);
 
             Assert.AreEqual(2, json.Count);
             Assert.IsTrue(json.GetValue("crashes").ToObject<bool>());
@@ -170,10 +161,7 @@ namespace Tests
             requestModel = Countly.Instance.Consents._requestCountlyHelper._requestRepo.Dequeue();
 
             collection = HttpUtility.ParseQueryString(requestModel.RequestData);
-            queryParams = collection.AllKeys.ToDictionary(t => t, t => collection[t]);
-
-            obj = JObject.FromObject(queryParams);
-            json = JObject.Parse(obj["consent"].ToString());
+            json = JObject.Parse(collection["consent"]);
 
             Assert.AreEqual(1, json.Count);
             Assert.IsTrue(json.GetValue("views").ToObject<bool>());
@@ -185,10 +173,7 @@ namespace Tests
             requestModel = Countly.Instance.Consents._requestCountlyHelper._requestRepo.Dequeue();
 
             collection = HttpUtility.ParseQueryString(requestModel.RequestData);
-            queryParams = collection.AllKeys.ToDictionary(t => t, t => collection[t]);
-
-            obj = JObject.FromObject(queryParams);
-            json = JObject.Parse(obj["consent"].ToString());
+            json = JObject.Parse(collection["consent"]);
 
             Assert.AreEqual(2, json.Count);
             Assert.IsFalse(json.GetValue("crashes").ToObject<bool>());
@@ -198,10 +183,7 @@ namespace Tests
             requestModel = Countly.Instance.Consents._requestCountlyHelper._requestRepo.Dequeue();
 
             collection = HttpUtility.ParseQueryString(requestModel.RequestData);
-            queryParams = collection.AllKeys.ToDictionary(t => t, t => collection[t]);
-
-            obj = JObject.FromObject(queryParams);
-            json = JObject.Parse(obj["consent"].ToString());
+            json = JObject.Parse(collection["consent"]);
 
             Assert.AreEqual(1, json.Count);
             Assert.IsFalse(json.GetValue("events").ToObject<bool>());

@@ -111,10 +111,8 @@ namespace Tests
 
             CountlyRequestModel requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
             NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
-            Dictionary<string, string> queryParams = collection.AllKeys.ToDictionary(t => t, t => collection[t]);
 
-            JObject json = JObject.FromObject(queryParams);
-            JObject crashObj = JObject.Parse(json["crash"].ToString());
+            JObject crashObj = JObject.Parse(collection["crash"]);
             Assert.AreEqual("message", crashObj.GetValue("_name").ToString());
             Assert.AreEqual("True", crashObj.GetValue("_nonfatal").ToString());
             Assert.AreEqual("Stack\nStack", crashObj.GetValue("_error").ToString());
@@ -164,10 +162,7 @@ namespace Tests
 
             CountlyRequestModel requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
             NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
-            Dictionary<string, string> queryParams = collection.AllKeys.ToDictionary(t => t, t => collection[t]);
-
-            JObject json = JObject.FromObject(queryParams);
-            JObject crashObj = JObject.Parse(json["crash"].ToString());
+            JObject crashObj = JObject.Parse(collection["crash"]);
             Assert.AreEqual("message", crashObj.GetValue("_name").ToString());
             Assert.AreEqual("True", crashObj.GetValue("_nonfatal").ToString());
             Assert.AreEqual("StackTrace", crashObj.GetValue("_error").ToString());

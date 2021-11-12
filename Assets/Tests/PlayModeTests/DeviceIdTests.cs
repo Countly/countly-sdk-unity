@@ -102,22 +102,16 @@ namespace Tests
 
             CountlyRequestModel requestModel = Countly.Instance.Device._requestCountlyHelper._requestRepo.Dequeue();
             NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
-            Dictionary<string, string> queryParams = collection.AllKeys.ToDictionary(t => t, t => collection[t]);
 
-            JObject obj = JObject.FromObject(queryParams);
-
-            Assert.AreEqual(1, obj.GetValue("end_session").ToObject<int>());
-            Assert.AreEqual(oldDeviceId, obj.GetValue("device_id").ToObject<string>());
-            Assert.IsTrue(obj.ContainsKey("session_duration"));
+            Assert.AreEqual("1", collection.Get("end_session"));
+            Assert.AreEqual(oldDeviceId, collection.Get("device_id"));
+            Assert.IsNotNull(collection["session_duration"]);
 
             requestModel = Countly.Instance.Device._requestCountlyHelper._requestRepo.Dequeue();
             collection = HttpUtility.ParseQueryString(requestModel.RequestData);
-            queryParams = collection.AllKeys.ToDictionary(t => t, t => collection[t]);
 
-            obj = JObject.FromObject(queryParams);
-
-            Assert.AreEqual(1, obj.GetValue("begin_session").ToObject<int>());
-            Assert.AreEqual("new_device_id", obj.GetValue("device_id").ToObject<string>());
+            Assert.AreEqual("1", collection.Get("begin_session"));
+            Assert.AreEqual("new_device_id", collection.Get("device_id"));
             Assert.AreEqual("new_device_id", Countly.Instance.Device.DeviceId);
         }
 
@@ -144,14 +138,10 @@ namespace Tests
 
             CountlyRequestModel requestModel = Countly.Instance.Device._requestCountlyHelper._requestRepo.Dequeue();
             NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
-            Dictionary<string, string> queryParams = collection.AllKeys.ToDictionary(t => t, t => collection[t]);
 
-            JObject obj = JObject.FromObject(queryParams);
-
-            Assert.AreEqual(oldDeviceId, obj.GetValue("old_device_id").ToObject<string>());
-            Assert.AreEqual("new_device_id", obj.GetValue("device_id").ToObject<string>());
+            Assert.AreEqual(oldDeviceId, collection.Get("old_device_id"));
+            Assert.AreEqual("new_device_id", collection.Get("device_id"));
             Assert.AreEqual("new_device_id", Countly.Instance.Device.DeviceId);
-
         }
 
         [TearDown]
