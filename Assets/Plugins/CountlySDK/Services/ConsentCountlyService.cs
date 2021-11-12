@@ -41,7 +41,7 @@ namespace Plugins.CountlySDK.Services
         #region Public Methods
 
         /// <summary>
-        ///  Check if consent for the specific feature has been given
+        /// Check if consent for the specific feature has been given
         /// </summary>
         /// <param name="consent">The consent that should be checked</param>
         /// <returns>Returns "true" if the consent for the checked feature has been provided</returns>
@@ -54,7 +54,7 @@ namespace Plugins.CountlySDK.Services
         }
 
         /// <summary>
-        ///  An internal function to check if consent for the specific feature has been given
+        /// An internal function to check if consent for the specific feature has been given
         /// </summary>
         /// <param name="consent">The consent that should be checked</param>
         /// <returns>Returns "true" if the consent for the checked feature has been provided</returns>
@@ -66,7 +66,7 @@ namespace Plugins.CountlySDK.Services
         }
 
         /// <summary>
-        ///  Check if consent for any feature has been given
+        /// Check if consent for any feature has been given
         /// </summary>
         /// <returns>Returns "true" if consent is given for any of the possible features</returns>
         internal bool AnyConsentGiven()

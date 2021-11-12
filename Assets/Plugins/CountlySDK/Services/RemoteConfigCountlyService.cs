@@ -46,7 +46,7 @@ namespace Plugins.CountlySDK.Services
         }
 
         /// <summary>
-        ///     Fetch fresh remote config values from server and initialize <code>Configs</code>
+        /// Fetch fresh remote config values from server and initialize <code>Configs</code>
         /// </summary>
         internal async Task<CountlyResponse> InitConfig()
         {
@@ -60,7 +60,7 @@ namespace Plugins.CountlySDK.Services
         }
 
         /// <summary>
-        ///     Fetch locally stored remote config values.
+        /// Fetch locally stored remote config values.
         /// </summary>
         /// <returns>Stored Remote config</returns>
         private Dictionary<string, object> FetchConfigFromDB()
@@ -77,7 +77,7 @@ namespace Plugins.CountlySDK.Services
         }
 
         /// <summary>
-        ///     Fetch fresh remote config values from server and store locally.
+        /// Fetch fresh remote config values from server and store locally.
         /// </summary>
         /// <returns></returns>
         public async Task<CountlyResponse> Update()

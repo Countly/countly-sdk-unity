@@ -93,31 +93,31 @@ namespace Plugins.CountlySDK
         public OptionalParametersCountlyService OptionalParameters { get; private set; }
 
         /// <summary>
-        ///     Exposes functionality to set location parameters.
+        /// Exposes functionality to set location parameters.
         /// </summary>
         /// <returns>LocationService</returns>
         public Services.LocationService Location { get; private set; }
 
         /// <summary>
-        ///     Exposes functionality to update the remote config values. It also provides a way to access the currently downloaded ones.
+        /// Exposes functionality to update the remote config values. It also provides a way to access the currently downloaded ones.
         /// </summary>
         /// <returns>RemoteConfigCountlyService</returns>
         public RemoteConfigCountlyService RemoteConfigs { get; private set; }
 
         /// <summary>
-        ///     Exposes functionality to report start rating.
+        /// Exposes functionality to report start rating.
         /// </summary>
         /// <returns>StarRatingCountlyService</returns>
         public StarRatingCountlyService StarRating { get; private set; }
 
         /// <summary>
-        ///     Exposes functionality to set and change custom user properties and interract with custom property modifiers.
+        /// Exposes functionality to set and change custom user properties and interract with custom property modifiers.
         /// </summary>
         /// <returns>UserDetailsCountlyService</returns>
         public UserDetailsCountlyService UserDetails { get; private set; }
 
         /// <summary>
-        ///     Exposes functionality to start and stop recording views and report positions for heatmap.
+        /// Exposes functionality to start and stop recording views and report positions for heatmap.
         /// </summary>
         /// <returns>ViewCountlyService</returns>
         public ViewCountlyService Views { get; private set; }
@@ -125,7 +125,7 @@ namespace Plugins.CountlySDK
         internal SessionCountlyService Session { get; set; }
 
         /// <summary>
-        ///     Add callbacks to listen to push notification events for when a notification is received and when it is clicked.
+        /// Add callbacks to listen to push notification events for when a notification is received and when it is clicked.
         /// </summary>
         /// <returns>NotificationsCallbackService</returns>
         public NotificationsCallbackService Notifications { get; set; }
@@ -135,7 +135,7 @@ namespace Plugins.CountlySDK
 
 
         /// <summary>
-        ///     Initialize SDK at the start of your app
+        /// Initialize SDK at the start of your app
         /// </summary>
         private void Awake()
         {
@@ -270,7 +270,7 @@ namespace Plugins.CountlySDK
         }
 
         /// <summary>
-        ///     End session on application close/quit
+        /// End session on application close/quit
         /// </summary>
         private void OnApplicationQuit()
         {

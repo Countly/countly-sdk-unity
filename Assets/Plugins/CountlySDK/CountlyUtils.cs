@@ -29,7 +29,7 @@ namespace Plugins.CountlySDK
         }
 
         /// <summary>
-        ///     Gets the least set of paramas required to be sent along with each request.
+        /// Gets the least set of paramas required to be sent along with each request.
         /// </summary>
         /// <returns></returns>
         public Dictionary<string, object> GetBaseParams()
@@ -50,7 +50,7 @@ namespace Plugins.CountlySDK
         }
 
         /// <summary>
-        ///     Gets the least set of app key and device id required to be sent along with remote config request,
+        /// Gets the least set of app key and device id required to be sent along with remote config request,
         /// </summary>
         /// <returns></returns>
         public Dictionary<string, object> GetAppKeyAndDeviceIdParams()
@@ -68,7 +68,7 @@ namespace Plugins.CountlySDK
         }
 
         /// <summary>
-        ///     Validates the picture format. The Countly server supports a specific set of formats only.
+        /// Validates the picture format. The Countly server supports a specific set of formats only.
         /// </summary>
         /// <param name="pictureUrl"></param>
         /// <returns></returns>

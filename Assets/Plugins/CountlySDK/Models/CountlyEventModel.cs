@@ -9,7 +9,7 @@ namespace Plugins.CountlySDK.Models
     public class CountlyEventModel : IModel
     {
         /// <summary>
-        ///     Initializes a new instance of event model.
+        /// Initializes a new instance of event model.
         /// </summary>
         /// <param name="key"></param>
         /// <param name="segmentation"></param>
