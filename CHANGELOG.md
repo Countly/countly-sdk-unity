@@ -1,7 +1,8 @@
 ## 21.10.0
-* !! Major breaking change !! On successfully changing device id without merge, SDK removes all given consents.
-* ! Minor breaking change ! 'UserCustomDetailAsync (CountlyUserDetailsModel userDetailsModel)' is deprecated, this is going to be removed in the future.
-* Fixed parameters tampering protection issue while calculating checksum.
+* !! Major breaking change !! Changing device ID without merging will now clear the current consent. Consent has to be given again after performing this action.
+* 'UserCustomDetailAsync (CountlyUserDetailsModel userDetailsModel)' is deprecated.
+* Fixed issues with how parameter tampering protection was handled.
+
 ## 20.11.5
 * Added new configuration fields to manipulate internal SDK value and key limits.
 * Warning! This release will introduce configurable maximum size limits for values and keys throughout the SDK. If they would exceed the limits, they would be truncated.
