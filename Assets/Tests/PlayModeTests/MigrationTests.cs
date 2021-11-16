@@ -38,9 +38,6 @@ namespace Tests
 
             Assert.AreEqual(2, Countly.Instance.StorageHelper.SchemaVersion);
 
-            Countly.Instance.StorageHelper.CurrentVersion = 1;
-            Countly.Instance.StorageHelper.RunMigration();
-
             int schemaVersion = PlayerPrefs.GetInt(Constants.SchemaVersion);
             Assert.AreEqual(2, schemaVersion);
             Assert.AreEqual(2, Countly.Instance.StorageHelper.CurrentVersion);
@@ -71,6 +68,7 @@ namespace Tests
             storageHelper.AddRequestToQueue(request);
             storageHelper.CloseDB();
             PlayerPrefs.DeleteAll();
+            PlayerPrefs.SetInt(Constants.SchemaVersion, 1);
 
             FirstLaunchAppHelper.Process();
             Countly.Instance.Init(configuration);
@@ -112,11 +110,11 @@ namespace Tests
             CountlyRequestModel request = new CountlyRequestModel(url, null);
             storageHelper.AddRequestToQueue(request);
 
-            url = "https://xyz.com/i?app_key=772c091355076ead703f987fee94490&device_id=57049b51faf44804a10967f54d8f8420&sdk_name=csharp-unity-editor&sdk_version=20.11.5&timestamp=1633595280409&hour=13&dow=4&tz=300&consent=%7b%0a++%22crashes%22%3a+true%2c%0a++%22events%22%3a+true%2c%0a++%22clicks%22%3a+true%2c%0a++%22star-rating%22%3a+true%2c%0a++%22views%22%3a+true%2c%0a++%22users%22%3a+true%2c%0a++%22sessions%22%3a+true%2c%0a++%22push%22%3a+true%2c%0a++%22remote-config%22%3a+true%2c%0a++%22location%22%3a+true%2c%0a++%22feedback%22%3a+true%0a%7d&checksum256=a3c63ddd0fa788eb05c75752533fdb8083960c4c35fb0ed5a689b631d2beb194";
+            url = "https://xyz.com/i?app_key=772c091355076ead703f987fee94490&device_id=57049b51faf44804a10967f54d8f8420&sdk_name=csharp-unity-editor&sdk_version=20.11.4&timestamp=1633595280409&hour=13&dow=4&tz=300&consent=%7b%0a++%22crashes%22%3a+true%2c%0a++%22events%22%3a+true%2c%0a++%22clicks%22%3a+true%2c%0a++%22star-rating%22%3a+true%2c%0a++%22views%22%3a+true%2c%0a++%22users%22%3a+true%2c%0a++%22sessions%22%3a+true%2c%0a++%22push%22%3a+true%2c%0a++%22remote-config%22%3a+true%2c%0a++%22location%22%3a+true%2c%0a++%22feedback%22%3a+true%0a%7d&checksum256=a3c63ddd0fa788eb05c75752533fdb8083960c4c35fb0ed5a689b631d2beb194";
             request = new CountlyRequestModel(url, null);
             storageHelper.AddRequestToQueue(request);
 
-            url = "https://xyz.com/i?app_key=772c091355076ead703f987fee94490&device_id=57049b51faf44804a10967f54d8f8420&sdk_name=csharp-unity-editor&sdk_version=20.11.5&timestamp=1633595280409&hour=13&dow=4&tz=300&consent=%7b%0a++%22crashes%22%3a+true%2c%0a++%22events%22%3a+true%2c%0a++%22clicks%22%3a+true%2c%0a++%22star-rating%22%3a+true%2c%0a++%22views%22%3a+true%2c%0a++%22users%22%3a+true%2c%0a++%22sessions%22%3a+true%2c%0a++%22push%22%3a+true%2c%0a++%22remote-config%22%3a+true%2c%0a++%22location%22%3a+true%2c%0a++%22feedback%22%3a+true%0a%7d&checksum256=a3c63ddd0fa788eb05c75752533fdb8083960c4c35fb0ed5a689b631d2beb194";
+            url = "https://xyz.com/i?app_key=772c091355076ead703f987fee94490&device_id=57049b51faf44804a10967f54d8f8420&sdk_name=csharp-unity-editor&sdk_version=20.11.3&timestamp=1633595280409&hour=13&dow=4&tz=300&consent=%7b%0a++%22crashes%22%3a+true%2c%0a++%22events%22%3a+true%2c%0a++%22clicks%22%3a+true%2c%0a++%22star-rating%22%3a+true%2c%0a++%22views%22%3a+true%2c%0a++%22users%22%3a+true%2c%0a++%22sessions%22%3a+true%2c%0a++%22push%22%3a+true%2c%0a++%22remote-config%22%3a+true%2c%0a++%22location%22%3a+true%2c%0a++%22feedback%22%3a+true%0a%7d&checksum256=a3c63ddd0fa788eb05c75752533fdb8083960c4c35fb0ed5a689b631d2beb194";
             request = new CountlyRequestModel(url, null);
             storageHelper.AddRequestToQueue(request);
 
@@ -180,30 +178,33 @@ namespace Tests
                 AppKey = _appKey,
             };
 
-            Countly.Instance.Init(configuration);
-            Countly.Instance.RequestHelper._requestRepo.Clear();
+            TempStorageHelper storageHelper = new TempStorageHelper(new CountlyLogHelper(configuration));
+            storageHelper.OpenDB();
+            storageHelper.ClearDBData();
 
             string data = "{\"app_key\":\"772c091355076ead703f987fee94490\",\"device_id\":\"57049b51faf44874a10967f54d8f8420\",\"sdk_name\":\"csharp-unity-editor\",\"sdk_version\":\"20.11.5\",\"timestamp\":1633595280409,\"hour\":13,\"dow\":4,\"tz\":\"300\",\"consent\":{\"crashes\":true,\"events\":true,\"clicks\":true,\"star-rating\":true,\"views\":true,\"users\":true,\"sessions\":true,\"push\":true,\"remote-config\":true,\"location\":true,\"feedback\":true},\"checksum256\":\"a3c63ddd0fa788eb05c75752533fdb8083960c4c35fb0ed5a689b631d2beb194\"}";
             CountlyRequestModel request = new CountlyRequestModel(_serverUrl, data);
-            Countly.Instance.RequestHelper.AddRequestToQueue(request);
+            storageHelper.AddRequestToQueue(request);
 
             data = "{\"app_key\":\"772c091355076ead703f987fee94490\",\"device_id\":\"57049b51faf44874a10967f54d8f8420\",\"sdk_name\":\"csharp-unity-editor\",\"sdk_version\":\"20.11.4\",\"timestamp\":1633595280409,\"hour\":13,\"dow\":4,\"tz\":\"300\",\"consent\":{\"crashes\":true,\"events\":true,\"clicks\":true,\"star-rating\":true,\"views\":true,\"users\":true,\"sessions\":true,\"push\":true,\"remote-config\":true,\"location\":true,\"feedback\":true},\"checksum256\":\"a3c63ddd0fa788eb05c75752533fdb8083960c4c35fb0ed5a689b631d2beb194\"}";
             request = new CountlyRequestModel(_serverUrl, data);
-            Countly.Instance.RequestHelper.AddRequestToQueue(request);
+            storageHelper.AddRequestToQueue(request);
 
             data = "{\"app_key\":\"772c091355076ead703f987fee94490\",\"device_id\":\"57049b51faf44874a10967f54d8f8420\",\"sdk_name\":\"csharp-unity-editor\",\"sdk_version\":\"20.11.3\",\"timestamp\":1633595280409,\"hour\":13,\"dow\":4,\"tz\":\"300\",\"consent\":{\"crashes\":true,\"events\":true,\"clicks\":true,\"star-rating\":true,\"views\":true,\"users\":true,\"sessions\":true,\"push\":true,\"remote-config\":true,\"location\":true,\"feedback\":true},\"checksum256\":\"a3c63ddd0fa788eb05c75752533fdb8083960c4c35fb0ed5a689b631d2beb194\"}";
             request = new CountlyRequestModel(_serverUrl, data);
-            Countly.Instance.RequestHelper.AddRequestToQueue(request);
+            storageHelper.AddRequestToQueue(request);
 
-            Countly.Instance.StorageHelper.CurrentVersion = 1;
-            Countly.Instance.StorageHelper.RunMigration();
+            storageHelper.CloseDB();
+            PlayerPrefs.DeleteAll();
+
+            FirstLaunchAppHelper.Process();
+
+            Countly.Instance.Init(configuration);
 
             int schemaVersion = PlayerPrefs.GetInt(Constants.SchemaVersion);
             Assert.AreEqual(2, schemaVersion);
             Assert.AreEqual(2, Countly.Instance.StorageHelper.CurrentVersion);
             Assert.AreEqual(Countly.Instance.StorageHelper.SchemaVersion, Countly.Instance.StorageHelper.CurrentVersion);
-
-            Assert.AreEqual(3, Countly.Instance.RequestHelper._requestRepo.Count);
 
             CountlyRequestModel requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
             NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
@@ -251,16 +252,20 @@ namespace Tests
                 AppKey = _appKey,
             };
 
-            Countly.Instance.Init(configuration);
-            Countly.Instance.RequestHelper._requestRepo.Clear();
+            TempStorageHelper storageHelper = new TempStorageHelper(new CountlyLogHelper(configuration));
+            storageHelper.OpenDB();
+            storageHelper.ClearDBData();
 
             string data = "{\"app_key\":\"772c091355076ead703f987fee94490\",\"device_id\":\"57049b51faf44874a10967f54d8f8420\",\"sdk_name\":\"csharp-unity-editor\",\"sdk_version\":\"20.11.5\",\"timestamp\":1633595280409,\"hour\":13,\"dow\":4,\"tz\":\"300\",\"consent\":{\"crashes\":true,\"events\":true,\"clicks\":true,\"star-rating\":true,\"views\":true,\"users\":true,\"sessions\":true,\"push\":true,\"remote-config\":true,\"location\":true,\"feedback\":true},\"checksum256\":\"a3c63ddd0fa788eb05c75752533fdb8083960c4c35fb0ed5a689b631d2beb194\"}";
             CountlyRequestModel request = new CountlyRequestModel(_serverUrl, data);
-            Countly.Instance.RequestHelper.AddRequestToQueue(request);
-            Countly.Instance.StorageHelper.CurrentVersion = 1;
-            Countly.Instance.StorageHelper.RunMigration();
+            storageHelper.AddRequestToQueue(request);
 
-            Assert.AreEqual(1, Countly.Instance.RequestHelper._requestRepo.Count);
+            storageHelper.CloseDB();
+            PlayerPrefs.DeleteAll();
+
+            FirstLaunchAppHelper.Process();
+
+            Countly.Instance.Init(configuration);
 
             CountlyRequestModel requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
             NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
@@ -292,43 +297,45 @@ namespace Tests
                 AppKey = _appKey,
             };
 
-            Countly.Instance.Init(configuration);
-            Countly.Instance.RequestHelper._requestRepo.Clear();
+            TempStorageHelper storageHelper = new TempStorageHelper(new CountlyLogHelper(configuration));
+            storageHelper.OpenDB();
+            storageHelper.ClearDBData();
 
             string url = "https://xyz.com/i?app_key=772c091355076ead703f987fee94490&device_id=57049b51faf44874a10967f54d8f8420&sdk_name=csharp-unity-editor&sdk_version=20.11.5&timestamp=1633595280409&hour=13&dow=4&tz=300&consent=%7b%0a++%22crashes%22%3a+true%2c%0a++%22events%22%3a+true%2c%0a++%22clicks%22%3a+true%2c%0a++%22star-rating%22%3a+true%2c%0a++%22views%22%3a+true%2c%0a++%22users%22%3a+true%2c%0a++%22sessions%22%3a+true%2c%0a++%22push%22%3a+true%2c%0a++%22remote-config%22%3a+true%2c%0a++%22location%22%3a+true%2c%0a++%22feedback%22%3a+true%0a%7d&checksum256=a3c63ddd0fa788eb05c75752533fdb8083960c4c35fb0ed5a689b631d2beb194";
             CountlyRequestModel request = new CountlyRequestModel(url, null);
-            Countly.Instance.RequestHelper.AddRequestToQueue(request);
+            storageHelper.AddRequestToQueue(request);
 
             string data = "{\"app_key\":\"772c091355076ead703f987fee94490\",\"device_id\":\"57049b51faf44874a10967f54d8f8420\",\"sdk_name\":\"csharp-unity-editor\",\"sdk_version\":\"20.11.4\",\"timestamp\":1633595280409,\"hour\":13,\"dow\":4,\"tz\":\"300\",\"consent\":{\"crashes\":true,\"events\":true,\"clicks\":true,\"star-rating\":true,\"views\":true,\"users\":true,\"sessions\":true,\"push\":true,\"remote-config\":true,\"location\":true,\"feedback\":true},\"checksum256\":\"a3c63ddd0fa788eb05c75752533fdb8083960c4c35fb0ed5a689b631d2beb194\"}";
             request = new CountlyRequestModel(_serverUrl, data);
-            Countly.Instance.RequestHelper.AddRequestToQueue(request);
+            storageHelper.AddRequestToQueue(request);
 
             url = "https://xyz.com/i?app_key=772c091355076ead703f987fee94490&device_id=57049b51faf44874a10967f54d8f8420&sdk_name=csharp-unity-editor&sdk_version=20.11.3&timestamp=1633595280409&hour=13&dow=4&tz=300&consent=%7b%0a++%22crashes%22%3a+true%2c%0a++%22events%22%3a+true%2c%0a++%22clicks%22%3a+true%2c%0a++%22star-rating%22%3a+true%2c%0a++%22views%22%3a+true%2c%0a++%22users%22%3a+true%2c%0a++%22sessions%22%3a+true%2c%0a++%22push%22%3a+true%2c%0a++%22remote-config%22%3a+true%2c%0a++%22location%22%3a+true%2c%0a++%22feedback%22%3a+true%0a%7d&checksum256=a3c63ddd0fa788eb05c75752533fdb8083960c4c35fb0ed5a689b631d2beb194";
             request = new CountlyRequestModel(url, null);
-            Countly.Instance.RequestHelper.AddRequestToQueue(request);
+            storageHelper.AddRequestToQueue(request);
 
             url = "https://xyz.com/i?app_key=772c091355076ead703f987fee94490&device_id=57049b51faf44874a10967f54d8f8420&sdk_name=csharp-unity-editor&sdk_version=20.11.2&timestamp=1633595280409&hour=13&dow=4&tz=300&consent=%7b%0a++%22crashes%22%3a+true%2c%0a++%22events%22%3a+true%2c%0a++%22clicks%22%3a+true%2c%0a++%22star-rating%22%3a+true%2c%0a++%22views%22%3a+true%2c%0a++%22users%22%3a+true%2c%0a++%22sessions%22%3a+true%2c%0a++%22push%22%3a+true%2c%0a++%22remote-config%22%3a+true%2c%0a++%22location%22%3a+true%2c%0a++%22feedback%22%3a+true%0a%7d";
             request = new CountlyRequestModel(url, null);
-            Countly.Instance.RequestHelper.AddRequestToQueue(request);
+            storageHelper.AddRequestToQueue(request);
 
             data = "{\"app_key\":\"772c091355076ead703f987fee94490\",\"device_id\":\"57049b51faf44874a10967f54d8f8420\",\"sdk_name\":\"csharp-unity-editor\",\"sdk_version\":\"20.11.1\",\"timestamp\":1633595280409,\"hour\":13,\"dow\":4,\"tz\":\"300\",\"consent\":{\"crashes\":true,\"events\":true,\"clicks\":true,\"star-rating\":true,\"views\":true,\"users\":true,\"sessions\":true,\"push\":true,\"remote-config\":true,\"location\":true,\"feedback\":true},\"checksum256\":\"a3c63ddd0fa788eb05c75752533fdb8083960c4c35fb0ed5a689b631d2beb194\"}";
-
             request = new CountlyRequestModel(_serverUrl, data);
-            Countly.Instance.RequestHelper.AddRequestToQueue(request);
+            storageHelper.AddRequestToQueue(request);
 
             data = "{\"app_key\":\"772c091355076ead703f987fee94490\",\"device_id\":\"57049b51faf44874a10967f54d8f8420\",\"sdk_name\":\"csharp-unity-editor\",\"sdk_version\":\"20.11.0\",\"timestamp\":1633595280409,\"hour\":13,\"dow\":4,\"tz\":\"300\",\"consent\":{\"crashes\":true,\"events\":true,\"clicks\":true,\"star-rating\":true,\"views\":true,\"users\":true,\"sessions\":true,\"push\":true,\"remote-config\":true,\"location\":true,\"feedback\":true},\"checksum256\":\"a3c63ddd0fa788eb05c75752533fdb8083960c4c35fb0ed5a689b631d2beb194\"}";
             request = new CountlyRequestModel(_serverUrl, data);
-            Countly.Instance.RequestHelper.AddRequestToQueue(request);
+            storageHelper.AddRequestToQueue(request);
 
-            Countly.Instance.StorageHelper.CurrentVersion = 1;
-            Countly.Instance.StorageHelper.RunMigration();
 
+            storageHelper.CloseDB();
+            PlayerPrefs.DeleteAll();
+
+            FirstLaunchAppHelper.Process();
+            Countly.Instance.Init(configuration);
+      
             int schemaVersion = PlayerPrefs.GetInt(Constants.SchemaVersion);
             Assert.AreEqual(2, schemaVersion);
             Assert.AreEqual(2, Countly.Instance.StorageHelper.CurrentVersion);
             Assert.AreEqual(Countly.Instance.StorageHelper.SchemaVersion, Countly.Instance.StorageHelper.CurrentVersion);
-
-            Assert.AreEqual(6, Countly.Instance.RequestHelper._requestRepo.Count);
 
             CountlyRequestModel requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
             NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
