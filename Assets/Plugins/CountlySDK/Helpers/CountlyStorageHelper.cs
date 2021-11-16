@@ -50,6 +50,7 @@ namespace Plugins.CountlySDK.Helpers
 
             if (FirstLaunchAppHelper.IsFirstLaunchApp) {
                 CurrentVersion = SchemaVersion;
+                PlayerPrefs.SetInt(Constants.SchemaVersion, SchemaVersion);
             } else {
                 CurrentVersion = PlayerPrefs.GetInt(Constants.SchemaVersion, 0);
             }
@@ -187,7 +188,7 @@ namespace Plugins.CountlySDK.Helpers
 
                     Dictionary<string, object> queryParams = collection.AllKeys.ToDictionary(t => t, t => (object)collection[t]);
                     queryParams.Remove("checksum256");
-                    string data = _requestBuilder.BuildQueryString(queryParams);//JsonConvert.SerializeObject(queryParams);
+                    string data = _requestBuilder.BuildQueryString(queryParams);
 
                     request.RequestUrl = null;
                     request.RequestData = data;
@@ -197,7 +198,6 @@ namespace Plugins.CountlySDK.Helpers
 
                     request.RequestUrl = null;
                     request.RequestData = _requestBuilder.BuildQueryString(requestData);
-                    //JsonConvert.SerializeObject(requestData);
                 }
 
                 bool result = RequestRepo.Update(request);

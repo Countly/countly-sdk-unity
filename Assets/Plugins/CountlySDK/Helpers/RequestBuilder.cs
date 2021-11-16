@@ -27,7 +27,7 @@ internal class RequestBuilder
             requestData.Add(item.Key, item.Value);
         }
 
-        string data = BuildQueryString(requestData); //JsonConvert.SerializeObject(requestData);
+        string data = BuildQueryString(requestData);
         CountlyRequestModel requestModel = new CountlyRequestModel(null, data);
 
         return requestModel;

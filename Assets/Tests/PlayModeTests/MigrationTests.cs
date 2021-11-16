@@ -24,26 +24,22 @@ namespace Tests
         [Test]
         public void TestMigrationOnEmptyRequestRepo()
         {
+            PlayerPrefs.DeleteAll();
             CountlyConfiguration configuration = new CountlyConfiguration {
                 ServerUrl = _serverUrl,
                 AppKey = _appKey,
             };
 
+            Assert.AreEqual(0, PlayerPrefs.GetInt(Constants.SchemaVersion));
+
             Countly.Instance.Init(configuration);
             Countly.Instance.RequestHelper._requestRepo.Clear();
 
             Assert.AreEqual(2, Countly.Instance.StorageHelper.SchemaVersion);
-
-            Countly.Instance.StorageHelper.CurrentVersion = 1;
-            Countly.Instance.StorageHelper.RunMigration();
-
-            int schemaVersion = PlayerPrefs.GetInt(Constants.SchemaVersion);
-            Assert.AreEqual(2, schemaVersion);
             Assert.AreEqual(2, Countly.Instance.StorageHelper.CurrentVersion);
             Assert.AreEqual(Countly.Instance.StorageHelper.SchemaVersion, Countly.Instance.StorageHelper.CurrentVersion);
-
+            Assert.AreEqual(2, PlayerPrefs.GetInt(Constants.SchemaVersion));
             Assert.AreEqual(0, Countly.Instance.RequestHelper._requestRepo.Count);
-
         }
 
         /// <summary>
