@@ -331,7 +331,7 @@ namespace Tests
 
             FirstLaunchAppHelper.Process();
             Countly.Instance.Init(configuration);
-      
+
             int schemaVersion = PlayerPrefs.GetInt(Constants.SchemaVersion);
             Assert.AreEqual(2, schemaVersion);
             Assert.AreEqual(2, Countly.Instance.StorageHelper.CurrentVersion);
@@ -413,7 +413,8 @@ namespace Tests
             Object.DestroyImmediate(Countly.Instance);
         }
 
-        private class TempStorageHelper {
+        private class TempStorageHelper
+        {
 
             private DB _db;
             private CountlyLogHelper _logHelper;
