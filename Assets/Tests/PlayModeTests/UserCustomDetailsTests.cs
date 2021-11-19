@@ -373,15 +373,11 @@ namespace Tests
             Assert.AreEqual(1, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
 
             CountlyRequestModel requestModel = Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Dequeue();
+            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            JObject userdetail = JObject.Parse(collection["user_details"]);
 
-
-            string userDetailData = requestModel.RequestData;
-            JObject json = JObject.Parse(userDetailData);
-            string userDetail = json["user_details"].ToString();
-            JObject custom = JObject.Parse(userDetail);
-
-            Assert.AreEqual("Black", custom["custom"]["Hair"].ToString());
-            Assert.AreEqual("5.9", custom["custom"]["Height"].ToString());
+            Assert.AreEqual("Black", userdetail["custom"]["Hair"].ToString());
+            Assert.AreEqual("5.9", userdetail["custom"]["Height"].ToString());
         }
 
         /// <summary>
@@ -417,13 +413,11 @@ namespace Tests
             Assert.AreEqual(1, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
 
             CountlyRequestModel requestModel = Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Dequeue();
-            string userDetailData = requestModel.RequestData;
-            JObject json = JObject.Parse(userDetailData);
-            string userDetail = json["user_details"].ToString();
-            JObject custom = JObject.Parse(userDetail);
+            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            JObject userdetail = JObject.Parse(collection["user_details"]);
 
-            Assert.AreEqual("Black", custom["custom"]["Hair"].ToString());
-            Assert.AreEqual("5.9", custom["custom"]["Height"].ToString());
+            Assert.AreEqual("Black", userdetail["custom"]["Hair"].ToString());
+            Assert.AreEqual("5.9", userdetail["custom"]["Height"].ToString());
         }
         /// <summary>
         /// It validates the user's custom properties set via 'SetOnce' and 'Set' methods.
