@@ -1,4 +1,4 @@
-﻿using NUnit.Framework;
+using NUnit.Framework;
 using UnityEngine;
 using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK;
@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Collections.Specialized;
 using Plugins.CountlySDK.Enums;
+using Newtonsoft.Json.Linq;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace Tests
 {
@@ -100,21 +102,18 @@ namespace Tests
 
 
             CountlyRequestModel requestModel = Countly.Instance.Device._requestCountlyHelper._requestRepo.Dequeue();
-            string uri = requestModel.RequestUrl;
-            NameValueCollection values = HttpUtility.ParseQueryString(uri);
+            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
 
-            Assert.AreEqual("1", values.Get("end_session"));
-            Assert.AreEqual(oldDeviceId, values.Get("device_id"));
-            Assert.IsNotNull(values.Get("session_duration"));
+            Assert.AreEqual("1", collection.Get("end_session"));
+            Assert.AreEqual(oldDeviceId, collection.Get("device_id"));
+            Assert.IsNotNull(collection["session_duration"]);
 
             requestModel = Countly.Instance.Device._requestCountlyHelper._requestRepo.Dequeue();
-            uri = requestModel.RequestUrl;
-            values = HttpUtility.ParseQueryString(uri);
+            collection = HttpUtility.ParseQueryString(requestModel.RequestData);
 
-            Assert.AreEqual("1", values.Get("begin_session"));
-            Assert.AreEqual("new_device_id", values.Get("device_id"));
+            Assert.AreEqual("1", collection.Get("begin_session"));
+            Assert.AreEqual("new_device_id", collection.Get("device_id"));
             Assert.AreEqual("new_device_id", Countly.Instance.Device.DeviceId);
-
         }
 
         /// <summary>
@@ -167,7 +166,7 @@ namespace Tests
 
             Countly.Instance.Init(configuration);
             Assert.IsNotNull(Countly.Instance.Consents);
-            
+
             string oldDeviceId = Countly.Instance.Device.DeviceId;
             Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
             await Countly.Instance.Device.ChangeDeviceIdWithMerge("new_device_id");
@@ -176,13 +175,11 @@ namespace Tests
 
 
             CountlyRequestModel requestModel = Countly.Instance.Device._requestCountlyHelper._requestRepo.Dequeue();
-            string uri = requestModel.RequestUrl;
-            NameValueCollection values = HttpUtility.ParseQueryString(uri);
+            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
 
-            Assert.AreEqual(oldDeviceId, values.Get("old_device_id"));
-            Assert.AreEqual("new_device_id", values.Get("device_id"));
+            Assert.AreEqual(oldDeviceId, collection.Get("old_device_id"));
+            Assert.AreEqual("new_device_id", collection.Get("device_id"));
             Assert.AreEqual("new_device_id", Countly.Instance.Device.DeviceId);
-
         }
 
         [TearDown]

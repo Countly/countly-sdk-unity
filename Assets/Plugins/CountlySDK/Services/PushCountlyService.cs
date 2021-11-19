@@ -105,7 +105,7 @@ namespace Plugins.CountlySDK.Services
             Log.Debug("[PushCountlyService] ReportPushActionAsync");
 
             if (!_consentService.CheckConsentInternal(Consents.Push)) {
-                return new CountlyResponse { IsSuccess = false};
+                return new CountlyResponse { IsSuccess = false };
             }
 
 

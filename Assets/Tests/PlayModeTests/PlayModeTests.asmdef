@@ -1,5 +1,6 @@
 {
     "name": "PlayModeTests",
+    "rootNamespace": "",
     "references": [
         "PluginAssembly",
         "UnityEngine.TestRunner",
@@ -12,7 +13,8 @@
     "precompiledReferences": [
         "nunit.framework.dll",
         "nunit.framework.dll",
-        "Newtonsoft.Json.dll"
+        "Newtonsoft.Json.dll",
+        "iBoxDB.NET2.dll"
     ],
     "autoReferenced": false,
     "defineConstraints": [

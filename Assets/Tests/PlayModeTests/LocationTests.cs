@@ -59,7 +59,7 @@ namespace Tests
                 ServerUrl = _serverUrl,
                 AppKey = _appKey,
             };
-            
+
             string city = "Houston";
             string countryCode = "us";
             string latitude = "29.634933";

@@ -1,3 +1,8 @@
+## 21.10.0
+* !! Major breaking change !! Changing device ID without merging will now clear the current consent. Consent has to be given again after performing this action.
+* 'UserCustomDetailAsync (CountlyUserDetailsModel userDetailsModel)' is deprecated.
+* Fixed issues with how parameter tampering protection was handled.
+
 ## 20.11.5
 * Added new configuration fields to manipulate internal SDK value and key limits.
 * Warning! This release will introduce configurable maximum size limits for values and keys throughout the SDK. If they would exceed the limits, they would be truncated.

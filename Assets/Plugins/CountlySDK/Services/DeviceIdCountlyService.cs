@@ -42,7 +42,7 @@ namespace Plugins.CountlySDK.Services
             //Static DeviceID (only when the app is running or in the background)
             //User provided DeviceID
             //Generate Random DeviceID
-            string storedDeviceId = PlayerPrefs.GetString("DeviceID");
+            string storedDeviceId = PlayerPrefs.GetString(Constants.DeviceIDKey);
             if (!_countlyUtils.IsNullEmptyOrWhitespace(storedDeviceId)) {
                 DeviceId = storedDeviceId;
             } else {
