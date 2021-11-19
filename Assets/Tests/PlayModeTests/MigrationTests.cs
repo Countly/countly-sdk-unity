@@ -33,14 +33,20 @@ namespace Tests
                 AppKey = _appKey,
             };
 
+            TempStorageHelper storageHelper = new TempStorageHelper(new CountlyLogHelper(configuration));
+            storageHelper.OpenDB();
+            storageHelper.ClearDBData();
+            storageHelper.CloseDB();
+            PlayerPrefs.DeleteAll();
+            PlayerPrefs.SetInt(Constants.SchemaVersion, 1);
+
+            FirstLaunchAppHelper.Process();
             Countly.Instance.Init(configuration);
             Countly.Instance.RequestHelper._requestRepo.Clear();
 
-            Assert.AreEqual(2, Countly.Instance.StorageHelper.SchemaVersion);
-
             int schemaVersion = PlayerPrefs.GetInt(Constants.SchemaVersion);
-            Assert.AreEqual(2, schemaVersion);
-            Assert.AreEqual(2, Countly.Instance.StorageHelper.CurrentVersion);
+            Assert.AreEqual(schemaVersion, Countly.Instance.StorageHelper.SchemaVersion);
+            Assert.AreEqual(schemaVersion, Countly.Instance.StorageHelper.CurrentVersion);
             Assert.AreEqual(Countly.Instance.StorageHelper.SchemaVersion, Countly.Instance.StorageHelper.CurrentVersion);
 
             Assert.AreEqual(0, Countly.Instance.RequestHelper._requestRepo.Count);
