@@ -14,7 +14,7 @@ public class CountlyLogHelper
         if (_configuration.EnableConsoleLogging) {
             UnityEngine.Debug.Log("[Info]" + TAG + message);
         }
-        
+
     }
 
     internal void Debug(string message)

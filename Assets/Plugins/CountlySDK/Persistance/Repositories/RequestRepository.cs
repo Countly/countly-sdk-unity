@@ -1,4 +1,4 @@
-﻿using Plugins.CountlySDK.Helpers;
+using Plugins.CountlySDK.Helpers;
 using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK.Persistance.Entities;
 using Plugins.iBoxDB;
@@ -18,7 +18,7 @@ namespace Plugins.CountlySDK.Persistance.Repositories
 
         protected override RequestEntity ConvertModelToEntity(CountlyRequestModel model)
         {
-            return Converter.ConvertRequestModelToRequestEntity(model, GenerateNewId());
+            return Converter.ConvertRequestModelToRequestEntity(model, model.Id > 0 ? model.Id : GenerateNewId());
         }
 
         protected override bool ValidateModelBeforeEnqueue(CountlyRequestModel model)

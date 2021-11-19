@@ -8,7 +8,6 @@ namespace Plugins.CountlySDK
 {
     public class CountlyUtils
     {
-        private static readonly StringBuilder Builder = new StringBuilder();
 
         private readonly Countly _countly;
 
@@ -30,7 +29,7 @@ namespace Plugins.CountlySDK
         }
 
         /// <summary>
-        ///     Gets the least set of paramas required to be sent along with each request.
+        /// Gets the least set of paramas required to be sent along with each request.
         /// </summary>
         /// <returns></returns>
         public Dictionary<string, object> GetBaseParams()
@@ -51,7 +50,7 @@ namespace Plugins.CountlySDK
         }
 
         /// <summary>
-        ///     Gets the least set of app key and device id required to be sent along with remote config request,
+        /// Gets the least set of app key and device id required to be sent along with remote config request,
         /// </summary>
         /// <returns></returns>
         public Dictionary<string, object> GetAppKeyAndDeviceIdParams()
@@ -69,7 +68,7 @@ namespace Plugins.CountlySDK
         }
 
         /// <summary>
-        ///     Validates the picture format. The Countly server supports a specific set of formats only.
+        /// Validates the picture format. The Countly server supports a specific set of formats only.
         /// </summary>
         /// <param name="pictureUrl"></param>
         /// <returns></returns>
@@ -88,11 +87,11 @@ namespace Plugins.CountlySDK
 
         public string GetStringFromBytes(byte[] bytes)
         {
-            for (int i = 0; i < bytes.Length; i++) {
-                Builder.Append(bytes[i].ToString("x2"));
+            StringBuilder hex = new StringBuilder(bytes.Length * 2);
+            foreach (byte b in bytes) {
+                hex.AppendFormat("{0:x2}", b);
             }
-
-            return Builder.ToString();
+            return hex.ToString();
         }
     }
 }

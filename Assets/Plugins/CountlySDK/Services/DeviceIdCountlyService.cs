@@ -41,7 +41,7 @@ namespace Plugins.CountlySDK.Services
             //Static DeviceID (only when the app is running or in the background)
             //User provided DeviceID
             //Generate Random DeviceID
-            string storedDeviceId = PlayerPrefs.GetString("DeviceID");
+            string storedDeviceId = PlayerPrefs.GetString(Constants.DeviceIDKey);
             if (!_countlyUtils.IsNullEmptyOrWhitespace(storedDeviceId)) {
                 DeviceId = storedDeviceId;
             } else {
@@ -110,7 +110,7 @@ namespace Plugins.CountlySDK.Services
                 //Ends current session
                 //Do not dispose timer object
                 if (!_configuration.IsAutomaticSessionTrackingDisabled) {
-                    _=_sessionCountlyService.EndSessionAsync();
+                    _ = _sessionCountlyService.EndSessionAsync();
                 }
 
                 //Update device id
@@ -119,19 +119,19 @@ namespace Plugins.CountlySDK.Services
                 //Begin new session with new device id
                 //Do not initiate timer again, it is already initiated
                 if (!_configuration.IsAutomaticSessionTrackingDisabled) {
-                    _=_sessionCountlyService.BeginSessionAsync();
+                    _ = _sessionCountlyService.BeginSessionAsync();
                 }
 
                 NotifyListeners(false);
 
-                _=_requestCountlyHelper.ProcessQueue();
+                _ = _requestCountlyHelper.ProcessQueue();
             }
         }
 
         /// <summary>
-        /// Changes DeviceId. 
+        /// Changes DeviceId.
         /// Continues with the current session.
-        /// Merges data for old and new Device Id. 
+        /// Merges data for old and new Device Id.
         /// </summary>
         /// <param name="deviceId">new device id</param>
         [Obsolete("ChangeDeviceIdAndMergeSessionDataAsync is deprecated, please use ChangeDeviceIdWithMerge method instead.")]
@@ -148,9 +148,9 @@ namespace Plugins.CountlySDK.Services
         }
 
         /// <summary>
-        /// Changes DeviceId. 
+        /// Changes DeviceId.
         /// Continues with the current session.
-        /// Merges data for old and new Device Id. 
+        /// Merges data for old and new Device Id.
         /// </summary>
         /// <param name="deviceId">new device id</param>
         public async Task ChangeDeviceIdWithMerge(string deviceId)
@@ -182,7 +182,7 @@ namespace Plugins.CountlySDK.Services
                    };
 
                 _requestCountlyHelper.AddToRequestQueue(requestParams);
-                _=_requestCountlyHelper.ProcessQueue();
+                _ = _requestCountlyHelper.ProcessQueue();
                 NotifyListeners(true);
             }
         }
