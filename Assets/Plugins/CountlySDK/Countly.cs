@@ -24,6 +24,7 @@ namespace Plugins.CountlySDK
 
         public CountlyAuthModel Auth;
         public CountlyConfigModel Config;
+        internal RequestCountlyHelper RequestHelper;
         internal CountlyConfiguration Configuration;
 
         /// <summary>
@@ -34,7 +35,7 @@ namespace Plugins.CountlySDK
 
         private CountlyLogHelper _logHelper;
         private static Countly _instance = null;
-        private CountlyStorageHelper _storageHelper;
+        internal CountlyStorageHelper StorageHelper;
         internal readonly object lockObj = new object();
         private List<AbstractBaseService> _listeners = new List<AbstractBaseService>();
 
@@ -92,31 +93,31 @@ namespace Plugins.CountlySDK
         public OptionalParametersCountlyService OptionalParameters { get; private set; }
 
         /// <summary>
-        ///     Exposes functionality to set location parameters.
+        /// Exposes functionality to set location parameters.
         /// </summary>
         /// <returns>LocationService</returns>
         public Services.LocationService Location { get; private set; }
 
         /// <summary>
-        ///     Exposes functionality to update the remote config values. It also provides a way to access the currently downloaded ones.
+        /// Exposes functionality to update the remote config values. It also provides a way to access the currently downloaded ones.
         /// </summary>
         /// <returns>RemoteConfigCountlyService</returns>
         public RemoteConfigCountlyService RemoteConfigs { get; private set; }
 
         /// <summary>
-        ///     Exposes functionality to report start rating.
+        /// Exposes functionality to report start rating.
         /// </summary>
         /// <returns>StarRatingCountlyService</returns>
         public StarRatingCountlyService StarRating { get; private set; }
 
         /// <summary>
-        ///     Exposes functionality to set and change custom user properties and interract with custom property modifiers.
+        /// Exposes functionality to set and change custom user properties and interract with custom property modifiers.
         /// </summary>
         /// <returns>UserDetailsCountlyService</returns>
         public UserDetailsCountlyService UserDetails { get; private set; }
 
         /// <summary>
-        ///     Exposes functionality to start and stop recording views and report positions for heatmap.
+        /// Exposes functionality to start and stop recording views and report positions for heatmap.
         /// </summary>
         /// <returns>ViewCountlyService</returns>
         public ViewCountlyService Views { get; private set; }
@@ -124,7 +125,7 @@ namespace Plugins.CountlySDK
         internal SessionCountlyService Session { get; set; }
 
         /// <summary>
-        ///     Add callbacks to listen to push notification events for when a notification is received and when it is clicked.
+        /// Add callbacks to listen to push notification events for when a notification is received and when it is clicked.
         /// </summary>
         /// <returns>NotificationsCallbackService</returns>
         public NotificationsCallbackService Notifications { get; set; }
@@ -134,7 +135,7 @@ namespace Plugins.CountlySDK
 
 
         /// <summary>
-        ///     Initialize SDK at the start of your app
+        /// Initialize SDK at the start of your app
         /// </summary>
         private void Awake()
         {
@@ -184,12 +185,13 @@ namespace Plugins.CountlySDK
             Constants.ProcessPlatform();
             FirstLaunchAppHelper.Process();
 
-            _storageHelper = new CountlyStorageHelper(_logHelper);
-            _storageHelper.OpenDB();
+            RequestBuilder requestBuilder = new RequestBuilder();
+            StorageHelper = new CountlyStorageHelper(_logHelper, requestBuilder);
+            StorageHelper.OpenDB();
 
-            _storageHelper.RunMigration();
+            StorageHelper.RunMigration();
 
-            Init(_storageHelper.RequestRepo, _storageHelper.EventRepo, _storageHelper.ConfigDao);
+            Init(requestBuilder, StorageHelper.RequestRepo, StorageHelper.EventRepo, StorageHelper.ConfigDao);
 
             Device.InitDeviceId(configuration.DeviceId);
             OnInitialisationComplete();
@@ -198,30 +200,30 @@ namespace Plugins.CountlySDK
 
         }
 
-        private void Init(RequestRepository requestRepo,
+        private void Init(RequestBuilder requestBuilder, RequestRepository requestRepo,
             NonViewEventRepository nonViewEventRepo, Dao<ConfigEntity> configDao)
         {
             CountlyUtils countlyUtils = new CountlyUtils(this);
-            RequestCountlyHelper requests = new RequestCountlyHelper(Configuration, _logHelper, countlyUtils, requestRepo);
+            RequestHelper = new RequestCountlyHelper(Configuration, _logHelper, countlyUtils, requestBuilder, requestRepo);
 
-            Consents = new ConsentCountlyService(Configuration, _logHelper, Consents, requests);
-            Events = new EventCountlyService(Configuration, _logHelper, requests, nonViewEventRepo, Consents);
+            Consents = new ConsentCountlyService(Configuration, _logHelper, Consents, RequestHelper);
+            Events = new EventCountlyService(Configuration, _logHelper, RequestHelper, nonViewEventRepo, Consents);
 
-            Location = new Services.LocationService(Configuration, _logHelper, requests, Consents);
+            Location = new Services.LocationService(Configuration, _logHelper, RequestHelper, Consents);
             OptionalParameters = new OptionalParametersCountlyService(Location, Configuration, _logHelper, Consents);
             Notifications = new NotificationsCallbackService(Configuration, _logHelper);
             ProxyNotificationsService notificationsService = new ProxyNotificationsService(transform, Configuration, _logHelper, InternalStartCoroutine, Events);
-            _push = new PushCountlyService(Configuration, _logHelper, requests, notificationsService, Notifications, Consents);
-            Session = new SessionCountlyService(Configuration, _logHelper, Events, requests, Location, Consents);
+            _push = new PushCountlyService(Configuration, _logHelper, RequestHelper, notificationsService, Notifications, Consents);
+            Session = new SessionCountlyService(Configuration, _logHelper, Events, RequestHelper, Location, Consents);
 
-            CrashReports = new CrashReportsCountlyService(Configuration, _logHelper, requests, Consents);
+            CrashReports = new CrashReportsCountlyService(Configuration, _logHelper, RequestHelper, Consents);
             Initialization = new InitializationCountlyService(Configuration, _logHelper, Location, Session, Consents);
-            RemoteConfigs = new RemoteConfigCountlyService(Configuration, _logHelper, requests, countlyUtils, configDao, Consents);
+            RemoteConfigs = new RemoteConfigCountlyService(Configuration, _logHelper, RequestHelper, countlyUtils, configDao, Consents, requestBuilder);
 
             StarRating = new StarRatingCountlyService(Configuration, _logHelper, Consents, Events);
-            UserDetails = new UserDetailsCountlyService(Configuration, _logHelper, requests, countlyUtils, Consents);
+            UserDetails = new UserDetailsCountlyService(Configuration, _logHelper, RequestHelper, countlyUtils, Consents);
             Views = new ViewCountlyService(Configuration, _logHelper, Events, Consents);
-            Device = new DeviceIdCountlyService(Configuration, _logHelper, Session, requests, Events, countlyUtils, Consents);
+            Device = new DeviceIdCountlyService(Configuration, _logHelper, Session, RequestHelper, Events, countlyUtils, Consents);
 
             CreateListOfIBaseService();
             RegisterListenersToServices();
@@ -268,7 +270,7 @@ namespace Plugins.CountlySDK
         }
 
         /// <summary>
-        ///     End session on application close/quit
+        /// End session on application close/quit
         /// </summary>
         private void OnApplicationQuit()
         {
@@ -278,7 +280,7 @@ namespace Plugins.CountlySDK
 
             _logHelper.Debug("[Countly] OnApplicationQuit");
             Session?._sessionTimer?.Dispose();
-            _storageHelper?.CloseDB();
+            StorageHelper?.CloseDB();
         }
 
         internal void ClearStorage()
@@ -290,9 +292,9 @@ namespace Plugins.CountlySDK
             _logHelper.Debug("[Countly] ClearStorage");
 
             PlayerPrefs.DeleteAll();
-            _storageHelper?.ClearDBData();
+            StorageHelper?.ClearDBData();
 
-            _storageHelper?.CloseDB();
+            StorageHelper?.CloseDB();
         }
 
         private void OnApplicationFocus(bool hasFocus)

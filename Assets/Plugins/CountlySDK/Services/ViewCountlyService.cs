@@ -71,7 +71,7 @@ namespace Plugins.CountlySDK.Services
                 }
 
                 CountlyEventModel currentView = new CountlyEventModel(CountlyEventModel.ViewEvent, currentViewSegment.OpenViewDictionary());
-                _=_eventService.RecordEventAsync(currentView);
+                _ = _eventService.RecordEventAsync(currentView);
 
                 _isFirstView = false;
             }
@@ -134,7 +134,7 @@ namespace Plugins.CountlySDK.Services
                 IDictionary<string, object> segment = currentViewSegment.CloseViewDictionary();
 
                 CountlyEventModel currentView = new CountlyEventModel(CountlyEventModel.ViewEvent, segment, 1, null, duration);
-                _=_eventService.RecordEventAsync(currentView);
+                _ = _eventService.RecordEventAsync(currentView);
             }
         }
 
@@ -166,7 +166,7 @@ namespace Plugins.CountlySDK.Services
                     };
 
                 CountlyEventModel currentView = new CountlyEventModel(CountlyEventModel.ViewActionEvent, segment.ToDictionary());
-                _=_eventService.RecordEventAsync(currentView);
+                _ = _eventService.RecordEventAsync(currentView);
             }
         }
 

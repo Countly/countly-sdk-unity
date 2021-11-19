@@ -91,12 +91,12 @@ namespace Plugins.CountlySDK.Models
         public int MaxSegmentationValues = 30;
 
         /// <summary>
-        ///Limits how many stack trace lines would be recorded per thread
+        /// Limits how many stack trace lines would be recorded per thread
         /// </summary>
         public int MaxStackTraceLinesPerThread = 30;
 
         /// <summary>
-        ///Limits how many characters are allowed per stack trace line
+        /// Limits how many characters are allowed per stack trace line
         /// </summary>
         public int MaxStackTraceLineLength = 200;
 
@@ -139,7 +139,7 @@ namespace Plugins.CountlySDK.Models
         internal Dictionary<string, Consents[]> ConsentGroups { get; private set; }
 
         /// <summary>
-        ///     Parent must be undestroyable
+        /// Parent must be undestroyable
         /// </summary>
         public GameObject Parent = null;
 
@@ -179,7 +179,7 @@ namespace Plugins.CountlySDK.Models
         }
 
         /// <summary>
-        ///Disabled the automatic session tracking.
+        /// Disabled the automatic session tracking.
         /// </summary>
         public void DisableAutomaticSessionTracking()
         {
@@ -225,7 +225,7 @@ namespace Plugins.CountlySDK.Models
         /// <param name="groupName">name of the consent group that will be created</param>
         /// <param name="consents">array of consent to be added to the consent group</param>
         /// <returns></returns>
-        public void  CreateConsentGroup([NotNull] string groupName, [NotNull] Consents[] consents)
+        public void CreateConsentGroup([NotNull] string groupName, [NotNull] Consents[] consents)
         {
             ConsentGroups[groupName] = consents;
         }

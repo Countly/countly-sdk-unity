@@ -24,7 +24,7 @@ namespace Plugins.CountlySDK.Services
         }
 
         /// <summary>
-        ///     Add all recorded events to request queue
+        /// Add all recorded events to request queue
         /// </summary>
         internal void AddEventsToRequestQueue()
         {
@@ -178,7 +178,7 @@ namespace Plugins.CountlySDK.Services
         }
 
         /// <summary>
-        ///     Reports a custom event to the Countly server.
+        /// Reports a custom event to the Countly server.
         /// </summary>
         /// <param name="key">event key</param>
         /// <param name="segmentation">custom segmentation you want to set, leave null if you don't want to add anything</param>

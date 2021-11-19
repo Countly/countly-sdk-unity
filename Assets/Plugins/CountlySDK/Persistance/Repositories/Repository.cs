@@ -63,6 +63,12 @@ namespace Plugins.CountlySDK.Persistance.Repositories
             return model;
         }
 
+        public virtual bool Update(TModel model)
+        {
+            TEntity entity = ConvertModelToEntity(model);
+            return _dao.Update(entity);
+        }
+
 
         public virtual void Clear()
         {

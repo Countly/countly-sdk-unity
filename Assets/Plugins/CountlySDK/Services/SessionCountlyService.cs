@@ -85,10 +85,10 @@ namespace Plugins.CountlySDK.Services
                 Log.Debug("[SessionCountlyService] SessionTimerOnElapsedAsync");
 
                 _eventService.AddEventsToRequestQueue();
-                _= _requestCountlyHelper.ProcessQueue();
+                _ = _requestCountlyHelper.ProcessQueue();
 
                 if (!_configuration.IsAutomaticSessionTrackingDisabled) {
-                    _= ExtendSessionAsync();
+                    _ = ExtendSessionAsync();
                 }
             }
         }
@@ -168,7 +168,7 @@ namespace Plugins.CountlySDK.Services
 
             _eventService.AddEventsToRequestQueue();
 
-           
+
             Dictionary<string, object> requestParams =
                 new Dictionary<string, object>
                 {

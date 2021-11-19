@@ -11,7 +11,7 @@ namespace Plugins.CountlySDK.Services
 {
     public class ConsentCountlyService : AbstractBaseService
     {
-        
+
         internal bool RequiresConsent { get; private set; }
 
         private bool _sendConsentOnChange;
@@ -41,7 +41,7 @@ namespace Plugins.CountlySDK.Services
         #region Public Methods
 
         /// <summary>
-        ///  Check if consent for the specific feature has been given
+        /// Check if consent for the specific feature has been given
         /// </summary>
         /// <param name="consent">The consent that should be checked</param>
         /// <returns>Returns "true" if the consent for the checked feature has been provided</returns>
@@ -54,7 +54,7 @@ namespace Plugins.CountlySDK.Services
         }
 
         /// <summary>
-        ///  An internal function to check if consent for the specific feature has been given
+        /// An internal function to check if consent for the specific feature has been given
         /// </summary>
         /// <param name="consent">The consent that should be checked</param>
         /// <returns>Returns "true" if the consent for the checked feature has been provided</returns>
@@ -66,7 +66,7 @@ namespace Plugins.CountlySDK.Services
         }
 
         /// <summary>
-        ///  Check if consent for any feature has been given
+        /// Check if consent for any feature has been given
         /// </summary>
         /// <returns>Returns "true" if consent is given for any of the possible features</returns>
         internal bool AnyConsentGiven()
@@ -242,7 +242,7 @@ namespace Plugins.CountlySDK.Services
         {
             _sendConsentOnChange = true;
 
-            if (!RequiresConsent || consents.Count == 0 ) {
+            if (!RequiresConsent || consents.Count == 0) {
                 return;
             }
 
@@ -250,7 +250,7 @@ namespace Plugins.CountlySDK.Services
             foreach (Consents consent in consents) {
                 jObj.Add(GetConsentKey(consent), value);
             }
-            
+
             Dictionary<string, object> requestParams =
                 new Dictionary<string, object>
                 {
@@ -311,12 +311,12 @@ namespace Plugins.CountlySDK.Services
 
             return key;
         }
-            /// <summary>
-            /// Private method that update selected consents.
-            /// </summary>
-            /// <param name="consents">List of consent</param>
-            /// <param name="value">value to be set</param>
-            private async void SetConsentInternal(Consents[] consents, bool value)
+        /// <summary>
+        /// Private method that update selected consents.
+        /// </summary>
+        /// <param name="consents">List of consent</param>
+        /// <param name="value">value to be set</param>
+        private async void SetConsentInternal(Consents[] consents, bool value)
         {
             if (consents == null) {
                 Log.Debug("[ConsentCountlyService] Calling SetConsentInternal with null consents list!");

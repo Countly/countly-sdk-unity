@@ -20,12 +20,15 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
             ServerUrl = "https://try.count.ly/",
             AppKey = "YOUR_APP_KEY",
             EnableConsoleLogging = true,
+            Salt = "test-salt-checksum",
+            EnablePost = false,
             RequiresConsent = true,
+            EventQueueThreshold = 1,
             NotificationMode = TestMode.AndroidTestToken
         };
 
         string countryCode = "us";
-        string city = "Houston";
+        string city = "Böston’ 墨尔本";
         string latitude = "29.634933";
         string longitude = "-95.220255";
         string ipAddress = "10.2.33.12";
@@ -181,7 +184,7 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
 
     public async void BasicEvent()
     {
-        await countly.Events.RecordEventAsync("Basic Event");
+        await countly.Events.RecordEventAsync("Sample App’ event");
     }
 
     public async void EventWithSum()
@@ -250,7 +253,7 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
     public void SetLocation()
     {
         string countryCode = "us";
-        string city = "Houston";
+        string city = "Böston’ 墨尔本";
         string latitude = "29.634933";
         string longitude = "-95.220255";
         string ipAddress = null;
@@ -312,7 +315,7 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
                                     { "Mole", "Lower Left Cheek" }
                  });
 
-        await countly.UserDetails.SetUserDetailsAsync(userDetails);
+        await countly.UserDetails.SetCustomUserDetailsAsync(userDetails);
     }
 
     public async void SetPropertyOnce()
@@ -322,14 +325,14 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
 
     }
 
-    public async void IncreamentValue()
+    public async void IncrementValue()
     {
         countly.UserDetails.Increment("Weight");
         await countly.UserDetails.SaveAsync();
 
     }
 
-    public async void IncreamentBy()
+    public async void IncrementBy()
     {
         countly.UserDetails.IncrementBy("Weight", 2);
         await countly.UserDetails.SaveAsync();
@@ -404,6 +407,6 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
 
     public void OnNotificationClicked(string message, int index)
     {
-        Debug.Log("[Example] OnNoticicationClicked: " + message + ", index: " + index);
+        Debug.Log("[Example] OnNotificationClicked: " + message + ", index: " + index);
     }
 }
