@@ -133,11 +133,10 @@ namespace Tests
             Countly.Instance.Init(configuration);
             Assert.IsNotNull(Countly.Instance.Consents);
 
-            string oldDeviceId = Countly.Instance.Device.DeviceId;
             Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
             await Countly.Instance.Device.ChangeDeviceIdWithoutMerge("new_device_id_1");
-            //RQ will have begin session and end session requests
-            Assert.AreEqual(2, Countly.Instance.Device._requestCountlyHelper._requestRepo.Count);
+            //RQ will have end session request
+            Assert.AreEqual(1, Countly.Instance.Device._requestCountlyHelper._requestRepo.Count);
 
 
             CountlyRequestModel requestModel = Countly.Instance.Device._requestCountlyHelper._requestRepo.Dequeue();
@@ -180,6 +179,83 @@ namespace Tests
             Assert.AreEqual(oldDeviceId, collection.Get("old_device_id"));
             Assert.AreEqual("new_device_id", collection.Get("device_id"));
             Assert.AreEqual("new_device_id", Countly.Instance.Device.DeviceId);
+        }
+
+        /// <summary>
+        /// It validates the functionality of method 'ChangeDeviceIdWithoutMerge' when automatic session tracking is enabled.
+        /// </summary>
+        [Test]
+        public async void TestMethod_ChangeDeviceIdWithoutMerge_WhenAutomaticSessionTrackingEnabled()
+        {
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                AppKey = _appKey,
+                ServerUrl = _serverUrl,
+                RequiresConsent = true,
+                IsAutomaticSessionTrackingDisabled = false,
+            };
+
+            configuration.GiveConsent(new Consents[] { Consents.Crashes, Consents.Events, Consents.Clicks, Consents.StarRating, Consents.Views, Consents.Users, Consents.Sessions, Consents.Push, Consents.RemoteConfig, Consents.Location, Consents.Feedback });
+
+            Countly.Instance.Init(configuration);
+            Assert.IsNotNull(Countly.Instance.Consents);
+
+            string oldDeviceId = Countly.Instance.Device.DeviceId;
+            Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
+            await Countly.Instance.Device.ChangeDeviceIdWithoutMerge("new_device_id");
+            //RQ will have end session request
+            Assert.AreEqual(1, Countly.Instance.Device._requestCountlyHelper._requestRepo.Count);
+
+
+            CountlyRequestModel requestModel = Countly.Instance.Device._requestCountlyHelper._requestRepo.Dequeue();
+            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+
+            Assert.AreEqual("1", collection.Get("end_session"));
+            Assert.AreEqual(oldDeviceId, collection.Get("device_id"));
+            Assert.IsNotNull(collection["session_duration"]);
+
+            Countly.Instance.Consents.GiveConsentAll();
+
+            //RQ will have consent request and begin session request
+            Assert.AreEqual(2, Countly.Instance.Device._requestCountlyHelper._requestRepo.Count);
+
+            //Remove consent request from queue
+            Countly.Instance.Device._requestCountlyHelper._requestRepo.Dequeue();
+            requestModel = Countly.Instance.Device._requestCountlyHelper._requestRepo.Dequeue();
+            collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+
+            Assert.AreEqual("1", collection.Get("begin_session"));
+            Assert.AreEqual("new_device_id", collection.Get("device_id"));
+            Assert.AreEqual("new_device_id", Countly.Instance.Device.DeviceId);
+        }
+
+        /// <summary>
+        /// It validates the functionality of method 'ChangeDeviceIdWithoutMerge' when automatic session tracking is disabled.
+        /// </summary>
+        [Test]
+        public async void TestMethod_ChangeDeviceIdWithoutMerge_WhenAutomaticSessionTrackingIsDisabled()
+        {
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                AppKey = _appKey,
+                ServerUrl = _serverUrl,
+                RequiresConsent = true,
+                IsAutomaticSessionTrackingDisabled = true,
+            };
+
+            configuration.GiveConsent(new Consents[] { Consents.Crashes, Consents.Events, Consents.Clicks, Consents.StarRating, Consents.Views, Consents.Users, Consents.Sessions, Consents.Push, Consents.RemoteConfig, Consents.Location, Consents.Feedback });
+
+            Countly.Instance.Init(configuration);
+            Assert.IsNotNull(Countly.Instance.Consents);
+
+            Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
+            await Countly.Instance.Device.ChangeDeviceIdWithoutMerge("new_device_id");
+            //Since automatic session tracking is disabled, RQ will be empty
+            Assert.AreEqual(0, Countly.Instance.Device._requestCountlyHelper._requestRepo.Count);
+
+            Countly.Instance.Consents.GiveConsentAll();
+
+            //RQ will have only consent request
+            Assert.AreEqual(1, Countly.Instance.Device._requestCountlyHelper._requestRepo.Count);
+            Assert.IsTrue(Countly.Instance.Configuration.IsAutomaticSessionTrackingDisabled);
         }
 
         [TearDown]

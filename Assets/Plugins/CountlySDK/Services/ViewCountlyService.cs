@@ -177,11 +177,6 @@ namespace Plugins.CountlySDK.Services
                 _isFirstView = true;
             }
         }
-
-        internal override void ConsentChanged(List<Consents> updatedConsents, bool newConsentValue)
-        {
-
-        }
         #endregion
 
         /// <summary>

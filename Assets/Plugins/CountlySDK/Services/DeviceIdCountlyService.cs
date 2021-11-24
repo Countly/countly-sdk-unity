@@ -112,6 +112,10 @@ namespace Plugins.CountlySDK.Services
                 //Update device id
                 UpdateDeviceId(deviceId);
 
+                if (_consentService.RequiresConsent) {
+                    _consentService.SetConsentInternal(_consentService.CountlyConsents.Keys.ToArray(), false, sendRequest: false, notifyListeners: false);
+                }
+
                 //Begin new session with new device id
                 //Do not initiate timer again, it is already initiated
                 if (!_configuration.IsAutomaticSessionTrackingDisabled) {
@@ -119,11 +123,6 @@ namespace Plugins.CountlySDK.Services
                 }
 
                 NotifyListeners(false);
-
-                if (_consentService.RequiresConsent) {
-
-                    _consentService.SetConsentInternal(_consentService.CountlyConsents.Keys.ToArray(), false, sendRequest: false);
-                }
 
                 _ = _requestCountlyHelper.ProcessQueue();
             }
@@ -212,15 +211,6 @@ namespace Plugins.CountlySDK.Services
         }
 
         #region override Methods
-        internal override void DeviceIdChanged(string deviceId, bool merged)
-        {
-
-        }
-
-        internal override void ConsentChanged(List<Consents> updatedConsents, bool newConsentValue)
-        {
-
-        }
         #endregion
     }
 }

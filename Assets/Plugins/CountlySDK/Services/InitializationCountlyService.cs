@@ -20,8 +20,10 @@ namespace Plugins.CountlySDK.Services
 
         internal async Task OnInitialisationComplete()
         {
-            await _consentService.SendConsentChanges(_consentService.CountlyConsents.Keys.ToList(), true);
-            await _sessionService.StartSessionService();
+            lock (LockObj) {
+                _ = _consentService.SendConsentChanges(_consentService.CountlyConsents.Keys.ToList(), true);
+                _ = _sessionService.StartSessionService();
+            }
         }
     }
 }

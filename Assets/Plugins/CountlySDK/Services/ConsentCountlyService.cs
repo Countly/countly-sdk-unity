@@ -305,7 +305,7 @@ namespace Plugins.CountlySDK.Services
         /// </summary>
         /// <param name="consents">List of consent</param>
         /// <param name="value">value to be set</param>
-        internal async void SetConsentInternal(Consents[] consents, bool value, bool sendRequest = false)
+        internal async void SetConsentInternal(Consents[] consents, bool value, bool sendRequest = false, bool notifyListeners = true)
         {
             if (consents == null) {
                 Log.Debug("[ConsentCountlyService] Calling SetConsentInternal with null consents list!");
@@ -331,7 +331,10 @@ namespace Plugins.CountlySDK.Services
             if (sendRequest) {
                 await SendConsentChanges(updatedConsents, value);
             }
-            NotifyListeners(updatedConsents, value);
+
+            if (notifyListeners) {
+                NotifyListeners(updatedConsents, value);
+            }
         }
 
         /// <summary>

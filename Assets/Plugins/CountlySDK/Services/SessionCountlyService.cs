@@ -214,11 +214,6 @@ namespace Plugins.CountlySDK.Services
         }
 
         #region override Methods
-        internal override void DeviceIdChanged(string deviceId, bool merged)
-        {
-
-        }
-
         internal override async void ConsentChanged(List<Consents> updatedConsents, bool newConsentValue)
         {
             if (updatedConsents.Contains(Consents.Sessions) && newConsentValue) {
