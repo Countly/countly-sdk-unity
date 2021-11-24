@@ -144,7 +144,7 @@ namespace Plugins.CountlySDK.Services
             }
 
             if (customDetail == null || customDetail.Count == 0) {
-                Log.Warning("[UserDetailsCountlyService] SetCustomUserDetails : User custom detail 'customDetail' can't be null or empty.");
+                Log.Warning("[UserDetailsCountlyService] SetCustomUserDetails : Provided custom detail 'customDetail' can't be null or empty.");
 
                 return;
             }
