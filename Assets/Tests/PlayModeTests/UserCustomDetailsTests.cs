@@ -343,7 +343,7 @@ namespace Tests
         }
 
         /// <summary>
-        /// It check the working of method 'UserCustomDetails'.
+        /// It validates the user's custom properties set with method 'UserCustomDetails'.
         /// </summary>
         [Test]
         public void TestUserDetailMethod_UserCustomDetails()
@@ -381,7 +381,7 @@ namespace Tests
         }
 
         /// <summary>
-        /// It check the working of method 'UserCustomDetailsAsync'.
+        /// It validates the user's custom properties set with method 'UserCustomDetailsAsync'.
         /// </summary>
         [Test]
         public async void TestUserDetailMethod_UserCustomDetailsAsync()

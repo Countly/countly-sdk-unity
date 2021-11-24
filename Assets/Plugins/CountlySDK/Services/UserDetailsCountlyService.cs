@@ -137,14 +137,14 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public void SetCustomUserDetails(Dictionary<string, object> customDetail)
         {
-            Log.Info("[UserDetailsCountlyService] SetCustomUserDetailsAsync " + (customDetail != null));
+            Log.Info("[UserDetailsCountlyService] SetCustomUserDetails " + (customDetail != null));
 
             if (!_consentService.CheckConsentInternal(Consents.Users)) {
                 return;
             }
 
             if (customDetail == null || customDetail.Count == 0) {
-                Log.Warning("[UserDetailsCountlyService] SetCustomUserDetailsAsync : The custom property 'userDetailsModel.Custom' can't be null or empty.");
+                Log.Warning("[UserDetailsCountlyService] SetCustomUserDetails : User custom detail 'customDetail' can't be null or empty.");
 
                 return;
             }
