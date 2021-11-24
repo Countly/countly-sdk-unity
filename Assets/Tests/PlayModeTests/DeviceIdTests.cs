@@ -134,13 +134,17 @@ namespace Tests
             Assert.IsNotNull(Countly.Instance.Consents);
 
             Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
+            string oldDeviceId = Countly.Instance.Device.DeviceId;
             await Countly.Instance.Device.ChangeDeviceIdWithoutMerge("new_device_id_1");
             //RQ will have end session request
             Assert.AreEqual(1, Countly.Instance.Device._requestCountlyHelper._requestRepo.Count);
 
-
             CountlyRequestModel requestModel = Countly.Instance.Device._requestCountlyHelper._requestRepo.Dequeue();
-            string uri = requestModel.RequestUrl;
+            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+
+            Assert.AreEqual("1", collection.Get("end_session"));
+            Assert.AreEqual(oldDeviceId, collection.Get("device_id"));
+            Assert.IsNotNull(collection["session_duration"]);
 
             Assert.IsTrue(Countly.Instance.Consents.RequiresConsent);
 
@@ -148,8 +152,6 @@ namespace Tests
             foreach (Consents consent in consents) {
                 Assert.IsFalse(Countly.Instance.Consents.CheckConsentInternal(consent));
             }
-
-
         }
 
         /// <summary>
