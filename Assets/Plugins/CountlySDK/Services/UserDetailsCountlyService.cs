@@ -104,6 +104,7 @@ namespace Plugins.CountlySDK.Services
         /// </summary>
         /// <param name="userDetailsModel">User Detail Model with the custom properties</param>
         /// <returns></returns>
+        [Obsolete("SetCustomUserDetailsAsync is deprecated, please use SetCustomUserDetails method instead.")]
         public async Task SetCustomUserDetailsAsync(CountlyUserDetailsModel userDetailsModel)
         {
             lock (LockObj) {
@@ -126,6 +127,29 @@ namespace Plugins.CountlySDK.Services
 
                 AddCustomDetailToRequestQueue(userDetailsModel.Custom);
             }
+        }
+
+        /// <summary>
+        /// Sets information about user with custom properties.
+        /// In custom properties you can provide any string key values to be stored with user.
+        /// </summary>
+        /// <param name="customDetail">User custom detail</param>
+        /// <returns></returns>
+        public void SetCustomUserDetails(Dictionary<string, object> customDetail)
+        {
+            Log.Info("[UserDetailsCountlyService] SetCustomUserDetails " + (customDetail != null));
+
+            if (!_consentService.CheckConsentInternal(Consents.Users)) {
+                return;
+            }
+
+            if (customDetail == null || customDetail.Count == 0) {
+                Log.Warning("[UserDetailsCountlyService] SetCustomUserDetails : Provided custom detail 'customDetail' can't be null or empty.");
+
+                return;
+            }
+
+            AddCustomDetailToRequestQueue(customDetail);
         }
 
         /// <summary>
