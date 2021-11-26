@@ -344,6 +344,8 @@ namespace Tests
 
         /// <summary>
         /// It validates the user's custom properties set with method 'UserCustomDetails'.
+        /// Case 1: If invalid custom detail is provided, no request will add to the request queue.
+        /// Case 2: If valid custom detail is provided, a request that have custom detail, should be added in the request queue.
         /// </summary>
         [Test]
         public void TestUserDetailMethod_UserCustomDetails()
