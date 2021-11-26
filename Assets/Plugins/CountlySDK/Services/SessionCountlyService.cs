@@ -214,7 +214,7 @@ namespace Plugins.CountlySDK.Services
         }
 
         #region override Methods
-        internal override async void ConsentChanged(List<Consents> updatedConsents, bool newConsentValue)
+        internal override async void ConsentChanged(List<Consents> updatedConsents, bool newConsentValue, ConsentChangedAction action)
         {
             if (updatedConsents.Contains(Consents.Sessions) && newConsentValue) {
                 if (!_configuration.IsAutomaticSessionTrackingDisabled) {

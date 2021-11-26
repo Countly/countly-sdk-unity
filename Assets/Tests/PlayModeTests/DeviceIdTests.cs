@@ -220,8 +220,24 @@ namespace Tests
             //RQ will have consent request and begin session request
             Assert.AreEqual(2, Countly.Instance.Device._requestCountlyHelper._requestRepo.Count);
 
-            //Remove consent request from queue
-            Countly.Instance.Device._requestCountlyHelper._requestRepo.Dequeue();
+            requestModel = Countly.Instance.Device._requestCountlyHelper._requestRepo.Dequeue();
+            collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+
+            JObject consentObj = JObject.Parse(collection.Get("consent"));
+
+            Assert.AreEqual(11, consentObj.Count);
+            Assert.IsTrue(consentObj.GetValue("push").ToObject<bool>());
+            Assert.IsTrue(consentObj.GetValue("users").ToObject<bool>());
+            Assert.IsTrue(consentObj.GetValue("views").ToObject<bool>());
+            Assert.IsTrue(consentObj.GetValue("clicks").ToObject<bool>());
+            Assert.IsTrue(consentObj.GetValue("events").ToObject<bool>());
+            Assert.IsTrue(consentObj.GetValue("crashes").ToObject<bool>());
+            Assert.IsTrue(consentObj.GetValue("sessions").ToObject<bool>());
+            Assert.IsTrue(consentObj.GetValue("location").ToObject<bool>());
+            Assert.IsTrue(consentObj.GetValue("feedback").ToObject<bool>());
+            Assert.IsTrue(consentObj.GetValue("star-rating").ToObject<bool>());
+            Assert.IsTrue(consentObj.GetValue("remote-config").ToObject<bool>());
+
             requestModel = Countly.Instance.Device._requestCountlyHelper._requestRepo.Dequeue();
             collection = HttpUtility.ParseQueryString(requestModel.RequestData);
 
@@ -257,6 +273,23 @@ namespace Tests
 
             //RQ will have only consent request
             Assert.AreEqual(1, Countly.Instance.Device._requestCountlyHelper._requestRepo.Count);
+            CountlyRequestModel requestModel = Countly.Instance.Device._requestCountlyHelper._requestRepo.Dequeue();
+            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            JObject consentObj = JObject.Parse(collection.Get("consent"));
+
+            Assert.AreEqual(11, consentObj.Count);
+            Assert.IsTrue(consentObj.GetValue("push").ToObject<bool>());
+            Assert.IsTrue(consentObj.GetValue("users").ToObject<bool>());
+            Assert.IsTrue(consentObj.GetValue("views").ToObject<bool>());
+            Assert.IsTrue(consentObj.GetValue("clicks").ToObject<bool>());
+            Assert.IsTrue(consentObj.GetValue("events").ToObject<bool>());
+            Assert.IsTrue(consentObj.GetValue("crashes").ToObject<bool>());
+            Assert.IsTrue(consentObj.GetValue("sessions").ToObject<bool>());
+            Assert.IsTrue(consentObj.GetValue("location").ToObject<bool>());
+            Assert.IsTrue(consentObj.GetValue("feedback").ToObject<bool>());
+            Assert.IsTrue(consentObj.GetValue("star-rating").ToObject<bool>());
+            Assert.IsTrue(consentObj.GetValue("remote-config").ToObject<bool>());
+
             Assert.IsTrue(Countly.Instance.Configuration.IsAutomaticSessionTrackingDisabled);
         }
 

@@ -27,12 +27,12 @@ namespace Plugins.CountlySDK.Services
             if (_configuration.EnabledConsentGroups != null) {
                 foreach (KeyValuePair<string, Consents[]> entry in _countlyConsentGroups) {
                     if (_configuration.EnabledConsentGroups.Contains(entry.Key)) {
-                        SetConsentInternal(entry.Value, true, sendRequest: false);
+                        SetConsentInternal(entry.Value, true, sendRequest: false, ConsentChangedAction.Initialization);
                     }
                 }
             }
 
-            SetConsentInternal(_configuration.GivenConsent, true, sendRequest: false);
+            SetConsentInternal(_configuration.GivenConsent, true, sendRequest: false, ConsentChangedAction.Initialization);
         }
 
         #region Public Methods
@@ -305,7 +305,7 @@ namespace Plugins.CountlySDK.Services
         /// </summary>
         /// <param name="consents">List of consent</param>
         /// <param name="value">value to be set</param>
-        internal async void SetConsentInternal(Consents[] consents, bool value, bool sendRequest = false, bool notifyListeners = true)
+        internal async void SetConsentInternal(Consents[] consents, bool value, bool sendRequest = false, ConsentChangedAction action = ConsentChangedAction.ConsentUpdated)
         {
             if (consents == null) {
                 Log.Debug("[ConsentCountlyService] Calling SetConsentInternal with null consents list!");
@@ -332,9 +332,7 @@ namespace Plugins.CountlySDK.Services
                 await SendConsentChanges(updatedConsents, value);
             }
 
-            if (notifyListeners) {
-                NotifyListeners(updatedConsents, value);
-            }
+            NotifyListeners(updatedConsents, value, action);
         }
 
         /// <summary>
@@ -342,14 +340,14 @@ namespace Plugins.CountlySDK.Services
         /// </summary>
         /// <param name="updatedConsents">List of modified consent</param>
         /// <param name="newConsentValue">Modified Consents's new value</param>
-        private void NotifyListeners(List<Consents> updatedConsents, bool newConsentValue)
+        private void NotifyListeners(List<Consents> updatedConsents, bool newConsentValue, ConsentChangedAction action)
         {
             if (Listeners == null || updatedConsents.Count < 1) {
                 return;
             }
 
             foreach (AbstractBaseService listener in Listeners) {
-                listener.ConsentChanged(updatedConsents, newConsentValue);
+                listener.ConsentChanged(updatedConsents, newConsentValue, action);
             }
 
         }
