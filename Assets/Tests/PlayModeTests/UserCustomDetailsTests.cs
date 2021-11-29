@@ -135,7 +135,7 @@ namespace Tests
         /// It check the working of method 'SetUserDetailsAsync'.
         /// </summary>
         [Test]
-        public async void TestUserDetailMethod_SetCustomUserDetailsAsync()
+        public void TestUserDetailMethod_SetCustomUserDetailsAsync()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 ServerUrl = _serverUrl,
@@ -149,23 +149,22 @@ namespace Tests
             Assert.IsNotNull(Countly.Instance.UserDetails);
             Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
 
-            CountlyUserDetailsModel userDetails = null;
+            Dictionary<string, object> userCustomDetail = null;
 
-            await Countly.Instance.UserDetails.SetCustomUserDetailsAsync(userDetails);
+            Countly.Instance.UserDetails.SetCustomUserDetails(userCustomDetail);
             Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
 
-            userDetails = new CountlyUserDetailsModel(
-                    new Dictionary<string, object>{
+            userCustomDetail = new Dictionary<string, object> {
                         { "Hair", "Black" },
                         { "Height", "5.9" },
-                    });
-            await Countly.Instance.UserDetails.SetCustomUserDetailsAsync(userDetails);
+            };
+            Countly.Instance.UserDetails.SetCustomUserDetails(userCustomDetail);
             Assert.AreEqual(1, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
 
             CountlyRequestModel requestModel = Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Dequeue();
             NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
-
             JObject custom = JObject.Parse(collection["user_details"]);
+
 
             Assert.AreEqual("Black", custom["custom"]["Hair"].ToString());
             Assert.AreEqual("5.9", custom["custom"]["Height"].ToString());
@@ -176,7 +175,7 @@ namespace Tests
         /// It validate user detail segments limits.
         /// </summary>
         [Test]
-        public async void TestUserDetailSegmentLimits()
+        public void TestUserDetailSegmentLimits()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 ServerUrl = _serverUrl,
@@ -192,17 +191,16 @@ namespace Tests
             Assert.IsNotNull(Countly.Instance.UserDetails);
             Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
 
-            CountlyUserDetailsModel userDetails = null;
-
-            await Countly.Instance.UserDetails.SetCustomUserDetailsAsync(userDetails);
+            Dictionary<string, object> userCustomDetail = null;
+            Countly.Instance.UserDetails.SetCustomUserDetails(userCustomDetail);
             Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
 
-            userDetails = new CountlyUserDetailsModel(
-                    new Dictionary<string, object>{
-                        { "Hair", "Black_000" },
+            userCustomDetail = new Dictionary<string, object> {
+                        { "Hair", "Black_1" },
                         { "Height", "5.9" },
-                    });
-            await Countly.Instance.UserDetails.SetCustomUserDetailsAsync(userDetails);
+            };
+
+            Countly.Instance.UserDetails.SetCustomUserDetails(userCustomDetail);
             Assert.AreEqual(1, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
 
             CountlyRequestModel requestModel = Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Dequeue();
@@ -345,14 +343,17 @@ namespace Tests
         }
 
         /// <summary>
-        /// It check the working of method 'UserCustomDetailsAsync'.
+        /// It validates the user's custom properties set with method 'UserCustomDetails'.
+        /// Case 1: If invalid custom detail is provided, no request will add to the request queue.
+        /// Case 2: If valid custom detail is provided, a request that have custom detail, should be added in the request queue.
         /// </summary>
         [Test]
-        public async void TestUserDetailMethod_UserCustomDetailsAsync()
+        public void TestUserDetailMethod_UserCustomDetails()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 ServerUrl = _serverUrl,
                 AppKey = _appKey,
+                EnablePost = true,
             };
 
             Countly.Instance.Init(configuration);
@@ -361,21 +362,64 @@ namespace Tests
             Assert.IsNotNull(Countly.Instance.UserDetails);
             Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
 
-            CountlyUserDetailsModel InvalidUserDetails = null;
-            await Countly.Instance.UserDetails.SetCustomUserDetailsAsync(InvalidUserDetails);
+            Dictionary<string, object> InvalidUserDetails = null;
+            Countly.Instance.UserDetails.SetCustomUserDetails(InvalidUserDetails);
             Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
 
-            InvalidUserDetails = new CountlyUserDetailsModel(null);
-            await Countly.Instance.UserDetails.SetCustomUserDetailsAsync(InvalidUserDetails);
-            Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
-
-            Dictionary<string, object> customDetail = new Dictionary<string, object>{
-                { "Height", "5.8" },
-                { "Mole", "Lower Left Cheek" }
+            Dictionary<string, object> userCustomDetail = new Dictionary<string, object> {
+                        { "Hair", "Black" },
+                        { "Height", "5.9" },
             };
-            CountlyUserDetailsModel userDetails = new CountlyUserDetailsModel(customDetail);
-            await Countly.Instance.UserDetails.SetCustomUserDetailsAsync(userDetails);
+
+            Countly.Instance.UserDetails.SetCustomUserDetails(userCustomDetail);
             Assert.AreEqual(1, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
+
+            CountlyRequestModel requestModel = Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Dequeue();
+            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            JObject userdetail = JObject.Parse(collection["user_details"]);
+
+            Assert.AreEqual("Black", userdetail["custom"]["Hair"].ToString());
+            Assert.AreEqual("5.9", userdetail["custom"]["Height"].ToString());
+        }
+
+        /// <summary>
+        /// It validates the user's custom properties set with method 'UserCustomDetailsAsync'.
+        /// </summary>
+        [Test]
+        public async void TestUserDetailMethod_UserCustomDetailsAsync()
+        {
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                ServerUrl = _serverUrl,
+                AppKey = _appKey,
+                EnablePost = true,
+            };
+
+            Countly.Instance.Init(configuration);
+            Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
+
+            Assert.IsNotNull(Countly.Instance.UserDetails);
+            Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
+
+            CountlyUserDetailsModel userDetails = null;
+
+            await Countly.Instance.UserDetails.SetCustomUserDetailsAsync(userDetails);
+            Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
+
+            userDetails = new CountlyUserDetailsModel(
+                  new Dictionary<string, object>{
+                        { "Hair", "Black" },
+                        { "Height", "5.9" },
+                  });
+
+            Countly.Instance.UserDetails.SetCustomUserDetailsAsync(userDetails);
+            Assert.AreEqual(1, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
+
+            CountlyRequestModel requestModel = Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Dequeue();
+            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            JObject userdetail = JObject.Parse(collection["user_details"]);
+
+            Assert.AreEqual("Black", userdetail["custom"]["Hair"].ToString());
+            Assert.AreEqual("5.9", userdetail["custom"]["Height"].ToString());
         }
         /// <summary>
         /// It validates the user's custom properties set via 'SetOnce' and 'Set' methods.
