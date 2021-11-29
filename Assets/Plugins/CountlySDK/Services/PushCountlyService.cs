@@ -117,13 +117,7 @@ namespace Plugins.CountlySDK.Services
         {
             EnableNotification();
         }
-
-        internal override void DeviceIdChanged(string deviceId, bool merged)
-        {
-
-        }
-
-        internal override void ConsentChanged(List<Consents> updatedConsents, bool newConsentValue)
+        internal override void ConsentChanged(List<Consents> updatedConsents, bool newConsentValue, ConsentChangedAction action)
         {
             if (updatedConsents.Contains(Consents.Push) && newConsentValue && !_isDeviceRegistered) {
                 EnableNotification();

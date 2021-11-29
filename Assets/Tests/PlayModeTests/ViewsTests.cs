@@ -369,19 +369,11 @@ namespace Tests
 
             Assert.IsTrue(Countly.Instance.Views._isFirstView);
             await Countly.Instance.Views.RecordOpenViewAsync("second_view_open");
-            Assert.IsFalse(Countly.Instance.Views._isFirstView);
-            Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
 
-            CountlyEventModel model = Countly.Instance.Views._eventService._eventRepo.Dequeue();
+            Assert.IsTrue(Countly.Instance.Views._isFirstView);
+            Assert.IsFalse(Countly.Instance.Consents.CheckConsent(Consents.Views));
+            Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
 
-            Assert.AreEqual(CountlyEventModel.ViewEvent, model.Key);
-            Assert.IsNull(model.Sum);
-            Assert.AreEqual(1, model.Count);
-            Assert.IsNull(model.Duration);
-            Assert.IsNotNull(model.Segmentation);
-            Assert.AreEqual("second_view_open", model.Segmentation["name"]);
-            Assert.AreEqual(1, model.Segmentation["visit"]);
-            Assert.AreEqual(1, model.Segmentation["start"]);
         }
 
         [TearDown]

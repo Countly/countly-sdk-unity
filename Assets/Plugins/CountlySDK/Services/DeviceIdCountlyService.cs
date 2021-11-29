@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Plugins.CountlySDK.Enums;
 using Plugins.CountlySDK.Helpers;
@@ -94,11 +95,6 @@ namespace Plugins.CountlySDK.Services
             lock (LockObj) {
                 Log.Info("[DeviceIdCountlyService] ChangeDeviceIdWithoutMerge: deviceId = " + deviceId);
 
-                if (!_consentService.AnyConsentGiven()) {
-                    Log.Debug("[DeviceIdCountlyService] ChangeDeviceIdWithoutMerge: Please set at least a single consent before calling this!");
-                    return;
-                }
-
                 //Ignore call if new and old device id are same
                 if (DeviceId == deviceId) {
                     return;
@@ -115,6 +111,10 @@ namespace Plugins.CountlySDK.Services
 
                 //Update device id
                 UpdateDeviceId(deviceId);
+
+                if (_consentService.RequiresConsent) {
+                    _consentService.SetConsentInternal(_consentService.CountlyConsents.Keys.ToArray(), false, sendRequest: false, ConsentChangedAction.DeviceIDChangedNotMerged);
+                }
 
                 //Begin new session with new device id
                 //Do not initiate timer again, it is already initiated
@@ -158,11 +158,6 @@ namespace Plugins.CountlySDK.Services
             lock (LockObj) {
                 Log.Info("[DeviceIdCountlyService] ChangeDeviceIdWithMerge: deviceId = " + deviceId);
 
-                if (!_consentService.AnyConsentGiven()) {
-                    Log.Debug("[DeviceIdCountlyService] ChangeDeviceIdWithMerge: Please set at least a single consent before calling this!");
-                    return;
-                }
-
                 //Ignore call if new and old device id are same
                 if (DeviceId == deviceId) {
                     return;
@@ -176,10 +171,7 @@ namespace Plugins.CountlySDK.Services
 
                 //Merge user data for old and new device
                 Dictionary<string, object> requestParams =
-                   new Dictionary<string, object>
-                   {
-                        { "old_device_id", oldDeviceId }
-                   };
+                    new Dictionary<string, object> { { "old_device_id", oldDeviceId } };
 
                 _requestCountlyHelper.AddToRequestQueue(requestParams);
                 _ = _requestCountlyHelper.ProcessQueue();
@@ -219,16 +211,6 @@ namespace Plugins.CountlySDK.Services
         }
 
         #region override Methods
-
-        internal override void DeviceIdChanged(string deviceId, bool merged)
-        {
-
-        }
-
-        internal override void ConsentChanged(List<Consents> updatedConsents, bool newConsentValue)
-        {
-
-        }
         #endregion
     }
 }

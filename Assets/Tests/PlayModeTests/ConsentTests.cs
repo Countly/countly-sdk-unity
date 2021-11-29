@@ -669,7 +669,7 @@ namespace Tests
                 DeltaConsentsList = new List<DeltaConsents>();
             }
 
-            internal override void ConsentChanged(List<Consents> updatedConsents, bool newConsentValue)
+            internal override void ConsentChanged(List<Consents> updatedConsents, bool newConsentValue, ConsentChangedAction action)
             {
                 DeltaConsents deltaConsents;
                 deltaConsents.value = newConsentValue;

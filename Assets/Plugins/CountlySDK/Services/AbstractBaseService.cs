@@ -122,7 +122,14 @@ namespace Plugins.CountlySDK.Services
         }
         internal virtual void OnInitializationCompleted() { }
         internal virtual void DeviceIdChanged(string deviceId, bool merged) { }
-        internal virtual void ConsentChanged(List<Consents> updatedConsents, bool newConsentValue) { }
+        internal virtual void ConsentChanged(List<Consents> updatedConsents, bool newConsentValue, ConsentChangedAction action) { }
+    }
+
+    internal enum ConsentChangedAction
+    {
+       Initialization,
+       ConsentUpdated,
+       DeviceIDChangedNotMerged,
     }
 
 }
