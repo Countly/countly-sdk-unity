@@ -113,7 +113,7 @@ namespace Plugins.CountlySDK.Services
                 UpdateDeviceId(deviceId);
 
                 if (_consentService.RequiresConsent) {
-                    _consentService.SetConsentInternal(_consentService.CountlyConsents.Keys.ToArray(), false, sendRequest: false, ConsentChangedAction.DeviceIDChanged);
+                    _consentService.SetConsentInternal(_consentService.CountlyConsents.Keys.ToArray(), false, sendRequest: false, ConsentChangedAction.DeviceIDChangedNotMerged);
                 }
 
                 //Begin new session with new device id

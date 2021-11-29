@@ -177,7 +177,7 @@ namespace Plugins.CountlySDK.Services
         #region override Methods
         internal override void ConsentChanged(List<Consents> updatedConsents, bool newConsentValue, ConsentChangedAction action)
         {
-            if (action != ConsentChangedAction.DeviceIDChanged && updatedConsents.Contains(Consents.Location) && !newConsentValue) {
+            if (action != ConsentChangedAction.DeviceIDChangedNotMerged && updatedConsents.Contains(Consents.Location) && !newConsentValue) {
                 OnLocationConsentRemoved();
             }
 

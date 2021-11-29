@@ -129,7 +129,7 @@ namespace Plugins.CountlySDK.Services
     {
        Initialization,
        ConsentUpdated,
-       DeviceIDChanged,
+       DeviceIDChangedNotMerged,
     }
 
 }
