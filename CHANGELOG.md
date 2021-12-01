@@ -1,4 +1,4 @@
-## 21.10.0
+## 21.11.0
 * !! Major breaking change !! Changing device ID without merging will now clear the current consent. Consent has to be given again after performing this action.
 * 'UserCustomDetailAsync (CountlyUserDetailsModel userDetailsModel)' is deprecated.
 * Fixed issues with how parameter tampering protection was handled.
