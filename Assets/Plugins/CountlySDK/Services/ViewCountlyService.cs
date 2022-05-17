@@ -40,7 +40,7 @@ namespace Plugins.CountlySDK.Services
         /// </summary>
         /// <param name="name">name of the view</param>
         /// <returns></returns>
-        public async Task RecordOpenViewAsync(string name)
+        public async Task RecordOpenViewAsync(string name, IDictionary<string, object> segmentation = null)
         {
             lock (LockObj) {
                 Log.Info("[ViewCountlyService] RecordOpenViewAsync : name = " + name);
@@ -66,11 +66,23 @@ namespace Plugins.CountlySDK.Services
                         Start = _isFirstView ? 1 : 0
                     };
 
+                IDictionary<string, object> openViewSegment = currentViewSegment.OpenViewDictionary();
+
+                if (segmentation != null) {
+
+                    segmentation = RemoveSegmentInvalidDataTypes(segmentation);
+                    segmentation = FixSegmentKeysAndValues(segmentation);
+
+                    foreach (KeyValuePair<string, object> item in segmentation) {
+                        openViewSegment.Add(item.Key, item.Value);
+                    }
+                }
+
                 if (!_viewToLastViewStartTime.ContainsKey(name)) {
                     _viewToLastViewStartTime.Add(name, DateTime.UtcNow);
                 }
 
-                CountlyEventModel currentView = new CountlyEventModel(CountlyEventModel.ViewEvent, currentViewSegment.OpenViewDictionary());
+                CountlyEventModel currentView = new CountlyEventModel(CountlyEventModel.ViewEvent, openViewSegment));
                 _ = _eventService.RecordEventAsync(currentView);
 
                 _isFirstView = false;
