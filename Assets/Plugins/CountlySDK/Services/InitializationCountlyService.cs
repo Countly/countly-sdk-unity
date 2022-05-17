@@ -21,7 +21,7 @@ namespace Plugins.CountlySDK.Services
         internal async Task OnInitialisationComplete()
         {
             lock (LockObj) {
-                _ = _consentService.SendConsentChanges(_consentService.CountlyConsents.Keys.ToList(), true);
+                _ = _consentService.SendConsentChanges();
                 _ = _sessionService.StartSessionService();
             }
         }

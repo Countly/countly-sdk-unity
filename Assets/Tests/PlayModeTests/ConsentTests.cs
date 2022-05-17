@@ -152,9 +152,20 @@ namespace Tests
             NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
             JObject json = JObject.Parse(collection["consent"]);
 
-            Assert.AreEqual(2, json.Count);
-            Assert.IsTrue(json.GetValue("crashes").ToObject<bool>());
+            Assert.AreEqual(11, json.Count);
+
             Assert.IsTrue(json.GetValue("events").ToObject<bool>());
+            Assert.IsTrue(json.GetValue("crashes").ToObject<bool>());
+
+            Assert.IsFalse(json.GetValue("push").ToObject<bool>());
+            Assert.IsFalse(json.GetValue("users").ToObject<bool>());
+            Assert.IsFalse(json.GetValue("views").ToObject<bool>());
+            Assert.IsFalse(json.GetValue("clicks").ToObject<bool>());
+            Assert.IsFalse(json.GetValue("sessions").ToObject<bool>());
+            Assert.IsFalse(json.GetValue("location").ToObject<bool>());
+            Assert.IsFalse(json.GetValue("feedback").ToObject<bool>());
+            Assert.IsFalse(json.GetValue("star-rating").ToObject<bool>());
+            Assert.IsFalse(json.GetValue("remote-config").ToObject<bool>());
 
             Countly.Instance.Consents.GiveConsent(new Consents[] { Consents.Crashes, Consents.Views });
             Assert.AreEqual(1, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
@@ -163,8 +174,20 @@ namespace Tests
             collection = HttpUtility.ParseQueryString(requestModel.RequestData);
             json = JObject.Parse(collection["consent"]);
 
-            Assert.AreEqual(1, json.Count);
+            Assert.AreEqual(11, json.Count);
+
             Assert.IsTrue(json.GetValue("views").ToObject<bool>());
+            Assert.IsTrue(json.GetValue("events").ToObject<bool>());
+            Assert.IsTrue(json.GetValue("crashes").ToObject<bool>());
+
+            Assert.IsFalse(json.GetValue("push").ToObject<bool>());
+            Assert.IsFalse(json.GetValue("users").ToObject<bool>());
+            Assert.IsFalse(json.GetValue("clicks").ToObject<bool>());
+            Assert.IsFalse(json.GetValue("sessions").ToObject<bool>());
+            Assert.IsFalse(json.GetValue("location").ToObject<bool>());
+            Assert.IsFalse(json.GetValue("feedback").ToObject<bool>());
+            Assert.IsFalse(json.GetValue("star-rating").ToObject<bool>());
+            Assert.IsFalse(json.GetValue("remote-config").ToObject<bool>());
 
             Countly.Instance.Consents.GiveConsent(new Consents[] { Consents.Views });
             Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
@@ -175,9 +198,19 @@ namespace Tests
             collection = HttpUtility.ParseQueryString(requestModel.RequestData);
             json = JObject.Parse(collection["consent"]);
 
-            Assert.AreEqual(2, json.Count);
-            Assert.IsFalse(json.GetValue("crashes").ToObject<bool>());
+            Assert.IsTrue(json.GetValue("events").ToObject<bool>());
+
             Assert.IsFalse(json.GetValue("views").ToObject<bool>());
+            Assert.IsFalse(json.GetValue("crashes").ToObject<bool>());
+
+            Assert.IsFalse(json.GetValue("push").ToObject<bool>());
+            Assert.IsFalse(json.GetValue("users").ToObject<bool>());
+            Assert.IsFalse(json.GetValue("clicks").ToObject<bool>());
+            Assert.IsFalse(json.GetValue("sessions").ToObject<bool>());
+            Assert.IsFalse(json.GetValue("location").ToObject<bool>());
+            Assert.IsFalse(json.GetValue("feedback").ToObject<bool>());
+            Assert.IsFalse(json.GetValue("star-rating").ToObject<bool>());
+            Assert.IsFalse(json.GetValue("remote-config").ToObject<bool>());
 
             Countly.Instance.Consents.RemoveConsent(new Consents[] { Consents.Events, Consents.Views });
             requestModel = Countly.Instance.Consents._requestCountlyHelper._requestRepo.Dequeue();
@@ -185,12 +218,23 @@ namespace Tests
             collection = HttpUtility.ParseQueryString(requestModel.RequestData);
             json = JObject.Parse(collection["consent"]);
 
-            Assert.AreEqual(1, json.Count);
+            Assert.AreEqual(11, json.Count);
             Assert.IsFalse(json.GetValue("events").ToObject<bool>());
+
+            Assert.IsFalse(json.GetValue("views").ToObject<bool>());
+            Assert.IsFalse(json.GetValue("crashes").ToObject<bool>());
+
+            Assert.IsFalse(json.GetValue("push").ToObject<bool>());
+            Assert.IsFalse(json.GetValue("users").ToObject<bool>());
+            Assert.IsFalse(json.GetValue("clicks").ToObject<bool>());
+            Assert.IsFalse(json.GetValue("sessions").ToObject<bool>());
+            Assert.IsFalse(json.GetValue("location").ToObject<bool>());
+            Assert.IsFalse(json.GetValue("feedback").ToObject<bool>());
+            Assert.IsFalse(json.GetValue("star-rating").ToObject<bool>());
+            Assert.IsFalse(json.GetValue("remote-config").ToObject<bool>());
 
             Countly.Instance.Consents.RemoveConsent(new Consents[] { Consents.Crashes });
             Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
-
         }
 
         /// <summary>

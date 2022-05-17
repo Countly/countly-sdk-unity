@@ -234,15 +234,16 @@ namespace Plugins.CountlySDK.Services
         /// </summary>
         /// <param name="consents">List of consent</param>
         /// <param name="value">value to be set</param>
-        internal async Task SendConsentChanges(List<Consents> consents, bool value)
+        internal async Task SendConsentChanges()
         {
-            if (!RequiresConsent || consents.Count == 0 || _requestCountlyHelper == null) {
+            if (!RequiresConsent || _requestCountlyHelper == null) {
                 return;
             }
 
             JObject jObj = new JObject();
+            Consents[] consents = System.Enum.GetValues(typeof(Consents)).Cast<Consents>().ToArray();
             foreach (Consents consent in consents) {
-                jObj.Add(GetConsentKey(consent), value);
+                jObj.Add(GetConsentKey(consent), CheckConsentInternal(consent));
             }
 
             Dictionary<string, object> requestParams =
@@ -328,8 +329,8 @@ namespace Plugins.CountlySDK.Services
                 Log.Debug("[ConsentCountlyService] Setting consent for: [" + consent.ToString() + "] with value: [" + value + "]");
             }
 
-            if (sendRequest) {
-                await SendConsentChanges(updatedConsents, value);
+            if (sendRequest && updatedConsents.Count > 0) {
+                await SendConsentChanges();
             }
 
             NotifyListeners(updatedConsents, value, action);
