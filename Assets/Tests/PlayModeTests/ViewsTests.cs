@@ -232,6 +232,69 @@ namespace Tests
         }
 
         /// <summary>
+        /// It validates functionality of method 'RecordOpenViewAsync' while recording view with segmentations.
+        /// </summary>
+        [Test]
+        public async void TestViewsMethod_RecordOpenViewAsyncWithSegment()
+        {
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                ServerUrl = _serverUrl,
+                AppKey = _appKey,
+            };
+
+            Countly.Instance.Init(configuration);
+
+
+            Countly.Instance.Views._eventService._eventRepo.Clear();
+            Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
+
+            Assert.IsNotNull(Countly.Instance.Views);
+            Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
+
+            Dictionary<string, object> segmentations = new Dictionary<string, object>();
+            segmentations.Add("name", "new_open_view"); // override name
+            segmentations.Add("key1", "value1"); 
+            segmentations.Add("key2", null); // invalid value
+            segmentations.Add("", "value2"); // invalid key
+            segmentations.Add("visit", null); // override existing key with invalid value
+
+            await Countly.Instance.Views.RecordOpenViewAsync("open_view", segmentations);
+            Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
+
+            CountlyEventModel model = Countly.Instance.Views._eventService._eventRepo.Dequeue();
+
+            Assert.AreEqual(CountlyEventModel.ViewEvent, model.Key);
+            Assert.IsNull(model.Sum);
+            Assert.AreEqual(1, model.Count);
+            Assert.IsNull(model.Duration);
+            Assert.IsNotNull(model.Segmentation);
+            Assert.AreEqual("new_open_view", model.Segmentation["name"]);
+            Assert.AreEqual("value1", model.Segmentation["key1"]);
+
+            Assert.AreEqual(1, model.Segmentation["visit"]);
+            Assert.AreEqual(1, model.Segmentation["start"]);
+
+            Assert.IsFalse(model.Segmentation.ContainsKey("key2"));
+            Assert.IsFalse(model.Segmentation.ContainsKey(""));
+            
+
+            await Countly.Instance.Views.RecordOpenViewAsync("open_view_2");
+            Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
+
+            model = Countly.Instance.Views._eventService._eventRepo.Dequeue();
+
+            Assert.AreEqual(CountlyEventModel.ViewEvent, model.Key);
+            Assert.IsNull(model.Sum);
+            Assert.AreEqual(1, model.Count);
+            Assert.IsNull(model.Duration);
+            Assert.IsNotNull(model.Segmentation);
+            Assert.AreEqual("open_view_2", model.Segmentation["name"]);
+            Assert.AreEqual(1, model.Segmentation["visit"]);
+            Assert.AreEqual(0, model.Segmentation["start"]);
+
+        }
+
+        /// <summary>
         /// It validates 'EventQueueThreshold' limit.
         /// </summary>
         [Test]

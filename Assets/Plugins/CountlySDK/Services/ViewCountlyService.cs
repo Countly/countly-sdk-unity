@@ -74,7 +74,7 @@ namespace Plugins.CountlySDK.Services
                     segmentation = FixSegmentKeysAndValues(segmentation);
 
                     foreach (KeyValuePair<string, object> item in segmentation) {
-                        openViewSegment.Add(item.Key, item.Value);
+                        openViewSegment[item.Key] = item.Value;
                     }
                 }
 
@@ -82,7 +82,7 @@ namespace Plugins.CountlySDK.Services
                     _viewToLastViewStartTime.Add(name, DateTime.UtcNow);
                 }
 
-                CountlyEventModel currentView = new CountlyEventModel(CountlyEventModel.ViewEvent, openViewSegment));
+                CountlyEventModel currentView = new CountlyEventModel(CountlyEventModel.ViewEvent, openViewSegment);
                 _ = _eventService.RecordEventAsync(currentView);
 
                 _isFirstView = false;
