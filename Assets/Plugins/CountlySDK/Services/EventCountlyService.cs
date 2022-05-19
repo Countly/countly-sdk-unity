@@ -15,12 +15,15 @@ namespace Plugins.CountlySDK.Services
         internal readonly NonViewEventRepository _eventRepo;
         private readonly RequestCountlyHelper _requestCountlyHelper;
 
+        internal readonly IDictionary<string, DateTime> _timedEvents;
+
         internal EventCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, RequestCountlyHelper requestCountlyHelper, NonViewEventRepository nonViewEventRepo, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
         {
             Log.Debug("[EventCountlyService] Initializing.");
 
             _eventRepo = nonViewEventRepo;
             _requestCountlyHelper = requestCountlyHelper;
+            _timedEvents = new Dictionary<string, DateTime>();
         }
 
         /// <summary>
@@ -103,6 +106,142 @@ namespace Plugins.CountlySDK.Services
             } else if (key.Equals(CountlyEventModel.OrientationEvent)) {
                 return _consentService.CheckConsentInternal(Consents.Users);
             } else { return _consentService.CheckConsentInternal(Consents.Events); }
+
+        }
+
+        /// <summary>
+        /// Start a timed event.
+        /// </summary>
+        /// <param name="key">event key</param>
+        /// <returns></returns>
+        public void StartEvent(string key)
+        {
+            lock (LockObj) {
+                Log.Info("[EventCountlyService] StartEvent : key = " + key);
+
+                if (string.IsNullOrEmpty(key) || string.IsNullOrWhiteSpace(key)) {
+                    Log.Warning("[EventCountlyService] StartEvent : The event key '" + key + "' isn't valid.");
+
+                    return;
+                }
+
+                if (!CheckConsentOnKey(key)) {
+                    return;
+                }
+
+                if (_timedEvents.ContainsKey(key)) {
+                    Log.Warning("[EventCountlyService] StartEvent : Event with key '" + key + "' has already started.");
+                    return;
+                }
+
+                TimeMetricModel timeModel = TimeMetricModel.GetTimeZoneInfoForRequest();
+                _timedEvents.Add(key, DateTime.Now);
+            }
+
+        }
+
+        /// <summary>
+        /// Cancel a timed event.
+        /// </summary>
+        /// <param name="key">event key</param>
+        /// <returns></returns>
+        public void CancelEvent(string key)
+        {
+            lock (LockObj) {
+                Log.Info("[EventCountlyService] CancelEvent : key = " + key);
+
+                if (string.IsNullOrEmpty(key) || string.IsNullOrWhiteSpace(key)) {
+                    Log.Warning("[EventCountlyService] CancelEvent : The event key '" + key + "' isn't valid.");
+
+                    return;
+                }
+
+                if (!CheckConsentOnKey(key)) {
+                    return;
+                }
+
+                if (!_timedEvents.ContainsKey(key)) {
+                    Log.Debug("[EventCountlyService] CancelEvent : Time event with key '" + key + "' doesn't exist.");
+                    return;
+                }
+
+                _timedEvents.Remove(key);
+            }
+
+        }
+
+        /// <summary>
+        /// End a timed event.
+        /// </summary>
+        /// <param name="key">event key</param>
+        /// <returns></returns>
+        public void EndEvent(string key)
+        {
+            lock (LockObj) {
+                Log.Info("[EventCountlyService] EndEvent : key = " + key);
+
+                if (string.IsNullOrEmpty(key) || string.IsNullOrWhiteSpace(key)) {
+                    Log.Warning("[EventCountlyService] EndEvent : The event key '" + key + "' isn't valid.");
+
+                    return;
+                }
+
+                if (!CheckConsentOnKey(key)) {
+                    return;
+                }
+
+                if (!_timedEvents.ContainsKey(key)) {
+                    Log.Debug("[EventCountlyService] EndEvent : Time event with key '" + key + "' doesn't exist.");
+                    return;
+                }
+
+                DateTime startTime = _timedEvents[key];
+                double duration = Convert.ToInt32((DateTime.Now - startTime).TotalSeconds);
+
+                CountlyEventModel @event = new CountlyEventModel(key, null, 1, 0, duration);
+                _ = RecordEventAsync(@event);
+
+                _timedEvents.Remove(key);
+            }
+        }
+
+        /// <summary>
+        /// End a timed event.
+        /// </summary>
+        /// <param name="key">event key</param>
+        /// <param name="segmentation">custom segmentation you want to set, leave null if you don't want to add anything</param>
+        /// <param name="count">how many of these events have occurred, default value is "1"</param>
+        /// <param name="sum">set sum if needed, default value is "0"</param>
+        /// <returns></returns>
+        public void EndEvent(string key, IDictionary<string, object> segmentation = null,
+            int? count = 1, double? sum = 0)
+        {
+            lock (LockObj) {
+                Log.Info("[EventCountlyService] EndEvent : key = " + key + ", segmentation = " + segmentation + ", count = " + count + ", sum = " + sum);
+
+                if (string.IsNullOrEmpty(key) || string.IsNullOrWhiteSpace(key)) {
+                    Log.Warning("[EventCountlyService] EndEvent : The event key '" + key + "' isn't valid.");
+
+                    return;
+                }
+
+                if (!CheckConsentOnKey(key)) {
+                    return;
+                }
+
+                if (!_timedEvents.ContainsKey(key)) {
+                    Log.Debug("[EventCountlyService] EndEvent : Time event with key '" + key + "' doesn't exist.");
+                    return;
+                }
+
+                DateTime startTime = _timedEvents[key];
+                double duration = Convert.ToInt32((DateTime.Now - startTime).TotalSeconds);
+
+                CountlyEventModel @event = new CountlyEventModel(key, segmentation, count, sum, duration);
+                _ = RecordEventAsync(@event);
+
+                _timedEvents.Remove(key);
+            }
 
         }
 
