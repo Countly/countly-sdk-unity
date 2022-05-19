@@ -29,6 +29,13 @@ namespace Plugins.CountlySDK.Services
         /// <summary>
         /// Add all recorded events to request queue
         /// </summary>
+        internal void CancelAllTimedEvents() {
+            _timedEvents.Clear();
+        }
+
+        /// <summary>
+        /// Add all recorded events to request queue
+        /// </summary>
         internal void AddEventsToRequestQueue()
         {
 
@@ -125,7 +132,7 @@ namespace Plugins.CountlySDK.Services
                     return;
                 }
 
-                if (!CheckConsentOnKey(key)) {
+                if (!_consentService.CheckConsentInternal(Consents.Events)) {
                     return;
                 }
 
@@ -156,12 +163,12 @@ namespace Plugins.CountlySDK.Services
                     return;
                 }
 
-                if (!CheckConsentOnKey(key)) {
+                if (!_consentService.CheckConsentInternal(Consents.Events)) {
                     return;
                 }
 
                 if (!_timedEvents.ContainsKey(key)) {
-                    Log.Debug("[EventCountlyService] CancelEvent : Time event with key '" + key + "' doesn't exist.");
+                    Log.Warning("[EventCountlyService] CancelEvent : Time event with key '" + key + "' doesn't exist.");
                     return;
                 }
 
@@ -186,17 +193,17 @@ namespace Plugins.CountlySDK.Services
                     return;
                 }
 
-                if (!CheckConsentOnKey(key)) {
+                if (!_consentService.CheckConsentInternal(Consents.Events)) {
                     return;
                 }
 
                 if (!_timedEvents.ContainsKey(key)) {
-                    Log.Debug("[EventCountlyService] EndEvent : Time event with key '" + key + "' doesn't exist.");
+                    Log.Warning("[EventCountlyService] EndEvent : Time event with key '" + key + "' doesn't exist.");
                     return;
                 }
 
                 DateTime startTime = _timedEvents[key];
-                double duration = Convert.ToInt32((DateTime.Now - startTime).TotalSeconds);
+                double duration = (DateTime.Now - startTime).TotalSeconds;
 
                 CountlyEventModel @event = new CountlyEventModel(key, null, 1, 0, duration);
                 _ = RecordEventAsync(@event);
@@ -225,17 +232,17 @@ namespace Plugins.CountlySDK.Services
                     return;
                 }
 
-                if (!CheckConsentOnKey(key)) {
+                if (!_consentService.CheckConsentInternal(Consents.Events)) {
                     return;
                 }
 
                 if (!_timedEvents.ContainsKey(key)) {
-                    Log.Debug("[EventCountlyService] EndEvent : Time event with key '" + key + "' doesn't exist.");
+                    Log.Warning("[EventCountlyService] EndEvent : Time event with key '" + key + "' doesn't exist.");
                     return;
                 }
 
                 DateTime startTime = _timedEvents[key];
-                double duration = Convert.ToInt32((DateTime.Now - startTime).TotalSeconds);
+                double duration = (DateTime.Now - startTime).TotalSeconds;
 
                 CountlyEventModel @event = new CountlyEventModel(key, segmentation, count, sum, duration);
                 _ = RecordEventAsync(@event);
@@ -359,6 +366,12 @@ namespace Plugins.CountlySDK.Services
         }
 
         #region override Methods
+        internal override void ConsentChanged(List<Consents> updatedConsents, bool newConsentValue, ConsentChangedAction action)
+        {
+            if (updatedConsents.Contains(Consents.Events) && !newConsentValue) {
+                CancelAllTimedEvents();
+            }
+        }
         #endregion
     }
 }
