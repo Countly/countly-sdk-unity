@@ -21,7 +21,7 @@ namespace Plugins.CountlySDK.Services
             RequestCountlyHelper requestCountlyHelper, EventCountlyService eventCountlyService, CountlyUtils countlyUtils, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
         {
             Log.Debug("[DeviceIdCountlyService] Initializing.");
-
+            
             _countlyUtils = countlyUtils;
             _eventCountlyService = eventCountlyService;
             _requestCountlyHelper = requestCountlyHelper;
@@ -55,8 +55,13 @@ namespace Plugins.CountlySDK.Services
                 if (_countlyUtils.IsNullEmptyOrWhitespace(DeviceId)) {
                     if (!_countlyUtils.IsNullEmptyOrWhitespace(deviceId)) {
                         DeviceId = deviceId;
+                        PlayerPrefs.SetInt(Constants.DeviceIDType, 1);
+                        DeviceIdType = DeviceIdType.DeveloperProvidede;
+
                     } else {
                         DeviceId = _countlyUtils.GetUniqueDeviceId();
+                        PlayerPrefs.SetInt(Constants.DeviceIDType, 0);
+                        DeviceIdType = DeviceIdType.SystemGenerated;
                     }
                 }
             }
@@ -193,6 +198,9 @@ namespace Plugins.CountlySDK.Services
         {
             //Change device id
             DeviceId = newDeviceId;
+
+            PlayerPrefs.SetInt(Constants.DeviceIDType, 1);
+            DeviceIdType = DeviceIdType.DeveloperProvidede;
 
             //Updating Cache
             PlayerPrefs.SetString(Constants.DeviceIDKey, DeviceId);
