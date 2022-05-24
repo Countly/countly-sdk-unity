@@ -15,6 +15,7 @@ namespace Plugins.CountlySDK.Services
         private readonly EventCountlyService _eventCountlyService;
         internal readonly RequestCountlyHelper _requestCountlyHelper;
         private readonly SessionCountlyService _sessionCountlyService;
+        
 
         internal DeviceIdCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, SessionCountlyService sessionCountlyService,
             RequestCountlyHelper requestCountlyHelper, EventCountlyService eventCountlyService, CountlyUtils countlyUtils, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
@@ -30,6 +31,11 @@ namespace Plugins.CountlySDK.Services
         /// Returns the Device ID that is currently used by the SDK
         /// </summary>
         public string DeviceId { get; private set; }
+
+        /// <summary>
+        /// Returns the type Device ID that is currently used by the SDK
+        /// </summary>
+        public DeviceIdType DeviceIdType { get; private set; }
 
         /// <summary>
         /// Initialize <code>DeviceId</code> field with device id provided in configuration or with Randome generated Id and Cache it.
