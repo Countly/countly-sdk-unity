@@ -50,7 +50,7 @@ namespace Tests
             Countly.Instance.Init(configuration);
             Assert.IsNotNull(Countly.Instance.Device);
             Assert.AreEqual("device_id", Countly.Instance.Device.DeviceId);
-            Assert.AreEqual(DeviceIdType.DeveloperProvidede, Countly.Instance.Device.DeviceIdType);
+            Assert.AreEqual(DeviceIdType.DeveloperProvided, Countly.Instance.Device.DeviceIdType);
 
         }
 
@@ -69,16 +69,16 @@ namespace Tests
             Countly.Instance.Init(configuration);
             Assert.IsNotNull(Countly.Instance.Device);
             Assert.AreEqual("device_id", Countly.Instance.Device.DeviceId);
-            Assert.AreEqual(DeviceIdType.DeveloperProvidede, Countly.Instance.Device.DeviceIdType);
+            Assert.AreEqual(DeviceIdType.DeveloperProvided, Countly.Instance.Device.DeviceIdType);
 
             Countly.Instance.Device._requestCountlyHelper._requestRepo.Clear();
             await Countly.Instance.Device.ChangeDeviceIdWithMerge("device_id");
             Assert.AreEqual(0, Countly.Instance.Device._requestCountlyHelper._requestRepo.Count);
-            Assert.AreEqual(DeviceIdType.DeveloperProvidede, Countly.Instance.Device.DeviceIdType);
+            Assert.AreEqual(DeviceIdType.DeveloperProvided, Countly.Instance.Device.DeviceIdType);
 
             await Countly.Instance.Device.ChangeDeviceIdWithoutMerge("device_id");
             Assert.AreEqual(0, Countly.Instance.Device._requestCountlyHelper._requestRepo.Count);
-            Assert.AreEqual(DeviceIdType.DeveloperProvidede, Countly.Instance.Device.DeviceIdType);
+            Assert.AreEqual(DeviceIdType.DeveloperProvided, Countly.Instance.Device.DeviceIdType);
 
             Assert.AreEqual("device_id", Countly.Instance.Device.DeviceId);
 
@@ -105,7 +105,7 @@ namespace Tests
             await Countly.Instance.Device.ChangeDeviceIdWithoutMerge("new_device_id");
             //RQ will have begin session and end session requests
             Assert.AreEqual(2, Countly.Instance.Device._requestCountlyHelper._requestRepo.Count);
-            Assert.AreEqual(DeviceIdType.DeveloperProvidede, Countly.Instance.Device.DeviceIdType);
+            Assert.AreEqual(DeviceIdType.DeveloperProvided, Countly.Instance.Device.DeviceIdType);
 
 
             CountlyRequestModel requestModel = Countly.Instance.Device._requestCountlyHelper._requestRepo.Dequeue();
@@ -146,7 +146,7 @@ namespace Tests
             await Countly.Instance.Device.ChangeDeviceIdWithoutMerge("new_device_id_1");
             //RQ will have end session request
             Assert.AreEqual(1, Countly.Instance.Device._requestCountlyHelper._requestRepo.Count);
-            Assert.AreEqual(DeviceIdType.DeveloperProvidede, Countly.Instance.Device.DeviceIdType);
+            Assert.AreEqual(DeviceIdType.DeveloperProvided, Countly.Instance.Device.DeviceIdType);
 
             CountlyRequestModel requestModel = Countly.Instance.Device._requestCountlyHelper._requestRepo.Dequeue();
             NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
@@ -183,7 +183,7 @@ namespace Tests
             await Countly.Instance.Device.ChangeDeviceIdWithMerge("new_device_id");
             //RQ will have begin session and end session requests
             Assert.AreEqual(1, Countly.Instance.Device._requestCountlyHelper._requestRepo.Count);
-            Assert.AreEqual(DeviceIdType.DeveloperProvidede, Countly.Instance.Device.DeviceIdType);
+            Assert.AreEqual(DeviceIdType.DeveloperProvided, Countly.Instance.Device.DeviceIdType);
 
             CountlyRequestModel requestModel = Countly.Instance.Device._requestCountlyHelper._requestRepo.Dequeue();
             NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
@@ -217,7 +217,7 @@ namespace Tests
             await Countly.Instance.Device.ChangeDeviceIdWithoutMerge("new_device_id");
             //RQ will have end session request
             Assert.AreEqual(1, Countly.Instance.Device._requestCountlyHelper._requestRepo.Count);
-            Assert.AreEqual(DeviceIdType.DeveloperProvidede, Countly.Instance.Device.DeviceIdType);
+            Assert.AreEqual(DeviceIdType.DeveloperProvided, Countly.Instance.Device.DeviceIdType);
 
             CountlyRequestModel requestModel = Countly.Instance.Device._requestCountlyHelper._requestRepo.Dequeue();
             NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
@@ -280,7 +280,7 @@ namespace Tests
             await Countly.Instance.Device.ChangeDeviceIdWithoutMerge("new_device_id");
             //Since automatic session tracking is disabled, RQ will be empty
             Assert.AreEqual(0, Countly.Instance.Device._requestCountlyHelper._requestRepo.Count);
-            Assert.AreEqual(DeviceIdType.DeveloperProvidede, Countly.Instance.Device.DeviceIdType);
+            Assert.AreEqual(DeviceIdType.DeveloperProvided, Countly.Instance.Device.DeviceIdType);
 
 
             Countly.Instance.Consents.GiveConsentAll();

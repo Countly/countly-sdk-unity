@@ -56,7 +56,7 @@ namespace Plugins.CountlySDK.Services
                     if (!_countlyUtils.IsNullEmptyOrWhitespace(deviceId)) {
                         DeviceId = deviceId;
                         PlayerPrefs.SetInt(Constants.DeviceIDType, 1);
-                        DeviceIdType = DeviceIdType.DeveloperProvidede;
+                        DeviceIdType = DeviceIdType.DeveloperProvided;
 
                     } else {
                         DeviceId = _countlyUtils.GetUniqueDeviceId();
@@ -200,7 +200,7 @@ namespace Plugins.CountlySDK.Services
             DeviceId = newDeviceId;
 
             PlayerPrefs.SetInt(Constants.DeviceIDType, 1);
-            DeviceIdType = DeviceIdType.DeveloperProvidede;
+            DeviceIdType = DeviceIdType.DeveloperProvided;
 
             //Updating Cache
             PlayerPrefs.SetString(Constants.DeviceIDKey, DeviceId);
