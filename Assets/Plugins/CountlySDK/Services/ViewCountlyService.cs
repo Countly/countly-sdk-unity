@@ -69,20 +69,21 @@ namespace Plugins.CountlySDK.Services
                 IDictionary<string, object> openViewSegment = currentViewSegment.OpenViewDictionary();
 
                 if (segmentation != null) {
-
                     segmentation = RemoveSegmentInvalidDataTypes(segmentation);
                     segmentation = FixSegmentKeysAndValues(segmentation);
 
-                    foreach (KeyValuePair<string, object> item in segmentation) {
-                        openViewSegment[item.Key] = item.Value;
+                    foreach (KeyValuePair<string, object> item in openViewSegment) {
+                        segmentation[item.Key] = item.Value;
                     }
+                } else {
+                    segmentation = openViewSegment;
                 }
 
                 if (!_viewToLastViewStartTime.ContainsKey(name)) {
                     _viewToLastViewStartTime.Add(name, DateTime.UtcNow);
                 }
 
-                CountlyEventModel currentView = new CountlyEventModel(CountlyEventModel.ViewEvent, openViewSegment);
+                CountlyEventModel currentView = new CountlyEventModel(CountlyEventModel.ViewEvent, segmentation);
                 _ = _eventService.RecordEventAsync(currentView);
 
                 _isFirstView = false;
