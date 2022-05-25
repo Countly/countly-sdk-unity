@@ -97,7 +97,6 @@ namespace Plugins.CountlySDK.Services
 
         private bool CheckConsentOnKey(string key)
         {
-
             if (key.Equals(CountlyEventModel.ViewEvent)) {
                 return _consentService.CheckConsentInternal(Consents.Views);
             } else if (key.Equals(CountlyEventModel.StarRatingEvent)) {
@@ -113,7 +112,6 @@ namespace Plugins.CountlySDK.Services
             } else if (key.Equals(CountlyEventModel.OrientationEvent)) {
                 return _consentService.CheckConsentInternal(Consents.Users);
             } else { return _consentService.CheckConsentInternal(Consents.Events); }
-
         }
 
         /// <summary>
@@ -126,15 +124,14 @@ namespace Plugins.CountlySDK.Services
             lock (LockObj) {
                 Log.Info("[EventCountlyService] StartEvent : key = " + key);
 
-                if (string.IsNullOrEmpty(key) || string.IsNullOrWhiteSpace(key)) {
-                    Log.Warning("[EventCountlyService] StartEvent : The event key '" + key + "' isn't valid.");
-
-                    return;
-                }
-
                 if (!_consentService.CheckConsentInternal(Consents.Events)) {
                     return;
                 }
+
+                if (string.IsNullOrEmpty(key) || string.IsNullOrWhiteSpace(key)) {
+                    Log.Warning("[EventCountlyService] StartEvent : The event key '" + key + "' isn't valid.");
+                    return;
+                }                
 
                 if (_timedEvents.ContainsKey(key)) {
                     Log.Warning("[EventCountlyService] StartEvent : Event with key '" + key + "' has already started.");
@@ -157,15 +154,14 @@ namespace Plugins.CountlySDK.Services
             lock (LockObj) {
                 Log.Info("[EventCountlyService] CancelEvent : key = " + key);
 
-                if (string.IsNullOrEmpty(key) || string.IsNullOrWhiteSpace(key)) {
-                    Log.Warning("[EventCountlyService] CancelEvent : The event key '" + key + "' isn't valid.");
-
-                    return;
-                }
-
                 if (!_consentService.CheckConsentInternal(Consents.Events)) {
                     return;
                 }
+
+                if (string.IsNullOrEmpty(key) || string.IsNullOrWhiteSpace(key)) {
+                    Log.Warning("[EventCountlyService] CancelEvent : The event key '" + key + "' isn't valid.");
+                    return;
+                }                
 
                 if (!_timedEvents.ContainsKey(key)) {
                     Log.Warning("[EventCountlyService] CancelEvent : Time event with key '" + key + "' doesn't exist.");
@@ -181,60 +177,23 @@ namespace Plugins.CountlySDK.Services
         /// End a timed event.
         /// </summary>
         /// <param name="key">event key</param>
-        /// <returns></returns>
-        public void EndEvent(string key)
-        {
-            lock (LockObj) {
-                Log.Info("[EventCountlyService] EndEvent : key = " + key);
-
-                if (string.IsNullOrEmpty(key) || string.IsNullOrWhiteSpace(key)) {
-                    Log.Warning("[EventCountlyService] EndEvent : The event key '" + key + "' isn't valid.");
-
-                    return;
-                }
-
-                if (!_consentService.CheckConsentInternal(Consents.Events)) {
-                    return;
-                }
-
-                if (!_timedEvents.ContainsKey(key)) {
-                    Log.Warning("[EventCountlyService] EndEvent : Time event with key '" + key + "' doesn't exist.");
-                    return;
-                }
-
-                DateTime startTime = _timedEvents[key];
-                double duration = (DateTime.Now - startTime).TotalSeconds;
-
-                CountlyEventModel @event = new CountlyEventModel(key, null, 1, 0, duration);
-                _ = RecordEventAsync(@event);
-
-                _timedEvents.Remove(key);
-            }
-        }
-
-        /// <summary>
-        /// End a timed event.
-        /// </summary>
-        /// <param name="key">event key</param>
         /// <param name="segmentation">custom segmentation you want to set, leave null if you don't want to add anything</param>
         /// <param name="count">how many of these events have occurred, default value is "1"</param>
         /// <param name="sum">set sum if needed, default value is "0"</param>
         /// <returns></returns>
-        public void EndEvent(string key, IDictionary<string, object> segmentation = null,
-            int? count = 1, double? sum = 0)
+        public void EndEvent(string key, IDictionary<string, object> segmentation = null, int? count = 1, double? sum = 0)
         {
             lock (LockObj) {
                 Log.Info("[EventCountlyService] EndEvent : key = " + key + ", segmentation = " + segmentation + ", count = " + count + ", sum = " + sum);
 
-                if (string.IsNullOrEmpty(key) || string.IsNullOrWhiteSpace(key)) {
-                    Log.Warning("[EventCountlyService] EndEvent : The event key '" + key + "' isn't valid.");
-
-                    return;
-                }
-
                 if (!_consentService.CheckConsentInternal(Consents.Events)) {
                     return;
                 }
+
+                if (string.IsNullOrEmpty(key) || string.IsNullOrWhiteSpace(key)) {
+                    Log.Warning("[EventCountlyService] EndEvent : The event key '" + key + "' isn't valid.");
+                    return;
+                }                
 
                 if (!_timedEvents.ContainsKey(key)) {
                     Log.Warning("[EventCountlyService] EndEvent : Time event with key '" + key + "' doesn't exist.");
@@ -262,15 +221,14 @@ namespace Plugins.CountlySDK.Services
             lock (LockObj) {
                 Log.Info("[EventCountlyService] RecordEventAsync : key = " + key);
 
-                if (string.IsNullOrEmpty(key) || string.IsNullOrWhiteSpace(key)) {
-                    Log.Warning("[EventCountlyService] RecordEventAsync : The event key '" + key + "'isn't valid.");
-
-                    return;
-                }
-
                 if (!CheckConsentOnKey(key)) {
                     return;
                 }
+
+                if (string.IsNullOrEmpty(key) || string.IsNullOrWhiteSpace(key)) {
+                    Log.Warning("[EventCountlyService] RecordEventAsync : The event key '" + key + "'isn't valid.");
+                    return;
+                }                
 
                 CountlyEventModel @event = new CountlyEventModel(key, null, 1, 0, null);
 
