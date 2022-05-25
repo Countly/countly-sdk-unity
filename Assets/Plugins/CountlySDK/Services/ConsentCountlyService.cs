@@ -56,9 +56,19 @@ namespace Plugins.CountlySDK.Services
         /// <returns>Returns "true" if the consent for the checked feature has been provided</returns>
         internal bool CheckConsentInternal(Consents consent)
         {
-            bool result = !RequiresConsent || (CountlyConsents.ContainsKey(consent) && CountlyConsents[consent]);
+            bool result = !RequiresConsent || CheckConsentRawValue(consent);
             Log.Verbose("[ConsentCountlyService] CheckConsent : consent = " + consent.ToString() + ", result = " + result);
             return result;
+        }
+
+        /// <summary>
+        /// Returns the raw consent value as it is stored internally
+        /// </summary>
+        /// <param name="consent"></param>
+        /// <returns></returns>
+        internal bool CheckConsentRawValue(Consents consent)
+        {            
+            return CountlyConsents.ContainsKey(consent) && CountlyConsents[consent];
         }
 
         /// <summary>
@@ -243,7 +253,7 @@ namespace Plugins.CountlySDK.Services
             JObject jObj = new JObject();
             Consents[] consents = System.Enum.GetValues(typeof(Consents)).Cast<Consents>().ToArray();
             foreach (Consents consent in consents) {
-                jObj.Add(GetConsentKey(consent), CheckConsentInternal(consent));
+                jObj.Add(GetConsentKey(consent), CheckConsentRawValue(consent));
             }
 
             Dictionary<string, object> requestParams =
