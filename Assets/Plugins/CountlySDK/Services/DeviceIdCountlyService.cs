@@ -48,22 +48,28 @@ namespace Plugins.CountlySDK.Services
             //Static DeviceID (only when the app is running or in the background)
             //User provided DeviceID
             //Generate Random DeviceID
+            int type = PlayerPrefs.GetInt(Constants.DeviceIDType, 0);
             string storedDeviceId = PlayerPrefs.GetString(Constants.DeviceIDKey);
             if (!_countlyUtils.IsNullEmptyOrWhitespace(storedDeviceId)) {
                 DeviceId = storedDeviceId;
             } else {
                 if (_countlyUtils.IsNullEmptyOrWhitespace(DeviceId)) {
                     if (!_countlyUtils.IsNullEmptyOrWhitespace(deviceId)) {
+                        type = 1;
                         DeviceId = deviceId;
-                        PlayerPrefs.SetInt(Constants.DeviceIDType, 1);
-                        DeviceIdType = DeviceIdType.DeveloperProvided;
-
                     } else {
+                        type = 0;
                         DeviceId = _countlyUtils.GetUniqueDeviceId();
-                        PlayerPrefs.SetInt(Constants.DeviceIDType, 0);
-                        DeviceIdType = DeviceIdType.SystemGenerated;
                     }
                 }
+            }
+
+            PlayerPrefs.SetInt(Constants.DeviceIDType, type);
+
+            if (type == 0) {
+                DeviceIdType = DeviceIdType.SystemGenerated;
+            } else {
+                DeviceIdType = DeviceIdType.DeveloperProvided;
             }
 
             //Set DeviceID in Cache if it doesn't already exists in Cache
