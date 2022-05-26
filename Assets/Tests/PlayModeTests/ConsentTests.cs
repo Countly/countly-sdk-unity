@@ -20,6 +20,18 @@ namespace Tests
 
 
         /// <summary>
+        /// Assert an array of keys against the expected value in consnet reqeust json.
+        /// </summary>
+        /// <param name="expectedValue"> an expected values of consents</param>
+        /// <param name="consents"> an array consents</param>
+        public void AssertConsentKeys(JObject consentObj, string[] keys, bool expectedValue)
+        {
+            foreach (string key in keys) {
+                Assert.AreEqual(expectedValue, consentObj.GetValue(key).ToObject<bool>());
+            }
+        }
+
+        /// <summary>
         /// Assert an array of consent against the expected value.
         /// </summary>
         /// <param name="expectedValue"> an expected values of consents</param>
@@ -114,18 +126,7 @@ namespace Tests
             JObject consentObj = JObject.Parse(collection.Get("consent"));
 
             Assert.AreEqual(11, consentObj.Count);
-            Assert.IsTrue(consentObj.GetValue("push").ToObject<bool>());
-            Assert.IsTrue(consentObj.GetValue("users").ToObject<bool>());
-            Assert.IsTrue(consentObj.GetValue("views").ToObject<bool>());
-            Assert.IsTrue(consentObj.GetValue("clicks").ToObject<bool>());
-            Assert.IsTrue(consentObj.GetValue("events").ToObject<bool>());
-            Assert.IsTrue(consentObj.GetValue("crashes").ToObject<bool>());
-            Assert.IsTrue(consentObj.GetValue("sessions").ToObject<bool>());
-            Assert.IsTrue(consentObj.GetValue("location").ToObject<bool>());
-            Assert.IsTrue(consentObj.GetValue("feedback").ToObject<bool>());
-            Assert.IsTrue(consentObj.GetValue("star-rating").ToObject<bool>());
-            Assert.IsTrue(consentObj.GetValue("remote-config").ToObject<bool>());
-
+            AssertConsentKeys(consentObj, new string[] { "push", "users", "views", "clicks", "events", "crashes", "sessions", "location", "feedback", "star-rating", "remote-config" }, true);
         }
 
         /// <summary>
@@ -153,19 +154,8 @@ namespace Tests
             JObject json = JObject.Parse(collection["consent"]);
 
             Assert.AreEqual(11, json.Count);
-
-            Assert.IsTrue(json.GetValue("events").ToObject<bool>());
-            Assert.IsTrue(json.GetValue("crashes").ToObject<bool>());
-
-            Assert.IsFalse(json.GetValue("push").ToObject<bool>());
-            Assert.IsFalse(json.GetValue("users").ToObject<bool>());
-            Assert.IsFalse(json.GetValue("views").ToObject<bool>());
-            Assert.IsFalse(json.GetValue("clicks").ToObject<bool>());
-            Assert.IsFalse(json.GetValue("sessions").ToObject<bool>());
-            Assert.IsFalse(json.GetValue("location").ToObject<bool>());
-            Assert.IsFalse(json.GetValue("feedback").ToObject<bool>());
-            Assert.IsFalse(json.GetValue("star-rating").ToObject<bool>());
-            Assert.IsFalse(json.GetValue("remote-config").ToObject<bool>());
+            AssertConsentKeys(json, new string[] { "events", "crashes" }, true);
+            AssertConsentKeys(json, new string[] { "push", "users", "views", "clicks", "sessions", "location", "feedback", "star-rating", "remote-config" }, false);
 
             Countly.Instance.Consents.GiveConsent(new Consents[] { Consents.Crashes, Consents.Views });
             Assert.AreEqual(1, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
@@ -175,19 +165,9 @@ namespace Tests
             json = JObject.Parse(collection["consent"]);
 
             Assert.AreEqual(11, json.Count);
+            AssertConsentKeys(json, new string[] { "views", "events", "crashes" }, true);
+            AssertConsentKeys(json, new string[] { "push", "users", "clicks", "sessions", "location", "feedback", "star-rating", "remote-config" }, false);
 
-            Assert.IsTrue(json.GetValue("views").ToObject<bool>());
-            Assert.IsTrue(json.GetValue("events").ToObject<bool>());
-            Assert.IsTrue(json.GetValue("crashes").ToObject<bool>());
-
-            Assert.IsFalse(json.GetValue("push").ToObject<bool>());
-            Assert.IsFalse(json.GetValue("users").ToObject<bool>());
-            Assert.IsFalse(json.GetValue("clicks").ToObject<bool>());
-            Assert.IsFalse(json.GetValue("sessions").ToObject<bool>());
-            Assert.IsFalse(json.GetValue("location").ToObject<bool>());
-            Assert.IsFalse(json.GetValue("feedback").ToObject<bool>());
-            Assert.IsFalse(json.GetValue("star-rating").ToObject<bool>());
-            Assert.IsFalse(json.GetValue("remote-config").ToObject<bool>());
 
             Countly.Instance.Consents.GiveConsent(new Consents[] { Consents.Views });
             Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
@@ -198,19 +178,8 @@ namespace Tests
             collection = HttpUtility.ParseQueryString(requestModel.RequestData);
             json = JObject.Parse(collection["consent"]);
 
-            Assert.IsTrue(json.GetValue("events").ToObject<bool>());
-
-            Assert.IsFalse(json.GetValue("views").ToObject<bool>());
-            Assert.IsFalse(json.GetValue("crashes").ToObject<bool>());
-
-            Assert.IsFalse(json.GetValue("push").ToObject<bool>());
-            Assert.IsFalse(json.GetValue("users").ToObject<bool>());
-            Assert.IsFalse(json.GetValue("clicks").ToObject<bool>());
-            Assert.IsFalse(json.GetValue("sessions").ToObject<bool>());
-            Assert.IsFalse(json.GetValue("location").ToObject<bool>());
-            Assert.IsFalse(json.GetValue("feedback").ToObject<bool>());
-            Assert.IsFalse(json.GetValue("star-rating").ToObject<bool>());
-            Assert.IsFalse(json.GetValue("remote-config").ToObject<bool>());
+            AssertConsentKeys(json, new string[] { "events", }, true);
+            AssertConsentKeys(json, new string[] { "push", "users", "views", "clicks", "crashes", "sessions", "location", "feedback", "star-rating", "remote-config" }, false);
 
             Countly.Instance.Consents.RemoveConsent(new Consents[] { Consents.Events, Consents.Views });
             requestModel = Countly.Instance.Consents._requestCountlyHelper._requestRepo.Dequeue();
@@ -219,19 +188,7 @@ namespace Tests
             json = JObject.Parse(collection["consent"]);
 
             Assert.AreEqual(11, json.Count);
-            Assert.IsFalse(json.GetValue("events").ToObject<bool>());
-
-            Assert.IsFalse(json.GetValue("views").ToObject<bool>());
-            Assert.IsFalse(json.GetValue("crashes").ToObject<bool>());
-
-            Assert.IsFalse(json.GetValue("push").ToObject<bool>());
-            Assert.IsFalse(json.GetValue("users").ToObject<bool>());
-            Assert.IsFalse(json.GetValue("clicks").ToObject<bool>());
-            Assert.IsFalse(json.GetValue("sessions").ToObject<bool>());
-            Assert.IsFalse(json.GetValue("location").ToObject<bool>());
-            Assert.IsFalse(json.GetValue("feedback").ToObject<bool>());
-            Assert.IsFalse(json.GetValue("star-rating").ToObject<bool>());
-            Assert.IsFalse(json.GetValue("remote-config").ToObject<bool>());
+            AssertConsentKeys(json, new string[] { "push", "users", "views", "clicks", "events", "crashes", "sessions", "location", "feedback", "star-rating", "remote-config" }, false);
 
             Countly.Instance.Consents.RemoveConsent(new Consents[] { Consents.Crashes });
             Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
@@ -322,7 +279,6 @@ namespace Tests
 
             AssertConsentArray(new Consents[] { Consents.Events, Consents.Crashes, Consents.Sessions, Consents.Location }, true);
             AssertConsentArray(new Consents[] { Consents.Views, Consents.Users, Consents.Clicks, Consents.StarRating, Consents.RemoteConfig }, false);
-
         }
 
         /// <summary>
@@ -337,7 +293,6 @@ namespace Tests
                 RequiresConsent = true
             };
 
-
             Countly.Instance.Init(configuration);
 
             /// All consent shouldn't work.
@@ -351,8 +306,6 @@ namespace Tests
             /// All consents shouldn't work
             Countly.Instance.Consents.RemoveAllConsent();
             AssertConsentAll(expectedValue: false);
-
-
         }
 
         /// <summary>
@@ -386,7 +339,6 @@ namespace Tests
 
             AssertConsentArray(new Consents[] { Consents.Events, Consents.Crashes, Consents.Sessions, Consents.Location, Consents.StarRating }, true);
             AssertConsentArray(new Consents[] { Consents.Views, Consents.Users, Consents.Clicks, Consents.RemoteConfig }, false);
-
         }
 
         /// <summary>
@@ -568,7 +520,6 @@ namespace Tests
                 RequiresConsent = true,
             };
 
-
             ConsentTestHelperClass listener = new ConsentTestHelperClass();
             CountlyLogHelper logHelper = new CountlyLogHelper(configuration);
             ConsentCountlyService consentCountlyService = new ConsentCountlyService(configuration, logHelper, null, null);
@@ -595,7 +546,6 @@ namespace Tests
                 ServerUrl = _serverUrl,
                 RequiresConsent = true,
             };
-
 
             ConsentTestHelperClass listener = new ConsentTestHelperClass();
             CountlyLogHelper logHelper = new CountlyLogHelper(configuration);
