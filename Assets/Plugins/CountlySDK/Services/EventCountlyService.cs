@@ -74,6 +74,45 @@ namespace Plugins.CountlySDK.Services
             Log.Debug("[EventCountlyService] AddEventsToRequestQueue: End");
         }
 
+        // <summary>
+        /// An internal method to record an event to the server with segmentation.
+        /// </summary>
+        /// <param name="key">event key</param>
+        /// <param name="segmentation">custom segmentation you want to set, leave null if you don't want to add anything</param>
+        /// <param name="count">how many of these events have occurred, default value is "1"</param>
+        /// <param name="sum">set sum if needed, default value is "0"</param>
+        /// <param name="duration">set sum if needed, default value is "0"</param>
+        /// <returns></returns>
+        internal async Task RecordEventInternal(string key, IDictionary<string, object> segmentation = null,
+            int? count = 1, double? sum = 0, double? duration = null)
+        {
+            if (!CheckConsentOnKey(key)) {
+                return;
+            }
+
+            if (string.IsNullOrEmpty(key) || string.IsNullOrWhiteSpace(key)) {
+                Log.Warning("[EventCountlyService] RecordEventInternal : The event key '" + key + "'isn't valid.");
+                return;
+            }
+
+            if (_configuration.EnableTestMode) {
+                return;
+            }
+
+            if (key.Length > _configuration.MaxKeyLength) {
+                Log.Warning("[EventCountlyService] RecordEventInternal : Max allowed key length is " + _configuration.MaxKeyLength);
+                key = key.Substring(0, _configuration.MaxKeyLength);
+            }
+
+            IDictionary<string, object> segments = RemoveSegmentInvalidDataTypes(segmentation);
+            segments = FixSegmentKeysAndValues(segments);
+
+            CountlyEventModel @event = new CountlyEventModel(key, segments, count, sum, duration);
+
+            await RecordEventAsync(@event);
+
+        }
+
         /// <summary>
         /// An internal function to add an event to event queue.
         /// </summary>
@@ -252,33 +291,8 @@ namespace Plugins.CountlySDK.Services
             lock (LockObj) {
                 Log.Info("[EventCountlyService] RecordEventAsync : key = " + key + ", segmentation = " + segmentation + ", count = " + count + ", sum = " + sum + ", duration = " + duration);
 
-                if (string.IsNullOrEmpty(key) || string.IsNullOrWhiteSpace(key)) {
-                    Log.Warning("[EventCountlyService] RecordEventAsync : The event key '" + key + "'isn't valid.");
-
-                    return;
-                }
-
-                if (!CheckConsentOnKey(key)) {
-                    return;
-                }
-
-                if (_configuration.EnableTestMode) {
-                    return;
-                }
-
-                if (key.Length > _configuration.MaxKeyLength) {
-                    Log.Warning("[EventCountlyService] RecordEventAsync : Max allowed key length is " + _configuration.MaxKeyLength);
-                    key = key.Substring(0, _configuration.MaxKeyLength);
-                }
-
-                IDictionary<string, object> segments = RemoveSegmentInvalidDataTypes(segmentation);
-                segments = FixSegmentKeysAndValues(segments);
-
-                CountlyEventModel @event = new CountlyEventModel(key, segments, count, sum, duration);
-
-                _ = RecordEventAsync(@event);
+                _ = RecordEventInternal(key, segmentation, count, sum, duration);
             }
-
         }
 
         /// <summary>
@@ -298,28 +312,7 @@ namespace Plugins.CountlySDK.Services
             lock (LockObj) {
                 Log.Info("[EventCountlyService] ReportCustomEventAsync : key = " + key + ", segmentation = " + (segmentation != null) + ", count = " + count + ", sum = " + sum + ", duration = " + duration);
 
-                if (string.IsNullOrEmpty(key) || string.IsNullOrWhiteSpace(key)) {
-                    Log.Warning("[EventCountlyService] RecordEventAsync : The event key '" + key + "'isn't valid.");
-
-                    return;
-                }
-
-                if (CheckConsentOnKey(key)) {
-                    return;
-                }
-
-                if (key.Length > _configuration.MaxKeyLength) {
-                    Log.Warning("[EventCountlyService] ReportCustomEventAsync : Max allowed key length is " + _configuration.MaxKeyLength);
-                    key = key.Substring(0, _configuration.MaxKeyLength);
-                }
-
-
-                IDictionary<string, object> segments = RemoveSegmentInvalidDataTypes(segmentation);
-                segments = FixSegmentKeysAndValues(segments);
-
-                CountlyEventModel @event = new CountlyEventModel(key, segments, count, sum, duration);
-
-                _ = RecordEventAsync(@event);
+                _ = RecordEventInternal(key, segmentation, count, sum, duration);
             }
         }
 
