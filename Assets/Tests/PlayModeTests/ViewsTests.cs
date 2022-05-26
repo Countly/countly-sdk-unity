@@ -16,6 +16,26 @@ namespace Tests
         private readonly string _serverUrl = "https://xyz.com/";
         private readonly string _appKey = "772c091355076ead703f987fee94490";
 
+        private void validateViewSegmentation(CountlyEventModel model, string name, bool isOpenView, int start = 1, bool isAction = false)
+        {
+            Assert.IsNull(model.Sum);
+            Assert.AreEqual(1, model.Count);
+            Assert.IsNull(model.Duration);
+            Assert.IsNotNull(model.Segmentation);
+
+            if (isAction) {
+                Assert.AreEqual(CountlyEventModel.ViewActionEvent, model.Key);
+            } else {
+                Assert.AreEqual(CountlyEventModel.ViewEvent, model.Key);
+                Assert.AreEqual(name, model.Segmentation["name"]);
+            }
+
+            if (isOpenView) {
+                Assert.AreEqual(1, model.Segmentation["visit"]);
+                Assert.AreEqual(start, model.Segmentation["start"]);
+            }
+        }
+
         /// <summary>
         /// It validates the event repository initial state.
         /// </summary>
@@ -59,25 +79,13 @@ namespace Tests
             Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
 
             CountlyEventModel model = Countly.Instance.Views._eventService._eventRepo.Dequeue();
-
-            Assert.AreEqual(CountlyEventModel.ViewEvent, model.Key);
-            Assert.IsNull(model.Sum);
-            Assert.AreEqual(1, model.Count);
-            Assert.IsNull(model.Duration);
-            Assert.IsNotNull(model.Segmentation);
-            Assert.AreEqual("open_view", model.Segmentation["name"]);
+            validateViewSegmentation(model, "open_view", true);
 
             await Countly.Instance.Views.RecordOpenViewAsync("close_view");
             Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
 
             model = Countly.Instance.Views._eventService._eventRepo.Dequeue();
-
-            Assert.AreEqual(CountlyEventModel.ViewEvent, model.Key);
-            Assert.IsNull(model.Sum);
-            Assert.AreEqual(1, model.Count);
-            Assert.IsNull(model.Duration);
-            Assert.IsNotNull(model.Segmentation);
-            Assert.AreEqual("close_view", model.Segmentation["name"]);
+            validateViewSegmentation(model, "close_view", false);
         }
 
         /// <summary>
@@ -131,22 +139,10 @@ namespace Tests
             Assert.AreEqual(2, Countly.Instance.Views._eventService._eventRepo.Count);
 
             CountlyEventModel model = Countly.Instance.Views._eventService._eventRepo.Dequeue();
-
-            Assert.AreEqual(CountlyEventModel.ViewEvent, model.Key);
-            Assert.IsNull(model.Sum);
-            Assert.AreEqual(1, model.Count);
-            Assert.IsNull(model.Duration);
-            Assert.IsNotNull(model.Segmentation);
-            Assert.AreEqual("open_", model.Segmentation["name"]);
+            validateViewSegmentation(model, "open_", true);
 
             model = Countly.Instance.Views._eventService._eventRepo.Dequeue();
-
-            Assert.AreEqual(CountlyEventModel.ViewEvent, model.Key);
-            Assert.IsNull(model.Sum);
-            Assert.AreEqual(1, model.Count);
-            Assert.IsNull(model.Duration);
-            Assert.IsNotNull(model.Segmentation);
-            Assert.AreEqual("close", model.Segmentation["name"]);
+            validateViewSegmentation(model, "close", false);
         }
 
         /// <summary>
@@ -171,13 +167,7 @@ namespace Tests
             Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
 
             CountlyEventModel model = Countly.Instance.Views._eventService._eventRepo.Dequeue();
-
-            Assert.AreEqual(CountlyEventModel.ViewEvent, model.Key);
-            Assert.IsNull(model.Sum);
-            Assert.AreEqual(1, model.Count);
-            Assert.IsNull(model.Duration);
-            Assert.IsNotNull(model.Segmentation);
-            Assert.AreEqual("close_view", model.Segmentation["name"]);
+            validateViewSegmentation(model, "close_view", false);
         }
 
         /// <summary>
@@ -202,30 +192,14 @@ namespace Tests
             Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
 
             CountlyEventModel model = Countly.Instance.Views._eventService._eventRepo.Dequeue();
+            validateViewSegmentation(model, "open_view", true);
 
-            Assert.AreEqual(CountlyEventModel.ViewEvent, model.Key);
-            Assert.IsNull(model.Sum);
-            Assert.AreEqual(1, model.Count);
-            Assert.IsNull(model.Duration);
-            Assert.IsNotNull(model.Segmentation);
-            Assert.AreEqual("open_view", model.Segmentation["name"]);
-            Assert.AreEqual(1, model.Segmentation["visit"]);
-            Assert.AreEqual(1, model.Segmentation["start"]);
 
             await Countly.Instance.Views.RecordOpenViewAsync("open_view_2");
             Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
 
             model = Countly.Instance.Views._eventService._eventRepo.Dequeue();
-
-            Assert.AreEqual(CountlyEventModel.ViewEvent, model.Key);
-            Assert.IsNull(model.Sum);
-            Assert.AreEqual(1, model.Count);
-            Assert.IsNull(model.Duration);
-            Assert.IsNotNull(model.Segmentation);
-            Assert.AreEqual("open_view_2", model.Segmentation["name"]);
-            Assert.AreEqual(1, model.Segmentation["visit"]);
-            Assert.AreEqual(0, model.Segmentation["start"]);
-
+            validateViewSegmentation(model, "open_view_2", true, 0);
         }
 
         /// <summary>
@@ -258,35 +232,17 @@ namespace Tests
 
             CountlyEventModel model = Countly.Instance.Views._eventService._eventRepo.Dequeue();
 
-            Assert.AreEqual(CountlyEventModel.ViewEvent, model.Key);
-            Assert.IsNull(model.Sum);
-            Assert.AreEqual(1, model.Count);
-            Assert.IsNull(model.Duration);
-            Assert.IsNotNull(model.Segmentation);
-            Assert.AreEqual("new_open_view", model.Segmentation["name"]);
+            validateViewSegmentation(model, "open_view", true);
             Assert.AreEqual("value1", model.Segmentation["key1"]);
-
-            Assert.AreEqual(1, model.Segmentation["visit"]);
-            Assert.AreEqual(1, model.Segmentation["start"]);
-
             Assert.IsFalse(model.Segmentation.ContainsKey("key2"));
             Assert.IsFalse(model.Segmentation.ContainsKey(""));
-            
 
             await Countly.Instance.Views.RecordOpenViewAsync("open_view_2");
             Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
 
             model = Countly.Instance.Views._eventService._eventRepo.Dequeue();
 
-            Assert.AreEqual(CountlyEventModel.ViewEvent, model.Key);
-            Assert.IsNull(model.Sum);
-            Assert.AreEqual(1, model.Count);
-            Assert.IsNull(model.Duration);
-            Assert.IsNotNull(model.Segmentation);
-            Assert.AreEqual("open_view_2", model.Segmentation["name"]);
-            Assert.AreEqual(1, model.Segmentation["visit"]);
-            Assert.AreEqual(0, model.Segmentation["start"]);
-
+            validateViewSegmentation(model, "open_view_2", true, 0);
         }
 
         /// <summary>
@@ -316,8 +272,6 @@ namespace Tests
 
             await Countly.Instance.Views.ReportActionAsync("action", 10, 10, 100, 100);
             Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
-
-
         }
 
         /// <summary>
@@ -342,12 +296,7 @@ namespace Tests
             Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
 
             CountlyEventModel model = Countly.Instance.Views._eventService._eventRepo.Dequeue();
-
-            Assert.AreEqual(CountlyEventModel.ViewActionEvent, model.Key);
-            Assert.IsNull(model.Sum);
-            Assert.AreEqual(1, model.Count);
-            Assert.IsNull(model.Duration);
-            Assert.IsNotNull(model.Segmentation);
+            validateViewSegmentation(model, "", false, 0, true);
 
             Assert.AreEqual("action", model.Segmentation["type"]);
             Assert.AreEqual(10, model.Segmentation["x"]);
@@ -383,14 +332,7 @@ namespace Tests
 
             CountlyEventModel model = Countly.Instance.Views._eventService._eventRepo.Dequeue();
 
-            Assert.AreEqual(CountlyEventModel.ViewEvent, model.Key);
-            Assert.IsNull(model.Sum);
-            Assert.AreEqual(1, model.Count);
-            Assert.IsNull(model.Duration);
-            Assert.IsNotNull(model.Segmentation);
-            Assert.AreEqual("first_view", model.Segmentation["name"]);
-            Assert.AreEqual(1, model.Segmentation["visit"]);
-            Assert.AreEqual(1, model.Segmentation["start"]);
+            validateViewSegmentation(model, "first_view", true);
         }
 
         /// <summary>
@@ -427,7 +369,6 @@ namespace Tests
             Assert.IsTrue(Countly.Instance.Views._isFirstView);
             Assert.IsFalse(Countly.Instance.Consents.CheckConsent(Consents.Views));
             Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
-
         }
 
         [TearDown]
