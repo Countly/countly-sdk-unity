@@ -283,6 +283,10 @@ namespace Plugins.CountlySDK
             StorageHelper?.CloseDB();
         }
 
+        internal void CloseDBConnection() {
+            StorageHelper?.CloseDB();
+        }
+
         internal void ClearStorage()
         {
             if (!IsSDKInitialized) {

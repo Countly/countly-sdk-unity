@@ -293,7 +293,207 @@ namespace Tests
             Assert.IsTrue(Countly.Instance.Configuration.IsAutomaticSessionTrackingDisabled);
         }
 
-        [TearDown]
+        /// <summary>
+        /// Custome device ID was set. Init SDK again with no custom ID.
+        /// case 1: 'clearStoredDeviceID' not set.
+        /// resutl: SDK uses internaly sotred ID.
+        /// case 2: 'clearStoredDeviceID' is set.
+        /// resutl: SDK generates new ID.
+        /// 
+        /// </summary>
+        [Test]
+        public void CustomDeviceIDWasSet_CustomDeviceIDNotProvided()
+        {
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                ServerUrl = _serverUrl,
+                AppKey = _appKey,
+                DeviceId = "device_id"
+            };
+
+            Countly.Instance.Init(configuration);
+            Assert.IsNotNull(Countly.Instance.Device);
+            Assert.AreEqual("device_id", Countly.Instance.Device.DeviceId);
+
+            // Destory instance bofore init SDK again.
+            CloseDBConnectionAndDestoryInstance();
+
+            configuration = new CountlyConfiguration {
+                ServerUrl = _serverUrl,
+                AppKey = _appKey,
+            };
+
+            Countly.Instance.Init(configuration);
+            Assert.IsNotNull(Countly.Instance.Device);
+            Assert.AreEqual("device_id", Countly.Instance.Device.DeviceId);
+
+            // Destory instance bofore init SDK again abd clear device id
+            CloseDBConnectionAndDestoryInstance(true);
+
+            configuration = new CountlyConfiguration {
+                ServerUrl = _serverUrl,
+                AppKey = _appKey,
+            };
+
+            Countly.Instance.Init(configuration);
+            Assert.IsNotNull(Countly.Instance.Device);
+            Assert.AreNotEqual("device_id", Countly.Instance.Device.DeviceId);
+        }
+
+        /// <summary>
+        /// Custome device ID was set. Init SDK again with custom ID.
+        /// case 1: 'clearStoredDeviceID' not set.
+        /// resutl: SDK uses internaly sotred ID.
+        /// case 2: 'clearStoredDeviceID' is set.
+        /// resutl: SDK sets provided ID.
+        /// 
+        /// </summary>
+        [Test]
+        public void CustomDeviceIDWasSet_CustomDeviceIDProvided()
+        {
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                ServerUrl = _serverUrl,
+                AppKey = _appKey,
+                DeviceId = "device_id"
+            };
+
+            Countly.Instance.Init(configuration);
+            Assert.IsNotNull(Countly.Instance.Device);
+            Assert.AreEqual("device_id", Countly.Instance.Device.DeviceId);
+
+            // Destory instance bofore init SDK again.
+            CloseDBConnectionAndDestoryInstance();
+
+            configuration = new CountlyConfiguration {
+                ServerUrl = _serverUrl,
+                AppKey = _appKey,
+                DeviceId = "device_id_new"
+            };
+
+            Countly.Instance.Init(configuration);
+            Assert.IsNotNull(Countly.Instance.Device);
+            Assert.AreEqual("device_id", Countly.Instance.Device.DeviceId);
+
+            // Destory instance bofore init SDK again abd clear device id
+            CloseDBConnectionAndDestoryInstance(true);
+
+            configuration = new CountlyConfiguration {
+                ServerUrl = _serverUrl,
+                AppKey = _appKey,
+                DeviceId = "device_id_new"
+            };
+
+            Countly.Instance.Init(configuration);
+            Assert.IsNotNull(Countly.Instance.Device);
+            Assert.AreEqual("device_id_new", Countly.Instance.Device.DeviceId);
+        }
+
+        /// <summary>
+        /// SDK uses Generated device ID. Init SDK again with no custom ID.
+        /// case 1: 'clearStoredDeviceID' not set.
+        /// resutl: SDK uses internaly sotred ID.
+        /// case 2: 'clearStoredDeviceID' is set.
+        /// resutl: SDK generates new ID.
+        /// 
+        /// </summary>
+        [Test]
+        public void GeneratedDeviceID_CustomDeviceIDNotProvided()
+        {
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                ServerUrl = _serverUrl,
+                AppKey = _appKey,
+            };
+
+            Countly.Instance.Init(configuration);
+            Assert.IsNotNull(Countly.Instance.Device);
+            Assert.IsNotEmpty(Countly.Instance.Device.DeviceId);
+
+            string deviceID = Countly.Instance.Device.DeviceId;
+
+            // Destory instance bofore init SDK again.
+            CloseDBConnectionAndDestoryInstance();
+
+            configuration = new CountlyConfiguration {
+                ServerUrl = _serverUrl,
+                AppKey = _appKey,
+            };
+
+            Countly.Instance.Init(configuration);
+            Assert.IsNotNull(Countly.Instance.Device);
+            Assert.AreEqual(deviceID, Countly.Instance.Device.DeviceId);
+
+            // Destory instance bofore init SDK again abd clear device id
+            CloseDBConnectionAndDestoryInstance(true);
+
+            configuration = new CountlyConfiguration {
+                ServerUrl = _serverUrl,
+                AppKey = _appKey,
+            };
+
+            Countly.Instance.Init(configuration);
+            Assert.IsNotNull(Countly.Instance.Device);
+            Assert.AreEqual(deviceID, Countly.Instance.Device.DeviceId);
+        }
+
+        /// <summary>
+        /// SDK uses Generated device ID. Init SDK again with custom ID.
+        /// case 1: 'clearStoredDeviceID' not set.
+        /// resutl: SDK uses internaly sotred ID.
+        /// case 2: 'clearStoredDeviceID' is set.
+        /// resutl: SDK sets provided ID.
+        /// 
+        /// </summary>
+        [Test]
+        public void GeneratedDeviceID_CustomDeviceIDProvided()
+        {
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                ServerUrl = _serverUrl,
+                AppKey = _appKey,
+            };
+
+            Countly.Instance.Init(configuration);
+            Assert.IsNotNull(Countly.Instance.Device);
+            Assert.IsNotEmpty(Countly.Instance.Device.DeviceId);
+
+            string deviceID = Countly.Instance.Device.DeviceId;
+
+            // Destory instance bofore init SDK again.
+            CloseDBConnectionAndDestoryInstance();
+
+            configuration = new CountlyConfiguration {
+                ServerUrl = _serverUrl,
+                AppKey = _appKey,
+                DeviceId = "device_id_new"
+            };
+
+            Countly.Instance.Init(configuration);
+            Assert.IsNotNull(Countly.Instance.Device);
+            Assert.AreEqual(deviceID, Countly.Instance.Device.DeviceId);
+
+            // Destory instance bofore init SDK again abd clear device id
+            CloseDBConnectionAndDestoryInstance(true);
+
+            configuration = new CountlyConfiguration {
+                ServerUrl = _serverUrl,
+                AppKey = _appKey,
+                DeviceId = "device_id_new"
+            };
+
+            Countly.Instance.Init(configuration);
+            Assert.IsNotNull(Countly.Instance.Device);
+            Assert.AreEqual("device_id_new", Countly.Instance.Device.DeviceId);
+        }
+
+        private void CloseDBConnectionAndDestoryInstance(bool clearStorage = false) {
+            if (clearStorage) {
+                PlayerPrefs.DeleteAll();
+            }
+
+            Countly.Instance.CloseDBConnection();
+            Object.DestroyImmediate(Countly.Instance);
+        }
+        
+
+            [TearDown]
         public void End()
         {
             Countly.Instance.ClearStorage();
