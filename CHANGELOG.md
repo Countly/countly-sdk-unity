@@ -1,5 +1,6 @@
 ## 22.02.0
 * When changing consent, the SDK will now send the full state of the consent and not just the delta.
+* Added platform information to push actioned events
 
 ## 21.11.0
 * !! Major breaking change !! Changing device ID without merging will now clear the current consent. Consent has to be given again after performing this action.

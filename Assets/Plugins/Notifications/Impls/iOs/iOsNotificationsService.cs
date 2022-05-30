@@ -52,7 +52,8 @@ namespace Notifications.Impls.iOs
                 PushCountlyService.PushActionSegment segment =
                     new Plugins.CountlySDK.Services.PushCountlyService.PushActionSegment {
                         MessageID = mesageId,
-                        Identifier = identifier
+                        Identifier = identifier,
+                        Platform = "i"
                     };
 
                 Log.Debug("[IOsNotificationsService] ReportPushActionAsync key: " + CountlyEventModel.PushActionEvent + ", segments: " + segment);
