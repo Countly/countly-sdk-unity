@@ -108,7 +108,8 @@ namespace Notifications.Impls.Android
                     PushCountlyService.PushActionSegment segment =
                     new Plugins.CountlySDK.Services.PushCountlyService.PushActionSegment {
                         MessageID = mesageId,
-                        Identifier = identifier
+                        Identifier = identifier,
+                        Platform = "a"
                     };
 
                     Log.Debug("[AndroidNotificationsService] ReportPushActionAsync key: " + CountlyEventModel.PushActionEvent + ", segments: " + segment);
