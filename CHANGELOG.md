@@ -1,4 +1,5 @@
 ## 22.02.0
+* Added calls to record Timed Events
 * Add new 'segmentation' parameter in 'RecordOpenViewAsync' method to record view with segmentation.
 * When changing consent, the SDK will now send the full state of the consent and not just the delta.
 * Added platform information to push actioned events.
