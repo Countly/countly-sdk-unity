@@ -251,32 +251,6 @@ namespace Plugins.CountlySDK.Services
         }
 
         /// <summary>
-        /// Report an event to the server.
-        /// </summary>
-        /// <param name="key">event key</param>
-        /// <returns></returns>
-        public async Task RecordEventAsync(string key)
-        {
-            lock (LockObj) {
-                Log.Info("[EventCountlyService] RecordEventAsync : key = " + key);
-
-                if (!CheckConsentOnKey(key)) {
-                    return;
-                }
-
-                if (string.IsNullOrEmpty(key) || string.IsNullOrWhiteSpace(key)) {
-                    Log.Warning("[EventCountlyService] RecordEventAsync : The event key '" + key + "'isn't valid.");
-                    return;
-                }                
-
-                CountlyEventModel @event = new CountlyEventModel(key, null, 1, 0, null);
-
-                _ = RecordEventAsync(@event);
-            }
-
-        }
-
-        /// <summary>
         /// Report an event to the server with segmentation.
         /// </summary>
         /// <param name="key">event key</param>
