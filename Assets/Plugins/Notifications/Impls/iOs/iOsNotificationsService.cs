@@ -3,6 +3,7 @@ using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK.Services;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -49,16 +50,16 @@ namespace Notifications.Impls.iOs
             string identifier = _bridge.ButtonIndex;
 
             if (_bridge.MessageId != null) {
-                PushCountlyService.PushActionSegment segment =
-                    new Plugins.CountlySDK.Services.PushCountlyService.PushActionSegment {
-                        MessageID = mesageId,
-                        Identifier = identifier,
-                        Platform = "i"
-                    };
+                IDictionary<string, object> segment = new Dictionary<string, object>()
+                {
+                    {"b", mesageId},
+                    {"i", identifier},
+                    {"p", "i"}
+                };
 
                 Log.Debug("[IOsNotificationsService] ReportPushActionAsync key: " + CountlyEventModel.PushActionEvent + ", segments: " + segment);
 
-                CountlyEventModel eventModel = new CountlyEventModel(CountlyEventModel.PushActionEvent, segment.ToDictionary());
+                CountlyEventModel eventModel = new CountlyEventModel(CountlyEventModel.PushActionEvent, segment);
                 await _eventCountlyService.RecordEventAsync(eventModel);
             }
 
