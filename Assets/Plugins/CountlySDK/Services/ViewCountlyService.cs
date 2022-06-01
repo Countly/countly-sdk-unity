@@ -40,7 +40,7 @@ namespace Plugins.CountlySDK.Services
         /// </summary>
         /// <param name="name">name of the view</param>
         /// <returns></returns>
-        public async Task RecordOpenViewAsync(string name)
+        public async Task RecordOpenViewAsync(string name, IDictionary<string, object> segmentation = null)
         {
             lock (LockObj) {
                 Log.Info("[ViewCountlyService] RecordOpenViewAsync : name = " + name);
@@ -58,19 +58,30 @@ namespace Plugins.CountlySDK.Services
                     name = name.Substring(0, _configuration.MaxKeyLength);
                 }
 
-                ViewSegment currentViewSegment =
-                    new ViewSegment {
-                        Name = name,
-                        Segment = Constants.UnityPlatform,
-                        Visit = 1,
-                        Start = _isFirstView ? 1 : 0
-                    };
+                IDictionary<string, object> openViewSegment = new Dictionary<string, object>
+                {
+                    {"name", name},
+                    {"segment", Constants.UnityPlatform},
+                    {"visit", 1},
+                    {"start", _isFirstView ? 1 : 0}
+                };
+
+                if (segmentation != null) {
+                    segmentation = RemoveSegmentInvalidDataTypes(segmentation);
+                    segmentation = FixSegmentKeysAndValues(segmentation);
+
+                    foreach (KeyValuePair<string, object> item in openViewSegment) {
+                        segmentation[item.Key] = item.Value;
+                    }
+                } else {
+                    segmentation = openViewSegment;
+                }
 
                 if (!_viewToLastViewStartTime.ContainsKey(name)) {
                     _viewToLastViewStartTime.Add(name, DateTime.UtcNow);
                 }
 
-                CountlyEventModel currentView = new CountlyEventModel(CountlyEventModel.ViewEvent, currentViewSegment.OpenViewDictionary());
+                CountlyEventModel currentView = new CountlyEventModel(CountlyEventModel.ViewEvent, segmentation);
                 _ = _eventService.RecordEventAsync(currentView);
 
                 _isFirstView = false;
@@ -115,14 +126,6 @@ namespace Plugins.CountlySDK.Services
                     name = name.Substring(0, _configuration.MaxKeyLength);
                 }
 
-                ViewSegment currentViewSegment =
-                    new ViewSegment {
-                        Name = name,
-                        Segment = Constants.UnityPlatform,
-                        Visit = 0,
-                        Start = 0
-                    };
-
                 double? duration = null;
                 if (_viewToLastViewStartTime.ContainsKey(name)) {
                     DateTime lastViewStartTime = _viewToLastViewStartTime[name];
@@ -131,7 +134,11 @@ namespace Plugins.CountlySDK.Services
                     _viewToLastViewStartTime.Remove(name);
                 }
 
-                IDictionary<string, object> segment = currentViewSegment.CloseViewDictionary();
+                IDictionary<string, object> segment = new Dictionary<string, object>
+                {
+                    {"name", name},
+                    {"segment", Constants.UnityPlatform},
+                };
 
                 CountlyEventModel currentView = new CountlyEventModel(CountlyEventModel.ViewEvent, segment, 1, null, duration);
                 _ = _eventService.RecordEventAsync(currentView);
@@ -156,16 +163,15 @@ namespace Plugins.CountlySDK.Services
                     return;
                 }
 
-                ActionSegment segment =
-                    new ActionSegment {
-                        Type = type,
-                        PositionX = x,
-                        PositionY = y,
-                        Width = width,
-                        Height = height
-                    };
-
-                CountlyEventModel currentView = new CountlyEventModel(CountlyEventModel.ViewActionEvent, segment.ToDictionary());
+                IDictionary<string, object> segmentation = new Dictionary<string, object>()
+                {
+                    {"type", type},
+                    {"x", x},
+                    {"y", y},
+                    {"width", width},
+                    {"height", height},
+                };
+                CountlyEventModel currentView = new CountlyEventModel(CountlyEventModel.ViewActionEvent, segmentation);
                 _ = _eventService.RecordEventAsync(currentView);
             }
         }
@@ -178,67 +184,5 @@ namespace Plugins.CountlySDK.Services
             }
         }
         #endregion
-
-        /// <summary>
-        /// Custom Segmentation for Views related events.
-        /// </summary>
-        [Serializable]
-        class ViewSegment
-        {
-            public string Name { get; set; }
-            public string Segment { get; set; }
-            public int Visit { get; set; }
-            public int Start { get; set; }
-
-            public IDictionary<string, object> OpenViewDictionary()
-            {
-                Dictionary<string, object> dict = new Dictionary<string, object>
-                {
-                    {"name", Name},
-                    {"segment", Segment},
-                    {"visit", Visit},
-                    {"start", Start}
-                };
-                return dict;
-            }
-
-            public IDictionary<string, object> CloseViewDictionary()
-            {
-                Dictionary<string, object> dict = new Dictionary<string, object>
-                {
-                    {"name", Name},
-                    {"segment", Segment},
-                };
-                return dict;
-            }
-        }
-
-
-        /// <summary>
-        /// Custom Segmentation for Action related events.
-        /// </summary>
-        [Serializable]
-        class ActionSegment
-        {
-            public string Type { get; set; }
-            public int PositionX { get; set; }
-            public int PositionY { get; set; }
-            public int Width { get; set; }
-            public int Height { get; set; }
-
-            public IDictionary<string, object> ToDictionary()
-            {
-                return new Dictionary<string, object>()
-                {
-                    {"type", Type},
-                    {"x", PositionX},
-                    {"y", PositionY},
-                    {"width", Width},
-                    {"height", Height},
-                };
-            }
-        }
-
-
     }
 }
