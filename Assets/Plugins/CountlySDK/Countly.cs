@@ -159,8 +159,7 @@ namespace Plugins.CountlySDK
             Configuration = configuration;
             _logHelper = new CountlyLogHelper(Configuration);
 
-            _logHelper.Info("[Init] Initializing Countly [SdkName: " + Constants.SdkName + " SdkVersion: " + Constants.SdkVersion + "]");
-
+            _logHelper.Info("[Init] Initializing Countly {" + Configuration.ToString() + " SdkName: " + Constants.SdkName + " SdkVersion: " + Constants.SdkVersion + "}");
 
             if (configuration.Parent != null) {
                 transform.parent = configuration.Parent.transform;

@@ -175,7 +175,7 @@ namespace Plugins.CountlySDK.Models
 
         public override string ToString()
         {
-            return $"{nameof(Salt)}: {Salt}, {nameof(EnablePost)}: {EnablePost}, {nameof(EnableConsoleLogging)}: {EnableConsoleLogging}, {nameof(IgnoreSessionCooldown)}: {IgnoreSessionCooldown}, {nameof(NotificationMode)}: {NotificationMode}, {nameof(EnableManualSessionHandling)}: {EnableManualSessionHandling}, {nameof(SessionDuration)}: {SessionDuration}, {nameof(EventQueueThreshold)}: {EventQueueThreshold}, {nameof(StoredRequestLimit)}: {StoredRequestLimit}, {nameof(TotalBreadcrumbsAllowed)}: {TotalBreadcrumbsAllowed}, {nameof(EnableAutomaticCrashReporting)}: {EnableAutomaticCrashReporting}";
+            return $"{nameof(ServerUrl)}: {ServerUrl}, {nameof(AppKey)}: {AppKey}, {nameof(DeviceId)}: {DeviceId}, {nameof(EnableTestMode)}: {EnableTestMode}, {nameof(EnableConsoleLogging)}: {EnableConsoleLogging}, {nameof(EventQueueThreshold)}: {EventQueueThreshold}, {nameof(StoredRequestLimit)}: {StoredRequestLimit}";
         }
 
         /// <summary>
