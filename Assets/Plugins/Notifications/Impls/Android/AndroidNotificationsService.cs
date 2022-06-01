@@ -3,6 +3,7 @@ using Plugins.CountlySDK.Helpers;
 using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK.Services;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -104,18 +105,17 @@ namespace Notifications.Impls.Android
                 foreach (JObject item in jArray) {
                     string mesageId = item.GetValue("messageId").ToString();
                     string identifier = item.GetValue("action_index").ToString();
-
-                    PushCountlyService.PushActionSegment segment =
-                    new Plugins.CountlySDK.Services.PushCountlyService.PushActionSegment {
-                        MessageID = mesageId,
-                        Identifier = identifier,
-                        Platform = "a"
+                    Dictionary<string, object>  segment = new Dictionary<string, object>()
+                    {
+                        {"b", mesageId},
+                        {"i", identifier},
+                        {"p", "a"}
                     };
 
                     Log.Debug("[AndroidNotificationsService] ReportPushActionAsync key: " + CountlyEventModel.PushActionEvent + ", segments: " + segment);
 
 
-                    CountlyEventModel eventModel = new CountlyEventModel(CountlyEventModel.PushActionEvent, segment.ToDictionary());
+                    CountlyEventModel eventModel = new CountlyEventModel(CountlyEventModel.PushActionEvent, segment);
                     await _eventCountlyService.RecordEventAsync(eventModel);
                 }
 
