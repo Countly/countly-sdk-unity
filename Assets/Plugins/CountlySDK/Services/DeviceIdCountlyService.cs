@@ -45,13 +45,13 @@ namespace Plugins.CountlySDK.Services
         public DeviceIdType DeviceIdType { get; private set; }
 
         /// <summary>
-        /// Initialize <code>DeviceId</code> field with device id provided in configuration or with Randome generated Id and Cache it.
+        /// Initialize <code>DeviceId</code> field with device id provided in configuration or with Random generated Id and Cache it.
         /// </summary>
         /// <param name="deviceId">new device id provided in configuration</param>
         internal void InitDeviceId(string deviceId = null)
         {
             //**Priority is**
-            //Cached DeviceID (remains even after after app kill)
+            //Cached DeviceID (remains even after app kill)
             //Static DeviceID (only when the app is running or in the background)
             //User provided DeviceID
             //Generate Random DeviceID
@@ -214,7 +214,7 @@ namespace Plugins.CountlySDK.Services
         /// <summary>
         /// Call <code>DeviceIdChanged</code> on all listeners.
         /// </summary>
-        /// <param name="merged">If passed "true" if will perform a device ID merge serverside of the old and new device ID. This will merge their data</param>
+        /// <param name="merged">If passed "true" if will perform a device ID merge server side of the old and new device ID. This will merge their data</param>
         private void NotifyListeners(bool merged)
         {
             if (Listeners == null) {
