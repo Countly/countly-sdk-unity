@@ -35,7 +35,7 @@ namespace Plugins.CountlySDK
 
         private CountlyLogHelper _logHelper;
         private static Countly _instance = null;
-        internal CountlyStorageHelper StorageHelper;
+        internal CountlyMigrationHelper StorageHelper;
         internal readonly object lockObj = new object();
         private List<AbstractBaseService> _listeners = new List<AbstractBaseService>();
 
@@ -186,10 +186,15 @@ namespace Plugins.CountlySDK
             FirstLaunchAppHelper.Process();
 
             RequestBuilder requestBuilder = new RequestBuilder();
-            StorageHelper = new CountlyStorageHelper(_logHelper, requestBuilder);
+            StorageHelper = new CountlyMigrationHelper(_logHelper, requestBuilder);
             StorageHelper.OpenDB();
 
-            StorageHelper.RunMigration();
+            IDictionary<string, object> migrationParams = new Dictionary<string, object>()
+            {
+                {CountlyMigrationHelper.key_from_0_to_1_custom_id_set, configuration.DeviceId != null },
+            };
+
+            StorageHelper.RunMigration(migrationParams);
 
             Init(requestBuilder, StorageHelper.RequestRepo, StorageHelper.EventRepo, StorageHelper.ConfigDao);
 

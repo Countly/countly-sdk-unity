@@ -32,7 +32,7 @@ namespace Tests
             Assert.IsNotNull(Countly.Instance.Device);
             Assert.IsNotNull(Countly.Instance.Device.DeviceId);
             Assert.IsNotEmpty(Countly.Instance.Device.DeviceId);
-            Assert.AreEqual(DeviceIdType.SystemGenerated, Countly.Instance.Device.DeviceIdType);
+            Assert.AreEqual(DeviceIdType.SDKGenerated, Countly.Instance.Device.DeviceIdType);
         }
 
         /// <summary>
@@ -51,7 +51,6 @@ namespace Tests
             Assert.IsNotNull(Countly.Instance.Device);
             Assert.AreEqual("device_id", Countly.Instance.Device.DeviceId);
             Assert.AreEqual(DeviceIdType.DeveloperProvided, Countly.Instance.Device.DeviceIdType);
-
         }
 
         /// <summary>
@@ -98,7 +97,7 @@ namespace Tests
 
             Countly.Instance.Init(configuration);
             Assert.IsNotNull(Countly.Instance.Consents);
-            Assert.AreEqual(DeviceIdType.SystemGenerated, Countly.Instance.Device.DeviceIdType);
+            Assert.AreEqual(DeviceIdType.SDKGenerated, Countly.Instance.Device.DeviceIdType);
 
             string oldDeviceId = Countly.Instance.Device.DeviceId;
             Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
@@ -139,7 +138,7 @@ namespace Tests
 
             Countly.Instance.Init(configuration);
             Assert.IsNotNull(Countly.Instance.Consents);
-            Assert.AreEqual(DeviceIdType.SystemGenerated, Countly.Instance.Device.DeviceIdType);
+            Assert.AreEqual(DeviceIdType.SDKGenerated, Countly.Instance.Device.DeviceIdType);
 
             Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
             string oldDeviceId = Countly.Instance.Device.DeviceId;
@@ -176,7 +175,7 @@ namespace Tests
 
             Countly.Instance.Init(configuration);
             Assert.IsNotNull(Countly.Instance.Consents);
-            Assert.AreEqual(DeviceIdType.SystemGenerated, Countly.Instance.Device.DeviceIdType);
+            Assert.AreEqual(DeviceIdType.SDKGenerated, Countly.Instance.Device.DeviceIdType);
 
             string oldDeviceId = Countly.Instance.Device.DeviceId;
             Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
@@ -210,7 +209,7 @@ namespace Tests
 
             Countly.Instance.Init(configuration);
             Assert.IsNotNull(Countly.Instance.Consents);
-            Assert.AreEqual(DeviceIdType.SystemGenerated, Countly.Instance.Device.DeviceIdType);
+            Assert.AreEqual(DeviceIdType.SDKGenerated, Countly.Instance.Device.DeviceIdType);
 
             string oldDeviceId = Countly.Instance.Device.DeviceId;
             Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
@@ -274,7 +273,7 @@ namespace Tests
 
             Countly.Instance.Init(configuration);
             Assert.IsNotNull(Countly.Instance.Consents);
-            Assert.AreEqual(DeviceIdType.SystemGenerated, Countly.Instance.Device.DeviceIdType);
+            Assert.AreEqual(DeviceIdType.SDKGenerated, Countly.Instance.Device.DeviceIdType);
 
             Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
             await Countly.Instance.Device.ChangeDeviceIdWithoutMerge("new_device_id");

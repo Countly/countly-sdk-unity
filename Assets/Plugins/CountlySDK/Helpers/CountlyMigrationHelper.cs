@@ -23,12 +23,13 @@ namespace Plugins.CountlySDK.Helpers
         ViewEvents, NonViewEvents, Requests, ViewEventSegments, NonViewEventSegments, Configs, EventNumberInSameSessions
     }
 
-    internal class CountlyStorageHelper
+    internal class CountlyMigrationHelper
     {
         private DB _db;
         internal int CurrentVersion = 0;
         private const long _dbNumber = 3;
         internal readonly int SchemaVersion = 2;
+        public const string key_from_0_to_1_custom_id_set = "0_1_custom_id_set";
 
         private CountlyLogHelper _logHelper;
         private readonly RequestBuilder _requestBuilder;
@@ -43,7 +44,7 @@ namespace Plugins.CountlySDK.Helpers
         internal NonViewEventRepository EventRepo { get; private set; }
         internal ViewEventRepository ViewRepo { get; private set; }
 
-        internal CountlyStorageHelper(CountlyLogHelper logHelper, RequestBuilder requestBuilder)
+        internal CountlyMigrationHelper(CountlyLogHelper logHelper, RequestBuilder requestBuilder)
         {
             _logHelper = logHelper;
             _requestBuilder = requestBuilder;
@@ -127,7 +128,7 @@ namespace Plugins.CountlySDK.Helpers
         /// <summary>
         /// Migrate database schema.
         /// </summary>
-        internal void RunMigration()
+        internal void RunMigration(IDictionary<string, object> migrationParams)
         {
             _logHelper.Verbose("[CountlyStorageHelper] RunMigration : currentVersion = " + CurrentVersion);
 
@@ -149,6 +150,13 @@ namespace Plugins.CountlySDK.Helpers
                 Migration_MigrateOldRequests();
                 CurrentVersion = 2;
                 PlayerPrefs.SetInt(Constants.SchemaVersion, CurrentVersion);
+            }
+
+            int type = PlayerPrefs.GetInt(Constants.DeviceIDType, -1);
+
+            if (type == -1) {
+                bool customIdProvided = (bool)migrationParams[key_from_0_to_1_custom_id_set];
+                Migration_GuessTheDeviceIDType(customIdProvided);
             }
         }
 
@@ -207,6 +215,14 @@ namespace Plugins.CountlySDK.Helpers
             }
             _logHelper.Verbose("[CountlyStorageHelper] Migration_MigrateOldRequests");
 
+        }
+
+        private void Migration_GuessTheDeviceIDType(bool customIdProvided) {
+            if (customIdProvided) {
+                PlayerPrefs.SetInt(Constants.DeviceIDType, 1);
+            } else {
+                PlayerPrefs.SetInt(Constants.DeviceIDType, 0);
+            }
         }
 
         internal void ClearDBData()
