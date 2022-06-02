@@ -124,22 +124,5 @@ namespace Plugins.CountlySDK.Services
             }
         }
         #endregion
-
-        [Serializable]
-        public struct PushActionSegment
-        {
-            public string Identifier { get; set; }
-            public string MessageID { get; set; }
-
-            public IDictionary<string, object> ToDictionary()
-            {
-                return new Dictionary<string, object>()
-                {
-                    {"b", Identifier},
-                    {"i", MessageID}
-                };
-            }
-        }
-
     }
 }
