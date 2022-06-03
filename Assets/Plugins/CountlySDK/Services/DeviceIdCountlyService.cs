@@ -113,8 +113,11 @@ namespace Plugins.CountlySDK.Services
                     return;
                 }
 
-                //Add currently recorded events to request queue-----------------------------------
+                //Add currently recorded events to request queue
                 _eventCountlyService.AddEventsToRequestQueue();
+
+                //Cancel all timed events
+                _eventCountlyService.CancelAllTimedEvents();
 
                 //Ends current session
                 //Do not dispose timer object
