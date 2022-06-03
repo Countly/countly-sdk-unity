@@ -23,7 +23,7 @@ namespace Plugins.CountlySDK.Helpers
         ViewEvents, NonViewEvents, Requests, ViewEventSegments, NonViewEventSegments, Configs, EventNumberInSameSessions
     }
 
-    internal class CountlyMigrationHelper
+    internal class StorageAndMigrationHelper
     {
         private DB _db;
         internal int CurrentVersion = 0;
@@ -44,7 +44,7 @@ namespace Plugins.CountlySDK.Helpers
         internal NonViewEventRepository EventRepo { get; private set; }
         internal ViewEventRepository ViewRepo { get; private set; }
 
-        internal CountlyMigrationHelper(CountlyLogHelper logHelper, RequestBuilder requestBuilder)
+        internal StorageAndMigrationHelper(CountlyLogHelper logHelper, RequestBuilder requestBuilder)
         {
             _logHelper = logHelper;
             _requestBuilder = requestBuilder;
