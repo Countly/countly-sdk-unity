@@ -4,7 +4,8 @@ namespace Plugins.CountlySDK.Enums
 {
     public enum DeviceIdType
     {
-        SDKGenerated,
-        DeveloperProvided,
+        None = -1,
+        SDKGenerated = 0,
+        DeveloperProvided = 1,
     }
 }

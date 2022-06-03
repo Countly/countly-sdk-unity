@@ -15,24 +15,17 @@ namespace Plugins.CountlySDK.Services
         private readonly EventCountlyService _eventCountlyService;
         internal readonly RequestCountlyHelper _requestCountlyHelper;
         private readonly SessionCountlyService _sessionCountlyService;
-        
+
 
         internal DeviceIdCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, SessionCountlyService sessionCountlyService,
             RequestCountlyHelper requestCountlyHelper, EventCountlyService eventCountlyService, CountlyUtils countlyUtils, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
         {
             Log.Debug("[DeviceIdCountlyService] Initializing.");
-            
+
             _countlyUtils = countlyUtils;
             _eventCountlyService = eventCountlyService;
             _requestCountlyHelper = requestCountlyHelper;
             _sessionCountlyService = sessionCountlyService;
-
-            int type = PlayerPrefs.GetInt(Constants.DeviceIDType, 0);
-            if (type == 0) {
-                DeviceIdType = DeviceIdType.SDKGenerated;
-            } else {
-                DeviceIdType = DeviceIdType.DeveloperProvided;
-            }
         }
         /// <summary>
         /// Returns the Device ID that is currently used by the SDK
@@ -72,6 +65,9 @@ namespace Plugins.CountlySDK.Services
             if (_countlyUtils.IsNullEmptyOrWhitespace(storedDeviceId)) {
                 PlayerPrefs.SetString(Constants.DeviceIDKey, DeviceId);
             }
+
+            int type = PlayerPrefs.GetInt(Constants.DeviceIDType, (int)DeviceIdType.None);
+            DeviceIdType = (DeviceIdType)type;
         }
 
         /// <summary>
@@ -204,14 +200,13 @@ namespace Plugins.CountlySDK.Services
             //Change device id
             DeviceId = newDeviceId;
 
-            PlayerPrefs.SetInt(Constants.DeviceIDType, 1);
             DeviceIdType = DeviceIdType.DeveloperProvided;
+            PlayerPrefs.SetInt(Constants.DeviceIDType, (int)DeviceIdType);
 
             //Updating Cache
             PlayerPrefs.SetString(Constants.DeviceIDKey, DeviceId);
 
             Log.Debug("[DeviceIdCountlyService] UpdateDeviceId: " + newDeviceId);
-
         }
 
         /// <summary>
