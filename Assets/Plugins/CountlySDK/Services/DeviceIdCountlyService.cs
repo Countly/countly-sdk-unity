@@ -51,12 +51,17 @@ namespace Plugins.CountlySDK.Services
             string storedDeviceId = PlayerPrefs.GetString(Constants.DeviceIDKey);
             if (!_countlyUtils.IsNullEmptyOrWhitespace(storedDeviceId)) {
                 DeviceId = storedDeviceId;
+                DeviceIdType = (DeviceIdType)PlayerPrefs.GetInt(Constants.DeviceIDType, (int)DeviceIdType.None);
             } else {
                 if (_countlyUtils.IsNullEmptyOrWhitespace(DeviceId)) {
                     if (!_countlyUtils.IsNullEmptyOrWhitespace(deviceId)) {
                         DeviceId = deviceId;
+                        DeviceIdType = DeviceIdType.DeveloperProvided;
+                        PlayerPrefs.SetInt(Constants.DeviceIDType, (int)DeviceIdType);
                     } else {
                         DeviceId = _countlyUtils.GetUniqueDeviceId();
+                        DeviceIdType = DeviceIdType.SDKGenerated;
+                        PlayerPrefs.SetInt(Constants.DeviceIDType, (int)DeviceIdType);
                     }
                 }
             }
@@ -65,9 +70,6 @@ namespace Plugins.CountlySDK.Services
             if (_countlyUtils.IsNullEmptyOrWhitespace(storedDeviceId)) {
                 PlayerPrefs.SetString(Constants.DeviceIDKey, DeviceId);
             }
-
-            int type = PlayerPrefs.GetInt(Constants.DeviceIDType, (int)DeviceIdType.None);
-            DeviceIdType = (DeviceIdType)type;
         }
 
         /// <summary>

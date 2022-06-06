@@ -14,6 +14,7 @@ using iBoxDB.LocalServer;
 using Plugins.CountlySDK.Persistance.Entities;
 using Plugins.CountlySDK.Persistance.Repositories;
 using Plugins.iBoxDB;
+using Plugins.CountlySDK.Enums;
 
 namespace Tests
 {
@@ -82,8 +83,6 @@ namespace Tests
 
             NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
             int schemaVersion = PlayerPrefs.GetInt(Constants.SchemaVersion);
-            Assert.AreEqual(2, schemaVersion);
-            Assert.AreEqual(2, Countly.Instance.StorageHelper.CurrentVersion);
             Assert.AreEqual(Countly.Instance.StorageHelper.SchemaVersion, Countly.Instance.StorageHelper.CurrentVersion);
 
             Assert.AreEqual("772c091355076ead703f987fee94490", collection.Get("app_key"));
@@ -132,11 +131,7 @@ namespace Tests
             Countly.Instance.Init(configuration);
 
             int schemaVersion = PlayerPrefs.GetInt(Constants.SchemaVersion);
-            Assert.AreEqual(2, schemaVersion);
-            Assert.AreEqual(2, Countly.Instance.StorageHelper.CurrentVersion);
             Assert.AreEqual(Countly.Instance.StorageHelper.SchemaVersion, Countly.Instance.StorageHelper.CurrentVersion);
-
-
 
             CountlyRequestModel requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
             NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
@@ -208,8 +203,6 @@ namespace Tests
             Countly.Instance.Init(configuration);
 
             int schemaVersion = PlayerPrefs.GetInt(Constants.SchemaVersion);
-            Assert.AreEqual(2, schemaVersion);
-            Assert.AreEqual(2, Countly.Instance.StorageHelper.CurrentVersion);
             Assert.AreEqual(Countly.Instance.StorageHelper.SchemaVersion, Countly.Instance.StorageHelper.CurrentVersion);
 
             CountlyRequestModel requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
@@ -244,7 +237,6 @@ namespace Tests
             Assert.IsNotNull(collection["consent"]);
             Assert.IsNull(collection["checksum256"]);
             Assert.IsNull(requestModel.RequestUrl);
-
         }
 
         /// <summary>
@@ -277,8 +269,6 @@ namespace Tests
             NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
 
             int schemaVersion = PlayerPrefs.GetInt(Constants.SchemaVersion);
-            Assert.AreEqual(2, schemaVersion);
-            Assert.AreEqual(2, Countly.Instance.StorageHelper.CurrentVersion);
             Assert.AreEqual(Countly.Instance.StorageHelper.SchemaVersion, Countly.Instance.StorageHelper.CurrentVersion);
 
             Assert.AreEqual("772c091355076ead703f987fee94490", collection.Get("app_key"));
@@ -288,7 +278,6 @@ namespace Tests
             Assert.IsNotNull(collection["consent"]);
             Assert.IsNull(collection["checksum256"]);
             Assert.IsNull(requestModel.RequestUrl);
-
         }
 
 
@@ -339,8 +328,6 @@ namespace Tests
             Countly.Instance.Init(configuration);
 
             int schemaVersion = PlayerPrefs.GetInt(Constants.SchemaVersion);
-            Assert.AreEqual(2, schemaVersion);
-            Assert.AreEqual(2, Countly.Instance.StorageHelper.CurrentVersion);
             Assert.AreEqual(Countly.Instance.StorageHelper.SchemaVersion, Countly.Instance.StorageHelper.CurrentVersion);
 
             CountlyRequestModel requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
@@ -409,7 +396,55 @@ namespace Tests
             Assert.IsNotNull(collection["consent"]);
             Assert.IsNull(collection["checksum256"]);
             Assert.IsNull(requestModel.RequestUrl);
+        }
 
+        /// <summary>
+        /// It validates the migration of device ID type.
+        /// Case: No device id is provided in configuration.
+        /// Result: Device type will be 'SDKGenerated'. 
+        /// </summary>
+        [Test]
+        public void TestDeviceIDTypeAfterMigration_NoDeviceIDProvided()
+        {
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                ServerUrl = _serverUrl,
+                AppKey = _appKey,
+            };
+            FirstLaunchAppHelper.Process();
+
+            Countly.Instance.Init(configuration);
+
+            Assert.AreEqual(DeviceIdType.SDKGenerated, Countly.Instance.Device.DeviceIdType);
+
+            int schemaVersion = PlayerPrefs.GetInt(Constants.SchemaVersion);
+            Assert.AreEqual(schemaVersion, Countly.Instance.StorageHelper.SchemaVersion);
+            Assert.AreEqual(schemaVersion, Countly.Instance.StorageHelper.CurrentVersion);
+            Assert.AreEqual(Countly.Instance.StorageHelper.SchemaVersion, Countly.Instance.StorageHelper.CurrentVersion);
+        }
+
+        /// <summary>
+        /// It validates the migration of device ID type.
+        /// Case: Device id is provided in configuration.
+        /// Result: Device type will be 'DeveloperProvided'. 
+        /// </summary>
+        [Test]
+        public void TestDeviceIDTypeAfterMigration__DeviceIDProvided()
+        {
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                ServerUrl = _serverUrl,
+                AppKey = _appKey,
+                DeviceId = "device-id"
+            };
+            FirstLaunchAppHelper.Process();
+
+            Countly.Instance.Init(configuration);
+
+            Assert.AreEqual(DeviceIdType.DeveloperProvided, Countly.Instance.Device.DeviceIdType);
+
+            int schemaVersion = PlayerPrefs.GetInt(Constants.SchemaVersion);
+            Assert.AreEqual(schemaVersion, Countly.Instance.StorageHelper.SchemaVersion);
+            Assert.AreEqual(schemaVersion, Countly.Instance.StorageHelper.CurrentVersion);
+            Assert.AreEqual(Countly.Instance.StorageHelper.SchemaVersion, Countly.Instance.StorageHelper.CurrentVersion);
         }
 
         [TearDown]

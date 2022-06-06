@@ -15,6 +15,7 @@ using UnityEngine;
 using System.Web;
 using System.Text;
 using UnityEngine.Networking;
+using Plugins.CountlySDK.Enums;
 
 namespace Plugins.CountlySDK.Helpers
 {
@@ -28,8 +29,8 @@ namespace Plugins.CountlySDK.Helpers
         private DB _db;
         internal int CurrentVersion = 0;
         private const long _dbNumber = 3;
-        internal readonly int SchemaVersion = 2;
-        public const string key_from_0_to_1_custom_id_set = "0_1_custom_id_set";
+        internal readonly int SchemaVersion = 3;
+        public const string key_from_2_to_3_custom_id_set = "2_3_custom_id_set";
 
         private CountlyLogHelper _logHelper;
         private readonly RequestBuilder _requestBuilder;
@@ -143,7 +144,6 @@ namespace Plugins.CountlySDK.Helpers
 
                 CurrentVersion = 1;
                 PlayerPrefs.SetInt(Constants.SchemaVersion, CurrentVersion);
-
             }
 
             if (CurrentVersion == 1) {
@@ -152,11 +152,11 @@ namespace Plugins.CountlySDK.Helpers
                 PlayerPrefs.SetInt(Constants.SchemaVersion, CurrentVersion);
             }
 
-            int type = PlayerPrefs.GetInt(Constants.DeviceIDType, -1);
-
-            if (type == -1) {
-                bool customIdProvided = (bool)migrationParams[key_from_0_to_1_custom_id_set];
+            if (CurrentVersion == 2) {
+                bool customIdProvided = (bool)migrationParams[key_from_2_to_3_custom_id_set];
                 Migration_GuessTheDeviceIDType(customIdProvided);
+                CurrentVersion = 3;
+                PlayerPrefs.SetInt(Constants.SchemaVersion, CurrentVersion);
             }
         }
 
@@ -219,9 +219,9 @@ namespace Plugins.CountlySDK.Helpers
 
         private void Migration_GuessTheDeviceIDType(bool customIdProvided) {
             if (customIdProvided) {
-                PlayerPrefs.SetInt(Constants.DeviceIDType, 1);
+                PlayerPrefs.SetInt(Constants.DeviceIDType, (int)DeviceIdType.DeveloperProvided);
             } else {
-                PlayerPrefs.SetInt(Constants.DeviceIDType, 0);
+                PlayerPrefs.SetInt(Constants.DeviceIDType, (int)DeviceIdType.SDKGenerated);
             }
         }
 

@@ -191,7 +191,7 @@ namespace Plugins.CountlySDK
 
             IDictionary<string, object> migrationParams = new Dictionary<string, object>()
             {
-                {StorageAndMigrationHelper.key_from_0_to_1_custom_id_set, configuration.DeviceId != null },
+                {StorageAndMigrationHelper.key_from_2_to_3_custom_id_set, configuration.DeviceId != null },
             };
 
             StorageHelper.RunMigration(migrationParams);
