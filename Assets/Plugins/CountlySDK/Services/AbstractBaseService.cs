@@ -105,7 +105,7 @@ namespace Plugins.CountlySDK.Services
                 string k = item.Key;
                 object v = item.Value;
 
-                if (k == null || v == null) {
+                if (k == null || k.Length == 0 ||v == null) {
                     continue;
                 }
 

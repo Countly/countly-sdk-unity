@@ -48,13 +48,194 @@ namespace Tests
 
             Assert.IsNotNull(Countly.Instance.Events);
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
+            Assert.AreEqual(0, Countly.Instance.Events._timedEvents.Count);
 
 
             await Countly.Instance.Events.RecordEventAsync("test_event");
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
+            Assert.AreEqual(0, Countly.Instance.Events._timedEvents.Count);
 
             await Countly.Instance.Events.RecordEventAsync("test_event", segmentation: null, sum: 23, duration: 5);
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
+            Assert.AreEqual(0, Countly.Instance.Events._timedEvents.Count);
+
+            Countly.Instance.Events.StartEvent("test_event");
+            Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
+            Assert.AreEqual(0, Countly.Instance.Events._timedEvents.Count);
+        }
+
+
+        /// <summary>
+        /// It validates the cancelation of timed events on consent removal.
+        /// </summary>
+        [Test]
+        public void TestTimedEventsCancelationOnConsentRemoval()
+        {
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                ServerUrl = _serverUrl,
+                AppKey = _appKey,
+                RequiresConsent = true
+            };
+
+            Countly.Instance.Init(configuration);
+
+            Assert.IsNotNull(Countly.Instance.Events);
+            Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
+
+            Countly.Instance.Events.StartEvent("test_event");
+            Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
+            Assert.AreEqual(0, Countly.Instance.Events._timedEvents.Count);
+
+            Countly.Instance.Consents.GiveConsent(new Consents[] { Consents.Events });
+
+            Countly.Instance.Events.StartEvent("test_event");
+            Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
+            Assert.AreEqual(1, Countly.Instance.Events._timedEvents.Count);
+
+            Countly.Instance.Events.StartEvent("test_event_1");
+            Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
+            Assert.AreEqual(2, Countly.Instance.Events._timedEvents.Count);
+
+            Countly.Instance.Consents.RemoveConsent(new Consents[] { Consents.Events });
+            Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
+            Assert.AreEqual(0, Countly.Instance.Events._timedEvents.Count);
+
+            Countly.Instance.Events.StartEvent("test_event");
+            Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
+            Assert.AreEqual(0, Countly.Instance.Events._timedEvents.Count);
+        }
+
+        /// <summary>
+        /// It validates the cancelation of timed events on changing device id without merge.
+        /// </summary>
+        [Test]
+        public async void TestTimedEventsCancelationOnDeviceIdChange()
+        {
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                ServerUrl = _serverUrl,
+                AppKey = _appKey,
+            };
+
+            Countly.Instance.Init(configuration);
+
+            Countly.Instance.Events.StartEvent("test_event");
+            Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
+            Assert.AreEqual(1, Countly.Instance.Events._timedEvents.Count);
+
+            Countly.Instance.Events.StartEvent("test_event_1");
+            Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
+            Assert.AreEqual(2, Countly.Instance.Events._timedEvents.Count);
+
+            await Countly.Instance.Device.ChangeDeviceIdWithoutMerge("new_device_id");
+            Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
+            Assert.AreEqual(0, Countly.Instance.Events._timedEvents.Count);
+        }
+
+        /// <summary>
+        /// It validates functionality of 'Timed Events' methods .
+        /// </summary>
+        [UnityTest]
+        public IEnumerator TestTimedEventMethods()
+        {
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                ServerUrl = _serverUrl,
+                AppKey = _appKey,
+            };
+
+            Countly.Instance.Init(configuration);
+            Assert.IsNotNull(Countly.Instance.Events);
+            Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
+            Assert.AreEqual(0, Countly.Instance.Events._timedEvents.Count);
+
+            Countly.Instance.Events.StartEvent("test_event");
+            Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
+            Assert.AreEqual(1, Countly.Instance.Events._timedEvents.Count);
+
+            Countly.Instance.Events.StartEvent("test_event");
+            Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
+            Assert.AreEqual(1, Countly.Instance.Events._timedEvents.Count);
+
+            Countly.Instance.Events.StartEvent("test_event_1");
+            Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
+            Assert.AreEqual(2, Countly.Instance.Events._timedEvents.Count);
+
+            Countly.Instance.Events.CancelEvent("test_event_1");
+            Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
+            Assert.AreEqual(1, Countly.Instance.Events._timedEvents.Count);
+
+            Countly.Instance.Events.CancelEvent("test_event_2");
+            Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
+            Assert.AreEqual(1, Countly.Instance.Events._timedEvents.Count);
+
+            Countly.Instance.Events.EndEvent("test_event_1");
+            Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
+            Assert.AreEqual(1, Countly.Instance.Events._timedEvents.Count);
+
+            System.DateTime startTime = System.DateTime.UtcNow;
+            do {
+                yield return null;
+            }
+            while ((System.DateTime.UtcNow - startTime).TotalSeconds < 2.1);
+
+            Countly.Instance.Events.EndEvent("test_event");
+            Assert.AreEqual(1, Countly.Instance.Events._eventRepo.Count);
+            Assert.AreEqual(0, Countly.Instance.Events._timedEvents.Count);
+
+            CountlyEventModel model = Countly.Instance.Events._eventRepo.Dequeue();
+
+            Assert.AreEqual("test_event", model.Key);
+            Assert.AreEqual(0, model.Sum);
+            Assert.AreEqual(1, model.Count);
+            Assert.IsTrue(model.Duration >= 2.1);
+            Assert.IsNull(model.Segmentation);
+        }
+
+        /// <summary>
+        /// It validates functionality of method 'RecordEventAsync'.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator TestTimedEventWithSegmentation()
+        {
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                ServerUrl = _serverUrl,
+                AppKey = _appKey,
+            };
+
+            Countly.Instance.Init(configuration);
+            Assert.IsNotNull(Countly.Instance.Events);
+            Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
+            Assert.AreEqual(0, Countly.Instance.Events._timedEvents.Count);
+
+            Countly.Instance.Events.StartEvent("test_event");
+            Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
+            Assert.AreEqual(1, Countly.Instance.Events._timedEvents.Count);
+
+            Countly.Instance.Events.StartEvent("test_event_1");
+            Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
+            Assert.AreEqual(2, Countly.Instance.Events._timedEvents.Count);
+
+            System.DateTime startTime = System.DateTime.UtcNow;
+            do {
+                yield return null;
+            }
+            while ((System.DateTime.UtcNow - startTime).TotalSeconds < 2.5);
+
+            IDictionary<string, object> segmentation = new Dictionary<string, object>();
+            segmentation.Add("key1", "value1");
+            segmentation.Add("key2", "value2");
+
+            Countly.Instance.Events.EndEvent("test_event", segmentation, 5, 10);
+            Assert.AreEqual(1, Countly.Instance.Events._eventRepo.Count);
+            Assert.AreEqual(1, Countly.Instance.Events._timedEvents.Count);
+
+            CountlyEventModel model = Countly.Instance.Events._eventRepo.Dequeue();
+
+            Assert.AreEqual("test_event", model.Key);
+            Assert.AreEqual(10, model.Sum);
+            Assert.AreEqual(5, model.Count);
+            Assert.IsTrue(model.Duration >= 2.5);
+            Assert.AreEqual("value1", model.Segmentation["key1"]);
+            Assert.AreEqual("value2", model.Segmentation["key2"]);
         }
 
         /// <summary>

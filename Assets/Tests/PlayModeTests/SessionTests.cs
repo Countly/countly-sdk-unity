@@ -138,7 +138,7 @@ namespace Tests
 
             Countly.Instance.Init(configuration);
             Assert.IsNotNull(Countly.Instance.Session);
-            Assert.AreEqual(1, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
+            Assert.AreEqual(2, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
             Countly.Instance.Session._requestCountlyHelper._requestRepo.Clear();
 
             Countly.Instance.Consents.GiveConsent(new Consents[] { Consents.Sessions });
@@ -185,7 +185,7 @@ namespace Tests
             configuration.DisableAutomaticSessionTracking();
             Countly.Instance.Init(configuration);
             Assert.IsNotNull(Countly.Instance.Session);
-            Assert.AreEqual(1, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
+            Assert.AreEqual(2, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
             Countly.Instance.Session._requestCountlyHelper._requestRepo.Clear();
 
             Countly.Instance.Consents.GiveConsent(new Consents[] { Consents.Sessions });
@@ -208,8 +208,8 @@ namespace Tests
 
             Countly.Instance.Init(configuration);
             Assert.IsNotNull(Countly.Instance.Session);
-            // RQ will have empty location request
-            Assert.AreEqual(1, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
+            // RQ will have empty location request and consent reqeust
+            Assert.AreEqual(2, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
             Countly.Instance.Session._requestCountlyHelper._requestRepo.Clear();
 
             Countly.Instance.Consents.GiveConsent(new Consents[] { Consents.Sessions });
