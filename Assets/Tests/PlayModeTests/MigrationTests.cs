@@ -20,6 +20,7 @@ namespace Tests
 {
     public class MigrationTests
     {
+        private readonly int SCHEMA_VERSION = 3;
         private readonly string _serverUrl = "https://xyz.com/";
         private readonly string _appKey = "772c091355076ead703f987fee94490";
 
@@ -46,6 +47,8 @@ namespace Tests
             Countly.Instance.RequestHelper._requestRepo.Clear();
 
             int schemaVersion = PlayerPrefs.GetInt(Constants.SchemaVersion);
+            Assert.AreEqual(SCHEMA_VERSION, schemaVersion);
+            Assert.AreEqual(SCHEMA_VERSION, Countly.Instance.StorageHelper.CurrentVersion);
             Assert.AreEqual(schemaVersion, Countly.Instance.StorageHelper.SchemaVersion);
             Assert.AreEqual(schemaVersion, Countly.Instance.StorageHelper.CurrentVersion);
             Assert.AreEqual(Countly.Instance.StorageHelper.SchemaVersion, Countly.Instance.StorageHelper.CurrentVersion);
@@ -83,6 +86,8 @@ namespace Tests
 
             NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
             int schemaVersion = PlayerPrefs.GetInt(Constants.SchemaVersion);
+            Assert.AreEqual(SCHEMA_VERSION, schemaVersion);
+            Assert.AreEqual(SCHEMA_VERSION, Countly.Instance.StorageHelper.CurrentVersion);
             Assert.AreEqual(Countly.Instance.StorageHelper.SchemaVersion, Countly.Instance.StorageHelper.CurrentVersion);
 
             Assert.AreEqual("772c091355076ead703f987fee94490", collection.Get("app_key"));
@@ -131,6 +136,8 @@ namespace Tests
             Countly.Instance.Init(configuration);
 
             int schemaVersion = PlayerPrefs.GetInt(Constants.SchemaVersion);
+            Assert.AreEqual(SCHEMA_VERSION, schemaVersion);
+            Assert.AreEqual(SCHEMA_VERSION, Countly.Instance.StorageHelper.CurrentVersion);
             Assert.AreEqual(Countly.Instance.StorageHelper.SchemaVersion, Countly.Instance.StorageHelper.CurrentVersion);
 
             CountlyRequestModel requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
@@ -203,6 +210,8 @@ namespace Tests
             Countly.Instance.Init(configuration);
 
             int schemaVersion = PlayerPrefs.GetInt(Constants.SchemaVersion);
+            Assert.AreEqual(SCHEMA_VERSION, schemaVersion);
+            Assert.AreEqual(SCHEMA_VERSION, Countly.Instance.StorageHelper.CurrentVersion);
             Assert.AreEqual(Countly.Instance.StorageHelper.SchemaVersion, Countly.Instance.StorageHelper.CurrentVersion);
 
             CountlyRequestModel requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
@@ -269,6 +278,8 @@ namespace Tests
             NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
 
             int schemaVersion = PlayerPrefs.GetInt(Constants.SchemaVersion);
+            Assert.AreEqual(SCHEMA_VERSION, schemaVersion);
+            Assert.AreEqual(SCHEMA_VERSION, Countly.Instance.StorageHelper.CurrentVersion);
             Assert.AreEqual(Countly.Instance.StorageHelper.SchemaVersion, Countly.Instance.StorageHelper.CurrentVersion);
 
             Assert.AreEqual("772c091355076ead703f987fee94490", collection.Get("app_key"));
@@ -328,6 +339,8 @@ namespace Tests
             Countly.Instance.Init(configuration);
 
             int schemaVersion = PlayerPrefs.GetInt(Constants.SchemaVersion);
+            Assert.AreEqual(SCHEMA_VERSION, schemaVersion);
+            Assert.AreEqual(SCHEMA_VERSION, Countly.Instance.StorageHelper.CurrentVersion);
             Assert.AreEqual(Countly.Instance.StorageHelper.SchemaVersion, Countly.Instance.StorageHelper.CurrentVersion);
 
             CountlyRequestModel requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
@@ -417,6 +430,8 @@ namespace Tests
             Assert.AreEqual(DeviceIdType.SDKGenerated, Countly.Instance.Device.DeviceIdType);
 
             int schemaVersion = PlayerPrefs.GetInt(Constants.SchemaVersion);
+            Assert.AreEqual(SCHEMA_VERSION, schemaVersion);
+            Assert.AreEqual(SCHEMA_VERSION, Countly.Instance.StorageHelper.CurrentVersion);
             Assert.AreEqual(schemaVersion, Countly.Instance.StorageHelper.SchemaVersion);
             Assert.AreEqual(schemaVersion, Countly.Instance.StorageHelper.CurrentVersion);
             Assert.AreEqual(Countly.Instance.StorageHelper.SchemaVersion, Countly.Instance.StorageHelper.CurrentVersion);
@@ -442,6 +457,8 @@ namespace Tests
             Assert.AreEqual(DeviceIdType.DeveloperProvided, Countly.Instance.Device.DeviceIdType);
 
             int schemaVersion = PlayerPrefs.GetInt(Constants.SchemaVersion);
+            Assert.AreEqual(SCHEMA_VERSION, schemaVersion);
+            Assert.AreEqual(SCHEMA_VERSION, Countly.Instance.StorageHelper.CurrentVersion);
             Assert.AreEqual(schemaVersion, Countly.Instance.StorageHelper.SchemaVersion);
             Assert.AreEqual(schemaVersion, Countly.Instance.StorageHelper.CurrentVersion);
             Assert.AreEqual(Countly.Instance.StorageHelper.SchemaVersion, Countly.Instance.StorageHelper.CurrentVersion);
