@@ -410,7 +410,7 @@ namespace Tests
         }
 
         /// <summary>
-        /// It validates the migration of device ID type.
+        /// It validates the device ID type if SDK already has device id and init SDK again.
         /// Case: Previous schema version and device id stored locally. No device id is provided in configuration.
         /// Result: Device type will be 'SDKGenerated'. 
         /// </summary>
@@ -439,7 +439,7 @@ namespace Tests
         }
 
         /// <summary>
-        /// It validates the migration of device ID type.
+        /// It validates the device ID type if SDK already has device id and init SDK again.
         /// Case: Device id is provided in configuration.
         /// Result: Device type will be 'DeveloperProvided'. 
         /// </summary>
