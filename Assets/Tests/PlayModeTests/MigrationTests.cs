@@ -54,7 +54,6 @@ namespace Tests
             Assert.AreEqual(Countly.Instance.StorageHelper.SchemaVersion, Countly.Instance.StorageHelper.CurrentVersion);
 
             Assert.AreEqual(0, Countly.Instance.RequestHelper._requestRepo.Count);
-
         }
 
         /// <summary>
@@ -97,7 +96,6 @@ namespace Tests
             Assert.IsNotNull(collection["consent"]);
             Assert.IsNull(collection["checksum256"]);
             Assert.IsNull(requestModel.RequestUrl);
-
         }
 
 
@@ -413,12 +411,14 @@ namespace Tests
 
         /// <summary>
         /// It validates the migration of device ID type.
-        /// Case: No device id is provided in configuration.
+        /// Case: Previous schema version and device id stored locally. No device id is provided in configuration.
         /// Result: Device type will be 'SDKGenerated'. 
         /// </summary>
         [Test]
         public void TestDeviceIDTypeAfterMigration_NoDeviceIDProvided()
         {
+            PlayerPrefs.SetInt(Constants.SchemaVersion, 1);
+            PlayerPrefs.SetString(Constants.DeviceIDKey, "device-id");
             CountlyConfiguration configuration = new CountlyConfiguration {
                 ServerUrl = _serverUrl,
                 AppKey = _appKey,
@@ -427,6 +427,7 @@ namespace Tests
 
             Countly.Instance.Init(configuration);
 
+            Assert.AreEqual("device-id", Countly.Instance.Device.DeviceId);
             Assert.AreEqual(DeviceIdType.SDKGenerated, Countly.Instance.Device.DeviceIdType);
 
             int schemaVersion = PlayerPrefs.GetInt(Constants.SchemaVersion);
@@ -445,6 +446,8 @@ namespace Tests
         [Test]
         public void TestDeviceIDTypeAfterMigration__DeviceIDProvided()
         {
+            PlayerPrefs.SetInt(Constants.SchemaVersion, 1);
+            PlayerPrefs.SetString(Constants.DeviceIDKey, "device-id");
             CountlyConfiguration configuration = new CountlyConfiguration {
                 ServerUrl = _serverUrl,
                 AppKey = _appKey,
@@ -454,6 +457,7 @@ namespace Tests
 
             Countly.Instance.Init(configuration);
 
+            Assert.AreEqual("device-id", Countly.Instance.Device.DeviceId);
             Assert.AreEqual(DeviceIdType.DeveloperProvided, Countly.Instance.Device.DeviceIdType);
 
             int schemaVersion = PlayerPrefs.GetInt(Constants.SchemaVersion);

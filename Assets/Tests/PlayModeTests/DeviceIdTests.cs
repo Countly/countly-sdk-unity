@@ -18,72 +18,6 @@ namespace Tests
         private readonly string _appKey = "772c091355076ead703f987fee94490";
 
         /// <summary>
-        /// It validates SDK generated device id and it's type.
-        /// </summary>
-        [Test]
-        public void TestDeviceIdGeneratedBySDK()
-        {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-            };
-
-            Countly.Instance.Init(configuration);
-            Assert.IsNotNull(Countly.Instance.Device);
-            Assert.IsNotNull(Countly.Instance.Device.DeviceId);
-            Assert.IsNotEmpty(Countly.Instance.Device.DeviceId);
-            Assert.AreEqual(DeviceIdType.SDKGenerated, Countly.Instance.Device.DeviceIdType);
-
-            // Destroy instance before init SDK again.
-            CloseDBConnectionAndDestroyInstance();
-
-            //Initialize SDK again with custom key
-            configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-                DeviceId = "device_id"
-            };
-
-            Countly.Instance.Init(configuration);
-            Assert.IsNotNull(Countly.Instance.Device);
-            Assert.IsNotNull(Countly.Instance.Device.DeviceId);
-            Assert.IsNotEmpty(Countly.Instance.Device.DeviceId);
-            Assert.AreEqual(DeviceIdType.SDKGenerated, Countly.Instance.Device.DeviceIdType);
-        }
-
-        /// <summary>
-        /// It validates device id provided in configuration and it's type.
-        /// </summary>
-        [Test]
-        public void TestDeviceIdGivenInConfig()
-        {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-                DeviceId = "device_id"
-            };
-
-            Countly.Instance.Init(configuration);
-            Assert.IsNotNull(Countly.Instance.Device);
-            Assert.AreEqual("device_id", Countly.Instance.Device.DeviceId);
-            Assert.AreEqual(DeviceIdType.DeveloperProvided, Countly.Instance.Device.DeviceIdType);
-
-            // Destroy instance before init SDK again.
-            CloseDBConnectionAndDestroyInstance();
-
-            //Initialize SDK again without custom key
-            configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-            };
-
-            Countly.Instance.Init(configuration);
-            Assert.IsNotNull(Countly.Instance.Device);
-            Assert.AreEqual("device_id", Countly.Instance.Device.DeviceId);
-            Assert.AreEqual(DeviceIdType.DeveloperProvided, Countly.Instance.Device.DeviceIdType);
-        }
-
-        /// <summary>
         /// It validates the working of methods 'ChangeDeviceIdWithMerge' and 'ChangeDeviceIdWithoutMerge' on giving same device id.
         /// </summary>
         [Test]
@@ -336,13 +270,99 @@ namespace Tests
             Assert.IsTrue(Countly.Instance.Configuration.IsAutomaticSessionTrackingDisabled);
         }
 
+        /**
+         * +--------------------------------------------------+------------------------------------+----------------------+
+         * | SDK state at the end of the previous app session | Provided configuration during init | Action taken by SDK  |
+         * +--------------------------------------------------+------------------------------------+----------------------+
+         * |           Custom      |   SDK used a             |              Custom                |    Flag   |   flag   |
+         * |         device ID     |   generated              |            device ID               |    not    |          |
+         * |         was set       |       ID                 |             provided               |    set    |   set    |
+         * +--------------------------------------------------+------------------------------------+----------------------+
+         * |                     First init                   |                   -                |    1      |    -     |
+         * +--------------------------------------------------+------------------------------------+----------------------+
+         * |                     First init                   |                   x                |    2      |    -     |
+         * +--------------------------------------------------+------------------------------------+----------------------+
+         * |            x          |             -            |                   -                |    3      |    -     |
+         * +--------------------------------------------------+------------------------------------+----------------------+
+         * |            x          |             -            |                   x                |    4      |    -     |
+         * +--------------------------------------------------+------------------------------------+----------------------+
+         * |            -          |             x            |                   -                |    5      |    -     |
+         * +--------------------------------------------------+------------------------------------+----------------------+
+         * |            -          |             x            |                   x                |    6      |    -     |
+         * +--------------------------------------------------+------------------------------------+----------------------+
+         */
+
         /// <summary>
-        /// Custom device ID was set. Init SDK again with no custom ID.
-        /// case 1: 'clearStoredDeviceID' not set.
-        /// result: SDK uses internally stored ID.
-        /// case 2: 'clearStoredDeviceID' is set.
-        /// result: SDK generates new ID.
-        /// 
+        /// Scenario 1: First time init the SDK with custom device ID and init the SDK second time without device ID.
+        /// SDK Action: During second init, SDK will not override the custom device ID provided in first init. 
+        /// </summary>
+        [Test]
+        public void TestDeviceIdGivenInConfig()
+        {
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                ServerUrl = _serverUrl,
+                AppKey = _appKey,
+                DeviceId = "device_id"
+            };
+
+            Countly.Instance.Init(configuration);
+            Assert.IsNotNull(Countly.Instance.Device);
+            Assert.AreEqual("device_id", Countly.Instance.Device.DeviceId);
+            Assert.AreEqual(DeviceIdType.DeveloperProvided, Countly.Instance.Device.DeviceIdType);
+
+            // Destroy instance before init SDK again.
+            CloseDBConnectionAndDestroyInstance();
+
+            //Initialize SDK again without custom key
+            configuration = new CountlyConfiguration {
+                ServerUrl = _serverUrl,
+                AppKey = _appKey,
+            };
+
+            Countly.Instance.Init(configuration);
+            Assert.IsNotNull(Countly.Instance.Device);
+            Assert.AreEqual("device_id", Countly.Instance.Device.DeviceId);
+            Assert.AreEqual(DeviceIdType.DeveloperProvided, Countly.Instance.Device.DeviceIdType);
+        }
+
+        /// <summary>
+        /// Scenario 2: First time init the SDK without custom device ID and init the SDK second time with custom device ID.
+        /// SDK Action: During second init, SDK will not override the device ID generated during first init. 
+        /// </summary>
+        [Test]
+        public void TestDeviceIdGeneratedBySDK()
+        {
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                ServerUrl = _serverUrl,
+                AppKey = _appKey,
+            };
+
+            Countly.Instance.Init(configuration);
+            Assert.IsNotNull(Countly.Instance.Device);
+            Assert.IsNotNull(Countly.Instance.Device.DeviceId);
+            Assert.IsNotEmpty(Countly.Instance.Device.DeviceId);
+            Assert.AreEqual(DeviceIdType.SDKGenerated, Countly.Instance.Device.DeviceIdType);
+
+            // Destroy instance before init SDK again.
+            CloseDBConnectionAndDestroyInstance();
+
+            //Initialize SDK again with custom key
+            configuration = new CountlyConfiguration {
+                ServerUrl = _serverUrl,
+                AppKey = _appKey,
+                DeviceId = "device_id"
+            };
+
+            Countly.Instance.Init(configuration);
+            Assert.IsNotNull(Countly.Instance.Device);
+            Assert.IsNotNull(Countly.Instance.Device.DeviceId);
+            Assert.IsNotEmpty(Countly.Instance.Device.DeviceId);
+            Assert.AreEqual(DeviceIdType.SDKGenerated, Countly.Instance.Device.DeviceIdType);
+        }
+
+        /// <summary>
+        /// Scenario 3: First time init the SDK with custom device ID and init the SDK second time without device ID.
+        /// SDK Action: During second init, SDK will not override the custom device ID provided in first init. 
         /// </summary>
         [Test]
         public void CustomDeviceIDWasSet_CustomDeviceIDNotProvided()
@@ -356,6 +376,7 @@ namespace Tests
             Countly.Instance.Init(configuration);
             Assert.IsNotNull(Countly.Instance.Device);
             Assert.AreEqual("device_id", Countly.Instance.Device.DeviceId);
+            Assert.AreEqual(DeviceIdType.DeveloperProvided, Countly.Instance.Device.DeviceIdType);
 
             // Destroy instance before init SDK again.
             CloseDBConnectionAndDestroyInstance();
@@ -368,15 +389,11 @@ namespace Tests
             Countly.Instance.Init(configuration);
             Assert.IsNotNull(Countly.Instance.Device);
             Assert.AreEqual("device_id", Countly.Instance.Device.DeviceId);
+            Assert.AreEqual(DeviceIdType.DeveloperProvided, Countly.Instance.Device.DeviceIdType);
         }
-
         /// <summary>
-        /// Custom device ID was set. Init SDK again with custom ID.
-        /// case 1: 'clearStoredDeviceID' not set.
-        /// result: SDK uses internally stored ID.
-        /// case 2: 'clearStoredDeviceID' is set.
-        /// result: SDK sets provided ID.
-        /// 
+        /// Scenario 4: First time init the SDK with custom device ID and init the SDK second time with a new custom device ID.
+        /// SDK Action: During second init, SDK will not override the custom device ID provided in first init. 
         /// </summary>
         [Test]
         public void CustomDeviceIDWasSet_CustomDeviceIDProvided()
@@ -390,6 +407,7 @@ namespace Tests
             Countly.Instance.Init(configuration);
             Assert.IsNotNull(Countly.Instance.Device);
             Assert.AreEqual("device_id", Countly.Instance.Device.DeviceId);
+            Assert.AreEqual(DeviceIdType.DeveloperProvided, Countly.Instance.Device.DeviceIdType);
 
             // Destroy instance before init SDK again.
             CloseDBConnectionAndDestroyInstance();
@@ -403,15 +421,12 @@ namespace Tests
             Countly.Instance.Init(configuration);
             Assert.IsNotNull(Countly.Instance.Device);
             Assert.AreEqual("device_id", Countly.Instance.Device.DeviceId);
+            Assert.AreEqual(DeviceIdType.DeveloperProvided, Countly.Instance.Device.DeviceIdType);
         }
 
         /// <summary>
-        /// SDK uses Generated device ID. Init SDK again with no custom ID.
-        /// case 1: 'clearStoredDeviceID' not set.
-        /// result: SDK uses internally stored ID.
-        /// case 2: 'clearStoredDeviceID' is set.
-        /// result: SDK generates new ID.
-        /// 
+        /// Scenario 5: First time init the SDK without custom device ID and init the SDK second time without custom device ID.
+        /// SDK Action: During second init, SDK will not override the device ID generated during first init.
         /// </summary>
         [Test]
         public void GeneratedDeviceID_CustomDeviceIDNotProvided()
@@ -424,6 +439,7 @@ namespace Tests
             Countly.Instance.Init(configuration);
             Assert.IsNotNull(Countly.Instance.Device);
             Assert.IsNotEmpty(Countly.Instance.Device.DeviceId);
+            Assert.AreEqual(DeviceIdType.SDKGenerated, Countly.Instance.Device.DeviceIdType);
 
             string deviceID = Countly.Instance.Device.DeviceId;
 
@@ -438,15 +454,14 @@ namespace Tests
             Countly.Instance.Init(configuration);
             Assert.IsNotNull(Countly.Instance.Device);
             Assert.AreEqual(deviceID, Countly.Instance.Device.DeviceId);
+            Assert.AreEqual(DeviceIdType.SDKGenerated, Countly.Instance.Device.DeviceIdType);
         }
 
         /// <summary>
-        /// SDK uses Generated device ID. Init SDK again with custom ID.
-        /// case 1: 'clearStoredDeviceID' not set.
-        /// result: SDK uses internally stored ID.
-        /// case 2: 'clearStoredDeviceID' is set.
-        /// result: SDK sets provided ID.
-        /// 
+        /// <summary>
+        /// Scenario 6: First time init the SDK without custom device ID and init the SDK second time with a custom device ID.
+        /// SDK Action: During second init, SDK will not override the device ID generated during first init.
+        /// </summary>
         /// </summary>
         [Test]
         public void GeneratedDeviceID_CustomDeviceIDProvided()
@@ -459,6 +474,7 @@ namespace Tests
             Countly.Instance.Init(configuration);
             Assert.IsNotNull(Countly.Instance.Device);
             Assert.IsNotEmpty(Countly.Instance.Device.DeviceId);
+            Assert.AreEqual(DeviceIdType.SDKGenerated, Countly.Instance.Device.DeviceIdType);
 
             string deviceID = Countly.Instance.Device.DeviceId;
 
@@ -474,6 +490,7 @@ namespace Tests
             Countly.Instance.Init(configuration);
             Assert.IsNotNull(Countly.Instance.Device);
             Assert.AreEqual(deviceID, Countly.Instance.Device.DeviceId);
+            Assert.AreEqual(DeviceIdType.SDKGenerated, Countly.Instance.Device.DeviceIdType);
         }
 
         private void CloseDBConnectionAndDestroyInstance(bool clearStorage = false) {
