@@ -458,10 +458,8 @@ namespace Tests
         }
 
         /// <summary>
-        /// <summary>
         /// Scenario 6: First time init the SDK without custom device ID and init the SDK second time with a custom device ID.
         /// SDK Action: During second init, SDK will not override the device ID generated during first init.
-        /// </summary>
         /// </summary>
         [Test]
         public void GeneratedDeviceID_CustomDeviceIDProvided()
