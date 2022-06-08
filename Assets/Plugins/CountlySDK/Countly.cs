@@ -15,6 +15,7 @@ using Plugins.CountlySDK.Persistance.Repositories.Impls;
 using Plugins.CountlySDK.Services;
 using Plugins.iBoxDB;
 using UnityEngine;
+using Plugins.CountlySDK.Enums;
 
 [assembly: InternalsVisibleTo("PlayModeTests")]
 namespace Plugins.CountlySDK
@@ -119,13 +120,13 @@ namespace Plugins.CountlySDK
         public StarRatingCountlyService StarRating { get; private set; }
 
         /// <summary>
-        /// Exposes functionality to set and change custom user properties and interract with custom property modifiers.
+        /// Exposes functionality to set and change custom user properties and interact with custom property modifiers.
         /// </summary>
         /// <returns>UserDetailsCountlyService</returns>
         public UserDetailsCountlyService UserDetails { get; private set; }
 
         /// <summary>
-        /// Exposes functionality to start and stop recording views and report positions for heatmap.
+        /// Exposes functionality to start and stop recording views and report positions for heat-map.
         /// </summary>
         /// <returns>ViewCountlyService</returns>
         public ViewCountlyService Views { get; private set; }
@@ -186,9 +187,43 @@ namespace Plugins.CountlySDK
             }
 
             _logHelper.Debug("[Init] SDK initialized with the URL:[" + configuration.ServerUrl + "] and the appKey:[" + configuration.AppKey + "]");
+            
 
+            if (configuration.SessionDuration < 1) {
+                _logHelper.Error("[Init] provided session duration is less than 1. Replacing it with 1.");
+                configuration.SessionDuration = 1;
+            }
+            _logHelper.Debug("[Init] session duration set to [" + configuration.SessionDuration + "]");
+
+            if (configuration.EnablePost) {
+                _logHelper.Debug("[Init] Setting HTTP POST to be forced");
+            }
+
+            if (configuration.Salt != null) {
+                _logHelper.Debug("[Init] Enabling tamper protection");
+            }
+
+            if (configuration.NotificationMode != TestMode.None) {
+                _logHelper.Debug("[Init] Enabling push notification");
+            }
+
+            if (configuration.EnableTestMode) {
+                _logHelper.Debug("[Init] Enabling test mode");
+            }
 
             // Have a look at the SDK limit values
+            if (configuration.EventQueueThreshold < 1) {
+                _logHelper.Error("[Init] provided event queue size is less than 1. Replacing it with 1.");
+                configuration.EventQueueThreshold = 1;
+            }
+            _logHelper.Debug("[Init] event queue size set to [" + configuration.EventQueueThreshold + "]");
+
+            if (configuration.StoredRequestLimit < 1) {
+                _logHelper.Error("[Init] provided request queue size is less than 1. Replacing it with 1.");
+                configuration.StoredRequestLimit = 1;
+            }
+            _logHelper.Debug("[Init] request queue size set to [" + configuration.StoredRequestLimit + "]");
+
             if (configuration.MaxKeyLength != MaxKeyLengthDefault) {
                 if (configuration.MaxKeyLength < 1) {
                     configuration.MaxKeyLength = 1;
@@ -237,26 +272,9 @@ namespace Plugins.CountlySDK
                 _logHelper.Info("[Init] provided 'maxStackTraceLineLength' override:[" + configuration.MaxStackTraceLineLength + "]");
             }
 
-            if (configuration.SessionDuration < 1) {
-                _logHelper.Error("[Init] provided session duration is less than 1. Replacing it with 1.");
-                configuration.SessionDuration = 1;
-            }
-            _logHelper.Debug("[Init] session duration set to [" + configuration.SessionDuration + "]");
-
-            if (configuration.EventQueueThreshold < 1) {
-                _logHelper.Error("[Init] provided event queue size is less than 1. Replacing it with 1.");
-                configuration.EventQueueThreshold = 1;
-            }
-            _logHelper.Debug("[Init] event queue size set to [" + configuration.EventQueueThreshold + "]");
-
-            if (configuration.StoredRequestLimit < 1) {
-                _logHelper.Error("[Init] provided request queue size is less than 1. Replacing it with 1.");
-                configuration.StoredRequestLimit = 1;
-            }
-            _logHelper.Debug("[Init] request queue size set to [" + configuration.StoredRequestLimit + "]");
 
             if (Configuration.EnableFirstAppLaunchSegment) {
-                _logHelper.Warning("'EnableFirstAppLaunchSegment' has been deprecated and it's functionality has been removed. This variable is only left for compatability.");
+                _logHelper.Warning("'EnableFirstAppLaunchSegment' has been deprecated and it's functionality has been removed. This variable is only left for compatibility.");
             }
 
             Constants.ProcessPlatform();
