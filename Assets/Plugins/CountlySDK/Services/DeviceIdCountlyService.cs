@@ -16,6 +16,8 @@ namespace Plugins.CountlySDK.Services
         internal readonly RequestCountlyHelper _requestCountlyHelper;
         private readonly SessionCountlyService _sessionCountlyService;
 
+        private readonly int DEVICE_TYPE_FALLBACK_VALUE = -1;
+
 
         internal DeviceIdCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, SessionCountlyService sessionCountlyService,
             RequestCountlyHelper requestCountlyHelper, EventCountlyService eventCountlyService, CountlyUtils countlyUtils, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
@@ -51,7 +53,19 @@ namespace Plugins.CountlySDK.Services
             string storedDeviceId = PlayerPrefs.GetString(Constants.DeviceIDKey);
             if (!_countlyUtils.IsNullEmptyOrWhitespace(storedDeviceId)) {
                 DeviceId = storedDeviceId;
-                DeviceIdType = (DeviceIdType)PlayerPrefs.GetInt(Constants.DeviceIDType, (int)DeviceIdType.None);
+                int storedDIDType = PlayerPrefs.GetInt(Constants.DeviceIDType, DEVICE_TYPE_FALLBACK_VALUE);
+                if (storedDIDType == DEVICE_TYPE_FALLBACK_VALUE) {
+                    Log.Error("[DeviceIdCountlyService] InitDeviceId: SDK doesn't have device ID type stored. There should have been one.");
+
+                    if (!_countlyUtils.IsNullEmptyOrWhitespace(deviceId)) {
+                        DeviceIdType = DeviceIdType.DeveloperProvided;
+                    } else {
+                        DeviceIdType = DeviceIdType.SDKGenerated;
+                    }
+                    PlayerPrefs.SetInt(Constants.DeviceIDType, (int)DeviceIdType);
+                } else {
+                    DeviceIdType = (DeviceIdType)storedDIDType;
+                }
             } else {
                 if (_countlyUtils.IsNullEmptyOrWhitespace(DeviceId)) {
                     if (!_countlyUtils.IsNullEmptyOrWhitespace(deviceId)) {
