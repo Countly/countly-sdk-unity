@@ -219,9 +219,9 @@ namespace Plugins.CountlySDK.Helpers
 
         private void Migration_GuessTheDeviceIDType(bool customIdProvided) {
             if (customIdProvided) {
-                PlayerPrefs.SetInt(Constants.DeviceIDType, (int)DeviceIdType.DeveloperProvided);
+                PlayerPrefs.SetInt(Constants.DeviceIDTypeKey, (int)DeviceIdType.DeveloperProvided);
             } else {
-                PlayerPrefs.SetInt(Constants.DeviceIDType, (int)DeviceIdType.SDKGenerated);
+                PlayerPrefs.SetInt(Constants.DeviceIDTypeKey, (int)DeviceIdType.SDKGenerated);
             }
         }
 

@@ -417,8 +417,13 @@ namespace Tests
         [Test]
         public void TestDeviceIDTypeAfterMigration_NoDeviceIDProvided()
         {
+            Assert.False(PlayerPrefs.HasKey(Constants.SchemaVersion));
+            Assert.False(PlayerPrefs.HasKey(Constants.DeviceIDKey));
+            Assert.False(PlayerPrefs.HasKey(Constants.DeviceIDTypeKey));
+
             PlayerPrefs.SetInt(Constants.SchemaVersion, 1);
             PlayerPrefs.SetString(Constants.DeviceIDKey, "device-id");
+
             CountlyConfiguration configuration = new CountlyConfiguration {
                 ServerUrl = _serverUrl,
                 AppKey = _appKey,
@@ -446,8 +451,13 @@ namespace Tests
         [Test]
         public void TestDeviceIDTypeAfterMigration__DeviceIDProvided()
         {
+            Assert.False(PlayerPrefs.HasKey(Constants.SchemaVersion));
+            Assert.False(PlayerPrefs.HasKey(Constants.DeviceIDKey));
+            Assert.False(PlayerPrefs.HasKey(Constants.DeviceIDTypeKey));
+
             PlayerPrefs.SetInt(Constants.SchemaVersion, 1);
             PlayerPrefs.SetString(Constants.DeviceIDKey, "device-id");
+
             CountlyConfiguration configuration = new CountlyConfiguration {
                 ServerUrl = _serverUrl,
                 AppKey = _appKey,
