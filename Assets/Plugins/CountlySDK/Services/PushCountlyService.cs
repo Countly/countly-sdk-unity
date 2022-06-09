@@ -20,6 +20,9 @@ namespace Plugins.CountlySDK.Services
         internal PushCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, RequestCountlyHelper requestCountlyHelper, INotificationsService notificationsService, NotificationsCallbackService notificationsCallbackService, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
         {
             Log.Debug("[PushCountlyService] Initializing.");
+            if (configuration.NotificationEventListeners.Count > 0) {
+                Log.Debug("[PushCountlyService] Registering " + configuration.NotificationEventListeners.Count + "  notification event listeners.");
+            }
 
             _requestCountlyHelper = requestCountlyHelper;
             _notificationsService = notificationsService;

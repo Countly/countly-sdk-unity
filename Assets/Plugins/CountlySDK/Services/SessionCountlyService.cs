@@ -28,6 +28,9 @@ namespace Plugins.CountlySDK.Services
             RequestCountlyHelper requestCountlyHelper, LocationService locationService, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
         {
             Log.Debug("[SessionCountlyService] Initializing.");
+            if (configuration.IsAutomaticSessionTrackingDisabled) {
+                Log.Debug("[SessionCountlyService] Disabling automatic session tracking");
+            }
 
             _eventService = eventService;
             _locationService = locationService;

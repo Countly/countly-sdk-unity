@@ -208,23 +208,11 @@ namespace Plugins.CountlySDK
             }
 
             if (configuration.EnableTestMode) {
-                _logHelper.Debug("[Init] Enabling test mode");
+                _logHelper.Warning("[Init] Enabling test mode");
             }
 
             if (configuration.EnableAutomaticCrashReporting) {
                 _logHelper.Debug("[Init] Enabling automatic crash reporting");
-            }
-
-            if (configuration.IsLocationDisabled) {
-                _logHelper.Debug("[Init] Disabling location");
-            }
-
-            if (configuration.IsAutomaticSessionTrackingDisabled) {
-                _logHelper.Debug("[Init] Disabling automatic session tracking");
-            }
-
-            if (configuration.RequiresConsent) {
-                _logHelper.Debug("[Init] Enabling consent: " + string.Format("[{0}]", string.Join(", ", configuration.GivenConsent)));
             }
 
             // Have a look at the SDK limit values
@@ -287,7 +275,6 @@ namespace Plugins.CountlySDK
                 }
                 _logHelper.Info("[Init] provided 'maxStackTraceLineLength' override:[" + configuration.MaxStackTraceLineLength + "]");
             }
-
 
             if (Configuration.EnableFirstAppLaunchSegment) {
                 _logHelper.Warning("'EnableFirstAppLaunchSegment' has been deprecated and it's functionality has been removed. This variable is only left for compatibility.");
