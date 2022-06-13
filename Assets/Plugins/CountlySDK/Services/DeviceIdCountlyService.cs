@@ -49,29 +49,46 @@ namespace Plugins.CountlySDK.Services
             //Cached DeviceID (remains even after app kill)
             //Static DeviceID (only when the app is running or in the background)
             //User provided DeviceID
-            //Generate Random DeviceID 
-            DeviceIdType type = DeviceIdType.DeveloperProvided;
+            //Generate Random DeviceID
             string storedDeviceId = PlayerPrefs.GetString(Constants.DeviceIDKey);
             if (!_countlyUtils.IsNullEmptyOrWhitespace(storedDeviceId)) {
-                deviceId = storedDeviceId;
+                //SDK already has a device id
+
+                //assign locally stored device id
+                DeviceId = storedDeviceId;
+
+                //Checking if device id type stored locally
                 int storedDIDType = PlayerPrefs.GetInt(Constants.DeviceIDTypeKey, DEVICE_TYPE_FALLBACK_VALUE);
-                if (storedDIDType == DEVICE_TYPE_FALLBACK_VALUE) {
-                    Log.Error("[DeviceIdCountlyService] InitDeviceId: SDK doesn't have device ID type stored. There should have been one.");
+
+                //checking if we valid device id type
+                if (storedDIDType == (int)DeviceIdType.SDKGenerated || storedDIDType == (int)DeviceIdType.DeveloperProvided) {
+                    //SDK has a valid device id type in storage. SDK will be using it.
+                    DeviceIdType = (DeviceIdType)storedDIDType;
+                } else {
+                    if (storedDIDType == DEVICE_TYPE_FALLBACK_VALUE) {
+                        Log.Error("[DeviceIdCountlyService] InitDeviceId: SDK doesn't have device ID type stored. There should have been one.");
+                    } else {
+                        Log.Error("[DeviceIdCountlyService] InitDeviceId: The stored device id type wasn't valid ['" + storedDeviceId + "']. SDK will assign a new type");
+                    }
 
                     if (_countlyUtils.IsNullEmptyOrWhitespace(deviceId)) {
-                        type = DeviceIdType.SDKGenerated;
+                        UpdateDeviceIdAndDeviceIdType(DeviceId, DeviceIdType.SDKGenerated);
+
+                    } else {
+                        UpdateDeviceIdAndDeviceIdType(DeviceId, DeviceIdType.DeveloperProvided);
+
                     }
-                } else {
-                    type = (DeviceIdType)storedDIDType;
                 }
             } else {
+                //SDK doesn't have a device id stored locally
+
+                //checking if developer provided device id is null or empty.
                 if (_countlyUtils.IsNullEmptyOrWhitespace(deviceId)) {
-                    deviceId = _countlyUtils.GetUniqueDeviceId();
-                    type = DeviceIdType.SDKGenerated;
+                    UpdateDeviceIdAndDeviceIdType(_countlyUtils.GetUniqueDeviceId(), DeviceIdType.SDKGenerated);
+                } else {
+                    UpdateDeviceIdAndDeviceIdType(deviceId, DeviceIdType.DeveloperProvided);
                 }
             }
-
-            UpdateDeviceIdAndDeviceIdType(deviceId, type);
         }
 
         /// <summary>
