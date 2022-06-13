@@ -16,6 +16,9 @@ namespace Plugins.CountlySDK.Services
         internal readonly RequestCountlyHelper _requestCountlyHelper;
         private readonly SessionCountlyService _sessionCountlyService;
 
+        private readonly int DEVICE_TYPE_FALLBACK_VALUE = -1;
+
+
         internal DeviceIdCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, SessionCountlyService sessionCountlyService,
             RequestCountlyHelper requestCountlyHelper, EventCountlyService eventCountlyService, CountlyUtils countlyUtils, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
         {
@@ -32,32 +35,58 @@ namespace Plugins.CountlySDK.Services
         public string DeviceId { get; private set; }
 
         /// <summary>
-        /// Initialize <code>DeviceId</code> field with device id provided in configuration or with Randome generated Id and Cache it.
+        /// Returns the type Device ID that is currently used by the SDK
+        /// </summary>
+        public DeviceIdType DeviceIdType { get; private set; }
+
+        /// <summary>
+        /// Initialize <code>DeviceId</code> field with device id provided in configuration or with Random generated Id and Cache it.
         /// </summary>
         /// <param name="deviceId">new device id provided in configuration</param>
         internal void InitDeviceId(string deviceId = null)
         {
             //**Priority is**
-            //Cached DeviceID (remains even after after app kill)
+            //Cached DeviceID (remains even after app kill)
             //Static DeviceID (only when the app is running or in the background)
             //User provided DeviceID
             //Generate Random DeviceID
             string storedDeviceId = PlayerPrefs.GetString(Constants.DeviceIDKey);
             if (!_countlyUtils.IsNullEmptyOrWhitespace(storedDeviceId)) {
+                //SDK already has a device id
+
+                //assign locally stored device id
                 DeviceId = storedDeviceId;
-            } else {
-                if (_countlyUtils.IsNullEmptyOrWhitespace(DeviceId)) {
-                    if (!_countlyUtils.IsNullEmptyOrWhitespace(deviceId)) {
-                        DeviceId = deviceId;
+
+                //Checking if device id type stored locally
+                int storedDIDType = PlayerPrefs.GetInt(Constants.DeviceIDTypeKey, DEVICE_TYPE_FALLBACK_VALUE);
+
+                //checking if we valid device id type
+                if (storedDIDType == (int)DeviceIdType.SDKGenerated || storedDIDType == (int)DeviceIdType.DeveloperProvided) {
+                    //SDK has a valid device id type in storage. SDK will be using it.
+                    DeviceIdType = (DeviceIdType)storedDIDType;
+                } else {
+                    if (storedDIDType == DEVICE_TYPE_FALLBACK_VALUE) {
+                        Log.Error("[DeviceIdCountlyService] InitDeviceId: SDK doesn't have device ID type stored. There should have been one.");
                     } else {
-                        DeviceId = _countlyUtils.GetUniqueDeviceId();
+                        Log.Error("[DeviceIdCountlyService] InitDeviceId: The stored device id type wasn't valid ['" + storedDeviceId + "']. SDK will assign a new type");
+                    }
+
+                    if (_countlyUtils.IsNullEmptyOrWhitespace(deviceId)) {
+                        UpdateDeviceIdAndDeviceIdType(DeviceId, DeviceIdType.SDKGenerated);
+
+                    } else {
+                        UpdateDeviceIdAndDeviceIdType(DeviceId, DeviceIdType.DeveloperProvided);
                     }
                 }
-            }
+            } else {
+                //SDK doesn't have a device id stored locally
 
-            //Set DeviceID in Cache if it doesn't already exists in Cache
-            if (_countlyUtils.IsNullEmptyOrWhitespace(storedDeviceId)) {
-                PlayerPrefs.SetString(Constants.DeviceIDKey, DeviceId);
+                //checking if developer provided device id is null or empty.
+                if (_countlyUtils.IsNullEmptyOrWhitespace(deviceId)) {
+                    UpdateDeviceIdAndDeviceIdType(_countlyUtils.GetUniqueDeviceId(), DeviceIdType.SDKGenerated);
+                } else {
+                    UpdateDeviceIdAndDeviceIdType(deviceId, DeviceIdType.DeveloperProvided);
+                }
             }
         }
 
@@ -113,7 +142,7 @@ namespace Plugins.CountlySDK.Services
                 }
 
                 //Update device id
-                UpdateDeviceId(deviceId);
+                UpdateDeviceIdAndDeviceIdType(deviceId, DeviceIdType.DeveloperProvided);
 
                 if (_consentService.RequiresConsent) {
                     _consentService.SetConsentInternal(_consentService.CountlyConsents.Keys.ToArray(), false, sendRequest: false, ConsentChangedAction.DeviceIDChangedNotMerged);
@@ -170,7 +199,7 @@ namespace Plugins.CountlySDK.Services
                 string oldDeviceId = DeviceId;
 
                 //Update device id
-                UpdateDeviceId(deviceId);
+                UpdateDeviceIdAndDeviceIdType(deviceId, DeviceIdType.DeveloperProvided);
 
                 //Merge user data for old and new device
                 Dictionary<string, object> requestParams =
@@ -186,22 +215,24 @@ namespace Plugins.CountlySDK.Services
         /// Updates Device ID both in app and in cache
         /// </summary>
         /// <param name="newDeviceId">new device id</param>
-        private void UpdateDeviceId(string newDeviceId)
+        /// <param name="type">device id type</param>
+        private void UpdateDeviceIdAndDeviceIdType(string newDeviceId, DeviceIdType type)
         {
-            //Change device id
+            //Change device id and type
             DeviceId = newDeviceId;
+            DeviceIdType = type;
 
             //Updating Cache
             PlayerPrefs.SetString(Constants.DeviceIDKey, DeviceId);
+            PlayerPrefs.SetInt(Constants.DeviceIDTypeKey, (int)DeviceIdType);
 
             Log.Debug("[DeviceIdCountlyService] UpdateDeviceId: " + newDeviceId);
-
         }
 
         /// <summary>
         /// Call <code>DeviceIdChanged</code> on all listeners.
         /// </summary>
-        /// <param name="merged">If passed "true" if will perform a device ID merge serverside of the old and new device ID. This will merge their data</param>
+        /// <param name="merged">If passed "true" if will perform a device ID merge server side of the old and new device ID. This will merge their data</param>
         private void NotifyListeners(bool merged)
         {
             if (Listeners == null) {

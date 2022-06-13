@@ -35,6 +35,7 @@ namespace Plugins.CountlySDK.Helpers
 
         public const string CountlyServerUrl = "https://us-try.count.ly/";
         public const string DeviceIDKey = "DeviceID";
+        public const string DeviceIDTypeKey = "DeviceIDType";
 
 
         public const string SchemaVersion = "Countly.SchemaVersion";

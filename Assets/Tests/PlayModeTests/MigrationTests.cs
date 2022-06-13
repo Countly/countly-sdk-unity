@@ -14,11 +14,13 @@ using iBoxDB.LocalServer;
 using Plugins.CountlySDK.Persistance.Entities;
 using Plugins.CountlySDK.Persistance.Repositories;
 using Plugins.iBoxDB;
+using Plugins.CountlySDK.Enums;
 
 namespace Tests
 {
     public class MigrationTests
     {
+        private readonly int SCHEMA_VERSION = 3;
         private readonly string _serverUrl = "https://xyz.com/";
         private readonly string _appKey = "772c091355076ead703f987fee94490";
 
@@ -45,12 +47,13 @@ namespace Tests
             Countly.Instance.RequestHelper._requestRepo.Clear();
 
             int schemaVersion = PlayerPrefs.GetInt(Constants.SchemaVersion);
+            Assert.AreEqual(SCHEMA_VERSION, schemaVersion);
+            Assert.AreEqual(SCHEMA_VERSION, Countly.Instance.StorageHelper.CurrentVersion);
             Assert.AreEqual(schemaVersion, Countly.Instance.StorageHelper.SchemaVersion);
             Assert.AreEqual(schemaVersion, Countly.Instance.StorageHelper.CurrentVersion);
             Assert.AreEqual(Countly.Instance.StorageHelper.SchemaVersion, Countly.Instance.StorageHelper.CurrentVersion);
 
             Assert.AreEqual(0, Countly.Instance.RequestHelper._requestRepo.Count);
-
         }
 
         /// <summary>
@@ -82,8 +85,8 @@ namespace Tests
 
             NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
             int schemaVersion = PlayerPrefs.GetInt(Constants.SchemaVersion);
-            Assert.AreEqual(2, schemaVersion);
-            Assert.AreEqual(2, Countly.Instance.StorageHelper.CurrentVersion);
+            Assert.AreEqual(SCHEMA_VERSION, schemaVersion);
+            Assert.AreEqual(SCHEMA_VERSION, Countly.Instance.StorageHelper.CurrentVersion);
             Assert.AreEqual(Countly.Instance.StorageHelper.SchemaVersion, Countly.Instance.StorageHelper.CurrentVersion);
 
             Assert.AreEqual("772c091355076ead703f987fee94490", collection.Get("app_key"));
@@ -93,7 +96,6 @@ namespace Tests
             Assert.IsNotNull(collection["consent"]);
             Assert.IsNull(collection["checksum256"]);
             Assert.IsNull(requestModel.RequestUrl);
-
         }
 
 
@@ -132,11 +134,9 @@ namespace Tests
             Countly.Instance.Init(configuration);
 
             int schemaVersion = PlayerPrefs.GetInt(Constants.SchemaVersion);
-            Assert.AreEqual(2, schemaVersion);
-            Assert.AreEqual(2, Countly.Instance.StorageHelper.CurrentVersion);
+            Assert.AreEqual(SCHEMA_VERSION, schemaVersion);
+            Assert.AreEqual(SCHEMA_VERSION, Countly.Instance.StorageHelper.CurrentVersion);
             Assert.AreEqual(Countly.Instance.StorageHelper.SchemaVersion, Countly.Instance.StorageHelper.CurrentVersion);
-
-
 
             CountlyRequestModel requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
             NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
@@ -208,8 +208,8 @@ namespace Tests
             Countly.Instance.Init(configuration);
 
             int schemaVersion = PlayerPrefs.GetInt(Constants.SchemaVersion);
-            Assert.AreEqual(2, schemaVersion);
-            Assert.AreEqual(2, Countly.Instance.StorageHelper.CurrentVersion);
+            Assert.AreEqual(SCHEMA_VERSION, schemaVersion);
+            Assert.AreEqual(SCHEMA_VERSION, Countly.Instance.StorageHelper.CurrentVersion);
             Assert.AreEqual(Countly.Instance.StorageHelper.SchemaVersion, Countly.Instance.StorageHelper.CurrentVersion);
 
             CountlyRequestModel requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
@@ -244,7 +244,6 @@ namespace Tests
             Assert.IsNotNull(collection["consent"]);
             Assert.IsNull(collection["checksum256"]);
             Assert.IsNull(requestModel.RequestUrl);
-
         }
 
         /// <summary>
@@ -277,8 +276,8 @@ namespace Tests
             NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
 
             int schemaVersion = PlayerPrefs.GetInt(Constants.SchemaVersion);
-            Assert.AreEqual(2, schemaVersion);
-            Assert.AreEqual(2, Countly.Instance.StorageHelper.CurrentVersion);
+            Assert.AreEqual(SCHEMA_VERSION, schemaVersion);
+            Assert.AreEqual(SCHEMA_VERSION, Countly.Instance.StorageHelper.CurrentVersion);
             Assert.AreEqual(Countly.Instance.StorageHelper.SchemaVersion, Countly.Instance.StorageHelper.CurrentVersion);
 
             Assert.AreEqual("772c091355076ead703f987fee94490", collection.Get("app_key"));
@@ -288,7 +287,6 @@ namespace Tests
             Assert.IsNotNull(collection["consent"]);
             Assert.IsNull(collection["checksum256"]);
             Assert.IsNull(requestModel.RequestUrl);
-
         }
 
 
@@ -339,8 +337,8 @@ namespace Tests
             Countly.Instance.Init(configuration);
 
             int schemaVersion = PlayerPrefs.GetInt(Constants.SchemaVersion);
-            Assert.AreEqual(2, schemaVersion);
-            Assert.AreEqual(2, Countly.Instance.StorageHelper.CurrentVersion);
+            Assert.AreEqual(SCHEMA_VERSION, schemaVersion);
+            Assert.AreEqual(SCHEMA_VERSION, Countly.Instance.StorageHelper.CurrentVersion);
             Assert.AreEqual(Countly.Instance.StorageHelper.SchemaVersion, Countly.Instance.StorageHelper.CurrentVersion);
 
             CountlyRequestModel requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
@@ -409,7 +407,75 @@ namespace Tests
             Assert.IsNotNull(collection["consent"]);
             Assert.IsNull(collection["checksum256"]);
             Assert.IsNull(requestModel.RequestUrl);
+        }
 
+        /// <summary>
+        /// It validates the device ID type if SDK already has device id and init SDK again.
+        /// Case: Previous schema version and device id stored locally. No device id is provided in configuration.
+        /// Result: Device type will be 'SDKGenerated'. 
+        /// </summary>
+        [Test]
+        public void TestDeviceIDTypeAfterMigration_NoDeviceIDProvided()
+        {
+            Assert.False(PlayerPrefs.HasKey(Constants.SchemaVersion));
+            Assert.False(PlayerPrefs.HasKey(Constants.DeviceIDKey));
+            Assert.False(PlayerPrefs.HasKey(Constants.DeviceIDTypeKey));
+
+            PlayerPrefs.SetInt(Constants.SchemaVersion, 2);
+            PlayerPrefs.SetString(Constants.DeviceIDKey, "device-id");
+
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                ServerUrl = _serverUrl,
+                AppKey = _appKey,
+            };
+            FirstLaunchAppHelper.Process();
+
+            Countly.Instance.Init(configuration);
+
+            Assert.AreEqual("device-id", Countly.Instance.Device.DeviceId);
+            Assert.AreEqual(DeviceIdType.SDKGenerated, Countly.Instance.Device.DeviceIdType);
+
+            int schemaVersion = PlayerPrefs.GetInt(Constants.SchemaVersion);
+            Assert.AreEqual(SCHEMA_VERSION, schemaVersion);
+            Assert.AreEqual(SCHEMA_VERSION, Countly.Instance.StorageHelper.CurrentVersion);
+            Assert.AreEqual(schemaVersion, Countly.Instance.StorageHelper.SchemaVersion);
+            Assert.AreEqual(schemaVersion, Countly.Instance.StorageHelper.CurrentVersion);
+            Assert.AreEqual(Countly.Instance.StorageHelper.SchemaVersion, Countly.Instance.StorageHelper.CurrentVersion);
+        }
+
+        /// <summary>
+        /// It validates the device ID type if SDK already has device id and init SDK again.
+        /// Case: Device id is provided in configuration.
+        /// Result: Device type will be 'DeveloperProvided'. 
+        /// </summary>
+        [Test]
+        public void TestDeviceIDTypeAfterMigration__DeviceIDProvided()
+        {
+            Assert.False(PlayerPrefs.HasKey(Constants.SchemaVersion));
+            Assert.False(PlayerPrefs.HasKey(Constants.DeviceIDKey));
+            Assert.False(PlayerPrefs.HasKey(Constants.DeviceIDTypeKey));
+
+            PlayerPrefs.SetInt(Constants.SchemaVersion, 2);
+            PlayerPrefs.SetString(Constants.DeviceIDKey, "device-id");
+
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                ServerUrl = _serverUrl,
+                AppKey = _appKey,
+                DeviceId = "device-id"
+            };
+            FirstLaunchAppHelper.Process();
+
+            Countly.Instance.Init(configuration);
+
+            Assert.AreEqual("device-id", Countly.Instance.Device.DeviceId);
+            Assert.AreEqual(DeviceIdType.DeveloperProvided, Countly.Instance.Device.DeviceIdType);
+
+            int schemaVersion = PlayerPrefs.GetInt(Constants.SchemaVersion);
+            Assert.AreEqual(SCHEMA_VERSION, schemaVersion);
+            Assert.AreEqual(SCHEMA_VERSION, Countly.Instance.StorageHelper.CurrentVersion);
+            Assert.AreEqual(schemaVersion, Countly.Instance.StorageHelper.SchemaVersion);
+            Assert.AreEqual(schemaVersion, Countly.Instance.StorageHelper.CurrentVersion);
+            Assert.AreEqual(Countly.Instance.StorageHelper.SchemaVersion, Countly.Instance.StorageHelper.CurrentVersion);
         }
 
         [TearDown]

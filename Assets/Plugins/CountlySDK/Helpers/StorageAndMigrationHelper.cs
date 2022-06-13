@@ -15,6 +15,7 @@ using UnityEngine;
 using System.Web;
 using System.Text;
 using UnityEngine.Networking;
+using Plugins.CountlySDK.Enums;
 
 namespace Plugins.CountlySDK.Helpers
 {
@@ -23,12 +24,13 @@ namespace Plugins.CountlySDK.Helpers
         ViewEvents, NonViewEvents, Requests, ViewEventSegments, NonViewEventSegments, Configs, EventNumberInSameSessions
     }
 
-    internal class CountlyStorageHelper
+    internal class StorageAndMigrationHelper
     {
         private DB _db;
         internal int CurrentVersion = 0;
         private const long _dbNumber = 3;
-        internal readonly int SchemaVersion = 2;
+        internal readonly int SchemaVersion = 3;
+        public const string key_from_2_to_3_custom_id_set = "2_3_custom_id_set";
 
         private CountlyLogHelper _logHelper;
         private readonly RequestBuilder _requestBuilder;
@@ -43,7 +45,7 @@ namespace Plugins.CountlySDK.Helpers
         internal NonViewEventRepository EventRepo { get; private set; }
         internal ViewEventRepository ViewRepo { get; private set; }
 
-        internal CountlyStorageHelper(CountlyLogHelper logHelper, RequestBuilder requestBuilder)
+        internal StorageAndMigrationHelper(CountlyLogHelper logHelper, RequestBuilder requestBuilder)
         {
             _logHelper = logHelper;
             _requestBuilder = requestBuilder;
@@ -127,7 +129,7 @@ namespace Plugins.CountlySDK.Helpers
         /// <summary>
         /// Migrate database schema.
         /// </summary>
-        internal void RunMigration()
+        internal void RunMigration(IDictionary<string, object> migrationParams)
         {
             _logHelper.Verbose("[CountlyStorageHelper] RunMigration : currentVersion = " + CurrentVersion);
 
@@ -142,12 +144,18 @@ namespace Plugins.CountlySDK.Helpers
 
                 CurrentVersion = 1;
                 PlayerPrefs.SetInt(Constants.SchemaVersion, CurrentVersion);
-
             }
 
             if (CurrentVersion == 1) {
                 Migration_MigrateOldRequests();
                 CurrentVersion = 2;
+                PlayerPrefs.SetInt(Constants.SchemaVersion, CurrentVersion);
+            }
+
+            if (CurrentVersion == 2) {
+                bool customIdProvided = (bool)migrationParams[key_from_2_to_3_custom_id_set];
+                Migration_GuessTheDeviceIDType(customIdProvided);
+                CurrentVersion = 3;
                 PlayerPrefs.SetInt(Constants.SchemaVersion, CurrentVersion);
             }
         }
@@ -207,6 +215,14 @@ namespace Plugins.CountlySDK.Helpers
             }
             _logHelper.Verbose("[CountlyStorageHelper] Migration_MigrateOldRequests");
 
+        }
+
+        private void Migration_GuessTheDeviceIDType(bool customIdProvided) {
+            if (customIdProvided) {
+                PlayerPrefs.SetInt(Constants.DeviceIDTypeKey, (int)DeviceIdType.DeveloperProvided);
+            } else {
+                PlayerPrefs.SetInt(Constants.DeviceIDTypeKey, (int)DeviceIdType.SDKGenerated);
+            }
         }
 
         internal void ClearDBData()
