@@ -421,7 +421,7 @@ namespace Tests
             Assert.False(PlayerPrefs.HasKey(Constants.DeviceIDKey));
             Assert.False(PlayerPrefs.HasKey(Constants.DeviceIDTypeKey));
 
-            PlayerPrefs.SetInt(Constants.SchemaVersion, 1);
+            PlayerPrefs.SetInt(Constants.SchemaVersion, 2);
             PlayerPrefs.SetString(Constants.DeviceIDKey, "device-id");
 
             CountlyConfiguration configuration = new CountlyConfiguration {
@@ -455,7 +455,7 @@ namespace Tests
             Assert.False(PlayerPrefs.HasKey(Constants.DeviceIDKey));
             Assert.False(PlayerPrefs.HasKey(Constants.DeviceIDTypeKey));
 
-            PlayerPrefs.SetInt(Constants.SchemaVersion, 1);
+            PlayerPrefs.SetInt(Constants.SchemaVersion, 2);
             PlayerPrefs.SetString(Constants.DeviceIDKey, "device-id");
 
             CountlyConfiguration configuration = new CountlyConfiguration {
