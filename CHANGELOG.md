@@ -1,4 +1,4 @@
-## 22.02.2
+## 22.02.0
 * Added device ID type.
 * Added calls to record Timed Events
 * Add new 'segmentation' parameter in 'RecordOpenViewAsync' method to record view with segmentation.
