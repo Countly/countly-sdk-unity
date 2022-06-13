@@ -22,8 +22,10 @@ namespace Plugins.CountlySDK.Services
             Log.Debug("[LocationService] Initializing.");
             if (configuration.IsLocationDisabled) {
                 Log.Debug("[LocationService] Disabling location");
-            } else {
-                Log.Debug("[LocationService] location: countryCode = " + configuration.CountryCode + ", city = " + configuration.City + ", gpsCoordinates = " + configuration.Location + ", ipAddress = " + configuration.IPAddress);
+            }
+
+            if (configuration.CountryCode != null || configuration.City != null || configuration.Location != null || configuration.IPAddress != null) {
+                Log.Debug("[LocationService] location: countryCode = [" + configuration.CountryCode + "], city = [" + configuration.City + "], gpsCoordinates = [" + configuration.Location + ",] ipAddress = [" + configuration.IPAddress + "]");
             }
 
             _requestCountlyHelper = requestCountlyHelper;
