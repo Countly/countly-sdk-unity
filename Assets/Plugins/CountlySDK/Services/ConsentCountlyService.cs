@@ -16,9 +16,18 @@ namespace Plugins.CountlySDK.Services
         private Dictionary<string, Consents[]> _countlyConsentGroups;
         internal readonly Dictionary<Consents, bool> CountlyConsents;
 
-        internal ConsentCountlyService(CountlyConfiguration config, CountlyLogHelper logHelper, ConsentCountlyService consentService, RequestCountlyHelper requestCountlyHelper) : base(config, logHelper, consentService)
+        internal ConsentCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, ConsentCountlyService consentService, RequestCountlyHelper requestCountlyHelper) : base(configuration, logHelper, consentService)
         {
             Log.Debug("[ConsentCountlyService] Initializing.");
+
+            if (configuration.RequiresConsent) {
+                Log.Debug("[ConsentCountlyService] Enabling consent: " + string.Format("[{0}]", string.Join(", ", configuration.GivenConsent)));
+
+                foreach (KeyValuePair<string, Consents[]> entry in configuration.ConsentGroups) {
+                    Log.Debug("[ConsentCountlyService] Enabling consent group " + entry.Key + ": " + string.Format("[{0}]", string.Join(", ", entry.Value)));
+                }
+            }
+
             _requestCountlyHelper = requestCountlyHelper;
             CountlyConsents = new Dictionary<Consents, bool>();
             RequiresConsent = _configuration.RequiresConsent;

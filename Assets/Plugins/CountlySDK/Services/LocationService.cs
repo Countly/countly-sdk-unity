@@ -20,6 +20,13 @@ namespace Plugins.CountlySDK.Services
         internal LocationService(CountlyConfiguration configuration, CountlyLogHelper logHelper, RequestCountlyHelper requestCountlyHelper, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
         {
             Log.Debug("[LocationService] Initializing.");
+            if (configuration.IsLocationDisabled) {
+                Log.Debug("[LocationService] Disabling location");
+            }
+
+            if (configuration.CountryCode != null || configuration.City != null || configuration.Location != null || configuration.IPAddress != null) {
+                Log.Debug("[LocationService] location: countryCode = [" + configuration.CountryCode + "], city = [" + configuration.City + "], gpsCoordinates = [" + configuration.Location + ",] ipAddress = [" + configuration.IPAddress + "]");
+            }
 
             _requestCountlyHelper = requestCountlyHelper;
             IsLocationDisabled = configuration.IsLocationDisabled;

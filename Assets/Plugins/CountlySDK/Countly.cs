@@ -15,12 +15,21 @@ using Plugins.CountlySDK.Persistance.Repositories.Impls;
 using Plugins.CountlySDK.Services;
 using Plugins.iBoxDB;
 using UnityEngine;
+using Plugins.CountlySDK.Enums;
 
 [assembly: InternalsVisibleTo("PlayModeTests")]
 namespace Plugins.CountlySDK
 {
     public class Countly : MonoBehaviour
     {
+        //SDK limit defaults
+        internal const int MaxKeyLengthDefault = 128;
+        internal const int MaxValueSizeDefault = 256;
+        internal const int MaxSegmentationValuesDefault = 30;
+        internal const int MaxBreadcrumbCountDefault = 100;
+        internal const int MaxStackTraceLinesPerThreadDefault = 30;
+        internal const int MaxStackTraceLineLengthDefault = 200;
+        internal const int MaxStackTraceThreadCountDefault = 30;
 
         public CountlyAuthModel Auth;
         public CountlyConfigModel Config;
@@ -111,13 +120,13 @@ namespace Plugins.CountlySDK
         public StarRatingCountlyService StarRating { get; private set; }
 
         /// <summary>
-        /// Exposes functionality to set and change custom user properties and interract with custom property modifiers.
+        /// Exposes functionality to set and change custom user properties and interact with custom property modifiers.
         /// </summary>
         /// <returns>UserDetailsCountlyService</returns>
         public UserDetailsCountlyService UserDetails { get; private set; }
 
         /// <summary>
-        /// Exposes functionality to start and stop recording views and report positions for heatmap.
+        /// Exposes functionality to start and stop recording views and report positions for heat-map.
         /// </summary>
         /// <returns>ViewCountlyService</returns>
         public ViewCountlyService Views { get; private set; }
@@ -152,7 +161,7 @@ namespace Plugins.CountlySDK
         public void Init(CountlyConfiguration configuration)
         {
             if (IsSDKInitialized) {
-                _logHelper.Error("SDK has already been initialised, 'Init' should not be called a second time!");
+                _logHelper.Error("SDK has already been initialized, 'Init' should not be called a second time!");
                 return;
             }
 
@@ -160,7 +169,6 @@ namespace Plugins.CountlySDK
             _logHelper = new CountlyLogHelper(Configuration);
 
             _logHelper.Info("[Init] Initializing Countly [SdkName: " + Constants.SdkName + " SdkVersion: " + Constants.SdkVersion + "]");
-
 
             if (configuration.Parent != null) {
                 transform.parent = configuration.Parent.transform;
@@ -178,8 +186,98 @@ namespace Plugins.CountlySDK
                 configuration.ServerUrl = configuration.ServerUrl.Remove(configuration.ServerUrl.Length - 1);
             }
 
+            _logHelper.Debug("[Init] SDK initialized with the URL:[" + configuration.ServerUrl + "] and the appKey:[" + configuration.AppKey + "]");
+            
+
+            if (configuration.SessionDuration < 1) {
+                _logHelper.Error("[Init] provided session duration is less than 1. Replacing it with 1.");
+                configuration.SessionDuration = 1;
+            }
+            _logHelper.Debug("[Init] session duration set to [" + configuration.SessionDuration + "]");
+
+            if (configuration.EnablePost) {
+                _logHelper.Debug("[Init] Setting HTTP POST to be forced");
+            }
+
+            if (configuration.Salt != null) {
+                _logHelper.Debug("[Init] Enabling tamper protection");
+            }
+
+            if (configuration.NotificationMode != TestMode.None) {
+                _logHelper.Debug("[Init] Enabling push notification");
+            }
+
+            if (configuration.EnableTestMode) {
+                _logHelper.Warning("[Init] Enabling test mode");
+            }
+
+            if (configuration.EnableAutomaticCrashReporting) {
+                _logHelper.Debug("[Init] Enabling automatic crash reporting");
+            }
+
+            // Have a look at the SDK limit values
+            if (configuration.EventQueueThreshold < 1) {
+                _logHelper.Error("[Init] provided event queue size is less than 1. Replacing it with 1.");
+                configuration.EventQueueThreshold = 1;
+            }
+            _logHelper.Debug("[Init] event queue size set to [" + configuration.EventQueueThreshold + "]");
+
+            if (configuration.StoredRequestLimit < 1) {
+                _logHelper.Error("[Init] provided request queue size is less than 1. Replacing it with 1.");
+                configuration.StoredRequestLimit = 1;
+            }
+            _logHelper.Debug("[Init] request queue size set to [" + configuration.StoredRequestLimit + "]");
+
+            if (configuration.MaxKeyLength != MaxKeyLengthDefault) {
+                if (configuration.MaxKeyLength < 1) {
+                    configuration.MaxKeyLength = 1;
+                    _logHelper.Warning("[Init] provided 'maxKeyLength' is less than '1'. Setting it to '1'.");
+                }
+                _logHelper.Info("[Init] provided 'maxKeyLength' override:[" + configuration.MaxKeyLength + "]");
+            }
+
+            if (configuration.MaxValueSize != MaxValueSizeDefault) {
+                if (configuration.MaxValueSize < 1) {
+                    configuration.MaxValueSize = 1;
+                    _logHelper.Warning("[Init] provided 'maxValueSize' is less than '1'. Setting it to '1'.");
+                }
+                _logHelper.Info("[Init] provided 'maxValueSize' override:[" + configuration.MaxValueSize + "]");
+            }
+
+            if (configuration.MaxSegmentationValues != MaxSegmentationValuesDefault) {
+                if (configuration.MaxSegmentationValues < 1) {
+                    configuration.MaxSegmentationValues = 1;
+                    _logHelper.Warning("[Init] provided 'maxSegmentationValues' is less than '1'. Setting it to '1'.");
+                }
+                _logHelper.Info("[Init] provided 'maxSegmentationValues' override:[" + configuration.MaxSegmentationValues + "]");
+            }
+
+            if (configuration.TotalBreadcrumbsAllowed != MaxBreadcrumbCountDefault) {
+                if (configuration.TotalBreadcrumbsAllowed < 1) {
+                    configuration.TotalBreadcrumbsAllowed = 1;
+                    _logHelper.Warning("[Init] provided 'maxBreadcrumbCount' is less than '1'. Setting it to '1'.");
+                }
+                _logHelper.Info("[Init] provided 'maxBreadcrumbCount' override:[" + configuration.TotalBreadcrumbsAllowed + "]");
+            }
+
+            if (configuration.MaxStackTraceLinesPerThread != MaxStackTraceLinesPerThreadDefault) {
+                if (configuration.MaxStackTraceLinesPerThread < 1) {
+                    configuration.MaxStackTraceLinesPerThread = 1;
+                    _logHelper.Warning("[Init] provided 'maxStackTraceLinesPerThread' is less than '1'. Setting it to '1'.");
+                }
+                _logHelper.Info("[Init] provided 'maxStackTraceLinesPerThread' override:[" + configuration.MaxStackTraceLinesPerThread + "]");
+            }
+
+            if (configuration.MaxStackTraceLineLength != MaxStackTraceLineLengthDefault) {
+                if (configuration.MaxStackTraceLineLength < 1) {
+                    configuration.MaxStackTraceLineLength = 1;
+                    _logHelper.Warning("[Init] provided 'maxStackTraceLineLength' is less than '1'. Setting it to '1'.");
+                }
+                _logHelper.Info("[Init] provided 'maxStackTraceLineLength' override:[" + configuration.MaxStackTraceLineLength + "]");
+            }
+
             if (Configuration.EnableFirstAppLaunchSegment) {
-                _logHelper.Warning("'EnableFirstAppLaunchSegment' has been deprecated and it's functionality has been removed. This variable is only left for compatability.");
+                _logHelper.Warning("'EnableFirstAppLaunchSegment' has been deprecated and it's functionality has been removed. This variable is only left for compatibility.");
             }
 
             Constants.ProcessPlatform();
@@ -197,7 +295,6 @@ namespace Plugins.CountlySDK
             OnInitialisationComplete();
 
             _logHelper.Debug("[Countly] Finished Initializing SDK.");
-
         }
 
         private void Init(RequestBuilder requestBuilder, RequestRepository requestRepo,
