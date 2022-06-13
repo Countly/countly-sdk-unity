@@ -283,25 +283,7 @@ namespace Tests
          */
 
         /// <summary>
-        /// Scenario 1: First time init the SDK with custom device ID and init the SDK second time without device ID.
-        /// SDK Action: During second init, SDK will not override the custom device ID provided in first init. 
-        /// </summary>
-        [Test]
-        public void TestDeviceIdGivenInConfig()
-        {
-            ConfigureAndInitSDK("device_id");
-            ValidateDeviceIDAndType(Countly.Instance, "device_id", DeviceIdType.DeveloperProvided);
-
-            // Destroy instance before init SDK again.
-            CloseDBConnectionAndDestroyInstance();
-
-            //Initialize SDK again without custom key
-            ConfigureAndInitSDK();
-            ValidateDeviceIDAndType(Countly.Instance, "device_id", DeviceIdType.DeveloperProvided);
-        }
-
-        /// <summary>
-        /// Scenario 2: First time init the SDK without custom device ID and init the SDK second time with custom device ID.
+        /// Scenario 1: First time init the SDK without custom device ID and init the SDK second time with custom device ID.
         /// SDK Action: During second init, SDK will not override the device ID generated during first init. 
         /// </summary>
         [Test]
@@ -309,14 +291,17 @@ namespace Tests
         {
             ConfigureAndInitSDK();
             ValidateDeviceIDAndType(Countly.Instance, null, DeviceIdType.SDKGenerated, false);
+        }
 
-            // Destroy instance before init SDK again.
-            CloseDBConnectionAndDestroyInstance();
-
-            //Initialize SDK again with custom key
+        /// <summary>
+        /// Scenario 2: First time init the SDK with custom device ID and init the SDK second time without device ID.
+        /// SDK Action: During second init, SDK will not override the custom device ID provided in first init. 
+        /// </summary>
+        [Test]
+        public void TestDeviceIdGivenInConfig()
+        {
             ConfigureAndInitSDK("device_id");
-            ValidateDeviceIDAndType(Countly.Instance, null, DeviceIdType.SDKGenerated, false);
-
+            ValidateDeviceIDAndType(Countly.Instance, "device_id", DeviceIdType.DeveloperProvided);
         }
 
         /// <summary>
@@ -350,11 +335,7 @@ namespace Tests
             CloseDBConnectionAndDestroyInstance();
 
             ConfigureAndInitSDK("device_id_new");
-            Assert.IsNotNull(Countly.Instance.Device);
-            Assert.AreEqual("device_id", Countly.Instance.Device.DeviceId);
-            Assert.AreEqual(DeviceIdType.DeveloperProvided, Countly.Instance.Device.DeviceIdType);
             ValidateDeviceIDAndType(Countly.Instance, "device_id", DeviceIdType.DeveloperProvided);
-
         }
 
         /// <summary>
