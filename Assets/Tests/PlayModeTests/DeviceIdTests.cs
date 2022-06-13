@@ -17,19 +17,43 @@ namespace Tests
         private readonly string _serverUrl = "https://xyz.com/";
         private readonly string _appKey = "772c091355076ead703f987fee94490";
 
+
+        private Countly ConfigureAndInitSDK(string deviceId = null, bool consentRequired = false, Consents[] consents = null, bool isAutomaticSessionTrackingDisabled = false)
+        {
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                AppKey = _appKey,
+                ServerUrl = _serverUrl,
+                RequiresConsent = consentRequired,
+                DeviceId = deviceId,
+                IsAutomaticSessionTrackingDisabled = isAutomaticSessionTrackingDisabled
+            };
+
+            configuration.GiveConsent(consents);
+
+            Countly.Instance.Init(configuration);
+            return Countly.Instance;
+        }
+
+        private void ValidateDeviceIDAndType(Countly instance, string deviceId, DeviceIdType type, bool compareDeviceId = true) {
+            Assert.IsNotNull(instance.Device);
+            Assert.AreEqual(type, instance.Device.DeviceIdType);
+
+            if (compareDeviceId) {
+                Assert.AreEqual(deviceId, instance.Device.DeviceId);
+            } else {
+                Assert.IsNotEmpty(instance.Device.DeviceId);
+
+            }
+        }
+
         /// <summary>
         /// It validates the working of methods 'ChangeDeviceIdWithMerge' and 'ChangeDeviceIdWithoutMerge' on giving same device id.
         /// </summary>
         [Test]
         public async void TestSameDeviceIdLogic()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-                DeviceId = "device_id"
-            };
+            ConfigureAndInitSDK("device_id");
 
-            Countly.Instance.Init(configuration);
             Assert.IsNotNull(Countly.Instance.Device);
             Assert.AreEqual("device_id", Countly.Instance.Device.DeviceId);
             Assert.AreEqual(DeviceIdType.DeveloperProvided, Countly.Instance.Device.DeviceIdType);
@@ -54,12 +78,7 @@ namespace Tests
         [Test]
         public async void TestDeviceServiceMethod_ChangeDeviceIdWithoutMerge()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                AppKey = _appKey,
-                ServerUrl = _serverUrl,
-            };
-
-            Countly.Instance.Init(configuration);
+            ConfigureAndInitSDK();
             Assert.IsNotNull(Countly.Instance.Consents);
             Assert.AreEqual(DeviceIdType.SDKGenerated, Countly.Instance.Device.DeviceIdType);
 
@@ -92,15 +111,7 @@ namespace Tests
         [Test]
         public async void TestConsentRemoval_ChangeDeviceIdWithoutMerge()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                AppKey = _appKey,
-                ServerUrl = _serverUrl,
-                RequiresConsent = true,
-            };
-
-            configuration.GiveConsent(new Consents[] { Consents.Crashes, Consents.Events, Consents.Clicks, Consents.StarRating, Consents.Views, Consents.Users, Consents.Sessions, Consents.Push, Consents.RemoteConfig, Consents.Location, Consents.Feedback });
-
-            Countly.Instance.Init(configuration);
+            ConfigureAndInitSDK(null, true, new Consents[] { Consents.Crashes, Consents.Events, Consents.Clicks, Consents.StarRating, Consents.Views, Consents.Users, Consents.Sessions, Consents.Push, Consents.RemoteConfig, Consents.Location, Consents.Feedback });
             Assert.IsNotNull(Countly.Instance.Consents);
             Assert.AreEqual(DeviceIdType.SDKGenerated, Countly.Instance.Device.DeviceIdType);
 
@@ -132,12 +143,8 @@ namespace Tests
         [Test]
         public async void TestConset_ChangeDeviceIdWithMerge()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                AppKey = _appKey,
-                ServerUrl = _serverUrl,
-            };
+            ConfigureAndInitSDK();
 
-            Countly.Instance.Init(configuration);
             Assert.IsNotNull(Countly.Instance.Consents);
             Assert.AreEqual(DeviceIdType.SDKGenerated, Countly.Instance.Device.DeviceIdType);
 
@@ -162,16 +169,7 @@ namespace Tests
         [Test]
         public async void TestMethod_ChangeDeviceIdWithoutMerge_WhenAutomaticSessionTrackingEnabled()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                AppKey = _appKey,
-                ServerUrl = _serverUrl,
-                RequiresConsent = true,
-                IsAutomaticSessionTrackingDisabled = false,
-            };
-
-            configuration.GiveConsent(new Consents[] { Consents.Crashes, Consents.Events, Consents.Clicks, Consents.StarRating, Consents.Views, Consents.Users, Consents.Sessions, Consents.Push, Consents.RemoteConfig, Consents.Location, Consents.Feedback });
-
-            Countly.Instance.Init(configuration);
+            ConfigureAndInitSDK(null, true, new Consents[] { Consents.Crashes, Consents.Events, Consents.Clicks, Consents.StarRating, Consents.Views, Consents.Users, Consents.Sessions, Consents.Push, Consents.RemoteConfig, Consents.Location, Consents.Feedback });
             Assert.IsNotNull(Countly.Instance.Consents);
             Assert.AreEqual(DeviceIdType.SDKGenerated, Countly.Instance.Device.DeviceIdType);
 
@@ -226,16 +224,8 @@ namespace Tests
         [Test]
         public async void TestMethod_ChangeDeviceIdWithoutMerge_WhenAutomaticSessionTrackingIsDisabled()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                AppKey = _appKey,
-                ServerUrl = _serverUrl,
-                RequiresConsent = true,
-                IsAutomaticSessionTrackingDisabled = true,
-            };
+            ConfigureAndInitSDK(null, true, new Consents[] { Consents.Crashes, Consents.Events, Consents.Clicks, Consents.StarRating, Consents.Views, Consents.Users, Consents.Sessions, Consents.Push, Consents.RemoteConfig, Consents.Location, Consents.Feedback }, true);
 
-            configuration.GiveConsent(new Consents[] { Consents.Crashes, Consents.Events, Consents.Clicks, Consents.StarRating, Consents.Views, Consents.Users, Consents.Sessions, Consents.Push, Consents.RemoteConfig, Consents.Location, Consents.Feedback });
-
-            Countly.Instance.Init(configuration);
             Assert.IsNotNull(Countly.Instance.Consents);
             Assert.AreEqual(DeviceIdType.SDKGenerated, Countly.Instance.Device.DeviceIdType);
 
@@ -299,30 +289,15 @@ namespace Tests
         [Test]
         public void TestDeviceIdGivenInConfig()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-                DeviceId = "device_id"
-            };
-
-            Countly.Instance.Init(configuration);
-            Assert.IsNotNull(Countly.Instance.Device);
-            Assert.AreEqual("device_id", Countly.Instance.Device.DeviceId);
-            Assert.AreEqual(DeviceIdType.DeveloperProvided, Countly.Instance.Device.DeviceIdType);
+            ConfigureAndInitSDK("device_id");
+            ValidateDeviceIDAndType(Countly.Instance, "device_id", DeviceIdType.DeveloperProvided);
 
             // Destroy instance before init SDK again.
             CloseDBConnectionAndDestroyInstance();
 
             //Initialize SDK again without custom key
-            configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-            };
-
-            Countly.Instance.Init(configuration);
-            Assert.IsNotNull(Countly.Instance.Device);
-            Assert.AreEqual("device_id", Countly.Instance.Device.DeviceId);
-            Assert.AreEqual(DeviceIdType.DeveloperProvided, Countly.Instance.Device.DeviceIdType);
+            ConfigureAndInitSDK();
+            ValidateDeviceIDAndType(Countly.Instance, "device_id", DeviceIdType.DeveloperProvided);
         }
 
         /// <summary>
@@ -332,32 +307,16 @@ namespace Tests
         [Test]
         public void TestDeviceIdGeneratedBySDK()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-            };
-
-            Countly.Instance.Init(configuration);
-            Assert.IsNotNull(Countly.Instance.Device);
-            Assert.IsNotNull(Countly.Instance.Device.DeviceId);
-            Assert.IsNotEmpty(Countly.Instance.Device.DeviceId);
-            Assert.AreEqual(DeviceIdType.SDKGenerated, Countly.Instance.Device.DeviceIdType);
+            ConfigureAndInitSDK();
+            ValidateDeviceIDAndType(Countly.Instance, null, DeviceIdType.SDKGenerated, false);
 
             // Destroy instance before init SDK again.
             CloseDBConnectionAndDestroyInstance();
 
             //Initialize SDK again with custom key
-            configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-                DeviceId = "device_id"
-            };
+            ConfigureAndInitSDK("device_id");
+            ValidateDeviceIDAndType(Countly.Instance, null, DeviceIdType.SDKGenerated, false);
 
-            Countly.Instance.Init(configuration);
-            Assert.IsNotNull(Countly.Instance.Device);
-            Assert.IsNotNull(Countly.Instance.Device.DeviceId);
-            Assert.IsNotEmpty(Countly.Instance.Device.DeviceId);
-            Assert.AreEqual(DeviceIdType.SDKGenerated, Countly.Instance.Device.DeviceIdType);
         }
 
         /// <summary>
@@ -367,29 +326,15 @@ namespace Tests
         [Test]
         public void CustomDeviceIDWasSet_CustomDeviceIDNotProvided()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-                DeviceId = "device_id"
-            };
-
-            Countly.Instance.Init(configuration);
-            Assert.IsNotNull(Countly.Instance.Device);
-            Assert.AreEqual("device_id", Countly.Instance.Device.DeviceId);
-            Assert.AreEqual(DeviceIdType.DeveloperProvided, Countly.Instance.Device.DeviceIdType);
+            ConfigureAndInitSDK("device_id");
+            ValidateDeviceIDAndType(Countly.Instance, "device_id", DeviceIdType.DeveloperProvided);
 
             // Destroy instance before init SDK again.
             CloseDBConnectionAndDestroyInstance();
 
-            configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-            };
+            ConfigureAndInitSDK();
+            ValidateDeviceIDAndType(Countly.Instance, "device_id", DeviceIdType.DeveloperProvided);
 
-            Countly.Instance.Init(configuration);
-            Assert.IsNotNull(Countly.Instance.Device);
-            Assert.AreEqual("device_id", Countly.Instance.Device.DeviceId);
-            Assert.AreEqual(DeviceIdType.DeveloperProvided, Countly.Instance.Device.DeviceIdType);
         }
         /// <summary>
         /// Scenario 4: First time init the SDK with custom device ID and init the SDK second time with a new custom device ID.
@@ -398,30 +343,18 @@ namespace Tests
         [Test]
         public void CustomDeviceIDWasSet_CustomDeviceIDProvided()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-                DeviceId = "device_id"
-            };
-
-            Countly.Instance.Init(configuration);
-            Assert.IsNotNull(Countly.Instance.Device);
-            Assert.AreEqual("device_id", Countly.Instance.Device.DeviceId);
-            Assert.AreEqual(DeviceIdType.DeveloperProvided, Countly.Instance.Device.DeviceIdType);
+            ConfigureAndInitSDK("device_id");
+            ValidateDeviceIDAndType(Countly.Instance, "device_id", DeviceIdType.DeveloperProvided);
 
             // Destroy instance before init SDK again.
             CloseDBConnectionAndDestroyInstance();
 
-            configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-                DeviceId = "device_id_new"
-            };
-
-            Countly.Instance.Init(configuration);
+            ConfigureAndInitSDK("device_id_new");
             Assert.IsNotNull(Countly.Instance.Device);
             Assert.AreEqual("device_id", Countly.Instance.Device.DeviceId);
             Assert.AreEqual(DeviceIdType.DeveloperProvided, Countly.Instance.Device.DeviceIdType);
+            ValidateDeviceIDAndType(Countly.Instance, "device_id", DeviceIdType.DeveloperProvided);
+
         }
 
         /// <summary>
@@ -431,30 +364,16 @@ namespace Tests
         [Test]
         public void GeneratedDeviceID_CustomDeviceIDNotProvided()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-            };
-
-            Countly.Instance.Init(configuration);
-            Assert.IsNotNull(Countly.Instance.Device);
-            Assert.IsNotEmpty(Countly.Instance.Device.DeviceId);
-            Assert.AreEqual(DeviceIdType.SDKGenerated, Countly.Instance.Device.DeviceIdType);
+            ConfigureAndInitSDK();
+            ValidateDeviceIDAndType(Countly.Instance, null, DeviceIdType.SDKGenerated, false);
 
             string deviceID = Countly.Instance.Device.DeviceId;
 
             // Destroy instance before init SDK again.
             CloseDBConnectionAndDestroyInstance();
 
-            configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-            };
-
-            Countly.Instance.Init(configuration);
-            Assert.IsNotNull(Countly.Instance.Device);
-            Assert.AreEqual(deviceID, Countly.Instance.Device.DeviceId);
-            Assert.AreEqual(DeviceIdType.SDKGenerated, Countly.Instance.Device.DeviceIdType);
+            ConfigureAndInitSDK();
+            ValidateDeviceIDAndType(Countly.Instance, deviceID, DeviceIdType.SDKGenerated);
         }
 
         /// <summary>
@@ -464,34 +383,20 @@ namespace Tests
         [Test]
         public void GeneratedDeviceID_CustomDeviceIDProvided()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-            };
-
-            Countly.Instance.Init(configuration);
-            Assert.IsNotNull(Countly.Instance.Device);
-            Assert.IsNotEmpty(Countly.Instance.Device.DeviceId);
-            Assert.AreEqual(DeviceIdType.SDKGenerated, Countly.Instance.Device.DeviceIdType);
+            ConfigureAndInitSDK();
+            ValidateDeviceIDAndType(Countly.Instance, null, DeviceIdType.SDKGenerated, false);
 
             string deviceID = Countly.Instance.Device.DeviceId;
 
             // Destroy instance before init SDK again.
             CloseDBConnectionAndDestroyInstance();
 
-            configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-                DeviceId = "device_id_new"
-            };
-
-            Countly.Instance.Init(configuration);
-            Assert.IsNotNull(Countly.Instance.Device);
-            Assert.AreEqual(deviceID, Countly.Instance.Device.DeviceId);
-            Assert.AreEqual(DeviceIdType.SDKGenerated, Countly.Instance.Device.DeviceIdType);
+            ConfigureAndInitSDK("device_id_new");
+            ValidateDeviceIDAndType(Countly.Instance, deviceID, DeviceIdType.SDKGenerated);
         }
 
-        private void CloseDBConnectionAndDestroyInstance(bool clearStorage = false) {
+        private void CloseDBConnectionAndDestroyInstance(bool clearStorage = false)
+        {
             if (clearStorage) {
                 PlayerPrefs.DeleteAll();
             }
@@ -499,9 +404,9 @@ namespace Tests
             Countly.Instance.CloseDBConnection();
             Object.DestroyImmediate(Countly.Instance);
         }
-        
 
-            [TearDown]
+
+        [TearDown]
         public void End()
         {
             Countly.Instance.ClearStorage();
