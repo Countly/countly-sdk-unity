@@ -76,7 +76,6 @@ namespace Plugins.CountlySDK.Services
 
                     } else {
                         UpdateDeviceIdAndDeviceIdType(DeviceId, DeviceIdType.DeveloperProvided);
-
                     }
                 }
             } else {
