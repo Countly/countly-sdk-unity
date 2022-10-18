@@ -6,18 +6,17 @@ We're hiring: Countly is looking for full stack devs, devops and growth hackers 
 * **Questions?** [Ask in our Community forum](http://community.count.ly)
 
 ## What's Countly?
-[Countly](http://count.ly) is an innovative, real-time, open source mobile analytics application. It collects data from mobile devices, and visualizes this information to analyze mobile application usage and end-user behavior. There are two parts of Countly: the server that collects and analyzes data, and mobile SDK that sends this data. Both parts are open source with different licensing terms.
+[Countly](http://count.ly) is an innovative, real-time, open source mobile analytics application. It collects data from mobile devices, and visualizes this information to analyze mobile application usage and end-user behavior. 
+There are two parts of Countly: the server that collects and analyzes data, and mobile SDK that sends this data. Both parts are open source with different licensing terms.
 
 ## How to set up the project
 1. Fill Countly prefab with ServerUrl and AppKey. Also you can set up other countly parameters.
-
 <img src="https://api.monosnap.com/file/download?id=Un5qt0s49orTp3qA0zPEJ6FVyxnNdN" width="30%" height="30%">
 
 2. Change notification icons if necessary. All icons are placed in folder /Plugins/Android/Notifications/res. You can find more information in official Android documentation.
 3. Register in Firebase and create google-services.xml from google-services.json. You can use online converter [here](https://dandar3.github.io/android/google-services-json-to-xml.html). Put your file google-services.xml in /Plugins/Android/Notifications/res/values (replace if necessary).
 4. Put your applicationId in mainTemplate.gradle. Read more about mainTemplate [here](https://docs.unity3d.com/Manual/android-gradle-overview.html)
 5. Set **Write Permission** to 'External (SDCard)'. Sometimes it is required for iBoxDb.
-
 <img src="https://api.monosnap.com/file/download?id=Y1S7nuBAvZrdc0po5BROBzFoaxkRoY" width="30%" height="30%">
 
 ## How to use this SDK
@@ -41,6 +40,7 @@ List of handlers:
 10. Views - use this handler to publish any custom events. 
 
 Examples:
+
 ```csharp
 //Record event
 await Plugins.Countly.Impl.Countly.Instance.Events.RecordEventAsync("Test event");
@@ -80,18 +80,18 @@ There are two types of messages:
 * Notification messages, sometimes thought of as "display messages." These are handled by the FCM SDK automatically.
 * Data messages, which are handled by the client app.
 
-#### ANDROID. Push notification messages from countly
+### ANDROID. Push notification messages from countly
 
 Countly sends **ONLY** data messages. 
 
 <img src="https://api.monosnap.com/file/download?id=kzLK5q7A6K6mKYyF6AKDqtVxIeT0QC" width="70%" height="70%">
-
 
 There are two ways to send data messages via countly:
 
 <img src="https://api.monosnap.com/file/download?id=1bxCfiYlfzD87D6hEJTbYPWqkmWVYh" width="70%" height="70%">
 
 Json received on device:
+
 ```json
 {
   "message": {
@@ -159,11 +159,15 @@ If you like Countly, [why not use one of our badges](https://count.ly/brand-asse
 
 <a href="https://count.ly/f/badge" rel="nofollow"><img style="width:145px;height:60px" src="https://count.ly/badges/dark.svg?v2" alt="Countly - Product Analytics" /></a>
 
-    <a href="https://count.ly/f/badge" rel="nofollow"><img style="width:145px;height:60px" src="https://count.ly/badges/dark.svg" alt="Countly - Product Analytics" /></a>
+```JS
+<a href="https://count.ly/f/badge" rel="nofollow"><img style="width:145px;height:60px" src="https://count.ly/badges/dark.svg" alt="Countly - Product Analytics" /></a>
+```
 
 <a href="https://count.ly/f/badge" rel="nofollow"><img style="width:145px;height:60px" src="https://count.ly/badges/light.svg?v2" alt="Countly - Product Analytics" /></a>
 
-    <a href="https://count.ly/f/badge" rel="nofollow"><img style="width:145px;height:60px" src="https://count.ly/badges/light.svg" alt="Countly - Product Analytics" /></a>
+```JS
+<a href="https://count.ly/f/badge" rel="nofollow"><img style="width:145px;height:60px" src="https://count.ly/badges/light.svg" alt="Countly - Product Analytics" /></a>
+```
 
 ### Support
 
