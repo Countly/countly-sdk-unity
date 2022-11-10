@@ -38,6 +38,7 @@ namespace Plugins.CountlySDK
             {
                 {"app_key", _countly.Configuration.AppKey},
                 {"device_id", _countly.Device.DeviceId},
+                {"t", (int)_countly.Device.DeviceIdType},
                 {"sdk_name", Constants.SdkName},
                 {"sdk_version", Constants.SdkVersion}
             };

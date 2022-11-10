@@ -94,6 +94,7 @@ namespace Tests
             NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
 
             Assert.AreEqual("1", collection.Get("end_session"));
+            Assert.AreEqual("1", collection.Get("t"));
             Assert.AreEqual(oldDeviceId, collection.Get("device_id"));
             Assert.IsNotNull(collection["session_duration"]);
 
@@ -101,6 +102,8 @@ namespace Tests
             collection = HttpUtility.ParseQueryString(requestModel.RequestData);
 
             Assert.AreEqual("1", collection.Get("begin_session"));
+            Assert.AreEqual("0", collection.Get("t"));
+
             Assert.AreEqual("new_device_id", collection.Get("device_id"));
             Assert.AreEqual("new_device_id", Countly.Instance.Device.DeviceId);
         }
@@ -126,6 +129,7 @@ namespace Tests
             NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
 
             Assert.AreEqual("1", collection.Get("end_session"));
+            Assert.AreEqual("1", collection.Get("t"));
             Assert.AreEqual(oldDeviceId, collection.Get("device_id"));
             Assert.IsNotNull(collection["session_duration"]);
 
@@ -158,6 +162,7 @@ namespace Tests
             CountlyRequestModel requestModel = Countly.Instance.Device._requestCountlyHelper._requestRepo.Dequeue();
             NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
 
+            Assert.AreEqual("0", collection.Get("t"));
             Assert.AreEqual(oldDeviceId, collection.Get("old_device_id"));
             Assert.AreEqual("new_device_id", collection.Get("device_id"));
             Assert.AreEqual("new_device_id", Countly.Instance.Device.DeviceId);
@@ -184,6 +189,7 @@ namespace Tests
             NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
 
             Assert.AreEqual("1", collection.Get("end_session"));
+            Assert.AreEqual("1", collection.Get("t"));
             Assert.AreEqual(oldDeviceId, collection.Get("device_id"));
             Assert.IsNotNull(collection["session_duration"]);
 
@@ -214,6 +220,8 @@ namespace Tests
             collection = HttpUtility.ParseQueryString(requestModel.RequestData);
 
             Assert.AreEqual("1", collection.Get("begin_session"));
+            Assert.AreEqual("0", collection.Get("t"));
+
             Assert.AreEqual("new_device_id", collection.Get("device_id"));
             Assert.AreEqual("new_device_id", Countly.Instance.Device.DeviceId);
         }
