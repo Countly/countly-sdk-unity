@@ -17,6 +17,17 @@ namespace Tests
         private readonly string _serverUrl = "https://xyz.com/";
         private readonly string _appKey = "772c091355076ead703f987fee94490";
 
+        /// <summary>
+        /// Assert an array of keys against the expected value in consnet reqeust json.
+        /// </summary>
+        /// <param name="expectedValue"> an expected values of consents</param>
+        /// <param name="consents"> an array consents</param>
+        public void AssertConsentKeys(JObject consentObj, string[] keys, bool expectedValue)
+        {
+            foreach (string key in keys) {
+                Assert.AreEqual(expectedValue, consentObj.GetValue(key).ToObject<bool>());
+            }
+        }
 
         private Countly ConfigureAndInitSDK(string deviceId = null, bool consentRequired = false, Consents[] consents = null, bool isAutomaticSessionTrackingDisabled = false)
         {
@@ -68,7 +79,6 @@ namespace Tests
             Assert.AreEqual(DeviceIdType.DeveloperProvided, Countly.Instance.Device.DeviceIdType);
 
             Assert.AreEqual("device_id", Countly.Instance.Device.DeviceId);
-
         }
 
 
@@ -196,19 +206,7 @@ namespace Tests
             collection = HttpUtility.ParseQueryString(requestModel.RequestData);
 
             JObject consentObj = JObject.Parse(collection.Get("consent"));
-
-            Assert.AreEqual(11, consentObj.Count);
-            Assert.IsTrue(consentObj.GetValue("push").ToObject<bool>());
-            Assert.IsTrue(consentObj.GetValue("users").ToObject<bool>());
-            Assert.IsTrue(consentObj.GetValue("views").ToObject<bool>());
-            Assert.IsTrue(consentObj.GetValue("clicks").ToObject<bool>());
-            Assert.IsTrue(consentObj.GetValue("events").ToObject<bool>());
-            Assert.IsTrue(consentObj.GetValue("crashes").ToObject<bool>());
-            Assert.IsTrue(consentObj.GetValue("sessions").ToObject<bool>());
-            Assert.IsTrue(consentObj.GetValue("location").ToObject<bool>());
-            Assert.IsTrue(consentObj.GetValue("feedback").ToObject<bool>());
-            Assert.IsTrue(consentObj.GetValue("star-rating").ToObject<bool>());
-            Assert.IsTrue(consentObj.GetValue("remote-config").ToObject<bool>());
+            AssertConsentKeys(consentObj, new string[] { "push", "users", "views", "clicks", "events", "crashes", "sessions", "location", "feedback", "star-rating", "remote-config" }, true);
 
             requestModel = Countly.Instance.Device._requestCountlyHelper._requestRepo.Dequeue();
             collection = HttpUtility.ParseQueryString(requestModel.RequestData);
@@ -242,20 +240,9 @@ namespace Tests
             Assert.AreEqual(1, Countly.Instance.Device._requestCountlyHelper._requestRepo.Count);
             CountlyRequestModel requestModel = Countly.Instance.Device._requestCountlyHelper._requestRepo.Dequeue();
             NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
-            JObject consentObj = JObject.Parse(collection.Get("consent"));
 
-            Assert.AreEqual(11, consentObj.Count);
-            Assert.IsTrue(consentObj.GetValue("push").ToObject<bool>());
-            Assert.IsTrue(consentObj.GetValue("users").ToObject<bool>());
-            Assert.IsTrue(consentObj.GetValue("views").ToObject<bool>());
-            Assert.IsTrue(consentObj.GetValue("clicks").ToObject<bool>());
-            Assert.IsTrue(consentObj.GetValue("events").ToObject<bool>());
-            Assert.IsTrue(consentObj.GetValue("crashes").ToObject<bool>());
-            Assert.IsTrue(consentObj.GetValue("sessions").ToObject<bool>());
-            Assert.IsTrue(consentObj.GetValue("location").ToObject<bool>());
-            Assert.IsTrue(consentObj.GetValue("feedback").ToObject<bool>());
-            Assert.IsTrue(consentObj.GetValue("star-rating").ToObject<bool>());
-            Assert.IsTrue(consentObj.GetValue("remote-config").ToObject<bool>());
+            JObject consentObj = JObject.Parse(collection.Get("consent"));
+            AssertConsentKeys(consentObj, new string[] { "push", "users", "views", "clicks", "events", "crashes", "sessions", "location", "feedback", "star-rating", "remote-config" }, true);
 
             Assert.IsTrue(Countly.Instance.Configuration.IsAutomaticSessionTrackingDisabled);
         }
