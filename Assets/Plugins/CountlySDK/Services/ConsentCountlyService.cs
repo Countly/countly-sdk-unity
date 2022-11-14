@@ -21,7 +21,9 @@ namespace Plugins.CountlySDK.Services
             Log.Debug("[ConsentCountlyService] Initializing.");
 
             if (configuration.RequiresConsent) {
-                Log.Debug("[ConsentCountlyService] Enabling consent: " + string.Format("[{0}]", string.Join(", ", configuration.GivenConsent)));
+                if (configuration.GivenConsent != null) {
+                    Log.Debug("[ConsentCountlyService] Enabling consent: " + string.Format("[{0}]", string.Join(", ", configuration.GivenConsent)));
+                }
 
                 foreach (KeyValuePair<string, Consents[]> entry in configuration.ConsentGroups) {
                     Log.Debug("[ConsentCountlyService] Enabling consent group " + entry.Key + ": " + string.Format("[{0}]", string.Join(", ", entry.Value)));
