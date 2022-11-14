@@ -29,6 +29,21 @@ namespace Tests
             }
         }
 
+        /// <summary>
+        /// Assert session request.
+        /// </summary>
+        /// <param name="collection"> collection of params</param>
+        /// <param name="sessionKey"> session predefined key </param>
+        /// <param name="deviceId"> device id </param>
+        public void AssertSessionRequest(NameValueCollection collection, string sessionKey, string deviceId, bool checkDuration = false)
+        {
+            Assert.AreEqual("1", collection.Get(sessionKey));
+            Assert.AreEqual(deviceId, collection.Get("device_id"));
+            if (checkDuration) {
+                Assert.IsNotNull(collection["session_duration"]);
+            }
+        }
+
         private Countly ConfigureAndInitSDK(string deviceId = null, bool consentRequired = false, Consents[] consents = null, bool isAutomaticSessionTrackingDisabled = false)
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
@@ -103,16 +118,13 @@ namespace Tests
             CountlyRequestModel requestModel = Countly.Instance.Device._requestCountlyHelper._requestRepo.Dequeue();
             NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
 
-            Assert.AreEqual("1", collection.Get("end_session"));
-            Assert.AreEqual(oldDeviceId, collection.Get("device_id"));
-            Assert.IsNotNull(collection["session_duration"]);
+            AssertSessionRequest(collection, "end_session", oldDeviceId, true);
 
             requestModel = Countly.Instance.Device._requestCountlyHelper._requestRepo.Dequeue();
             collection = HttpUtility.ParseQueryString(requestModel.RequestData);
 
-            Assert.AreEqual("1", collection.Get("begin_session"));
-            Assert.AreEqual("new_device_id", collection.Get("device_id"));
-            Assert.AreEqual("new_device_id", Countly.Instance.Device.DeviceId);
+            AssertSessionRequest(collection, "begin_session", "new_device_id");
+
         }
 
         /// <summary>
@@ -135,9 +147,7 @@ namespace Tests
             CountlyRequestModel requestModel = Countly.Instance.Device._requestCountlyHelper._requestRepo.Dequeue();
             NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
 
-            Assert.AreEqual("1", collection.Get("end_session"));
-            Assert.AreEqual(oldDeviceId, collection.Get("device_id"));
-            Assert.IsNotNull(collection["session_duration"]);
+            AssertSessionRequest(collection, "end_session", oldDeviceId, true);
 
             Assert.IsTrue(Countly.Instance.Consents.RequiresConsent);
 
@@ -193,9 +203,7 @@ namespace Tests
             CountlyRequestModel requestModel = Countly.Instance.Device._requestCountlyHelper._requestRepo.Dequeue();
             NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
 
-            Assert.AreEqual("1", collection.Get("end_session"));
-            Assert.AreEqual(oldDeviceId, collection.Get("device_id"));
-            Assert.IsNotNull(collection["session_duration"]);
+            AssertSessionRequest(collection, "end_session", oldDeviceId, true);
 
             Countly.Instance.Consents.GiveConsentAll();
 
@@ -211,9 +219,8 @@ namespace Tests
             requestModel = Countly.Instance.Device._requestCountlyHelper._requestRepo.Dequeue();
             collection = HttpUtility.ParseQueryString(requestModel.RequestData);
 
-            Assert.AreEqual("1", collection.Get("begin_session"));
-            Assert.AreEqual("new_device_id", collection.Get("device_id"));
-            Assert.AreEqual("new_device_id", Countly.Instance.Device.DeviceId);
+            AssertSessionRequest(collection, "begin_session", "new_device_id");
+
         }
 
         /// <summary>
