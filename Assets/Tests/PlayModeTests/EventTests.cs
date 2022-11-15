@@ -380,7 +380,7 @@ namespace Tests
             { "key2", "value2"},
             };
 
-            AssertAnEvent(model, "test_event", 23, 1, 5, requireSegments);
+            AssertAnEvent(model, "test", 23, 1, 5, requireSegments);
 
         }
 
