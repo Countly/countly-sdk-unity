@@ -23,6 +23,40 @@ namespace Tests
 
 
         /// <summary>
+        /// Assert session request.
+        /// </summary>
+        /// <param name="collection"> collection of params</param>
+        /// <param name="sessionKey"> session predefined key </param>
+        /// <param name="deviceId"> device id </param>
+        private void AssertSessionRequest(NameValueCollection collection, string sessionKey, double? duration = null, bool hasMetrics = false)
+        {
+            if (sessionKey != null) {
+                Assert.AreEqual("1", collection.Get(sessionKey));
+            }
+            
+            if (duration != null)
+            {
+                Assert.GreaterOrEqual(duration, Convert.ToDouble(collection.Get("session_duration")));
+
+            }
+
+            if (hasMetrics) {
+                Assert.IsNotNull(collection.Get("metrics"));
+            }
+            else {
+                Assert.IsNull(collection.Get("metrics"));
+            }
+        }
+
+        private void AssertLocation(NameValueCollection collection, string gpsCoord, string city, string ipAddress, string countryCode)
+        {
+            Assert.AreEqual(ipAddress, collection.Get("ip_address"));
+            Assert.AreEqual(countryCode, collection.Get("country_code"));
+            Assert.AreEqual(city, collection.Get("city"));
+            Assert.AreEqual(gpsCoord, collection.Get("location"));
+        }
+
+        /// <summary>
         /// It checks the working of session service if no 'Session' consent is given.
         /// </summary>
         [Test]
@@ -68,8 +102,7 @@ namespace Tests
             CountlyRequestModel requestModel = Countly.Instance.Session._requestCountlyHelper._requestRepo.Dequeue();
             NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
 
-            Assert.AreEqual("1", collection.Get("begin_session"));
-            Assert.IsNotNull(collection.Get("metrics"));
+            AssertSessionRequest(collection, "begin_session", null, true);
         }
 
         /// <summary>
@@ -83,20 +116,16 @@ namespace Tests
                 AppKey = _appKey,
             };
 
-            configuration.SetLocation("PK", "Lahore", "10.0 , 10.0", "192.168.100.51");
+            configuration.SetLocation("PK", "Lahore", "10.0,10.0", "192.168.100.51");
             Countly.Instance.Init(configuration);
             Assert.IsNotNull(Countly.Instance.Session);
             Assert.AreEqual(1, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
 
             CountlyRequestModel requestModel = Countly.Instance.Session._requestCountlyHelper._requestRepo.Dequeue();
-            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
 
-            Assert.AreEqual("1", collection.Get("begin_session"));
-            Assert.AreEqual("192.168.100.51", collection.Get("ip_address"));
-            Assert.AreEqual("PK", collection.Get("country_code"));
-            Assert.AreEqual("Lahore", collection.Get("city"));
-            Assert.AreEqual("10.0 , 10.0", collection.Get("location"));
-            Assert.IsNotNull(collection.Get("metrics"));
+            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            AssertLocation(collection, "10.0,10.0", "Lahore", "192.168.100.51", "PK");
+            AssertSessionRequest(collection, "begin_session", null, true);
         }
 
         /// <summary>
@@ -116,12 +145,10 @@ namespace Tests
             Assert.AreEqual(1, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
 
             CountlyRequestModel requestModel = Countly.Instance.Session._requestCountlyHelper._requestRepo.Dequeue();
+
             NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
-
-            Assert.AreEqual("1", collection.Get("begin_session"));
             Assert.AreEqual(string.Empty, collection.Get("location"));
-            Assert.IsNotNull(collection.Get("metrics"));
-
+            AssertSessionRequest(collection, "begin_session", null, true);
         }
 
         /// <summary>
@@ -148,9 +175,7 @@ namespace Tests
             CountlyRequestModel requestModel = Countly.Instance.Session._requestCountlyHelper._requestRepo.Dequeue();
 
             NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
-
-            Assert.AreEqual("1", collection.Get("begin_session"));
-            Assert.IsNotNull(collection.Get("metrics"));
+            AssertSessionRequest(collection, "begin_session", null, true);
         }
 
         /// <summary>
@@ -246,10 +271,9 @@ namespace Tests
             Assert.AreEqual(1, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
 
             CountlyRequestModel requestModel = Countly.Instance.Session._requestCountlyHelper._requestRepo.Dequeue();
-            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
 
-            Assert.AreEqual("1", collection.Get("begin_session"));
-            Assert.IsNotNull(collection.Get("metrics"));
+            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            AssertSessionRequest(collection, "begin_session", null, true);
 
             System.DateTime startTime = System.DateTime.UtcNow;
             do {
@@ -269,11 +293,9 @@ namespace Tests
             Assert.AreEqual(1, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
 
             requestModel = Countly.Instance.Session._requestCountlyHelper._requestRepo.Dequeue();
-            collection = HttpUtility.ParseQueryString(requestModel.RequestData);
 
-            Assert.IsNull(collection.Get("metrics"));
-            Assert.AreEqual("2", collection.Get("session_duration"));
-            Assert.GreaterOrEqual(duration, Convert.ToDouble(collection.Get("session_duration")));
+            collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            AssertSessionRequest(collection, null, duration);
         }
 
         /// <summary>
@@ -315,12 +337,10 @@ namespace Tests
             Assert.AreEqual(1, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
 
             CountlyRequestModel requestModel = Countly.Instance.Session._requestCountlyHelper._requestRepo.Dequeue();
-            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
 
-            Assert.AreEqual("1", collection.Get("end_session"));
-            Assert.AreEqual("2", collection.Get("session_duration"));
-            Assert.GreaterOrEqual(duration, Convert.ToDouble(collection.Get("session_duration")));
-            Assert.IsNull(collection.Get("metrics"));
+            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            AssertSessionRequest(collection, "end_session", duration);
+
         }
 
         [TearDown]

@@ -22,7 +22,7 @@ namespace Tests
         /// </summary>
         /// <param name="expectedValue"> an expected values of consents</param>
         /// <param name="consents"> an array consents</param>
-        public void AssertConsentKeys(JObject consentObj, string[] keys, bool expectedValue)
+        private void AssertConsentKeys(JObject consentObj, string[] keys, bool expectedValue)
         {
             foreach (string key in keys) {
                 Assert.AreEqual(expectedValue, consentObj.GetValue(key).ToObject<bool>());
@@ -35,7 +35,7 @@ namespace Tests
         /// <param name="collection"> collection of params</param>
         /// <param name="sessionKey"> session predefined key </param>
         /// <param name="deviceId"> device id </param>
-        public void AssertSessionRequest(NameValueCollection collection, string sessionKey, string deviceId, bool checkDuration = false)
+        private void AssertSessionRequest(NameValueCollection collection, string sessionKey, string deviceId, bool checkDuration = false)
         {
             Assert.AreEqual("1", collection.Get(sessionKey));
             Assert.AreEqual(deviceId, collection.Get("device_id"));
