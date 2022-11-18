@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Plugins.CountlySDK.Enums;
 using Plugins.CountlySDK.Helpers;
 using Plugins.CountlySDK.Models;
 
@@ -38,7 +39,7 @@ namespace Plugins.CountlySDK
             {
                 {"app_key", _countly.Configuration.AppKey},
                 {"device_id", _countly.Device.DeviceId},
-                {"t", (int)_countly.Device.DeviceIdType},
+                {"t", Type()},
                 {"sdk_name", Constants.SdkName},
                 {"sdk_version", Constants.SdkVersion}
             };
@@ -93,6 +94,24 @@ namespace Plugins.CountlySDK
                 hex.AppendFormat("{0:x2}", b);
             }
             return hex.ToString();
+        }
+
+        private int Type()
+        {
+            int type = 0;
+            switch (_countly.Device.DeviceIdType)
+            {
+                case DeviceIdType.DeveloperProvided:
+                    type = 0;
+                    break;
+                case DeviceIdType.SDKGenerated:
+                    type = 1;
+                    break;
+                default:
+                    break;
+            }
+
+            return type;
         }
     }
 }
