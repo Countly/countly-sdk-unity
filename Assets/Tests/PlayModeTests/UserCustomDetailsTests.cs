@@ -19,6 +19,28 @@ namespace Tests
         private readonly string _serverUrl = "https://xyz.com/";
         private readonly string _appKey = "772c091355076ead703f987fee94490";
 
+        void AssertlUserDetailRequest(NameValueCollection collection, CountlyUserDetailsModel userInfo, IDictionary<string, object> customInfo) {
+            JObject userDetailJson = JObject.Parse(collection["user_details"]);
+
+            if (userInfo != null) {
+                Assert.AreEqual(userInfo.Name, userDetailJson["name"].ToString());
+                Assert.AreEqual(userInfo.Username, userDetailJson["username"].ToString());
+                Assert.AreEqual(userInfo.Email, userDetailJson["email"].ToString());
+                Assert.AreEqual(userInfo.Organization, userDetailJson["organization"].ToString());
+                Assert.AreEqual(userInfo.Phone, userDetailJson["phone"].ToString());
+                Assert.AreEqual(userInfo.PictureUrl, userDetailJson["picture"].ToString());
+                Assert.AreEqual(userInfo.Gender, userDetailJson["gender"].ToString());
+                Assert.AreEqual(userInfo.BirthYear, userDetailJson["byear"].ToString());
+            }
+
+            if (customInfo != null) {
+                foreach (KeyValuePair<string, object> entry in customInfo)
+                {
+                    Assert.AreEqual(entry.Value, userDetailJson["custom"][entry.Key].ToString());
+                }
+            }
+        }
+
         /// <summary>
         /// It check the working of method 'SetUserDetailsAsync'.
         /// </summary>
@@ -57,19 +79,7 @@ namespace Tests
             CountlyRequestModel requestModel = Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Dequeue();
 
             NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
-            JObject userDetailJson = JObject.Parse(collection["user_details"]);
-
-            Assert.AreEqual("Full Name", userDetailJson["name"].ToString());
-            Assert.AreEqual("username", userDetailJson["username"].ToString());
-            Assert.AreEqual("useremail@email.com", userDetailJson["email"].ToString());
-            Assert.AreEqual("Organization", userDetailJson["organization"].ToString());
-            Assert.AreEqual("222-222-222", userDetailJson["phone"].ToString());
-            Assert.AreEqual("http://webresizer.com/images2/bird1_after.jpg", userDetailJson["picture"].ToString());
-            Assert.AreEqual("M", userDetailJson["gender"].ToString());
-            Assert.AreEqual("1986", userDetailJson["byear"].ToString());
-
-            Assert.AreEqual("Black", userDetailJson["custom"]["Hair"].ToString());
-            Assert.AreEqual("5.9", userDetailJson["custom"]["Height"].ToString());
+            AssertlUserDetailRequest(collection, userDetails, userDetails.Custom);
         }
 
         /// <summary>
@@ -116,19 +126,17 @@ namespace Tests
 
 
             NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
-            JObject userDetailJson = JObject.Parse(collection["user_details"]);
 
-            Assert.AreEqual("Ful", userDetailJson["name"].ToString());
-            Assert.AreEqual("use", userDetailJson["username"].ToString());
-            Assert.AreEqual("use", userDetailJson["email"].ToString());
-            Assert.AreEqual("Org", userDetailJson["organization"].ToString());
-            Assert.AreEqual("222", userDetailJson["phone"].ToString());
-            Assert.AreEqual(4096, userDetailJson["picture"].ToString().Length);
-            Assert.AreEqual("M", userDetailJson["gender"].ToString());
-            Assert.AreEqual("198", userDetailJson["byear"].ToString());
+            userDetails = new CountlyUserDetailsModel("Ful", "use", "use", "Org",
+                   "222",
+                   userDetails.PictureUrl.Substring(0, 4096),
+                   "M", "198",
+                   new Dictionary<string, object>{
+                        { "Hair", "Bla" },
+                        { "Height", "5.9" },
+                   });
 
-            Assert.AreEqual("Bla", userDetailJson["custom"]["Hair"].ToString());
-            Assert.AreEqual("5.9", userDetailJson["custom"]["Height"].ToString());
+            AssertlUserDetailRequest(collection, userDetails, userDetails.Custom);
         }
 
         /// <summary>
@@ -163,11 +171,8 @@ namespace Tests
 
             CountlyRequestModel requestModel = Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Dequeue();
             NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
-            JObject custom = JObject.Parse(collection["user_details"]);
 
-
-            Assert.AreEqual("Black", custom["custom"]["Hair"].ToString());
-            Assert.AreEqual("5.9", custom["custom"]["Height"].ToString());
+            AssertlUserDetailRequest(collection, null, userCustomDetail);
         }
 
 
@@ -209,6 +214,13 @@ namespace Tests
 
             Assert.AreEqual("Black_", custom["custom"]["Hair"].ToString());
             Assert.AreEqual("5.9", custom["custom"]["Heigh"].ToString());
+
+            userCustomDetail = new Dictionary<string, object> {
+                        { "Hair", "Black_" },
+                        { "Heigh", "5.9" },
+            };
+
+            AssertlUserDetailRequest(collection, null, userCustomDetail);
         }
 
         /// <summary>
@@ -376,10 +388,7 @@ namespace Tests
 
             CountlyRequestModel requestModel = Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Dequeue();
             NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
-            JObject userdetail = JObject.Parse(collection["user_details"]);
-
-            Assert.AreEqual("Black", userdetail["custom"]["Hair"].ToString());
-            Assert.AreEqual("5.9", userdetail["custom"]["Height"].ToString());
+            AssertlUserDetailRequest(collection, null, userCustomDetail);
         }
 
         /// <summary>
@@ -416,10 +425,8 @@ namespace Tests
 
             CountlyRequestModel requestModel = Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Dequeue();
             NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
-            JObject userdetail = JObject.Parse(collection["user_details"]);
+            AssertlUserDetailRequest(collection, null, userDetails.Custom);
 
-            Assert.AreEqual("Black", userdetail["custom"]["Hair"].ToString());
-            Assert.AreEqual("5.9", userdetail["custom"]["Height"].ToString());
         }
         /// <summary>
         /// It validates the user's custom properties set via 'SetOnce' and 'Set' methods.

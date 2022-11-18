@@ -75,7 +75,6 @@ namespace Tests
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
             Assert.AreEqual(0, Countly.Instance.Events._timedEvents.Count);
 
-
             await Countly.Instance.Events.RecordEventAsync("test_event");
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
             Assert.AreEqual(0, Countly.Instance.Events._timedEvents.Count);
@@ -88,7 +87,6 @@ namespace Tests
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
             Assert.AreEqual(0, Countly.Instance.Events._timedEvents.Count);
         }
-
 
         /// <summary>
         /// It validates the cancelation of timed events on consent removal.
