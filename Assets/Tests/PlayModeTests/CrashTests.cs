@@ -16,6 +16,24 @@ namespace Tests
         private readonly string _serverUrl = "https://xyz.com/";
         private readonly string _appKey = "772c091355076ead703f987fee94490";
 
+        private void AssertCrashRequest(NameValueCollection collection, string msg, string stackTrace, bool isNonFatal, IDictionary<string, object> segmentation) {
+
+            JObject crashObj = JObject.Parse(collection["crash"]);
+            Assert.AreEqual(msg, crashObj.GetValue("_name").ToString());
+            Assert.AreEqual(isNonFatal, crashObj.GetValue("_nonfatal").ToObject<bool>());
+            Assert.AreEqual(stackTrace, crashObj.GetValue("_error").ToString());
+
+            JObject custom = crashObj["_custom"].ToObject<JObject>();
+
+            if (segmentation != null) {
+                Assert.AreEqual(segmentation.Count, custom.Count);
+                foreach (KeyValuePair<string, object> entry in segmentation) {
+                    Assert.AreEqual(entry.Value, custom.GetValue(entry.Key).ToString());
+                }
+            }
+            
+        }
+
 
         /// <summary>
         /// It checks the working of crash service if no 'Crash' consent is given.
@@ -112,16 +130,12 @@ namespace Tests
             CountlyRequestModel requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
             NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
 
-            JObject crashObj = JObject.Parse(collection["crash"]);
-            Assert.AreEqual("message", crashObj.GetValue("_name").ToString());
-            Assert.AreEqual("True", crashObj.GetValue("_nonfatal").ToString());
-            Assert.AreEqual("Stack\nStack", crashObj.GetValue("_error").ToString());
+            Dictionary<string, object> segmentation = new Dictionary<string, object>{
+                { "Time", "12344"},
+                { "Retry", "10"},
+            };
 
-            JObject custom = crashObj["_custom"].ToObject<JObject>();
-
-            Assert.AreEqual(2, custom.Count);
-            Assert.AreEqual("12344", custom.GetValue("Time").ToString());
-            Assert.AreEqual("10", custom.GetValue("Retry").ToString());
+            AssertCrashRequest(collection, "message", "Stack\nStack", true, segmentation);
 
         }
 
@@ -162,15 +176,8 @@ namespace Tests
 
             CountlyRequestModel requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
             NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
-            JObject crashObj = JObject.Parse(collection["crash"]);
-            Assert.AreEqual("message", crashObj.GetValue("_name").ToString());
-            Assert.AreEqual("True", crashObj.GetValue("_nonfatal").ToString());
-            Assert.AreEqual("StackTrace", crashObj.GetValue("_error").ToString());
+            AssertCrashRequest(collection, "message", "StackTrace", true, seg);
 
-            JObject custom = crashObj["_custom"].ToObject<JObject>();
-
-            Assert.AreEqual("1234455", custom.GetValue("Time Spent").ToString());
-            Assert.AreEqual("10", custom.GetValue("Retry Attempts").ToString());
 
         }
 

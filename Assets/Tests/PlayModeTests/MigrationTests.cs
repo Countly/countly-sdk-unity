@@ -24,6 +24,18 @@ namespace Tests
         private readonly string _serverUrl = "https://xyz.com/";
         private readonly string _appKey = "772c091355076ead703f987fee94490";
 
+        private void AssertMigrtedGetRequest(CountlyRequestModel requestModel, string appKey, string deviceId, string sdkName, string sdkVersion, string requestKey = "consent") {
+            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+
+            Assert.AreEqual(appKey, collection.Get("app_key"));
+            Assert.AreEqual(deviceId, collection.Get("device_id"));
+            Assert.AreEqual(sdkName, collection.Get("sdk_name"));
+            Assert.AreEqual(sdkVersion, collection.Get("sdk_version"));
+            Assert.IsNotNull(collection[requestKey]);
+            Assert.IsNull(collection["checksum256"]);
+            Assert.IsNull(requestModel.RequestUrl);
+        }
+
         /// <summary>
         /// It validates the request migration on empty request repo.
         /// </summary>
@@ -89,13 +101,7 @@ namespace Tests
             Assert.AreEqual(SCHEMA_VERSION, Countly.Instance.StorageHelper.CurrentVersion);
             Assert.AreEqual(Countly.Instance.StorageHelper.SchemaVersion, Countly.Instance.StorageHelper.CurrentVersion);
 
-            Assert.AreEqual("772c091355076ead703f987fee94490", collection.Get("app_key"));
-            Assert.AreEqual("57049b51faf44804a10967f54d8f8420", collection.Get("device_id"));
-            Assert.AreEqual("csharp-unity-editor", collection.Get("sdk_name"));
-            Assert.AreEqual("20.11.5", collection.Get("sdk_version"));
-            Assert.IsNotNull(collection["consent"]);
-            Assert.IsNull(collection["checksum256"]);
-            Assert.IsNull(requestModel.RequestUrl);
+            AssertMigrtedGetRequest(requestModel, "772c091355076ead703f987fee94490", "57049b51faf44804a10967f54d8f8420", "csharp-unity-editor", "20.11.5");
         }
 
 
@@ -140,36 +146,16 @@ namespace Tests
 
             CountlyRequestModel requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
             NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
-
-            Assert.AreEqual("772c091355076ead703f987fee94490", collection.Get("app_key"));
-            Assert.AreEqual("57049b51faf44804a10967f54d8f8420", collection.Get("device_id"));
-            Assert.AreEqual("csharp-unity-editor", collection.Get("sdk_name"));
-            Assert.AreEqual("20.11.5", collection.Get("sdk_version"));
-            Assert.IsNotNull(collection["consent"]);
-            Assert.IsNull(collection["checksum256"]);
-            Assert.IsNull(requestModel.RequestUrl);
+            AssertMigrtedGetRequest(requestModel, "772c091355076ead703f987fee94490", "57049b51faf44804a10967f54d8f8420", "csharp-unity-editor", "20.11.5");
 
             requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
             collection = HttpUtility.ParseQueryString(requestModel.RequestData);
 
-            Assert.AreEqual("772c091355076ead703f987fee94490", collection.Get("app_key"));
-            Assert.AreEqual("57049b51faf44804a10967f54d8f8420", collection.Get("device_id"));
-            Assert.AreEqual("csharp-unity-editor", collection.Get("sdk_name"));
-            Assert.AreEqual("20.11.4", collection.Get("sdk_version"));
-            Assert.IsNotNull(collection["consent"]);
-            Assert.IsNull(collection["checksum256"]);
-            Assert.IsNull(requestModel.RequestUrl);
+            AssertMigrtedGetRequest(requestModel, "772c091355076ead703f987fee94490", "57049b51faf44804a10967f54d8f8420", "csharp-unity-editor", "20.11.4");
 
             requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
             collection = HttpUtility.ParseQueryString(requestModel.RequestData);
-
-            Assert.AreEqual("772c091355076ead703f987fee94490", collection.Get("app_key"));
-            Assert.AreEqual("57049b51faf44804a10967f54d8f8420", collection.Get("device_id"));
-            Assert.AreEqual("csharp-unity-editor", collection.Get("sdk_name"));
-            Assert.AreEqual("20.11.3", collection.Get("sdk_version"));
-            Assert.IsNotNull(collection["consent"]);
-            Assert.IsNull(collection["checksum256"]);
-            Assert.IsNull(requestModel.RequestUrl);
+            AssertMigrtedGetRequest(requestModel, "772c091355076ead703f987fee94490", "57049b51faf44804a10967f54d8f8420", "csharp-unity-editor", "20.11.3");
 
         }
 
@@ -213,37 +199,13 @@ namespace Tests
             Assert.AreEqual(Countly.Instance.StorageHelper.SchemaVersion, Countly.Instance.StorageHelper.CurrentVersion);
 
             CountlyRequestModel requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
-            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
-
-            Assert.AreEqual("772c091355076ead703f987fee94490", collection.Get("app_key"));
-            Assert.AreEqual("57049b51faf44874a10967f54d8f8420", collection.Get("device_id"));
-            Assert.AreEqual("csharp-unity-editor", collection.Get("sdk_name"));
-            Assert.AreEqual("20.11.5", collection.Get("sdk_version"));
-            Assert.IsNotNull(collection["consent"]);
-            Assert.IsNull(collection["checksum256"]);
-            Assert.IsNull(requestModel.RequestUrl);
+            AssertMigrtedGetRequest(requestModel, "772c091355076ead703f987fee94490", "57049b51faf44874a10967f54d8f8420", "csharp-unity-editor", "20.11.5");
 
             requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
-            collection = HttpUtility.ParseQueryString(requestModel.RequestData);
-
-            Assert.AreEqual("772c091355076ead703f987fee94490", collection.Get("app_key"));
-            Assert.AreEqual("57049b51faf44874a10967f54d8f8420", collection.Get("device_id"));
-            Assert.AreEqual("csharp-unity-editor", collection.Get("sdk_name"));
-            Assert.AreEqual("20.11.4", collection.Get("sdk_version"));
-            Assert.IsNotNull(collection["consent"]);
-            Assert.IsNull(collection["checksum256"]);
-            Assert.IsNull(requestModel.RequestUrl);
+            AssertMigrtedGetRequest(requestModel, "772c091355076ead703f987fee94490", "57049b51faf44874a10967f54d8f8420", "csharp-unity-editor", "20.11.4");
 
             requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
-            collection = HttpUtility.ParseQueryString(requestModel.RequestData);
-
-            Assert.AreEqual("772c091355076ead703f987fee94490", collection.Get("app_key"));
-            Assert.AreEqual("57049b51faf44874a10967f54d8f8420", collection.Get("device_id"));
-            Assert.AreEqual("csharp-unity-editor", collection.Get("sdk_name"));
-            Assert.AreEqual("20.11.3", collection.Get("sdk_version"));
-            Assert.IsNotNull(collection["consent"]);
-            Assert.IsNull(collection["checksum256"]);
-            Assert.IsNull(requestModel.RequestUrl);
+            AssertMigrtedGetRequest(requestModel, "772c091355076ead703f987fee94490", "57049b51faf44874a10967f54d8f8420", "csharp-unity-editor", "20.11.3");
         }
 
         /// <summary>
@@ -273,20 +235,12 @@ namespace Tests
             Countly.Instance.Init(configuration);
 
             CountlyRequestModel requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
-            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
-
             int schemaVersion = PlayerPrefs.GetInt(Constants.SchemaVersion);
             Assert.AreEqual(SCHEMA_VERSION, schemaVersion);
             Assert.AreEqual(SCHEMA_VERSION, Countly.Instance.StorageHelper.CurrentVersion);
             Assert.AreEqual(Countly.Instance.StorageHelper.SchemaVersion, Countly.Instance.StorageHelper.CurrentVersion);
 
-            Assert.AreEqual("772c091355076ead703f987fee94490", collection.Get("app_key"));
-            Assert.AreEqual("57049b51faf44874a10967f54d8f8420", collection.Get("device_id"));
-            Assert.AreEqual("csharp-unity-editor", collection.Get("sdk_name"));
-            Assert.AreEqual("20.11.5", collection.Get("sdk_version"));
-            Assert.IsNotNull(collection["consent"]);
-            Assert.IsNull(collection["checksum256"]);
-            Assert.IsNull(requestModel.RequestUrl);
+            AssertMigrtedGetRequest(requestModel, "772c091355076ead703f987fee94490", "57049b51faf44874a10967f54d8f8420", "csharp-unity-editor", "20.11.5");
         }
 
 
@@ -342,71 +296,24 @@ namespace Tests
             Assert.AreEqual(Countly.Instance.StorageHelper.SchemaVersion, Countly.Instance.StorageHelper.CurrentVersion);
 
             CountlyRequestModel requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
-            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
 
-            Assert.AreEqual("772c091355076ead703f987fee94490", collection.Get("app_key"));
-            Assert.AreEqual("57049b51faf44874a10967f54d8f8420", collection.Get("device_id"));
-            Assert.AreEqual("csharp-unity-editor", collection.Get("sdk_name"));
-            Assert.AreEqual("20.11.5", collection.Get("sdk_version"));
-            Assert.IsNotNull(collection["consent"]);
-            Assert.IsNull(collection["checksum256"]);
-            Assert.IsNull(requestModel.RequestUrl);
+            AssertMigrtedGetRequest(requestModel, "772c091355076ead703f987fee94490", "57049b51faf44874a10967f54d8f8420", "csharp-unity-editor", "20.11.5");
 
             requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
-            collection = HttpUtility.ParseQueryString(requestModel.RequestData);
 
-            Assert.AreEqual("772c091355076ead703f987fee94490", collection.Get("app_key"));
-            Assert.AreEqual("57049b51faf44874a10967f54d8f8420", collection.Get("device_id"));
-            Assert.AreEqual("csharp-unity-editor", collection.Get("sdk_name"));
-            Assert.AreEqual("20.11.4", collection.Get("sdk_version"));
-            Assert.IsNotNull(collection["consent"]);
-            Assert.IsNull(collection["checksum256"]);
-            Assert.IsNull(requestModel.RequestUrl);
+            AssertMigrtedGetRequest(requestModel, "772c091355076ead703f987fee94490", "57049b51faf44874a10967f54d8f8420", "csharp-unity-editor", "20.11.4");
 
             requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
-            collection = HttpUtility.ParseQueryString(requestModel.RequestData);
-
-            Assert.AreEqual("772c091355076ead703f987fee94490", collection.Get("app_key"));
-            Assert.AreEqual("57049b51faf44874a10967f54d8f8420", collection.Get("device_id"));
-            Assert.AreEqual("csharp-unity-editor", collection.Get("sdk_name"));
-            Assert.AreEqual("20.11.3", collection.Get("sdk_version"));
-            Assert.IsNotNull(collection["consent"]);
-            Assert.IsNull(collection["checksum256"]);
-            Assert.IsNull(requestModel.RequestUrl);
+            AssertMigrtedGetRequest(requestModel, "772c091355076ead703f987fee94490", "57049b51faf44874a10967f54d8f8420", "csharp-unity-editor", "20.11.3");
 
             requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
-            collection = HttpUtility.ParseQueryString(requestModel.RequestData);
-
-            Assert.AreEqual("772c091355076ead703f987fee94490", collection.Get("app_key"));
-            Assert.AreEqual("57049b51faf44874a10967f54d8f8420", collection.Get("device_id"));
-            Assert.AreEqual("csharp-unity-editor", collection.Get("sdk_name"));
-            Assert.AreEqual("20.11.2", collection.Get("sdk_version"));
-            Assert.IsNotNull(collection["consent"]);
-            Assert.IsNull(collection["checksum256"]);
-            Assert.IsNull(requestModel.RequestUrl);
-
+            AssertMigrtedGetRequest(requestModel, "772c091355076ead703f987fee94490", "57049b51faf44874a10967f54d8f8420", "csharp-unity-editor", "20.11.2");
 
             requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
-            collection = HttpUtility.ParseQueryString(requestModel.RequestData);
-
-            Assert.AreEqual("772c091355076ead703f987fee94490", collection.Get("app_key"));
-            Assert.AreEqual("57049b51faf44874a10967f54d8f8420", collection.Get("device_id"));
-            Assert.AreEqual("csharp-unity-editor", collection.Get("sdk_name"));
-            Assert.AreEqual("20.11.1", collection.Get("sdk_version"));
-            Assert.IsNotNull(collection["consent"]);
-            Assert.IsNull(collection["checksum256"]);
-            Assert.IsNull(requestModel.RequestUrl);
+            AssertMigrtedGetRequest(requestModel, "772c091355076ead703f987fee94490", "57049b51faf44874a10967f54d8f8420", "csharp-unity-editor", "20.11.1");
 
             requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
-            collection = HttpUtility.ParseQueryString(requestModel.RequestData);
-
-            Assert.AreEqual("772c091355076ead703f987fee94490", collection.Get("app_key"));
-            Assert.AreEqual("57049b51faf44874a10967f54d8f8420", collection.Get("device_id"));
-            Assert.AreEqual("csharp-unity-editor", collection.Get("sdk_name"));
-            Assert.AreEqual("20.11.0", collection.Get("sdk_version"));
-            Assert.IsNotNull(collection["consent"]);
-            Assert.IsNull(collection["checksum256"]);
-            Assert.IsNull(requestModel.RequestUrl);
+            AssertMigrtedGetRequest(requestModel, "772c091355076ead703f987fee94490", "57049b51faf44874a10967f54d8f8420", "csharp-unity-editor", "20.11.0");
         }
 
         /// <summary>
