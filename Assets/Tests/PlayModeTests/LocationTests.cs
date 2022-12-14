@@ -15,6 +15,27 @@ namespace Tests
         private readonly string _serverUrl = "https://xyz.com/";
         private readonly string _appKey = "772c091355076ead703f987fee94490";
 
+        private void AssertLocation(string gpsCoord, string city, string ipAddress, string countryCode, bool IsLocationDisabled) {
+            Assert.AreNotEqual(Countly.Instance.Location, null);
+
+            Assert.AreEqual(city, Countly.Instance.Location.City);
+            Assert.AreEqual(ipAddress, Countly.Instance.Location.IPAddress);
+            Assert.AreEqual(countryCode, Countly.Instance.Location.CountryCode);
+            Assert.AreEqual(gpsCoord, Countly.Instance.Location.Location);
+
+            Assert.AreEqual(IsLocationDisabled, Countly.Instance.Location.IsLocationDisabled);
+        }
+
+        private void AssertOptionalLocation(string gpsCoord, string city, string ipAddress, string countryCode)
+        {
+            Assert.AreNotEqual(Countly.Instance.OptionalParameters, null);
+
+            Assert.AreEqual(city, Countly.Instance.OptionalParameters.City);
+            Assert.AreEqual(ipAddress, Countly.Instance.OptionalParameters.IPAddress);
+            Assert.AreEqual(countryCode, Countly.Instance.OptionalParameters.CountryCode);
+            Assert.AreEqual(gpsCoord, Countly.Instance.OptionalParameters.Location);
+        }
+
         /// <summary>
         /// It matches the user's location values set during configuration with location service values and, it also validates location default values after the location gets disable.
         /// </summary>
@@ -35,18 +56,14 @@ namespace Tests
             configuration.SetLocation(countryCode, city, latitude + "," + longitude, ipAddress);
             Countly.Instance.Init(configuration);
 
-            Assert.AreNotEqual(Countly.Instance.Location, null);
-            Assert.AreEqual(Countly.Instance.Location.City, Countly.Instance.Configuration.City);
-            Assert.AreEqual(Countly.Instance.Location.Location, Countly.Instance.Configuration.Location);
-            Assert.AreEqual(Countly.Instance.Location.IPAddress, Countly.Instance.Configuration.IPAddress);
-            Assert.AreEqual(Countly.Instance.Location.CountryCode, Countly.Instance.Configuration.CountryCode);
-            Assert.AreEqual(Countly.Instance.Location.IsLocationDisabled, Countly.Instance.Configuration.IsLocationDisabled);
+            
+
+            CountlyConfiguration cc = Countly.Instance.Configuration;
+            AssertLocation(cc.Location, cc.City, cc.IPAddress, cc.CountryCode, cc.IsLocationDisabled);
 
             Countly.Instance.Location.DisableLocation();
-            Assert.AreEqual(Countly.Instance.Location.City, null);
-            Assert.AreEqual(Countly.Instance.Location.IPAddress, null);
-            Assert.AreEqual(Countly.Instance.Location.CountryCode, null);
-            Assert.AreEqual(Countly.Instance.Location.IsLocationDisabled, true);
+            AssertLocation(null, null, null, null, true);
+           
         }
 
         /// <summary>
@@ -69,16 +86,11 @@ namespace Tests
             configuration.SetLocation(countryCode, city, latitude + "," + longitude, ipAddress);
             Countly.Instance.Init(configuration);
 
-            Assert.AreNotEqual(Countly.Instance.Location, null);
-            Assert.AreEqual(city, Countly.Instance.OptionalParameters.City);
-            Assert.AreEqual(ipAddress, Countly.Instance.OptionalParameters.IPAddress);
-            Assert.AreEqual(countryCode, Countly.Instance.OptionalParameters.CountryCode);
-            Assert.AreEqual(latitude + "," + longitude, Countly.Instance.OptionalParameters.Location);
+          
+            AssertOptionalLocation(latitude + "," + longitude, city, ipAddress, countryCode);
 
             Countly.Instance.OptionalParameters.DisableLocation();
-            Assert.AreEqual(null, Countly.Instance.OptionalParameters.City);
-            Assert.AreEqual(null, Countly.Instance.OptionalParameters.IPAddress);
-            Assert.AreEqual(null, Countly.Instance.OptionalParameters.CountryCode);
+            AssertOptionalLocation(null, null, null, null);
         }
 
 
@@ -101,23 +113,16 @@ namespace Tests
 
             Countly.Instance.Init(configuration);
 
-            Assert.AreNotEqual(Countly.Instance.Location, null);
             Countly.Instance.OptionalParameters.SetLocation(countryCode, city, latitude + "," + longitude, ipAddress);
+            AssertOptionalLocation(latitude + "," + longitude, city, ipAddress, countryCode);
 
-            Assert.AreEqual(city, Countly.Instance.OptionalParameters.City);
-            Assert.AreEqual(ipAddress, Countly.Instance.OptionalParameters.IPAddress);
-            Assert.AreEqual(countryCode, Countly.Instance.OptionalParameters.CountryCode);
-            Assert.AreEqual(latitude + "," + longitude, Countly.Instance.OptionalParameters.Location);
 
             Countly.Instance.OptionalParameters.SetCity("Lahore");
             Countly.Instance.OptionalParameters.SetIPAddress("192.168.100.51");
             Countly.Instance.OptionalParameters.SetLocation(10.00, -10.00);
             Countly.Instance.OptionalParameters.SetCountryCode("PK");
 
-            Assert.AreEqual("Lahore", Countly.Instance.OptionalParameters.City);
-            Assert.AreEqual("PK", Countly.Instance.OptionalParameters.CountryCode);
-            Assert.AreEqual("192.168.100.51", Countly.Instance.OptionalParameters.IPAddress);
-            Assert.AreEqual(10.00 + "," + -10.00, Countly.Instance.OptionalParameters.Location);
+            AssertOptionalLocation(10.00 + "," + -10.00, "Lahore", "192.168.100.51", "PK");
         }
 
         /// <summary>
@@ -139,14 +144,8 @@ namespace Tests
 
             Countly.Instance.Init(configuration);
 
-            Assert.AreNotEqual(Countly.Instance.Location, null);
             Countly.Instance.Location.SetLocation(countryCode, city, latitude + "," + longitude, ipAddress);
-
-            Assert.AreEqual(city, Countly.Instance.Location.City);
-            Assert.AreEqual(ipAddress, Countly.Instance.Location.IPAddress);
-            Assert.AreEqual(countryCode, Countly.Instance.Location.CountryCode);
-            Assert.AreEqual(latitude + "," + longitude, Countly.Instance.Location.Location);
-            Assert.AreEqual(Countly.Instance.Location.IsLocationDisabled, Countly.Instance.Configuration.IsLocationDisabled);
+            AssertLocation(latitude + "," + longitude, city, ipAddress, countryCode, Countly.Instance.Configuration.IsLocationDisabled);
         }
 
         [TearDown]

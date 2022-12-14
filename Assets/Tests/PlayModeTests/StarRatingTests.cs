@@ -3,6 +3,7 @@ using UnityEngine;
 using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK;
 using Plugins.CountlySDK.Enums;
+using System.Collections.Generic;
 
 namespace Tests
 {
@@ -10,6 +11,19 @@ namespace Tests
     {
         private readonly string _serverUrl = "https://xyz.com/";
         private readonly string _appKey = "772c091355076ead703f987fee94490";
+
+        private void AssertStarRatingModel(CountlyEventModel model, IDictionary<string, object> segmentation) {
+
+            Assert.AreEqual(CountlyEventModel.StarRatingEvent, model.Key);
+            Assert.IsNull(model.Sum);
+            Assert.AreEqual(1, model.Count);
+            Assert.IsNull(model.Duration);
+            Assert.IsNotNull(model.Segmentation);
+
+            foreach (KeyValuePair<string, object> entry in segmentation) {
+                Assert.AreEqual(entry.Value, model.Segmentation[entry.Key]);
+            }
+        }
 
         /// <summary>
         /// It validates the event repository initial state.
@@ -56,15 +70,12 @@ namespace Tests
 
             CountlyEventModel model = Countly.Instance.StarRating._eventCountlyService._eventRepo.Dequeue();
 
-            Assert.AreEqual(CountlyEventModel.StarRatingEvent, model.Key);
-            Assert.IsNull(model.Sum);
-            Assert.AreEqual(1, model.Count);
-            Assert.IsNull(model.Duration);
-            Assert.IsNotNull(model.Segmentation);
-            Assert.AreEqual("android", model.Segmentation["platform"]);
-            Assert.AreEqual("0.1", model.Segmentation["app_version"]);
-            Assert.AreEqual(3, model.Segmentation["rating"]);
+            IDictionary<string, object> segmentation = new Dictionary<string, object>();
+            segmentation.Add("platform", "android");
+            segmentation.Add("app_version", "0.1");
+            segmentation.Add("rating", 3);
 
+            AssertStarRatingModel(model, segmentation);
         }
 
         /// <summary>
@@ -122,6 +133,13 @@ namespace Tests
             Assert.AreEqual("android", model.Segmentation["platform"]);
             Assert.AreEqual("0.1", model.Segmentation["app_version"]);
             Assert.AreEqual(5, model.Segmentation["rating"]);
+
+            IDictionary<string, object> segmentation = new Dictionary<string, object>();
+            segmentation.Add("platform", "android");
+            segmentation.Add("app_version", "0.1");
+            segmentation.Add("rating", 5);
+
+            AssertStarRatingModel(model, segmentation);
 
         }
 

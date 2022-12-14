@@ -7,6 +7,8 @@ using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK;
 using Plugins.CountlySDK.Enums;
 using System.Threading.Tasks;
+using System;
+using System.Linq;
 
 namespace Tests
 {
@@ -14,6 +16,29 @@ namespace Tests
     {
         private readonly string _serverUrl = "https://xyz.com/";
         private readonly string _appKey = "772c091355076ead703f987fee94490";
+
+        private void AssertAnEvent(CountlyEventModel model, string name, double? sum, double count, double? duration, IDictionary<string, object> segmentation) {
+            Assert.AreEqual(name, model.Key);
+            Assert.AreEqual(model.Sum, sum);
+            Assert.AreEqual(model.Count, count);
+
+            if (duration != null) {
+                Assert.IsTrue(duration <= model.Duration);
+            } else {
+                Assert.IsNull(model.Duration);
+            }
+
+            if (segmentation != null) {
+                foreach (KeyValuePair<string, object> entry in model.Segmentation) {
+                    Assert.AreEqual(segmentation[entry.Key], entry.Value);
+                }
+
+                Assert.AreEqual(segmentation.Count, model.Segmentation.Count);
+
+            } else {
+                Assert.IsNull(model.Segmentation);
+            }
+        }
 
         /// <summary>
         /// It validates the event repository initial state.
@@ -50,7 +75,6 @@ namespace Tests
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
             Assert.AreEqual(0, Countly.Instance.Events._timedEvents.Count);
 
-
             await Countly.Instance.Events.RecordEventAsync("test_event");
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
             Assert.AreEqual(0, Countly.Instance.Events._timedEvents.Count);
@@ -63,7 +87,6 @@ namespace Tests
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
             Assert.AreEqual(0, Countly.Instance.Events._timedEvents.Count);
         }
-
 
         /// <summary>
         /// It validates the cancelation of timed events on consent removal.
@@ -182,12 +205,7 @@ namespace Tests
             Assert.AreEqual(0, Countly.Instance.Events._timedEvents.Count);
 
             CountlyEventModel model = Countly.Instance.Events._eventRepo.Dequeue();
-
-            Assert.AreEqual("test_event", model.Key);
-            Assert.AreEqual(0, model.Sum);
-            Assert.AreEqual(1, model.Count);
-            Assert.IsTrue(model.Duration >= 2.1);
-            Assert.IsNull(model.Segmentation);
+            AssertAnEvent(model, "test_event", 0, 1, 2.1, null);
         }
 
         /// <summary>
@@ -229,13 +247,8 @@ namespace Tests
             Assert.AreEqual(1, Countly.Instance.Events._timedEvents.Count);
 
             CountlyEventModel model = Countly.Instance.Events._eventRepo.Dequeue();
+            AssertAnEvent(model, "test_event", 10, 5, 2.5, segmentation);
 
-            Assert.AreEqual("test_event", model.Key);
-            Assert.AreEqual(10, model.Sum);
-            Assert.AreEqual(5, model.Count);
-            Assert.IsTrue(model.Duration >= 2.5);
-            Assert.AreEqual("value1", model.Segmentation["key1"]);
-            Assert.AreEqual("value2", model.Segmentation["key2"]);
         }
 
         /// <summary>
@@ -257,23 +270,15 @@ namespace Tests
             Assert.AreEqual(1, Countly.Instance.Events._eventRepo.Count);
 
             CountlyEventModel model = Countly.Instance.Events._eventRepo.Dequeue();
+            AssertAnEvent(model, "test_event", 0, 1, null, null);
 
-            Assert.AreEqual("test_event", model.Key);
-            Assert.AreEqual(0, model.Sum);
-            Assert.AreEqual(1, model.Count);
-            Assert.IsNull(model.Duration);
-            Assert.IsNull(model.Segmentation);
 
             await Countly.Instance.Events.RecordEventAsync("test_event1", segmentation: null, count: 5, duration: null, sum: null);
             Assert.AreEqual(1, Countly.Instance.Events._eventRepo.Count);
 
-            CountlyEventModel model1 = Countly.Instance.Events._eventRepo.Dequeue();
+            model = Countly.Instance.Events._eventRepo.Dequeue();
+            AssertAnEvent(model, "test_event1", null, 5, null, null);
 
-            Assert.AreEqual("test_event1", model1.Key);
-            Assert.AreEqual(5, model1.Count);
-            Assert.IsNull(model1.Sum);
-            Assert.IsNull(model1.Duration);
-            Assert.IsNull(model1.Segmentation);
         }
 
         /// <summary>
@@ -301,8 +306,6 @@ namespace Tests
 
             await Countly.Instance.Events.RecordEventAsync("test_event_3");
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
-
-
         }
 
         /// <summary>
@@ -333,14 +336,8 @@ namespace Tests
             await Countly.Instance.Events.RecordEventAsync("test_event", segmentation: segmentModel, sum: 23, duration: 5);
 
             CountlyEventModel model = Countly.Instance.Events._eventRepo.Dequeue();
+            AssertAnEvent(model, "test_event", 23, 1, 5, segments);
 
-            Assert.AreEqual("test_event", model.Key);
-            Assert.AreEqual(23, model.Sum);
-            Assert.AreEqual(1, model.Count);
-            Assert.AreEqual(5, model.Duration);
-            Assert.AreEqual(2, model.Segmentation.Count);
-            Assert.AreEqual("value1", model.Segmentation["key1"]);
-            Assert.AreEqual("value2", model.Segmentation["key2"]);
         }
 
         /// <summary>
@@ -376,13 +373,13 @@ namespace Tests
 
             CountlyEventModel model = Countly.Instance.Events._eventRepo.Dequeue();
 
-            Assert.AreEqual("test", model.Key);
-            Assert.AreEqual(23, model.Sum);
-            Assert.AreEqual(1, model.Count);
-            Assert.AreEqual(5, model.Duration);
-            Assert.AreEqual(2, model.Segmentation.Count);
-            Assert.AreEqual("value1", model.Segmentation["key1"]);
-            Assert.AreEqual("value2", model.Segmentation["key2"]);
+            Dictionary<string, object> requireSegments = new Dictionary<string, object>{
+            { "key1", "value1"},
+            { "key2", "value2"},
+            };
+
+            AssertAnEvent(model, "test", 23, 1, 5, requireSegments);
+
         }
 
         /// <summary>
@@ -414,18 +411,14 @@ namespace Tests
 
             CountlyEventModel model = Countly.Instance.Events._eventRepo.Dequeue();
 
-            Assert.AreEqual("test_event", model.Key);
-            Assert.AreEqual(23, model.Sum);
-            Assert.AreEqual(1, model.Count);
-            Assert.AreEqual(5, model.Duration);
-            Assert.AreEqual(4, model.Segmentation.Count);
-            Assert.AreEqual(true, model.Segmentation.ContainsKey("key1"));
-            Assert.AreEqual(true, model.Segmentation.ContainsKey("key2"));
-            Assert.AreEqual(true, model.Segmentation.ContainsKey("key3"));
-            Assert.AreEqual(true, model.Segmentation.ContainsKey("key4"));
-            Assert.AreEqual(false, model.Segmentation.ContainsKey("key5"));
-            Assert.AreEqual(false, model.Segmentation.ContainsKey("key6"));
+            Dictionary<string, object> requireSegments = new Dictionary<string, object>{
+            { "key1", "value1"},
+            { "key2", 1},
+            { "key3", 10.0},
+            { "key4", true},
+            };
 
+            AssertAnEvent(model, "test_event", 23, 1, 5, requireSegments);
         }
 
         /// <summary>
@@ -562,24 +555,11 @@ namespace Tests
             Assert.AreEqual(1, Countly.Instance.Events._eventRepo.Count);
 
             CountlyEventModel model = Countly.Instance.Events._eventRepo.Dequeue();
-
-            Assert.AreEqual("[CLY]_view", model.Key);
-            Assert.AreEqual(0, model.Sum);
-            Assert.AreEqual(1, model.Count);
-            Assert.IsNull(model.Duration);
-            Assert.IsNull(model.Segmentation);
-
             await Countly.Instance.Events.RecordEventAsync("[CLY]_view", segmentation: null, count: 5, duration: null, sum: 1);
             Assert.AreEqual(1, Countly.Instance.Events._eventRepo.Count);
 
             model = Countly.Instance.Events._eventRepo.Dequeue();
-
-            Assert.AreEqual("[CLY]_view", model.Key);
-            Assert.AreEqual(1, model.Sum);
-            Assert.AreEqual(5, model.Count);
-            Assert.IsNull(model.Duration);
-            Assert.IsNull(model.Segmentation);
-
+            AssertAnEvent(model, "[CLY]_view", 1, 5, null, null);
         }
 
         /// <summary>
@@ -627,23 +607,14 @@ namespace Tests
             Assert.AreEqual(1, Countly.Instance.Events._eventRepo.Count);
 
             CountlyEventModel model = Countly.Instance.Events._eventRepo.Dequeue();
+            AssertAnEvent(model, "[CLY]_action", 0, 1, null, null);
 
-            Assert.AreEqual("[CLY]_action", model.Key);
-            Assert.AreEqual(0, model.Sum);
-            Assert.AreEqual(1, model.Count);
-            Assert.IsNull(model.Duration);
-            Assert.IsNull(model.Segmentation);
 
             await Countly.Instance.Events.RecordEventAsync("[CLY]_action", segmentation: null, count: 5, duration: null, sum: 1);
             Assert.AreEqual(1, Countly.Instance.Events._eventRepo.Count);
 
             model = Countly.Instance.Events._eventRepo.Dequeue();
-
-            Assert.AreEqual("[CLY]_action", model.Key);
-            Assert.AreEqual(1, model.Sum);
-            Assert.AreEqual(5, model.Count);
-            Assert.IsNull(model.Duration);
-            Assert.IsNull(model.Segmentation);
+            AssertAnEvent(model, "[CLY]_action", 1, 5, null, null);
         }
 
         /// <summary>
@@ -691,23 +662,15 @@ namespace Tests
             Assert.AreEqual(1, Countly.Instance.Events._eventRepo.Count);
 
             CountlyEventModel model = Countly.Instance.Events._eventRepo.Dequeue();
+            AssertAnEvent(model, "[CLY]_star_rating", 0, 1, null, null);
 
-            Assert.AreEqual("[CLY]_star_rating", model.Key);
-            Assert.AreEqual(0, model.Sum);
-            Assert.AreEqual(1, model.Count);
-            Assert.IsNull(model.Duration);
-            Assert.IsNull(model.Segmentation);
 
             await Countly.Instance.Events.RecordEventAsync("[CLY]_star_rating", segmentation: null, count: 5, duration: null, sum: 1);
             Assert.AreEqual(1, Countly.Instance.Events._eventRepo.Count);
 
             model = Countly.Instance.Events._eventRepo.Dequeue();
+            AssertAnEvent(model, "[CLY]_star_rating", 1, 5, null, null);
 
-            Assert.AreEqual("[CLY]_star_rating", model.Key);
-            Assert.AreEqual(1, model.Sum);
-            Assert.AreEqual(5, model.Count);
-            Assert.IsNull(model.Duration);
-            Assert.IsNull(model.Segmentation);
         }
 
         /// <summary>
@@ -755,23 +718,15 @@ namespace Tests
             Assert.AreEqual(1, Countly.Instance.Events._eventRepo.Count);
 
             CountlyEventModel model = Countly.Instance.Events._eventRepo.Dequeue();
+            AssertAnEvent(model, "[CLY]_push_action", 0, 1, null, null);
 
-            Assert.AreEqual("[CLY]_push_action", model.Key);
-            Assert.AreEqual(0, model.Sum);
-            Assert.AreEqual(1, model.Count);
-            Assert.IsNull(model.Duration);
-            Assert.IsNull(model.Segmentation);
 
             await Countly.Instance.Events.RecordEventAsync("[CLY]_push_action", segmentation: null, count: 5, duration: null, sum: 1);
             Assert.AreEqual(1, Countly.Instance.Events._eventRepo.Count);
 
             model = Countly.Instance.Events._eventRepo.Dequeue();
+            AssertAnEvent(model, "[CLY]_push_action", 1, 5, null, null);
 
-            Assert.AreEqual("[CLY]_push_action", model.Key);
-            Assert.AreEqual(1, model.Sum);
-            Assert.AreEqual(5, model.Count);
-            Assert.IsNull(model.Duration);
-            Assert.IsNull(model.Segmentation);
         }
         /// <summary>
         /// It validates 'recordEvent' against push specific key '[CLY]_orientation'.
@@ -817,24 +772,13 @@ namespace Tests
             Assert.AreEqual(1, Countly.Instance.Events._eventRepo.Count);
 
             CountlyEventModel model = Countly.Instance.Events._eventRepo.Dequeue();
-
-            Assert.AreEqual("[CLY]_orientation", model.Key);
-            Assert.AreEqual(0, model.Sum);
-            Assert.AreEqual(1, model.Count);
-            Assert.IsNull(model.Duration);
-            Assert.IsNull(model.Segmentation);
+            AssertAnEvent(model, "[CLY]_orientation", 0, 1, null, null);
 
             await Countly.Instance.Events.RecordEventAsync("[CLY]_orientation", segmentation: null, count: 5, duration: null, sum: 1);
             Assert.AreEqual(1, Countly.Instance.Events._eventRepo.Count);
 
             model = Countly.Instance.Events._eventRepo.Dequeue();
-
-            Assert.AreEqual("[CLY]_orientation", model.Key);
-            Assert.AreEqual(1, model.Sum);
-            Assert.AreEqual(5, model.Count);
-            Assert.IsNull(model.Duration);
-            Assert.IsNull(model.Segmentation);
-
+            AssertAnEvent(model, "[CLY]_orientation", 1, 5, null, null);
         }
 
         /// <summary>
@@ -892,34 +836,20 @@ namespace Tests
             Assert.AreEqual(1, Countly.Instance.Events._eventRepo.Count);
 
             model = Countly.Instance.Events._eventRepo.Dequeue();
-
-            Assert.AreEqual("[CLY]_survey", model.Key);
-            Assert.AreEqual(1, model.Sum);
-            Assert.AreEqual(5, model.Count);
-            Assert.IsNull(model.Duration);
-            Assert.IsNull(model.Segmentation);
+            AssertAnEvent(model, "[CLY]_survey", 1, 5, null, null);
 
             await Countly.Instance.Events.RecordEventAsync("[CLY]_nps");
             Assert.AreEqual(1, Countly.Instance.Events._eventRepo.Count);
 
             model = Countly.Instance.Events._eventRepo.Dequeue();
-
-            Assert.AreEqual("[CLY]_nps", model.Key);
-            Assert.AreEqual(0, model.Sum);
-            Assert.AreEqual(1, model.Count);
-            Assert.IsNull(model.Duration);
-            Assert.IsNull(model.Segmentation);
+            AssertAnEvent(model, "[CLY]_nps", 0, 1, null, null);
 
             await Countly.Instance.Events.RecordEventAsync("[CLY]_nps", segmentation: null, count: 5, duration: null, sum: 1);
             Assert.AreEqual(1, Countly.Instance.Events._eventRepo.Count);
 
             model = Countly.Instance.Events._eventRepo.Dequeue();
+            AssertAnEvent(model, "[CLY]_nps", 1, 5, null, null);
 
-            Assert.AreEqual("[CLY]_nps", model.Key);
-            Assert.AreEqual(1, model.Sum);
-            Assert.AreEqual(5, model.Count);
-            Assert.IsNull(model.Duration);
-            Assert.IsNull(model.Segmentation);
         }
         /// <summary>
         /// It validates 'recordEvent' against specific event keys.
@@ -977,19 +907,15 @@ namespace Tests
             Assert.AreEqual(1, Countly.Instance.Events._eventRepo.Count);
 
             model = Countly.Instance.Events._eventRepo.Dequeue();
+            AssertAnEvent(model, "event", 1, 5, null, null);
 
-            Assert.AreEqual("event", model.Key);
-            Assert.AreEqual(1, model.Sum);
-            Assert.AreEqual(5, model.Count);
-            Assert.IsNull(model.Duration);
-            Assert.IsNull(model.Segmentation);
         }
 
         [TearDown]
         public void End()
         {
             Countly.Instance.ClearStorage();
-            Object.DestroyImmediate(Countly.Instance);
+            UnityEngine.Object.DestroyImmediate(Countly.Instance);
         }
     }
 }
