@@ -11,7 +11,13 @@ using UnityEngine.SceneManagement;
 
 public class UserDetail : MonoBehaviour
 {
-
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            SceneManager.LoadScene(sceneBuildIndex: 0);
+        }
+    }
 
     public async void SetUserDetail()
     {

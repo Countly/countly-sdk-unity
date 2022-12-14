@@ -2,11 +2,19 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class CrashReporting : MonoBehaviour
 {
 
 
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            SceneManager.LoadScene(sceneBuildIndex: 0);
+        }
+    }
 
     public async void CustomCrashLogs()
     {

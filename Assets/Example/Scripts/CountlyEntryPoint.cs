@@ -17,6 +17,10 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
 
     private void Awake()
     {
+        if (Countly.Instance.IsSDKInitialized) {
+            return;
+        }
+
         CountlyConfiguration configuration = new CountlyConfiguration {
             ServerUrl = "https://try.count.ly/",
             AppKey = "YOUR_APP_KEY",

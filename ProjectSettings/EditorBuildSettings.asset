@@ -20,4 +20,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Example/Scenes/ViewsTracking.unity
     guid: 6f3383fe4c2d24385831f86bb36a6b8a
+  - enabled: 1
+    path: Assets/Example/Scenes/DeviceId.unity
+    guid: 4ddfa2cd5691c4508bff6e278c22b974
   m_configObjects: {}

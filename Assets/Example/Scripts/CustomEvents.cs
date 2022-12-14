@@ -7,9 +7,18 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class CustomEvents : MonoBehaviour
 {
+
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            SceneManager.LoadScene(sceneBuildIndex: 0);
+        }
+    }
 
     public async void BasicEvent()
     {

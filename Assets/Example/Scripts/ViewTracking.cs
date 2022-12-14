@@ -11,9 +11,13 @@ using UnityEngine.SceneManagement;
 
 public class ViewTracking : MonoBehaviour
 {
-
-
-
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            SceneManager.LoadScene(sceneBuildIndex: 0);
+        }
+    }
 
     public async void RecordViewA()
     {
