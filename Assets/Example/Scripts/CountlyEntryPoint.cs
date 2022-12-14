@@ -65,7 +65,7 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
             {
                 barrier.SignalAndWait();
                 Debug.Log("Thread[00] executing at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
-                //EventWithSum();
+                _ = Countly.Instance.Events.RecordEventAsync("Event With Segmentation", sum: 10);
                 Debug.Log("Thread[00] finished at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
             }
         });
@@ -75,7 +75,14 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
             {
                 barrier.SignalAndWait();
                 Debug.Log("Thread[01] executing at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
-                //EventWithSegmentation();
+
+                Dictionary<string, object> segment = new Dictionary<string, object> {
+                { "Time Spent", "60"},
+                { "Retry Attempts", "10"}
+                };
+
+                _= Countly.Instance.Events.RecordEventAsync("Event With Segmentation", segmentation: segment);
+
                 Debug.Log("Thread[01] finished at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
             }
         });
@@ -84,7 +91,14 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
             {
                 barrier.SignalAndWait();
                 Debug.Log("Thread[02] executing at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
-               //EventWithSumAndSegmentation();
+
+                Dictionary<string, object> segment = new Dictionary<string, object> {
+                { "Time Spent", "60"},
+                { "Retry Attempts", "10"}
+                };
+
+                _ = Countly.Instance.Events.RecordEventAsync("Event With Segmentation", segmentation: segment, sum: 5);
+
                 Debug.Log("Thread[02] finished at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
             }
         });
@@ -93,7 +107,7 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
             {
                 barrier.SignalAndWait();
                 Debug.Log("Thread[03] executing at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
-                //ReportViewMainScene();
+                _= Countly.Instance.Views.RecordOpenViewAsync("View A");
                 Debug.Log("Thread[03] finished at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
             }
         });
@@ -102,7 +116,14 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
             {
                 barrier.SignalAndWait();
                 Debug.Log("Thread[04] executing at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
-                //SendCrashReport();
+
+                Dictionary<string, object> seg = new Dictionary<string, object>{
+                { "Time Spent", "1234455"},
+                { "Retry Attempts", "10"}
+                };
+                _= Countly.Instance.CrashReports.SendCrashReportAsync("Exception", "Stacktrace", LogType.Exception, seg);
+
+
                 Debug.Log("Thread[04] finished at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
             }
         });
@@ -119,7 +140,10 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
             {
                 barrier.SignalAndWait();
                 Debug.Log("Thread[06] executing at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
-                //Pull();
+
+                Countly.Instance.UserDetails.Pull("Mole", new string[] { "Left Cheek" });
+                _= Countly.Instance.UserDetails.SaveAsync();
+
                 Debug.Log("Thread[06] finished at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
             }
         });
@@ -128,7 +152,10 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
             {
                 barrier.SignalAndWait();
                 Debug.Log("Thread[07] executing at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
-                //Push();
+
+                Countly.Instance.UserDetails.PushUnique("Mole", new string[] { "Left Cheek", "Left Cheek" });
+                _= Countly.Instance.UserDetails.SaveAsync();
+
                 Debug.Log("Thread[07] finished at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
             }
         });
@@ -137,7 +164,10 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
             {
                 barrier.SignalAndWait();
                 Debug.Log("Thread[08] executing at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
-               // PushUnique();
+
+                Countly.Instance.UserDetails.PushUnique("Mole", new string[] { "Left Cheek", "Left Cheek" });
+                _= Countly.Instance.UserDetails.SaveAsync();
+
                 Debug.Log("Thread[08] finished at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
             }
         });
@@ -146,7 +176,10 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
             {
                 barrier.SignalAndWait();
                 Debug.Log("Thread[09] executing at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
-                //Min();
+
+                Countly.Instance.UserDetails.Min("Weight", 10);
+                _= Countly.Instance.UserDetails.SaveAsync();
+
                 Debug.Log("Thread[09] finished at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
             }
         });
@@ -155,7 +188,13 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
             {
                 barrier.SignalAndWait();
                 Debug.Log("Thread[10] executing at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
-                //Multiply();
+
+                Countly.Instance.UserDetails.Max("Weight", 90);
+                Countly.Instance.UserDetails.SetOnce("Distance", "10KM");
+                Countly.Instance.UserDetails.Push("Mole", new string[] { "Left Cheek", "Back", "Toe" });
+
+                _= Countly.Instance.UserDetails.SaveAsync();
+
                 Debug.Log("Thread[10] finished at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
             }
         });
@@ -163,7 +202,20 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
             {
                 barrier.SignalAndWait();
                 Debug.Log("Thread[11] executing at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
-                //SetUserDetail();
+
+                CountlyUserDetailsModel userDetails = new CountlyUserDetailsModel(
+                                  "Full Name", "username", "useremail@email.com", "Organization",
+                                  "222-222-222",
+                  "http://webresizer.com/images2/bird1_after.jpg",
+                    "M", "1986",
+                                  new Dictionary<string, object>
+                                  {
+                                    { "Hair", "Black" },
+                                    { "Race", "Asian" },
+                                  });
+
+                _= Countly.Instance.UserDetails.SetUserDetailsAsync(userDetails);
+
                 Debug.Log("Thread[11] finished at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
             }
         });
@@ -171,7 +223,17 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
             {
                 barrier.SignalAndWait();
                 Debug.Log("Thread[12] executing at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
-              //  SetCustomeUserDetail();
+
+                CountlyUserDetailsModel userDetails = new CountlyUserDetailsModel(
+                                new Dictionary<string, object>
+                                {
+                                    { "Nationality", "Turkish" },
+                                    { "Height", "5.8" },
+                                    { "Mole", "Lower Left Cheek" }
+                 });
+
+                _ = Countly.Instance.UserDetails.SetCustomUserDetailsAsync(userDetails);
+
                 Debug.Log("Thread[12] finished at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
             }
         });
