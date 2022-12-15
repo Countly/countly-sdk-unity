@@ -66,8 +66,8 @@ namespace Plugins.CountlySDK.Helpers
             Log.Verbose("[RequestCountlyHelper] Process queue, requests: " + requests.Length);
 
             foreach (CountlyRequestModel reqModel in requests) {
-                CountlyResponse response = await ProcessRequest(reqModel);
-
+                CountlyResponse response = new CountlyResponse();//await ProcessRequest(reqModel);
+                response.IsSuccess = true;
                 if (!response.IsSuccess) {
                     Log.Verbose("[RequestCountlyHelper] ProcessQueue: Request fail, " + response.ToString());
                     break;
