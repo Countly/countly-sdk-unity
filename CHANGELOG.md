@@ -1,3 +1,7 @@
+## 22.06.0
+* Sample App improved.
+* Add device ID type information to all requests.
+
 ## 22.02.0
 * Added device ID type.
 * Added calls to record Timed Events
