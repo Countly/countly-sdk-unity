@@ -88,7 +88,7 @@ namespace Plugins.CountlySDK.Models
         /// <summary>
         /// Max amount of custom (dev provided) segmentation in one event
         /// </summary>
-        public int MaxSegmentationValues = 30;
+        public int MaxSegmentationValues = 100;
 
         /// <summary>
         /// Limits how many stack trace lines would be recorded per thread
