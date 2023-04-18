@@ -1,5 +1,5 @@
 ## 22.06.1
-* Max segmentation value set to 100 (from 30)
+* Default max segmentation value count changed from 30 to 100
 
 ## 22.06.0
 * Adding device ID type information to all requests.
