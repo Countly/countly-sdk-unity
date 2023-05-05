@@ -25,7 +25,7 @@ namespace Plugins.CountlySDK
         //SDK limit defaults
         internal const int MaxKeyLengthDefault = 128;
         internal const int MaxValueSizeDefault = 256;
-        internal const int MaxSegmentationValuesDefault = 30;
+        internal const int MaxSegmentationValuesDefault = 100;
         internal const int MaxBreadcrumbCountDefault = 100;
         internal const int MaxStackTraceLinesPerThreadDefault = 30;
         internal const int MaxStackTraceLineLengthDefault = 200;
@@ -187,7 +187,7 @@ namespace Plugins.CountlySDK
             }
 
             _logHelper.Debug("[Init] SDK initialized with the URL:[" + configuration.ServerUrl + "] and the appKey:[" + configuration.AppKey + "]");
-            
+
 
             if (configuration.SessionDuration < 1) {
                 _logHelper.Error("[Init] provided session duration is less than 1. Replacing it with 1.");
@@ -385,7 +385,8 @@ namespace Plugins.CountlySDK
             StorageHelper?.CloseDB();
         }
 
-        internal void CloseDBConnection() {
+        internal void CloseDBConnection()
+        {
             StorageHelper?.CloseDB();
         }
 

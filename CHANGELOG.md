@@ -1,5 +1,6 @@
 ## 22.06.1
 * ! Minor breaking change ! The unhandled crash handler will no longer report messages with the LogType "errors". It will report only messages of the type "exceptions".
+* Default max segmentation value count changed from 30 to 100
 
 ## 22.06.0
 * Adding device ID type information to all requests.
