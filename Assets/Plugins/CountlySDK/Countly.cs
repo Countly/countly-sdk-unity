@@ -464,7 +464,7 @@ namespace Plugins.CountlySDK
 
         private void LogCallback(string condition, string stackTrace, LogType type)
         {
-            if (type == LogType.Error || type == LogType.Exception) {
+            if (type == LogType.Exception) {
                 CrashReports?.LogCallback(condition, stackTrace, type);
             }
         }
