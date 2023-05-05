@@ -115,7 +115,7 @@ namespace Tests
 
             Assert.AreEqual(256, Countly.Instance.Configuration.MaxValueSize);
             Assert.AreEqual(128, Countly.Instance.Configuration.MaxKeyLength);
-            Assert.AreEqual(30, Countly.Instance.Configuration.MaxSegmentationValues);
+            Assert.AreEqual(100, Countly.Instance.Configuration.MaxSegmentationValues);
             Assert.AreEqual(200, Countly.Instance.Configuration.MaxStackTraceLineLength);
             Assert.AreEqual(30, Countly.Instance.Configuration.MaxStackTraceLinesPerThread);
 
@@ -166,7 +166,7 @@ namespace Tests
 
             Assert.AreEqual(256, Countly.Instance.Configuration.MaxValueSize);
             Assert.AreEqual(128, Countly.Instance.Configuration.MaxKeyLength);
-            Assert.AreEqual(30, Countly.Instance.Configuration.MaxSegmentationValues);
+            Assert.AreEqual(100, Countly.Instance.Configuration.MaxSegmentationValues);
             Assert.AreEqual(200, Countly.Instance.Configuration.MaxStackTraceLineLength);
             Assert.AreEqual(30, Countly.Instance.Configuration.MaxStackTraceLinesPerThread);
 
