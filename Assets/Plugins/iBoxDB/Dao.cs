@@ -1,3 +1,10 @@
+using System;
+using System.Collections.Generic;
+using iBoxDB.LocalServer;
+using Plugins.CountlySDK.Models;
+using Plugins.CountlySDK.Persistance.Entities;
+using UnityEngine;
+
 namespace Plugins.iBoxDB
 {
     public class Dao<TEntity> where TEntity : class, IEntity, new()
