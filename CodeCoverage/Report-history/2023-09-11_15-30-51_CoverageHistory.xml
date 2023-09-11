@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<coverage version="1.0" date="2023-09-11_15-30-51" tag="">
+  <assembly name="PlayModeTests">
+    <class name="Assets.Tests.PlayModeTests.TestUtility" coveredlines="0" coverablelines="4" totallines="18" coveredbranches="0" totalbranches="0" />
+    <class name="Tests.ConfigurationTests" coveredlines="98" coverablelines="98" totallines="190" coveredbranches="0" totalbranches="0" />
+    <class name="Tests.ConsentTests" coveredlines="314" coverablelines="317" totallines="704" coveredbranches="0" totalbranches="0" />
+    <class name="Tests.CrashTests" coveredlines="113" coverablelines="113" totallines="260" coveredbranches="0" totalbranches="0" />
+    <class name="Tests.DeviceIdTests" coveredlines="185" coverablelines="187" totallines="400" coveredbranches="0" totalbranches="0" />
+    <class name="Tests.EventTests" coveredlines="461" coverablelines="461" totallines="921" coveredbranches="0" totalbranches="0" />
+    <class name="Tests.LocationTests" coveredlines="75" coverablelines="75" totallines="158" coveredbranches="0" totalbranches="0" />
+    <class name="Tests.MigrationTests" coveredlines="248" coverablelines="248" totallines="456" coveredbranches="0" totalbranches="0" />
+    <class name="Tests.SessionTests" coveredlines="166" coverablelines="166" totallines="353" coveredbranches="0" totalbranches="0" />
+    <class name="Tests.StarRatingTests" coveredlines="108" coverablelines="108" totallines="224" coveredbranches="0" totalbranches="0" />
+    <class name="Tests.UserCustomDetailsTests" coveredlines="290" coverablelines="290" totallines="601" coveredbranches="0" totalbranches="0" />
+    <class name="Tests.ViewsTests" coveredlines="174" coverablelines="174" totallines="364" coveredbranches="0" totalbranches="0" />
+  </assembly>
+  <assembly name="PluginAssembly">
+    <class name="CountlyLogHelper" coveredlines="27" coverablelines="29" totallines="50" coveredbranches="0" totalbranches="0" />
+    <class name="IOSBridge" coveredlines="0" coverablelines="34" totallines="86" coveredbranches="0" totalbranches="0" />
+    <class name="Notifications.Impls.Android.AndroidBridge" coveredlines="4" coverablelines="24" totallines="53" coveredbranches="0" totalbranches="0" />
+    <class name="Notifications.Impls.Android.AndroidNotificationsService" coveredlines="17" coverablelines="58" totallines="131" coveredbranches="0" totalbranches="0" />
+    <class name="Notifications.Impls.iOs.IOsNotificationsService" coveredlines="0" coverablelines="38" totallines="89" coveredbranches="0" totalbranches="0" />
+    <class name="Notifications.Impls.ProxyNotificationsService" coveredlines="12" coverablelines="39" totallines="85" coveredbranches="0" totalbranches="0" />
+    <class name="Notifications.NotificationsCallbackService" coveredlines="6" coverablelines="34" totallines="87" coveredbranches="0" totalbranches="0" />
+    <class name="Plugins.CountlySDK.Countly" coveredlines="186" coverablelines="270" totallines="498" coveredbranches="0" totalbranches="0" />
+    <class name="Plugins.CountlySDK.CountlyUtils" coveredlines="34" coverablelines="47" totallines="117" coveredbranches="0" totalbranches="0" />
+    <class name="Plugins.CountlySDK.Helpers.Constants" coveredlines="5" coverablelines="5" totallines="66" coveredbranches="0" totalbranches="0" />
+    <class name="Plugins.CountlySDK.Helpers.Converter" coveredlines="25" coverablelines="33" totallines="72" coveredbranches="0" totalbranches="0" />
+    <class name="Plugins.CountlySDK.Helpers.CountlyResponse" coveredlines="7" coverablelines="7" totallines="15" coveredbranches="0" totalbranches="0" />
+    <class name="Plugins.CountlySDK.Helpers.FirstLaunchAppHelper" coveredlines="15" coverablelines="16" totallines="34" coveredbranches="0" totalbranches="0" />
+    <class name="Plugins.CountlySDK.Helpers.RequestCountlyHelper" coveredlines="78" coverablelines="129" totallines="232" coveredbranches="0" totalbranches="0" />
+    <class name="Plugins.CountlySDK.Helpers.StorageAndMigrationHelper" coveredlines="123" coverablelines="126" totallines="235" coveredbranches="0" totalbranches="0" />
+    <class name="Plugins.CountlySDK.Models.CountlyConfigModel" coveredlines="0" coverablelines="18" totallines="67" coveredbranches="0" totalbranches="0" />
+    <class name="Plugins.CountlySDK.Models.CountlyConfiguration" coveredlines="79" coverablelines="85" totallines="252" coveredbranches="0" totalbranches="0" />
+    <class name="Plugins.CountlySDK.Models.CountlyEventModel" coveredlines="27" coverablelines="30" totallines="93" coveredbranches="0" totalbranches="0" />
+    <class name="Plugins.CountlySDK.Models.CountlyExceptionDetailModel" coveredlines="25" coverablelines="25" totallines="67" coveredbranches="0" totalbranches="0" />
+    <class name="Plugins.CountlySDK.Models.CountlyMetricModel" coveredlines="17" coverablelines="17" totallines="59" coveredbranches="0" totalbranches="0" />
+    <class name="Plugins.CountlySDK.Models.CountlyRequestModel" coveredlines="11" coverablelines="11" totallines="24" coveredbranches="0" totalbranches="0" />
+    <class name="Plugins.CountlySDK.Models.CountlyUserDetailsModel" coveredlines="27" coverablelines="30" totallines="75" coveredbranches="0" totalbranches="0" />
+    <class name="Plugins.CountlySDK.Models.SegmentModel" coveredlines="10" coverablelines="10" totallines="24" coveredbranches="0" totalbranches="0" />
+    <class name="Plugins.CountlySDK.Models.TimeMetricModel" coveredlines="25" coverablelines="27" totallines="69" coveredbranches="0" totalbranches="0" />
+    <class name="Plugins.CountlySDK.Persistance.Dao.SegmentDao" coveredlines="19" coverablelines="20" totallines="50" coveredbranches="0" totalbranches="0" />
+    <class name="Plugins.CountlySDK.Persistance.Entities.ConfigEntity" coveredlines="0" coverablelines="3" totallines="13" coveredbranches="0" totalbranches="0" />
+    <class name="Plugins.CountlySDK.Persistance.Entities.EventEntity" coveredlines="3" coverablelines="3" totallines="13" coveredbranches="0" totalbranches="0" />
+    <class name="Plugins.CountlySDK.Persistance.Entities.EventNumberInSameSessionEntity" coveredlines="0" coverablelines="3" totallines="14" coveredbranches="0" totalbranches="0" />
+    <class name="Plugins.CountlySDK.Persistance.Entities.RequestEntity" coveredlines="3" coverablelines="3" totallines="13" coveredbranches="0" totalbranches="0" />
+    <class name="Plugins.CountlySDK.Persistance.Entities.SegmentEntity" coveredlines="3" coverablelines="3" totallines="14" coveredbranches="0" totalbranches="0" />
+    <class name="Plugins.CountlySDK.Persistance.Repositories.AbstractEventRepository" coveredlines="40" coverablelines="49" totallines="86" coveredbranches="0" totalbranches="0" />
+    <class name="Plugins.CountlySDK.Persistance.Repositories.Impls.NonViewEventRepository" coveredlines="6" coverablelines="6" totallines="19" coveredbranches="0" totalbranches="0" />
+    <class name="Plugins.CountlySDK.Persistance.Repositories.Impls.ViewEventRepository" coveredlines="3" coverablelines="7" totallines="22" coveredbranches="0" totalbranches="0" />
+    <class name="Plugins.CountlySDK.Persistance.Repositories.Repository[TEntity,TModel]" coveredlines="41" coverablelines="43" totallines="89" coveredbranches="0" totalbranches="0" />
+    <class name="Plugins.CountlySDK.Persistance.Repositories.RequestRepository" coveredlines="12" coverablelines="12" totallines="29" coveredbranches="0" totalbranches="0" />
+    <class name="Plugins.CountlySDK.Services.AbstractBaseService" coveredlines="74" coverablelines="74" totallines="135" coveredbranches="0" totalbranches="0" />
+    <class name="Plugins.CountlySDK.Services.ConsentCountlyService" coveredlines="169" coverablelines="192" totallines="382" coveredbranches="0" totalbranches="0" />
+    <class name="Plugins.CountlySDK.Services.CrashReportsCountlyService" coveredlines="63" coverablelines="79" totallines="213" coveredbranches="0" totalbranches="0" />
+    <class name="Plugins.CountlySDK.Services.DeviceIdCountlyService" coveredlines="74" coverablelines="100" totallines="250" coveredbranches="0" totalbranches="0" />
+    <class name="Plugins.CountlySDK.Services.EventCountlyService" coveredlines="120" coverablelines="138" totallines="302" coveredbranches="0" totalbranches="0" />
+    <class name="Plugins.CountlySDK.Services.InitializationCountlyService" coveredlines="12" coverablelines="12" totallines="29" coveredbranches="0" totalbranches="0" />
+    <class name="Plugins.CountlySDK.Services.LocationService" coveredlines="93" coverablelines="99" totallines="194" coveredbranches="0" totalbranches="0" />
+    <class name="Plugins.CountlySDK.Services.OptionalParametersCountlyService" coveredlines="29" coverablelines="29" totallines="90" coveredbranches="0" totalbranches="0" />
+    <class name="Plugins.CountlySDK.Services.PushCountlyService" coveredlines="21" coverablelines="55" totallines="131" coveredbranches="0" totalbranches="0" />
+    <class name="Plugins.CountlySDK.Services.RemoteConfigCountlyService" coveredlines="28" coverablelines="58" totallines="135" coveredbranches="0" totalbranches="0" />
+    <class name="Plugins.CountlySDK.Services.SessionCountlyService" coveredlines="98" coverablelines="106" totallines="232" coveredbranches="0" totalbranches="0" />
+    <class name="Plugins.CountlySDK.Services.StarRatingCountlyService" coveredlines="30" coverablelines="30" totallines="91" coveredbranches="0" totalbranches="0" />
+    <class name="Plugins.CountlySDK.Services.UserDetailsCountlyService" coveredlines="171" coverablelines="178" totallines="409" coveredbranches="0" totalbranches="0" />
+    <class name="Plugins.CountlySDK.Services.ViewCountlyService" coveredlines="78" coverablelines="81" totallines="188" coveredbranches="0" totalbranches="0" />
+    <class name="Plugins.iBoxDB.Dao[TEntity]" coveredlines="73" coverablelines="98" totallines="142" coveredbranches="0" totalbranches="0" />
+    <class name="RequestBuilder" coveredlines="22" coverablelines="22" totallines="58" coveredbranches="0" totalbranches="0" />
+  </assembly>
+</coverage>

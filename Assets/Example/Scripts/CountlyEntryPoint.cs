@@ -249,7 +249,7 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
 
         Debug.Log("All threads completed at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
     }
-
+    /*
     public void CustomEvents()
     {
 
@@ -280,7 +280,7 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
         SceneManager.LoadScene(sceneBuildIndex: 5);
 
     }
-
+    */
     public void SetLocation()
     {
         string countryCode = "us";

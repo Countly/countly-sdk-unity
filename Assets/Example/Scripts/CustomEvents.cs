@@ -12,13 +12,13 @@ using UnityEngine.SceneManagement;
 public class CustomEvents : MonoBehaviour
 {
 
-    void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            SceneManager.LoadScene(sceneBuildIndex: 0);
-        }
-    }
+    // void Update()
+    // {
+    //     if (Input.GetKeyDown(KeyCode.Escape))
+    //     {
+    //         SceneManager.LoadScene(sceneBuildIndex: 0);
+    //     }
+    // }
 
     public async void BasicEvent()
     {
@@ -47,7 +47,7 @@ public class CustomEvents : MonoBehaviour
         await Countly.Instance.Events.RecordEventAsync("Event With Duration", duration: 10);
     }
 
-    public async void EventWithSegmentationCountSumDurationDuration()
+    public async void EventWithSegmentationCountSumDuration()
     {
         Dictionary<string, object> segments = new Dictionary<string, object>{
             { "Time Spent", "12"},
