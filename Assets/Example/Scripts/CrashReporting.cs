@@ -6,16 +6,6 @@ using UnityEngine.SceneManagement;
 
 public class CrashReporting : MonoBehaviour
 {
-
-
-    void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            SceneManager.LoadScene(sceneBuildIndex: 0);
-        }
-    }
-
     public async void CustomCrashLogs()
     {
         Dictionary<string, object> seg = new Dictionary<string, object>{
@@ -26,7 +16,6 @@ public class CrashReporting : MonoBehaviour
 
 
     }
-
     public void RecordUnhandledException()
     {
         throw new NullReferenceException("Test Nuhandled Exception");

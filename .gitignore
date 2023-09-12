@@ -29,11 +29,14 @@
 /unity/Assets/Plugins/Android/Countly.jar.meta
 /unity/Assets/Plugins/Android.meta
 
+/unity/UserSettings/EditorUserSettings.asset
+
 [Ll]ibrary/
 [Tt]emp/
 [Oo]bj/
 [Bb]uild/
 [Bb]uilds/
+[Cc]odeCoverage/
 Assets/AssetStoreTools*
 
 # Visual Studio cache directory

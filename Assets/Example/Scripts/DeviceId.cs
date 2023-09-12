@@ -11,15 +11,6 @@ using UnityEngine.SceneManagement;
 
 public class DeviceId : MonoBehaviour
 {
-
-    void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            SceneManager.LoadScene(sceneBuildIndex: 0);
-        }
-    }
-
     public async void ChangeDeviceIdWithMerge()
     {
         await Countly.Instance.Device.ChangeDeviceIdWithMerge("device-id");

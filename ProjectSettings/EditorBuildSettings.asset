@@ -6,21 +6,6 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Example/Scenes/EntryPoint.unity
-    guid: 1c20d5da09217487baf6b6447d965f1d
-  - enabled: 1
-    path: Assets/Example/Scenes/CustomEvents.unity
-    guid: e06c9e4c5d8ef4515b1ba809b52ee4c7
-  - enabled: 1
-    path: Assets/Example/Scenes/CrashReporting.unity
-    guid: 12295a51320414191a03b9e14137c155
-  - enabled: 1
-    path: Assets/Example/Scenes/UserDetails.unity
-    guid: 704cf86a982494fe3aabc936f09f206a
-  - enabled: 1
-    path: Assets/Example/Scenes/ViewsTracking.unity
-    guid: 6f3383fe4c2d24385831f86bb36a6b8a
-  - enabled: 1
-    path: Assets/Example/Scenes/DeviceId.unity
-    guid: 4ddfa2cd5691c4508bff6e278c22b974
+    path: Assets/Example/Scenes/ExampleUsageScene.unity
+    guid: eb9a0832f522bc04494538f872502d25
   m_configObjects: {}
