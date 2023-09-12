@@ -11,14 +11,6 @@ using UnityEngine.SceneManagement;
 
 public class ViewTracking : MonoBehaviour
 {
-    // void Update()
-    // {
-    //     if (Input.GetKeyDown(KeyCode.Escape))
-    //     {
-    //         SceneManager.LoadScene(sceneBuildIndex: 0);
-    //     }
-    // }
-
     public async void RecordViewA()
     {
         await Countly.Instance.Views.RecordOpenViewAsync("View A");

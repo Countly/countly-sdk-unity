@@ -11,15 +11,6 @@ using UnityEngine.SceneManagement;
 
 public class CustomEvents : MonoBehaviour
 {
-
-    // void Update()
-    // {
-    //     if (Input.GetKeyDown(KeyCode.Escape))
-    //     {
-    //         SceneManager.LoadScene(sceneBuildIndex: 0);
-    //     }
-    // }
-
     public async void BasicEvent()
     {
         await Countly.Instance.Events.RecordEventAsync("Sample App’ event");

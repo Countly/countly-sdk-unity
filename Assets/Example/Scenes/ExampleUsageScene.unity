@@ -1664,6 +1664,16 @@ PrefabInstance:
       propertyPath: m_AnchorMax.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8402652500479244036, guid: 50d4d41c61e965d44885fd3890c43f1a,
+        type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8402652500479244036, guid: 50d4d41c61e965d44885fd3890c43f1a,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: NaN
+      objectReference: {fileID: 0}
     - target: {fileID: 8402652500501552824, guid: 50d4d41c61e965d44885fd3890c43f1a,
         type: 3}
       propertyPath: m_AnchorMax.x
@@ -2773,8 +2783,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d60fd5ed058d6424eb8f42a5f548adb1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  countlyPrefab: {fileID: 114679878964049358, guid: fa112482eec144a75b81bc5f456724c6,
-    type: 3}
 --- !u!4 &1906960435
 Transform:
   m_ObjectHideFlags: 0

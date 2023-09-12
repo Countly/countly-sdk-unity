@@ -11,8 +11,6 @@ using UnityEngine.SceneManagement;
 
 public class CountlyEntryPoint : MonoBehaviour, INotificationListener
 {
-    public Countly countlyPrefab;
-
     private Countly countly;
 
     private void Awake()
@@ -45,13 +43,10 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
         Countly.Instance.Init(configuration);
         countly = Countly.Instance;
     }
-
     private void OnApplicationQuit()
     {
         Countly.Instance?.Notifications?.RemoveListener(this);
-
     }
-
     public void TestWithMultipleThreads()
     {
 
@@ -249,38 +244,6 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
 
         Debug.Log("All threads completed at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
     }
-    /*
-    public void CustomEvents()
-    {
-
-        SceneManager.LoadScene(sceneBuildIndex: 1);
-
-    }
-
-    public void CrashReporting()
-    {
-        SceneManager.LoadScene(sceneBuildIndex: 2);
-
-    }
-
-    public void UserDetails()
-    {
-        SceneManager.LoadScene(sceneBuildIndex: 3);
-
-    }
-
-    public void ViewTracking()
-    {
-        SceneManager.LoadScene(sceneBuildIndex: 4);
-
-    }
-
-    public void DeviceId()
-    {
-        SceneManager.LoadScene(sceneBuildIndex: 5);
-
-    }
-    */
     public void SetLocation()
     {
         string countryCode = "us";

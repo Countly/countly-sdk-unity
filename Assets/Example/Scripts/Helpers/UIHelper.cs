@@ -9,21 +9,19 @@ public class UIHelper : MonoBehaviour
 
     public void OpenRelatedMenu(GameObject menu)
     {
-        OpenCloseMenus(menu);
-        closeButton.SetActive(true);
+        OpenCloseMenus(menu, true);
     }
     public void ReturnToMainMenu(GameObject menu)
     {
-        OpenCloseMenus(menu);
-        closeButton.SetActive(false);
+        OpenCloseMenus(menu, false);
     }
-
-    private void OpenCloseMenus(GameObject menu)
+    private void OpenCloseMenus(GameObject menu, bool isCloseButtonEnabled)
     {
         for(int i = 0; i < testMenus.Count; i++)
         {
             testMenus[i].SetActive(false);
         }
         menu.SetActive(true);
+        closeButton.SetActive(isCloseButtonEnabled);
     }
 }
