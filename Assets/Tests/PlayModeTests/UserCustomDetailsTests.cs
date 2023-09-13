@@ -1,16 +1,11 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEngine;
-using UnityEngine.TestTools;
 using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK;
-using Plugins.CountlySDK.Enums;
-using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using System.Collections.Specialized;
 using System.Web;
-using System.Linq;
 
 namespace Tests
 {
@@ -391,43 +386,7 @@ namespace Tests
             AssertlUserDetailRequest(collection, null, userCustomDetail);
         }
 
-        /// <summary>
-        /// It validates the user's custom properties set with method 'UserCustomDetailsAsync'.
-        /// </summary>
-        [Test]
-        public async void TestUserDetailMethod_UserCustomDetailsAsync()
-        {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-                EnablePost = true,
-            };
-
-            Countly.Instance.Init(configuration);
-            Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
-
-            Assert.IsNotNull(Countly.Instance.UserDetails);
-            Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
-
-            CountlyUserDetailsModel userDetails = null;
-
-            await Countly.Instance.UserDetails.SetCustomUserDetailsAsync(userDetails);
-            Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
-
-            userDetails = new CountlyUserDetailsModel(
-                  new Dictionary<string, object>{
-                        { "Hair", "Black" },
-                        { "Height", "5.9" },
-                  });
-
-            Countly.Instance.UserDetails.SetCustomUserDetailsAsync(userDetails);
-            Assert.AreEqual(1, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
-
-            CountlyRequestModel requestModel = Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Dequeue();
-            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
-            AssertlUserDetailRequest(collection, null, userDetails.Custom);
-
-        }
+        
         /// <summary>
         /// It validates the user's custom properties set via 'SetOnce' and 'Set' methods.
         /// </summary>

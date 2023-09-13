@@ -269,27 +269,6 @@ namespace Plugins.CountlySDK.Services
             }
         }
 
-        /// <summary>
-        /// Reports a custom event to the Countly server.
-        /// </summary>
-        /// <param name="key">event key</param>
-        /// <param name="segmentation">custom segmentation you want to set, leave null if you don't want to add anything</param>
-        /// <param name="count">how many of these events have occurred, default value is "1"</param>
-        /// <param name="sum">set sum if needed, default value is "0"</param>
-        /// <param name="duration">set sum if needed, default value is "0"</param>
-        /// <returns></returns>
-        [Obsolete("ReportCustomEventAsync is deprecated, please use RecordEventAsync method instead.")]
-        public async Task ReportCustomEventAsync(string key,
-                    IDictionary<string, object> segmentation = null,
-                    int? count = 1, double? sum = null, double? duration = null)
-        {
-            lock (LockObj) {
-                Log.Info("[EventCountlyService] ReportCustomEventAsync : key = " + key + ", segmentation = " + (segmentation != null) + ", count = " + count + ", sum = " + sum + ", duration = " + duration);
-
-                _ = RecordEventInternal(key, segmentation, count, sum, duration);
-            }
-        }
-
         #region override Methods
         internal override void ConsentChanged(List<Consents> updatedConsents, bool newConsentValue, ConsentChangedAction action)
         {

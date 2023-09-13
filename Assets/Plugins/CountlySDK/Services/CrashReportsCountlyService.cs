@@ -55,36 +55,6 @@ namespace Plugins.CountlySDK.Services
         }
         #endregion
 
-
-        /// <summary>
-        /// Called when there is an exception 
-        /// </summary>
-        /// <param name="message">Exception Class</param>
-        /// <param name="stackTrace">Stack Trace</param>
-        /// <param name="type">The type of log message e.g error, warning, Exception etc</param>
-        [Obsolete("LogCallback is deprecated, this is going to be removed in the future.")]
-        public async void LogCallback(string message, string stackTrace, LogType type)
-        {
-            lock (LockObj) {
-                //In future make this function internal
-                if (!_consentService.CheckConsentInternal(Consents.Crashes)) {
-                    return;
-                }
-
-                if (string.IsNullOrEmpty(message) || string.IsNullOrWhiteSpace(message)) {
-                    Log.Warning("[CrashReportsCountlyService] LogCallback : The parameter 'message' can't be null or empty");
-                    return;
-                }
-
-                CountlyExceptionDetailModel model = ExceptionDetailModel(message, ManipulateStackTrace(stackTrace), false, null);
-
-                if (_configuration.EnableAutomaticCrashReporting
-                    && (type == LogType.Error || type == LogType.Exception)) {
-                    _ = SendCrashReportInternal(model);
-                }
-            }
-        }
-
         /// <summary>
         /// Public method that sends crash details to the server. Set param "nonfatal" to true for Custom Logged errors
         /// </summary>

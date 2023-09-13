@@ -18,7 +18,7 @@ public class CrashReporting : MonoBehaviour
     }
     public void RecordUnhandledException()
     {
-        throw new NullReferenceException("Test Nuhandled Exception");
+        throw new NullReferenceException("Test Unhandled Exception");
     }
 
     public async void RecordHandledException()

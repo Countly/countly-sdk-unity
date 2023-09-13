@@ -69,3 +69,4 @@ sysinfo.txt
 # Builds
 *.apk
 *.unitypackage
+UserSettings/EditorUserSettings.asset

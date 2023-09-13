@@ -58,12 +58,6 @@ namespace Plugins.CountlySDK.Models
 
         [JsonProperty("dow")] public int DayOfWeek { get; set; }
 
-        [JsonIgnore]
-        [Obsolete("Timezone is deprecated, it will get removed in the future.")]
-        private double Timezone { get; set; }
-
-        //        [JsonIgnore] public DateTime TimeRecorded { get; set; }
-
         #region Reserved Event Names
 
         [JsonIgnore] public const string NPSEvent = "[CLY]_nps";
@@ -87,7 +81,7 @@ namespace Plugins.CountlySDK.Models
 
         public override string ToString()
         {
-            return $"{nameof(Id)}: {Id}, {nameof(Key)}: {Key}, {nameof(Count)}: {Count}, {nameof(Sum)}: {Sum}, {nameof(Duration)}: {Duration}, {nameof(Segmentation)}: {Segmentation}, {nameof(Timestamp)}: {Timestamp}, {nameof(Hour)}: {Hour}, {nameof(DayOfWeek)}: {DayOfWeek}, {nameof(Timezone)}: {Timezone}";
+            return $"{nameof(Id)}: {Id}, {nameof(Key)}: {Key}, {nameof(Count)}: {Count}, {nameof(Sum)}: {Sum}, {nameof(Duration)}: {Duration}, {nameof(Segmentation)}: {Segmentation}, {nameof(Timestamp)}: {Timestamp}, {nameof(Hour)}: {Hour}, {nameof(DayOfWeek)}: {DayOfWeek},";
         }
     }
 }

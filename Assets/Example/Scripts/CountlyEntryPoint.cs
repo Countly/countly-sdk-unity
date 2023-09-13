@@ -49,8 +49,8 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
     }
     public void TestWithMultipleThreads()
     {
-
         int participants = 13;
+        //int participants = 12;
         Barrier barrier = new Barrier(participantCount: participants, postPhaseAction: (bar) => {
             Debug.Log("All threads reached the barrier at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
         });
@@ -219,16 +219,11 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
                 barrier.SignalAndWait();
                 Debug.Log("Thread[12] executing at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
 
-                CountlyUserDetailsModel userDetails = new CountlyUserDetailsModel(
-                                new Dictionary<string, object>
-                                {
-                                    { "Nationality", "Turkish" },
-                                    { "Height", "5.8" },
-                                    { "Mole", "Lower Left Cheek" }
-                 });
-
-                _ = Countly.Instance.UserDetails.SetCustomUserDetailsAsync(userDetails);
-
+                Dictionary<string, object> userCustomDetail = new Dictionary<string, object> {
+                            { "Hair", "Black" },
+                            { "Height", "5.9" },
+                };
+                Countly.Instance.UserDetails.SetCustomUserDetails(userCustomDetail);
                 Debug.Log("Thread[12] finished at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
             }
         });

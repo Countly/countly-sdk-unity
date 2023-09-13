@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using JetBrains.Annotations;
 using Notifications;
 using Plugins.CountlySDK.Enums;
@@ -34,12 +33,6 @@ namespace Plugins.CountlySDK.Models
         public string Salt = null;
 
         /// <summary>
-        /// Set to send first app launch segment with event on app's first launch.
-        /// </summary>
-        [Obsolete("EnableFirstAppLaunchSegment is deprecated, this is going to be removed in the future.")]
-        public bool EnableFirstAppLaunchSegment = false;
-
-        /// <summary>
         /// Set to send all requests made to the Countly server using HTTP POST.
         /// </summary>
         public bool EnablePost = false;
@@ -53,11 +46,6 @@ namespace Plugins.CountlySDK.Models
         /// Set to true if you want to enable countly internal debugging logs.
         /// </summary>
         public bool EnableConsoleLogging = false;
-        /// <summary>
-        /// Set to true when you don't want to extend session.
-        /// </summary
-        [Obsolete("IgnoreSessionCooldown is deprecated, this is going to be removed in the future.")]
-        public bool IgnoreSessionCooldown = false;
 
         /// <summary>
         /// Set mode of push notification.
@@ -159,8 +147,6 @@ namespace Plugins.CountlySDK.Models
             Salt = config.Salt;
             EnablePost = config.EnablePost;
             EnableManualSessionHandling = config.EnableManualSessionHandling;
-            IgnoreSessionCooldown = config.IgnoreSessionCooldown;
-            EnableFirstAppLaunchSegment = config.EnableFirstAppLaunchSegment;
             EnableTestMode = config.EnableTestMode;
             EnableConsoleLogging = config.EnableConsoleLogging;
             NotificationMode = config.NotificationMode;

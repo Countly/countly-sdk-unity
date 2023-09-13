@@ -28,23 +28,22 @@ public class UserDetail : MonoBehaviour
 
     }
 
-    public async void SetCustomeUserDetail()
+    public async void SetCustomUserDetail()
     {
-        CountlyUserDetailsModel userDetails = new CountlyUserDetailsModel(
-                                new Dictionary<string, object>
-                                {
-            { "Nationality", "Turkish" },
-                                    { "Height", "5.8" },
-                                    { "Mole", "Lower Left Cheek" }
-                 });
+        Dictionary<string, object> userCustomDetail = null;
 
-        await Countly.Instance.UserDetails.SetCustomUserDetailsAsync(userDetails);
+            Countly.Instance.UserDetails.SetCustomUserDetails(userCustomDetail);
+            userCustomDetail = new Dictionary<string, object> {
+                        { "Hair", "Black" },
+                        { "Height", "5.9" },
+            };
+        Countly.Instance.UserDetails.SetCustomUserDetails(userCustomDetail);
     }
 
     public async void SetPropertyOnce()
     {
         Countly.Instance.UserDetails.SetOnce("Distance", "10KM");
-        await Countly.Instance.UserDetails.SaveAsync();
+        await Countly.Instance.UserDetails.SaveAsync(); 
 
     }
 
