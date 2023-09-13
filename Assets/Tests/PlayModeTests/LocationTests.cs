@@ -10,7 +10,8 @@ namespace Tests
         private readonly string _serverUrl = "https://xyz.com/";
         private readonly string _appKey = "772c091355076ead703f987fee94490";
 
-        private void AssertLocation(string gpsCoord, string city, string ipAddress, string countryCode, bool IsLocationDisabled) {
+        private void AssertLocation(string gpsCoord, string city, string ipAddress, string countryCode, bool IsLocationDisabled)
+        {
             Assert.AreNotEqual(Countly.Instance.Location, null);
 
             Assert.AreEqual(city, Countly.Instance.Location.City);
@@ -41,14 +42,14 @@ namespace Tests
             configuration.SetLocation(countryCode, city, latitude + "," + longitude, ipAddress);
             Countly.Instance.Init(configuration);
 
-            
+
 
             CountlyConfiguration cc = Countly.Instance.Configuration;
             AssertLocation(cc.Location, cc.City, cc.IPAddress, cc.CountryCode, cc.IsLocationDisabled);
 
             Countly.Instance.Location.DisableLocation();
             AssertLocation(null, null, null, null, true);
-           
+
         }
 
         /// <summary>

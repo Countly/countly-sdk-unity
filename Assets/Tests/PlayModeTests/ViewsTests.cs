@@ -206,14 +206,14 @@ namespace Tests
                 AppKey = _appKey,
             };
 
-            Countly.Instance.Init(configuration);        
+            Countly.Instance.Init(configuration);
 
             Assert.IsNotNull(Countly.Instance.Views);
             Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
 
             Dictionary<string, object> segmentations = new Dictionary<string, object>();
             segmentations.Add("name", "new_open_view"); // override name
-            segmentations.Add("key1", "value1"); 
+            segmentations.Add("key1", "value1");
             segmentations.Add("key2", null); // invalid value
             segmentations.Add("", "value2"); // invalid key
             segmentations.Add("visit", null); // override existing key with invalid value

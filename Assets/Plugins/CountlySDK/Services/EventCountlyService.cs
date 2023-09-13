@@ -29,7 +29,8 @@ namespace Plugins.CountlySDK.Services
         /// <summary>
         /// Add all recorded events to request queue
         /// </summary>
-        internal void CancelAllTimedEvents() {
+        internal void CancelAllTimedEvents()
+        {
             _timedEvents.Clear();
         }
 
@@ -170,7 +171,7 @@ namespace Plugins.CountlySDK.Services
                 if (string.IsNullOrEmpty(key) || string.IsNullOrWhiteSpace(key)) {
                     Log.Warning("[EventCountlyService] StartEvent : The event key '" + key + "' isn't valid.");
                     return;
-                }                
+                }
 
                 if (_timedEvents.ContainsKey(key)) {
                     Log.Warning("[EventCountlyService] StartEvent : Event with key '" + key + "' has already started.");
@@ -200,7 +201,7 @@ namespace Plugins.CountlySDK.Services
                 if (string.IsNullOrEmpty(key) || string.IsNullOrWhiteSpace(key)) {
                     Log.Warning("[EventCountlyService] CancelEvent : The event key '" + key + "' isn't valid.");
                     return;
-                }                
+                }
 
                 if (!_timedEvents.ContainsKey(key)) {
                     Log.Warning("[EventCountlyService] CancelEvent : Time event with key '" + key + "' doesn't exist.");
@@ -232,7 +233,7 @@ namespace Plugins.CountlySDK.Services
                 if (string.IsNullOrEmpty(key) || string.IsNullOrWhiteSpace(key)) {
                     Log.Warning("[EventCountlyService] EndEvent : The event key '" + key + "' isn't valid.");
                     return;
-                }                
+                }
 
                 if (!_timedEvents.ContainsKey(key)) {
                     Log.Warning("[EventCountlyService] EndEvent : Time event with key '" + key + "' doesn't exist.");

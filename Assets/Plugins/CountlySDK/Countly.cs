@@ -451,7 +451,7 @@ namespace Plugins.CountlySDK
 
         private void LogCallback(string condition, string stackTrace, LogType type)
         {
-            
+
         }
 
         private void SubscribeAppLog()

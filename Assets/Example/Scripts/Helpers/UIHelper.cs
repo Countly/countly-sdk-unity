@@ -17,8 +17,7 @@ public class UIHelper : MonoBehaviour
     }
     private void OpenCloseMenus(GameObject menu, bool isCloseButtonEnabled)
     {
-        for(int i = 0; i < testMenus.Count; i++)
-        {
+        for (int i = 0; i < testMenus.Count; i++) {
             testMenus[i].SetActive(false);
         }
         menu.SetActive(true);

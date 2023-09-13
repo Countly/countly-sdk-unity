@@ -14,7 +14,8 @@ namespace Tests
         private readonly string _serverUrl = "https://xyz.com/";
         private readonly string _appKey = "772c091355076ead703f987fee94490";
 
-        void AssertlUserDetailRequest(NameValueCollection collection, CountlyUserDetailsModel userInfo, IDictionary<string, object> customInfo) {
+        void AssertlUserDetailRequest(NameValueCollection collection, CountlyUserDetailsModel userInfo, IDictionary<string, object> customInfo)
+        {
             JObject userDetailJson = JObject.Parse(collection["user_details"]);
 
             if (userInfo != null) {
@@ -29,8 +30,7 @@ namespace Tests
             }
 
             if (customInfo != null) {
-                foreach (KeyValuePair<string, object> entry in customInfo)
-                {
+                foreach (KeyValuePair<string, object> entry in customInfo) {
                     Assert.AreEqual(entry.Value, userDetailJson["custom"][entry.Key].ToString());
                 }
             }
@@ -386,7 +386,7 @@ namespace Tests
             AssertlUserDetailRequest(collection, null, userCustomDetail);
         }
 
-        
+
         /// <summary>
         /// It validates the user's custom properties set via 'SetOnce' and 'Set' methods.
         /// </summary>

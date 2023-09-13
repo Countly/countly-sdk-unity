@@ -32,8 +32,8 @@ public class UserDetail : MonoBehaviour
     {
         Dictionary<string, object> userCustomDetail = null;
 
-            Countly.Instance.UserDetails.SetCustomUserDetails(userCustomDetail);
-            userCustomDetail = new Dictionary<string, object> {
+        Countly.Instance.UserDetails.SetCustomUserDetails(userCustomDetail);
+        userCustomDetail = new Dictionary<string, object> {
                         { "Hair", "Black" },
                         { "Height", "5.9" },
             };
@@ -43,7 +43,7 @@ public class UserDetail : MonoBehaviour
     public async void SetPropertyOnce()
     {
         Countly.Instance.UserDetails.SetOnce("Distance", "10KM");
-        await Countly.Instance.UserDetails.SaveAsync(); 
+        await Countly.Instance.UserDetails.SaveAsync();
 
     }
 

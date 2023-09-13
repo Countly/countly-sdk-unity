@@ -73,7 +73,7 @@ namespace Plugins.CountlySDK.Services
                 _isFirstView = false;
             }
         }
-        
+
         /// <summary>
         /// Stop tracking a view
         /// </summary>

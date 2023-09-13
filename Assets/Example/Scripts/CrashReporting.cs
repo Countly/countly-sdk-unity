@@ -23,13 +23,10 @@ public class CrashReporting : MonoBehaviour
 
     public async void RecordHandledException()
     {
-        try
-        {
+        try {
 
             throw new DivideByZeroException();
-        }
-        catch (Exception ex)
-        {
+        } catch (Exception ex) {
             Dictionary<string, object> seg = new Dictionary<string, object>{
                 { "Time Spent", "1234455"},
                 { "Retry Attempts", "10"}

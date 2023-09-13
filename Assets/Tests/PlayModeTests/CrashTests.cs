@@ -16,7 +16,8 @@ namespace Tests
         private readonly string _serverUrl = "https://xyz.com/";
         private readonly string _appKey = "772c091355076ead703f987fee94490";
 
-        private void AssertCrashRequest(NameValueCollection collection, string msg, string stackTrace, bool isNonFatal, IDictionary<string, object> segmentation) {
+        private void AssertCrashRequest(NameValueCollection collection, string msg, string stackTrace, bool isNonFatal, IDictionary<string, object> segmentation)
+        {
 
             JObject crashObj = JObject.Parse(collection["crash"]);
             Assert.AreEqual(msg, crashObj.GetValue("_name").ToString());
@@ -31,7 +32,7 @@ namespace Tests
                     Assert.AreEqual(entry.Value, custom.GetValue(entry.Key).ToString());
                 }
             }
-            
+
         }
 
 

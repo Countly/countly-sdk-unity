@@ -24,7 +24,8 @@ namespace Tests
         private readonly string _serverUrl = "https://xyz.com/";
         private readonly string _appKey = "772c091355076ead703f987fee94490";
 
-        private void AssertMigrtedGetRequest(CountlyRequestModel requestModel, string appKey, string deviceId, string sdkName, string sdkVersion, string requestKey = "consent") {
+        private void AssertMigrtedGetRequest(CountlyRequestModel requestModel, string appKey, string deviceId, string sdkName, string sdkVersion, string requestKey = "consent")
+        {
             NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
 
             Assert.AreEqual(appKey, collection.Get("app_key"));
