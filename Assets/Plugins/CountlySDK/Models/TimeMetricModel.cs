@@ -59,6 +59,7 @@ namespace Plugins.CountlySDK.Models
                 new TimeMetricModel {
                     Hour = currentDateTime.TimeOfDay.Hours,
                     DayOfWeek = (int)currentDateTime.DayOfWeek,
+                    Timezone = TimeZone.CurrentTimeZone.GetUtcOffset(currentDateTime).TotalMinutes.ToString(CultureInfo.InvariantCulture)
                 };
 
             model.Timestamp = model.GetUniqueMilliSecTimeStamp(currentDateTime);

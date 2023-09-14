@@ -21,7 +21,7 @@ public class UserDetail : MonoBehaviour
                                   new Dictionary<string, object>
                                   {
                                     { "Hair", "Black" },
-                                    { "Race", "Asian" },
+                                    { "Age", "30" },
                                   });
 
         await Countly.Instance.UserDetails.SetUserDetailsAsync(userDetails);
@@ -34,7 +34,7 @@ public class UserDetail : MonoBehaviour
 
         Countly.Instance.UserDetails.SetCustomUserDetails(userCustomDetail);
         userCustomDetail = new Dictionary<string, object> {
-                        { "Hair", "Black" },
+                        { "Language", "English" },
                         { "Height", "5.9" },
             };
         Countly.Instance.UserDetails.SetCustomUserDetails(userCustomDetail);
@@ -56,28 +56,28 @@ public class UserDetail : MonoBehaviour
 
     public async void IncrementBy()
     {
-        Countly.Instance.UserDetails.IncrementBy("Weight", 2);
+        Countly.Instance.UserDetails.IncrementBy("ShoeSize", 2);
         await Countly.Instance.UserDetails.SaveAsync();
 
     }
 
     public async void Multiply()
     {
-        Countly.Instance.UserDetails.Multiply("Weight", 2);
+        Countly.Instance.UserDetails.Multiply("PetNumber", 2);
         await Countly.Instance.UserDetails.SaveAsync();
 
     }
 
     public async void Max()
     {
-        Countly.Instance.UserDetails.Max("Weight", 90);
+        Countly.Instance.UserDetails.Max("TravelDistance", 90);
         await Countly.Instance.UserDetails.SaveAsync();
 
     }
 
     public async void Min()
     {
-        Countly.Instance.UserDetails.Min("Weight", 10);
+        Countly.Instance.UserDetails.Min("YearsExperience", 10);
         await Countly.Instance.UserDetails.SaveAsync();
 
     }
@@ -91,7 +91,7 @@ public class UserDetail : MonoBehaviour
 
     public async void PushUnique()
     {
-        Countly.Instance.UserDetails.PushUnique("Mole", new string[] { "Left Cheek", "Left Cheek" });
+        Countly.Instance.UserDetails.PushUnique("Mole", new string[] { "Left Cheek", "Right Cheek" });
         await Countly.Instance.UserDetails.SaveAsync();
 
     }
@@ -99,7 +99,7 @@ public class UserDetail : MonoBehaviour
     public async void Pull()
     {
         //Remove one or many values
-        Countly.Instance.UserDetails.Pull("Mole", new string[] { "Left Cheek" });
+        Countly.Instance.UserDetails.Pull("Cat", new string[] { "Claw" });
         await Countly.Instance.UserDetails.SaveAsync();
 
     }
@@ -107,9 +107,9 @@ public class UserDetail : MonoBehaviour
     public async void RecordMultiple()
     {
         //Remove one or many values
-        Countly.Instance.UserDetails.Max("Weight", 90);
-        Countly.Instance.UserDetails.SetOnce("Distance", "10KM");
-        Countly.Instance.UserDetails.Push("Mole", new string[] { "Left Cheek", "Back", "Toe" });
+        Countly.Instance.UserDetails.Max("Income", 9000);
+        Countly.Instance.UserDetails.SetOnce("FavoriteColor", "Blue");
+        Countly.Instance.UserDetails.Push("Inventory", new string[] { "Sword", "Shield", "Armor" });
         await Countly.Instance.UserDetails.SaveAsync();
 
     }

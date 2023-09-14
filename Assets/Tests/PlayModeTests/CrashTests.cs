@@ -59,7 +59,7 @@ namespace Tests
                 { "Retry Attempts", "10"}
             };
 
-            await Countly.Instance.CrashReports.SendCrashReportAsync("message", "StackTrace", LogType.Exception, seg);
+            await Countly.Instance.CrashReports.SendCrashReportAsync("message", "StackTrace", seg);
             Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
 
 
@@ -109,13 +109,13 @@ namespace Tests
             Assert.IsNotNull(Countly.Instance.CrashReports);
             Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
 
-            await Countly.Instance.CrashReports.SendCrashReportAsync("", "StackTrace", LogType.Exception, null);
+            await Countly.Instance.CrashReports.SendCrashReportAsync("", "StackTrace", null);
             Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
 
-            await Countly.Instance.CrashReports.SendCrashReportAsync(null, "StackTrace", LogType.Exception, null);
+            await Countly.Instance.CrashReports.SendCrashReportAsync(null, "StackTrace", null);
             Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
 
-            await Countly.Instance.CrashReports.SendCrashReportAsync(" ", "StackTrace", LogType.Exception, null);
+            await Countly.Instance.CrashReports.SendCrashReportAsync(" ", "StackTrace", null);
             Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
 
 
@@ -125,7 +125,7 @@ namespace Tests
                 { "Temp", "100"}
             };
 
-            await Countly.Instance.CrashReports.SendCrashReportAsync("message", "StackTrace_1\nStackTrace_2\nStackTrace_3", LogType.Exception, seg);
+            await Countly.Instance.CrashReports.SendCrashReportAsync("message", "StackTrace_1\nStackTrace_2\nStackTrace_3", seg);
             Assert.AreEqual(1, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
 
             CountlyRequestModel requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
@@ -157,13 +157,13 @@ namespace Tests
             Assert.IsNotNull(Countly.Instance.CrashReports);
             Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
 
-            await Countly.Instance.CrashReports.SendCrashReportAsync("", "StackTrace", LogType.Exception, null);
+            await Countly.Instance.CrashReports.SendCrashReportAsync("", "StackTrace", null);
             Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
 
-            await Countly.Instance.CrashReports.SendCrashReportAsync(null, "StackTrace", LogType.Exception, null);
+            await Countly.Instance.CrashReports.SendCrashReportAsync(null, "StackTrace", null);
             Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
 
-            await Countly.Instance.CrashReports.SendCrashReportAsync(" ", "StackTrace", LogType.Exception, null);
+            await Countly.Instance.CrashReports.SendCrashReportAsync(" ", "StackTrace", null);
             Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
 
 
@@ -172,7 +172,7 @@ namespace Tests
                 { "Retry Attempts", "10"}
             };
 
-            await Countly.Instance.CrashReports.SendCrashReportAsync("message", "StackTrace", LogType.Exception, seg);
+            await Countly.Instance.CrashReports.SendCrashReportAsync("message", "StackTrace", seg);
             Assert.AreEqual(1, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
 
             CountlyRequestModel requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();

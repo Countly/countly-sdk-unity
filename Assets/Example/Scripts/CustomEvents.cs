@@ -26,8 +26,8 @@ public class CustomEvents : MonoBehaviour
 
         Dictionary<string, object> segment = new Dictionary<string, object>
         {
-            { "Time Spent", "60"},
-            { "Retry Attempts", "10"}
+            { "Class", "Wizard"},
+            { "Level", "10"}
         };
 
         await Countly.Instance.Events.RecordEventAsync("Event With Segmentation", segmentation: segment);
@@ -41,8 +41,8 @@ public class CustomEvents : MonoBehaviour
     public async void EventWithSegmentationCountSumDuration()
     {
         Dictionary<string, object> segments = new Dictionary<string, object>{
-            { "Time Spent", "12"},
-            { "Retry Attempts", "10"}
+            { "Application", "Tiktok"},
+            { "Country", "Japan"}
         };
 
         await Countly.Instance.Events.RecordEventAsync("Event With Sum, Duration, Count And Segmentation", segmentation: segments, sum: 23, count: 2, duration: 10);
@@ -51,8 +51,8 @@ public class CustomEvents : MonoBehaviour
     public async void EventWithSumAndSegmentation()
     {
         Dictionary<string, object> segments = new Dictionary<string, object>{
-            { "Time Spent", "1234455"},
-            { "Retry Attempts", "10"}
+            { "Monthly Visit", "30"},
+            { "Name", "John Doe"}
         };
 
         await Countly.Instance.Events.RecordEventAsync("Event With Sum And Segmentation", segmentation: segments, sum: 23);
@@ -62,8 +62,8 @@ public class CustomEvents : MonoBehaviour
     public async void EventWithSegmentationSumAndCount()
     {
         Dictionary<string, object> segments = new Dictionary<string, object>{
-            { "Time Spent", "1234455"},
-            { "Retry Attempts", "10"}
+            { "Blood Type", "B-"},
+            { "GPA", "3.2"}
         };
 
         await Countly.Instance.Events.RecordEventAsync("Event With Sum And Segmentation", segmentation: segments, sum: 23, count: 5);
