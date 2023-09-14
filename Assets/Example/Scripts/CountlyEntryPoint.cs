@@ -241,7 +241,7 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
     public void SetLocation()
     {
         string countryCode = "uk";
-        string city = "London";
+        string city = "런던";
         string latitude = "51.5072";
         string longitude = "0.1276";
         string ipAddress = null;

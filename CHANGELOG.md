@@ -1,43 +1,18 @@
 ## xx.xx.x
-* Removed deprecated functionality in "Countly" class:
-	- "CrushReports" getter
-	- "OptionalParameters" getter
-* Removed deprecated functionality in "CountlyConfiguration" class
-	- "EnableFirstAppLaunchSegment" bool
-	- "IgnoreSessionCooldown" bool
-* "OptionalParametersCountlyService" class is removed.
-* Removed deprecated functionality in "LocationTests" class
-	- "AssertOptionalLocation" method 
-	- "TestLocationValuesSetDuringInitOnOptionalLocationService" method
-* Removed deprecated functionality in "CountlyConfigModel" class
-	- "EnableFirstAppLaunchSegment" bool
-	- "IgnoreSessionCooldown" bool
-* Removed deprecated functionality in "CountlyEventModel" class
-	- "Timezone" getter
-* Removed deprecated functionality in "CrashReportsCountlyService" class
-	- "LogCallback" method
-* Deprecated functionality in "CrashReportsCountlyService" class
-	- "public async Task SendCrashReportAsync(string message, string stackTrace, LogType type,
-            IDictionary<string, object> segments = null, bool nonfatal = true)" method is deprecated
-    - "public async Task SendCrashReportAsync(string message, string stackTrace,
-            IDictionary<string, object> segments = null, bool nonfatal = true)" method is created
-* Removed deprecated functionality in "DeviceIdCountlyService" class
-	- "ChangeDeviceIdAndEndCurrentSessionAsync" method
-	- "ChangeDeviceIdAndMergeSessionDataAsync" method
-* Removed deprecated functionality in "EventCountlyService" class
-	- "ReportCustomEventAsync" method
-* Removed deprecated functionality in "UserDetailsCountlyService" class
-	- "SetCustomUserDetailsAsync" method
-* Removed deprecated functionality in "UserCustomDetailsTests" class
-	- "TestUserDetailMethod_UserCustomDetailsAsync" method
-* Removed deprecated functionality in "ViewCountlyService" class
-	- "RecordOpenViewAsync(string name, bool hasSessionBegunWithView)" method
-	- "RecordCloseViewAsync(string name, bool hasSessionBegunWithView)" method
-* Changed deprecated functionalities in "ViewTests" class
-	- "RecordOpenViewAsync(string name, bool hasSessionBegunWithView)" is replaced with "RecordOpenViewAsync(string name)"
-	- "RecordCloseViewAsync(string name, bool hasSessionBegunWithView)" is replaced with "RecordCloseViewAsync(string name)"
-* Removed deprecated functionality in "UserDetails" class
-	- "SetCustomeUserDetail()" method
+* Deprecated "CrushReports" and "OptionalParameters" getters, in "Countly" class are removed.
+* Deprecated "EnableFirstAppLaunchSegment" and "IgnoreSessionCooldown" bools are removed within SDK.
+* Deprecated "OptionalParametersCountlyService" class is removed.
+* Deprecated "AssertOptionalLocation" and "TestLocationValuesSetDuringInitOnOptionalLocationService" methods, in "LocationTests" class are removed.
+* Deprecated "Timezone" getter, in "CountlyEventModel" class is removed.
+* Deprecated "LogCallback" method in "CrashReportsCountlyService" class is removed.
+* Deprecated "ChangeDeviceIdAndEndCurrentSessionAsync" and "ChangeDeviceIdAndMergeSessionDataAsync" methods, in "DeviceIdCountlyService" class are removed.
+* Deprecated "ReportCustomEventAsync" method, in "EventCountlyService" class is removed.
+* Deprecated "SetCustomUserDetailsAsync" method, in "UserDetailsCountlyService" class is removed.
+* Deprecated "TestUserDetailMethod_UserCustomDetailsAsync" method in "UserCustomDetailsTests" class is removed.
+* Deprecated "RecordOpenViewAsync" and "RecordCloseViewAsync"in "ViewCountlyService" class are removed
+* Deprecated "SetCustomeUserDetail" method in "UserDetails" class is removed.
+* "SendCrashReportAsync" method in "CrashReportsCountlyService" class is deprecated
+
 
 ## 22.06.1
 * ! Minor breaking change ! The unhandled crash handler will no longer report messages with the LogType "errors". It will report only messages of the type "exceptions".
