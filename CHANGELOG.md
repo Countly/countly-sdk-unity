@@ -11,8 +11,8 @@
 * Deprecated "TestUserDetailMethod_UserCustomDetailsAsync" method in "UserCustomDetailsTests" class is removed.
 * Deprecated "RecordOpenViewAsync" and "RecordCloseViewAsync"in "ViewCountlyService" class are removed
 * Deprecated "SetCustomeUserDetail" method in "UserDetails" class is removed.
-* "SendCrashReportAsync" method in "CrashReportsCountlyService" class is deprecated
 
+* "SendCrashReportAsync" method in "CrashReportsCountlyService" class is deprecated
 
 ## 22.06.1
 * ! Minor breaking change ! The unhandled crash handler will no longer report messages with the LogType "errors". It will report only messages of the type "exceptions".
