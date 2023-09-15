@@ -55,36 +55,6 @@ namespace Plugins.CountlySDK.Services
         }
         #endregion
 
-
-        /// <summary>
-        /// Called when there is an exception 
-        /// </summary>
-        /// <param name="message">Exception Class</param>
-        /// <param name="stackTrace">Stack Trace</param>
-        /// <param name="type">The type of log message e.g error, warning, Exception etc</param>
-        [Obsolete("LogCallback is deprecated, this is going to be removed in the future.")]
-        public async void LogCallback(string message, string stackTrace, LogType type)
-        {
-            lock (LockObj) {
-                //In future make this function internal
-                if (!_consentService.CheckConsentInternal(Consents.Crashes)) {
-                    return;
-                }
-
-                if (string.IsNullOrEmpty(message) || string.IsNullOrWhiteSpace(message)) {
-                    Log.Warning("[CrashReportsCountlyService] LogCallback : The parameter 'message' can't be null or empty");
-                    return;
-                }
-
-                CountlyExceptionDetailModel model = ExceptionDetailModel(message, ManipulateStackTrace(stackTrace), false, null);
-
-                if (_configuration.EnableAutomaticCrashReporting
-                    && (type == LogType.Error || type == LogType.Exception)) {
-                    _ = SendCrashReportInternal(model);
-                }
-            }
-        }
-
         /// <summary>
         /// Public method that sends crash details to the server. Set param "nonfatal" to true for Custom Logged errors
         /// </summary>
@@ -94,6 +64,7 @@ namespace Plugins.CountlySDK.Services
         /// <param name="segments">custom key/values to be reported</param>
         /// <param name="nonfatal">Fof automatically captured errors, you should set to <code>false</code>, whereas on logged errors it should be <code>true</code></param>
         /// <returns></returns>
+        [Obsolete("SendCrashReportAsync(string message, string stackTrace, LogType type, IDictionary<string, object> segments = null, bool nonfatal = true) is deprecated, this is going to be removed in the future.")]
         public async Task SendCrashReportAsync(string message, string stackTrace, LogType type,
             IDictionary<string, object> segments = null, bool nonfatal = true)
         {
@@ -115,9 +86,38 @@ namespace Plugins.CountlySDK.Services
                 CountlyExceptionDetailModel model = ExceptionDetailModel(message, ManipulateStackTrace(stackTrace), nonfatal, segmentation);
                 _ = SendCrashReportInternal(model);
             }
-
         }
+        /// <summary>
+        /// Public method that sends crash details to the server. Set param "nonfatal" to true for Custom Logged errors
+        /// </summary>
+        /// <param name="message">a string that contain detailed description of the exception.</param>
+        /// <param name="stackTrace">a string that describes the contents of the callstack.</param>
+        /// <param name="segments">custom key/values to be reported</param>
+        /// <param name="nonfatal">Fof automatically captured errors, you should set to <code>false</code>, whereas on logged errors it should be <code>true</code></param>
+        /// <returns></returns>
+        public async Task SendCrashReportAsync(string message, string stackTrace, IDictionary<string, object> segments = null, bool nonfatal = true)
+        {
+            if (_configuration.EnableAutomaticCrashReporting) {
+                lock (LockObj) {
+                    Log.Info("[CrashReportsCountlyService] SendCrashReportAsync : message = " + message + ", stackTrace = " + stackTrace);
 
+                    if (!_consentService.CheckConsentInternal(Consents.Crashes)) {
+                        return;
+                    }
+
+                    if (string.IsNullOrEmpty(message) || string.IsNullOrWhiteSpace(message)) {
+                        Log.Warning("[CrashReportsCountlyService] SendCrashReportAsync : The parameter 'message' can't be null or empty");
+                        return;
+                    }
+
+                    IDictionary<string, object> segmentation = RemoveSegmentInvalidDataTypes(segments);
+                    segmentation = FixSegmentKeysAndValues(segments);
+
+                    CountlyExceptionDetailModel model = ExceptionDetailModel(message, ManipulateStackTrace(stackTrace), nonfatal, segmentation);
+                    _ = SendCrashReportInternal(model);
+                }
+            }
+        }
         internal async Task SendCrashReportInternal(CountlyExceptionDetailModel model)
         {
             Log.Debug("[CrashReportsCountlyService] SendCrashReportInternal : model = " + model.ToString());

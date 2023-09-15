@@ -31,7 +31,7 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
         };
 
         string countryCode = "us";
-        string city = "Böston’ 墨尔本";
+        string city = "Boston’ 墨尔本";
         string latitude = "29.634933";
         string longitude = "-95.220255";
         string ipAddress = "10.2.33.12";
@@ -49,7 +49,6 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
     }
     public void TestWithMultipleThreads()
     {
-
         int participants = 13;
         Barrier barrier = new Barrier(participantCount: participants, postPhaseAction: (bar) => {
             Debug.Log("All threads reached the barrier at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
@@ -76,7 +75,7 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
                 { "Retry Attempts", "10"}
                 };
 
-                _= Countly.Instance.Events.RecordEventAsync("Event With Segmentation", segmentation: segment);
+                _ = Countly.Instance.Events.RecordEventAsync("Event With Segmentation", segmentation: segment);
 
                 Debug.Log("Thread[01] finished at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
             }
@@ -102,7 +101,7 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
             {
                 barrier.SignalAndWait();
                 Debug.Log("Thread[03] executing at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
-                _= Countly.Instance.Views.RecordOpenViewAsync("View A");
+                _ = Countly.Instance.Views.RecordOpenViewAsync("View A");
                 Debug.Log("Thread[03] finished at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
             }
         });
@@ -116,7 +115,7 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
                 { "Time Spent", "1234455"},
                 { "Retry Attempts", "10"}
                 };
-                _= Countly.Instance.CrashReports.SendCrashReportAsync("Exception", "Stacktrace", LogType.Exception, seg);
+                _ = Countly.Instance.CrashReports.SendCrashReportAsync("Exception", "Stacktrace", seg);
 
 
                 Debug.Log("Thread[04] finished at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
@@ -126,7 +125,7 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
             {
                 barrier.SignalAndWait();
                 Debug.Log("Thread[05] executing at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
-              //  RecordMultiple();
+                //  RecordMultiple();
                 Debug.Log("Thread[05] finished at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
             }
         });
@@ -136,8 +135,8 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
                 barrier.SignalAndWait();
                 Debug.Log("Thread[06] executing at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
 
-                Countly.Instance.UserDetails.Pull("Mole", new string[] { "Left Cheek" });
-                _= Countly.Instance.UserDetails.SaveAsync();
+                Countly.Instance.UserDetails.Pull("Food", new string[] { "Pizza" });
+                _ = Countly.Instance.UserDetails.SaveAsync();
 
                 Debug.Log("Thread[06] finished at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
             }
@@ -148,8 +147,8 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
                 barrier.SignalAndWait();
                 Debug.Log("Thread[07] executing at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
 
-                Countly.Instance.UserDetails.PushUnique("Mole", new string[] { "Left Cheek", "Left Cheek" });
-                _= Countly.Instance.UserDetails.SaveAsync();
+                Countly.Instance.UserDetails.PushUnique("Mole", new string[] { "Right foot", "Left foot" });
+                _ = Countly.Instance.UserDetails.SaveAsync();
 
                 Debug.Log("Thread[07] finished at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
             }
@@ -160,8 +159,8 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
                 barrier.SignalAndWait();
                 Debug.Log("Thread[08] executing at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
 
-                Countly.Instance.UserDetails.PushUnique("Mole", new string[] { "Left Cheek", "Left Cheek" });
-                _= Countly.Instance.UserDetails.SaveAsync();
+                Countly.Instance.UserDetails.PushUnique("Animals", new string[] { "Lion", "Tiger" });
+                _ = Countly.Instance.UserDetails.SaveAsync();
 
                 Debug.Log("Thread[08] finished at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
             }
@@ -173,7 +172,7 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
                 Debug.Log("Thread[09] executing at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
 
                 Countly.Instance.UserDetails.Min("Weight", 10);
-                _= Countly.Instance.UserDetails.SaveAsync();
+                _ = Countly.Instance.UserDetails.SaveAsync();
 
                 Debug.Log("Thread[09] finished at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
             }
@@ -186,9 +185,9 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
 
                 Countly.Instance.UserDetails.Max("Weight", 90);
                 Countly.Instance.UserDetails.SetOnce("Distance", "10KM");
-                Countly.Instance.UserDetails.Push("Mole", new string[] { "Left Cheek", "Back", "Toe" });
+                Countly.Instance.UserDetails.Push("FootballTeams", new string[] { "Arsenal", "Chelsea", "Barcelona" });
 
-                _= Countly.Instance.UserDetails.SaveAsync();
+                _ = Countly.Instance.UserDetails.SaveAsync();
 
                 Debug.Log("Thread[10] finished at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
             }
@@ -205,11 +204,11 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
                     "M", "1986",
                                   new Dictionary<string, object>
                                   {
-                                    { "Hair", "Black" },
-                                    { "Race", "Asian" },
+                                    { "Beverage", "Coke" },
+                                    { "FavoritePlayer", "Messi" },
                                   });
 
-                _= Countly.Instance.UserDetails.SetUserDetailsAsync(userDetails);
+                _ = Countly.Instance.UserDetails.SetUserDetailsAsync(userDetails);
 
                 Debug.Log("Thread[11] finished at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
             }
@@ -219,16 +218,11 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
                 barrier.SignalAndWait();
                 Debug.Log("Thread[12] executing at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
 
-                CountlyUserDetailsModel userDetails = new CountlyUserDetailsModel(
-                                new Dictionary<string, object>
-                                {
-                                    { "Nationality", "Turkish" },
-                                    { "Height", "5.8" },
-                                    { "Mole", "Lower Left Cheek" }
-                 });
-
-                _ = Countly.Instance.UserDetails.SetCustomUserDetailsAsync(userDetails);
-
+                Dictionary<string, object> userCustomDetail = new Dictionary<string, object> {
+                            { "DeviceOS", "Android" },
+                            { "Vehicle", "Car" },
+                };
+                Countly.Instance.UserDetails.SetCustomUserDetails(userCustomDetail);
                 Debug.Log("Thread[12] finished at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
             }
         });
@@ -246,10 +240,10 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
     }
     public void SetLocation()
     {
-        string countryCode = "us";
-        string city = "Böston’ 墨尔本";
-        string latitude = "29.634933";
-        string longitude = "-95.220255";
+        string countryCode = "uk";
+        string city = "런던";
+        string latitude = "51.5072";
+        string longitude = "0.1276";
         string ipAddress = null;
 
         countly.Location.SetLocation(countryCode, city, latitude + "," + longitude, ipAddress);

@@ -29,7 +29,8 @@ namespace Plugins.CountlySDK.Services
         /// <summary>
         /// Add all recorded events to request queue
         /// </summary>
-        internal void CancelAllTimedEvents() {
+        internal void CancelAllTimedEvents()
+        {
             _timedEvents.Clear();
         }
 
@@ -170,7 +171,7 @@ namespace Plugins.CountlySDK.Services
                 if (string.IsNullOrEmpty(key) || string.IsNullOrWhiteSpace(key)) {
                     Log.Warning("[EventCountlyService] StartEvent : The event key '" + key + "' isn't valid.");
                     return;
-                }                
+                }
 
                 if (_timedEvents.ContainsKey(key)) {
                     Log.Warning("[EventCountlyService] StartEvent : Event with key '" + key + "' has already started.");
@@ -200,7 +201,7 @@ namespace Plugins.CountlySDK.Services
                 if (string.IsNullOrEmpty(key) || string.IsNullOrWhiteSpace(key)) {
                     Log.Warning("[EventCountlyService] CancelEvent : The event key '" + key + "' isn't valid.");
                     return;
-                }                
+                }
 
                 if (!_timedEvents.ContainsKey(key)) {
                     Log.Warning("[EventCountlyService] CancelEvent : Time event with key '" + key + "' doesn't exist.");
@@ -232,7 +233,7 @@ namespace Plugins.CountlySDK.Services
                 if (string.IsNullOrEmpty(key) || string.IsNullOrWhiteSpace(key)) {
                     Log.Warning("[EventCountlyService] EndEvent : The event key '" + key + "' isn't valid.");
                     return;
-                }                
+                }
 
                 if (!_timedEvents.ContainsKey(key)) {
                     Log.Warning("[EventCountlyService] EndEvent : Time event with key '" + key + "' doesn't exist.");
@@ -264,27 +265,6 @@ namespace Plugins.CountlySDK.Services
         {
             lock (LockObj) {
                 Log.Info("[EventCountlyService] RecordEventAsync : key = " + key + ", segmentation = " + segmentation + ", count = " + count + ", sum = " + sum + ", duration = " + duration);
-
-                _ = RecordEventInternal(key, segmentation, count, sum, duration);
-            }
-        }
-
-        /// <summary>
-        /// Reports a custom event to the Countly server.
-        /// </summary>
-        /// <param name="key">event key</param>
-        /// <param name="segmentation">custom segmentation you want to set, leave null if you don't want to add anything</param>
-        /// <param name="count">how many of these events have occurred, default value is "1"</param>
-        /// <param name="sum">set sum if needed, default value is "0"</param>
-        /// <param name="duration">set sum if needed, default value is "0"</param>
-        /// <returns></returns>
-        [Obsolete("ReportCustomEventAsync is deprecated, please use RecordEventAsync method instead.")]
-        public async Task ReportCustomEventAsync(string key,
-                    IDictionary<string, object> segmentation = null,
-                    int? count = 1, double? sum = null, double? duration = null)
-        {
-            lock (LockObj) {
-                Log.Info("[EventCountlyService] ReportCustomEventAsync : key = " + key + ", segmentation = " + (segmentation != null) + ", count = " + count + ", sum = " + sum + ", duration = " + duration);
 
                 _ = RecordEventInternal(key, segmentation, count, sum, duration);
             }

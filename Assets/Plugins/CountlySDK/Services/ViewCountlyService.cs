@@ -25,20 +25,6 @@ namespace Plugins.CountlySDK.Services
         /// Start tracking a view
         /// </summary>
         /// <param name="name">name of the view</param>
-        /// <param name="hasSessionBegunWithView">set true if the session is beginning with this view</param>
-        /// <returns></returns>
-        [Obsolete("RecordOpenViewAsync(string name, bool hasSessionBegunWithView) is deprecated, please use RecordOpenViewAsync(string name) instead.")]
-        public async Task RecordOpenViewAsync(string name, bool hasSessionBegunWithView)
-        {
-            Log.Info("[ViewCountlyService] RecordOpenViewAsync : name = " + name + ", hasSessionBegunWithView = " + hasSessionBegunWithView);
-
-            await RecordOpenViewAsync(name);
-        }
-
-        /// <summary>
-        /// Start tracking a view
-        /// </summary>
-        /// <param name="name">name of the view</param>
         /// <returns></returns>
         public async Task RecordOpenViewAsync(string name, IDictionary<string, object> segmentation = null)
         {
@@ -86,21 +72,6 @@ namespace Plugins.CountlySDK.Services
 
                 _isFirstView = false;
             }
-        }
-
-        /// <summary>
-        /// Stop tracking a view
-        /// </summary>
-        /// <param name="name of the view"></param>
-        /// <param name="hasSessionBegunWithView">set true if the session is beginning with this view</param>
-        /// <returns></returns>
-        [Obsolete("RecordCloseViewAsync(string name, bool hasSessionBegunWithView) is deprecated, please use RecordCloseViewAsync(string name) instead.")]
-        public async Task RecordCloseViewAsync(string name, bool hasSessionBegunWithView)
-        {
-            Log.Info("[ViewCountlyService] RecordCloseViewAsync : name = " + name + ", hasSessionBegunWithView = " + hasSessionBegunWithView);
-
-            await RecordCloseViewAsync(name);
-
         }
 
         /// <summary>

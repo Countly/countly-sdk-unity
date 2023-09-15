@@ -33,17 +33,15 @@ namespace Tests
             if (sessionKey != null) {
                 Assert.AreEqual("1", collection.Get(sessionKey));
             }
-            
-            if (duration != null)
-            {
+
+            if (duration != null) {
                 Assert.GreaterOrEqual(duration, Convert.ToDouble(collection.Get("session_duration")));
 
             }
 
             if (hasMetrics) {
                 Assert.IsNotNull(collection.Get("metrics"));
-            }
-            else {
+            } else {
                 Assert.IsNull(collection.Get("metrics"));
             }
         }

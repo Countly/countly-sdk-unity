@@ -105,7 +105,7 @@ namespace Notifications.Impls.Android
                 foreach (JObject item in jArray) {
                     string mesageId = item.GetValue("messageId").ToString();
                     string identifier = item.GetValue("action_index").ToString();
-                    Dictionary<string, object>  segment = new Dictionary<string, object>()
+                    Dictionary<string, object> segment = new Dictionary<string, object>()
                     {
                         {"b", mesageId},
                         {"i", identifier},

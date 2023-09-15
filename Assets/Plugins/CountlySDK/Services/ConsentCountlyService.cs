@@ -78,7 +78,7 @@ namespace Plugins.CountlySDK.Services
         /// <param name="consent"></param>
         /// <returns></returns>
         internal bool CheckConsentRawValue(Consents consent)
-        {            
+        {
             return CountlyConsents.ContainsKey(consent) && CountlyConsents[consent];
         }
 

@@ -12,30 +12,27 @@ public class CrashReporting : MonoBehaviour
                 { "Time Spent", "1234455"},
                 { "Retry Attempts", "10"}
             };
-        await Countly.Instance.CrashReports.SendCrashReportAsync("Exception", "Stacktrace", LogType.Exception, seg);
+        await Countly.Instance.CrashReports.SendCrashReportAsync("Exception", "Stacktrace", seg);
 
 
     }
     public void RecordUnhandledException()
     {
-        throw new NullReferenceException("Test Nuhandled Exception");
+        throw new NullReferenceException("Test Unhandled Exception");
     }
 
     public async void RecordHandledException()
     {
-        try
-        {
+        try {
 
             throw new DivideByZeroException();
-        }
-        catch (Exception ex)
-        {
+        } catch (Exception ex) {
             Dictionary<string, object> seg = new Dictionary<string, object>{
-                { "Time Spent", "1234455"},
-                { "Retry Attempts", "10"}
+                { "Fail Message", "Please retry"},
+                { "Retry Left", "2"}
             };
 
-            await Countly.Instance.CrashReports.SendCrashReportAsync(ex.Message, ex.StackTrace, LogType.Exception, seg, nonfatal: true);
+            await Countly.Instance.CrashReports.SendCrashReportAsync(ex.Message, ex.StackTrace, seg, nonfatal: true);
         }
 
     }

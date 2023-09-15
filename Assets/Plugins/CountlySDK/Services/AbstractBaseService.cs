@@ -105,7 +105,7 @@ namespace Plugins.CountlySDK.Services
                 string k = item.Key;
                 object v = item.Value;
 
-                if (k == null || k.Length == 0 ||v == null) {
+                if (k == null || k.Length == 0 || v == null) {
                     continue;
                 }
 
@@ -127,9 +127,9 @@ namespace Plugins.CountlySDK.Services
 
     internal enum ConsentChangedAction
     {
-       Initialization,
-       ConsentUpdated,
-       DeviceIDChangedNotMerged,
+        Initialization,
+        ConsentUpdated,
+        DeviceIDChangedNotMerged,
     }
 
 }

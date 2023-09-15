@@ -2,13 +2,10 @@ using System;
 using System.Collections;
 using System.Runtime.CompilerServices;
 using System.Collections.Generic;
-using iBoxDB.LocalServer;
 using Notifications;
 using Notifications.Impls;
 using Plugins.CountlySDK.Helpers;
 using Plugins.CountlySDK.Models;
-using Plugins.CountlySDK.Persistance;
-using Plugins.CountlySDK.Persistance.Dao;
 using Plugins.CountlySDK.Persistance.Entities;
 using Plugins.CountlySDK.Persistance.Repositories;
 using Plugins.CountlySDK.Persistance.Repositories.Impls;
@@ -75,9 +72,6 @@ namespace Plugins.CountlySDK
         ///<returns>ConsentCountlyService</returns>
         public ConsentCountlyService Consents { get; private set; }
 
-        [Obsolete("CrushReports is deprecated, please use CrashReports instead.")]
-        public CrashReportsCountlyService CrushReports { get { return CrashReports; } }
-
         /// <summary>
         /// Exposes functionality to record crashes/errors and record breadcrumbs.
         /// </summary>
@@ -97,9 +91,6 @@ namespace Plugins.CountlySDK
         public EventCountlyService Events { get; private set; }
 
         internal InitializationCountlyService Initialization { get; private set; }
-
-        [Obsolete("OptionalParameters is deprecated, please use Location instead.")]
-        public OptionalParametersCountlyService OptionalParameters { get; private set; }
 
         /// <summary>
         /// Exposes functionality to set location parameters.
@@ -276,10 +267,6 @@ namespace Plugins.CountlySDK
                 _logHelper.Info("[Init] provided 'maxStackTraceLineLength' override:[" + configuration.MaxStackTraceLineLength + "]");
             }
 
-            if (Configuration.EnableFirstAppLaunchSegment) {
-                _logHelper.Warning("'EnableFirstAppLaunchSegment' has been deprecated and it's functionality has been removed. This variable is only left for compatibility.");
-            }
-
             Constants.ProcessPlatform();
             FirstLaunchAppHelper.Process();
 
@@ -312,7 +299,6 @@ namespace Plugins.CountlySDK
             Events = new EventCountlyService(Configuration, _logHelper, RequestHelper, nonViewEventRepo, Consents);
 
             Location = new Services.LocationService(Configuration, _logHelper, RequestHelper, Consents);
-            OptionalParameters = new OptionalParametersCountlyService(Location, Configuration, _logHelper, Consents);
             Notifications = new NotificationsCallbackService(Configuration, _logHelper);
             ProxyNotificationsService notificationsService = new ProxyNotificationsService(transform, Configuration, _logHelper, InternalStartCoroutine, Events);
             _push = new PushCountlyService(Configuration, _logHelper, RequestHelper, notificationsService, Notifications, Consents);
@@ -466,8 +452,9 @@ namespace Plugins.CountlySDK
         private void LogCallback(string condition, string stackTrace, LogType type)
         {
             if (type == LogType.Exception) {
-                CrashReports?.LogCallback(condition, stackTrace, type);
+                CrashReports?.SendCrashReportAsync(condition, stackTrace);
             }
+
         }
 
         private void SubscribeAppLog()

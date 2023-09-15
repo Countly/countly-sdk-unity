@@ -99,8 +99,7 @@ namespace Plugins.CountlySDK
         private int Type()
         {
             int type = 0;
-            switch (_countly.Device.DeviceIdType)
-            {
+            switch (_countly.Device.DeviceIdType) {
                 case DeviceIdType.DeveloperProvided:
                     type = 0;
                     break;

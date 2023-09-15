@@ -17,7 +17,8 @@ namespace Tests
         private readonly string _serverUrl = "https://xyz.com/";
         private readonly string _appKey = "772c091355076ead703f987fee94490";
 
-        private void AssertAnEvent(CountlyEventModel model, string name, double? sum, double count, double? duration, IDictionary<string, object> segmentation) {
+        private void AssertAnEvent(CountlyEventModel model, string name, double? sum, double count, double? duration, IDictionary<string, object> segmentation)
+        {
             Assert.AreEqual(name, model.Key);
             Assert.AreEqual(model.Sum, sum);
             Assert.AreEqual(model.Count, count);

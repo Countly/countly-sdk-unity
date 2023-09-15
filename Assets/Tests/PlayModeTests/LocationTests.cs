@@ -1,12 +1,7 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using UnityEngine;
-using UnityEngine.TestTools;
 using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK;
-using Plugins.CountlySDK.Enums;
-using System.Threading.Tasks;
 
 namespace Tests
 {
@@ -15,7 +10,8 @@ namespace Tests
         private readonly string _serverUrl = "https://xyz.com/";
         private readonly string _appKey = "772c091355076ead703f987fee94490";
 
-        private void AssertLocation(string gpsCoord, string city, string ipAddress, string countryCode, bool IsLocationDisabled) {
+        private void AssertLocation(string gpsCoord, string city, string ipAddress, string countryCode, bool IsLocationDisabled)
+        {
             Assert.AreNotEqual(Countly.Instance.Location, null);
 
             Assert.AreEqual(city, Countly.Instance.Location.City);
@@ -24,16 +20,6 @@ namespace Tests
             Assert.AreEqual(gpsCoord, Countly.Instance.Location.Location);
 
             Assert.AreEqual(IsLocationDisabled, Countly.Instance.Location.IsLocationDisabled);
-        }
-
-        private void AssertOptionalLocation(string gpsCoord, string city, string ipAddress, string countryCode)
-        {
-            Assert.AreNotEqual(Countly.Instance.OptionalParameters, null);
-
-            Assert.AreEqual(city, Countly.Instance.OptionalParameters.City);
-            Assert.AreEqual(ipAddress, Countly.Instance.OptionalParameters.IPAddress);
-            Assert.AreEqual(countryCode, Countly.Instance.OptionalParameters.CountryCode);
-            Assert.AreEqual(gpsCoord, Countly.Instance.OptionalParameters.Location);
         }
 
         /// <summary>
@@ -56,14 +42,14 @@ namespace Tests
             configuration.SetLocation(countryCode, city, latitude + "," + longitude, ipAddress);
             Countly.Instance.Init(configuration);
 
-            
+
 
             CountlyConfiguration cc = Countly.Instance.Configuration;
             AssertLocation(cc.Location, cc.City, cc.IPAddress, cc.CountryCode, cc.IsLocationDisabled);
 
             Countly.Instance.Location.DisableLocation();
             AssertLocation(null, null, null, null, true);
-           
+
         }
 
         /// <summary>
@@ -85,44 +71,6 @@ namespace Tests
 
             configuration.SetLocation(countryCode, city, latitude + "," + longitude, ipAddress);
             Countly.Instance.Init(configuration);
-
-          
-            AssertOptionalLocation(latitude + "," + longitude, city, ipAddress, countryCode);
-
-            Countly.Instance.OptionalParameters.DisableLocation();
-            AssertOptionalLocation(null, null, null, null);
-        }
-
-
-        /// <summary>
-        /// It matches the user's location values set after init with optional location service
-        /// </summary>
-        [Test]
-        public void TestOptionalLocationValuesSetAfterInit()
-        {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-            };
-
-            string countryCode = "us";
-            string city = "Houston";
-            string latitude = "29.634933";
-            string longitude = "-95.220255";
-            string ipAddress = "10.2.33.12";
-
-            Countly.Instance.Init(configuration);
-
-            Countly.Instance.OptionalParameters.SetLocation(countryCode, city, latitude + "," + longitude, ipAddress);
-            AssertOptionalLocation(latitude + "," + longitude, city, ipAddress, countryCode);
-
-
-            Countly.Instance.OptionalParameters.SetCity("Lahore");
-            Countly.Instance.OptionalParameters.SetIPAddress("192.168.100.51");
-            Countly.Instance.OptionalParameters.SetLocation(10.00, -10.00);
-            Countly.Instance.OptionalParameters.SetCountryCode("PK");
-
-            AssertOptionalLocation(10.00 + "," + -10.00, "Lahore", "192.168.100.51", "PK");
         }
 
         /// <summary>

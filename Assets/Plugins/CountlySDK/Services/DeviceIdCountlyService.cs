@@ -89,28 +89,6 @@ namespace Plugins.CountlySDK.Services
                 }
             }
         }
-
-        /// <summary>
-        /// Changes Device Id.
-        /// Adds currently recorded but not queued events to request queue.
-        /// Clears all started timed-events
-        /// Ends current session with old Device Id.
-        /// Begins a new session with new Device Id
-        /// </summary>
-        /// <param name="deviceId">new device id</param>
-        [Obsolete("ChangeDeviceIdAndEndCurrentSessionAsync is deprecated, please use ChangeDeviceIdWithoutMerge method instead.")]
-        public async Task ChangeDeviceIdAndEndCurrentSessionAsync(string deviceId)
-        {
-            Log.Info("[DeviceIdCountlyService] ChangeDeviceIdAndEndCurrentSessionAsync: deviceId = " + deviceId);
-
-            if (!_consentService.AnyConsentGiven()) {
-                Log.Debug("[DeviceIdCountlyService] ChangeDeviceIdAndEndCurrentSessionAsync: Please set at least a single consent before calling this!");
-                return;
-            }
-
-            await ChangeDeviceIdWithoutMerge(deviceId);
-        }
-
         /// <summary>
         /// Changes Device Id.
         /// Adds currently recorded but not queued events to request queue.
@@ -158,25 +136,6 @@ namespace Plugins.CountlySDK.Services
 
                 _ = _requestCountlyHelper.ProcessQueue();
             }
-        }
-
-        /// <summary>
-        /// Changes DeviceId.
-        /// Continues with the current session.
-        /// Merges data for old and new Device Id.
-        /// </summary>
-        /// <param name="deviceId">new device id</param>
-        [Obsolete("ChangeDeviceIdAndMergeSessionDataAsync is deprecated, please use ChangeDeviceIdWithMerge method instead.")]
-        public async Task ChangeDeviceIdAndMergeSessionDataAsync(string deviceId)
-        {
-            Log.Info("[DeviceIdCountlyService] ChangeDeviceIdAndMergeSessionDataAsync: deviceId = " + deviceId);
-
-            if (!_consentService.AnyConsentGiven()) {
-                Log.Debug("[DeviceIdCountlyService] ChangeDeviceIdAndMergeSessionDataAsync: Please set at least a single consent before calling this!");
-                return;
-            }
-
-            await ChangeDeviceIdWithMerge(deviceId);
         }
 
         /// <summary>

@@ -20,8 +20,8 @@ public class ViewTracking : MonoBehaviour
     public async void RecordViewAWithSeg()
     {
         Dictionary<string, object> segments = new Dictionary<string, object>{
-            { "a", "12"},
-            { "b", "10"}
+            { "Platform", "Windows"},
+            { "Engine", "Unity"}
         };
 
         await Countly.Instance.Views.RecordOpenViewAsync("View A with segmentation", segmentation: segments);
@@ -37,8 +37,8 @@ public class ViewTracking : MonoBehaviour
     public async void RecordViewBWithSeg()
     {
         Dictionary<string, object> segments = new Dictionary<string, object>{
-            { "a", "12"},
-            { "b", "10"}
+            { "Musician", "Album"},
+            { "Director", "Movie"}
         };
 
         await Countly.Instance.Views.RecordOpenViewAsync("View B with segmentation", segmentation: segments);
@@ -54,8 +54,8 @@ public class ViewTracking : MonoBehaviour
     public async void RecordViewCWithSeg()
     {
         Dictionary<string, object> segments = new Dictionary<string, object>{
-            { "a", "12"},
-            { "b", "10"}
+            { "Backpack", "12L"},
+            { "Handbag", "10L"}
         };
 
         await Countly.Instance.Views.RecordOpenViewAsync("View C with segmentation", segmentation: segments);
