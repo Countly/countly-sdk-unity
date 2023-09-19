@@ -76,6 +76,46 @@ namespace Tests
             NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
             AssertlUserDetailRequest(collection, userDetails, userDetails.Custom);
         }
+        /// <summary>
+        /// It checks the working of method 'SetUserDetailsAsync' when provided invalid URL.
+        /// </summary>
+        [Test]
+        public async void TestUserDetailMethod_SetUserDetailsAsyncWithInvalidPicture()
+        {
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                ServerUrl = _serverUrl,
+                AppKey = _appKey,
+                EnablePost = true
+            };
+
+            Countly.Instance.Init(configuration);
+
+            Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
+
+            Assert.IsNotNull(Countly.Instance.UserDetails);
+            Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
+
+            CountlyUserDetailsModel userDetails = null;
+
+            await Countly.Instance.UserDetails.SetUserDetailsAsync(userDetails);
+            Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
+
+            userDetails = new CountlyUserDetailsModel("First Name", "Last Name", "firstnamelastname@email.com", "Company",
+                    "666-777-888",
+                    "Invalid Picture Type",
+                    "F", "1999",
+                    new Dictionary<string, object>{
+                        { "Song", "Billie Jean" },
+                        { "Team", "Arsenal" },
+                    });
+            await Countly.Instance.UserDetails.SetUserDetailsAsync(userDetails);
+            Assert.AreEqual(1, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
+
+            CountlyRequestModel requestModel = Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Dequeue();
+
+            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            AssertlUserDetailRequest(collection, userDetails, userDetails.Custom);
+        }
 
         /// <summary>
         /// It validate user profile fields limits.

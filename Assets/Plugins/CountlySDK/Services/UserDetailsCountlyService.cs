@@ -68,7 +68,7 @@ namespace Plugins.CountlySDK.Services
                 }
 
                 if (!_countlyUtils.IsPictureValid(userDetailsModel.PictureUrl)) {
-                    throw new Exception("Accepted picture formats are .png, .gif and .jpeg");
+                    Log.Warning("Accepted picture formats are .png, .gif and .jpeg");
                 }
 
 
