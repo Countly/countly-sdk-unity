@@ -3,10 +3,21 @@ using UnityEngine;
 
 namespace Plugins.CountlySDK.Helpers
 {
+    /// <summary>
+    /// Helper class for managing and tracking the first launch of the application.
+    /// </summary>
     internal static class FirstLaunchAppHelper
     {
         private static bool? _firstLaunchApp;
 
+        /// <summary>
+        /// Processes the first launch of the application.
+        /// 
+        /// <para>
+        /// This method checks if the application has been launched for the first time.
+        /// If it is the first launch, it sets the appropriate flag and saves it to PlayerPrefs.
+        /// </para>
+        /// </summary>
         public static void Process()
         {
             if (!PlayerPrefs.HasKey(Constants.FirstAppLaunch)) {
@@ -20,13 +31,19 @@ namespace Plugins.CountlySDK.Helpers
             }
         }
 
+        /// <summary>
+        /// Gets a value indicating whether this is the first launch of the application.                   
+        /// </summary>
+        /// <returns>
+        ///   <c>true</c> if this is the first launch of the application; otherwise, <c>false</c>.
+        /// </returns>
         public static bool IsFirstLaunchApp
         {
             get {
                 if (!_firstLaunchApp.HasValue) {
-                    throw new ArgumentException("FirstLaunchAppHelper.Process should be called when session begins");
+                    Debug.LogWarning("[FirstLaunchAppHelper] IsFirstLaunchApp : Process should be called when session begins");
+                    Process();
                 }
-
                 return _firstLaunchApp.Value;
             }
         }
