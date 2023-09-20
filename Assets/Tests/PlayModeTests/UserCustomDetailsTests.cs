@@ -1,11 +1,12 @@
 ﻿using System.Collections.Generic;
-using NUnit.Framework;
-using UnityEngine;
-using Plugins.CountlySDK.Models;
-using Plugins.CountlySDK;
-using Newtonsoft.Json.Linq;
 using System.Collections.Specialized;
 using System.Web;
+using Assets.Tests.PlayModeTests;
+using Newtonsoft.Json.Linq;
+using NUnit.Framework;
+using Plugins.CountlySDK;
+using Plugins.CountlySDK.Models;
+using UnityEngine;
 
 namespace Tests
 {
@@ -40,15 +41,9 @@ namespace Tests
         /// It check the working of method 'SetUserDetailsAsync'.
         /// </summary>
         [Test]
-        public async void TestUserDetailMethod_SetUserDetailsAsync()
+        public async void SetUserDetailsAsync()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-                EnablePost = true
-            };
-
-            Countly.Instance.Init(configuration);
+            Countly.Instance.Init(TestUtility.createBaseConfig());
 
             Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
 
@@ -83,15 +78,37 @@ namespace Tests
         /// This value should then be used in the end request. It should not be rejected
         /// </summary>
         [Test]
-        public async void TestUserDetailMethod_SetUserDetailsAsyncWithInvalidPicture()
+        public async void SetPicturePath_invalidUrl()
         {
-            // Initialize Countly 
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-                EnablePost = true
-            };
-            Countly.Instance.Init(configuration);
+            SetPicturePath_base("Invalid URL", "Invalid URL");
+        }
+
+
+        /// <summary>
+        /// 'SetUserDetailAsync' method in UserDetailsCountlyService
+        /// we pass an 'null' URL to the user profiles property
+        /// This value should then be used in the end request. It should not be rejected
+        /// </summary>
+        [Test]
+        public async void SetPicturePath_nullUrl()
+        {
+            SetPicturePath_base(null, null);
+        }
+
+        /// <summary>
+        /// 'SetUserDetailAsync' method in UserDetailsCountlyService
+        /// we pass an empty string URL to the user profiles property
+        /// This value should then be used in the end request. It should not be rejected.
+        /// </summary>
+        [Test]
+        public async void SetPicturePath_emptyUrl()
+        {
+            SetPicturePath_base("", "");
+        }
+
+        public async void SetPicturePath_base(string setPictureUrl, string expectedValue)
+        {
+            Countly.Instance.Init(TestUtility.createBaseConfig());
             Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
 
             // Ensure that the UserDetails instance is not null and request repository is empty
@@ -106,7 +123,7 @@ namespace Tests
             // Initialize userDetails and assign an invalid picture URL to the user model
             userDetails = new CountlyUserDetailsModel("FirstName", "LastName", "name@email.com", "Company",
                     "666-777-888",
-                    "Invalid URL",
+                    setPictureUrl,
                     "F", "1999",
                     new Dictionary<string, object>{
                         { "Song", "Billie Jean" },
@@ -121,105 +138,11 @@ namespace Tests
             // Parse the "user_details" JSON from the request data
             JObject userDetailJson = JObject.Parse(collection["user_details"]);
             // Verify that the picture URL in the JSON matches the modified user model's picture URL
-            Assert.AreEqual(userDetails.PictureUrl, userDetailJson["picture"].ToString());
-        }
-
-
-        /// <summary>
-        /// 'SetUserDetailAsync' method in UserDetailsCountlyService
-        /// we pass an 'null' URL to the user profiles property
-        /// This value should then be used in the end request. It should not be rejected
-        /// </summary>
-        [Test]
-        public async void TestUserDetailMethod_SetUserDetailsAsyncWithNullPicUrl()
-        {
-            // Initialize Countly 
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-                EnablePost = true
-            };
-            Countly.Instance.Init(configuration);
-            Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
-
-            // Ensure that the UserDetails instance is not null and request repository is empty
-            Assert.IsNotNull(Countly.Instance.UserDetails);
-            Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
-
-            // Attempt to set user details with a null user model
-            CountlyUserDetailsModel userDetails = null;
-            await Countly.Instance.UserDetails.SetUserDetailsAsync(userDetails);
-            Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
-
-            // Initialize userDetails and set PictureURL as null
-            userDetails = new CountlyUserDetailsModel("John", "Doe", "john.doe@email.com", "Acme Inc.",
-                    "123-456-789",
-                    null,
-                    "M", "1985",
-                    new Dictionary<string, object>{
-                        { "FavoriteColor", "Blue" }
-                    });
-
-            // Set User Details with null URL 
-            await Countly.Instance.UserDetails.SetUserDetailsAsync(userDetails);
-
-            Assert.AreEqual(1, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
-            CountlyRequestModel requestModel = Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Dequeue();
-            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
-            JObject userDetailJson = JObject.Parse(collection["user_details"]);
-
-            // Verify that the modified user model's picture URL is null
-            Assert.IsNull(userDetails.PictureUrl);
-            Assert.AreEqual(userDetails.PictureUrl, userDetailJson["picture"]);
-        }
-
-        /// <summary>
-        /// 'SetUserDetailAsync' method in UserDetailsCountlyService
-        /// we pass an empty string URL to the user profiles property
-        /// This value should then be used in the end request. It should not be rejected.
-        /// </summary>
-        [Test]
-        public async void TestUserDetailMethod_SetUserDetailsAsyncWithEmptyPictureUrl()
-        {
-            // Initialize Countly 
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-                EnablePost = true
-            };
-            Countly.Instance.Init(configuration);
-            Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
-
-            // Ensure that the UserDetails instance is not null and request repository is empty
-            Assert.IsNotNull(Countly.Instance.UserDetails);
-            Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
-
-            // Attempt to set user details with a null user model
-            CountlyUserDetailsModel userDetails = null;
-            await Countly.Instance.UserDetails.SetUserDetailsAsync(userDetails);
-            Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
-
-            // Initialize userDetails and assign picture URL empty to the user model
-            userDetails = new CountlyUserDetailsModel("Alice", "Johnson", "alice.johnson@email.com", "TechCorp",
-                    "555-123-456",
-                    "",
-                    "F", "1990",
-                    new Dictionary<string, object> {
-                        { "FavoriteFood", "Pizza" }
-                    });
-            await Countly.Instance.UserDetails.SetUserDetailsAsync(userDetails);
-
-            // Ensure that a request is added, retrieve and parse it for verification
-            Assert.AreEqual(1, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
-            CountlyRequestModel requestModel = Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Dequeue();
-            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
-
-            // Parse the "user_details" JSON from the request data
-            JObject userDetailJson = JObject.Parse(collection["user_details"]);
-            // Verify that the picture URL is empty
-            Assert.IsEmpty(userDetails.PictureUrl);
-            // Verify that the picture URL in the JSON matches the modified user model's picture URL
-            Assert.AreEqual(userDetails.PictureUrl, userDetailJson["picture"].ToString());
+            if (expectedValue != null) {
+                Assert.AreEqual(expectedValue, userDetailJson["picture"].ToString());
+            } else {
+                Assert.IsNull(userDetailJson["picture"]);
+            }
         }
 
         /// <summary>
@@ -228,12 +151,8 @@ namespace Tests
         [Test]
         public async void TestUserProfileFieldsLimits()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-                MaxValueSize = 3,
-                EnablePost = true
-            };
+            CountlyConfiguration configuration = TestUtility.createBaseConfig();
+            configuration.MaxValueSize = 3;
 
             Countly.Instance.Init(configuration);
             Countly.Instance.ClearStorage();
@@ -283,7 +202,7 @@ namespace Tests
         /// It check the working of method 'SetUserDetailsAsync'.
         /// </summary>
         [Test]
-        public void TestUserDetailMethod_SetCustomUserDetailsAsync()
+        public void SetCustomUserDetailsAsync()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 ServerUrl = _serverUrl,
@@ -320,7 +239,7 @@ namespace Tests
         /// It validate user detail segments limits.
         /// </summary>
         [Test]
-        public void TestUserDetailSegmentLimits()
+        public void UserDetailSegmentLimits()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 ServerUrl = _serverUrl,
@@ -367,7 +286,7 @@ namespace Tests
         /// It validate custom user detail segments key and value limits.
         /// </summary>
         [Test]
-        public void TestCustomUserDetailSegmentLimits()
+        public void CustomUserDetailSegmentLimits()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 ServerUrl = _serverUrl,
@@ -445,7 +364,7 @@ namespace Tests
         /// It validate custom user detail invalid keys.
         /// </summary>
         [Test]
-        public async void TestCustomUserDetailInvalidKeys()
+        public async void CustomUserDetailInvalidKeys()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 ServerUrl = _serverUrl,
@@ -500,7 +419,7 @@ namespace Tests
         /// Case 2: If valid custom detail is provided, a request that have custom detail, should be added in the request queue.
         /// </summary>
         [Test]
-        public void TestUserDetailMethod_UserCustomDetails()
+        public void UserDetailMethod_UserCustomDetails()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 ServerUrl = _serverUrl,
@@ -536,7 +455,7 @@ namespace Tests
         /// It validates the user's custom properties set via 'SetOnce' and 'Set' methods.
         /// </summary>
         [Test]
-        public void TestUserCustomProperty_SetOnceAndSet()
+        public void UserCustomProperty_SetOnceAndSet()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 ServerUrl = _serverUrl,
@@ -565,7 +484,7 @@ namespace Tests
         /// It validates the user's custom properties set via 'IncrementBy' and 'Increment' methods.
         /// </summary>
         [Test]
-        public void TestUserCustomProperty_IncrementBy()
+        public void UserCustomProperty_IncrementBy()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 ServerUrl = _serverUrl,
@@ -591,7 +510,7 @@ namespace Tests
         /// It validates the user's custom property set via 'Pull'.
         /// </summary>
         [Test]
-        public void TestUserCustomProperty_Pull()
+        public void UserCustomProperty_Pull()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 ServerUrl = _serverUrl,
@@ -612,7 +531,7 @@ namespace Tests
         /// It validates the user's custom properties set via 'PushUnique' and 'Push' methods.
         /// </summary>
         [Test]
-        public void TestUserCustomProperty_PushUniqueAndPush()
+        public void UserCustomProperty_PushUniqueAndPush()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 ServerUrl = _serverUrl,
@@ -638,7 +557,7 @@ namespace Tests
         /// It validates the user's custom properties set via 'Min' and 'Max' methods.
         /// </summary>
         [Test]
-        public void TestUserCustomProperty_MinAndMax()
+        public void UserCustomProperty_MinAndMax()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 ServerUrl = _serverUrl,
@@ -664,7 +583,7 @@ namespace Tests
         /// It validates the user's custom properties befor and after calling SaveAsync'.
         /// </summary>
         [Test]
-        public async void TestUserDetailService_SaveAsync()
+        public async void UserDetailService_SaveAsync()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 ServerUrl = _serverUrl,
