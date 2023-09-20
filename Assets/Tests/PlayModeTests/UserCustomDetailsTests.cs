@@ -163,8 +163,14 @@ namespace Tests
             // Set User Details with null URL 
             await Countly.Instance.UserDetails.SetUserDetailsAsync(userDetails);
 
+            Assert.AreEqual(1, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
+            CountlyRequestModel requestModel = Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Dequeue();
+            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            JObject userDetailJson = JObject.Parse(collection["user_details"]);
+
             // Verify that the modified user model's picture URL is null
             Assert.IsNull(userDetails.PictureUrl);
+            Assert.AreEqual(userDetails.PictureUrl, userDetailJson["picture"]);
         }
 
         /// <summary>
