@@ -12,11 +12,12 @@ namespace Plugins.CountlySDK.Helpers
 
         /// <summary>
         /// Processes the first launch of the application.
-        /// </summary>
-        /// <remarks>
+        /// 
+        /// <para>
         /// This method checks if the application has been launched for the first time.
         /// If it is the first launch, it sets the appropriate flag and saves it to PlayerPrefs.
-        /// </remarks>
+        /// </para>
+        /// </summary>
         public static void Process()
         {
             if (!PlayerPrefs.HasKey(Constants.FirstAppLaunch)) {
@@ -31,11 +32,11 @@ namespace Plugins.CountlySDK.Helpers
         }
 
         /// <summary>
-        /// Gets a value indicating whether this is the first launch of the application.
+        /// Gets a value indicating whether this is the first launch of the application.                   
         /// </summary>
-        /// <value>
+        /// <returns>
         ///   <c>true</c> if this is the first launch of the application; otherwise, <c>false</c>.
-        /// </value>
+        /// </returns>
         public static bool IsFirstLaunchApp
         {
             get {
