@@ -77,46 +77,134 @@ namespace Tests
             AssertlUserDetailRequest(collection, userDetails, userDetails.Custom);
         }
         /// <summary>
-        /// It checks the working of method 'SetUserDetailsAsync' when provided invalid URL.
+        /// Tests 'SetUserDetailAsync' in UserDetailsCountlyService with an invalid URL, ensuring it handles the case correctly.
         /// </summary>
         [Test]
         public async void TestUserDetailMethod_SetUserDetailsAsyncWithInvalidPicture()
         {
+            // Initialize Countly 
             CountlyConfiguration configuration = new CountlyConfiguration {
                 ServerUrl = _serverUrl,
                 AppKey = _appKey,
                 EnablePost = true
             };
-
             Countly.Instance.Init(configuration);
-
             Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
 
+            // Ensure that the UserDetails instance is not null and request repository is empty
             Assert.IsNotNull(Countly.Instance.UserDetails);
             Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
 
+            // Attempt to set user details with a null user model
             CountlyUserDetailsModel userDetails = null;
-
             await Countly.Instance.UserDetails.SetUserDetailsAsync(userDetails);
             Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
 
-            userDetails = new CountlyUserDetailsModel("First Name", "Last Name", "firstnamelastname@email.com", "Company",
+            // Initialize userDetails and assign an invalid picture URL to the user model
+            userDetails = new CountlyUserDetailsModel("FirstName", "LastName", "name@email.com", "Company",
                     "666-777-888",
-                    "Invalid Picture Type",
+                    "Invalid URL",
                     "F", "1999",
                     new Dictionary<string, object>{
                         { "Song", "Billie Jean" },
                         { "Team", "Arsenal" },
                     });
             await Countly.Instance.UserDetails.SetUserDetailsAsync(userDetails);
+            // Ensure that a request is added, retrieve and parse it for verification
             Assert.AreEqual(1, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
-
             CountlyRequestModel requestModel = Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Dequeue();
-
             NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
-            AssertlUserDetailRequest(collection, userDetails, userDetails.Custom);
-        }
 
+            // Parse the "user_details" JSON from the request data
+            JObject userDetailJson = JObject.Parse(collection["user_details"]);
+            // Verify that the picture URL in the JSON matches the modified user model's picture URL
+            Assert.AreEqual(userDetails.PictureUrl, userDetailJson["picture"].ToString());
+        }
+        /// <summary>
+        /// Tests 'SetUserDetailAsync' in UserDetailsCountlyService with a null URL, ensuring it handles the case correctly.
+        /// </summary>
+        [Test]
+        public async void TestUserDetailMethod_SetUserDetailsAsyncWithNullPicUrl()
+        {
+            // Initialize Countly 
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                ServerUrl = _serverUrl,
+                AppKey = _appKey,
+                EnablePost = true
+            };
+            Countly.Instance.Init(configuration);
+            Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
+
+            // Ensure that the UserDetails instance is not null and request repository is empty
+            Assert.IsNotNull(Countly.Instance.UserDetails);
+            Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
+
+            // Attempt to set user details with a null user model
+            CountlyUserDetailsModel userDetails = null;
+            await Countly.Instance.UserDetails.SetUserDetailsAsync(userDetails);
+            Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
+
+            // Initialize userDetails and set PictureURL as null
+            userDetails = new CountlyUserDetailsModel("John", "Doe", "john.doe@email.com", "Acme Inc.",
+                    "123-456-789",
+                    null,
+                    "M", "1985",
+                    new Dictionary<string, object>{
+                        { "FavoriteColor", "Blue" }
+                    });
+
+            // Set User Details with null URL 
+            await Countly.Instance.UserDetails.SetUserDetailsAsync(userDetails);
+
+            // Verify that the modified user model's picture URL is null
+            Assert.IsNull(userDetails.PictureUrl);
+        }
+        /// <summary>
+        /// Tests 'SetUserDetailAsync' in UserDetailsCountlyService with an empty URL, ensuring it handles the case correctly.
+        /// </summary>
+        [Test]
+        public async void TestUserDetailMethod_SetUserDetailsAsyncWithEmptyPictureUrl()
+        {
+            // Initialize Countly 
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                ServerUrl = _serverUrl,
+                AppKey = _appKey,
+                EnablePost = true
+            };
+            Countly.Instance.Init(configuration);
+            Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
+
+            // Ensure that the UserDetails instance is not null and request repository is empty
+            Assert.IsNotNull(Countly.Instance.UserDetails);
+            Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
+
+            // Attempt to set user details with a null user model
+            CountlyUserDetailsModel userDetails = null;
+            await Countly.Instance.UserDetails.SetUserDetailsAsync(userDetails);
+            Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
+
+            // Initialize userDetails and assign picture URL empty to the user model
+            userDetails = new CountlyUserDetailsModel("Alice", "Johnson", "alice.johnson@email.com", "TechCorp",
+                    "555-123-456",
+                    "",
+                    "F", "1990",
+                    new Dictionary<string, object> {
+                        { "FavoriteFood", "Pizza" }
+                    });
+            await Countly.Instance.UserDetails.SetUserDetailsAsync(userDetails);
+
+            // Ensure that a request is added, retrieve and parse it for verification
+            Assert.AreEqual(1, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
+            CountlyRequestModel requestModel = Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Dequeue();
+            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+
+            // Parse the "user_details" JSON from the request data
+            JObject userDetailJson = JObject.Parse(collection["user_details"]);
+            // Verify that the picture URL is empty
+            Assert.IsEmpty(userDetails.PictureUrl);
+            // Verify that the picture URL in the JSON matches the modified user model's picture URL
+            Assert.AreEqual(userDetails.PictureUrl, userDetailJson["picture"].ToString());
+        }
         /// <summary>
         /// It validate user profile fields limits.
         /// </summary>

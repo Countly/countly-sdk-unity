@@ -68,7 +68,7 @@ namespace Plugins.CountlySDK.Services
                 }
 
                 if (!_countlyUtils.IsPictureValid(userDetailsModel.PictureUrl)) {
-                    Log.Warning("Accepted picture formats are .png, .gif and .jpeg");
+                    Log.Warning($"[UserDetailsCountlyService] SetUserDetailAsync: Picture format for URL '{userDetailsModel.PictureUrl}' is not as expected. Expected formats are .png, .gif, or .jpeg");
                 }
 
 
@@ -80,7 +80,7 @@ namespace Plugins.CountlySDK.Services
                 userDetailsModel.BirthYear = TrimValue("BirthYear", userDetailsModel.BirthYear);
                 userDetailsModel.Organization = TrimValue("Organization", userDetailsModel.Organization);
 
-                if (userDetailsModel.PictureUrl.Length > 4096) {
+                if (userDetailsModel.PictureUrl != null && userDetailsModel.PictureUrl.Length > 4096) {
                     Log.Warning("[" + GetType().Name + "] TrimValue : Max allowed length of 'PictureUrl' is " + _configuration.MaxValueSize);
                     userDetailsModel.PictureUrl = userDetailsModel.PictureUrl.Substring(0, 4096);
                 }
