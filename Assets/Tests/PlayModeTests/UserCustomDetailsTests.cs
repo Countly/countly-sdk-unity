@@ -76,8 +76,11 @@ namespace Tests
             NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
             AssertlUserDetailRequest(collection, userDetails, userDetails.Custom);
         }
+
         /// <summary>
-        /// Tests 'SetUserDetailAsync' in UserDetailsCountlyService with an invalid URL, ensuring it handles the case correctly.
+        /// 'SetUserDetailAsync' method in UserDetailsCountlyService
+        /// we pass an invalid URL to the user profiles property
+        /// This value should then be used in the end request. It should not be rejected
         /// </summary>
         [Test]
         public async void TestUserDetailMethod_SetUserDetailsAsyncWithInvalidPicture()
@@ -120,8 +123,12 @@ namespace Tests
             // Verify that the picture URL in the JSON matches the modified user model's picture URL
             Assert.AreEqual(userDetails.PictureUrl, userDetailJson["picture"].ToString());
         }
+
+
         /// <summary>
-        /// Tests 'SetUserDetailAsync' in UserDetailsCountlyService with a null URL, ensuring it handles the case correctly.
+        /// 'SetUserDetailAsync' method in UserDetailsCountlyService
+        /// we pass an 'null' URL to the user profiles property
+        /// This value should then be used in the end request. It should not be rejected
         /// </summary>
         [Test]
         public async void TestUserDetailMethod_SetUserDetailsAsyncWithNullPicUrl()
@@ -159,8 +166,11 @@ namespace Tests
             // Verify that the modified user model's picture URL is null
             Assert.IsNull(userDetails.PictureUrl);
         }
+
         /// <summary>
-        /// Tests 'SetUserDetailAsync' in UserDetailsCountlyService with an empty URL, ensuring it handles the case correctly.
+        /// 'SetUserDetailAsync' method in UserDetailsCountlyService
+        /// we pass an empty string URL to the user profiles property
+        /// This value should then be used in the end request. It should not be rejected.
         /// </summary>
         [Test]
         public async void TestUserDetailMethod_SetUserDetailsAsyncWithEmptyPictureUrl()
@@ -205,6 +215,7 @@ namespace Tests
             // Verify that the picture URL in the JSON matches the modified user model's picture URL
             Assert.AreEqual(userDetails.PictureUrl, userDetailJson["picture"].ToString());
         }
+
         /// <summary>
         /// It validate user profile fields limits.
         /// </summary>
