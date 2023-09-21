@@ -8,11 +8,9 @@ namespace Tests
 {
     public class HelpersTests
     {
-        /// <summary>
         /// 'ConvertEventEntityToEventModel' method in Converter.
         /// We convert an EventEntity to CountlyEventModel.
         /// Conversion should be successful and EventModel then be used.
-        /// </summary>
         [Test]
         public void EventEntityToEventModel()
         {
@@ -32,11 +30,9 @@ namespace Tests
             Assert.AreEqual("SampleEvent", model.Key);
         }
 
-        /// <summary>
         /// 'ConvertJsonToDictionary' method in Converter.
         /// We convert a Json to a Dictionary.
         /// Conversion should be successful and Dictionary then be used
-        /// </summary>
         [Test]
         public void JsonToDictionary()
         {
