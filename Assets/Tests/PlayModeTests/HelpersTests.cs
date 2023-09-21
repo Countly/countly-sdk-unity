@@ -17,7 +17,7 @@ namespace Tests
             // Create new EventEntity
             EventEntity entity = new EventEntity {
                 Id = 1,
-                Json = "{\"Id\": 1, \"Key\": \"SampleEvent\"}"
+                Json = "{\"Id\": 1, \"Key\": \"SampleEvent\", \"Count\": 5, \"Sum\": 10, \"Duration\": 3.6, \"Segmentation\": { \"key1\": \"value1\", \"key2\": \"value2\" }}"
             };
 
             // Convert EventEntity to EventModel and assign it 
@@ -28,6 +28,10 @@ namespace Tests
             Assert.IsNotNull(model);
             Assert.AreEqual(1, model.Id);
             Assert.AreEqual("SampleEvent", model.Key);
+            Assert.AreEqual(5, model.Count);
+            Assert.AreEqual(10, model.Sum);
+            Assert.IsTrue(model.Segmentation.ContainsValue("value1"));
+            Assert.IsTrue(model.Segmentation.ContainsValue("value2"));
         }
 
         /// 'ConvertJsonToDictionary' method in Converter.
@@ -36,19 +40,28 @@ namespace Tests
         [Test]
         public void JsonToDictionary()
         {
-            // Create Json string
-            string json = "{\"Id\": 0, \"Name\": \"John\"}";
+            // Create new EventEntity
+            EventEntity entity = new EventEntity {
+                Id = 1,
+                Json = "{\"Id\": 2, \"Key\": \"NewEvent\", \"Count\": 7, \"Sum\": 12, \"Duration\": 5.7}"
+            };
 
             // Convert Json into Dictionary
-            Dictionary<string, object> result = Converter.ConvertJsonToDictionary(json);
+            Dictionary<string, object> result = Converter.ConvertJsonToDictionary(entity.Json);
 
             // Verify if conversion is correct
             Assert.IsNotNull(result);
-            Assert.AreEqual(2, result.Count);
+            Assert.AreEqual(5, result.Count);
             Assert.IsTrue(result.ContainsKey("Id"));
-            Assert.AreEqual(0, result["Id"]);
-            Assert.IsTrue(result.ContainsKey("Name"));
-            Assert.AreEqual("John", result["Name"]);
+            Assert.IsTrue(result.ContainsKey("Key"));
+            Assert.IsTrue(result.ContainsKey("Count"));
+            Assert.IsTrue(result.ContainsKey("Sum"));
+            Assert.IsTrue(result.ContainsKey("Duration"));
+            Assert.AreEqual(2, result["Id"]);
+            Assert.AreEqual("NewEvent", result["Key"]);
+            Assert.AreEqual(7, result["Count"]);
+            Assert.AreEqual(12, result["Sum"]);
+            Assert.AreEqual(5.7, result["Duration"]);
         }
     }
 }
