@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Diagnostics;
 using Newtonsoft.Json;
 using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK.Persistance.Entities;
@@ -9,6 +10,11 @@ namespace Plugins.CountlySDK.Helpers
     {
         public static CountlyEventModel ConvertEventEntityToEventModel(EventEntity entity)
         {
+            if (entity == null) {
+                UnityEngine.Debug.LogWarning("[Converter] 'ConvertEventEntityToEventModel': EventEntity variable is null");
+                return null;
+            }
+
             CountlyEventModel model = JsonConvert.DeserializeObject<CountlyEventModel>(entity.Json);
             model.Id = entity.Id;
             return model;
@@ -66,6 +72,10 @@ namespace Plugins.CountlySDK.Helpers
 
         public static Dictionary<string, object> ConvertJsonToDictionary(string json)
         {
+            if (json == null) {
+                UnityEngine.Debug.LogWarning("[Converter] 'ConvertJsonToDictionary': Json value is null");
+                return null;
+            }
             return JsonConvert.DeserializeObject<Dictionary<string, object>>(json);
         }
     }
