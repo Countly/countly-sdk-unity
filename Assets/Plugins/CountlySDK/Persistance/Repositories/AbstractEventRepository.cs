@@ -35,7 +35,7 @@ namespace Plugins.CountlySDK.Persistance.Repositories
 
         protected override CountlyEventModel ConvertEntityToModel(EventEntity entity)
         {
-            return Converter.ConvertEventEntityToEventModel(entity);
+            return Converter.ConvertEventEntityToEventModel(entity, Log);
         }
 
         protected override EventEntity ConvertModelToEntity(CountlyEventModel model)
