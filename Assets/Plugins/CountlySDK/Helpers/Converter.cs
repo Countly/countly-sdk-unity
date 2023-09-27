@@ -29,24 +29,10 @@ namespace Plugins.CountlySDK.Helpers
                 L?.Warning("[Converter] 'ConvertEventEntityToEventModel': EventEntity.Json variable is null or empty");
                 return null;
             }
-
-            string[] desiredVariables = { "Key", "Count", "Sum", "Duration", "Segmentation" };
-
-            JObject jsonObject = JObject.Parse(entity.Json);
-            JObject filteredObject = new JObject();
-
-            foreach (string variable in desiredVariables) {
-                if (jsonObject.ContainsKey(variable)) {
-                    filteredObject[variable] = jsonObject[variable];
-                }
-            }
-
-            string filteredJsonString = filteredObject.ToString(Formatting.None);
-
+            
             try {
 
-                CountlyEventModel model = JsonConvert.DeserializeObject<CountlyEventModel>(filteredJsonString);
-
+                CountlyEventModel model = JsonConvert.DeserializeObject<CountlyEventModel>(entity.Json);
                 model.Id = entity.Id;
 
                 return model;
