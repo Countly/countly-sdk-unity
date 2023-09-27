@@ -7,9 +7,9 @@ namespace Assets.Tests.PlayModeTests
     /// Utility class for creating Countly configurations, clearing SDK queues, and managing log helpers.
     public class TestUtility
     {
-        private readonly static string SERVER_URL = "https://xyz.com/";
-        private readonly static string APP_KEY = "772c091355076ead703f987fee94490";
-        private readonly static string DEVICE_ID = "test_user";
+        readonly static string SERVER_URL = "https://xyz.com/";
+        readonly static string APP_KEY = "772c091355076ead703f987fee94490";
+        readonly static string DEVICE_ID = "test_user";
 
         /// <summary>
         /// Creates a basic Countly configuration with predefined server URL, app key, and device ID.
@@ -37,7 +37,7 @@ namespace Assets.Tests.PlayModeTests
         /// Creates a CountlyLogHelper instance for testing purposes, based on the provided configuration and enables or disables logging.
         /// </summary>
         /// <returns>CountlyLogHelper instance with the specified logging configuration.</returns>
-        public static CountlyLogHelper LogHelper(bool enableLogging)
+        public static CountlyLogHelper CreateLogHelper(bool enableLogging)
         {
             CountlyConfiguration config = createBaseConfig();
             config.EnableConsoleLogging = enableLogging;
@@ -45,6 +45,10 @@ namespace Assets.Tests.PlayModeTests
 
             return logHelper;
         }
+        /// <summary>
+        /// Creates an EventEntity for testing purposes, with provided id and json.
+        /// </summary>
+        /// <returns> EventEntity instance with the specified id and json configuration.</returns>
         public static EventEntity CreateEventEntity(int id, string json)
         {
             EventEntity entity = new EventEntity {
