@@ -1,6 +1,9 @@
-﻿using Plugins.CountlySDK;
+﻿using Newtonsoft.Json.Linq;
+using System.Collections.Generic;
+using Plugins.CountlySDK;
 using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK.Persistance.Entities;
+using Newtonsoft.Json;
 
 namespace Assets.Tests.PlayModeTests
 {
@@ -56,6 +59,82 @@ namespace Assets.Tests.PlayModeTests
                 Json = json
             };
             return entity;
+        }
+
+        public static CountlyEventModel CreateEventModel(string key, int? count = null, double? sum = null, double? dur = null, Dictionary<string, object> segmentation = null, long? timestamp = null, int? dow = null, int? hour = null)
+        {
+            CountlyEventModel expected = new CountlyEventModel();
+
+            expected.Key = key;
+
+            if (count != null) {
+                expected.Count = (int)count;
+            }
+            if (sum != null) {
+                expected.Sum = (double)sum;
+            }
+            if (dur != null) {
+                expected.Duration = (double)dur;
+            }
+            if (segmentation != null) {
+                expected.Segmentation = new SegmentModel(segmentation);
+            }
+            if (timestamp != null) {
+                expected.Timestamp = (long)timestamp;
+            }
+            if (dow != null) {
+                expected.DayOfWeek = (int)dow;
+            }
+            if (hour != null) {
+                expected.Hour = (int)hour;
+            }
+
+            return expected;
+        }
+
+        public static string CreateEventEntityJSONString(string? key = null, int? count = null, double? sum = null, double? dur = null, string segmentation = null, long? timestamp = null, int? dow = null, int? hour = null, string? customData = null)
+        {
+            JObject jobj = new JObject();
+
+            if (key != null) {
+                jobj.Add("Key", key);
+            }
+
+            if (count != null) {
+                jobj.Add("Count", count);
+            }
+
+            if (sum != null) {
+                jobj.Add("Sum", sum);
+            }
+
+            if (dur != null) {
+                jobj.Add("dur", dur);
+            }
+
+            if (timestamp != null) {
+                jobj.Add("timestamp", timestamp);
+            }
+
+            if (dow != null) {
+                jobj.Add("dow", dow);
+            }
+
+            if (hour != null) {
+                jobj.Add("hour", hour);
+            }
+
+            string returnS = jobj.ToString();
+
+            if (segmentation != null) {
+                returnS = returnS.Insert(returnS.Length - 1, ", \"Segmentation\":" + segmentation);
+            }
+
+            if (customData != null) {
+                returnS = returnS.Insert(returnS.Length - 1, "," + customData);
+            }
+
+            return returnS;
         }
 
     }

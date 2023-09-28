@@ -16,9 +16,7 @@ namespace Plugins.CountlySDK.Models
         /// <param name="count"></param>
         /// <param name="sum"></param>
         /// <param name="duration"></param>
-        public CountlyEventModel(string key, IDictionary<string, object> segmentation = null, int? count = 1,
-            double? sum = null,
-            double? duration = null)
+        public CountlyEventModel(string key, IDictionary<string, object> segmentation = null, int? count = 1, double? sum = null, double? duration = null)
         {
             Key = key;
             Count = count ?? 1;

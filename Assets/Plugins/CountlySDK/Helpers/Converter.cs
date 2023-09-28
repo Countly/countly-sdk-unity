@@ -29,7 +29,7 @@ namespace Plugins.CountlySDK.Helpers
                 L?.Warning("[Converter] 'ConvertEventEntityToEventModel': EventEntity.Json variable is null or empty");
                 return null;
             }
-            
+
             try {
 
                 CountlyEventModel model = JsonConvert.DeserializeObject<CountlyEventModel>(entity.Json);

@@ -9,6 +9,9 @@ using UnityEngine;
 using Newtonsoft.Json;
 using static UnityEngine.Networking.UnityWebRequest;
 using Newtonsoft.Json.Linq;
+using UnityEditor.UIElements;
+using System.Text;
+using System.Net.NetworkInformation;
 
 namespace Tests
 {
@@ -29,11 +32,15 @@ namespace Tests
             // Check if the conversion resulted in a non-null CountlyEventModel.
             else {
                 // Assert that individual properties of the converted CountlyEventModel match the expected values.
+                Assert.IsNotNull(model);
                 Assert.AreEqual(expected.Id, model.Id);
                 Assert.AreEqual(expected.Key, model.Key);
                 Assert.AreEqual(expected.Count, model.Count);
                 Assert.AreEqual(expected.Sum, model.Sum);
                 Assert.AreEqual(expected.Segmentation, model.Segmentation);
+                Assert.AreEqual(expected.Timestamp, model.Timestamp);
+                Assert.AreEqual(expected.Hour, model.Hour);
+                Assert.AreEqual(expected.DayOfWeek, model.DayOfWeek);
             }
         }
 
@@ -43,9 +50,37 @@ namespace Tests
         [Test]
         public void EventEntityToEventModel_withValidEntity()
         {
+            string json = @"
+            {
+                ""Class"": ""Fighter"",
+                ""Level"": 20,
+                ""OtherClass"": null,
+                ""IsMultiClass"": false,
+                ""Languages"": [""Elven"", ""Common""],
+                ""Character"": {
+                    ""Name"": ""John"",
+                    ""Race"": ""Human"",
+                }
+            }";
+
+            Dictionary<string, object> segm = new Dictionary<string, object>
+            {
+                { "Class", "Fighter" },
+                { "Level", 20 },
+                { "IsMultiClass", false },
+                { "OtherClass", null},
+                { "Languages", new JArray { "Elven", "Common" } },
+                { "Character", new JObject
+                    {
+                        { "Name", "John" },
+                        { "Race", "Human" },
+                    }
+                }
+            };
             // Create a valid EventEntity with JSON data and an expected CountlyEventModel.
-            EventEntity entity = TestUtility.CreateEventEntity(0, "{\"Key\": \"SampleEvent\", \"Count\": 5, \"Sum\": 10, \"Segmentation\": null}");
-            CountlyEventModel expected = new CountlyEventModel(key: "SampleEvent", count: 5, sum: 10, segmentation: null);
+            EventEntity entity = TestUtility.CreateEventEntity(0, TestUtility.CreateEventEntityJSONString(key: "SampleEvent", count: 5, sum: 10, dow: 2, hour: 13, timestamp: 123456, segmentation: json));
+
+            CountlyEventModel expected = TestUtility.CreateEventModel(key: "SampleEvent", count: 5, sum: 10, dow: 2, hour: 13, timestamp: 123456, segmentation: segm);
 
             EventEntityToEventModel_base(entity, expected);
         }
@@ -70,8 +105,8 @@ namespace Tests
         public void EventEntityToEventModel_withNonExistingVariable()
         {
             // Create an EventEntity with invalid JSON data and an expected null CountlyEventModel.
-            EventEntity entity = TestUtility.CreateEventEntity(0, "{\"Key\": \"Example Key\", \"This Doesn't Exist\": 5,\"Count\": 5, \"Sum\": 10}");
-            CountlyEventModel expected = new CountlyEventModel(key: "Example Key", sum: 10, count: 5);
+            EventEntity entity = TestUtility.CreateEventEntity(0, TestUtility.CreateEventEntityJSONString(key: "Example Key", count: 5, sum: 10, customData: "\"This Doesn't Exist\": 5"));
+            CountlyEventModel expected = TestUtility.CreateEventModel(key: "Example Key", sum: 10, count: 5);
             EventEntityToEventModel_base(entity, expected);
         }
 
