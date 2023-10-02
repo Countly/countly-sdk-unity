@@ -5,6 +5,7 @@ using Plugins.CountlySDK.Enums;
 using Plugins.CountlySDK.Helpers;
 using Plugins.CountlySDK.Models;
 
+
 namespace Plugins.CountlySDK
 {
     public class CountlyUtils
