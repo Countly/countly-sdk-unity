@@ -63,6 +63,7 @@ namespace Assets.Tests.PlayModeTests
 
             return logHelper;
         }
+
         /// <summary>
         /// Creates an EventEntity for testing purposes, with provided id and json.
         /// </summary>
