@@ -5,7 +5,6 @@ using Plugins.CountlySDK.Enums;
 using Plugins.CountlySDK.Helpers;
 using Plugins.CountlySDK.Models;
 
-
 namespace Plugins.CountlySDK
 {
     public class CountlyUtils
@@ -30,7 +29,7 @@ namespace Plugins.CountlySDK
         }
 
         /// <summary>
-        /// Retrieves a dictionary of base parameters required for requsts to the Countly server.
+        /// Retrieves a dictionary of base parameters required for requests to the Countly server.
         /// </summary>
         /// <returns>
         /// A dictionary containing essential parameters, including "app_key," "device_id," "t," "sdk_name," "sdk_version," and time-based metrics.
