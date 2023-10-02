@@ -79,6 +79,7 @@ namespace Plugins.CountlySDK.Services
         /// </summary>
         /// <param name="name of the view"></param>
         /// <returns></returns>
+        //TODO: this performs in a non standard way. It should only be possible to close started views.
         public async Task RecordCloseViewAsync(string name)
         {
             lock (LockObj) {

@@ -4,11 +4,11 @@ using Plugins.CountlySDK;
 using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK.Persistance.Entities;
 using Newtonsoft.Json;
+using Plugins.CountlySDK.Enums;
 
 namespace Assets.Tests.PlayModeTests
 {
-    /// Utility class for creating Countly configurations, clearing SDK queues, and managing log helpers. <summary>        
-
+    /// Utility class for creating Countly configurations, clearing SDK queues, and managing log helpers.
     public class TestUtility
     {
         readonly static string SERVER_URL = "https://xyz.com/";
@@ -26,6 +26,20 @@ namespace Assets.Tests.PlayModeTests
                 AppKey = APP_KEY,
                 DeviceId = DEVICE_ID,
             };
+
+            return configuration;
+        }
+
+        public static CountlyConfiguration createBaseConfigConsent(Consents[] givenConsent)
+        {
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                ServerUrl = SERVER_URL,
+                AppKey = APP_KEY,
+                DeviceId = DEVICE_ID,
+            };
+
+            configuration.RequiresConsent = true;
+            configuration.GiveConsent(givenConsent);
 
             return configuration;
         }
@@ -49,6 +63,7 @@ namespace Assets.Tests.PlayModeTests
 
             return logHelper;
         }
+
         /// <summary>
         /// Creates an EventEntity for testing purposes, with provided id and json.
         /// </summary>
