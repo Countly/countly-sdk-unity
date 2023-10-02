@@ -16,7 +16,6 @@ namespace Tests
         // Validates the properties of a CountlyEventModel object for view events or view action events
         private void ValidateViewEvent(CountlyEventModel model, string name, bool isOpenView, int start = 1, bool isAction = false)
         {
-            // Validating the values of model's variables.
             Assert.IsNull(model.Sum);
             Assert.AreEqual(1, model.Count);
             Assert.IsNull(model.Duration);
@@ -36,21 +35,19 @@ namespace Tests
         }
 
         // It validates the event repository initial state.
-        // After initializing Countly, ViewCountlyService shouldn't be null.
+        // After initializing Countly, ViewCountlyService shouldn't be "null".
         // If no event is recorded, count in the event repository should be 0.
         [Test]
         public void ViewsRepoInitialState()
         {
-            // Initialize Countly.
             Countly.Instance.Init(TestUtility.createBaseConfig());
 
-            // Validate if ViewCountlyService is not null and repository is empty.
             Assert.IsNotNull(Countly.Instance.Views);
             Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
         }
 
         // 'RecordOpenViewAsync' method in ViewCountlyService.
-        // We validate the dependency of 'Event Consent'.
+        // We validate the view interraction with of 'Event Consent'.
         // Views Service should only record if consent is given.
         [Test]
         public async void EventConsentDependency()
@@ -79,8 +76,8 @@ namespace Tests
         }
 
         // 'RecordOpenViewAsync' method in ViewCountlyService
-        // We check the working of Views Service if no views consent is given.
-        // If no consent is given, Views Service shouldn't record
+        // Validating how Views Service performs if no "views" consent is given.
+        // If no consent is given, Views Service shouldn't record anything
         [Test]
         public async void ViewsConsent()
         {
@@ -103,7 +100,7 @@ namespace Tests
 
         // 'RecordOpenViewAsync' method in ViewCountlyService
         // We validate the limit of the view's name size with configuring MaxKeyLength.
-        // View Name length should be equal to the MaxKeyLength
+        // View Name length should be equal to the "MaxKeyLength"
         [Test]
         public async void ViewNameLimit()
         {
@@ -127,35 +124,24 @@ namespace Tests
         }
 
         // 'RecordCloseViewAsync' method in ViewCountlyService.
-        // Records the closing of a view and verifies the event is correctly recorded in the Views repository
+        // We close a view. Verify that the event is correctly recorded in the Views repository
         // If a valid view name is provided, it should be recorded and EventModel should be validated by ValidateViewEvent
         [Test]
         public async void RecordCloseViewAsync()
         {
-            // Initialize Countly
             Countly.Instance.Init(TestUtility.createBaseConfig());
-
-            // Views repository in the Countly instance should not be null.
             Assert.IsNotNull(Countly.Instance.Views);
-
-            // Count of events in the event repository of the Views should be zero initially.
             Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
 
-            // Record the closing of a view with the name "close_view".
             await Countly.Instance.Views.RecordCloseViewAsync("close_view");
-
-            // After recording, there should be one event in the event repository.
             Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
 
-            // Dequeue the recorded event from the event repository for validation.
             CountlyEventModel model = Countly.Instance.Views._eventService._eventRepo.Dequeue();
-
-            // Validate the recorded event.
             ValidateViewEvent(model, "close_view", false);
         }
 
         // 'RecordCloseViewAsync' method in ViewCountlyService.
-        // Records the closing of a view and verifies the event is correctly recorded in the Views repository
+        // Close a view, verify that the event is correctly recorded in the Views repository
         // If a null view name is provided, it shouldn't be recorded. 
         [Test]
         public async void RecordCloseViewAsync_NullViewName()
@@ -170,7 +156,7 @@ namespace Tests
         }
 
         // 'RecordCloseViewAsync' method in ViewCountlyService.
-        // Records the closing of a view and verifies the event is correctly recorded in the Views repository
+        // Close a view, verify that the event is correctly recorded in the Views repository
         // If an empty view name is provided, it shouldn't be recorded. 
         [Test]
         public async void RecordCloseViewAsync_EmptyViewName()
@@ -185,40 +171,31 @@ namespace Tests
         }
 
         // 'RecordOpenViewAsync' method in ViewCountlyService.
-        // Records the opening of a view and verifies the event is correctly recorded in the Views repository
+        // Open a view and verify that the event is correctly recorded in the Views repository
         // If a valid view name is provided, it should be recorded and EventModel should be validated by ValidateViewEvent
+        // It's possible to open 2 views at the same time
         [Test]
         public async void RecordOpenViewAsync()
         {
-            // Initialize Countly
             Countly.Instance.Init(TestUtility.createBaseConfig());
-
-            // Views repository in the Countly instance should not be null.
             Assert.IsNotNull(Countly.Instance.Views);
-
-            // Count of events in the event repository of the Views should be zero initially.
             Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
 
+            //record the first view
             await Countly.Instance.Views.RecordOpenViewAsync("open_view");
-
-            // After recording, there should be one event in the event repository.
             Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
-
-            // Dequeue the recorded event from the event repository for validation.
             CountlyEventModel model = Countly.Instance.Views._eventService._eventRepo.Dequeue();
             ValidateViewEvent(model, "open_view", true);
 
-            // Record the opening of the second view with the name "open_view_2".
+            //record the second view and make sure it's not marked as a start view
             await Countly.Instance.Views.RecordOpenViewAsync("open_view_2");
-
-            // There should still be only one event in the event repository, and it should be validated.
             Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
             model = Countly.Instance.Views._eventService._eventRepo.Dequeue();
             ValidateViewEvent(model, "open_view_2", true, 0);
         }
 
         // 'RecordOpenViewAsync' method in ViewCountlyService.
-        // Records the opening of a view and verifies the event is correctly recorded in the Views repository
+        // Open a view and verify that the event is correctly recorded in the Views repository
         // If an null view name is provided, it shouldn't be recorded. 
         [Test]
         public async void RecordOpenViewAsync_NullViewName()
@@ -233,7 +210,7 @@ namespace Tests
         }
 
         // 'RecordOpenViewAsync' method in ViewCountlyService.
-        // Records the opening of a view and verifies the event is correctly recorded in the Views repository
+        // Open a view and verify that the event is correctly recorded in the Views repository
         // If an empty view name is provided, it shouldn't be recorded. 
         [Test]
         public async void RecordOpenViewAsync_EmptyViewName()
@@ -248,7 +225,7 @@ namespace Tests
         }
 
         // 'RecordOpenViewAsync' method in ViewCountlyService.
-        // Records the opening of a view with segmentation and verifies the event is correctly recorded in the Views repository 
+        // Open a view with segmentation  and verify that verifies the event is correctly recorded in the Views repository 
         // If a valid view name and segmentation is provided, it should be recorded and EventModel should be validated by ValidateViewEvent
         [Test]
         public async void RecordOpenViewAsyncWithSegment()
@@ -258,12 +235,13 @@ namespace Tests
             Assert.IsNotNull(Countly.Instance.Views);
             Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
 
-            Dictionary<string, object> segmentations = new Dictionary<string, object>();
-            segmentations.Add("name", "new_open_view"); // override name
-            segmentations.Add("key1", "value1");
-            segmentations.Add("key2", null); // invalid value
-            segmentations.Add("", "value2"); // invalid key
-            segmentations.Add("visit", null); // override existing key with invalid value
+            Dictionary<string, object> segmentations = new Dictionary<string, object> {
+                { "name", "new_open_view" }, // override name
+                { "key1", "value1" },
+                { "key2", null }, // invalid value
+                { "", "value2" }, // invalid key
+                { "visit", null } // override existing key with invalid value
+            };
 
             await Countly.Instance.Views.RecordOpenViewAsync("open_view", segmentations);
             Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
@@ -284,8 +262,8 @@ namespace Tests
         }
 
         // 'RecordOpenViewAsync' method in ViewCountlyService.
-        // We set an EventQueueThreshold limit before initialization.
-        // Event count in the repository should never pass the threshold. 
+        // We set an EventQueueThreshold limit before initialization and add events.
+        // Once we reach the treshold, all events in the EQ should be written out to the RQ
         [Test]
         public async void EventQueueThreshold_Limit()
         {
@@ -304,11 +282,13 @@ namespace Tests
 
             await Countly.Instance.Views.ReportActionAsync("action", 10, 10, 100, 100);
             Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
+
+            //todo: add verification in the RQ
         }
 
         // 'ReportActionAsync' method in ViewCountlyService.
         // We report a particular action with the specified details
-        // If a valid action is provided, it should be recorded and validated.
+        // The action should be recorded and its fields are validated.
         [Test]
         public async void ReportActionAsync()
         {
@@ -331,24 +311,18 @@ namespace Tests
         }
 
         // 'RecordOpenViewAsync' method in ViewCountlyService.
-        // We validate the behavior of the "isFirstView" field and view event recording when consent is required.
-        // "isFirstView" field should be false if a view is recorded. 
+        // We record a view. Consent is required, consent is given. The recorded view is the first view.
+        // The recorded view should be marked with te "first_view" flag 
         [Test]
         public async void StartField()
         {
-            // Create a CountlyConfiguration with consent requirements enabled.
-            CountlyConfiguration configuration = TestUtility.createBaseConfig();
-            configuration.RequiresConsent = true;
-
-            // Give consent to various features and initialize Countly
-            configuration.GiveConsent(new Consents[] { Consents.Crashes, Consents.Events, Consents.Clicks, Consents.StarRating, Consents.Views, Consents.Users, Consents.Push, Consents.RemoteConfig, Consents.Location });
+            CountlyConfiguration configuration = TestUtility.createBaseConfigConsent(new Consents[] { Consents.Crashes, Consents.Events, Consents.Clicks, Consents.StarRating, Consents.Views, Consents.Users, Consents.Push, Consents.RemoteConfig, Consents.Location });
             Countly.Instance.Init(configuration);
 
             Assert.IsNotNull(Countly.Instance.Views);
             Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
             Assert.IsTrue(Countly.Instance.Views._isFirstView);
 
-            // Record the opening of the first view with the name "first_view".
             await Countly.Instance.Views.RecordOpenViewAsync("first_view");
             Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
             Assert.IsFalse(Countly.Instance.Views._isFirstView);
@@ -364,13 +338,9 @@ namespace Tests
         [Test]
         public async void StartField_AfterDeviceIdChangeWithoutMerge()
         {
-            // Create a CountlyConfiguration with consent requirements enabled and initialize Countly .
-            CountlyConfiguration configuration = TestUtility.createBaseConfig();
-            configuration.RequiresConsent = true;
-            configuration.GiveConsent(new Consents[] { Consents.Crashes, Consents.Events, Consents.Clicks, Consents.StarRating, Consents.Views, Consents.Users, Consents.Push, Consents.RemoteConfig, Consents.Location });
+            CountlyConfiguration configuration = TestUtility.createBaseConfigConsent(new Consents[] { Consents.Crashes, Consents.Events, Consents.Clicks, Consents.StarRating, Consents.Views, Consents.Users, Consents.Push, Consents.RemoteConfig, Consents.Location });
             Countly.Instance.Init(configuration);
 
-            // The Views repository in the Countly instance should not be null
             Assert.IsNotNull(Countly.Instance.Views);
             Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
             Assert.IsTrue(Countly.Instance.Views._isFirstView);
