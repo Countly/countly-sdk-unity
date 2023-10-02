@@ -38,30 +38,20 @@ namespace Tests
         [Test]
         public async void CrashConsent()
         {
-            CountlyConfiguration configuration = TestUtility.createBaseConfig();
-            configuration.RequiresConsent = true;
+            CountlyConfiguration configuration = TestUtility.createBaseConfigConsent(new Plugins.CountlySDK.Enums.Consents[] { });
             Countly.Instance.Init(configuration);
 
-            // Clear the request repository to ensure no requests are queued.
             Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
-
-            // Assert that the CrashReports instance is not null.
             Assert.IsNotNull(Countly.Instance.CrashReports);
-
-            // Assert that the initial count of requests in the repository is 0.
             Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
 
-            // Define custom segmentation data for the crash report.
             Dictionary<string, object> seg = new Dictionary<string, object>
             {
                 { "Time Spent", "1234455" },
                 { "Retry Attempts", "10" }
             };
 
-            // Send a crash report asynchronously.
             await Countly.Instance.CrashReports.SendCrashReportAsync("message", "StackTrace", seg);
-
-            // Assert that no requests have been added to the request repository.
             Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
         }
 
@@ -71,33 +61,23 @@ namespace Tests
         [Test]
         public void CrashBreadCrumbs()
         {
-            // Initialize Countly
-            CountlyConfiguration configuration = TestUtility.createBaseConfig();
-            Countly.Instance.Init(configuration);
+            Countly.Instance.Init(TestUtility.createBaseConfig());
 
-            // Assert that the CrashReports instance is not null.
             Assert.IsNotNull(Countly.Instance.CrashReports);
-
-            // Assert that the initial count of crash breadcrumbs is 0.
             Assert.AreEqual(0, Countly.Instance.CrashReports._crashBreadcrumbs.Count);
 
-            // Add a breadcrumb to the crash reporting system.
             Countly.Instance.CrashReports.AddBreadcrumbs("bread_crumbs");
 
-            // Assert that there is now 1 breadcrumb in the system.
             Assert.AreEqual(1, Countly.Instance.CrashReports._crashBreadcrumbs.Count);
-
-            // Verify that the added breadcrumb can be dequeued and matches the original value.
             Assert.AreEqual("bread_crumbs", Countly.Instance.CrashReports._crashBreadcrumbs.Dequeue());
         }
 
         // 'SendCrashReportAsync' method in CrashReportsCountlyService.
-        // We verify the limitations of crash reporting parameters based on the configured maximum values.
-        // CrashReport that is sent should be within the configured maximum values.
+        // Validate SDK limits on crash parameters
+        // The provided values should be limited by the limits
         [Test]
         public async void CrashLimits()
         {
-            // Initialize Countly with specific configuration values for maximum parameter lengths and counts.
             CountlyConfiguration configuration = TestUtility.createBaseConfig();
             configuration.MaxValueSize = 5;
             configuration.MaxKeyLength = 5;
@@ -107,23 +87,10 @@ namespace Tests
             Countly.Instance.Init(configuration);
             Countly.Instance.ClearStorage();
 
-            // Assert that the CrashReports instance is not null.
+
             Assert.IsNotNull(Countly.Instance.CrashReports);
-
-            // Assert that the initial count of requests in the repository is 0.
             Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
 
-            // Attempt to send empty or null crash reports and verify that they are not added to the repository.
-            await Countly.Instance.CrashReports.SendCrashReportAsync("", "StackTrace", null);
-            Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
-
-            await Countly.Instance.CrashReports.SendCrashReportAsync(null, "StackTrace", null);
-            Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
-
-            await Countly.Instance.CrashReports.SendCrashReportAsync(" ", "StackTrace", null);
-            Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
-
-            // Define custom segmentation data for a valid crash report.
             Dictionary<string, object> seg = new Dictionary<string, object>
             {
                 { "Time", "1234455" },
@@ -131,7 +98,6 @@ namespace Tests
                 { "Temp", "100" }
             };
 
-            // Send a valid crash report and verify that it is added to the repository.
             await Countly.Instance.CrashReports.SendCrashReportAsync("message", "StackTrace_1\nStackTrace_2\nStackTrace_3", seg);
             Assert.AreEqual(1, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
 
@@ -139,14 +105,12 @@ namespace Tests
             CountlyRequestModel requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
             NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
 
-            // Define segmentation data for the expected crash report.
             Dictionary<string, object> segmentation = new Dictionary<string, object>
             {
                 { "Time", "12344" },
                 { "Retry", "10" },
             };
 
-            // Verify that the sent crash report matches the expected properties.
             AssertCrashRequest(collection, "message", "Stack\nStack", true, segmentation);
         }
 
@@ -156,33 +120,25 @@ namespace Tests
         [Test]
         public async void SendCrashReportAsyncDeprecated()
         {
-            // Initialize Countly and clear the repository
-            CountlyConfiguration configuration = TestUtility.createBaseConfig();
-            Countly.Instance.Init(configuration);
+            Countly.Instance.Init(TestUtility.createBaseConfig());
             Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
 
-            // Validate that there are no CrashReport at the repository
             Assert.IsNotNull(Countly.Instance.CrashReports);
             Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
 
-            // Send CrashReport with null message, LogType and null segments
             await Countly.Instance.CrashReports.SendCrashReportAsync(null, "stackTrace", LogType.Log, null);
             Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
 
-            // Send CrashReport with white-space message, LogType and null segments
             await Countly.Instance.CrashReports.SendCrashReportAsync(" ", "stackTrace", LogType.Log, null);
             Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
 
-            // Send CrashReport with empty message, LogType and null segments
             await Countly.Instance.CrashReports.SendCrashReportAsync("", "stackTrace", LogType.Log, null);
             Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
 
-            // Create segmentation to send a CrashReport with segmentation
             Dictionary<string, object> seg = new Dictionary<string, object>{
                 { "ExampleSegmentation", "Segment1"},
             };
 
-            // Send CrashReport with message, LogType and segmentation
             await Countly.Instance.CrashReports.SendCrashReportAsync("Crash message", "stackTrace", LogType.Log, seg);
             Assert.AreEqual(1, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
 
@@ -197,28 +153,23 @@ namespace Tests
         [Test]
         public async void SendCrashReportAsync()
         {
-            // Initialize Countly and clear the repository
-            CountlyConfiguration configuration = TestUtility.createBaseConfig();
-            Countly.Instance.Init(configuration);
+            Countly.Instance.Init(TestUtility.createBaseConfig());
             Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
 
-            // Validate that there are no CrashReport at the repository
             Assert.IsNotNull(Countly.Instance.CrashReports);
             Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
 
-            // Send CrashReport with empty message and null segments
+            //crashes with bad params are not recorded
             await Countly.Instance.CrashReports.SendCrashReportAsync("", "StackTrace", null);
             Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
 
-            // Send CrashReport with null message and null segments
             await Countly.Instance.CrashReports.SendCrashReportAsync(null, "StackTrace", null);
             Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
 
-            // Send CrashReport with white-space message and null segments
             await Countly.Instance.CrashReports.SendCrashReportAsync(" ", "StackTrace", null);
             Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
 
-            // Create segmentation to send a CrashReport with segmentation
+
             Dictionary<string, object> seg = new Dictionary<string, object>{
                 { "Time Spent", "1234455"},
                 { "Retry Attempts", "10"}
@@ -239,31 +190,19 @@ namespace Tests
         [Test]
         public void CrashBreadCrumbsLength()
         {
-            // Initialize Countly
-            CountlyConfiguration configuration = TestUtility.createBaseConfig();
-            Countly.Instance.Init(configuration);
+            Countly.Instance.Init(TestUtility.createBaseConfig());
 
-            // CrashReports instance is not null and initial count of crash breadcrumbs is 0
             Assert.IsNotNull(Countly.Instance.CrashReports);
             Assert.AreEqual(0, Countly.Instance.CrashReports._crashBreadcrumbs.Count);
 
-            // Define a long breadcrumb string and add the breadcrumb
             string breadCrumbs = "12345123451234512345123451234512345112345123451234512345123451234512345112345123451234512345123451234512345112345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345";
             Countly.Instance.CrashReports.AddBreadcrumbs(breadCrumbs);
 
-            // There is now 1 breadcrumb in the queue
             Assert.AreEqual(1, Countly.Instance.CrashReports._crashBreadcrumbs.Count);
-
-            // Dequeue the breadcrumb from the queue
             string qBreadCrumbs = Countly.Instance.CrashReports._crashBreadcrumbs.Dequeue();
-
-            // The dequeued breadcrumb has a length of 256 characters
             Assert.AreEqual(256, qBreadCrumbs.Length);
 
-            // Create a valid breadcrumb string of maximum length 256 characters
             string validBreadcrumb = breadCrumbs.Length > 256 ? breadCrumbs.Substring(0, 256) : breadCrumbs;
-
-            // The dequeued breadcrumb matches the valid breadcrumb
             Assert.AreEqual(validBreadcrumb, qBreadCrumbs);
         }
 
@@ -273,42 +212,31 @@ namespace Tests
         [Test]
         public void LimitOfAllowedBreadCrumbs()
         {
-            // Initialize Countly with a configuration allowing a maximum of 5 breadcrumbs.
             CountlyConfiguration configuration = TestUtility.createBaseConfig();
             configuration.TotalBreadcrumbsAllowed = 5;
             Countly.Instance.Init(configuration);
 
-            // Assert that the CrashReports instance is not null.
             Assert.IsNotNull(Countly.Instance.CrashReports);
-
-            // Assert that the initial count of crash breadcrumbs is 0.
             Assert.AreEqual(0, Countly.Instance.CrashReports._crashBreadcrumbs.Count);
 
-            // Add breadcrumbs to the system.
             Countly.Instance.CrashReports.AddBreadcrumbs("bread_crumbs_1");
             Countly.Instance.CrashReports.AddBreadcrumbs("bread_crumbs_2");
             Countly.Instance.CrashReports.AddBreadcrumbs("bread_crumbs_3");
-
-            // Verify that there are 3 breadcrumbs in the system.
             Assert.AreEqual(3, Countly.Instance.CrashReports._crashBreadcrumbs.Count);
 
-            // Add more breadcrumbs to reach the maximum allowed count.
+            // Add more and recognize that they are already limited
             Countly.Instance.CrashReports.AddBreadcrumbs("bread_crumbs_4");
             Countly.Instance.CrashReports.AddBreadcrumbs("bread_crumbs_5");
             Countly.Instance.CrashReports.AddBreadcrumbs("bread_crumbs_6");
-
-            // Verify that there are now 5 breadcrumbs in the system.
             Assert.AreEqual(5, Countly.Instance.CrashReports._crashBreadcrumbs.Count);
 
             // Add more breadcrumbs beyond the allowed limit.
             Countly.Instance.CrashReports.AddBreadcrumbs("bread_crumbs_7");
             Countly.Instance.CrashReports.AddBreadcrumbs("bread_crumbs_8");
             Countly.Instance.CrashReports.AddBreadcrumbs("bread_crumbs_9");
-
-            // Verify that the system still contains 5 breadcrumbs, with older ones dequeued.
             Assert.AreEqual(5, Countly.Instance.CrashReports._crashBreadcrumbs.Count);
 
-            // Verify that the oldest breadcrumbs have been dequeued.
+            // Verify that the oldest breadcrumbs have been dropped and only the latest ones remain
             Assert.AreEqual("bread_crumbs_5", Countly.Instance.CrashReports._crashBreadcrumbs.Dequeue());
             Assert.AreEqual("bread_crumbs_6", Countly.Instance.CrashReports._crashBreadcrumbs.Dequeue());
             Assert.AreEqual("bread_crumbs_7", Countly.Instance.CrashReports._crashBreadcrumbs.Dequeue());
@@ -321,10 +249,7 @@ namespace Tests
         [TearDown]
         public void End()
         {
-            // Clear Countly storage to remove any stored data.
             Countly.Instance.ClearStorage();
-
-            // Destroy the Countly instance immediately to ensure a clean state.
             Object.DestroyImmediate(Countly.Instance);
         }
     }
