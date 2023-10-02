@@ -29,7 +29,7 @@ namespace Plugins.CountlySDK
         }
 
         /// <summary>
-        /// Retrieves a dictionary of base parameters required for Countly communication.
+        /// Retrieves a dictionary of base parameters required for requsts to the Countly server.
         /// </summary>
         /// <returns>
         /// A dictionary containing essential parameters, including "app_key," "device_id," "t," "sdk_name," "sdk_version," and time-based metrics.
@@ -70,6 +70,7 @@ namespace Plugins.CountlySDK
 
         /// <summary>
         /// Checks whether a string is null, empty, or consists only of whitespace characters.
+        /// Convenience call that combines both checks
         /// </summary>
         /// <param name="input">The string to be checked.</param>
         /// <returns>
@@ -90,7 +91,7 @@ namespace Plugins.CountlySDK
         /// </returns>
         public bool IsPictureValid(string pictureUrl)
         {
-            // Check if the input string is not null or empty and contains a query string (?).
+            // Check if the provided url contains additional query parameters. Indicated by "?" 
             if (!string.IsNullOrEmpty(pictureUrl) && pictureUrl.Contains("?")) {
                 // Remove the query string portion to isolate the file extension.
                 pictureUrl = pictureUrl.Split(new[] { '?' }, StringSplitOptions.RemoveEmptyEntries)[0];
@@ -110,32 +111,34 @@ namespace Plugins.CountlySDK
         /// <param name="bytes">The byte array to be converted.</param>
         /// <returns>
         /// A hexadecimal string representation of the input byte array,
-        /// or an empty string if the input byte array is null.
+        /// or an empty string if the input byte array is <c>null</c>.
         /// </returns>
         public string GetStringFromBytes(byte[] bytes)
         {
-            if (bytes != null) {
-                StringBuilder hex = new StringBuilder(bytes.Length * 2);
-
-                // Iterate through each byte and convert to hexadecimal
-                foreach (byte b in bytes) {
-                    hex.AppendFormat("{0:x2}", b);
-                }
-
-                // Return the hexadecimal string
-                return hex.ToString();
-            } else {
-                // Return an empty string if the input byte array is null
+            if (bytes == null) {
+                // Always return a value as a fallback
                 return "";
             }
+
+            StringBuilder hex = new StringBuilder(bytes.Length * 2);
+
+            // Iterate through each byte and convert to hexadecimal
+            foreach (byte b in bytes) {
+                hex.AppendFormat("{0:x2}", b);
+            }
+
+            return hex.ToString();
         }
 
-        // Determines the type of device ID currently configured in the Countly instance.
+        /// <summary>
+        /// Returns the device ID type of the current device ID.<br/>   
+        /// 0 - developer provided<br/>
+        /// 1 - SDK generated<br/>
+        /// </summary>
         private int Type()
         {
             int type = 0;
 
-            // Determine the type of device ID
             switch (_countly.Device.DeviceIdType) {
                 case DeviceIdType.DeveloperProvided:
                     type = 0;
