@@ -15,17 +15,12 @@ namespace Tests
         [Test]
         public void GetAppKeyAndDeviceIdParams()
         {
-            // Create a base Countly configuration and initialize Countly
-            CountlyConfiguration configuration = TestUtility.createBaseConfig();
-            Countly.Instance.Init(configuration);
+            Countly.Instance.Init(TestUtility.createBaseConfig());
 
-            // Create a CountlyUtils instance
             CountlyUtils utils = new CountlyUtils(Countly.Instance);
 
-            // Retrieve the "app_key" and "device_id" parameters
             Dictionary<string, object> userParams = utils.GetAppKeyAndDeviceIdParams();
 
-            // Perform assertions
             Assert.IsNotNull(userParams);
             Assert.AreEqual(userParams.Count, userParams.Count);
             Assert.AreEqual(userParams["app_key"], userParams["app_key"]);
@@ -37,17 +32,10 @@ namespace Tests
         // Method should convert the provided array into string
         public void GetStringFromBytes_base(byte[] byteArray, string expected)
         {
-            // Create a base Countly configuration and initialize Countly
-            CountlyConfiguration configuration = TestUtility.createBaseConfig();
-            Countly.Instance.Init(configuration);
-
-            // Create a CountlyUtils instance
+            Countly.Instance.Init(TestUtility.createBaseConfig());
             CountlyUtils utils = new CountlyUtils(Countly.Instance);
 
-            // Connvert the byte array to a hexadecimal string
             string hexString = utils.GetStringFromBytes(byteArray);
-
-            // Perform assertion to ensure the correct conversion
             Assert.AreEqual(expected, hexString);
         }
 
@@ -102,17 +90,10 @@ namespace Tests
         [TestCase("invalid_url", ExpectedResult = false)] // Invalid URL without extension
         public bool TestIsPictureValid(string pictureUrl)
         {
-            // Create a base Countly configuration and initialize Countly
-            CountlyConfiguration configuration = TestUtility.createBaseConfig();
-            Countly.Instance.Init(configuration);
-
-            // Create a CountlyUtils instance
+            Countly.Instance.Init(TestUtility.createBaseConfig());
             CountlyUtils utils = new CountlyUtils(Countly.Instance);
 
-            // Check if the provided picture URL is valid
             bool isValid = utils.IsPictureValid(pictureUrl);
-
-            // Check if the method returns the expected result
             return isValid;
         }
 
