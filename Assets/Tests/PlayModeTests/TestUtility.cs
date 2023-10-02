@@ -7,7 +7,8 @@ using Newtonsoft.Json;
 
 namespace Assets.Tests.PlayModeTests
 {
-    /// Utility class for creating Countly configurations, clearing SDK queues, and managing log helpers.
+    /// Utility class for creating Countly configurations, clearing SDK queues, and managing log helpers. <summary>        
+
     public class TestUtility
     {
         readonly static string SERVER_URL = "https://xyz.com/";
