@@ -68,7 +68,7 @@ namespace Plugins.CountlySDK.Services
             Dictionary<string, object> config = null;
             List<ConfigEntity> allConfigs = _configDao.LoadAll();
             if (allConfigs != null && allConfigs.Count > 0) {
-                config = Converter.ConvertJsonToDictionary(allConfigs[0].Json);
+                config = Converter.ConvertJsonToDictionary(allConfigs[0].Json, Log);
             }
 
             Log.Debug("[RemoteConfigCountlyService] FetchConfigFromDB : Configs = " + config);
@@ -113,7 +113,7 @@ namespace Plugins.CountlySDK.Services
                     Json = response.Data
                 };
                 _configDao.Save(configEntity);
-                Configs = Converter.ConvertJsonToDictionary(response.Data);
+                Configs = Converter.ConvertJsonToDictionary(response.Data, Log);
 
                 Log.Debug("[RemoteConfigCountlyService] UpdateConfig: " + response.ToString());
 
