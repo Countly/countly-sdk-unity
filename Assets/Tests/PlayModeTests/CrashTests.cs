@@ -17,18 +17,13 @@ namespace Tests
         // Verifies that the collected crash report matches the with the expected 
         private void AssertCrashRequest(NameValueCollection collection, string msg, string stackTrace, bool isNonFatal, IDictionary<string, object> segmentation)
         {
-            // Parse the crash report as a JSON object.
             JObject crashObj = JObject.Parse(collection["crash"]);
 
-            // Assert that the error message, non-fatal status and stack trace matches the expected value.
             Assert.AreEqual(msg, crashObj.GetValue("_name").ToString());
             Assert.AreEqual(isNonFatal, crashObj.GetValue("_nonfatal").ToObject<bool>());
             Assert.AreEqual(stackTrace, crashObj.GetValue("_error").ToString());
 
-            // Extract the custom segmentation data from the crash report.
             JObject custom = crashObj["_custom"].ToObject<JObject>();
-
-            // If segmentation data is provided, verify that it matches the expected values.
             if (segmentation != null) {
                 Assert.AreEqual(segmentation.Count, custom.Count);
                 foreach (KeyValuePair<string, object> entry in segmentation) {
@@ -38,12 +33,11 @@ namespace Tests
         }
 
         // 'SendCrashReportAsync' method in CrashReportsCountlyService
-        // We check the working of crash service if no 'Crash' consent is given.
+        // Checks if crash service is working if no 'Crash' consent is given.
         // If consent is not given, no report should be sent.
         [Test]
         public async void CrashConsent()
         {
-            // Initialize Countly with consent required.
             CountlyConfiguration configuration = TestUtility.createBaseConfig();
             configuration.RequiresConsent = true;
             Countly.Instance.Init(configuration);
