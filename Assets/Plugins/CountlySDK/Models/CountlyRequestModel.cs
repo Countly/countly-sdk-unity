@@ -11,7 +11,7 @@ namespace Plugins.CountlySDK.Models
             RequestData = requestData;
         }
 
-
+        //the request URL field does not seem to be used and probably exists only for migration purposes
         public string RequestUrl { get; set; }
         public string RequestData { get; set; }
         public long Id { get; set; }

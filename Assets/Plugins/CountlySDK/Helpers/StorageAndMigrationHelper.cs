@@ -16,6 +16,7 @@ using System.Web;
 using System.Text;
 using UnityEngine.Networking;
 using Plugins.CountlySDK.Enums;
+using Plugins.CountlySDK.Persistance;
 
 namespace Plugins.CountlySDK.Helpers
 {
@@ -161,7 +162,8 @@ namespace Plugins.CountlySDK.Helpers
         }
 
         /// <summary>
-        /// Migration to version 1: Deletion Of data in the 'EventNumberInSameSessionEntity' table.
+        /// Helper for migration from version 0 to version 1.
+        /// Deletion Of data in the 'EventNumberInSameSessionEntity' table.
         /// </summary>
         private void Migration_EventNumberInSameSessionEntityDataRemoval()
         {
@@ -170,7 +172,8 @@ namespace Plugins.CountlySDK.Helpers
         }
 
         /// <summary>
-        /// Migration to version 1: Copy data of 'Views Repository(Entity Dao, Segment Dao)' into Event Repository(Entity Dao, Segment Dao)'.
+        /// Helper for migration from version 0 to version 1.
+        /// Copy data of 'Views Repository(Entity Dao, Segment Dao)' into Event Repository(Entity Dao, Segment Dao)'.
         /// </summary>
         private void Migration_CopyViewDataIntoEventData()
         {
@@ -182,14 +185,20 @@ namespace Plugins.CountlySDK.Helpers
         }
 
         /// <summary>
-        /// Migration to version 1: Copy data of 'Views Repository(Entity Dao, Segment Dao)' into Event Repository(Entity Dao, Segment Dao)'.
+        /// Helper for migration from version 1 to version 2.
+        /// Go through all requests and remove the checksum param set there.
+        /// Checksum would now be computed just before sending the request
         /// </summary>
         private void Migration_MigrateOldRequests()
         {
+            //get all stored requests
             CountlyRequestModel[] requestModels = RequestRepo.Models.ToArray();
             foreach (CountlyRequestModel request in requestModels) {
+                //go through all of them
                 if (request.RequestData == null) {
-
+                    // if we have no request data then that means that all of the info is in the request URL
+                    // start by parsing all the params from the URL.
+                    // remove the checksum and then write the request back as a string
                     int index = request.RequestUrl.IndexOf('?');
                     string uri = request.RequestUrl.Substring(index);
                     NameValueCollection collection = HttpUtility.ParseQueryString(uri);
@@ -201,6 +210,8 @@ namespace Plugins.CountlySDK.Helpers
                     request.RequestUrl = null;
                     request.RequestData = data;
                 } else {
+                    // if we don't have request data then that means that all of the request params are in the request data field
+                    // deserialize the values, remove the checksum and then combine them all into a single array which should then be the replacement
                     Dictionary<string, object> requestData = JsonConvert.DeserializeObject<Dictionary<string, object>>(request.RequestData);
                     requestData.Remove("checksum256");
 
@@ -210,11 +221,16 @@ namespace Plugins.CountlySDK.Helpers
 
                 bool result = RequestRepo.Update(request);
                 if (!result) {
-                    throw new DataException();
+                    _logHelper.Warning("[CountlyStorageHelper] Migration_MigrateOldRequests: updating the request failed");
+                    //we failed to update the old request,
+
+                    RequestRepo.DeleteEntry(request);
                 }
             }
             _logHelper.Verbose("[CountlyStorageHelper] Migration_MigrateOldRequests");
 
+            //refresh internal memory represensation for future migrations
+            RequestRepo.RefreshMemoryCache();
         }
 
         private void Migration_GuessTheDeviceIDType(bool customIdProvided)

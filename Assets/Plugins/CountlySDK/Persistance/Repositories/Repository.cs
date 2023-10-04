@@ -23,17 +23,7 @@ namespace Plugins.CountlySDK.Persistance.Repositories
 
         public virtual void Initialize()
         {
-            List<TEntity> entities = _dao.LoadAll();
-            foreach (TEntity entity in entities) {
-                TModel model = ConvertEntityToModel(entity);
-                if (!ValidateModelBeforeEnqueue(model)) {
-                    continue;
-                }
-
-                // Log.Verbose("[Repository] Loaded model: " + model.ToString());
-
-                Models.Enqueue(model);
-            }
+            RefreshMemoryCache();
 
             Log.Verbose("[Repository] Loaded entities of type " + typeof(TEntity).Name + " from db:" + entities.Count);
 
@@ -67,6 +57,34 @@ namespace Plugins.CountlySDK.Persistance.Repositories
         {
             TEntity entity = ConvertModelToEntity(model);
             return _dao.Update(entity);
+        }
+
+        public virtual void RefreshMemoryCache()
+        {
+            Models.Clear();
+
+            List<TEntity> entities = _dao.LoadAll();
+            foreach (TEntity entity in entities) {
+                TModel model = ConvertEntityToModel(entity);
+                if (!ValidateModelBeforeEnqueue(model)) {
+                    continue;
+                }
+
+                // Log.Verbose("[Repository] Loaded model: " + model.ToString());
+
+                Models.Enqueue(model);
+            }
+        }
+
+        /// <summary>
+        /// Should only be used for migration or tests
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        public virtual void DeleteEntry(TModel model)
+        {
+            _dao.Remove(model.Id);
+            Log.Verbose("[Repository] DeleteEntry, TModel: " + model.ToString());
         }
 
 
