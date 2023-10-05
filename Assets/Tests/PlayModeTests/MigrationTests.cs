@@ -15,6 +15,7 @@ using Plugins.CountlySDK.Persistance.Entities;
 using Plugins.CountlySDK.Persistance.Repositories;
 using Plugins.iBoxDB;
 using Plugins.CountlySDK.Enums;
+using Assets.Tests.PlayModeTests;
 
 namespace Tests
 {
@@ -41,12 +42,9 @@ namespace Tests
         /// It validates the request migration on empty request repo.
         /// </summary>
         [Test]
-        public void TestMigrationOnEmptyRequestRepo()
+        public void MigrationOnEmptyRequestRepo()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-            };
+            CountlyConfiguration configuration = TestUtility.createBaseConfig();
 
             TempStorageHelper storageHelper = new TempStorageHelper(new CountlyLogHelper(configuration));
             storageHelper.OpenDB();
@@ -73,13 +71,10 @@ namespace Tests
         /// It validates the request after migrating old GET request to new GET request format.
         /// </summary>
         [Test]
-        public void TestStoreGETRequestsAfterMigration()
+        public void StoreGETRequestsAfterMigration()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-                EnableConsoleLogging = false
-            };
+            CountlyConfiguration configuration = TestUtility.createBaseConfig();
+            configuration.EnableConsoleLogging = false;
 
             TempStorageHelper storageHelper = new TempStorageHelper(new CountlyLogHelper(configuration));
             storageHelper.OpenDB();
@@ -110,12 +105,9 @@ namespace Tests
         /// It validates the orders and format of request after migrating old GET requests to new GET request format.
         /// </summary>
         [Test]
-        public void TestMultipleGETRequestsAfterMigration()
+        public void MultipleGETRequestsAfterMigration()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-            };
+            CountlyConfiguration configuration = TestUtility.createBaseConfig();
 
             TempStorageHelper storageHelper = new TempStorageHelper(new CountlyLogHelper(configuration));
             storageHelper.OpenDB();
@@ -164,12 +156,9 @@ namespace Tests
         /// It validates the order and format of requests after migrating old POST requests to new POST request format.
         /// </summary>
         [Test]
-        public void TestMultiplePostRequestsAfterMigration()
+        public void MultiplePostRequestsAfterMigration()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-            };
+            CountlyConfiguration configuration = TestUtility.createBaseConfig();
 
             TempStorageHelper storageHelper = new TempStorageHelper(new CountlyLogHelper(configuration));
             storageHelper.OpenDB();
@@ -213,12 +202,9 @@ namespace Tests
         /// It validates the request after migrating old POST request to new POST request format.
         /// </summary>
         [Test]
-        public void TestStorePostRequestsAfterMigration()
+        public void StorePostRequestsAfterMigration()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-            };
+            CountlyConfiguration configuration = TestUtility.createBaseConfig();
 
             TempStorageHelper storageHelper = new TempStorageHelper(new CountlyLogHelper(configuration));
             storageHelper.OpenDB();
@@ -249,13 +235,9 @@ namespace Tests
         /// It validates the order and format of requests after migrating old POST and GET requests to new request format.
         /// </summary>
         [Test]
-        public void TestMultiplePostAndGetRequestsAfterMigration()
+        public void MultiplePostAndGetRequestsAfterMigration()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-            };
-
+            CountlyConfiguration configuration = TestUtility.createBaseConfig();
             TempStorageHelper storageHelper = new TempStorageHelper(new CountlyLogHelper(configuration));
             storageHelper.OpenDB();
             storageHelper.ClearDBData();
@@ -323,7 +305,7 @@ namespace Tests
         /// Result: Device type will be 'SDKGenerated'. 
         /// </summary>
         [Test]
-        public void TestDeviceIDTypeAfterMigration_NoDeviceIDProvided()
+        public void DeviceIDTypeAfterMigration_NoDeviceIDProvided()
         {
             Assert.False(PlayerPrefs.HasKey(Constants.SchemaVersion));
             Assert.False(PlayerPrefs.HasKey(Constants.DeviceIDKey));
@@ -357,7 +339,7 @@ namespace Tests
         /// Result: Device type will be 'DeveloperProvided'. 
         /// </summary>
         [Test]
-        public void TestDeviceIDTypeAfterMigration__DeviceIDProvided()
+        public void DeviceIDTypeAfterMigration__DeviceIDProvided()
         {
             Assert.False(PlayerPrefs.HasKey(Constants.SchemaVersion));
             Assert.False(PlayerPrefs.HasKey(Constants.DeviceIDKey));
@@ -366,14 +348,9 @@ namespace Tests
             PlayerPrefs.SetInt(Constants.SchemaVersion, 2);
             PlayerPrefs.SetString(Constants.DeviceIDKey, "device-id");
 
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-                DeviceId = "device-id"
-            };
             FirstLaunchAppHelper.Process();
 
-            Countly.Instance.Init(configuration);
+            Countly.Instance.Init(TestUtility.createBaseConfig());
 
             Assert.AreEqual("device-id", Countly.Instance.Device.DeviceId);
             Assert.AreEqual(DeviceIdType.DeveloperProvided, Countly.Instance.Device.DeviceIdType);
