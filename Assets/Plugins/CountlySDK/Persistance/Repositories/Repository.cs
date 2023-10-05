@@ -24,9 +24,6 @@ namespace Plugins.CountlySDK.Persistance.Repositories
         public virtual void Initialize()
         {
             RefreshMemoryCache();
-
-            Log.Verbose("[Repository] Loaded entities of type " + typeof(TEntity).Name + " from db:" + entities.Count);
-
         }
 
         public virtual bool Enqueue(TModel model)
@@ -74,6 +71,7 @@ namespace Plugins.CountlySDK.Persistance.Repositories
 
                 Models.Enqueue(model);
             }
+            Log.Verbose("[Repository] Loaded entities of type " + typeof(TEntity).Name + " from db:" + entities.Count);
         }
 
         /// <summary>
