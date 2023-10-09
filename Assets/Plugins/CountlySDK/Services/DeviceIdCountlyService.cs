@@ -181,6 +181,10 @@ namespace Plugins.CountlySDK.Services
             DeviceId = newDeviceId;
             DeviceIdType = type;
 
+            if (type == DeviceIdType.SDKGenerated) {
+                DeviceId = "CLY_" + DeviceId;
+            }
+
             //Updating Cache
             PlayerPrefs.SetString(Constants.DeviceIDKey, DeviceId);
             PlayerPrefs.SetInt(Constants.DeviceIDTypeKey, (int)DeviceIdType);
