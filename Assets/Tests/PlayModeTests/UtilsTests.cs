@@ -127,6 +127,17 @@ namespace Tests
             Assert.IsTrue(Countly.Instance.Device.DeviceId.StartsWith("CLY_")); //sdk generated
         }
 
+        // "CountlyUtils.GetUniqueDeviceId()"
+        // Generate a value
+        // That value should start with the "CLY_" prefix and it should be more then just the prefix
+        [Test]
+        public void GetUniqueDeviceId()
+        {
+            string generatedValue = CountlyUtils.GetUniqueDeviceId();
+            Assert.IsTrue(generatedValue.StartsWith("CLY_"));
+            Assert.IsTrue(generatedValue.Length > 4);
+        }
+
         [TearDown]
         public void End()
         {
