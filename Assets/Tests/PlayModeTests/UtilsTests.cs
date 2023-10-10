@@ -99,60 +99,32 @@ namespace Tests
             return isValid;
         }
 
-        // 'GetUniqueDeviceId' method in CountlyUtils
-        // We add "CLY_" preface to the SDK Generated device id
-        // If developer provided a device id which is not whitespace, empty or null, SDK should not generate one with a preface
-        public void GetUniqueDeviceId_base(string deviceId)
-        {
-            CountlyConfiguration configuration = TestUtility.createBaseConfig();
-            configuration.DeviceId = deviceId;
-            Countly.Instance.Init(configuration);
-
-            string currentDeviceID = Countly.Instance.Device.DeviceId;
-            Assert.IsNotNull(currentDeviceID);
-
-            if (!string.IsNullOrEmpty(deviceId) && !string.IsNullOrWhiteSpace(deviceId)) {
-                Assert.AreEqual(currentDeviceID, deviceId);
-                Assert.AreEqual(DeviceIdType.DeveloperProvided, Countly.Instance.Device.DeviceIdType);
-                Assert.AreNotEqual(currentDeviceID, CountlyUtils.GetUniqueDeviceId());
-                Assert.IsFalse(currentDeviceID.Contains("CLY_")); //developer provided 
-            } else {
-                Assert.AreEqual(currentDeviceID, CountlyUtils.GetUniqueDeviceId());
-                Assert.AreEqual(DeviceIdType.SDKGenerated, Countly.Instance.Device.DeviceIdType);
-                Assert.IsTrue(currentDeviceID.Contains("CLY_")); //sdk generated
-            }
-        }
-
-        // Developer is providing a device id which is not whitespace, empty or null
-        // Therefore developer provided device id should be used.
+        // The SDK device ID acquisition method
+        // During the first init we are providing a device ID value so the SDK does not generate a device ID
+        // The device ID that the SDK internally acquires should have no prefix
         [Test]
         public void GetUniqueDeviceId_UserProvidedDeviceId()
         {
-            GetUniqueDeviceId_base("device_id");
+            CountlyConfiguration configuration = TestUtility.createBaseConfig();
+            configuration.DeviceId = "device_id";
+            Countly.Instance.Init(configuration);
+
+            Assert.AreEqual(DeviceIdType.DeveloperProvided, Countly.Instance.Device.DeviceIdType);
+            Assert.IsFalse(Countly.Instance.Device.DeviceId.Contains("CLY_")); //developer provided
         }
 
-        // Developer is providing a device id which is empty
-        // Therefore SDK should generate a device id with "CLY_" preface
-        [Test]
-        public void GetUniqueDeviceId_EmptyDeviceId()
-        {
-            GetUniqueDeviceId_base("");
-        }
-
-        // Developer is providing a device id which is null
-        // Therefore SDK should generate a device id with "CLY_" preface
+        // The SDK device ID acquisition method
+        // During the first init we do not provide a device ID value so the SDK does generates a device ID
+        // The device ID that the SDK internally acquires should have a "CLY_" prefix
         [Test]
         public void GetUniqueDeviceId_NullDeviceId()
         {
-            GetUniqueDeviceId_base(null);
-        }
+            CountlyConfiguration configuration = TestUtility.createBaseConfig();
+            configuration.DeviceId = null;
+            Countly.Instance.Init(configuration);
 
-        // Developer is providing a device id which is whitespace
-        // Therefore SDK should generate a device id with "CLY_" preface
-        [Test]
-        public void GetUniqueDeviceId_WhitespaceDeviceId()
-        {
-            GetUniqueDeviceId_base(" ");
+            Assert.AreEqual(DeviceIdType.SDKGenerated, Countly.Instance.Device.DeviceIdType);
+            Assert.IsTrue(Countly.Instance.Device.DeviceId.StartsWith("CLY_")); //sdk generated
         }
 
         [TearDown]

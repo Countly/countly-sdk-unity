@@ -25,11 +25,7 @@ namespace Plugins.CountlySDK
 
         public static string GetUniqueDeviceId()
         {
-            if (Countly.Instance.Device.DeviceIdType == DeviceIdType.SDKGenerated) {
-                return "CLY_" + UnityEngine.SystemInfo.deviceUniqueIdentifier;
-            } else {
-                return UnityEngine.SystemInfo.deviceUniqueIdentifier;
-            }
+            return "CLY_" + UnityEngine.SystemInfo.deviceUniqueIdentifier;
         }
 
         /// <summary>
