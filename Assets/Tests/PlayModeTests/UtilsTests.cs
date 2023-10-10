@@ -4,6 +4,8 @@ using Plugins.CountlySDK.Models;
 using NUnit.Framework;
 using Assets.Tests.PlayModeTests;
 using UnityEngine;
+using Plugins.CountlySDK.Services;
+using Plugins.CountlySDK.Enums;
 
 namespace Tests
 {
@@ -95,6 +97,62 @@ namespace Tests
 
             bool isValid = utils.IsPictureValid(pictureUrl);
             return isValid;
+        }
+
+        // 'GetUniqueDeviceId' method in CountlyUtils
+        // We add "CLY_" preface to the SDK Generated device id
+        // If developer provided a device id which is not whitespace, empty or null, SDK should not generate one with a preface
+        public void GetUniqueDeviceId_base(string deviceId)
+        {
+            CountlyConfiguration configuration = TestUtility.createBaseConfig();
+            configuration.DeviceId = deviceId;
+            Countly.Instance.Init(configuration);
+
+            string currentDeviceID = Countly.Instance.Device.DeviceId;
+            Assert.IsNotNull(currentDeviceID);
+
+            if (!string.IsNullOrEmpty(deviceId) && !string.IsNullOrWhiteSpace(deviceId)) {
+                Assert.AreEqual(currentDeviceID, deviceId);
+                Assert.AreEqual(DeviceIdType.DeveloperProvided, Countly.Instance.Device.DeviceIdType);
+                Assert.AreNotEqual(currentDeviceID, CountlyUtils.GetUniqueDeviceId());
+                Assert.IsFalse(currentDeviceID.Contains("CLY_")); //developer provided 
+            } else {
+                Assert.AreEqual(currentDeviceID, CountlyUtils.GetUniqueDeviceId());
+                Assert.AreEqual(DeviceIdType.SDKGenerated, Countly.Instance.Device.DeviceIdType);
+                Assert.IsTrue(currentDeviceID.Contains("CLY_")); //sdk generated
+            }
+        }
+
+        // Developer is providing a device id which is not whitespace, empty or null
+        // Therefore developer provided device id should be used.
+        [Test]
+        public void GetUniqueDeviceId_UserProvidedDeviceId()
+        {
+            GetUniqueDeviceId_base("device_id");
+        }
+
+        // Developer is providing a device id which is empty
+        // Therefore SDK should generate a device id with "CLY_" preface
+        [Test]
+        public void GetUniqueDeviceId_EmptyDeviceId()
+        {
+            GetUniqueDeviceId_base("");
+        }
+
+        // Developer is providing a device id which is null
+        // Therefore SDK should generate a device id with "CLY_" preface
+        [Test]
+        public void GetUniqueDeviceId_NullDeviceId()
+        {
+            GetUniqueDeviceId_base(null);
+        }
+
+        // Developer is providing a device id which is whitespace
+        // Therefore SDK should generate a device id with "CLY_" preface
+        [Test]
+        public void GetUniqueDeviceId_WhitespaceDeviceId()
+        {
+            GetUniqueDeviceId_base(" ");
         }
 
         [TearDown]

@@ -83,7 +83,7 @@ namespace Plugins.CountlySDK.Services
 
                 //checking if developer provided device id is null or empty.
                 if (_countlyUtils.IsNullEmptyOrWhitespace(deviceId)) {
-                    UpdateDeviceIdAndDeviceIdType(_countlyUtils.GetUniqueDeviceId(), DeviceIdType.SDKGenerated);
+                    UpdateDeviceIdAndDeviceIdType(CountlyUtils.GetUniqueDeviceId(), DeviceIdType.SDKGenerated);
                 } else {
                     UpdateDeviceIdAndDeviceIdType(deviceId, DeviceIdType.DeveloperProvided);
                 }
@@ -180,10 +180,6 @@ namespace Plugins.CountlySDK.Services
             //Change device id and type
             DeviceId = newDeviceId;
             DeviceIdType = type;
-
-            if (type == DeviceIdType.SDKGenerated) {
-                DeviceId = "CLY_" + DeviceId;
-            }
 
             //Updating Cache
             PlayerPrefs.SetString(Constants.DeviceIDKey, DeviceId);

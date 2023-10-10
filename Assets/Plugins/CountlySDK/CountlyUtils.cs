@@ -23,9 +23,13 @@ namespace Plugins.CountlySDK
             ServerOutputUrl = _countly.Configuration.ServerUrl + "/o/sdk?";
         }
 
-        public string GetUniqueDeviceId()
+        public static string GetUniqueDeviceId()
         {
-            return UnityEngine.SystemInfo.deviceUniqueIdentifier;
+            if (Countly.Instance.Device.DeviceIdType == DeviceIdType.SDKGenerated) {
+                return "CLY_" + UnityEngine.SystemInfo.deviceUniqueIdentifier;
+            } else {
+                return UnityEngine.SystemInfo.deviceUniqueIdentifier;
+            }
         }
 
         /// <summary>
