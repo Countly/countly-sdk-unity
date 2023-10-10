@@ -4,6 +4,8 @@ using Plugins.CountlySDK.Models;
 using NUnit.Framework;
 using Assets.Tests.PlayModeTests;
 using UnityEngine;
+using Plugins.CountlySDK.Services;
+using Plugins.CountlySDK.Enums;
 
 namespace Tests
 {
@@ -95,6 +97,45 @@ namespace Tests
 
             bool isValid = utils.IsPictureValid(pictureUrl);
             return isValid;
+        }
+
+        // The SDK device ID acquisition method
+        // During the first init we are providing a device ID value so the SDK does not generate a device ID
+        // The device ID that the SDK internally acquires should have no prefix
+        [Test]
+        public void GetUniqueDeviceId_UserProvidedDeviceId()
+        {
+            CountlyConfiguration configuration = TestUtility.createBaseConfig();
+            configuration.DeviceId = "device_id";
+            Countly.Instance.Init(configuration);
+
+            Assert.AreEqual(DeviceIdType.DeveloperProvided, Countly.Instance.Device.DeviceIdType);
+            Assert.IsFalse(Countly.Instance.Device.DeviceId.Contains("CLY_")); //developer provided
+        }
+
+        // The SDK device ID acquisition method
+        // During the first init we do not provide a device ID value so the SDK does generates a device ID
+        // The device ID that the SDK internally acquires should have a "CLY_" prefix
+        [Test]
+        public void GetUniqueDeviceId_NullDeviceId()
+        {
+            CountlyConfiguration configuration = TestUtility.createBaseConfig();
+            configuration.DeviceId = null;
+            Countly.Instance.Init(configuration);
+
+            Assert.AreEqual(DeviceIdType.SDKGenerated, Countly.Instance.Device.DeviceIdType);
+            Assert.IsTrue(Countly.Instance.Device.DeviceId.StartsWith("CLY_")); //sdk generated
+        }
+
+        // "CountlyUtils.GetUniqueDeviceId()"
+        // Generate a value
+        // That value should start with the "CLY_" prefix and it should be more then just the prefix
+        [Test]
+        public void GetUniqueDeviceId()
+        {
+            string generatedValue = CountlyUtils.GetUniqueDeviceId();
+            Assert.IsTrue(generatedValue.StartsWith("CLY_"));
+            Assert.IsTrue(generatedValue.Length > 4);
         }
 
         [TearDown]

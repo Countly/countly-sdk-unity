@@ -83,7 +83,7 @@ namespace Plugins.CountlySDK.Services
 
                 //checking if developer provided device id is null or empty.
                 if (_countlyUtils.IsNullEmptyOrWhitespace(deviceId)) {
-                    UpdateDeviceIdAndDeviceIdType(_countlyUtils.GetUniqueDeviceId(), DeviceIdType.SDKGenerated);
+                    UpdateDeviceIdAndDeviceIdType(CountlyUtils.GetUniqueDeviceId(), DeviceIdType.SDKGenerated);
                 } else {
                     UpdateDeviceIdAndDeviceIdType(deviceId, DeviceIdType.DeveloperProvided);
                 }
