@@ -54,6 +54,10 @@ namespace Plugins.CountlySDK.Helpers
             _requestRepo.Enqueue(request);
         }
 
+        /// <summary>
+        ///  An internal method which iterates a queue of requests and sends them for processing.
+        ///  If a request fails, processing stops, and only successful requests are removed from the queue.
+        /// </summary>
         internal async Task ProcessQueue()
         {
             if (_isQueueBeingProcess) {
@@ -66,6 +70,8 @@ namespace Plugins.CountlySDK.Helpers
             Log.Verbose("[RequestCountlyHelper] Process queue, requests: " + requests.Length);
 
             foreach (CountlyRequestModel reqModel in requests) {
+                //add the remaining request count in RequestData
+                reqModel.RequestData += "&rr=" + (requests.Length - 1);
                 CountlyResponse response = await ProcessRequest(reqModel);
 
                 if (!response.IsSuccess) {
@@ -79,6 +85,9 @@ namespace Plugins.CountlySDK.Helpers
             _isQueueBeingProcess = false;
         }
 
+        /// <summary>
+        ///  Decides whether to use a POST or GET method based on configuration and request size, and then send the request accordingly.
+        /// </summary>
         private async Task<CountlyResponse> ProcessRequest(CountlyRequestModel model)
         {
             Log.Verbose("[RequestCountlyHelper] Process request, request: " + model);
