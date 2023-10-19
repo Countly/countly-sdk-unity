@@ -4,6 +4,7 @@ using System.Text;
 using Plugins.CountlySDK.Enums;
 using Plugins.CountlySDK.Helpers;
 using Plugins.CountlySDK.Models;
+using UnityEngine;
 
 namespace Plugins.CountlySDK
 {
@@ -32,7 +33,7 @@ namespace Plugins.CountlySDK
         /// Retrieves a dictionary of base parameters required for requests to the Countly server.
         /// </summary>
         /// <returns>
-        /// A dictionary containing essential parameters, including "app_key," "device_id," "t," "sdk_name," "sdk_version," and time-based metrics.
+        /// A dictionary containing essential parameters, including "app_key," "device_id," "t," "sdk_name," "sdk_version," "av," and time-based metrics.
         /// </returns>
         public Dictionary<string, object> GetBaseParams()
         {
@@ -42,17 +43,16 @@ namespace Plugins.CountlySDK
                 {"device_id", _countly.Device.DeviceId},
                 {"t", Type()},
                 {"sdk_name", Constants.SdkName},
-                {"sdk_version", Constants.SdkVersion}
+                {"sdk_version", Constants.SdkVersion},
+                {"av", CountlyMetricModel.GetAppVersion()}
             };
 
             // Add time-based metrics to the base parameters dictionary
             foreach (KeyValuePair<string, object> item in TimeMetricModel.GetTimeMetricModel()) {
                 baseParams.Add(item.Key, item.Value);
             }
-
             return baseParams;
         }
-
         /// <summary>
         /// Retrieves the set of parameters, "app_key" and "device_id,", required to be sent along with a remote configuration request.
         /// </summary>

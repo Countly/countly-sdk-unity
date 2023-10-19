@@ -13,15 +13,14 @@ using System.Collections;
 using UnityEngine.TestTools;
 using System.Linq;
 using System;
+using Assets.Tests.PlayModeTests;
+using Plugins.CountlySDK.Helpers;
+using System.Reflection;
 
 namespace Tests
 {
     public class SessionTests
     {
-        private readonly string _serverUrl = "https://xyz.com/";
-        private readonly string _appKey = "772c091355076ead703f987fee94490";
-
-
         /// <summary>
         /// Assert session request.
         /// </summary>
@@ -58,15 +57,9 @@ namespace Tests
         /// It checks the working of session service if no 'Session' consent is given.
         /// </summary>
         [Test]
-        public async void TestSessionConsent()
+        public async void SessionConsent()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-                RequiresConsent = true
-            };
-
-            Countly.Instance.Init(configuration);
+            Countly.Instance.Init(TestUtility.createBaseConfigConsent(null));
             Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
             Assert.IsNotNull(Countly.Instance.Session);
             Assert.AreEqual(0, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
@@ -79,21 +72,15 @@ namespace Tests
 
             await Countly.Instance.Session.EndSessionAsync();
             Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
-
         }
 
         /// <summary>
         /// It validates the functionality of 'BeginSessionAsync'.
         /// </summary>
         [Test]
-        public void TestSessionBegin_Default()
+        public void SessionBegin_Default()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-            };
-
-            Countly.Instance.Init(configuration);
+            Countly.Instance.Init(TestUtility.createBaseConfig());
             Assert.IsNotNull(Countly.Instance.Session);
             Assert.AreEqual(1, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
 
@@ -107,13 +94,9 @@ namespace Tests
         /// It validates the functionality of 'BeginSessionAsync' with location values.
         /// </summary>
         [Test]
-        public void TestSessionBegin_WithLocation()
+        public void SessionBegin_WithLocation()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-            };
-
+            CountlyConfiguration configuration = TestUtility.createBaseConfig();
             configuration.SetLocation("PK", "Lahore", "10.0,10.0", "192.168.100.51");
             Countly.Instance.Init(configuration);
             Assert.IsNotNull(Countly.Instance.Session);
@@ -130,13 +113,9 @@ namespace Tests
         /// It validates the functionality of 'BeginSessionAsync' with location disable.
         /// </summary>
         [Test]
-        public void TestSessionBegin_WithLocationDisable()
+        public void SessionBegin_WithLocationDisable()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-            };
-
+            CountlyConfiguration configuration = TestUtility.createBaseConfig();
             configuration.DisableLocation();
             Countly.Instance.Init(configuration);
             Assert.IsNotNull(Countly.Instance.Session);
@@ -153,15 +132,9 @@ namespace Tests
         /// It validates the functionality of 'BeginSessionAsync' when session consent is given after init.
         /// </summary>
         [Test]
-        public void TestSessionBegin_ConsentGivenAfterInit()
+        public void SessionBegin_ConsentGivenAfterInit()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-                RequiresConsent = true
-            };
-
-            Countly.Instance.Init(configuration);
+            Countly.Instance.Init(TestUtility.createBaseConfigConsent(null));
             Assert.IsNotNull(Countly.Instance.Session);
             Assert.AreEqual(2, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
             Countly.Instance.Session._requestCountlyHelper._requestRepo.Clear();
@@ -180,13 +153,9 @@ namespace Tests
         /// It validates the working of session service when automatic session tracking is disabled.
         /// </summary>
         [Test]
-        public void TestSessionService_WithDisableTracking()
+        public void SessionService_WithDisableTracking()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-            };
-
+            CountlyConfiguration configuration = TestUtility.createBaseConfig();
             configuration.DisableAutomaticSessionTracking();
             Countly.Instance.Init(configuration);
             Assert.IsNotNull(Countly.Instance.Session);
@@ -197,14 +166,9 @@ namespace Tests
         /// It validates if 'BeginSessionAsync' does call when session consent is given after init and automatic session tracking is disabled.
         /// </summary>
         [Test]
-        public void TestSessionBegin_ConsentGivenAfterInitWithDisableTracking()
+        public void SessionBegin_ConsentGivenAfterInitWithDisableTracking()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-                RequiresConsent = true
-            };
-
+            CountlyConfiguration configuration = TestUtility.createBaseConfigConsent(null);
             configuration.DisableAutomaticSessionTracking();
             Countly.Instance.Init(configuration);
             Assert.IsNotNull(Countly.Instance.Session);
@@ -214,22 +178,15 @@ namespace Tests
             Countly.Instance.Consents.GiveConsent(new Consents[] { Consents.Sessions });
             //RQ will have consent change request
             Assert.AreEqual(1, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
-
         }
 
         /// <summary>
         /// It validates if 'BeginSessionAsync' does call when session consent is given after init and session had begun before.
         /// </summary>
         [Test]
-        public void TestSessionBegin_ConsentGivenAfterSessionBegin()
+        public void SessionBegin_ConsentGivenAfterSessionBegin()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-                RequiresConsent = true
-            };
-
-            Countly.Instance.Init(configuration);
+            Countly.Instance.Init(TestUtility.createBaseConfigConsent(null));
             Assert.IsNotNull(Countly.Instance.Session);
             // RQ will have empty location request and consent reqeust
             Assert.AreEqual(2, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
@@ -248,23 +205,17 @@ namespace Tests
             // RQ will have Consent change request and Session begin request
             Countly.Instance.Consents.GiveConsent(new Consents[] { Consents.Sessions });
             Assert.AreEqual(2, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
-
         }
 
         /// <summary>
         /// It validates the request of 'ExtendSessionAsync'.
         /// </summary>
         [UnityTest]
-        public IEnumerator TestSessionExtend()
+        public IEnumerator SessionExtend()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-            };
-
             System.DateTime sessionStartTime = System.DateTime.Now;
 
-            Countly.Instance.Init(configuration);
+            Countly.Instance.Init(TestUtility.createBaseConfig());
             Assert.IsNotNull(Countly.Instance.Session);
             Assert.AreEqual(1, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
 
@@ -300,21 +251,14 @@ namespace Tests
         /// It validates the request of 'EndSessionAsync'.
         /// </summary>
         [UnityTest]
-        public IEnumerator TestSessionEnd()
+        public IEnumerator SessionEnd()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-            };
-
             System.DateTime sessionStartTime = System.DateTime.Now;
 
-            Countly.Instance.Init(configuration);
+            Countly.Instance.Init(TestUtility.createBaseConfig());
             Assert.IsNotNull(Countly.Instance.Session);
             Assert.AreEqual(1, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
             Countly.Instance.Session._requestCountlyHelper._requestRepo.Clear();
-
-
 
             System.DateTime startTime = System.DateTime.UtcNow;
             do {
@@ -338,7 +282,38 @@ namespace Tests
 
             NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
             AssertSessionRequest(collection, "end_session", duration);
+        }
 
+        // Validates the accuracy of the metrics within a request
+        // Parses the metrics within the request and compares with a new 'CountlyMetricModel'
+        // Metrics within the parsed object should be equal to the expected values.
+        [Test]
+        public void SessionMetrics()
+        {
+            Countly.Instance.Init(TestUtility.createBaseConfig());
+            Assert.IsNotNull(Countly.Instance.Session);
+            Assert.AreEqual(1, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
+
+            CountlyRequestModel requestModel = Countly.Instance.Session._requestCountlyHelper._requestRepo.Dequeue();
+            CountlyMetricModel metricModel = new CountlyMetricModel();
+
+            string[] kvp = requestModel.RequestData.Split('&');
+            string metricsKeyValue = kvp.FirstOrDefault(kv => kv.StartsWith("metrics="));
+            string metricsJsonString = Uri.UnescapeDataString(metricsKeyValue.Substring("metrics=".Length));
+
+            JObject metricsObject = JObject.Parse(metricsJsonString);
+
+            Assert.AreEqual(metricsObject["_os"].ToString(), metricModel.OS);
+            Assert.AreEqual(metricsObject["_os_version"].ToString(), metricModel.OSVersion);
+            Assert.AreEqual(metricsObject["_device"].ToString(), metricModel.Device);
+            Assert.AreEqual(metricsObject["_resolution"].ToString(), metricModel.Resolution);
+            Assert.AreEqual(metricsObject["_carrier"], metricModel.Carrier);
+            Assert.AreEqual(metricsObject["_app_version"].ToString(), metricModel.AppVersion);
+            Assert.AreEqual(metricsObject["_density"].ToString(), metricModel.Density);
+            Assert.AreEqual(metricsObject["_store"], metricModel.Store);
+            Assert.AreEqual(metricsObject["_browser"], metricModel.Browser);
+            Assert.AreEqual(metricsObject["_browser_version"], metricModel.BrowserVersion);
+            Assert.AreEqual(metricsObject["_locale"].ToString(), metricModel.Locale);
         }
 
         [TearDown]
