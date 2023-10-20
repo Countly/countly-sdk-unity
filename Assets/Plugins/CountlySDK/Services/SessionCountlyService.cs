@@ -144,8 +144,7 @@ namespace Plugins.CountlySDK.Services
                 }
             }
             CountlyMetricModel metrics = new CountlyMetricModel();
-            requestParams.Add("metrics", JsonConvert.SerializeObject(metrics, Formatting.Indented,
-            new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }));
+            requestParams.Add("metrics", JsonConvert.SerializeObject(metrics, Formatting.Indented, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }));
 
             _requestCountlyHelper.AddToRequestQueue(requestParams);
             await _requestCountlyHelper.ProcessQueue();
