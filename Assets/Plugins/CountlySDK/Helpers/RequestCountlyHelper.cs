@@ -73,8 +73,6 @@ namespace Plugins.CountlySDK.Helpers
                 //add the remaining request count in RequestData
                 reqModel.RequestData += "&rr=" + (requests.Length - 1);
                 CountlyResponse response = await ProcessRequest(reqModel);
-                //add the app version in RequestData
-                reqModel.RequestData += "&av=" + Application.version;
 
                 if (!response.IsSuccess) {
                     Log.Verbose("[RequestCountlyHelper] ProcessQueue: Request fail, " + response.ToString());
