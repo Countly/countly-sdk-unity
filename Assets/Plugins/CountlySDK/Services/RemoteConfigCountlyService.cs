@@ -94,7 +94,8 @@ namespace Plugins.CountlySDK.Services
 
             requestParams.Add("method", "fetch_remote_config");
 
-            requestParams.Add("metrics", JsonConvert.SerializeObject(CountlyMetricModel.Metrics, Formatting.Indented,
+            CountlyMetricModel metrics = new CountlyMetricModel();
+            requestParams.Add("metrics", JsonConvert.SerializeObject(metrics, Formatting.Indented,
             new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }));
 
             string data = _requestBuilder.BuildQueryString(requestParams);

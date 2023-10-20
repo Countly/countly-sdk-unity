@@ -8,30 +8,25 @@ namespace Plugins.CountlySDK.Models
     [Serializable]
     internal class CountlyMetricModel
     {
-        public static readonly CountlyMetricModel Metrics =
-            new CountlyMetricModel {
-                OS = Constants.UnityPlatform,
-                OSVersion = SystemInfo.operatingSystem,
-                Device = SystemInfo.deviceModel,
-                Resolution = Screen.currentResolution.ToString(),
-                AppVersion = Application.version,
-                Density = Screen.dpi.ToString(),
-                Locale = Application.systemLanguage.ToString(),
-
-
-                //Not found metrics data
-                Carrier = null,
-                Store = null,
-                Browser = null,
-                BrowserVersion = null
-            };
-
-        static CountlyMetricModel()
+        public CountlyMetricModel()
         {
+            OS = Constants.UnityPlatform;
+            OSVersion = SystemInfo.operatingSystem;
+            Device = SystemInfo.deviceModel;
+            Resolution = Screen.currentResolution.ToString();
+            AppVersion = GetAppVersion();
+            Density = Screen.dpi.ToString();
+            Locale = Application.systemLanguage.ToString();
+
+            // Not found metrics data
+            Carrier = null;
+            Store = null;
+            Browser = null;
+            BrowserVersion = null;
         }
-
-        private CountlyMetricModel()
+        public static string GetAppVersion()
         {
+            return Application.version;
         }
 
         [JsonProperty("_os")] public string OS { get; set; }
