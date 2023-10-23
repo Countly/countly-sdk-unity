@@ -1,3 +1,6 @@
+## XX.XX.X
+* Added app version metric to every request sent.
+
 ## 23.06.0
 * Deprecated "CrushReports" and "OptionalParameters" getters, in "Countly" class are removed.
 * Deprecated "EnableFirstAppLaunchSegment" and "IgnoreSessionCooldown" bools are removed from the "CountlyConfiguration" class.
