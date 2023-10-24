@@ -1,5 +1,6 @@
-## XX.XX.X
+## 23.06.1
 * Added app version metric to every request sent.
+* Fixed a bug that caused build issues.
 
 ## 23.06.0
 * Deprecated "CrushReports" and "OptionalParameters" getters, in "Countly" class are removed.
