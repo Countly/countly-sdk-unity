@@ -7,7 +7,7 @@
         android:supportsRtl="true">
 
         <!--Set remote notification handler-->
-        <service android:name="ly.count.unity.push_fcm.RemoteNotificationsService">
+        <service android:name="ly.count.unity.push_fcm.RemoteNotificationsService" android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT"/>
             </intent-filter>
@@ -21,7 +21,7 @@
             android:name="com.google.firebase.messaging.default_notification_color"
             android:resource="@color/color_notification" />
 
-        <receiver android:name="ly.count.unity.push_fcm.NotificationBroadcastReceiver" />
+        <receiver android:name="ly.count.unity.push_fcm.NotificationBroadcastReceiver" android:exported="false" />
 
     </application>
 </manifest>

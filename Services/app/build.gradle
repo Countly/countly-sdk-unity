@@ -3,11 +3,10 @@ apply plugin: 'com.android.library'
 buildscript {
     repositories {
         google()
-        jcenter()
-
+        mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.4.0'
+        classpath 'com.android.tools.build:gradle:3.4.3'
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
@@ -15,16 +14,23 @@ buildscript {
 }
 
 android {
-    compileSdkVersion 28
-    defaultConfig {
+  compileSdk 33
+  defaultConfig {
         minSdkVersion 16
-        targetSdkVersion 28
+        targetSdkVersion 34
     }
+  compileOptions {
+    targetCompatibility JavaVersion.VERSION_1_8
+    sourceCompatibility JavaVersion.VERSION_1_8
+  }
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'com.google.firebase:firebase-messaging:20.2.4'
+    //implementation 'com.google.firebase:firebase-messaging:22.0.0'
+    // The BoM version of 28.4.2 is the newest release that will target firebase-messaging version 22
+    implementation platform('com.google.firebase:firebase-bom:28.4.2')
+    implementation "com.google.firebase:firebase-messaging"
     implementation files('libs\\classes.jar')
     implementation project(path: ':notifications')
 }
