@@ -11,9 +11,7 @@ namespace Plugins.CountlySDK
     public class CountlyUtils
     {
         private readonly Countly _countly;
-
         internal string ServerInputUrl { get; private set; }
-
         internal string ServerOutputUrl { get; private set; }
 
         public CountlyUtils(Countly countly)
@@ -27,6 +25,10 @@ namespace Plugins.CountlySDK
         public static string GetUniqueDeviceId()
         {
             return "CLY_" + UnityEngine.SystemInfo.deviceUniqueIdentifier;
+        }
+        public static string GetAppVersion()
+        {
+            return Application.version;
         }
 
         /// <summary>
@@ -44,7 +46,7 @@ namespace Plugins.CountlySDK
                 {"t", Type()},
                 {"sdk_name", Constants.SdkName},
                 {"sdk_version", Constants.SdkVersion},
-                {"av", CountlyMetricModel.GetAppVersion()}
+                {"av", GetAppVersion()}
             };
 
             // Add time-based metrics to the base parameters dictionary
@@ -53,6 +55,7 @@ namespace Plugins.CountlySDK
             }
             return baseParams;
         }
+
         /// <summary>
         /// Retrieves the set of parameters, "app_key" and "device_id,", required to be sent along with a remote configuration request.
         /// </summary>
@@ -149,7 +152,6 @@ namespace Plugins.CountlySDK
                 default:
                     break;
             }
-
             return type;
         }
     }
