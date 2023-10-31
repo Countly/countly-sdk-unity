@@ -14,7 +14,7 @@ namespace Plugins.CountlySDK.Models
             OSVersion = SystemInfo.operatingSystem;
             Device = SystemInfo.deviceModel;
             Resolution = Screen.currentResolution.ToString();
-            AppVersion = GetAppVersion();
+            AppVersion = CountlyUtils.GetAppVersion();
             Density = Screen.dpi.ToString();
             Locale = Application.systemLanguage.ToString();
 
@@ -23,10 +23,6 @@ namespace Plugins.CountlySDK.Models
             Store = null;
             Browser = null;
             BrowserVersion = null;
-        }
-        public static string GetAppVersion()
-        {
-            return Application.version;
         }
 
         [JsonProperty("_os")] public string OS { get; set; }
