@@ -12,6 +12,7 @@ using Newtonsoft.Json.Linq;
 using UnityEditor.UIElements;
 using System.Text;
 using System.Net.NetworkInformation;
+using Plugins.CountlySDK;
 
 namespace Tests
 {
@@ -178,6 +179,61 @@ namespace Tests
                 }
             };
             JsonToDictionary_base(json, expected);
+        }
+
+        public void MetricHelper_base(MetricHelper expectedMetrics, Dictionary<string, string> metricValues)
+        {
+            Countly countly = Countly.Instance;
+            CountlyConfiguration config = TestUtility.createBaseConfig();
+            config.MetricHelper = metricValues;
+
+            countly.Init(config);
+
+            Assert.AreEqual(expectedMetrics.OS, countly.MetricHelper.OS);
+            Assert.AreEqual(expectedMetrics.OSVersion, countly.MetricHelper.OSVersion);
+            Assert.AreEqual(expectedMetrics.AppVersion, countly.MetricHelper.AppVersion);
+            Assert.AreEqual(expectedMetrics.Density, countly.MetricHelper.Density);
+            Assert.AreEqual(expectedMetrics.Locale, countly.MetricHelper.Locale);
+            Assert.AreEqual(expectedMetrics.Browser, countly.MetricHelper.Browser);
+            Assert.AreEqual(expectedMetrics.BrowserVersion, countly.MetricHelper.BrowserVersion);
+            Assert.AreEqual(expectedMetrics.Resolution, countly.MetricHelper.Resolution);
+            Assert.AreEqual(expectedMetrics.Carrier, countly.MetricHelper.Carrier);
+            Assert.AreEqual(expectedMetrics.Device, countly.MetricHelper.Device);
+        }
+
+        [Test]
+        public void MetricHelper_PassedNullDictionary()
+        {
+            Dictionary<string, string> metricValues = null;
+            MetricHelper metricHelper = new MetricHelper(metricValues);
+
+            MetricHelper_base(metricHelper, metricValues);
+        }
+
+        [Test]
+        public void MetricHelper_OverridenMetrics()
+        {
+            Dictionary<string, string> metricValues = new Dictionary<string, string>
+            {
+                {"OS", "SomeOtherOS"},
+                {"OSVersion", "OverNineThousand"},
+                {"appVersion", "5"}
+            };
+
+            MetricHelper metricHelper = new MetricHelper(metricValues);
+
+            Assert.AreEqual(metricHelper.OS, "SomeOtherOS");
+            Assert.AreEqual(metricHelper.OSVersion, "OverNineThousand");
+            Assert.AreEqual(metricHelper.AppVersion, "5");
+
+            MetricHelper_base(metricHelper, metricValues);
+        }
+
+        [TearDown]
+        public void End()
+        {
+            Countly.Instance.ClearStorage();
+            Object.DestroyImmediate(Countly.Instance);
         }
     }
 }

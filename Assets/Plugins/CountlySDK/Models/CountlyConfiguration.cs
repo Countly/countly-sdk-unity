@@ -121,6 +121,8 @@ namespace Plugins.CountlySDK.Models
         /// </summary>
         public bool RequiresConsent = false;
 
+        public Dictionary<string, string> MetricHelper = null;
+
         internal Consents[] GivenConsent { get; private set; }
         internal string[] EnabledConsentGroups { get; private set; }
         internal List<INotificationListener> NotificationEventListeners;
@@ -156,7 +158,7 @@ namespace Plugins.CountlySDK.Models
             TotalBreadcrumbsAllowed = config.TotalBreadcrumbsAllowed;
             EnableAutomaticCrashReporting = config.EnableAutomaticCrashReporting;
             NotificationEventListeners = new List<INotificationListener>();
-
+            MetricHelper = config.MetricHelper;
         }
 
         public override string ToString()

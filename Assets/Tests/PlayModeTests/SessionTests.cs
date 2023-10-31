@@ -295,7 +295,8 @@ namespace Tests
             Assert.AreEqual(1, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
 
             CountlyRequestModel requestModel = Countly.Instance.Session._requestCountlyHelper._requestRepo.Dequeue();
-            CountlyMetricModel metricModel = new CountlyMetricModel();
+
+            CountlyMetricModel metricModel = new CountlyMetricModel(Countly.Instance.MetricHelper);
 
             string[] kvp = requestModel.RequestData.Split('&');
             string metricsKeyValue = kvp.FirstOrDefault(kv => kv.StartsWith("metrics="));

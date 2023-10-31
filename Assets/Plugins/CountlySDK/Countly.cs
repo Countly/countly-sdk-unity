@@ -122,6 +122,7 @@ namespace Plugins.CountlySDK
         /// <returns>ViewCountlyService</returns>
         public ViewCountlyService Views { get; private set; }
 
+        public MetricHelper MetricHelper { get; private set; }
         internal SessionCountlyService Session { get; set; }
 
         /// <summary>
@@ -160,6 +161,8 @@ namespace Plugins.CountlySDK
             _logHelper = new CountlyLogHelper(Configuration);
 
             _logHelper.Info("[Init] Initializing Countly [SdkName: " + Constants.SdkName + " SdkVersion: " + Constants.SdkVersion + "]");
+
+            MetricHelper = new MetricHelper(Configuration.MetricHelper);
 
             if (configuration.Parent != null) {
                 transform.parent = configuration.Parent.transform;
