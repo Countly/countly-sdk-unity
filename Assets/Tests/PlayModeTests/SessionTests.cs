@@ -290,13 +290,14 @@ namespace Tests
         [Test]
         public void SessionMetrics()
         {
-            Countly.Instance.Init(TestUtility.createBaseConfig());
+            CountlyConfiguration config = TestUtility.createBaseConfig();
+            Countly.Instance.Init(config);
             Assert.IsNotNull(Countly.Instance.Session);
             Assert.AreEqual(1, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
 
             CountlyRequestModel requestModel = Countly.Instance.Session._requestCountlyHelper._requestRepo.Dequeue();
 
-            CountlyMetricModel metricModel = new CountlyMetricModel(Countly.Instance.MetricHelper);
+            CountlyMetricModel metricModel = new CountlyMetricModel(config.GetMetricHelper());
 
             string[] kvp = requestModel.RequestData.Split('&');
             string metricsKeyValue = kvp.FirstOrDefault(kv => kv.StartsWith("metrics="));

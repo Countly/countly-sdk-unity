@@ -5,12 +5,7 @@ namespace Plugins.CountlySDK.Helpers
 {
     public class MetricHelper
     {
-        private Dictionary<string, string> overridenMetrics;
-
-        internal MetricHelper(Dictionary<string, string> overridenMetrics)
-        {
-            this.overridenMetrics = overridenMetrics;
-        }
+        public Dictionary<string, string> overridenMetrics;
 
         public string OS
         {

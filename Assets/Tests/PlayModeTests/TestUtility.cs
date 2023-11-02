@@ -44,6 +44,16 @@ namespace Assets.Tests.PlayModeTests
             return configuration;
         }
 
+        public static CountlyConfiguration createConfigWithOverridenMetrics(Dictionary<string, string> overridenMetrics)
+        {
+            CountlyConfiguration configuration = new CountlyConfiguration {
+                ServerUrl = SERVER_URL,
+                AppKey = APP_KEY,
+                DeviceId = DEVICE_ID
+            };
+            configuration.SetOverridenMetrics(overridenMetrics);
+            return configuration;
+        }
         /// Clears the queues of the Countly SDK.
         public static void ClearSDKQueues(Countly CountlyInstance)
         {
@@ -153,5 +163,10 @@ namespace Assets.Tests.PlayModeTests
             return returnS;
         }
 
+        public static void TestCleanup()
+        {
+            Countly.Instance.ClearStorage();
+            UnityEngine.Object.DestroyImmediate(Countly.Instance);
+        }
     }
 }

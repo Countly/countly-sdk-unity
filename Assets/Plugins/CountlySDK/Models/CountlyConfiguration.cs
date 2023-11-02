@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using JetBrains.Annotations;
 using Notifications;
 using Plugins.CountlySDK.Enums;
+using Plugins.CountlySDK.Helpers;
 using UnityEngine;
 
 namespace Plugins.CountlySDK.Models
@@ -121,8 +123,6 @@ namespace Plugins.CountlySDK.Models
         /// </summary>
         public bool RequiresConsent = false;
 
-        public Dictionary<string, string> MetricHelper = null;
-
         internal Consents[] GivenConsent { get; private set; }
         internal string[] EnabledConsentGroups { get; private set; }
         internal List<INotificationListener> NotificationEventListeners;
@@ -133,10 +133,13 @@ namespace Plugins.CountlySDK.Models
         /// </summary>
         public GameObject Parent = null;
 
+        protected MetricHelper metricHelper { get; private set; }
+
         public CountlyConfiguration()
         {
             ConsentGroups = new Dictionary<string, Consents[]>();
             NotificationEventListeners = new List<INotificationListener>();
+            metricHelper = new MetricHelper();
         }
 
         internal CountlyConfiguration(CountlyAuthModel authModel, CountlyConfigModel config)
@@ -158,7 +161,6 @@ namespace Plugins.CountlySDK.Models
             TotalBreadcrumbsAllowed = config.TotalBreadcrumbsAllowed;
             EnableAutomaticCrashReporting = config.EnableAutomaticCrashReporting;
             NotificationEventListeners = new List<INotificationListener>();
-            MetricHelper = config.MetricHelper;
         }
 
         public override string ToString()
@@ -235,6 +237,16 @@ namespace Plugins.CountlySDK.Models
         public void AddNotificationListener(INotificationListener listener)
         {
             NotificationEventListeners.Add(listener);
+        }
+
+        public void SetOverridenMetrics(Dictionary<string, string> overridenMetrics)
+        {
+            metricHelper.overridenMetrics = overridenMetrics;
+        }
+
+        public MetricHelper GetMetricHelper()
+        {
+            return metricHelper;
         }
     }
 }

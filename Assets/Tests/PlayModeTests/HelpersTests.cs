@@ -18,6 +18,12 @@ namespace Tests
 {
     public class HelpersTests
     {
+        [SetUp]
+        public void SetUp()
+        {
+            TestUtility.TestCleanup();
+        }
+
         // 'ConvertEventEntityToEventModel' method in Converter.
         // We convert an EventEntity into CountlyEventModel.
         // With a valid EventEntity provided, conversion should be successful.
@@ -181,59 +187,82 @@ namespace Tests
             JsonToDictionary_base(json, expected);
         }
 
-        public void MetricHelper_base(MetricHelper expectedMetrics, Dictionary<string, string> metricValues)
+        // 'MetricHelper' class in CountlySDK.Helpers
+        // Provide a Dictionary<string,string> to override default values
+        // If a dictionary is provided MetricHelper should return overriden value
+        public void MetricHelper_base(Dictionary<string, string> overridenMetrics, MetricHelper expectedMetrics)
         {
-            Countly countly = Countly.Instance;
-            CountlyConfiguration config = TestUtility.createBaseConfig();
-            config.MetricHelper = metricValues;
+            CountlyConfiguration config = TestUtility.createConfigWithOverridenMetrics(overridenMetrics);
 
-            countly.Init(config);
+            MetricHelper configMetricHelper = config.GetMetricHelper();
 
-            Assert.AreEqual(expectedMetrics.OS, countly.MetricHelper.OS);
-            Assert.AreEqual(expectedMetrics.OSVersion, countly.MetricHelper.OSVersion);
-            Assert.AreEqual(expectedMetrics.AppVersion, countly.MetricHelper.AppVersion);
-            Assert.AreEqual(expectedMetrics.Density, countly.MetricHelper.Density);
-            Assert.AreEqual(expectedMetrics.Locale, countly.MetricHelper.Locale);
-            Assert.AreEqual(expectedMetrics.Browser, countly.MetricHelper.Browser);
-            Assert.AreEqual(expectedMetrics.BrowserVersion, countly.MetricHelper.BrowserVersion);
-            Assert.AreEqual(expectedMetrics.Resolution, countly.MetricHelper.Resolution);
-            Assert.AreEqual(expectedMetrics.Carrier, countly.MetricHelper.Carrier);
-            Assert.AreEqual(expectedMetrics.Device, countly.MetricHelper.Device);
+            Assert.AreEqual(expectedMetrics.OS, configMetricHelper.OS);
+            Assert.AreEqual(expectedMetrics.OSVersion, configMetricHelper.OSVersion);
+            Assert.AreEqual(expectedMetrics.AppVersion, configMetricHelper.AppVersion);
+            Assert.AreEqual(expectedMetrics.Density, configMetricHelper.Density);
+            Assert.AreEqual(expectedMetrics.Resolution, configMetricHelper.Resolution);
+            Assert.AreEqual(expectedMetrics.Browser, configMetricHelper.Browser);
+            Assert.AreEqual(expectedMetrics.BrowserVersion, configMetricHelper.BrowserVersion);
+            Assert.AreEqual(expectedMetrics.Carrier, configMetricHelper.Carrier);
+            Assert.AreEqual(expectedMetrics.Device, configMetricHelper.Device);
+            Assert.AreEqual(expectedMetrics.Locale, configMetricHelper.Locale);
+            Assert.AreEqual(expectedMetrics.Store, configMetricHelper.Store);
         }
 
+        // Providing a null dictionary to MetricHelper
+        // MetricHelper should return default values
         [Test]
-        public void MetricHelper_PassedNullDictionary()
+        public void MetricHelper_nullDictionary()
         {
-            Dictionary<string, string> metricValues = null;
-            MetricHelper metricHelper = new MetricHelper(metricValues);
+            MetricHelper expectedMetrics = new MetricHelper();
 
-            MetricHelper_base(metricHelper, metricValues);
+            expectedMetrics.overridenMetrics = null;
+
+            MetricHelper_base(null, expectedMetrics);
         }
 
+        // Providing a dictionary with valid keys to MetricHelper
+        // It should return overriden values instead of default
         [Test]
-        public void MetricHelper_OverridenMetrics()
+        public void MetricHelper_overridenMetrics()
         {
-            Dictionary<string, string> metricValues = new Dictionary<string, string>
+            Dictionary<string, string> overrides = new Dictionary<string, string>
             {
-                {"OS", "SomeOtherOS"},
-                {"OSVersion", "OverNineThousand"},
-                {"appVersion", "5"}
+                { "OS", "NotWindows" },
+                { "OSVersion", "NineThousand" }
             };
 
-            MetricHelper metricHelper = new MetricHelper(metricValues);
+            MetricHelper expectedMetrics = new MetricHelper();
+            expectedMetrics.overridenMetrics = overrides;
 
-            Assert.AreEqual(metricHelper.OS, "SomeOtherOS");
-            Assert.AreEqual(metricHelper.OSVersion, "OverNineThousand");
-            Assert.AreEqual(metricHelper.AppVersion, "5");
+            MetricHelper_base(overrides, expectedMetrics);
+        }
 
-            MetricHelper_base(metricHelper, metricValues);
+        // Providing a dictionary with valid key and setting it after creating MetricHelper
+        // It should return the overriden value after setting it.
+        [Test]
+        public void MetricHelper_OverrideRuntime()
+        {
+            CountlyConfiguration config = TestUtility.createBaseConfig();
+            MetricHelper metricHelper = new MetricHelper();
+            MetricHelper configMetricHelper = config.GetMetricHelper();
+
+            Assert.AreEqual(metricHelper.Carrier, configMetricHelper.Carrier);
+
+            Dictionary<string, string> overrides = new Dictionary<string, string>
+            {
+                { "Carrier", "CountlyMobile" }
+            };
+
+            metricHelper.overridenMetrics = overrides;
+
+            Assert.AreNotEqual(metricHelper.Carrier, configMetricHelper.Carrier);
         }
 
         [TearDown]
         public void End()
         {
-            Countly.Instance.ClearStorage();
-            Object.DestroyImmediate(Countly.Instance);
+            TestUtility.TestCleanup();
         }
     }
 }

@@ -19,7 +19,6 @@ namespace Plugins.CountlySDK.Models
         public int StoredRequestLimit;
         public int TotalBreadcrumbsAllowed;
         public bool EnableAutomaticCrashReporting;
-        public Dictionary<string, string> MetricHelper;
 
         /// <summary>
         /// Initializes the SDK configurations
@@ -36,7 +35,7 @@ namespace Plugins.CountlySDK.Models
                                     bool ignoreSessionCooldown = false, bool enableManualSessionHandling = false,
                                     int sessionDuration = 60, int eventQueueThreshold = 100,
                                     int storedRequestLimit = 1000, int totalBreadcrumbsAllowed = 100,
-                                    TestMode notificationMode = TestMode.None, bool enableAutomaticCrashReporting = true, Dictionary<string, string> metricHelper = null)
+                                    TestMode notificationMode = TestMode.None, bool enableAutomaticCrashReporting = true)
 
         {
             this.Salt = salt;
@@ -51,7 +50,6 @@ namespace Plugins.CountlySDK.Models
             StoredRequestLimit = storedRequestLimit;
             TotalBreadcrumbsAllowed = totalBreadcrumbsAllowed;
             EnableAutomaticCrashReporting = enableAutomaticCrashReporting;
-            MetricHelper = metricHelper;
         }
 
         public override string ToString()

@@ -162,8 +162,6 @@ namespace Plugins.CountlySDK
 
             _logHelper.Info("[Init] Initializing Countly [SdkName: " + Constants.SdkName + " SdkVersion: " + Constants.SdkVersion + "]");
 
-            MetricHelper = new MetricHelper(Configuration.MetricHelper);
-
             if (configuration.Parent != null) {
                 transform.parent = configuration.Parent.transform;
             }
