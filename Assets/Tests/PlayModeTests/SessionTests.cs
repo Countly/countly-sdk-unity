@@ -297,7 +297,7 @@ namespace Tests
 
             CountlyRequestModel requestModel = Countly.Instance.Session._requestCountlyHelper._requestRepo.Dequeue();
 
-            CountlyMetricModel metricModel = new CountlyMetricModel(config.GetMetricHelper());
+            CountlyMetricModel metricModel = new CountlyMetricModel(config.metricHelper);
 
             string[] kvp = requestModel.RequestData.Split('&');
             string metricsKeyValue = kvp.FirstOrDefault(kv => kv.StartsWith("metrics="));

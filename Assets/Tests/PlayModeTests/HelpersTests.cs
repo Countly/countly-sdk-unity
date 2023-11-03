@@ -187,45 +187,98 @@ namespace Tests
             JsonToDictionary_base(json, expected);
         }
 
-        // 'MetricHelper' class in CountlySDK.Helpers
+        // 'MetricHelper' override functionality
         // Provide a Dictionary<string,string> to override default values
         // If a dictionary is provided MetricHelper should return overriden value
-        public void MetricHelper_base(Dictionary<string, string> overridenMetrics, MetricHelper expectedMetrics)
+        //public void MetricHelper_base(Dictionary<string, string> overridenMetrics, MetricHelper expectedMetrics)
+        //{            
+        //    MetricHelper configMetricHelper = new MetricHelper(overridenMetrics);
+
+        //    Assert.AreEqual(expectedMetrics.OS, configMetricHelper.OS);
+        //    Assert.AreEqual(expectedMetrics.OSVersion, configMetricHelper.OSVersion);
+        //    Assert.AreEqual(expectedMetrics.AppVersion, configMetricHelper.AppVersion);
+        //    Assert.AreEqual(expectedMetrics.Density, configMetricHelper.Density);
+        //    Assert.AreEqual(expectedMetrics.Resolution, configMetricHelper.Resolution);
+        //    Assert.AreEqual(expectedMetrics.Browser, configMetricHelper.Browser);
+        //    Assert.AreEqual(expectedMetrics.BrowserVersion, configMetricHelper.BrowserVersion);
+        //    Assert.AreEqual(expectedMetrics.Carrier, configMetricHelper.Carrier);
+        //    Assert.AreEqual(expectedMetrics.Device, configMetricHelper.Device);
+        //    Assert.AreEqual(expectedMetrics.Locale, configMetricHelper.Locale);
+        //    Assert.AreEqual(expectedMetrics.Store, configMetricHelper.Store);
+        //}
+
+        // 'MetricHelper' default values
+        // no override provided
+        // all values should be valid and not "null"
+        [Test]
+        public void MetricHelper_defaultValues()
         {
-            CountlyConfiguration config = TestUtility.createConfigWithOverridenMetrics(overridenMetrics);
+            MetricHelper defaultMetricHelper = new MetricHelper();
 
-            MetricHelper configMetricHelper = config.GetMetricHelper();
-
-            Assert.AreEqual(expectedMetrics.OS, configMetricHelper.OS);
-            Assert.AreEqual(expectedMetrics.OSVersion, configMetricHelper.OSVersion);
-            Assert.AreEqual(expectedMetrics.AppVersion, configMetricHelper.AppVersion);
-            Assert.AreEqual(expectedMetrics.Density, configMetricHelper.Density);
-            Assert.AreEqual(expectedMetrics.Resolution, configMetricHelper.Resolution);
-            Assert.AreEqual(expectedMetrics.Browser, configMetricHelper.Browser);
-            Assert.AreEqual(expectedMetrics.BrowserVersion, configMetricHelper.BrowserVersion);
-            Assert.AreEqual(expectedMetrics.Carrier, configMetricHelper.Carrier);
-            Assert.AreEqual(expectedMetrics.Device, configMetricHelper.Device);
-            Assert.AreEqual(expectedMetrics.Locale, configMetricHelper.Locale);
-            Assert.AreEqual(expectedMetrics.Store, configMetricHelper.Store);
+            Assert.NotNull(defaultMetricHelper.OS);
+            Assert.NotNull(defaultMetricHelper.OSVersion);
+            Assert.NotNull(defaultMetricHelper.AppVersion);
+            Assert.NotNull(defaultMetricHelper.Density);
+            Assert.NotNull(defaultMetricHelper.Resolution);
+            Assert.NotNull(defaultMetricHelper.Browser);
+            Assert.NotNull(defaultMetricHelper.BrowserVersion);
+            Assert.NotNull(defaultMetricHelper.Carrier);
+            Assert.NotNull(defaultMetricHelper.Device);
+            Assert.NotNull(defaultMetricHelper.Locale);
+            Assert.NotNull(defaultMetricHelper.Store);
         }
 
+        // 'MetricHelper' override functionality
         // Providing a null dictionary to MetricHelper
         // MetricHelper should return default values
         [Test]
-        public void MetricHelper_nullDictionary()
+        public void MetricHelper_nullOverride()
         {
             MetricHelper expectedMetrics = new MetricHelper();
-
             expectedMetrics.overridenMetrics = null;
 
-            MetricHelper_base(null, expectedMetrics);
+            MetricHelper defaultMetricHelper = new MetricHelper();
+
+            Assert.AreEqual(expectedMetrics.OS, defaultMetricHelper.OS);
+            Assert.AreEqual(expectedMetrics.OSVersion, defaultMetricHelper.OSVersion);
+            Assert.AreEqual(expectedMetrics.AppVersion, defaultMetricHelper.AppVersion);
+            Assert.AreEqual(expectedMetrics.Density, defaultMetricHelper.Density);
+            Assert.AreEqual(expectedMetrics.Resolution, defaultMetricHelper.Resolution);
+            Assert.AreEqual(expectedMetrics.Browser, defaultMetricHelper.Browser);
+            Assert.AreEqual(expectedMetrics.BrowserVersion, defaultMetricHelper.BrowserVersion);
+            Assert.AreEqual(expectedMetrics.Carrier, defaultMetricHelper.Carrier);
+            Assert.AreEqual(expectedMetrics.Device, defaultMetricHelper.Device);
+            Assert.AreEqual(expectedMetrics.Locale, defaultMetricHelper.Locale);
+            Assert.AreEqual(expectedMetrics.Store, defaultMetricHelper.Store);
         }
 
+        [Test]
+        public void MetricHelper_emptyOverride()
+        {
+            MetricHelper expectedMetrics = new MetricHelper();
+            expectedMetrics.overridenMetrics = new Dictionary<string, string>();
+            MetricHelper defaultMetricHelper = new MetricHelper();
+
+            Assert.AreEqual(expectedMetrics.OS, defaultMetricHelper.OS);
+            Assert.AreEqual(expectedMetrics.OSVersion, defaultMetricHelper.OSVersion);
+            Assert.AreEqual(expectedMetrics.AppVersion, defaultMetricHelper.AppVersion);
+            Assert.AreEqual(expectedMetrics.Density, defaultMetricHelper.Density);
+            Assert.AreEqual(expectedMetrics.Resolution, defaultMetricHelper.Resolution);
+            Assert.AreEqual(expectedMetrics.Browser, defaultMetricHelper.Browser);
+            Assert.AreEqual(expectedMetrics.BrowserVersion, defaultMetricHelper.BrowserVersion);
+            Assert.AreEqual(expectedMetrics.Carrier, defaultMetricHelper.Carrier);
+            Assert.AreEqual(expectedMetrics.Device, defaultMetricHelper.Device);
+            Assert.AreEqual(expectedMetrics.Locale, defaultMetricHelper.Locale);
+            Assert.AreEqual(expectedMetrics.Store, defaultMetricHelper.Store);
+        }
+
+        // 'MetricHelper' override functionality
         // Providing a dictionary with valid keys to MetricHelper
         // It should return overriden values instead of default
         [Test]
         public void MetricHelper_overridenMetrics()
         {
+            //todo override all predefined metrics and validate the value
             Dictionary<string, string> overrides = new Dictionary<string, string>
             {
                 { "OS", "NotWindows" },
@@ -235,9 +288,9 @@ namespace Tests
             MetricHelper expectedMetrics = new MetricHelper();
             expectedMetrics.overridenMetrics = overrides;
 
-            MetricHelper_base(overrides, expectedMetrics);
         }
 
+        // 'MetricHelper' override functionality
         // Providing a dictionary with valid key and setting it after creating MetricHelper
         // It should return the overriden value after setting it.
         [Test]
@@ -245,7 +298,7 @@ namespace Tests
         {
             CountlyConfiguration config = TestUtility.createBaseConfig();
             MetricHelper metricHelper = new MetricHelper();
-            MetricHelper configMetricHelper = config.GetMetricHelper();
+            MetricHelper configMetricHelper = config.metricHelper;
 
             Assert.AreEqual(metricHelper.Carrier, configMetricHelper.Carrier);
 

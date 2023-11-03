@@ -51,7 +51,7 @@ namespace Assets.Tests.PlayModeTests
                 AppKey = APP_KEY,
                 DeviceId = DEVICE_ID
             };
-            configuration.SetOverridenMetrics(overridenMetrics);
+            configuration.SetMetricOverride(overridenMetrics);
             return configuration;
         }
         /// Clears the queues of the Countly SDK.

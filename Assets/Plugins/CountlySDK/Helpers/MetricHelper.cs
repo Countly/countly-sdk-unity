@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Newtonsoft.Json.Linq;
 using UnityEngine;
 
 namespace Plugins.CountlySDK.Helpers
@@ -6,6 +7,16 @@ namespace Plugins.CountlySDK.Helpers
     public class MetricHelper
     {
         public Dictionary<string, string> overridenMetrics;
+
+        public MetricHelper()
+        {
+
+        }
+
+        public MetricHelper(Dictionary<string, string> overridenMetrics)
+        {
+            this.overridenMetrics = overridenMetrics;
+        }
 
         public string OS
         {
@@ -115,6 +126,12 @@ namespace Plugins.CountlySDK.Helpers
                 }
                 return null;
             }
+        }
+
+        public JObject buildMetricJSON()
+        {
+            //todo this should include custom metrics
+            return null;
         }
     }
 }

@@ -117,7 +117,6 @@ namespace Plugins.CountlySDK.Models
         internal bool IsLocationDisabled = false;
         internal bool IsAutomaticSessionTrackingDisabled = false;
 
-
         /// <summary>
         /// Set if consent should be required.
         /// </summary>
@@ -128,18 +127,18 @@ namespace Plugins.CountlySDK.Models
         internal List<INotificationListener> NotificationEventListeners;
         internal Dictionary<string, Consents[]> ConsentGroups { get; private set; }
 
+        internal Dictionary<string, string> overridenMetrics;
+        internal MetricHelper metricHelper;
+
         /// <summary>
         /// Parent must be undestroyable
         /// </summary>
-        public GameObject Parent = null;
-
-        protected MetricHelper metricHelper { get; private set; }
+        public GameObject Parent = null;        
 
         public CountlyConfiguration()
         {
             ConsentGroups = new Dictionary<string, Consents[]>();
-            NotificationEventListeners = new List<INotificationListener>();
-            metricHelper = new MetricHelper();
+            NotificationEventListeners = new List<INotificationListener>();            
         }
 
         internal CountlyConfiguration(CountlyAuthModel authModel, CountlyConfigModel config)
@@ -238,15 +237,10 @@ namespace Plugins.CountlySDK.Models
         {
             NotificationEventListeners.Add(listener);
         }
-
-        public void SetOverridenMetrics(Dictionary<string, string> overridenMetrics)
+        
+        public void SetMetricOverride(Dictionary<string, string> overridenMetrics)
         {
-            metricHelper.overridenMetrics = overridenMetrics;
-        }
-
-        public MetricHelper GetMetricHelper()
-        {
-            return metricHelper;
+            this.overridenMetrics = overridenMetrics;
         }
     }
 }

@@ -31,7 +31,7 @@ namespace Plugins.CountlySDK
         public CountlyAuthModel Auth;
         public CountlyConfigModel Config;
         internal RequestCountlyHelper RequestHelper;
-        internal CountlyConfiguration Configuration;
+        internal CountlyConfiguration Configuration;        
 
         /// <summary>
         /// Check if SDK has been initialized.
@@ -161,6 +161,8 @@ namespace Plugins.CountlySDK
             _logHelper = new CountlyLogHelper(Configuration);
 
             _logHelper.Info("[Init] Initializing Countly [SdkName: " + Constants.SdkName + " SdkVersion: " + Constants.SdkVersion + "]");
+
+            configuration.metricHelper = new MetricHelper(configuration.overridenMetrics);
 
             if (configuration.Parent != null) {
                 transform.parent = configuration.Parent.transform;
