@@ -1,4 +1,4 @@
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/3b64ffc8902d4353b45f335c98347613)](https://www.codacy.com/gh/Countly/countly-sdk-unity/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Countly/countly-sdk-unity&amp;utm_campaign=Badge_Grade)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/5dfe3b292b554a1fb6579ffe139b3270)](https://app.codacy.com/gh/Countly/countly-sdk-unity?utm_source=github.com&utm_medium=referral&utm_content=Countly/countly-sdk-unity&utm_campaign=Badge_Grade)
 
 # Countly Unity SDK
 
