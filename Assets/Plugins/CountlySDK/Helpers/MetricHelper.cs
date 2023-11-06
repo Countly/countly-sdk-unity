@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 using UnityEngine;
 
 namespace Plugins.CountlySDK.Helpers
@@ -7,32 +7,36 @@ namespace Plugins.CountlySDK.Helpers
     public class MetricHelper
     {
         public Dictionary<string, string> overridenMetrics;
+        string unityPlatform;
 
-        public MetricHelper()
+        public MetricHelper() : this(null)
         {
 
         }
 
         public MetricHelper(Dictionary<string, string> overridenMetrics)
         {
+            string platform = Application.platform.ToString().ToLower();
+            unityPlatform = (Application.platform == RuntimePlatform.IPhonePlayer) ? "iOS" : platform;
+
             this.overridenMetrics = overridenMetrics;
         }
 
         public string OS
         {
             get {
-                if (overridenMetrics != null && overridenMetrics.ContainsKey("OS")) {
-                    return overridenMetrics["OS"];
+                if (overridenMetrics != null && overridenMetrics.ContainsKey("_os")) {
+                    return overridenMetrics["_os"];
                 }
-                return Constants.UnityPlatform;
+                return unityPlatform;
             }
         }
 
         public string OSVersion
         {
             get {
-                if (overridenMetrics != null && overridenMetrics.ContainsKey("OSVersion")) {
-                    return overridenMetrics["OSVersion"];
+                if (overridenMetrics != null && overridenMetrics.ContainsKey("_os_version")) {
+                    return overridenMetrics["_os_version"];
                 }
                 return SystemInfo.operatingSystem;
             }
@@ -41,8 +45,8 @@ namespace Plugins.CountlySDK.Helpers
         public string Device
         {
             get {
-                if (overridenMetrics != null && overridenMetrics.ContainsKey("Device")) {
-                    return overridenMetrics["Device"];
+                if (overridenMetrics != null && overridenMetrics.ContainsKey("_device")) {
+                    return overridenMetrics["_device"];
                 }
                 return SystemInfo.deviceModel;
             }
@@ -51,8 +55,8 @@ namespace Plugins.CountlySDK.Helpers
         public string Resolution
         {
             get {
-                if (overridenMetrics != null && overridenMetrics.ContainsKey("Resolution")) {
-                    return overridenMetrics["Resolution"];
+                if (overridenMetrics != null && overridenMetrics.ContainsKey("_resolution")) {
+                    return overridenMetrics["_resolution"];
                 }
                 return Screen.currentResolution.ToString();
             }
@@ -61,8 +65,8 @@ namespace Plugins.CountlySDK.Helpers
         public string AppVersion
         {
             get {
-                if (overridenMetrics != null && overridenMetrics.ContainsKey("appVersion")) {
-                    return overridenMetrics["appVersion"];
+                if (overridenMetrics != null && overridenMetrics.ContainsKey("_app_version")) {
+                    return overridenMetrics["_app_version"];
                 }
                 return Application.version;
             }
@@ -71,8 +75,8 @@ namespace Plugins.CountlySDK.Helpers
         public string Density
         {
             get {
-                if (overridenMetrics != null && overridenMetrics.ContainsKey("Density")) {
-                    return overridenMetrics["Density"];
+                if (overridenMetrics != null && overridenMetrics.ContainsKey("_density")) {
+                    return overridenMetrics["_density"];
                 }
                 return Screen.dpi.ToString();
             }
@@ -81,57 +85,39 @@ namespace Plugins.CountlySDK.Helpers
         public string Locale
         {
             get {
-                if (overridenMetrics != null && overridenMetrics.ContainsKey("Locale")) {
-                    return overridenMetrics["Locale"];
+                if (overridenMetrics != null && overridenMetrics.ContainsKey("_locale")) {
+                    return overridenMetrics["_locale"];
                 }
                 return Application.systemLanguage.ToString();
             }
         }
 
-        public string Carrier
+        /// <summary>
+        /// Generates a JSON representation of device and application metrics, combining default and overridden metrics.
+        /// </summary>
+        public string buildMetricJSON()
         {
-            get {
-                if (overridenMetrics != null && overridenMetrics.ContainsKey("Carrier")) {
-                    return overridenMetrics["Carrier"];
-                }
-                return null;
-            }
-        }
+            Dictionary<string, string> metrics = new Dictionary<string, string>
+            {
+                { "_os", OS },
+                { "_os_version", OSVersion},
+                { "_device", Device},
+                { "_resolution", Resolution},
+                { "_app_version", AppVersion},
+                { "_density", Density},
+                { "_locale", Locale}
+            };
 
-        public string Store
-        {
-            get {
-                if (overridenMetrics != null && overridenMetrics.ContainsKey("Store")) {
-                    return overridenMetrics["Store"];
+            if (overridenMetrics != null) {
+                foreach (KeyValuePair<string, string> kvp in overridenMetrics) {
+                    if (!metrics.ContainsKey(kvp.Key)) {
+                        metrics[kvp.Key] = kvp.Value;
+                    }
                 }
-                return null;
             }
-        }
 
-        public string Browser
-        {
-            get {
-                if (overridenMetrics != null && overridenMetrics.ContainsKey("Browser")) {
-                    return overridenMetrics["Browser"];
-                }
-                return null;
-            }
-        }
-
-        public string BrowserVersion
-        {
-            get {
-                if (overridenMetrics != null && overridenMetrics.ContainsKey("browserVersion")) {
-                    return overridenMetrics["browserVersion"];
-                }
-                return null;
-            }
-        }
-
-        public JObject buildMetricJSON()
-        {
-            //todo this should include custom metrics
-            return null;
+            return JsonConvert.SerializeObject(metrics, Formatting.Indented,
+                new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
         }
     }
 }

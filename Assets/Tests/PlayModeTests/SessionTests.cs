@@ -297,32 +297,31 @@ namespace Tests
 
             CountlyRequestModel requestModel = Countly.Instance.Session._requestCountlyHelper._requestRepo.Dequeue();
 
-            CountlyMetricModel metricModel = new CountlyMetricModel(config.metricHelper);
-
             string[] kvp = requestModel.RequestData.Split('&');
             string metricsKeyValue = kvp.FirstOrDefault(kv => kv.StartsWith("metrics="));
             string metricsJsonString = Uri.UnescapeDataString(metricsKeyValue.Substring("metrics=".Length));
 
             JObject metricsObject = JObject.Parse(metricsJsonString);
 
-            Assert.AreEqual(metricsObject["_os"].ToString(), metricModel.OS);
-            Assert.AreEqual(metricsObject["_os_version"].ToString(), metricModel.OSVersion);
-            Assert.AreEqual(metricsObject["_device"].ToString(), metricModel.Device);
-            Assert.AreEqual(metricsObject["_resolution"].ToString(), metricModel.Resolution);
-            Assert.AreEqual(metricsObject["_carrier"], metricModel.Carrier);
-            Assert.AreEqual(metricsObject["_app_version"].ToString(), metricModel.AppVersion);
-            Assert.AreEqual(metricsObject["_density"].ToString(), metricModel.Density);
-            Assert.AreEqual(metricsObject["_store"], metricModel.Store);
-            Assert.AreEqual(metricsObject["_browser"], metricModel.Browser);
-            Assert.AreEqual(metricsObject["_browser_version"], metricModel.BrowserVersion);
-            Assert.AreEqual(metricsObject["_locale"].ToString(), metricModel.Locale);
+            Assert.AreEqual(metricsObject["_os"].ToString(), config.metricHelper.OS);
+            Assert.AreEqual(metricsObject["_os_version"].ToString(), config.metricHelper.OSVersion);
+            Assert.AreEqual(metricsObject["_device"].ToString(), config.metricHelper.Device);
+            Assert.AreEqual(metricsObject["_resolution"].ToString(), config.metricHelper.Resolution);
+            Assert.AreEqual(metricsObject["_app_version"].ToString(), config.metricHelper.AppVersion);
+            Assert.AreEqual(metricsObject["_density"].ToString(), config.metricHelper.Density);
+            Assert.AreEqual(metricsObject["_locale"].ToString(), config.metricHelper.Locale);
+        }
+
+        [SetUp]
+        public void SetUp()
+        {
+            TestUtility.TestCleanup();
         }
 
         [TearDown]
         public void End()
         {
-            Countly.Instance.ClearStorage();
-            UnityEngine.Object.DestroyImmediate(Countly.Instance);
+            TestUtility.TestCleanup();
         }
     }
 }

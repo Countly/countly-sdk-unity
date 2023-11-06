@@ -31,7 +31,7 @@ namespace Plugins.CountlySDK
         public CountlyAuthModel Auth;
         public CountlyConfigModel Config;
         internal RequestCountlyHelper RequestHelper;
-        internal CountlyConfiguration Configuration;        
+        internal CountlyConfiguration Configuration;
 
         /// <summary>
         /// Check if SDK has been initialized.
@@ -270,7 +270,6 @@ namespace Plugins.CountlySDK
                 _logHelper.Info("[Init] provided 'maxStackTraceLineLength' override:[" + configuration.MaxStackTraceLineLength + "]");
             }
 
-            Constants.ProcessPlatform();
             FirstLaunchAppHelper.Process();
 
             RequestBuilder requestBuilder = new RequestBuilder();

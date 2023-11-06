@@ -44,16 +44,6 @@ namespace Assets.Tests.PlayModeTests
             return configuration;
         }
 
-        public static CountlyConfiguration createConfigWithOverridenMetrics(Dictionary<string, string> overridenMetrics)
-        {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = SERVER_URL,
-                AppKey = APP_KEY,
-                DeviceId = DEVICE_ID
-            };
-            configuration.SetMetricOverride(overridenMetrics);
-            return configuration;
-        }
         /// Clears the queues of the Countly SDK.
         public static void ClearSDKQueues(Countly CountlyInstance)
         {
