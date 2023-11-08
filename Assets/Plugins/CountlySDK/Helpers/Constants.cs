@@ -52,15 +52,5 @@ namespace Plugins.CountlySDK.Helpers
         public const string SoundDataKey = "sound";
 
         #endregion
-
-        #region Unity System
-        public static void ProcessPlatform()
-        {
-            string platform = Application.platform.ToString().ToLower();
-            UnityPlatform = (Application.platform == RuntimePlatform.IPhonePlayer) ? "iOS" : platform;
-        }
-        public static string UnityPlatform { get; internal set; }
-
-        #endregion
     }
 }

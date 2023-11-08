@@ -153,5 +153,10 @@ namespace Assets.Tests.PlayModeTests
             return returnS;
         }
 
+        public static void TestCleanup()
+        {
+            Countly.Instance.ClearStorage();
+            UnityEngine.Object.DestroyImmediate(Countly.Instance);
+        }
     }
 }

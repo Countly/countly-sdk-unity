@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using JetBrains.Annotations;
 using Notifications;
 using Plugins.CountlySDK.Enums;
+using Plugins.CountlySDK.Helpers;
 using UnityEngine;
 
 namespace Plugins.CountlySDK.Models
@@ -115,7 +117,6 @@ namespace Plugins.CountlySDK.Models
         internal bool IsLocationDisabled = false;
         internal bool IsAutomaticSessionTrackingDisabled = false;
 
-
         /// <summary>
         /// Set if consent should be required.
         /// </summary>
@@ -126,15 +127,18 @@ namespace Plugins.CountlySDK.Models
         internal List<INotificationListener> NotificationEventListeners;
         internal Dictionary<string, Consents[]> ConsentGroups { get; private set; }
 
+        internal Dictionary<string, string> overridenMetrics;
+        internal MetricHelper metricHelper;
+
         /// <summary>
         /// Parent must be undestroyable
         /// </summary>
-        public GameObject Parent = null;
+        public GameObject Parent = null;        
 
         public CountlyConfiguration()
         {
             ConsentGroups = new Dictionary<string, Consents[]>();
-            NotificationEventListeners = new List<INotificationListener>();
+            NotificationEventListeners = new List<INotificationListener>();            
         }
 
         internal CountlyConfiguration(CountlyAuthModel authModel, CountlyConfigModel config)
@@ -156,7 +160,6 @@ namespace Plugins.CountlySDK.Models
             TotalBreadcrumbsAllowed = config.TotalBreadcrumbsAllowed;
             EnableAutomaticCrashReporting = config.EnableAutomaticCrashReporting;
             NotificationEventListeners = new List<INotificationListener>();
-
         }
 
         public override string ToString()
@@ -233,6 +236,11 @@ namespace Plugins.CountlySDK.Models
         public void AddNotificationListener(INotificationListener listener)
         {
             NotificationEventListeners.Add(listener);
+        }
+        
+        public void SetMetricOverride(Dictionary<string, string> overridenMetrics)
+        {
+            this.overridenMetrics = overridenMetrics;
         }
     }
 }

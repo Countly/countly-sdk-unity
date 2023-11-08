@@ -171,7 +171,7 @@ namespace Plugins.CountlySDK.Services
         internal CountlyExceptionDetailModel ExceptionDetailModel(string message, string stackTrace, bool nonfatal, IDictionary<string, object> segments)
         {
             return new CountlyExceptionDetailModel {
-                OS = Constants.UnityPlatform,
+                OS = _configuration.metricHelper.OS,
                 OSVersion = SystemInfo.operatingSystem,
                 Device = SystemInfo.deviceName,
                 Resolution = Screen.currentResolution.ToString(),

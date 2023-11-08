@@ -47,7 +47,7 @@ namespace Plugins.CountlySDK.Services
                 IDictionary<string, object> openViewSegment = new Dictionary<string, object>
                 {
                     {"name", name},
-                    {"segment", Constants.UnityPlatform},
+                    {"segment", _configuration.metricHelper.OS},
                     {"visit", 1},
                     {"start", _isFirstView ? 1 : 0}
                 };
@@ -109,7 +109,7 @@ namespace Plugins.CountlySDK.Services
                 IDictionary<string, object> segment = new Dictionary<string, object>
                 {
                     {"name", name},
-                    {"segment", Constants.UnityPlatform},
+                    {"segment", _configuration.metricHelper.OS},
                 };
 
                 CountlyEventModel currentView = new CountlyEventModel(CountlyEventModel.ViewEvent, segment, 1, null, duration);

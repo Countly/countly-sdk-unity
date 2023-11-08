@@ -143,8 +143,9 @@ namespace Plugins.CountlySDK.Services
                     requestParams.Add("location", _locationService.Location);
                 }
             }
-            CountlyMetricModel metrics = new CountlyMetricModel();
-            requestParams.Add("metrics", JsonConvert.SerializeObject(metrics, Formatting.Indented, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }));
+
+            string metricsJSON = _configuration.metricHelper.buildMetricJSON();
+            requestParams.Add("metrics", metricsJSON);
 
             _requestCountlyHelper.AddToRequestQueue(requestParams);
             await _requestCountlyHelper.ProcessQueue();
