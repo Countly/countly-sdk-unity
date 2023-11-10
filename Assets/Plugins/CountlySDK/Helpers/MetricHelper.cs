@@ -6,7 +6,7 @@ namespace Plugins.CountlySDK.Helpers
 {
     public class MetricHelper
     {
-        private Dictionary<string, string> overridenMetrics;
+        internal Dictionary<string, string> overridenMetrics;
         readonly string unityPlatform;
 
         public MetricHelper() : this(null)

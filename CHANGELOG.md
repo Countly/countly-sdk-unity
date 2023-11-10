@@ -1,3 +1,6 @@
+## XX.X.X
+* Added MetricHelper class and "overriddenMetrics" field in the configuration object, allowing to pass custom or overridden metrics.
+
 ## 23.06.1
 * Added app version metric to every request sent.
 * Fixed a bug that caused build issues when not running inside the editor.

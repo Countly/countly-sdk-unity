@@ -126,19 +126,18 @@ namespace Plugins.CountlySDK.Models
         internal string[] EnabledConsentGroups { get; private set; }
         internal List<INotificationListener> NotificationEventListeners;
         internal Dictionary<string, Consents[]> ConsentGroups { get; private set; }
-
         internal Dictionary<string, string> overridenMetrics;
         internal MetricHelper metricHelper;
 
         /// <summary>
         /// Parent must be undestroyable
         /// </summary>
-        public GameObject Parent = null;        
+        public GameObject Parent = null;
 
         public CountlyConfiguration()
         {
             ConsentGroups = new Dictionary<string, Consents[]>();
-            NotificationEventListeners = new List<INotificationListener>();            
+            NotificationEventListeners = new List<INotificationListener>();
         }
 
         internal CountlyConfiguration(CountlyAuthModel authModel, CountlyConfigModel config)
@@ -236,11 +235,6 @@ namespace Plugins.CountlySDK.Models
         public void AddNotificationListener(INotificationListener listener)
         {
             NotificationEventListeners.Add(listener);
-        }
-        
-        public void SetMetricOverride(Dictionary<string, string> overridenMetrics)
-        {
-            this.overridenMetrics = overridenMetrics;
         }
     }
 }
