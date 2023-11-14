@@ -236,5 +236,10 @@ namespace Plugins.CountlySDK.Models
         {
             NotificationEventListeners.Add(listener);
         }
+
+        public void SetMetricOverride(Dictionary<string, string> overridenMetrics)
+        {
+            this.overridenMetrics = overridenMetrics;
+        }
     }
 }

@@ -312,6 +312,9 @@ namespace Tests
             Assert.AreEqual(metricsObject["_locale"].ToString(), config.metricHelper.Locale);
         }
 
+        // Validates the metric override and custom metric functionalities
+        // Overrides metrics in configuration object and compares them with metrics within the request
+        // Metrics within configuration object should be equal to parsed session metrics and overridden ones
         [Test]
         public void SessionMetricOverride()
         {
@@ -327,7 +330,7 @@ namespace Tests
                 { "_locale", "한국인"},
                 { "UserMetric", "user metric"}
             };
-            config.overridenMetrics = overrides;
+            config.SetMetricOverride(overrides);
 
             Countly.Instance.Init(config);
             Assert.IsNotNull(Countly.Instance.Session);
