@@ -1,3 +1,6 @@
+## XX.X.X
+* Added functionality to allow passing custom or overridden metrics.
+
 ## 23.06.1
 * Added app version metric to every request sent.
 * Fixed a bug that caused build issues when not running inside the editor.

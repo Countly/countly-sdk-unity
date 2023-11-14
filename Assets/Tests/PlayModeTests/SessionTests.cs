@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEngine;
 using Plugins.CountlySDK.Models;
@@ -285,7 +285,7 @@ namespace Tests
         }
 
         // Validates the accuracy of the metrics within a request
-        // Parses the metrics within the request and compares with a new 'CountlyMetricModel'
+        // Parses the metrics within the request and compares with 'MetricHelper' in configuration object
         // Metrics within the parsed object should be equal to the expected values.
         [Test]
         public void SessionMetrics()
@@ -310,6 +310,48 @@ namespace Tests
             Assert.AreEqual(metricsObject["_app_version"].ToString(), config.metricHelper.AppVersion);
             Assert.AreEqual(metricsObject["_density"].ToString(), config.metricHelper.Density);
             Assert.AreEqual(metricsObject["_locale"].ToString(), config.metricHelper.Locale);
+        }
+
+        // Validates the metric override and custom metric functionalities
+        // Overrides metrics in configuration object and compares them with metrics within the request
+        // Metrics within configuration object should be equal to parsed session metrics and overridden ones
+        [Test]
+        public void SessionMetricOverride()
+        {
+            CountlyConfiguration config = TestUtility.createBaseConfig();
+            Dictionary<string, string> overrides = new Dictionary<string, string>
+            {
+                { "_os", "New OS" },
+                { "_os_version", "First One" },
+                { "_device", "Smart Fridge"},
+                { "_resolution", "1080p"},
+                { "_app_version","0" },
+                { "_density", "High"},
+                { "_locale", "한국인"},
+                { "UserMetric", "user metric"}
+            };
+            config.SetMetricOverride(overrides);
+
+            Countly.Instance.Init(config);
+            Assert.IsNotNull(Countly.Instance.Session);
+            Assert.AreEqual(1, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
+
+            CountlyRequestModel requestModel = Countly.Instance.Session._requestCountlyHelper._requestRepo.Dequeue();
+            string[] kvp = requestModel.RequestData.Split('&');
+            string metricsKeyValue = kvp.FirstOrDefault(kv => kv.StartsWith("metrics="));
+            string metricsJsonString = Uri.UnescapeDataString(metricsKeyValue.Substring("metrics=".Length));
+            JObject metricsObject = JObject.Parse(metricsJsonString);
+
+            Dictionary<string, object> configMetrics = Converter.ConvertJsonToDictionary(config.metricHelper.buildMetricJSON(), null);
+
+            Assert.AreEqual(metricsObject["_os"].ToString(), configMetrics["_os"], "New OS");
+            Assert.AreEqual(metricsObject["_os_version"].ToString(), configMetrics["_os_version"], "First One");
+            Assert.AreEqual(metricsObject["_device"].ToString(), configMetrics["_device"], "Smart Fridge");
+            Assert.AreEqual(metricsObject["_resolution"].ToString(), configMetrics["_resolution"], "1080p");
+            Assert.AreEqual(metricsObject["_app_version"].ToString(), configMetrics["_app_version"], "0");
+            Assert.AreEqual(metricsObject["_density"].ToString(), configMetrics["_density"], "High");
+            Assert.AreEqual(metricsObject["_locale"].ToString(), configMetrics["_locale"], "한국인");
+            Assert.AreEqual(metricsObject["UserMetric"].ToString(), configMetrics["UserMetric"], "user metric");
         }
 
         [SetUp]
