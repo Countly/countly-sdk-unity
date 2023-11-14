@@ -38,6 +38,8 @@ public class UserDetail : MonoBehaviour
                         { "Height", "5.9" },
             };
         Countly.Instance.UserDetails.SetCustomUserDetails(userCustomDetail);
+
+        await Task.CompletedTask;
     }
 
     public async void SetPropertyOnce()

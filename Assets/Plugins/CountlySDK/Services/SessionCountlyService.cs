@@ -94,6 +94,8 @@ namespace Plugins.CountlySDK.Services
                     _ = ExtendSessionAsync();
                 }
             }
+
+            await Task.CompletedTask;
         }
 
         /// <summary>
