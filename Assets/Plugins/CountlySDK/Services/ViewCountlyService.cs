@@ -72,6 +72,8 @@ namespace Plugins.CountlySDK.Services
 
                 _isFirstView = false;
             }
+
+            await Task.CompletedTask;
         }
 
         /// <summary>
@@ -115,6 +117,7 @@ namespace Plugins.CountlySDK.Services
                 CountlyEventModel currentView = new CountlyEventModel(CountlyEventModel.ViewEvent, segment, 1, null, duration);
                 _ = _eventService.RecordEventAsync(currentView);
             }
+            await Task.CompletedTask;
         }
 
         /// <summary>
@@ -146,6 +149,7 @@ namespace Plugins.CountlySDK.Services
                 CountlyEventModel currentView = new CountlyEventModel(CountlyEventModel.ViewActionEvent, segmentation);
                 _ = _eventService.RecordEventAsync(currentView);
             }
+            await Task.CompletedTask;
         }
 
         #region override Methods
