@@ -140,6 +140,15 @@ namespace Plugins.CountlySDK.Models
             NotificationEventListeners = new List<INotificationListener>();
         }
 
+        public CountlyConfiguration(string appKey, string serverUrl)
+        {
+            AppKey = appKey;
+            ServerUrl = serverUrl;
+
+            ConsentGroups = new Dictionary<string, Consents[]>();
+            NotificationEventListeners = new List<INotificationListener>();
+        }
+
         internal CountlyConfiguration(CountlyAuthModel authModel, CountlyConfigModel config)
         {
             ConsentGroups = new Dictionary<string, Consents[]>();
@@ -183,22 +192,6 @@ namespace Plugins.CountlySDK.Models
         }
 
         /// <summary>
-        /// Set location parameters that will be used during init.
-        /// </summary>
-        /// <param name="countryCode">ISO Country code for the user's country</param>
-        /// <param name="city">Name of the user's city</param>
-        /// <param name="gpsCoordinates">comma separate lat and lng values.<example>"56.42345,123.45325"</example> </param>
-        /// <param name="ipAddress">user's IP Address</param>
-        /// <returns></returns>
-        public void SetLocation(string countryCode, string city, string gpsCoordinates, string ipAddress)
-        {
-            City = city;
-            IPAddress = ipAddress;
-            CountryCode = countryCode;
-            Location = gpsCoordinates;
-        }
-
-        /// <summary>
         /// Give consent to features in case consent is required.
         /// </summary>
         /// <param name="consents">array of consent for which consent should be given</param>
@@ -237,9 +230,243 @@ namespace Plugins.CountlySDK.Models
             NotificationEventListeners.Add(listener);
         }
 
+        #region Setters
         public void SetMetricOverride(Dictionary<string, string> overridenMetrics)
         {
             this.overridenMetrics = overridenMetrics;
         }
+
+        /// <summary>
+        /// Set location parameters that will be used during init.
+        /// </summary>
+        /// <param name="countryCode">ISO Country code for the user's country</param>
+        /// <param name="city">Name of the user's city</param>
+        /// <param name="gpsCoordinates">comma separate lat and lng values.<example>"56.42345,123.45325"</example> </param>
+        /// <param name="ipAddress">user's IP Address</param>
+        /// <returns></returns>
+        public void SetLocation(string countryCode, string city, string gpsCoordinates, string ipAddress)
+        {
+            City = city;
+            IPAddress = ipAddress;
+            CountryCode = countryCode;
+            Location = gpsCoordinates;
+        }
+
+        /// <summary>
+        /// Set location parameters that will be used during init.
+        /// </summary>
+        /// <param name="countryCode">ISO Country code for the user's country</param>
+        /// <param name="city">Name of the user's city</param>
+        /// <param name="gpsCoordinates">comma separate lat and lng values.<example>"56.42345,123.45325"</example> </param>
+        /// <param name="ipAddress">user's IP Address</param>
+        /// <returns>Modified instance of the CountlyConfiguration</returns>
+        public CountlyConfiguration SetLocationInformation(string countryCode, string city, string gpsCoordinates, string ipAddress)
+        {
+            City = city;
+            IPAddress = ipAddress;
+            CountryCode = countryCode;
+            Location = gpsCoordinates;
+
+            return this;
+        }
+
+        /// <summary>
+        /// Set URL of the Countly server to submit data to.
+        /// </summary>
+        /// <returns>Modified instance of the CountlyConfiguration</returns>
+        public CountlyConfiguration SetServerUrl(string serverUrl)
+        {
+            ServerUrl = serverUrl;
+
+            return this;
+        }
+
+        /// <summary>
+        /// Set App key for the application being tracked.
+        /// </summary>
+        /// <returns>Modified instance of the CountlyConfiguration</returns>
+        public CountlyConfiguration SetAppKey(string appKey)
+        {
+            AppKey = appKey;
+
+            return this;
+        }
+
+        /// <summary>
+        /// Set unique ID for the device the app is running on.
+        /// </summary>
+        /// <returns>Modified instance of the CountlyConfiguration</returns>
+        public CountlyConfiguration SetDeviceId(string deviceId)
+        {
+            DeviceId = deviceId;
+
+            return this;
+        }
+
+        /// <summary>
+        /// Set to prevent parameter tampering.
+        /// </summary>
+        /// <returns>Modified instance of the CountlyConfiguration</returns>
+        public CountlyConfiguration SetSalt(string salt)
+        {
+            Salt = salt;
+
+            return this;
+        }
+
+        /// <summary>
+        /// Set to send all requests made to the Countly server using HTTP POST.
+        /// </summary>
+        /// <returns>Modified instance of the CountlyConfiguration</returns>
+        public CountlyConfiguration SetEnablingPost(bool enable)
+        {
+            EnablePost = enable;
+
+            return this;
+        }
+
+        /// <summary>
+        /// Set to true if you want the SDK to pretend that it's functioning.
+        /// </summary>
+        /// <returns>Modified instance of the CountlyConfiguration</returns>
+        public CountlyConfiguration SetEnablingTestMode(bool enable)
+        {
+            EnableTestMode = enable;
+
+            return this;
+        }
+
+        /// <summary>
+        /// Set to true if you want to enable Countly internal debugging logs.
+        /// </summary>
+        /// <returns>Modified instance of the CountlyConfiguration</returns>
+        public CountlyConfiguration SetEnablingConsoleLogging(bool enable)
+        {
+            EnableConsoleLogging = enable;
+
+            return this;
+        }
+
+        /// <summary>
+        /// Set mode of push notification.
+        /// </summary>
+        /// <returns>Modified instance of the CountlyConfiguration</returns>
+        public CountlyConfiguration SetNotificationMode(TestMode mode)
+        {
+            NotificationMode = mode;
+
+            return this;
+        }
+
+        /// <summary>
+        /// Set mode of push notification.
+        /// </summary>
+        /// <returns>Modified instance of the CountlyConfiguration</returns>
+        public CountlyConfiguration SetSessionDuration(int duration)
+        {
+            SessionDuration = duration;
+
+            return this;
+        }
+
+        /// <summary>
+        /// Set maximum size of all string keys
+        /// </summary>
+        /// <returns>Modified instance of the CountlyConfiguration</returns>
+        public CountlyConfiguration SetMaxKeyLength(int length)
+        {
+            MaxKeyLength = length;
+
+            return this;
+        }
+
+        /// <summary>
+        /// Set maximum size of all values in our key-value pairs
+        /// </summary>
+        /// <returns>Modified instance of the CountlyConfiguration</returns>
+        public CountlyConfiguration SetMaxValueSize(int size)
+        {
+            MaxValueSize = size;
+
+            return this;
+        }
+
+        /// <summary>
+        /// Set max amount of custom (dev provided) segmentation in one event
+        /// </summary>
+        /// <returns>Modified instance of the CountlyConfiguration</returns>
+        public CountlyConfiguration SetMaxSegmentationValues(int values)
+        {
+            MaxSegmentationValues = values;
+
+            return this;
+        }
+
+        /// <summary>
+        /// Set the limit of how many stack trace lines would be recorded per thread
+        /// </summary>
+        /// <returns>Modified instance of the CountlyConfiguration</returns>
+        public CountlyConfiguration SetMaxStackTraceLinesPerThread(int lines)
+        {
+            MaxStackTraceLinesPerThread = lines;
+
+            return this;
+        }
+
+        /// <summary>
+        /// Set the limit of how many characters are allowed per stack trace line
+        /// </summary>
+        /// <returns>Modified instance of the CountlyConfiguration</returns>
+        public CountlyConfiguration SetMaxStackTraceLineLength(int length)
+        {
+            MaxStackTraceLineLength = length;
+
+            return this;
+        }
+
+        /// <summary>
+        /// Set threshold value for the number of events that can be stored locally.
+        /// </summary>
+        /// <returns>Modified instance of the CountlyConfiguration</returns>
+        public CountlyConfiguration SetEventQueueThreshold(int threshold)
+        {
+            EventQueueThreshold = threshold;
+
+            return this;
+        }
+
+        /// <summary>
+        /// Set limit for the number of requests that can be stored locally.
+        /// </summary>
+        /// <returns>Modified instance of the CountlyConfiguration</returns>
+        public CountlyConfiguration SetStoredRequestLimit(int limit)
+        {
+            StoredRequestLimit = limit;
+
+            return this;
+        }
+
+        /// <summary>
+        /// Set the maximum amount of breadcrumbs.
+        /// </summary>
+        /// <returns>Modified instance of the CountlyConfiguration</returns>
+        public CountlyConfiguration SetTotalBreadcrumbsAllowed(int amount)
+        {
+            TotalBreadcrumbsAllowed = amount;
+
+            return this;
+        }
+
+        /// <summary>
+        /// Set true to enable uncaught crash reporting.
+        /// </summary>
+        /// <returns>Modified instance of the CountlyConfiguration</returns>
+        public CountlyConfiguration SetEnablingAutomaticCrashReporting(bool enable)
+        {
+            EnableAutomaticCrashReporting = enable;
+
+            return this;
+        }
+        #endregion
     }
 }
