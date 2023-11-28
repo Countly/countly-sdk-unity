@@ -232,27 +232,24 @@ namespace Tests
         public void NewConfigSetters_ValidValues()
         {
             CountlyConfiguration config = new CountlyConfiguration(_appKey, _serverUrl)
-                .SetAppKey("App Key")
-                .SetServerUrl("test.count.ly")
                 .SetDeviceId("device id")
-                .SetLocationInformation("+90", "İzmir", "38.4237° N", "XXX.XXX.XX.XX")
-                .SetSalt("Salt")
-                .SetTotalBreadcrumbsAllowed(10)
-                .SetStoredRequestLimit(5)
-                .SetSessionDuration(50)
+                .SetLocation("+90", "İzmir", "38.4237° N", "XXX.XXX.XX.XX")
+                .SetParameterTamperingProtectionSalt("Salt")
+                .SetMaxBreadcrumbCount(10)
+                .SetMaxRequestQueueSize(5)
+                .SetUpdateSessionTimerDelay(50)
                 .SetMaxKeyLength(129)
                 .SetMaxSegmentationValues(40)
                 .SetMaxStackTraceLineLength(44)
                 .SetMaxStackTraceLinesPerThread(2)
-                .SetEventQueueThreshold(1222)
+                .SetEventQueueSizeToSend(1222)
                 .SetNotificationMode(TestMode.None)
-                .SetEnablingAutomaticCrashReporting(true)
-                .SetEnablingConsoleLogging(true)
-                .SetEnablingPost(true)
-                .SetEnablingTestMode(true);
+                .EnableAutomaticCrashReport(true)
+                .EnableLogging(true)
+                .EnableHttpPostForced(true);
 
-            Assert.AreEqual("App Key", config.AppKey);
-            Assert.AreEqual("test.count.ly", config.ServerUrl);
+            Assert.AreEqual(_appKey, config.AppKey);
+            Assert.AreEqual(_serverUrl, config.ServerUrl);
             Assert.AreEqual("device id", config.DeviceId);
             Assert.AreEqual("+90", config.CountryCode);
             Assert.AreEqual("İzmir", config.City);
@@ -271,34 +268,30 @@ namespace Tests
             Assert.IsTrue(config.EnableAutomaticCrashReporting);
             Assert.IsTrue(config.EnableConsoleLogging);
             Assert.IsTrue(config.EnablePost);
-            Assert.IsTrue(config.EnableTestMode);
         }
 
         [Test]
         public void NewConfigSetters_NegativeNullValues()
         {
             CountlyConfiguration config = new CountlyConfiguration(_appKey, _serverUrl)
-                .SetAppKey(null)
-                .SetServerUrl(null)
                 .SetDeviceId(null)
-                .SetLocationInformation(null, null, null, null)
-                .SetSalt(null)
-                .SetTotalBreadcrumbsAllowed(-10)
-                .SetStoredRequestLimit(-5)
-                .SetSessionDuration(-50)
+                .SetLocation(null, null, null, null)
+                .SetParameterTamperingProtectionSalt(null)
+                .SetMaxBreadcrumbCount(-10)
+                .SetMaxRequestQueueSize(-5)
+                .SetUpdateSessionTimerDelay(-50)
                 .SetMaxKeyLength(-129)
                 .SetMaxSegmentationValues(-40)
                 .SetMaxStackTraceLineLength(-44)
                 .SetMaxStackTraceLinesPerThread(-2)
-                .SetEventQueueThreshold(-1222)
+                .SetEventQueueSizeToSend(-1222)
                 .SetNotificationMode(TestMode.ProductionToken)
-                .SetEnablingAutomaticCrashReporting(false)
-                .SetEnablingConsoleLogging(false)
-                .SetEnablingPost(false)
-                .SetEnablingTestMode(false);
+                .EnableAutomaticCrashReport(false)
+                .EnableLogging(false)
+                .EnableHttpPostForced(false);
 
-            Assert.AreEqual(null, config.AppKey);
-            Assert.AreEqual(null, config.ServerUrl);
+            Assert.AreEqual(_appKey, config.AppKey);
+            Assert.AreEqual(_serverUrl, config.ServerUrl);
             Assert.AreEqual(null, config.DeviceId);
             Assert.AreEqual(null, config.CountryCode);
             Assert.AreEqual(null, config.City);
@@ -317,7 +310,6 @@ namespace Tests
             Assert.IsFalse(config.EnableAutomaticCrashReporting);
             Assert.IsFalse(config.EnableConsoleLogging);
             Assert.IsFalse(config.EnablePost);
-            Assert.IsFalse(config.EnableTestMode);
         }
 
         [TearDown]

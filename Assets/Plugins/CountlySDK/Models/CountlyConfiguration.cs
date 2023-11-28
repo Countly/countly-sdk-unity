@@ -134,6 +134,7 @@ namespace Plugins.CountlySDK.Models
         /// </summary>
         public GameObject Parent = null;
 
+        [Obsolete("CountlyConfiguration() is deprecated, this is going to be removed in the future.")]
         public CountlyConfiguration()
         {
             ConsentGroups = new Dictionary<string, Consents[]>();
@@ -244,50 +245,12 @@ namespace Plugins.CountlySDK.Models
         /// <param name="gpsCoordinates">comma separate lat and lng values.<example>"56.42345,123.45325"</example> </param>
         /// <param name="ipAddress">user's IP Address</param>
         /// <returns></returns>
-        public void SetLocation(string countryCode, string city, string gpsCoordinates, string ipAddress)
+        public CountlyConfiguration SetLocation(string countryCode, string city, string gpsCoordinates, string ipAddress)
         {
             City = city;
             IPAddress = ipAddress;
             CountryCode = countryCode;
             Location = gpsCoordinates;
-        }
-
-        /// <summary>
-        /// Set location parameters that will be used during init.
-        /// </summary>
-        /// <param name="countryCode">ISO Country code for the user's country</param>
-        /// <param name="city">Name of the user's city</param>
-        /// <param name="gpsCoordinates">comma separate lat and lng values.<example>"56.42345,123.45325"</example> </param>
-        /// <param name="ipAddress">user's IP Address</param>
-        /// <returns>Modified instance of the CountlyConfiguration</returns>
-        public CountlyConfiguration SetLocationInformation(string countryCode, string city, string gpsCoordinates, string ipAddress)
-        {
-            City = city;
-            IPAddress = ipAddress;
-            CountryCode = countryCode;
-            Location = gpsCoordinates;
-
-            return this;
-        }
-
-        /// <summary>
-        /// Set URL of the Countly server to submit data to.
-        /// </summary>
-        /// <returns>Modified instance of the CountlyConfiguration</returns>
-        public CountlyConfiguration SetServerUrl(string serverUrl)
-        {
-            ServerUrl = serverUrl;
-
-            return this;
-        }
-
-        /// <summary>
-        /// Set App key for the application being tracked.
-        /// </summary>
-        /// <returns>Modified instance of the CountlyConfiguration</returns>
-        public CountlyConfiguration SetAppKey(string appKey)
-        {
-            AppKey = appKey;
 
             return this;
         }
@@ -307,7 +270,7 @@ namespace Plugins.CountlySDK.Models
         /// Set to prevent parameter tampering.
         /// </summary>
         /// <returns>Modified instance of the CountlyConfiguration</returns>
-        public CountlyConfiguration SetSalt(string salt)
+        public CountlyConfiguration SetParameterTamperingProtectionSalt(string salt)
         {
             Salt = salt;
 
@@ -318,20 +281,9 @@ namespace Plugins.CountlySDK.Models
         /// Set to send all requests made to the Countly server using HTTP POST.
         /// </summary>
         /// <returns>Modified instance of the CountlyConfiguration</returns>
-        public CountlyConfiguration SetEnablingPost(bool enable)
+        public CountlyConfiguration EnableHttpPostForced(bool enable)
         {
             EnablePost = enable;
-
-            return this;
-        }
-
-        /// <summary>
-        /// Set to true if you want the SDK to pretend that it's functioning.
-        /// </summary>
-        /// <returns>Modified instance of the CountlyConfiguration</returns>
-        public CountlyConfiguration SetEnablingTestMode(bool enable)
-        {
-            EnableTestMode = enable;
 
             return this;
         }
@@ -340,7 +292,7 @@ namespace Plugins.CountlySDK.Models
         /// Set to true if you want to enable Countly internal debugging logs.
         /// </summary>
         /// <returns>Modified instance of the CountlyConfiguration</returns>
-        public CountlyConfiguration SetEnablingConsoleLogging(bool enable)
+        public CountlyConfiguration EnableLogging(bool enable)
         {
             EnableConsoleLogging = enable;
 
@@ -359,10 +311,10 @@ namespace Plugins.CountlySDK.Models
         }
 
         /// <summary>
-        /// Set mode of push notification.
+        /// Sets the interval for the automatic update calls. Min value 1 (1 second)
         /// </summary>
         /// <returns>Modified instance of the CountlyConfiguration</returns>
-        public CountlyConfiguration SetSessionDuration(int duration)
+        public CountlyConfiguration SetUpdateSessionTimerDelay(int duration)
         {
             SessionDuration = duration;
 
@@ -428,7 +380,7 @@ namespace Plugins.CountlySDK.Models
         /// Set threshold value for the number of events that can be stored locally.
         /// </summary>
         /// <returns>Modified instance of the CountlyConfiguration</returns>
-        public CountlyConfiguration SetEventQueueThreshold(int threshold)
+        public CountlyConfiguration SetEventQueueSizeToSend(int threshold)
         {
             EventQueueThreshold = threshold;
 
@@ -439,7 +391,7 @@ namespace Plugins.CountlySDK.Models
         /// Set limit for the number of requests that can be stored locally.
         /// </summary>
         /// <returns>Modified instance of the CountlyConfiguration</returns>
-        public CountlyConfiguration SetStoredRequestLimit(int limit)
+        public CountlyConfiguration SetMaxRequestQueueSize(int limit)
         {
             StoredRequestLimit = limit;
 
@@ -450,7 +402,7 @@ namespace Plugins.CountlySDK.Models
         /// Set the maximum amount of breadcrumbs.
         /// </summary>
         /// <returns>Modified instance of the CountlyConfiguration</returns>
-        public CountlyConfiguration SetTotalBreadcrumbsAllowed(int amount)
+        public CountlyConfiguration SetMaxBreadcrumbCount(int amount)
         {
             TotalBreadcrumbsAllowed = amount;
 
@@ -461,7 +413,7 @@ namespace Plugins.CountlySDK.Models
         /// Set true to enable uncaught crash reporting.
         /// </summary>
         /// <returns>Modified instance of the CountlyConfiguration</returns>
-        public CountlyConfiguration SetEnablingAutomaticCrashReporting(bool enable)
+        public CountlyConfiguration EnableAutomaticCrashReport(bool enable)
         {
             EnableAutomaticCrashReporting = enable;
 
