@@ -23,9 +23,9 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
         string _serverUrl = "https://try.count.ly/";
 
         CountlyConfiguration configuration = new CountlyConfiguration(_appKey, _serverUrl)
-            .EnableLogging(true)
+            .EnableLogging()
             .SetParameterTamperingProtectionSalt("test-salt-checksum")
-            .EnableHttpPostForced(false)
+            .EnableForcedHttpPost()
             .SetRequiresConsent(true)
             .SetEventQueueSizeToSend(1)
             .SetNotificationMode(TestMode.AndroidTestToken);

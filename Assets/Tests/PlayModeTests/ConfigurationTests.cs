@@ -23,7 +23,7 @@ namespace Tests
         /// It validates configuration values provided during init and URL sanitation.
         /// </summary>
         [Test]
-        public void TestSDKInitParams()
+        public void SDKInitParams()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 AppKey = _appKey,
@@ -105,7 +105,7 @@ namespace Tests
         /// It validates the configuration's default values.
         /// </summary>
         [Test]
-        public void TestDefaultConfigValues()
+        public void DefaultConfigValues()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 AppKey = _appKey,
@@ -145,7 +145,7 @@ namespace Tests
         /// It initialize SDK with countly prefab and validates the new configuration against old configuration.
         /// </summary>
         [Test]
-        public void TestNewConfigurationAndOldConfiguration()
+        public void NewConfigurationAndOldConfiguration()
         {
             Object countlyPrefab = AssetDatabase.LoadAssetAtPath("Assets/Plugins/CountlySDK/Prefabs/Countly.prefab", typeof(GameObject));
 
@@ -245,10 +245,10 @@ namespace Tests
                 .SetMaxStackTraceLinesPerThread(2)
                 .SetEventQueueSizeToSend(1222)
                 .SetNotificationMode(TestMode.None)
-                .EnableAutomaticCrashReport(true)
-                .EnableLogging(true)
+                .DisableAutomaticCrashReporting()
+                .EnableLogging()
                 .SetRequiresConsent(true)
-                .EnableHttpPostForced(true);
+                .EnableForcedHttpPost();
 
             Assert.AreEqual(_appKey, config.AppKey);
             Assert.AreEqual(_serverUrl, config.ServerUrl);
@@ -267,7 +267,7 @@ namespace Tests
             Assert.AreEqual(2, config.MaxStackTraceLinesPerThread);
             Assert.AreEqual(1222, config.EventQueueThreshold);
             Assert.AreEqual(TestMode.None, config.NotificationMode);
-            Assert.IsTrue(config.EnableAutomaticCrashReporting);
+            Assert.IsFalse(config.EnableAutomaticCrashReporting);
             Assert.IsTrue(config.EnableConsoleLogging);
             Assert.IsTrue(config.EnablePost);
             Assert.IsTrue(config.RequiresConsent);
@@ -288,11 +288,7 @@ namespace Tests
                 .SetMaxStackTraceLineLength(-44)
                 .SetMaxStackTraceLinesPerThread(-2)
                 .SetEventQueueSizeToSend(-1222)
-                .SetNotificationMode(TestMode.ProductionToken)
-                .EnableAutomaticCrashReport(false)
-                .EnableLogging(false)
-                .SetRequiresConsent(false)
-                .EnableHttpPostForced(false);
+                .SetNotificationMode(TestMode.ProductionToken);
 
             Assert.AreEqual(_appKey, config.AppKey);
             Assert.AreEqual(_serverUrl, config.ServerUrl);
@@ -311,10 +307,6 @@ namespace Tests
             Assert.AreEqual(-2, config.MaxStackTraceLinesPerThread);
             Assert.AreEqual(-1222, config.EventQueueThreshold);
             Assert.AreEqual(TestMode.ProductionToken, config.NotificationMode);
-            Assert.IsFalse(config.EnableAutomaticCrashReporting);
-            Assert.IsFalse(config.EnableConsoleLogging);
-            Assert.IsFalse(config.EnablePost);
-            Assert.IsFalse(config.RequiresConsent);
         }
 
         [TearDown]

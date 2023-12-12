@@ -40,7 +40,7 @@ namespace Plugins.CountlySDK.Models
         /// <summary>
         /// Set to send all requests made to the Countly server using HTTP POST.
         /// </summary>
-        [Obsolete("EnablePost is deprecated. Use EnableHttpPostForced(bool enable) instead.")]
+        [Obsolete("EnablePost is deprecated. Use EnableForcedHttpPost() instead.")]
         public bool EnablePost = false;
 
         /// <summary>
@@ -52,7 +52,7 @@ namespace Plugins.CountlySDK.Models
         /// <summary>
         /// Set to true if you want to enable countly internal debugging logs.
         /// </summary>
-        [Obsolete("EnableConsoleLogging is deprecated. Use EnableLogging(bool enable) instead.")]
+        [Obsolete("EnableConsoleLogging is deprecated. Use EnableLogging() instead.")]
         public bool EnableConsoleLogging = false;
 
         /// <summary>
@@ -125,7 +125,7 @@ namespace Plugins.CountlySDK.Models
         /// <summary>
         /// Set true to enable uncaught crash reporting.
         /// </summary>
-        [Obsolete("EnableAutomaticCrashReporting is deprecated. Use EnableAutomaticCrashReport(bool enable) instead.")]
+        [Obsolete("EnableAutomaticCrashReporting is deprecated. Use DisableAutomaticCrashReporting() instead.")]
         public bool EnableAutomaticCrashReporting = true;
 
         /// <summary>
@@ -300,23 +300,23 @@ namespace Plugins.CountlySDK.Models
         }
 
         /// <summary>
-        /// Set to send all requests made to the Countly server using HTTP POST.
+        /// Enables to send all requests made to the Countly server using HTTP POST.
         /// </summary>
         /// <returns>Modified instance of the CountlyConfiguration</returns>
-        public CountlyConfiguration EnableHttpPostForced(bool enable)
+        public CountlyConfiguration EnableForcedHttpPost()
         {
-            EnablePost = enable;
+            EnablePost = true;
 
             return this;
         }
 
         /// <summary>
-        /// Set to true if you want to enable Countly internal debugging logs.
+        /// Enables Countly internal debugging logs.
         /// </summary>
         /// <returns>Modified instance of the CountlyConfiguration</returns>
-        public CountlyConfiguration EnableLogging(bool enable)
+        public CountlyConfiguration EnableLogging()
         {
-            EnableConsoleLogging = enable;
+            EnableConsoleLogging = true;
 
             return this;
         }
@@ -432,18 +432,18 @@ namespace Plugins.CountlySDK.Models
         }
 
         /// <summary>
-        /// Set true to enable uncaught crash reporting.
+        /// Disables uncaught crash reporting.
         /// </summary>
         /// <returns>Modified instance of the CountlyConfiguration</returns>
-        public CountlyConfiguration EnableAutomaticCrashReport(bool enable)
+        public CountlyConfiguration DisableAutomaticCrashReporting()
         {
-            EnableAutomaticCrashReporting = enable;
+            EnableAutomaticCrashReporting = false;
 
             return this;
         }
 
         /// <summary>
-        /// Set true if consent should be required.
+        /// Enables requirement of the consent.
         /// </summary>
         /// <returns>Modified instance of the CountlyConfiguration</returns>
         public CountlyConfiguration SetRequiresConsent(bool enable)
