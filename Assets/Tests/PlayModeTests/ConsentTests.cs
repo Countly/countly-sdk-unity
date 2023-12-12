@@ -136,7 +136,7 @@ namespace Tests
         public void ConsentRequest_NewConstructor()
         {
             CountlyConfiguration configuration = new CountlyConfiguration(_appKey, _serverUrl)
-                .SetRequiresConsent(true);
+                .SetRequiresConsent();
 
             configuration.GiveConsent(new Consents[] { Consents.Crashes, Consents.Events, Consents.Clicks, Consents.StarRating, Consents.Views, Consents.Users, Consents.Push, Consents.RemoteConfig, Consents.Location, Consents.Feedback, Consents.Sessions });
             Countly.Instance.Init(configuration);
