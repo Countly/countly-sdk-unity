@@ -226,6 +226,7 @@ namespace Tests
             Assert.IsNull(Countly.Instance.Configuration.IPAddress);
             Assert.IsNull(Countly.Instance.Configuration.CountryCode);
             Assert.IsFalse(Countly.Instance.Configuration.IsLocationDisabled);
+            Assert.IsFalse(Countly.Instance.Configuration.RequiresConsent);
         }
 
         [Test]
@@ -246,6 +247,7 @@ namespace Tests
                 .SetNotificationMode(TestMode.None)
                 .EnableAutomaticCrashReport(true)
                 .EnableLogging(true)
+                .SetRequiresConsent(true)
                 .EnableHttpPostForced(true);
 
             Assert.AreEqual(_appKey, config.AppKey);
@@ -268,6 +270,7 @@ namespace Tests
             Assert.IsTrue(config.EnableAutomaticCrashReporting);
             Assert.IsTrue(config.EnableConsoleLogging);
             Assert.IsTrue(config.EnablePost);
+            Assert.IsTrue(config.RequiresConsent);
         }
 
         [Test]
@@ -288,6 +291,7 @@ namespace Tests
                 .SetNotificationMode(TestMode.ProductionToken)
                 .EnableAutomaticCrashReport(false)
                 .EnableLogging(false)
+                .SetRequiresConsent(false)
                 .EnableHttpPostForced(false);
 
             Assert.AreEqual(_appKey, config.AppKey);
@@ -310,6 +314,7 @@ namespace Tests
             Assert.IsFalse(config.EnableAutomaticCrashReporting);
             Assert.IsFalse(config.EnableConsoleLogging);
             Assert.IsFalse(config.EnablePost);
+            Assert.IsFalse(config.RequiresConsent);
         }
 
         [TearDown]

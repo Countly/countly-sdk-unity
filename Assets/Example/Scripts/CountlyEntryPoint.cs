@@ -19,16 +19,16 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
             return;
         }
 
-        CountlyConfiguration configuration = new CountlyConfiguration {
-            ServerUrl = "https://try.count.ly/",
-            AppKey = "YOUR_APP_KEY",
-            EnableConsoleLogging = true,
-            Salt = "test-salt-checksum",
-            EnablePost = false,
-            RequiresConsent = true,
-            EventQueueThreshold = 1,
-            NotificationMode = TestMode.AndroidTestToken
-        };
+        string _appKey = "YOUR_APP_KEY";
+        string _serverUrl = "https://try.count.ly/";
+
+        CountlyConfiguration configuration = new CountlyConfiguration(_appKey, _serverUrl)
+            .EnableLogging(true)
+            .SetParameterTamperingProtectionSalt("test-salt-checksum")
+            .EnableHttpPostForced(false)
+            .SetRequiresConsent(true)
+            .SetEventQueueSizeToSend(1)
+            .SetNotificationMode(TestMode.AndroidTestToken);
 
         string countryCode = "us";
         string city = "Boston’ 墨尔本";
@@ -43,10 +43,12 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
         Countly.Instance.Init(configuration);
         countly = Countly.Instance;
     }
+
     private void OnApplicationQuit()
     {
         Countly.Instance?.Notifications?.RemoveListener(this);
     }
+
     public void TestWithMultipleThreads()
     {
         int participants = 13;
@@ -238,6 +240,7 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
 
         Debug.Log("All threads completed at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
     }
+
     public void SetLocation()
     {
         string countryCode = "uk";
@@ -247,7 +250,6 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
         string ipAddress = null;
 
         countly.Location.SetLocation(countryCode, city, latitude + "," + longitude, ipAddress);
-
     }
 
     public void DisableLocation()

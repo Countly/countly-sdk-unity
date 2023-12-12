@@ -5,6 +5,7 @@
 * Deprecated "AppKey" string in "CountlyConfiguration" class.
 * Deprecated "DeviceId" string in "CountlyConfiguration" class. A setter method is added.
 * Deprecated "Salt" string in "CountlyConfiguration" class. A setter method is added.
+* Deprecated "RequiresConsent" bool in CountlyConfiguration class. A setter method is added.
 * Deprecated "EnablePost" bool in "CountlyConfiguration" class. A setter method is added.
 * Deprecated "EnableTestMode" bool in "CountlyConfiguration" class.
 * Deprecated "EnableConsoleLogging" bool in "CountlyConfiguration" class. A setter method is added.
