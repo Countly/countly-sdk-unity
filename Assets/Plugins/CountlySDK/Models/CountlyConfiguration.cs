@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using JetBrains.Annotations;
 using Notifications;
 using Plugins.CountlySDK.Enums;
@@ -129,17 +128,18 @@ namespace Plugins.CountlySDK.Models
         [Obsolete("EnableAutomaticCrashReporting is deprecated. Use EnableAutomaticCrashReport(bool enable) instead.")]
         public bool EnableAutomaticCrashReporting = true;
 
+        /// <summary>
+        /// Set if consent should be required.
+        /// </summary>
+        [Obsolete("RequiresConsent is deprecated. Use SetRequiresConsent(bool enable) instead.")]
+        public bool RequiresConsent = false;
+
         internal string City = null;
         internal string Location = null;
         internal string IPAddress = null;
         internal string CountryCode = null;
         internal bool IsLocationDisabled = false;
         internal bool IsAutomaticSessionTrackingDisabled = false;
-
-        /// <summary>
-        /// Set if consent should be required.
-        /// </summary>
-        public bool RequiresConsent = false;
 
         internal Consents[] GivenConsent { get; private set; }
         internal string[] EnabledConsentGroups { get; private set; }
@@ -251,6 +251,9 @@ namespace Plugins.CountlySDK.Models
         }
 
         #region Setters
+        /// <summary>
+        /// Set metric overrides.
+        /// </summary>
         public void SetMetricOverride(Dictionary<string, string> overridenMetrics)
         {
             this.overridenMetrics = overridenMetrics;
@@ -435,6 +438,17 @@ namespace Plugins.CountlySDK.Models
         public CountlyConfiguration EnableAutomaticCrashReport(bool enable)
         {
             EnableAutomaticCrashReporting = enable;
+
+            return this;
+        }
+
+        /// <summary>
+        /// Set true if consent should be required.
+        /// </summary>
+        /// <returns>Modified instance of the CountlyConfiguration</returns>
+        public CountlyConfiguration SetRequiresConsent(bool enable)
+        {
+            RequiresConsent = enable;
 
             return this;
         }
