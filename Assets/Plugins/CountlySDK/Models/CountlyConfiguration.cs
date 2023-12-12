@@ -131,7 +131,7 @@ namespace Plugins.CountlySDK.Models
         /// <summary>
         /// Set if consent should be required.
         /// </summary>
-        [Obsolete("RequiresConsent is deprecated. Use SetRequiresConsent() instead.")]
+        [Obsolete("RequiresConsent is deprecated. Use SetRequiresConsent(bool enable) instead.")]
         public bool RequiresConsent = false;
 
         internal string City = null;
@@ -446,9 +446,9 @@ namespace Plugins.CountlySDK.Models
         /// Enables requirement of the consent.
         /// </summary>
         /// <returns>Modified instance of the CountlyConfiguration</returns>
-        public CountlyConfiguration SetRequiresConsent()
+        public CountlyConfiguration SetRequiresConsent(bool enable)
         {
-            RequiresConsent = true;
+            RequiresConsent = enable;
 
             return this;
         }

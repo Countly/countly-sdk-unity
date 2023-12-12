@@ -247,7 +247,7 @@ namespace Tests
                 .SetNotificationMode(TestMode.None)
                 .DisableAutomaticCrashReporting()
                 .EnableLogging()
-                .SetRequiresConsent()
+                .SetRequiresConsent(true)
                 .EnableForcedHttpPost();
 
             Assert.AreEqual(_appKey, config.AppKey);

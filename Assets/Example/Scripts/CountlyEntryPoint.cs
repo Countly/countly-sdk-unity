@@ -26,7 +26,7 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
             .EnableLogging()
             .SetParameterTamperingProtectionSalt("test-salt-checksum")
             .EnableForcedHttpPost()
-            .SetRequiresConsent()
+            .SetRequiresConsent(true)
             .SetEventQueueSizeToSend(1)
             .SetNotificationMode(TestMode.AndroidTestToken);
 
