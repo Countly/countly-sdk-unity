@@ -8,24 +8,423 @@ using UnityEngine;
 
 namespace Plugins.CountlySDK.Services
 {
-
     public class ViewCountlyService : AbstractBaseService
     {
+        private class ViewData
+        {
+            public string ViewID;
+            public long ViewStartTimeSeconds; // If this is 0, the view is not started yet or was paused
+            public string ViewName;
+            public bool IsAutoStoppedView; // Views started with "startAutoStoppedView" would have this as "true".
+            public bool IsAutoPaused; // This marks that this view automatically paused when going to the background
+        }
+
+        private string currentViewID = null;
+        private string previousViewID = null;
+        private string viewEventKey = "[CLY]_view";
+
+
+        Dictionary<string, ViewData> viewDataMap = new Dictionary<string, ViewData>();
+        Dictionary<string, object> automaticViewSegmentation = new Dictionary<string, object>();
+
+        bool autoViewTracker = false;
+
         internal bool _isFirstView = true;
         internal readonly EventCountlyService _eventService;
+        internal readonly Countly _cly;
+        internal readonly CountlyUtils _utils;
+
+        string[] reservedSegmentationKeysViews = new string[] { "name", "visit", "start", "segment" };
         private readonly Dictionary<string, DateTime> _viewToLastViewStartTime = new Dictionary<string, DateTime>();
 
-        internal ViewCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, EventCountlyService eventService, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
+        internal ViewCountlyService(Countly countly, CountlyUtils utils, CountlyConfiguration configuration, CountlyLogHelper logHelper, EventCountlyService eventService, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
         {
             Log.Debug("[ViewCountlyService] Initializing.");
-
+            _cly = countly;
+            _utils = utils;
             _eventService = eventService;
         }
+
+        public string? StartView(string? viewName)
+        {
+            lock (LockObj) {
+                Log.Info("[ViewCountlyService] Calling StartView vn[" + viewName + "]");
+
+                return StartViewInternal(viewName, null, false);
+            }
+        }
+
+        public string? StartView(string? viewName, Dictionary<string, object>? viewSegmentation)
+        {
+            lock (LockObj) {
+                Log.Info("[ViewCountlyService] Calling StartView vn[" + viewName + "] sg[" + (viewSegmentation == null ? "null" : viewSegmentation.Count.ToString()) + "]");
+
+                if (autoViewTracker) {
+                    Log.Warning("[ViewCountlyService] StartView, manual view call will be ignored since automatic tracking is enabled.");
+                    return null;
+                }
+
+                return StartViewInternal(viewName, viewSegmentation, false);
+            }
+        }
+
+        public void StopViewWithName(string? viewName)
+        {
+            lock (LockObj) {
+                Log.Info("[ViewCountlyService] Calling StopViewWithName vn[" + viewName + "]");
+
+                StopViewWithNameInternal(viewName, null);
+            }
+        }
+
+        public void StopViewWithName(string? viewName, Dictionary<string, object>? viewSegmentation)
+        {
+            lock(LockObj) {
+                Log.Info("[ViewCountlyService] Calling StopViewWithName vn[" + viewName + "] sg[" + (viewSegmentation == null ? "null" : viewSegmentation.Count.ToString()) + "]");
+
+                StopViewWithNameInternal(viewName, viewSegmentation);
+            }
+        }
+
+        public void StopViewWithID(string? viewID)
+        {
+            lock(LockObj) {
+                Log.Info("[ViewCountlyService] Calling StopViewWithID vi[" + viewID + "]");
+
+                StopViewWithIDInternal(viewID, null);
+            }
+        }
+
+        public void StopViewWithID(string? viewID, Dictionary<string, object>? viewSegmentation)
+        {
+            lock (LockObj) {
+                Log.Info("[ViewCountlyService] Calling StopViewWithID vi[" + viewID + "] sg[" + (viewSegmentation == null ? "null" : viewSegmentation.Count.ToString()) + "]");
+
+                StopViewWithIDInternal(viewID, viewSegmentation);
+            }
+        }
+
+        public void PauseViewWithID(string? viewID)
+        {
+            lock(LockObj) {
+                Log.Info("[ViewCountlyService] Calling PauseViewWithID vi[" + viewID + "]");
+
+                PauseViewWithIDInternal(viewID, false);
+            }
+        }
+
+        public void ResumeViewWithID(string? viewID)
+        {
+            lock(LockObj) {
+                Log.Info("[ViewCountlyService] Calling ResumeViewWithID vi[" + viewID + "]");
+
+                ResumeViewWithIDInternal(viewID);
+            }
+        }
+
+        public void StopAllViews(Dictionary<string, object> viewSegmentation)
+        {
+            lock(LockObj) {
+                Log.Info("[ViewCountlyService] Calling StopAllViews sg[" + (viewSegmentation == null ? "null" : viewSegmentation.Count.ToString()) + "]");
+
+                StopAllViewsInternal(viewSegmentation);
+            }
+        }
+
+        public void SetGlobalViewSegmentation(Dictionary<string, object> viewSegmentation)
+        {
+            lock(LockObj) {
+                Log.Info("[ViewCountlyService] Calling SetGlobalViewSegmentation sg[" + (viewSegmentation == null ? "null" : viewSegmentation.Count.ToString()) + "]");
+
+                SetGlobalViewSegmentationInternal(viewSegmentation);
+            }
+        }
+
+        private string? StartViewInternal(string? viewName,  Dictionary<string, object>? customViewSegmentation, bool viewShouldBeAutomaticallyStopped)
+        {
+            if (!_cly.IsSDKInitialized) {
+                Log.Warning("Countly.Instance.Init() must be called before startViewInternal");
+                return null;
+            }
+
+            if (_utils.IsNullEmptyOrWhitespace(viewName)) {
+                Log.Warning("[ViewCountlyService] StartViewInternal, Trying to record view with null or empty view name, ignoring request");
+                return null;
+            }
+
+            _utils.TruncateSegmentationValues(customViewSegmentation, _configuration.MaxSegmentationValues, "[ViewCountlyService] StartViewInternal, ", Log);
+            _utils.RemoveReservedKeysFromSegmentation(customViewSegmentation, reservedSegmentationKeysViews, "[ViewCountlyService] AutoCloseRequiredViews, ", Log);
+
+            int segmCount = 0;
+            if (customViewSegmentation != null) {
+                segmCount = customViewSegmentation.Count;
+            }
+            Log.Debug("[ViewCountlyService] Recording view with name: [" + viewName + "], previous view ID:[" + currentViewID + "] custom view segment count:[" + segmCount + "], first:[" + _isFirstView + "], autoStop:[" + viewShouldBeAutomaticallyStopped + "]");
+
+            AutoCloseRequiredViews(false, null);
+
+            ViewData currentViewData = new ViewData();
+            currentViewData.ViewID = _utils.SafeRandomVal();
+            currentViewData.ViewName = viewName;
+            currentViewData.ViewStartTimeSeconds = _utils.CurrentTimestampSeconds();
+            currentViewData.IsAutoStoppedView = viewShouldBeAutomaticallyStopped;
+
+            viewDataMap.Add(currentViewData.ViewID, currentViewData);
+            previousViewID = currentViewID;
+            currentViewID = currentViewData.ViewID;
+
+            Dictionary<string, object> accumulatedEventSegm = new Dictionary<string, object>(automaticViewSegmentation);
+
+            if(customViewSegmentation != null) {
+                foreach(KeyValuePair<string, object> kvp in customViewSegmentation) {
+                    accumulatedEventSegm.Add(kvp.Key, kvp.Value);
+                }
+            }
+
+            Dictionary<string, object> viewSegmentation = CreateViewEventSegmentation(currentViewData, _isFirstView, true, accumulatedEventSegm);
+
+            if (_isFirstView) {
+                Log.Debug("[ViewCountlyService] Recording view as the first one in the session. [" + viewName + "]");
+                _isFirstView = false;
+            }
+            _ = _eventService.RecordEventAsync(viewEventKey, viewSegmentation, 1, 0, null);
+
+            return currentViewData.ViewID;
+        }
+
+        private void StopViewWithNameInternal(string? viewName, Dictionary<string, object>? customViewSegmentation)
+        {
+            if (_utils.IsNullEmptyOrWhitespace(viewName)) {
+                Log.Warning("[ViewCountlyService] StopViewWithNameInternal, Trying to record view with null or empty view name, ignoring request");
+                return;
+            }
+
+            string viewID = null;
+
+            foreach (KeyValuePair<string, ViewData> entry in viewDataMap) {
+                string key = entry.Key;
+                ViewData vd = entry.Value;
+
+                if (vd != null && viewName.Equals(vd.ViewName)) {
+                    viewID = key;
+                }
+            }
+
+            if (viewID == null) {
+                Log.Warning("[ViewCountlyService] StopViewWithNameInternal, No view entry found with the provided name :[" + viewName + "]");
+                return;
+            }
+
+            StopViewWithIDInternal(viewID, customViewSegmentation);
+        }
+
+        private void AutoCloseRequiredViews(bool closeAllViews, Dictionary<string, object>? customViewSegmentation)
+        {
+            Log.Debug("[ViewCountlyService] AutoCloseRequiredViews");
+            List<string> viewsToRemove = new List<string>(1);
+
+            foreach (var entry in viewDataMap) {
+                ViewData vd = entry.Value;
+                if (closeAllViews || vd.IsAutoStoppedView) {
+                    viewsToRemove.Add(vd.ViewID);
+                }
+            }
+
+            if (viewsToRemove.Count > 0) {
+                Log.Debug("[ViewCountlyService] AutoCloseRequiredViews, about to close [" + viewsToRemove.Count + "] views");
+            }
+
+            _utils.RemoveReservedKeysFromSegmentation(customViewSegmentation, reservedSegmentationKeysViews, "[ViewCountlyService] AutoCloseRequiredViews, ", Log);
+
+            for (int i = 0; i < viewsToRemove.Count; i++) {
+                StopViewWithIDInternal(viewsToRemove[i], customViewSegmentation);
+            }
+        }
+
+        private void StopViewWithIDInternal(string viewID, Dictionary<string, object>? customViewSegmentation)
+        {
+            if (_utils.IsNullEmptyOrWhitespace(viewID)) {
+                Log.Warning("[ViewCountlyService] StopViewWithIDInternal, Trying to record view with null or empty view ID, ignoring request");
+                return;
+            }
+            
+            if (!viewDataMap.ContainsKey(viewID)) {
+                Log.Warning("[ViewCountlyService] StopViewWithIDInternal, there is no view with the provided view id to close");
+                return;
+            }
+
+            ViewData vd = viewDataMap[viewID];
+            if (vd == null) {
+                Log.Warning("[ViewCountlyService] StopViewWithIDInternal, view id:[" + viewID + "] has a 'null' value. This should not be happening");
+                return;
+            }
+
+            Log.Debug("[ViewCountlyService] View [" + vd.ViewName + "], id:[" + vd.ViewID + "] is getting closed, reporting duration: [" + (_utils.CurrentTimestampSeconds() - vd.ViewStartTimeSeconds) + "] s, current timestamp: [" + _utils.CurrentTimestampSeconds() + "]");
+
+            if (!_consentService.CheckConsentInternal(Consents.Views)) {
+                return;
+            }
+
+            _utils.TruncateSegmentationValues(customViewSegmentation, _configuration.MaxSegmentationValues, "[ViewCountlyService] StopViewWithIDInternal", Log);
+
+            RecordViewEndEvent(vd, customViewSegmentation, "StopViewWithIDInternal");
+
+            viewDataMap.Remove(vd.ViewID);
+        }
+
+        void PauseViewWithIDInternal(string viewID, bool pausedAutomatically)
+        {
+            if (_utils.IsNullEmptyOrWhitespace(viewID)) {
+                Log.Warning("[ViewCountlyService] PauseViewWithIDInternal, Trying to record view with null or empty view ID, ignoring request");
+                return;
+            }
+
+            if (!viewDataMap.ContainsKey(viewID)) {
+                Log.Warning("[ViewCountlyService] PauseViewWithIDInternal, there is no view with the provided view id to close");
+                return;
+            }
+
+            ViewData vd = viewDataMap[viewID];
+            if (vd == null) {
+                Log.Warning("[ViewCountlyService] PauseViewWithIDInternal, view id:[" + viewID + "] has a 'null' value. This should not be happening, auto paused:[" + pausedAutomatically + "]");
+                return;
+            }
+
+            if (!_consentService.CheckConsentInternal(Consents.Views)) {
+                return;
+            }
+
+            Log.Debug("[ViewCountlyService] PauseViewWithIDInternal, pausing view for ID:[" + viewID + "], name:[" + vd.ViewName + "]");
+
+            if (vd.ViewStartTimeSeconds == 0) {
+                Log.Warning("[ViewCountlyService] PauseViewWithIDInternal, pausing a view that is already paused. ID:[" + viewID + "], name:[" + vd.ViewName + "]");
+                return;
+            }
+
+            vd.IsAutoPaused = pausedAutomatically;
+
+            RecordViewEndEvent(vd, null, "PauseViewWithIDInternal");
+
+            vd.ViewStartTimeSeconds = 0;
+        }
+
+        private void RecordViewEndEvent(ViewData vd, Dictionary<string, object> filteredCustomViewSegmentation, string viewRecordingSource)
+        {
+            long lastElapsedDurationSeconds = 0;
+
+            if (vd.ViewStartTimeSeconds < 0) {
+                Log.Warning("[ViewCountlyService] " + viewRecordingSource + ", view start time value is not normal: [" + vd.ViewStartTimeSeconds + "], ignoring that duration");
+            } else if (vd.ViewStartTimeSeconds == 0) {
+                Log.Info("[ViewCountlyService] " + viewRecordingSource + ", view is either paused or didn't run, ignoring start timestamp");
+            } else {
+                lastElapsedDurationSeconds = _utils.CurrentTimestampSeconds() - vd.ViewStartTimeSeconds;
+            }
+
+            if (vd.ViewName == null) {
+                Log.Warning("[ViewCountlyService] StopViewWithIDInternal, view has no internal name, ignoring it");
+                return;
+            }
+
+            Dictionary<string, object> accumulatedEventSegm = new Dictionary<string, object>(automaticViewSegmentation);
+            if (filteredCustomViewSegmentation != null) {
+                foreach(KeyValuePair<string, object> kvp in filteredCustomViewSegmentation) {
+                    accumulatedEventSegm.Add(kvp.Key, kvp.Value);
+                }
+            }
+
+            long viewDurationSeconds = lastElapsedDurationSeconds;
+            Dictionary <string, object> segments = CreateViewEventSegmentation(vd, false, false, accumulatedEventSegm);
+            CountlyEventModel currentView = new CountlyEventModel(CountlyEventModel.ViewEvent, segments);
+            _ = _eventService.RecordEventAsync(currentView);
+        }
+
+        private Dictionary<string, object> CreateViewEventSegmentation(ViewData vd, bool firstView, bool visit, Dictionary<string, object> customViewSegmentation)
+        {
+            Dictionary<string, object> viewSegmentation = new Dictionary<string, object>();
+            if (customViewSegmentation != null) {
+                foreach (KeyValuePair<string, object> kvp in customViewSegmentation) {
+                    viewSegmentation.Add(kvp.Key, kvp.Value);
+                }
+            }
+
+            viewSegmentation.Add("name", vd.ViewName);
+            if (visit) {
+                viewSegmentation.Add("visit", "1");
+            }
+            if (firstView) {
+                viewSegmentation.Add("start", "1");
+            }
+            viewSegmentation.Add("segment", _configuration.metricHelper.OS);
+
+            return viewSegmentation;
+        }
+
+        private void ResumeViewWithIDInternal(string viewID)
+        {
+            if (_utils.IsNullEmptyOrWhitespace(viewID)) {
+                Log.Warning("[ViewCountlyService] ResumeViewWithIDInternal, Trying to record view with null or empty view ID, ignoring request");
+                return;
+            }
+
+            if (!viewDataMap.ContainsKey(viewID)) {
+                Log.Warning("[ViewCountlyService] ResumeViewWithIDInternal, there is no view with the provided view id to close");
+                return;
+            }
+
+            ViewData vd = viewDataMap[viewID];
+            if (vd == null) {
+                Log.Warning("[ViewCountlyService] ResumeViewWithIDInternal, view id:[" + viewID + "] has a 'null' value. This should not be happening");
+                return;
+            }
+
+            if (!_consentService.CheckConsentInternal(Consents.Views)) {
+                return;
+            }
+
+            Log.Debug("[ViewCountlyService] ResumeViewWithIDInternal, resuming view for ID:[" + viewID + "], name:[" + vd.ViewName + "]");
+
+            if (vd.ViewStartTimeSeconds > 0) {
+                Log.Warning("[ViewCountlyService] ResumeViewWithIDInternal, resuming a view that is already running. ID:[" + viewID + "], name:[" + vd.ViewName + "]");
+                return;
+            }
+
+            vd.ViewStartTimeSeconds = _utils.CurrentTimestampSeconds();
+            vd.IsAutoPaused = false;
+        }
+
+        private void StopAllViewsInternal(Dictionary<string, object> viewSegmentation)
+        {
+            Log.Debug("[ViewCountlyService] StopAllViewsInternal");
+
+            AutoCloseRequiredViews(true, viewSegmentation);
+        }
+
+        private void SetGlobalViewSegmentationInternal(Dictionary<string, object> viewSegmentation)
+        {
+            Log.Debug("[ViewCountlyService] Calling SetGlobalViewSegmentationInternal with[" + (viewSegmentation == null ? "null" : viewSegmentation.Count.ToString()) + "] entries");
+
+            automaticViewSegmentation.Clear();
+
+            if (viewSegmentation != null) {
+
+                _utils.RemoveReservedKeysFromSegmentation(viewSegmentation, reservedSegmentationKeysViews, "[ViewCountlyService] SetGlobalViewSegmentationInternal, ", Log);
+
+                if (_utils.RemoveUnsupportedDataTypes(viewSegmentation, Log)) {  
+                    Log.Warning("[ViewCountlyService] SetGlobalViewSegmentationInternal, You have provided an unsupported data type in your View Segmentation. Removing the unsupported values.");
+                }
+
+                foreach(KeyValuePair<string, object> kvp in viewSegmentation) {
+                    automaticViewSegmentation.Add(kvp.Key, kvp.Value);
+                }
+            }
+        }
+
         /// <summary>
         /// Start tracking a view
         /// </summary>
         /// <param name="name">name of the view</param>
         /// <returns></returns>
+        [Obsolete("RecordOpenViewAsync(string name, IDictionary<string, object> segmentation = null) is deprecated, this is going to be removed in the future.")]
         public async Task RecordOpenViewAsync(string name, IDictionary<string, object> segmentation = null)
         {
             lock (LockObj) {
@@ -67,7 +466,7 @@ namespace Plugins.CountlySDK.Services
                     _viewToLastViewStartTime.Add(name, DateTime.UtcNow);
                 }
 
-                CountlyEventModel currentView = new CountlyEventModel(CountlyEventModel.ViewEvent, segmentation);
+                CountlyEventModel currentView = new CountlyEventModel(viewEventKey, segmentation, 1);
                 _ = _eventService.RecordEventAsync(currentView);
 
                 _isFirstView = false;
@@ -81,11 +480,11 @@ namespace Plugins.CountlySDK.Services
         /// </summary>
         /// <param name="name of the view"></param>
         /// <returns></returns>
-        //TODO: this performs in a non standard way. It should only be possible to close started views.
+        [Obsolete("RecordCloseViewAsync(string name) is deprecated, this is going to be removed in the future.")]
         public async Task RecordCloseViewAsync(string name)
         {
             lock (LockObj) {
-                Log.Info("[ViewCountlyService] RecordCloseViewAsync : name = " + name);
+                Log.Info("[ViewCountlyService] RecordCloseViewAsync : name = " + name); 
 
                 if (!_consentService.CheckConsentInternal(Consents.Views)) {
                     return;
@@ -129,6 +528,7 @@ namespace Plugins.CountlySDK.Services
         /// <param name="width">width of screen</param>
         /// <param name="height">height of screen</param>
         /// <returns></returns>
+        [Obsolete("ReportActionAsync(string type, int x, int y, int width, int height) is deprecated, this is going to be removed in the future.")]
         public async Task ReportActionAsync(string type, int x, int y, int width, int height)
         {
             lock (LockObj) {

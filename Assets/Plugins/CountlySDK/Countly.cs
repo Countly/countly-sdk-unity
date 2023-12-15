@@ -312,7 +312,7 @@ namespace Plugins.CountlySDK
 
             StarRating = new StarRatingCountlyService(Configuration, _logHelper, Consents, Events);
             UserDetails = new UserDetailsCountlyService(Configuration, _logHelper, RequestHelper, countlyUtils, Consents);
-            Views = new ViewCountlyService(Configuration, _logHelper, Events, Consents);
+            Views = new ViewCountlyService(this, countlyUtils, Configuration, _logHelper, Events, Consents);
             Device = new DeviceIdCountlyService(Configuration, _logHelper, Session, RequestHelper, Events, countlyUtils, Consents);
 
             CreateListOfIBaseService();

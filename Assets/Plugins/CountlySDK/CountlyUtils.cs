@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using System.Security.Cryptography;
 using Plugins.CountlySDK.Enums;
 using Plugins.CountlySDK.Helpers;
 using Plugins.CountlySDK.Models;
@@ -131,6 +133,106 @@ namespace Plugins.CountlySDK
             }
 
             return hex.ToString();
+        }
+
+        /// <summary>
+        /// Removes dictionary keys exceeding a specified count
+        /// </summary>
+        /// <param name="segmentation"></param>
+        /// <param name="maxCount"></param>
+        /// <param name="prefix"></param>
+        /// <param name="logger"></param>
+        public void TruncateSegmentationValues(Dictionary<string, object>? segmentation, int maxCount, string prefix, CountlyLogHelper logger)
+        {
+            if (segmentation == null) {
+                return;
+            }
+
+            List<string> keysToRemove = segmentation.Keys.Skip(maxCount).ToList();
+
+            foreach (string key in keysToRemove) {
+                logger.Warning($"{prefix}, Value exceeded the maximum segmentation count key:[{key}]");
+                segmentation.Remove(key);
+            }
+        }
+
+        /// <summary>
+        /// Removes specific reserved keys from a dictionary of segmentation values
+        /// </summary>
+        /// <param name="segmentation"></param>
+        /// <param name="reservedKeys"></param>
+        /// <param name="messagePrefix"></param>
+        /// <param name="logger"></param>
+        public void RemoveReservedKeysFromSegmentation(Dictionary<string, object>? segmentation, string[] reservedKeys, string messagePrefix, CountlyLogHelper logger)
+        {
+            if (segmentation == null) {
+                return;
+            }
+
+            foreach (string rKey in reservedKeys) {
+                if (segmentation.ContainsKey(rKey)) {
+                    logger.Warning($"{messagePrefix} provided segmentation contains protected key [{rKey}]");
+                    segmentation.Remove(rKey);
+                }
+            }
+        }
+
+        public int CurrentTimestampSeconds()
+        {
+            return (int)(DateTimeOffset.UtcNow.ToUnixTimeSeconds());
+        }
+
+        /// <summary>
+        /// Creates a crypto-safe SHA-256 hashed random value.
+        /// </summary>
+        /// <returns>Randomly generated string</returns>
+        public string SafeRandomVal()
+        {
+            long timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+            using (RandomNumberGenerator random = new RNGCryptoServiceProvider()) {
+                byte[] value = new byte[6];
+                random.GetBytes(value);
+                string b64Value = Convert.ToBase64String(value);
+                return b64Value + timestamp;
+            }
+        }
+
+        /// <summary>
+        /// Removes unsupported data types from provided Dictionary
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="logger"></param>
+        /// <returns>Returns true if any entry had been removed</returns>
+        public bool RemoveUnsupportedDataTypes(Dictionary<string, object>? data, CountlyLogHelper? logger)
+        {
+            if (data == null) {
+                return false;
+            }
+
+            List<string> keysToRemove = new List<string>();
+            bool removed = false;
+
+            foreach (var entry in data) {
+                string key = entry.Key;
+                object value = entry.Value;
+
+                if (string.IsNullOrEmpty(key) || !(value is string || value is int || value is double || value is bool)) {
+                    // found unsupported data type or null key or value, add key to removal list
+                    keysToRemove.Add(key);
+                    removed = true;
+                }
+            }
+
+            // Remove the keys marked for removal
+            foreach (string key in keysToRemove) {
+                data.Remove(key);
+            }
+
+            if (removed & logger != null) {
+                logger.Warning("[Utils] Unsupported data types were removed from provided segmentation");
+            }
+
+            return removed;
         }
 
         /// <summary>
