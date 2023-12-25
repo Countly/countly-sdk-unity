@@ -216,7 +216,7 @@ namespace Plugins.CountlySDK
                 string key = entry.Key;
                 object value = entry.Value;
 
-                if (string.IsNullOrEmpty(key) || !(value is string || value is int || value is double || value is bool)) {
+                if (string.IsNullOrEmpty(key) || !(value is string || value is int || value is double || value is bool || value is float)) {
                     // found unsupported data type or null key or value, add key to removal list
                     keysToRemove.Add(key);
                     removed = true;

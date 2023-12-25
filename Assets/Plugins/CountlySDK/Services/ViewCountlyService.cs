@@ -8,7 +8,26 @@ using UnityEngine;
 
 namespace Plugins.CountlySDK.Services
 {
-    public class ViewCountlyService : AbstractBaseService
+    // interface for SDK users
+    public interface IViewCountlyService
+    {
+        string GetCurrentViewId();
+        string GetPreviousViewId();
+        string? StartView(string? viewName);
+        string? StartView(string? viewName, Dictionary<string, object>? viewSegmentation);
+        void StopViewWithName(string? viewName);
+        void StopViewWithName(string? viewName, Dictionary<string, object>? viewSegmentation);
+        void StopViewWithID(string? viewID);
+        void StopViewWithID(string? viewID, Dictionary<string, object>? viewSegmentation);
+        void PauseViewWithID(string? viewID);
+        void ResumeViewWithID(string? viewID);
+        void StopAllViews(Dictionary<string, object> viewSegmentation);
+        void SetGlobalViewSegmentation(Dictionary<string, object> viewSegmentation);
+        void AddSegmentationToViewWithID(string? viewID, Dictionary<string, object>? viewSegmentation);
+        void AddSegmentationToViewWithName(string? viewName, Dictionary<string, object>? viewSegmentation);
+    }
+
+    public class ViewCountlyService : AbstractBaseService, IViewCountlyService
     {
         private class ViewData
         {
@@ -17,24 +36,24 @@ namespace Plugins.CountlySDK.Services
             public string ViewName;
             public bool IsAutoStoppedView; // Views started with "startAutoStoppedView" would have this as "true".
             public bool IsAutoPaused; // This marks that this view automatically paused when going to the background
+            public Dictionary<string, object> ViewSegmentation;
         }
 
-        private string currentViewID = null;
-        private string previousViewID = null;
-        private string viewEventKey = "[CLY]_view";
+        private string currentViewID;
+        private string previousViewID;
+        private readonly string viewEventKey = "[CLY]_view";
 
+        readonly Dictionary<string, ViewData> viewDataMap = new Dictionary<string, ViewData>();
+        readonly Dictionary<string, object> automaticViewSegmentation = new Dictionary<string, object>();
 
-        Dictionary<string, ViewData> viewDataMap = new Dictionary<string, ViewData>();
-        Dictionary<string, object> automaticViewSegmentation = new Dictionary<string, object>();
-
-        bool autoViewTracker = false;
+        readonly bool autoViewTracker;
 
         internal bool _isFirstView = true;
         internal readonly EventCountlyService _eventService;
         internal readonly Countly _cly;
         internal readonly CountlyUtils _utils;
 
-        string[] reservedSegmentationKeysViews = new string[] { "name", "visit", "start", "segment" };
+        readonly string[] reservedSegmentationKeysViews = { "name", "visit", "start", "segment" };
         private readonly Dictionary<string, DateTime> _viewToLastViewStartTime = new Dictionary<string, DateTime>();
 
         internal ViewCountlyService(Countly countly, CountlyUtils utils, CountlyConfiguration configuration, CountlyLogHelper logHelper, EventCountlyService eventService, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
@@ -45,6 +64,27 @@ namespace Plugins.CountlySDK.Services
             _eventService = eventService;
         }
 
+        /// <summary>
+        /// Returns the current ViewID
+        /// </summary>
+        public string GetCurrentViewId()
+        {
+            return currentViewID == null ? "" : currentViewID;
+        }
+
+        /// <summary>
+        /// Returns the previous ViewID
+        /// </summary>
+        public string GetPreviousViewId()
+        {
+            return previousViewID == null ? "" : previousViewID;
+        }
+
+        /// <summary>
+        /// Starts a view which would not close automatically
+        /// </summary>
+        /// <param name="viewName"></param>
+        /// <returns></returns>
         public string? StartView(string? viewName)
         {
             lock (LockObj) {
@@ -54,6 +94,12 @@ namespace Plugins.CountlySDK.Services
             }
         }
 
+        /// <summary>
+        /// Starts a view which would not close automatically
+        /// </summary>
+        /// <param name="viewName">name of the view</param>
+        /// <param name="viewSegmentation">segmentation that will be added to the view, set 'null' if none should be added</param>
+        /// <returns></returns>
         public string? StartView(string? viewName, Dictionary<string, object>? viewSegmentation)
         {
             lock (LockObj) {
@@ -68,6 +114,10 @@ namespace Plugins.CountlySDK.Services
             }
         }
 
+        /// <summary>
+        /// Stops a view with the given name if it was open
+        /// </summary>
+        /// <param name="viewName">name of the view</param>
         public void StopViewWithName(string? viewName)
         {
             lock (LockObj) {
@@ -77,6 +127,11 @@ namespace Plugins.CountlySDK.Services
             }
         }
 
+        /// <summary>
+        /// Stops a view with the given name if it was open
+        /// </summary>
+        /// <param name="viewName">name of the view</param>
+        /// <param name="viewSegmentation">view segmentation</param>
         public void StopViewWithName(string? viewName, Dictionary<string, object>? viewSegmentation)
         {
             lock(LockObj) {
@@ -86,6 +141,10 @@ namespace Plugins.CountlySDK.Services
             }
         }
 
+        /// <summary>
+        /// Stops a view with the given ID if it was open
+        /// </summary>
+        /// <param name="viewID">ID of the view</param>
         public void StopViewWithID(string? viewID)
         {
             lock(LockObj) {
@@ -95,6 +154,11 @@ namespace Plugins.CountlySDK.Services
             }
         }
 
+        /// <summary>
+        /// Stops a view with the given ID if it was open
+        /// </summary>
+        /// <param name="viewID">ID of the view</param>
+        /// <param name="viewSegmentation">view segmentation</param>
         public void StopViewWithID(string? viewID, Dictionary<string, object>? viewSegmentation)
         {
             lock (LockObj) {
@@ -104,6 +168,10 @@ namespace Plugins.CountlySDK.Services
             }
         }
 
+        /// <summary>
+        /// Pauses a view with the given ID
+        /// </summary>
+        /// <param name="viewID">ID of the view</param>
         public void PauseViewWithID(string? viewID)
         {
             lock(LockObj) {
@@ -113,6 +181,10 @@ namespace Plugins.CountlySDK.Services
             }
         }
 
+        /// <summary>
+        /// Resumes a view with the given ID
+        /// </summary>
+        /// <param name="viewID">ID of the view</param>
         public void ResumeViewWithID(string? viewID)
         {
             lock(LockObj) {
@@ -122,6 +194,10 @@ namespace Plugins.CountlySDK.Services
             }
         }
 
+        /// <summary>
+        /// Stops all views and records a segmentation if set
+        /// </summary>
+        /// <param name="viewSegmentation">view segmentation</param>
         public void StopAllViews(Dictionary<string, object> viewSegmentation)
         {
             lock(LockObj) {
@@ -131,6 +207,10 @@ namespace Plugins.CountlySDK.Services
             }
         }
 
+        /// <summary>
+        /// Set a segmentation to be recorded with all views
+        /// </summary>
+        /// <param name="viewSegmentation">global view segmentation</param>
         public void SetGlobalViewSegmentation(Dictionary<string, object> viewSegmentation)
         {
             lock(LockObj) {
@@ -140,6 +220,51 @@ namespace Plugins.CountlySDK.Services
             }
         }
 
+        /// <summary>
+        /// Updates the segmentation of a view with view id
+        /// </summary>
+        /// <param name="viewID">ID of the view</param>
+        /// <param name="viewSegmentation">view segmentation</param>
+        public void AddSegmentationToViewWithID(string? viewID, Dictionary<string, object>? viewSegmentation)
+        {
+            lock(LockObj) {
+                Log.Info("[ViewCountlyService] Calling AddSegmentationToViewWithID for view ID: [" + viewID + "]");
+
+                if (autoViewTracker) {
+                    Log.Warning("[ViewCountlyService] AddSegmentationToViewWithID, manual view call will be ignored since automatic tracking is enabled.");
+                    return;
+                }
+
+                AddSegmentationToViewWithIDInternal(viewID, viewSegmentation);
+            }
+        }
+
+        /// <summary>
+        /// Updates the segmentation of a view with view name
+        /// </summary>
+        /// <param name="viewName"></param>
+        /// <param name="viewSegmentation"></param>
+        public void AddSegmentationToViewWithName(string? viewName, Dictionary<string, object>? viewSegmentation)
+        {
+            lock(LockObj) {
+                Log.Info("[ViewCountlyService] Calling AddSegmentationToViewWithName for Name: [" + viewName + "]");
+
+                if (autoViewTracker) {
+                    Log.Warning("[ViewCountlyService] AddSegmentationToViewWithName, manual view call will be ignored since automatic tracking is enabled.");
+                    return;
+                }
+
+                AddSegmentationToViewWithNameInternal(viewName, viewSegmentation);
+            }
+        }
+
+        /// <summary>
+        /// Starts a view which would not close automatically.
+        /// </summary>
+        /// <param name="viewName">name of the view</param>
+        /// <param name="customViewSegmentation">segmentation that will be added to the view, set 'null' if none should be added</param>
+        /// <param name="viewShouldBeAutomaticallyStopped"></param>
+        /// <returns></returns>
         private string? StartViewInternal(string? viewName,  Dictionary<string, object>? customViewSegmentation, bool viewShouldBeAutomaticallyStopped)
         {
             if (!_cly.IsSDKInitialized) {
@@ -159,6 +284,7 @@ namespace Plugins.CountlySDK.Services
             if (customViewSegmentation != null) {
                 segmCount = customViewSegmentation.Count;
             }
+
             Log.Debug("[ViewCountlyService] Recording view with name: [" + viewName + "], previous view ID:[" + currentViewID + "] custom view segment count:[" + segmCount + "], first:[" + _isFirstView + "], autoStop:[" + viewShouldBeAutomaticallyStopped + "]");
 
             AutoCloseRequiredViews(false, null);
@@ -187,11 +313,16 @@ namespace Plugins.CountlySDK.Services
                 Log.Debug("[ViewCountlyService] Recording view as the first one in the session. [" + viewName + "]");
                 _isFirstView = false;
             }
-            _ = _eventService.RecordEventAsync(viewEventKey, viewSegmentation, 1, 0, null);
+            _ = _eventService.RecordEventAsync(viewEventKey, viewSegmentation, 1, 0, null);    
 
             return currentViewData.ViewID;
         }
 
+        /// <summary>
+        /// Stops a view with the given name if it was open.
+        /// </summary>
+        /// <param name="viewName">name of the view</param>
+        /// <param name="customViewSegmentation"></param>
         private void StopViewWithNameInternal(string? viewName, Dictionary<string, object>? customViewSegmentation)
         {
             if (_utils.IsNullEmptyOrWhitespace(viewName)) {
@@ -218,6 +349,11 @@ namespace Plugins.CountlySDK.Services
             StopViewWithIDInternal(viewID, customViewSegmentation);
         }
 
+        /// <summary>
+        /// Closes given views or all views.
+        /// </summary>
+        /// <param name="closeAllViews"></param>
+        /// <param name="customViewSegmentation"></param>
         private void AutoCloseRequiredViews(bool closeAllViews, Dictionary<string, object>? customViewSegmentation)
         {
             Log.Debug("[ViewCountlyService] AutoCloseRequiredViews");
@@ -241,6 +377,11 @@ namespace Plugins.CountlySDK.Services
             }
         }
 
+        /// <summary>
+        /// Stops a view with the given ID if it was open.
+        /// </summary>
+        /// <param name="viewID">ID of the view</param>
+        /// <param name="viewSegmentation">view segmentation</param>
         private void StopViewWithIDInternal(string viewID, Dictionary<string, object>? customViewSegmentation)
         {
             if (_utils.IsNullEmptyOrWhitespace(viewID)) {
@@ -272,7 +413,12 @@ namespace Plugins.CountlySDK.Services
             viewDataMap.Remove(vd.ViewID);
         }
 
-        void PauseViewWithIDInternal(string viewID, bool pausedAutomatically)
+        /// <summary>
+        /// Pauses a view with the given ID.
+        /// </summary>
+        /// <param name="viewID"></param>
+        /// <param name="pausedAutomatically"></param>
+        private void PauseViewWithIDInternal(string viewID, bool pausedAutomatically)
         {
             if (_utils.IsNullEmptyOrWhitespace(viewID)) {
                 Log.Warning("[ViewCountlyService] PauseViewWithIDInternal, Trying to record view with null or empty view ID, ignoring request");
@@ -308,6 +454,12 @@ namespace Plugins.CountlySDK.Services
             vd.ViewStartTimeSeconds = 0;
         }
 
+        /// <summary>
+        /// Records event with given ViewData and filtered segmentation.
+        /// </summary>
+        /// <param name="vd"></param>
+        /// <param name="filteredCustomViewSegmentation"></param>
+        /// <param name="viewRecordingSource"></param>
         private void RecordViewEndEvent(ViewData vd, Dictionary<string, object> filteredCustomViewSegmentation, string viewRecordingSource)
         {
             long lastElapsedDurationSeconds = 0;
@@ -332,12 +484,26 @@ namespace Plugins.CountlySDK.Services
                 }
             }
 
+            if(vd.ViewSegmentation != null) {
+                foreach(KeyValuePair<string, object> kvp in vd.ViewSegmentation) {
+                    accumulatedEventSegm.Add(kvp.Key, kvp.Value);
+                }
+            }
+
             long viewDurationSeconds = lastElapsedDurationSeconds;
             Dictionary <string, object> segments = CreateViewEventSegmentation(vd, false, false, accumulatedEventSegm);
-            CountlyEventModel currentView = new CountlyEventModel(CountlyEventModel.ViewEvent, segments);
+            CountlyEventModel currentView = new CountlyEventModel(CountlyEventModel.ViewEvent, segments, duration: viewDurationSeconds);
             _ = _eventService.RecordEventAsync(currentView);
         }
 
+        /// <summary>
+        /// Creates view event segmentation
+        /// </summary>
+        /// <param name="vd"></param>
+        /// <param name="firstView"></param>
+        /// <param name="visit"></param>
+        /// <param name="customViewSegmentation"></param>
+        /// <returns></returns>
         private Dictionary<string, object> CreateViewEventSegmentation(ViewData vd, bool firstView, bool visit, Dictionary<string, object> customViewSegmentation)
         {
             Dictionary<string, object> viewSegmentation = new Dictionary<string, object>();
@@ -349,16 +515,20 @@ namespace Plugins.CountlySDK.Services
 
             viewSegmentation.Add("name", vd.ViewName);
             if (visit) {
-                viewSegmentation.Add("visit", "1");
+                viewSegmentation.Add("visit", 1);
             }
             if (firstView) {
-                viewSegmentation.Add("start", "1");
+                viewSegmentation.Add("start", 1);
             }
             viewSegmentation.Add("segment", _configuration.metricHelper.OS);
 
             return viewSegmentation;
         }
 
+        /// <summary>
+        /// Resumes a paused view with the given ID. 
+        /// </summary>
+        /// <param name="viewID"></param>
         private void ResumeViewWithIDInternal(string viewID)
         {
             if (_utils.IsNullEmptyOrWhitespace(viewID)) {
@@ -392,6 +562,10 @@ namespace Plugins.CountlySDK.Services
             vd.IsAutoPaused = false;
         }
 
+        /// <summary>
+        /// Stops all open views and records a segmentation if set.
+        /// </summary>
+        /// <param name="viewSegmentation"></param>
         private void StopAllViewsInternal(Dictionary<string, object> viewSegmentation)
         {
             Log.Debug("[ViewCountlyService] StopAllViewsInternal");
@@ -399,6 +573,10 @@ namespace Plugins.CountlySDK.Services
             AutoCloseRequiredViews(true, viewSegmentation);
         }
 
+        /// <summary>
+        /// Set a segmentation to be recorded with all views
+        /// </summary>
+        /// <param name="viewSegmentation"></param>
         private void SetGlobalViewSegmentationInternal(Dictionary<string, object> viewSegmentation)
         {
             Log.Debug("[ViewCountlyService] Calling SetGlobalViewSegmentationInternal with[" + (viewSegmentation == null ? "null" : viewSegmentation.Count.ToString()) + "] entries");
@@ -419,6 +597,71 @@ namespace Plugins.CountlySDK.Services
             }
         }
 
+        /// <summary>
+        /// Updates the segmentation of a view.
+        /// </summary>
+        /// <param name="viewID"></param>
+        /// <param name="viewSegmentation"></param>
+        private void AddSegmentationToViewWithIDInternal(string? viewID, Dictionary<string, object>? viewSegmentation)
+        {
+            if (_utils.IsNullEmptyOrWhitespace(viewID) || viewSegmentation == null) {
+                Log.Warning("[ViewsCountlyService] AddSegmentationToViewWithID, null or empty parameters provided");
+                return;
+            }
+
+            if (!viewDataMap.ContainsKey(viewID)) {
+                Log.Warning("[ViewsCountlyService] AddSegmentationToViewWithID, there is no view with the provided view id");
+                return;
+            }
+
+            ViewData vd = viewDataMap[viewID];
+            if (vd == null) {
+                Log.Warning("[ViewsCountlyService] AddSegmentationToViewWithID, view id:[" + viewID + "] has a 'null' view data. This should not be happening");
+                return;
+            }
+
+            _utils.TruncateSegmentationValues(viewSegmentation, _cly.Configuration.MaxSegmentationValues, "[ViewsCountlyService] AddSegmentationToViewWithID", Log);
+            _utils.RemoveReservedKeysFromSegmentation(viewSegmentation, reservedSegmentationKeysViews, "[ViewsCountlyService] AddSegmentationToViewWithID, ", Log);
+
+            if (vd.ViewSegmentation == null) {
+                vd.ViewSegmentation = new Dictionary<string, object>(viewSegmentation);
+            } else {
+                foreach (KeyValuePair<string, object> kvp in viewSegmentation)
+                    {
+                    vd.ViewSegmentation.Add(kvp.Key, kvp.Value);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Updates the segmentation of a view.
+        /// </summary>
+        /// <param name="viewName"></param>
+        /// <param name="viewSegmentation"></param>
+        private void AddSegmentationToViewWithNameInternal(string? viewName, Dictionary<string, object>? viewSegmentation)
+        {
+            string viewID = null;
+
+            foreach (var entry in viewDataMap) {
+                string key = entry.Key;
+                ViewData vd = entry.Value;
+
+                if (vd != null && viewName != null && viewName.Equals(vd.ViewName)) {
+                    viewID = key;
+                }
+            }
+
+            if (viewID == null) {
+                Log.Warning("[ViewsCountlyService] AddSegmentationToViewWithName, No view entry found with the provided name :[" + viewName + "]");
+                return;
+            }
+
+            Log.Info("[ViewsCountlyService] Will add segmentation for view: [" + viewName + "] with ID:[" + viewID + "]");
+
+            AddSegmentationToViewWithIDInternal(viewID, viewSegmentation);
+        }
+
+        #region Deprecated Methods
         /// <summary>
         /// Start tracking a view
         /// </summary>
@@ -559,6 +802,8 @@ namespace Plugins.CountlySDK.Services
                 _isFirstView = true;
             }
         }
+        #endregion
+
         #endregion
     }
 }
