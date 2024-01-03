@@ -11,6 +11,12 @@ namespace Tests
 {
     public class UtilsTests
     {
+        [SetUp]
+        public void SetUp()
+        {
+            TestUtility.TestCleanup();
+        }
+
         // 'GetAppKeyAndDeviceIdParams' method in the CountlyUtils.
         // Retrieves a dictionary containing the "app_key" and "device_id" parameters.
         // It should return a dictionary which contains correct "app_key" and "device_id"
@@ -77,7 +83,6 @@ namespace Tests
             GetStringFromBytes_base(byteArray, expectedResult);
         }
 
-
         // 'IsPictureValid' method in CountlyUtils
         // We provide URLs with different extensions, empty URL, null URL and invalid URL
         // 'IsPictureValid' should return true if provided URL is valid, else false
@@ -138,11 +143,89 @@ namespace Tests
             Assert.IsTrue(generatedValue.Length > 4);
         }
 
+        // 'SafeRandomVal' in CountlyUtils
+        // Generates a random value which matches with required pattern
+        // Generator should produce different values each time with given pattern.
+        [Test]
+        public void GetSafeRandomValue()
+        {
+            Countly.Instance.Init(TestUtility.createBaseConfig());
+            CountlyUtils utils = new CountlyUtils(Countly.Instance);
+
+            string result1 = utils.SafeRandomVal();
+            string result2 = utils.SafeRandomVal();
+
+            Assert.NotNull(result1);
+            Assert.NotNull(result2);
+            Assert.AreNotEqual(result1, result2);
+            Assert.IsTrue(TestUtility.IsBase64String(result1));
+            Assert.IsTrue(TestUtility.IsBase64String(result2));
+            Assert.AreEqual(21, result2.Length, result1.Length);
+        }
+
+        // 'RemoveUnsupportedDataTypes' in CountlyUtils
+        // Removes unsuppored data types and returns true if something is removed
+        // It should remove data if provided Dictionary contains something other than string, int, double, bool
+        public void RemoveUnsupportedDataTypes_base(Dictionary<string, object> data, bool isRemovingExpected)
+        {
+            Countly.Instance.Init(TestUtility.createBaseConfig());
+            CountlyUtils utils = new CountlyUtils(Countly.Instance);
+
+            if (isRemovingExpected) {
+                Assert.IsTrue(utils.RemoveUnsupportedDataTypes(data, null));
+            } else {
+                Assert.IsFalse(utils.RemoveUnsupportedDataTypes(data, null));
+            }
+        }
+
+        // 'RemoveUnsupportedDataTypes' in CountlyUtils
+        // Removes unsuppored data types and returns true if something is removed
+        // It should return false since provided data is null and nothing can be removed
+        [Test]
+        public void RemoveUnsupportedDataTypes_Null()
+        {
+            RemoveUnsupportedDataTypes_base(null, false);
+        }
+
+        // 'RemoveUnsupportedDataTypes' in CountlyUtils
+        // Removes unsuppored data types and returns true if something is removed
+        // It should return true since provided data contains unsupported data type
+        [Test]
+        public void RemoveUnsupportedDataTypes_UnsupportedDataType()
+        {
+            Dictionary<string, object> data = new Dictionary<string, object>
+            {
+                { "key1", "value1" },
+                { "key2", 42 },
+                { "key3", 3.14 },
+                { "key4", true },
+                { "key5", new object() } // Unsupported data type
+            };
+
+            RemoveUnsupportedDataTypes_base(data, true);
+        }
+
+        // 'RemoveUnsupportedDataTypes' in CountlyUtils
+        // Removes unsuppored data types and returns true if something is removed
+        // It should return false since provided data does not contain unsupported data type
+        [Test]
+        public void RemoveUnsupportedDataTypes_SupportedDataType()
+        {
+            Dictionary<string, object> data = new Dictionary<string, object>
+            {
+                { "key1", "value1" },
+                { "key2", 42 },
+                { "key3", 3.14 },
+                { "key4", true },
+            };
+
+            RemoveUnsupportedDataTypes_base(data, false);
+        }
+
         [TearDown]
         public void End()
         {
-            Countly.Instance.ClearStorage();
-            Object.DestroyImmediate(Countly.Instance);
+            TestUtility.TestCleanup();
         }
     }
 }

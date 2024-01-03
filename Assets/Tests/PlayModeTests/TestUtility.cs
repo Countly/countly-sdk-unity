@@ -5,6 +5,7 @@ using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK.Persistance.Entities;
 using Newtonsoft.Json;
 using Plugins.CountlySDK.Enums;
+using System.Text.RegularExpressions;
 
 namespace Assets.Tests.PlayModeTests
 {
@@ -151,6 +152,12 @@ namespace Assets.Tests.PlayModeTests
             }
 
             return returnS;
+        }
+
+        public static bool IsBase64String(string value)
+        {
+            string base64Pattern = @"^[A-Za-z0-9+/]*={0,2}$";
+            return Regex.IsMatch(value, base64Pattern);
         }
 
         public static void TestCleanup()
