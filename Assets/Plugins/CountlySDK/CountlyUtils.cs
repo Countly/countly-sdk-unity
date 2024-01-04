@@ -28,6 +28,7 @@ namespace Plugins.CountlySDK
         {
             return "CLY_" + UnityEngine.SystemInfo.deviceUniqueIdentifier;
         }
+
         public static string GetAppVersion()
         {
             return Application.version;
@@ -177,6 +178,9 @@ namespace Plugins.CountlySDK
             }
         }
 
+        /// <summary>
+        /// Returns the current timestamp in seconds using the Unix time format
+        /// </summary>
         public int CurrentTimestampSeconds()
         {
             return (int)(DateTimeOffset.UtcNow.ToUnixTimeSeconds());

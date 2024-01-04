@@ -3,6 +3,7 @@ using UnityEngine;
 using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK;
 using Plugins.CountlySDK.Enums;
+using Assets.Tests.PlayModeTests;
 using UnityEditor;
 
 namespace Tests
@@ -12,11 +13,17 @@ namespace Tests
         private readonly string _serverUrl = "https://xyz.com/";
         private readonly string _appKey = "772c091355076ead703f987fee94490";
 
+        [SetUp]
+        public void SetUp()
+        {
+            TestUtility.TestCleanup();
+        }
+
         /// <summary>
         /// It validates configuration values provided during init and URL sanitation.
         /// </summary>
         [Test]
-        public void TestSDKInitParams()
+        public void SDKInitParams()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 AppKey = _appKey,
@@ -98,7 +105,7 @@ namespace Tests
         /// It validates the configuration's default values.
         /// </summary>
         [Test]
-        public void TestDefaultConfigValues()
+        public void DefaultConfigValues()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 AppKey = _appKey,
@@ -119,7 +126,6 @@ namespace Tests
             Assert.AreEqual(200, Countly.Instance.Configuration.MaxStackTraceLineLength);
             Assert.AreEqual(30, Countly.Instance.Configuration.MaxStackTraceLinesPerThread);
 
-
             Assert.IsNull(Countly.Instance.Configuration.Salt);
             Assert.IsNull(Countly.Instance.Configuration.DeviceId);
             Assert.IsFalse(Countly.Instance.Configuration.EnablePost);
@@ -127,7 +133,6 @@ namespace Tests
             Assert.IsFalse(Countly.Instance.Configuration.EnableConsoleLogging);
             Assert.IsTrue(Countly.Instance.Configuration.EnableAutomaticCrashReporting);
             Assert.IsFalse(Countly.Instance.Configuration.IsAutomaticSessionTrackingDisabled);
-
 
             Assert.IsNull(Countly.Instance.Configuration.City);
             Assert.IsNull(Countly.Instance.Configuration.Location);
@@ -140,12 +145,11 @@ namespace Tests
         /// It initialize SDK with countly prefab and validates the new configuration against old configuration.
         /// </summary>
         [Test]
-        public void TestNewConfigurationAndOldConfiguration()
+        public void NewConfigurationAndOldConfiguration()
         {
             Object countlyPrefab = AssetDatabase.LoadAssetAtPath("Assets/Plugins/CountlySDK/Prefabs/Countly.prefab", typeof(GameObject));
 
             Object.Instantiate(countlyPrefab);
-
 
             Assert.IsNotNull(Countly.Instance);
             Assert.IsTrue(Countly.Instance.IsSDKInitialized);
@@ -157,12 +161,10 @@ namespace Tests
             Assert.AreEqual(Countly.Instance.Config.TotalBreadcrumbsAllowed, Countly.Instance.Configuration.TotalBreadcrumbsAllowed);
             Assert.AreEqual(Countly.Instance.Config.NotificationMode, Countly.Instance.Configuration.NotificationMode);
 
-
             Assert.AreEqual(Countly.Instance.Config.Salt, Countly.Instance.Configuration.Salt);
             Assert.AreEqual(Countly.Instance.Config.EnablePost, Countly.Instance.Configuration.EnablePost);
             Assert.AreEqual(Countly.Instance.Config.EnableConsoleLogging, Countly.Instance.Configuration.EnableConsoleLogging);
             Assert.AreEqual(Countly.Instance.Config.EnableAutomaticCrashReporting, Countly.Instance.Configuration.EnableAutomaticCrashReporting);
-
 
             Assert.AreEqual(256, Countly.Instance.Configuration.MaxValueSize);
             Assert.AreEqual(128, Countly.Instance.Configuration.MaxKeyLength);
@@ -177,13 +179,140 @@ namespace Tests
             Assert.IsFalse(Countly.Instance.Configuration.IsLocationDisabled);
         }
 
+        [Test]
+        public void NewConfigConstructor_ConstructorValidation()
+        {
+            CountlyConfiguration config = new CountlyConfiguration(_appKey, _serverUrl);
 
+            Assert.AreEqual(_appKey, config.AppKey);
+            Assert.AreEqual(_serverUrl, config.ServerUrl);
+
+            Countly.Instance.Init(config);
+
+            Assert.AreEqual(Countly.Instance.Configuration.AppKey, _appKey);
+            Assert.AreEqual(Countly.Instance.Configuration.ServerUrl, "https://xyz.com");
+        }
+
+        [Test]
+        public void NewConfigConstructor_DefaultValues()
+        {
+            CountlyConfiguration config = new CountlyConfiguration(_appKey, _serverUrl);
+            Countly.Instance.Init(config);
+
+            Assert.IsTrue(Countly.Instance.IsSDKInitialized);
+
+            Assert.AreEqual(60, Countly.Instance.Configuration.SessionDuration);
+            Assert.AreEqual(1000, Countly.Instance.Configuration.StoredRequestLimit);
+            Assert.AreEqual(100, Countly.Instance.Configuration.EventQueueThreshold);
+            Assert.AreEqual(100, Countly.Instance.Configuration.TotalBreadcrumbsAllowed);
+            Assert.AreEqual(TestMode.None, Countly.Instance.Configuration.NotificationMode);
+
+            Assert.AreEqual(256, Countly.Instance.Configuration.MaxValueSize);
+            Assert.AreEqual(128, Countly.Instance.Configuration.MaxKeyLength);
+            Assert.AreEqual(100, Countly.Instance.Configuration.MaxSegmentationValues);
+            Assert.AreEqual(200, Countly.Instance.Configuration.MaxStackTraceLineLength);
+            Assert.AreEqual(30, Countly.Instance.Configuration.MaxStackTraceLinesPerThread);
+
+            Assert.IsNull(Countly.Instance.Configuration.Salt);
+            Assert.IsNull(Countly.Instance.Configuration.DeviceId);
+            Assert.IsFalse(Countly.Instance.Configuration.EnablePost);
+            Assert.IsFalse(Countly.Instance.Configuration.EnableTestMode);
+            Assert.IsFalse(Countly.Instance.Configuration.EnableConsoleLogging);
+            Assert.IsTrue(Countly.Instance.Configuration.EnableAutomaticCrashReporting);
+            Assert.IsFalse(Countly.Instance.Configuration.IsAutomaticSessionTrackingDisabled);
+
+            Assert.IsNull(Countly.Instance.Configuration.City);
+            Assert.IsNull(Countly.Instance.Configuration.Location);
+            Assert.IsNull(Countly.Instance.Configuration.IPAddress);
+            Assert.IsNull(Countly.Instance.Configuration.CountryCode);
+            Assert.IsFalse(Countly.Instance.Configuration.IsLocationDisabled);
+            Assert.IsFalse(Countly.Instance.Configuration.RequiresConsent);
+        }
+
+        [Test]
+        public void NewConfigSetters_ValidValues()
+        {
+            CountlyConfiguration config = new CountlyConfiguration(_appKey, _serverUrl)
+                .SetDeviceId("device id")
+                .SetLocation("+90", "İzmir", "38.4237° N", "XXX.XXX.XX.XX")
+                .SetParameterTamperingProtectionSalt("Salt")
+                .SetMaxBreadcrumbCount(10)
+                .SetMaxRequestQueueSize(5)
+                .SetUpdateSessionTimerDelay(50)
+                .SetMaxKeyLength(129)
+                .SetMaxSegmentationValues(40)
+                .SetMaxStackTraceLineLength(44)
+                .SetMaxStackTraceLinesPerThread(2)
+                .SetEventQueueSizeToSend(1222)
+                .SetNotificationMode(TestMode.None)
+                .DisableAutomaticCrashReporting()
+                .EnableLogging()
+                .SetRequiresConsent(true)
+                .EnableForcedHttpPost();
+
+            Assert.AreEqual(_appKey, config.AppKey);
+            Assert.AreEqual(_serverUrl, config.ServerUrl);
+            Assert.AreEqual("device id", config.DeviceId);
+            Assert.AreEqual("+90", config.CountryCode);
+            Assert.AreEqual("İzmir", config.City);
+            Assert.AreEqual("38.4237° N", config.Location);
+            Assert.AreEqual("XXX.XXX.XX.XX", config.IPAddress);
+            Assert.AreEqual("Salt", config.Salt);
+            Assert.AreEqual(10, config.TotalBreadcrumbsAllowed);
+            Assert.AreEqual(5, config.StoredRequestLimit);
+            Assert.AreEqual(50, config.SessionDuration);
+            Assert.AreEqual(129, config.MaxKeyLength);
+            Assert.AreEqual(40, config.MaxSegmentationValues);
+            Assert.AreEqual(44, config.MaxStackTraceLineLength);
+            Assert.AreEqual(2, config.MaxStackTraceLinesPerThread);
+            Assert.AreEqual(1222, config.EventQueueThreshold);
+            Assert.AreEqual(TestMode.None, config.NotificationMode);
+            Assert.IsFalse(config.EnableAutomaticCrashReporting);
+            Assert.IsTrue(config.EnableConsoleLogging);
+            Assert.IsTrue(config.EnablePost);
+            Assert.IsTrue(config.RequiresConsent);
+        }
+
+        [Test]
+        public void NewConfigSetters_NegativeNullValues()
+        {
+            CountlyConfiguration config = new CountlyConfiguration(_appKey, _serverUrl)
+                .SetDeviceId(null)
+                .SetLocation(null, null, null, null)
+                .SetParameterTamperingProtectionSalt(null)
+                .SetMaxBreadcrumbCount(-10)
+                .SetMaxRequestQueueSize(-5)
+                .SetUpdateSessionTimerDelay(-50)
+                .SetMaxKeyLength(-129)
+                .SetMaxSegmentationValues(-40)
+                .SetMaxStackTraceLineLength(-44)
+                .SetMaxStackTraceLinesPerThread(-2)
+                .SetEventQueueSizeToSend(-1222)
+                .SetNotificationMode(TestMode.ProductionToken);
+
+            Assert.AreEqual(_appKey, config.AppKey);
+            Assert.AreEqual(_serverUrl, config.ServerUrl);
+            Assert.AreEqual(null, config.DeviceId);
+            Assert.AreEqual(null, config.CountryCode);
+            Assert.AreEqual(null, config.City);
+            Assert.AreEqual(null, config.Location);
+            Assert.AreEqual(null, config.IPAddress);
+            Assert.AreEqual(null, config.Salt);
+            Assert.AreEqual(-10, config.TotalBreadcrumbsAllowed);
+            Assert.AreEqual(-5, config.StoredRequestLimit);
+            Assert.AreEqual(-50, config.SessionDuration);
+            Assert.AreEqual(-129, config.MaxKeyLength);
+            Assert.AreEqual(-40, config.MaxSegmentationValues);
+            Assert.AreEqual(-44, config.MaxStackTraceLineLength);
+            Assert.AreEqual(-2, config.MaxStackTraceLinesPerThread);
+            Assert.AreEqual(-1222, config.EventQueueThreshold);
+            Assert.AreEqual(TestMode.ProductionToken, config.NotificationMode);
+        }
 
         [TearDown]
         public void End()
         {
-            Countly.Instance.ClearStorage();
-            Object.DestroyImmediate(Countly.Instance);
+            TestUtility.TestCleanup();
         }
 
     }

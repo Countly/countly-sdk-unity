@@ -1,5 +1,26 @@
-## XX.X.X
+## 23.12.0
 * Added functionality to allow passing custom or overridden metrics.
+* Deprecated CountlyConfiguration constructor. A replacement constructor with parameters added.
+* Deprecated "ServerUrl" string in "CountlyConfiguration" class.
+* Deprecated "AppKey" string in "CountlyConfiguration" class.
+* Deprecated "DeviceId" string in "CountlyConfiguration" class. A setter method is added.
+* Deprecated "Salt" string in "CountlyConfiguration" class. A setter method is added.
+* Deprecated "RequiresConsent" bool in CountlyConfiguration class. A setter method is added.
+* Deprecated "EnablePost" bool in "CountlyConfiguration" class. A setter method is added.
+* Deprecated "EnableTestMode" bool in "CountlyConfiguration" class.
+* Deprecated "EnableConsoleLogging" bool in "CountlyConfiguration" class. A setter method is added.
+* Deprecated "EnableManualSessionHandling" bool in "CountlyConfiguration" class.
+* Deprecated "EnableAutomaticCrashReporting" bool in "CountlyConfiguration" class. A setter method is added.
+* Deprecated "SessionDuration" integer in "CountlyConfiguration" class. A setter method is added.
+* Deprecated "MaxKeyLength" integer in "CountlyConfiguration" class. A setter method is added.
+* Deprecated "MaxValueSize" integer in "CountlyConfiguration" class. A setter method is added.
+* Deprecated "MaxSegmentationValues" integer in "CountlyConfiguration" class. A setter method is added.
+* Deprecated "MaxStackTraceLinesPerThread" integer in "CountlyConfiguration" class. A setter method is added.
+* Deprecated "MaxStackTraceLineLength" integer in "CountlyConfiguration" class. A setter method is added.
+* Deprecated "EventQueueThreshold" integer in "CountlyConfiguration" class. A setter method is added.
+* Deprecated "StoredRequestLimit" integer in "CountlyConfiguration" class. A setter method is added.
+* Deprecated "TotalBreadcrumbsAllowed" integer in "CountlyConfiguration" class. A setter method is added.
+* Deprecated "NotificationMode" enum in "CountlyConfiguration" class. A setter method is added.
 
 ## 23.06.1
 * Added app version metric to every request sent.
