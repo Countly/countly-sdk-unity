@@ -270,6 +270,14 @@ namespace Plugins.CountlySDK
                 _logHelper.Info("[Init] provided 'maxStackTraceLineLength' override:[" + configuration.MaxStackTraceLineLength + "]");
             }
 
+            if(configuration.SafeEventIDGenerator == null) {
+                configuration.SafeEventIDGenerator = new SafeIDGenerator();
+            }
+
+            if(configuration.SafeViewIDGenerator == null) {
+                configuration.SafeViewIDGenerator = new SafeIDGenerator();
+            }
+
             FirstLaunchAppHelper.Process();
 
             RequestBuilder requestBuilder = new RequestBuilder();

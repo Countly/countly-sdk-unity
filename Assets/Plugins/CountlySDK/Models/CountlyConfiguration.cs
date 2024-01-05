@@ -4,6 +4,7 @@ using JetBrains.Annotations;
 using Notifications;
 using Plugins.CountlySDK.Enums;
 using Plugins.CountlySDK.Helpers;
+using Plugins.CountlySDK.Services;
 using UnityEngine;
 
 namespace Plugins.CountlySDK.Models
@@ -133,6 +134,9 @@ namespace Plugins.CountlySDK.Models
         /// </summary>
         [Obsolete("RequiresConsent is deprecated. Use SetRequiresConsent(bool enable) instead.")]
         public bool RequiresConsent = false;
+
+        internal SafeIDGenerator SafeViewIDGenerator = null;
+        internal SafeIDGenerator SafeEventIDGenerator = null;
 
         internal string City = null;
         internal string Location = null;

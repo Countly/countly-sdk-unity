@@ -147,13 +147,10 @@ namespace Tests
         // Generates a random value which matches with required pattern
         // Generator should produce different values each time with given pattern.
         [Test]
-        public void GetSafeRandomValue()
+        public void SafeRandomValue_001_validatingIDGenerator()
         {
-            Countly.Instance.Init(TestUtility.createBaseConfig());
-            CountlyUtils utils = new CountlyUtils(Countly.Instance);
-
-            string result1 = utils.SafeRandomVal();
-            string result2 = utils.SafeRandomVal();
+            string result1 = CountlyUtils.SafeRandomVal();
+            string result2 = CountlyUtils.SafeRandomVal();
 
             Assert.NotNull(result1);
             Assert.NotNull(result2);
