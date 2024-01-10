@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Plugins.CountlySDK;
 using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK.Persistance.Entities;
-using Newtonsoft.Json;
 using Plugins.CountlySDK.Enums;
 using System.Text.RegularExpressions;
 

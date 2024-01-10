@@ -2,15 +2,13 @@ using NUnit.Framework;
 using UnityEngine;
 using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK;
-using System.Threading.Tasks;
 using System.Web;
 using System.Collections.Specialized;
 using Plugins.CountlySDK.Enums;
 using Newtonsoft.Json.Linq;
 using System.Linq;
-using System.Collections.Generic;
 
-namespace Tests
+namespace Assets.Tests.PlayModeTests
 {
     public class DeviceIdTests
     {

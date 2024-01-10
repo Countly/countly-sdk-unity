@@ -1,16 +1,12 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using NUnit.Framework;
-using UnityEngine;
 using UnityEngine.TestTools;
 using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK;
 using Plugins.CountlySDK.Enums;
-using System.Threading.Tasks;
-using System;
-using System.Linq;
 
-namespace Tests
+namespace Assets.Tests.PlayModeTests
 {
     public class EventTests
     {

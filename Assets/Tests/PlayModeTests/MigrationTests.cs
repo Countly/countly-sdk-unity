@@ -1,23 +1,18 @@
-﻿using System.Collections.Generic;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using UnityEngine;
 using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK;
-using Newtonsoft.Json;
 using System.Web;
 using System.Collections.Specialized;
-using Newtonsoft.Json.Linq;
 using Plugins.CountlySDK.Helpers;
-using UnityEditor.PackageManager.Requests;
-using System.Linq;
 using iBoxDB.LocalServer;
 using Plugins.CountlySDK.Persistance.Entities;
 using Plugins.CountlySDK.Persistance.Repositories;
 using Plugins.iBoxDB;
 using Plugins.CountlySDK.Enums;
-using Assets.Tests.PlayModeTests;
 
-namespace Tests
+
+namespace Assets.Tests.PlayModeTests
 {
     public class MigrationTests
     {

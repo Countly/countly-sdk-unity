@@ -5,7 +5,7 @@ using Plugins.CountlySDK;
 using Plugins.CountlySDK.Enums;
 using System.Collections.Generic;
 
-namespace Tests
+namespace Assets.Tests.PlayModeTests
 {
     public class StarRatingTests
     {
@@ -14,7 +14,6 @@ namespace Tests
 
         private void AssertStarRatingModel(CountlyEventModel model, IDictionary<string, object> segmentation)
         {
-
             Assert.AreEqual(CountlyEventModel.StarRatingEvent, model.Key);
             Assert.IsNull(model.Sum);
             Assert.AreEqual(1, model.Count);

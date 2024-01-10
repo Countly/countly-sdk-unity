@@ -1,15 +1,11 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEngine;
-using UnityEngine.TestTools;
 using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK;
 using Plugins.CountlySDK.Enums;
-using System.Threading.Tasks;
-using Assets.Tests.PlayModeTests;
 
-namespace Tests
+namespace Assets.Tests.PlayModeTests
 {
     public class ViewsTests
     {

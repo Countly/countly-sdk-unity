@@ -8,10 +8,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using Newtonsoft.Json.Linq;
-using System.Threading.Tasks;
 using System.Collections.Specialized;
 
-namespace Tests
+namespace Assets.Tests.PlayModeTests
 {
     public class ConsentTests
     {
