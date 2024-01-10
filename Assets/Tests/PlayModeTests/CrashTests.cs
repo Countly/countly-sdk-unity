@@ -3,14 +3,11 @@ using NUnit.Framework;
 using UnityEngine;
 using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK;
-using Newtonsoft.Json;
 using System.Web;
 using System.Collections.Specialized;
 using Newtonsoft.Json.Linq;
-using System.Linq;
-using Assets.Tests.PlayModeTests;
 
-namespace Tests
+namespace Assets.Tests.PlayModeTests
 {
     public class CrashTests
     {

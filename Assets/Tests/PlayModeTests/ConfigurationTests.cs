@@ -3,10 +3,9 @@ using UnityEngine;
 using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK;
 using Plugins.CountlySDK.Enums;
-using Assets.Tests.PlayModeTests;
 using UnityEditor;
 
-namespace Tests
+namespace Assets.Tests.PlayModeTests
 {
     public class ConfigurationTests
     {

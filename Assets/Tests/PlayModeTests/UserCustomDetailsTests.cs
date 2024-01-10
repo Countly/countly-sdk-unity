@@ -1,14 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Web;
-using Assets.Tests.PlayModeTests;
 using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 using Plugins.CountlySDK;
 using Plugins.CountlySDK.Models;
 using UnityEngine;
 
-namespace Tests
+namespace Assets.Tests.PlayModeTests
 {
     public class UserCustomDetailsTests
     {

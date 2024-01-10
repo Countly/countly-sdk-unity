@@ -1,23 +1,18 @@
 ﻿using System.Collections.Generic;
 using NUnit.Framework;
-using UnityEngine;
 using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK;
-using Newtonsoft.Json;
 using System.Web;
 using System.Collections.Specialized;
 using Newtonsoft.Json.Linq;
 using Plugins.CountlySDK.Enums;
-using System.Threading.Tasks;
 using System.Collections;
 using UnityEngine.TestTools;
 using System.Linq;
 using System;
-using Assets.Tests.PlayModeTests;
 using Plugins.CountlySDK.Helpers;
-using System.Reflection;
 
-namespace Tests
+namespace Assets.Tests.PlayModeTests
 {
     public class SessionTests
     {

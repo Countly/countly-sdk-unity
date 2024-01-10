@@ -2,12 +2,9 @@ using System.Collections.Generic;
 using Plugins.CountlySDK;
 using Plugins.CountlySDK.Models;
 using NUnit.Framework;
-using Assets.Tests.PlayModeTests;
-using UnityEngine;
-using Plugins.CountlySDK.Services;
 using Plugins.CountlySDK.Enums;
 
-namespace Tests
+namespace Assets.Tests.PlayModeTests
 {
     public class UtilsTests
     {

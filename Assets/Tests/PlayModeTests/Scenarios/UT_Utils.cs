@@ -1,16 +1,15 @@
-using Assets.Tests.PlayModeTests;
 using NUnit.Framework;
 using Plugins.CountlySDK;
 
-namespace Tests
+namespace Assets.Tests.PlayModeTests.Scenarios
 {
-    public class SC_UA_UtilsTests
+    public class UT_Utils
     {
         // 'SafeRandomVal' in CountlyUtils
         // Generates a random value which matches with required pattern
         // Generator should produce different values each time with given pattern.
         [Test]
-        public void UA_001_validatingIDGenerator()
+        public void UT_001_validatingIDGenerator()
         {
             string result1 = CountlyUtils.SafeRandomVal();
             string result2 = CountlyUtils.SafeRandomVal();
