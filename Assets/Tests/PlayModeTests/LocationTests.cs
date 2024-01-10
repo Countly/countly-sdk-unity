@@ -3,7 +3,7 @@ using UnityEngine;
 using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK;
 
-namespace Tests
+namespace Assets.Tests.PlayModeTests
 {
     public class LocationTests
     {

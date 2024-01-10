@@ -190,7 +190,7 @@ namespace Plugins.CountlySDK
         /// Creates a crypto-safe SHA-256 hashed random value.
         /// </summary>
         /// <returns>Randomly generated string</returns>
-        public string SafeRandomVal()
+        public static string SafeRandomVal()
         {
             long timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds();
             using (RandomNumberGenerator random = new RNGCryptoServiceProvider()) {

@@ -3,18 +3,10 @@ using Plugins.CountlySDK.Persistance.Entities;
 using NUnit.Framework;
 using Plugins.CountlySDK.Helpers;
 using System.Collections.Generic;
-using Assets.Tests.PlayModeTests;
-using System.Linq;
-using UnityEngine;
-using Newtonsoft.Json;
-using static UnityEngine.Networking.UnityWebRequest;
 using Newtonsoft.Json.Linq;
-using UnityEditor.UIElements;
-using System.Text;
-using System.Net.NetworkInformation;
-using Plugins.CountlySDK;
 
-namespace Tests
+
+namespace Assets.Tests.PlayModeTests
 {
     public class HelpersTests
     {

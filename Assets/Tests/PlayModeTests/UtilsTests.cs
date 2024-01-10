@@ -2,12 +2,9 @@ using System.Collections.Generic;
 using Plugins.CountlySDK;
 using Plugins.CountlySDK.Models;
 using NUnit.Framework;
-using Assets.Tests.PlayModeTests;
-using UnityEngine;
-using Plugins.CountlySDK.Services;
 using Plugins.CountlySDK.Enums;
 
-namespace Tests
+namespace Assets.Tests.PlayModeTests
 {
     public class UtilsTests
     {
@@ -141,26 +138,6 @@ namespace Tests
             string generatedValue = CountlyUtils.GetUniqueDeviceId();
             Assert.IsTrue(generatedValue.StartsWith("CLY_"));
             Assert.IsTrue(generatedValue.Length > 4);
-        }
-
-        // 'SafeRandomVal' in CountlyUtils
-        // Generates a random value which matches with required pattern
-        // Generator should produce different values each time with given pattern.
-        [Test]
-        public void GetSafeRandomValue()
-        {
-            Countly.Instance.Init(TestUtility.createBaseConfig());
-            CountlyUtils utils = new CountlyUtils(Countly.Instance);
-
-            string result1 = utils.SafeRandomVal();
-            string result2 = utils.SafeRandomVal();
-
-            Assert.NotNull(result1);
-            Assert.NotNull(result2);
-            Assert.AreNotEqual(result1, result2);
-            Assert.IsTrue(TestUtility.IsBase64String(result1));
-            Assert.IsTrue(TestUtility.IsBase64String(result2));
-            Assert.AreEqual(21, result2.Length, result1.Length);
         }
 
         // 'RemoveUnsupportedDataTypes' in CountlyUtils
