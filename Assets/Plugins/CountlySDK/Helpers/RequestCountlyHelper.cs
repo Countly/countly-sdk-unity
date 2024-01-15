@@ -17,7 +17,7 @@ namespace Plugins.CountlySDK.Helpers
 {
     public class RequestCountlyHelper
     {
-        private bool _isQueueBeingProcess;
+        private bool _isQueueBeingProcess;  
 
         private readonly CountlyLogHelper Log;
         private readonly CountlyUtils _countlyUtils;
@@ -72,12 +72,19 @@ namespace Plugins.CountlySDK.Helpers
             foreach (CountlyRequestModel reqModel in requests) {
                 //add the remaining request count in RequestData
                 reqModel.RequestData += "&rr=" + (requests.Length - 1);
+
+                /*
                 CountlyResponse response = await ProcessRequest(reqModel);
 
                 if (!response.IsSuccess) {
                     Log.Verbose("[RequestCountlyHelper] ProcessQueue: Request fail, " + response.ToString());
                     break;
                 }
+                */
+
+                string query = AddChecksum(reqModel.RequestData);
+                string url = _countlyUtils.ServerInputUrl + query;
+                UnityWebRequestHelper.Instance.StartRequestRoutine(_config.EnablePost, url, reqModel.RequestData);
 
                 _requestRepo.Dequeue();
             }
@@ -133,12 +140,12 @@ namespace Plugins.CountlySDK.Helpers
         /// <returns></returns>
         internal async Task<CountlyResponse> GetAsync(string uri, string data)
         {
-
             Log.Verbose("[RequestCountlyHelper] GetAsync request: " + uri + " params: " + data);
 
             CountlyResponse countlyResponse = new CountlyResponse();
             string query = AddChecksum(data);
             string url = uri + query;
+
             try {
                 HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
                 using (HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync()) {
