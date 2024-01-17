@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -17,7 +18,7 @@ namespace Plugins.CountlySDK.Helpers
 {
     public class RequestCountlyHelper
     {
-        private bool _isQueueBeingProcess;  
+        private bool _isQueueBeingProcess;
 
         private readonly CountlyLogHelper Log;
         private readonly CountlyUtils _countlyUtils;
@@ -25,19 +26,20 @@ namespace Plugins.CountlySDK.Helpers
         private readonly RequestBuilder _requestBuilder;
         internal readonly RequestRepository _requestRepo;
 
-        internal RequestCountlyHelper(CountlyConfiguration config, CountlyLogHelper log, CountlyUtils countlyUtils, RequestBuilder requestBuilder, RequestRepository requestRepo)
+        private readonly MonoBehaviour _monoBehaviour;
+
+        internal RequestCountlyHelper(CountlyConfiguration config, CountlyLogHelper log, CountlyUtils countlyUtils, RequestBuilder requestBuilder, RequestRepository requestRepo, MonoBehaviour monoBehaviour)
         {
             Log = log;
             _config = config;
             _requestRepo = requestRepo;
             _countlyUtils = countlyUtils;
             _requestBuilder = requestBuilder;
-
+            _monoBehaviour = monoBehaviour;
         }
 
         internal void AddRequestToQueue(CountlyRequestModel request)
         {
-
             Log.Verbose("[RequestCountlyHelper] AddRequestToQueue: " + request.ToString());
 
             if (_config.EnableTestMode) {
@@ -73,18 +75,12 @@ namespace Plugins.CountlySDK.Helpers
                 //add the remaining request count in RequestData
                 reqModel.RequestData += "&rr=" + (requests.Length - 1);
 
-                /*
                 CountlyResponse response = await ProcessRequest(reqModel);
 
                 if (!response.IsSuccess) {
                     Log.Verbose("[RequestCountlyHelper] ProcessQueue: Request fail, " + response.ToString());
                     break;
                 }
-                */
-
-                string query = AddChecksum(reqModel.RequestData);
-                string url = _countlyUtils.ServerInputUrl + query;
-                UnityWebRequestHelper.Instance.StartRequestRoutine(_config.EnablePost, url, reqModel.RequestData);
 
                 _requestRepo.Dequeue();
             }
@@ -93,17 +89,21 @@ namespace Plugins.CountlySDK.Helpers
         }
 
         /// <summary>
-        ///  Decides whether to use a POST or GET method based on configuration and request size, and then send the request accordingly.
+        /// Decides whether to use a POST or GET method based on configuration and request size, and then send the request accordingly.
         /// </summary>
         private async Task<CountlyResponse> ProcessRequest(CountlyRequestModel model)
         {
             Log.Verbose("[RequestCountlyHelper] Process request, request: " + model);
+            bool shouldPost = _config.EnablePost || model.RequestData.Length > 2000;
 
-            if (_config.EnablePost || model.RequestData.Length > 2000) {
+#if UNITY_WEBGL
+            return await StartProcessRequestRoutine(shouldPost, _countlyUtils.ServerInputUrl, model.RequestData);
+#else
+            if (shouldPost) {
                 return await Task.Run(() => PostAsync(_countlyUtils.ServerInputUrl, model.RequestData));
             }
-
             return await Task.Run(() => GetAsync(_countlyUtils.ServerInputUrl, model.RequestData));
+#endif
         }
 
         /// <summary>
@@ -242,6 +242,80 @@ namespace Plugins.CountlySDK.Helpers
             Log.Verbose("[RequestCountlyHelper] PostAsync request: " + uri + " body: " + data + " response: " + countlyResponse.ToString());
 
             return countlyResponse;
+        }
+
+        /// <summary>
+        /// Asynchronously initiates a request routine, combining URL and data, and starts a coroutine to process the request with checksum validation.
+        /// </summary>
+        /// <param name="shouldPost"></param>
+        /// <param name="uri"></param>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        private Task<CountlyResponse> StartProcessRequestRoutine(bool shouldPost, string uri, string data)
+        {
+            TaskCompletionSource<CountlyResponse> tcs = new TaskCompletionSource<CountlyResponse>();
+
+            _monoBehaviour.StartCoroutine(ProcessRequestCoroutine(shouldPost, uri, data, (response) => {
+                tcs.SetResult(response);
+            }));
+
+            return tcs.Task;
+        }
+
+        /// <summary>
+        /// Processes a UnityWebRequest coroutine, handling response and errors, and invoking a callback with the CountlyResponse.
+        /// </summary>
+        /// <param name="shouldPost"></param>
+        /// <param name="url"></param>
+        /// <param name="data"></param>
+        /// <param name="callback"></param>
+        /// <returns></returns>
+        private IEnumerator ProcessRequestCoroutine(bool shouldPost, string uri, string data, Action<CountlyResponse> callback)
+        {
+            CountlyResponse countlyResponse = new CountlyResponse();
+
+            string query = AddChecksum(data);
+            string url = uri + query;
+
+            using (UnityWebRequest webRequest = UnityWebRequest.Put(url, data)) {
+
+                if (shouldPost) {
+                    webRequest.method = UnityWebRequest.kHttpVerbPOST;
+                } else {
+                    webRequest.method = UnityWebRequest.kHttpVerbGET;
+                }
+                
+                yield return webRequest.SendWebRequest();
+
+                string[] pages = url.Split('/');
+                int page = pages.Length - 1;
+                int code = (int)webRequest.responseCode;
+
+                switch (webRequest.result) {
+                    case UnityWebRequest.Result.ConnectionError:
+                    case UnityWebRequest.Result.DataProcessingError:
+                        Log.Verbose("[RequestCountlyHelper] ProcessRequestCoroutine request: " + uri + " body: " + pages[page] + ": Error: " + webRequest.error);
+                        countlyResponse.ErrorMessage = webRequest.error;
+                        countlyResponse.StatusCode = code;
+                        countlyResponse.IsSuccess = false;
+                        break;
+                    case UnityWebRequest.Result.ProtocolError:
+                        Log.Verbose("[RequestCountlyHelper] ProcessRequestCoroutine request: " + uri + " body: " + pages[page] + ": HTTP Error: " + webRequest.error);
+                        countlyResponse.ErrorMessage = webRequest.error;
+                        countlyResponse.StatusCode = code;
+                        countlyResponse.IsSuccess = false;
+                        break;
+                    case UnityWebRequest.Result.Success:
+                        countlyResponse.Data = webRequest.downloadHandler.text;
+                        countlyResponse.StatusCode = code;
+                        countlyResponse.IsSuccess = true;
+
+                        Log.Debug("[RequestCountlyHelper] ProcessRequestCoroutine request: " + uri + " body: " + pages[page] + ":\nReceived: " + webRequest.downloadHandler.text);
+                        break;
+                }
+            }
+
+            callback?.Invoke(countlyResponse);
         }
 
     }
