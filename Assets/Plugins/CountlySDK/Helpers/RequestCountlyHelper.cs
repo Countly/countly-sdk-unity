@@ -312,6 +312,12 @@ namespace Plugins.CountlySDK.Helpers
 
                         Log.Debug("[RequestCountlyHelper] ProcessRequestCoroutine request: " + uri + " body: " + pages[page] + ":\nReceived: " + webRequest.downloadHandler.text);
                         break;
+                    default:
+                        Log.Warning("[RequestCountlyHelper] ProcessRequestCoroutine request: " + uri + " body: " + pages[page] + ": Unexpected result: " + webRequest.result);
+                        countlyResponse.ErrorMessage = "Unexpected result: " + webRequest.result;
+                        countlyResponse.StatusCode = code;
+                        countlyResponse.IsSuccess = false;
+                        break;
                 }
             }
 
