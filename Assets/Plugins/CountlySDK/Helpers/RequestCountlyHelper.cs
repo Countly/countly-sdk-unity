@@ -287,38 +287,22 @@ namespace Plugins.CountlySDK.Helpers
                 
                 yield return webRequest.SendWebRequest();
 
-                string[] pages = url.Split('/');
+                string[] pages = url.Split('?');
                 int page = pages.Length - 1;
                 int code = (int)webRequest.responseCode;
 
-                switch (webRequest.result) {
-                    case UnityWebRequest.Result.ConnectionError:
-                    case UnityWebRequest.Result.DataProcessingError:
-                        Log.Verbose("[RequestCountlyHelper] ProcessRequestCoroutine request: " + uri + " body: " + pages[page] + ": Error: " + webRequest.error);
-                        countlyResponse.ErrorMessage = webRequest.error;
-                        countlyResponse.StatusCode = code;
-                        countlyResponse.IsSuccess = false;
-                        break;
-                    case UnityWebRequest.Result.ProtocolError:
-                        Log.Verbose("[RequestCountlyHelper] ProcessRequestCoroutine request: " + uri + " body: " + pages[page] + ": HTTP Error: " + webRequest.error);
-                        countlyResponse.ErrorMessage = webRequest.error;
-                        countlyResponse.StatusCode = code;
-                        countlyResponse.IsSuccess = false;
-                        break;
-                    case UnityWebRequest.Result.Success:
-                        countlyResponse.Data = webRequest.downloadHandler.text;
-                        countlyResponse.StatusCode = code;
-                        countlyResponse.IsSuccess = true;
-
-                        Log.Debug("[RequestCountlyHelper] ProcessRequestCoroutine request: " + uri + " body: " + pages[page] + ":\nReceived: " + webRequest.downloadHandler.text);
-                        break;
-                    default:
-                        Log.Warning("[RequestCountlyHelper] ProcessRequestCoroutine request: " + uri + " body: " + pages[page] + ": Unexpected result: " + webRequest.result);
-                        countlyResponse.ErrorMessage = "Unexpected result: " + webRequest.result;
-                        countlyResponse.StatusCode = code;
-                        countlyResponse.IsSuccess = false;
-                        break;
+                if(code == 200) {
+                    countlyResponse.Data = webRequest.downloadHandler.text;
+                    countlyResponse.StatusCode = code;
+                    countlyResponse.IsSuccess = true;
+                } else {
+                    countlyResponse.Data = webRequest.downloadHandler.text;
+                    countlyResponse.ErrorMessage = webRequest.error;
+                    countlyResponse.StatusCode = code;
+                    countlyResponse.IsSuccess = false;
                 }
+
+                Log.Debug("[RequestCountlyHelper] ProcessRequestCoroutine request url: " + uri + " body: " + pages[page] + ":\nReceived: " + webRequest.downloadHandler.text);
             }
 
             callback?.Invoke(countlyResponse);
