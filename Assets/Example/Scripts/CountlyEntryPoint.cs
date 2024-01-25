@@ -20,7 +20,11 @@ public class CountlyEntryPoint : MonoBehaviour, INotificationListener
         }
 
         string _appKey = "YOUR_APP_KEY";
-        string _serverUrl = "https://try.count.ly/";
+        string _serverUrl = "https://your.server.ly/";
+
+        if (_serverUrl.Equals("https://your.server.ly/") || _appKey.Equals("YOUR_APP_KEY")) {
+            throw new Exception("Please do not use default set of app key and server url");
+        }
 
         CountlyConfiguration configuration = new CountlyConfiguration(_appKey, _serverUrl)
             .EnableLogging()
