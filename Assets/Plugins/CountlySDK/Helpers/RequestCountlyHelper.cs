@@ -155,8 +155,6 @@ namespace Plugins.CountlySDK.Helpers
                     using (StreamReader reader = new StreamReader(stream)) {
                         string res = await reader.ReadToEndAsync();
 
-                        JObject body = JObject.Parse(res);
-
                         countlyResponse.Data = res;
                         countlyResponse.StatusCode = code;
                         countlyResponse.IsSuccess = IsSuccess(countlyResponse);
@@ -205,7 +203,6 @@ namespace Plugins.CountlySDK.Helpers
                 request.ContentType = "application/x-www-form-urlencoded";
                 request.Method = "POST";
 
-
                 using (Stream requestBody = request.GetRequestStream()) {
                     await requestBody.WriteAsync(dataBytes, 0, dataBytes.Length);
                 }
@@ -215,8 +212,6 @@ namespace Plugins.CountlySDK.Helpers
                     using (Stream stream = response.GetResponseStream())
                     using (StreamReader reader = new StreamReader(stream)) {
                         string res = await reader.ReadToEndAsync();
-
-                        JObject body = JObject.Parse(res);
 
                         countlyResponse.Data = res;
                         countlyResponse.StatusCode = code;
