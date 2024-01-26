@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -25,19 +26,20 @@ namespace Plugins.CountlySDK.Helpers
         private readonly RequestBuilder _requestBuilder;
         internal readonly RequestRepository _requestRepo;
 
-        internal RequestCountlyHelper(CountlyConfiguration config, CountlyLogHelper log, CountlyUtils countlyUtils, RequestBuilder requestBuilder, RequestRepository requestRepo)
+        private readonly MonoBehaviour _monoBehaviour;
+
+        internal RequestCountlyHelper(CountlyConfiguration config, CountlyLogHelper log, CountlyUtils countlyUtils, RequestBuilder requestBuilder, RequestRepository requestRepo, MonoBehaviour monoBehaviour)
         {
             Log = log;
             _config = config;
             _requestRepo = requestRepo;
             _countlyUtils = countlyUtils;
             _requestBuilder = requestBuilder;
-
+            _monoBehaviour = monoBehaviour;
         }
 
         internal void AddRequestToQueue(CountlyRequestModel request)
         {
-
             Log.Verbose("[RequestCountlyHelper] AddRequestToQueue: " + request.ToString());
 
             if (_config.EnableTestMode) {
@@ -72,6 +74,7 @@ namespace Plugins.CountlySDK.Helpers
             foreach (CountlyRequestModel reqModel in requests) {
                 //add the remaining request count in RequestData
                 reqModel.RequestData += "&rr=" + (requests.Length - 1);
+
                 CountlyResponse response = await ProcessRequest(reqModel);
 
                 if (!response.IsSuccess) {
@@ -86,17 +89,22 @@ namespace Plugins.CountlySDK.Helpers
         }
 
         /// <summary>
-        ///  Decides whether to use a POST or GET method based on configuration and request size, and then send the request accordingly.
+        /// Decides whether to use a POST or GET method based on configuration and request size, and then send the request accordingly.
         /// </summary>
         private async Task<CountlyResponse> ProcessRequest(CountlyRequestModel model)
         {
             Log.Verbose("[RequestCountlyHelper] Process request, request: " + model);
+            bool shouldPost = _config.EnablePost || model.RequestData.Length > 2000;
 
-            if (_config.EnablePost || model.RequestData.Length > 2000) {
+#if UNITY_WEBGL
+            // There is not HTTP GET for webGL. We always do a HTTP POST
+            return await StartProcessRequestRoutine(_countlyUtils.ServerInputUrl, model.RequestData);
+#else
+            if (shouldPost) {
                 return await Task.Run(() => PostAsync(_countlyUtils.ServerInputUrl, model.RequestData));
             }
-
             return await Task.Run(() => GetAsync(_countlyUtils.ServerInputUrl, model.RequestData));
+#endif
         }
 
         /// <summary>
@@ -133,12 +141,12 @@ namespace Plugins.CountlySDK.Helpers
         /// <returns></returns>
         internal async Task<CountlyResponse> GetAsync(string uri, string data)
         {
-
             Log.Verbose("[RequestCountlyHelper] GetAsync request: " + uri + " params: " + data);
 
             CountlyResponse countlyResponse = new CountlyResponse();
             string query = AddChecksum(data);
             string url = uri + query;
+
             try {
                 HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
                 using (HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync()) {
@@ -147,12 +155,9 @@ namespace Plugins.CountlySDK.Helpers
                     using (StreamReader reader = new StreamReader(stream)) {
                         string res = await reader.ReadToEndAsync();
 
-                        JObject body = JObject.Parse(res);
-
                         countlyResponse.Data = res;
                         countlyResponse.StatusCode = code;
-                        countlyResponse.IsSuccess = body.ContainsKey("result");
-
+                        countlyResponse.IsSuccess = IsSuccess(countlyResponse);
                     }
 
                 }
@@ -165,8 +170,8 @@ namespace Plugins.CountlySDK.Helpers
                     using (StreamReader reader = new StreamReader(stream)) {
                         string res = await reader.ReadToEndAsync();
                         countlyResponse.StatusCode = code;
-                        countlyResponse.IsSuccess = false;
                         countlyResponse.Data = res;
+                        countlyResponse.IsSuccess = IsSuccess(countlyResponse);
                     }
                 }
 
@@ -198,7 +203,6 @@ namespace Plugins.CountlySDK.Helpers
                 request.ContentType = "application/x-www-form-urlencoded";
                 request.Method = "POST";
 
-
                 using (Stream requestBody = request.GetRequestStream()) {
                     await requestBody.WriteAsync(dataBytes, 0, dataBytes.Length);
                 }
@@ -209,11 +213,9 @@ namespace Plugins.CountlySDK.Helpers
                     using (StreamReader reader = new StreamReader(stream)) {
                         string res = await reader.ReadToEndAsync();
 
-                        JObject body = JObject.Parse(res);
-
                         countlyResponse.Data = res;
                         countlyResponse.StatusCode = code;
-                        countlyResponse.IsSuccess = body.ContainsKey("result");
+                        countlyResponse.IsSuccess = IsSuccess(countlyResponse);
                     }
                 }
             } catch (WebException ex) {
@@ -225,8 +227,8 @@ namespace Plugins.CountlySDK.Helpers
                     using (StreamReader reader = new StreamReader(stream)) {
                         string res = await reader.ReadToEndAsync();
                         countlyResponse.StatusCode = code;
-                        countlyResponse.IsSuccess = false;
                         countlyResponse.Data = res;
+                        countlyResponse.IsSuccess = IsSuccess(countlyResponse);
                     }
                 }
 
@@ -237,5 +239,76 @@ namespace Plugins.CountlySDK.Helpers
             return countlyResponse;
         }
 
+        /// <summary>
+        /// Asynchronously initiates a request routine, combining URL and data, and starts a coroutine to process the request with checksum validation.
+        /// </summary>
+        /// <param name="shouldPost"></param>
+        /// <param name="uri"></param>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        private Task<CountlyResponse> StartProcessRequestRoutine(string uri, string data)
+        {
+            TaskCompletionSource<CountlyResponse> tcs = new TaskCompletionSource<CountlyResponse>();
+
+            _monoBehaviour.StartCoroutine(ProcessRequestCoroutine(uri, data, (response) => {
+                tcs.SetResult(response);
+            }));
+
+            return tcs.Task;
+        }
+
+        /// <summary>
+        /// Processes a UnityWebRequest coroutine, handling response and errors, and invoking a callback with the CountlyResponse.
+        /// </summary>
+        /// <param name="shouldPost"></param>
+        /// <param name="url"></param>
+        /// <param name="data"></param>
+        /// <param name="callback"></param>
+        /// <returns></returns>
+        private IEnumerator ProcessRequestCoroutine(string uri, string data, Action<CountlyResponse> callback)
+        {
+            CountlyResponse countlyResponse = new CountlyResponse();
+
+            string query = AddChecksum(data);
+            string url = uri + query;
+
+            using (UnityWebRequest webRequest = UnityWebRequest.Put(url, data)) {
+
+                webRequest.method = UnityWebRequest.kHttpVerbPOST;
+
+                yield return webRequest.SendWebRequest();
+
+                string[] pages = url.Split('?');
+                int page = pages.Length - 1;
+                int code = (int)webRequest.responseCode;
+
+                countlyResponse.Data = webRequest.downloadHandler.text;
+                countlyResponse.ErrorMessage = webRequest.error;
+                countlyResponse.StatusCode = code;
+                countlyResponse.IsSuccess = IsSuccess(countlyResponse);
+
+                Log.Debug($"[RequestCountlyHelper] ProcessRequestCoroutine request url: [{uri}] body: [{pages[page]}] response: [{countlyResponse}]");
+            }
+
+            callback?.Invoke(countlyResponse);
+        }
+
+        private bool IsSuccess(CountlyResponse countlyResponse)
+        {
+            if (countlyResponse.StatusCode >= 200 && countlyResponse.StatusCode < 300) {
+                try {
+                    JObject json = JObject.Parse(countlyResponse.Data);
+
+                    if (json.ContainsKey("result")) {
+                        return true;
+                    }
+                } catch(JsonException) {
+                    Log.Debug("[RequestCountlyHelper] IsSuccess : Returned request is not a JSON object");
+                    return false;
+                } 
+            }
+
+            return false;
+        }
     }
 }
