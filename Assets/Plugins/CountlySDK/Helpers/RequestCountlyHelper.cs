@@ -97,6 +97,7 @@ namespace Plugins.CountlySDK.Helpers
             bool shouldPost = _config.EnablePost || model.RequestData.Length > 2000;
 
 #if UNITY_WEBGL
+            // There is not HTTP GET for webGL. We always do a HTTP POST
             return await StartProcessRequestRoutine(_countlyUtils.ServerInputUrl, model.RequestData);
 #else
             if (shouldPost) {
