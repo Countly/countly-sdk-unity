@@ -16,6 +16,8 @@ namespace Plugins.CountlySDK
         internal string ServerInputUrl { get; private set; }
         internal string ServerOutputUrl { get; private set; }
 
+        static string appVersion;
+
         public CountlyUtils(Countly countly)
         {
             _countly = countly;
@@ -36,7 +38,10 @@ namespace Plugins.CountlySDK
 
         public static string GetAppVersion()
         {
-            return Application.version;
+            if(appVersion == null) {
+                appVersion = Application.version;
+            }
+            return appVersion;
         }
 
         /// <summary>

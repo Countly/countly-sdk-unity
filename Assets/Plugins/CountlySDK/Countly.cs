@@ -13,6 +13,8 @@ using Plugins.CountlySDK.Services;
 using Plugins.iBoxDB;
 using UnityEngine;
 using Plugins.CountlySDK.Enums;
+using PimDeWitte.UnityMainThreadDispatcher;
+using System.Threading;
 
 [assembly: InternalsVisibleTo("PlayModeTests")]
 namespace Plugins.CountlySDK
@@ -134,6 +136,8 @@ namespace Plugins.CountlySDK
         private bool _logSubscribed;
         private PushCountlyService _push;
 
+        private Thread mainThread;
+        bool isOnMainThread;
 
         /// <summary>
         /// Initialize SDK at the start of your app
@@ -142,15 +146,35 @@ namespace Plugins.CountlySDK
         {
             DontDestroyOnLoad(gameObject);
             Instance = this;
+            mainThread = Thread.CurrentThread;
 
             //Auth and Config will not be null in case initializing through countly prefab
             if (Auth != null && Config != null) {
                 Init(new CountlyConfiguration(Auth, Config));
             }
-
         }
 
         public void Init(CountlyConfiguration configuration)
+        {
+            if (IsMainThread()) {
+                InitInternal(configuration);
+            } else {
+                gameObject.AddComponent<UnityMainThreadDispatcher>();
+                UnityMainThreadDispatcher.Instance().Enqueue(() => InitInternal(configuration));
+            }
+        }
+
+        bool IsMainThread()
+        {
+            if (Thread.CurrentThread.ManagedThreadId == mainThread.ManagedThreadId) {
+                isOnMainThread = true;
+            } else {
+                isOnMainThread = false;
+            }
+            return isOnMainThread;
+        }
+
+        public void InitInternal(CountlyConfiguration configuration)
         {
             if (IsSDKInitialized) {
                 _logHelper.Error("SDK has already been initialized, 'Init' should not be called a second time!");
@@ -270,11 +294,11 @@ namespace Plugins.CountlySDK
                 _logHelper.Info("[Init] provided 'maxStackTraceLineLength' override:[" + configuration.MaxStackTraceLineLength + "]");
             }
 
-            if(configuration.SafeEventIDGenerator == null) {
+            if (configuration.SafeEventIDGenerator == null) {
                 configuration.SafeEventIDGenerator = new SafeIDGenerator();
             }
 
-            if(configuration.SafeViewIDGenerator == null) {
+            if (configuration.SafeViewIDGenerator == null) {
                 configuration.SafeViewIDGenerator = new SafeIDGenerator();
             }
 
