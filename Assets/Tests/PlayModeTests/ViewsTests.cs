@@ -535,10 +535,10 @@ namespace Assets.Tests.PlayModeTests
 
             string viewName = "viewName";
 
-            _viewService.StartView(viewName);
+            string viewID = _viewService.StartView(viewName);
             Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
 
-            _viewService.StopViewWithID(_viewService.GetCurrentViewId());
+            _viewService.StopViewWithID(viewID);
             Assert.AreEqual(2, Countly.Instance.Views._eventService._eventRepo.Count);
         }
 
@@ -569,7 +569,7 @@ namespace Assets.Tests.PlayModeTests
 
             string viewName = "viewName";
 
-            _viewService.StartView(viewName);
+            string viewID = _viewService.StartView(viewName);
             Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
 
             // segmentation data types are string, int, double, float, bool
@@ -582,7 +582,7 @@ namespace Assets.Tests.PlayModeTests
 
             Countly.Instance.Views._eventService._eventRepo.Clear();
 
-            _viewService.StopViewWithID(_viewService.GetCurrentViewId(), segmentation);
+            _viewService.StopViewWithID(viewID, segmentation);
             Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
 
             CountlyEventModel result = Countly.Instance.Views._eventService._eventRepo.Dequeue();
@@ -605,12 +605,12 @@ namespace Assets.Tests.PlayModeTests
 
             string viewName = "viewName";
 
-            _viewService.StartView(viewName);
+            string viewID = _viewService.StartView(viewName);
             Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
 
             Countly.Instance.Views._eventService._eventRepo.Clear();
 
-            _viewService.PauseViewWithID(_viewService.GetCurrentViewId());
+            _viewService.PauseViewWithID(viewID);
             Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
         }
 
@@ -643,13 +643,13 @@ namespace Assets.Tests.PlayModeTests
 
             string viewName = "viewName";
 
-            _viewService.StartView(viewName);
+            string viewID = _viewService.StartView(viewName);
             Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
 
-            _viewService.PauseViewWithID(_viewService.GetCurrentViewId());
+            _viewService.PauseViewWithID(viewID);
             Assert.AreEqual(2, Countly.Instance.Views._eventService._eventRepo.Count);
 
-            _viewService.ResumeViewWithID(_viewService.GetCurrentViewId());
+            _viewService.ResumeViewWithID(viewID);
             Assert.AreEqual(2, Countly.Instance.Views._eventService._eventRepo.Count);
         }
 

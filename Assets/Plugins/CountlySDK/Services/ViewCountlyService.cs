@@ -11,8 +11,6 @@ namespace Plugins.CountlySDK.Services
     // interface for SDK users
     public interface IViewCountlyService
     {
-        string GetCurrentViewId();
-        string GetPreviousViewId();
         string? StartView(string? viewName);
         string? StartView(string? viewName, Dictionary<string, object>? viewSegmentation);
         void StopViewWithName(string? viewName);
