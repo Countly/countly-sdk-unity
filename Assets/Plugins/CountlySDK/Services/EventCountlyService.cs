@@ -17,7 +17,7 @@ namespace Plugins.CountlySDK.Services
 
         internal readonly IDictionary<string, DateTime> _timedEvents;
 
-        SafeIDGenerator safeEventIDGenerator;
+        readonly SafeIDGenerator safeEventIDGenerator;
 
         internal IViewIDProvider viewIDProvider;
 
@@ -298,15 +298,16 @@ namespace Plugins.CountlySDK.Services
         /// <param name="segmentation">custom segmentation you want to set, leave null if you don't want to add anything</param>
         /// <param name="count">how many of these events have occurred, default value is "1"</param>
         /// <param name="sum">set sum if needed, default value is "0"</param>
-        /// <param name="duration">set sum if needed, default value is "0"</param>
+        /// <param name="duration">set duration if needed, default value is "null"</param>
+        /// <param name="eventIDOverride">override event id if needed, default value is "null"</param>
         /// <returns></returns>
         public async Task RecordEventAsync(string key, IDictionary<string, object> segmentation = null,
-            int? count = 1, double? sum = 0, double? duration = null)
+            int? count = 1, double? sum = 0, double? duration = null, string? eventIDOverride = null)
         {
             lock (LockObj) {
                 Log.Info("[EventCountlyService] RecordEventAsync : key = " + key + ", segmentation = " + segmentation + ", count = " + count + ", sum = " + sum + ", duration = " + duration);
 
-                _ = RecordEventInternal(key, segmentation, count, sum, duration, null);
+                _ = RecordEventInternal(key, segmentation, count, sum, duration, eventIDOverride);
             }
 
             await Task.CompletedTask;

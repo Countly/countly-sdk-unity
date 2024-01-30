@@ -58,7 +58,7 @@ namespace Plugins.CountlySDK.Services
         internal readonly Countly _cly;
         internal readonly CountlyUtils _utils;
 
-        SafeIDGenerator safeViewIDGenerator;
+        readonly SafeIDGenerator safeViewIDGenerator;
 
         readonly string[] reservedSegmentationKeysViews = { "name", "visit", "start", "segment" };
         private readonly Dictionary<string, DateTime> _viewToLastViewStartTime = new Dictionary<string, DateTime>();
