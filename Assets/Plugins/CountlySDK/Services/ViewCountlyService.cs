@@ -25,6 +25,7 @@ namespace Plugins.CountlySDK.Services
         void SetGlobalViewSegmentation(Dictionary<string, object> viewSegmentation);
         void AddSegmentationToViewWithID(string? viewID, Dictionary<string, object>? viewSegmentation);
         void AddSegmentationToViewWithName(string? viewName, Dictionary<string, object>? viewSegmentation);
+        void UpdateGlobalViewSegmentation(Dictionary<string, object> viewSegmentation);
     }
 
     public class ViewCountlyService : AbstractBaseService, IViewCountlyService
@@ -78,6 +79,7 @@ namespace Plugins.CountlySDK.Services
             return previousViewID == null ? "" : previousViewID;
         }
 
+        #region PublicAPI
         /// <summary>
         /// Starts a view which would not close automatically
         /// </summary>
@@ -241,6 +243,24 @@ namespace Plugins.CountlySDK.Services
             }
         }
 
+        /// <summary>
+        /// Updates the global segmentation
+        /// </summary>
+        /// <param name="viewSegmentation"></param>
+        public void UpdateGlobalViewSegmentation(Dictionary<string, object> viewSegmentation)
+        {
+            lock(LockObj) {
+                Log.Info("[ViewCountlyService] Calling UpdateGlobalViewSegmentation sg[" + (viewSegmentation == null ? "null" : viewSegmentation.Count.ToString()) + "]");
+
+                if (viewSegmentation == null) {
+                    Log.Warning("[ViewCountlyService] When updating segmentation values, they can't be 'null'.");
+                    return;
+                }
+
+                UpdateGlobalViewSegmentationInternal(viewSegmentation);
+            }
+        }
+        #endregion
         /// <summary>
         /// Starts a view which would not close automatically.
         /// </summary>
@@ -642,6 +662,24 @@ namespace Plugins.CountlySDK.Services
             Log.Info("[ViewsCountlyService] Will add segmentation for view: [" + viewName + "] with ID:[" + viewID + "]");
 
             AddSegmentationToViewWithIDInternal(viewID, viewSegmentation);
+        }
+
+        /// <summary>
+        /// Updates the global segmentation
+        /// </summary>
+        /// <param name="viewSegmentation"></param>
+        private void UpdateGlobalViewSegmentationInternal(Dictionary<string, object> viewSegmentation)
+        {
+            if (_utils.RemoveUnsupportedDataTypes(viewSegmentation, Log)) {
+                //found an unsupported type, print warning
+                Log.Warning("[ViewsCountlyService] UpdateGlobalViewSegmentationInternal, You have provided an unsupported data type in your View Segmentation. Removing the unsupported values.");
+            }
+
+            _utils.RemoveReservedKeysFromSegmentation(viewSegmentation, reservedSegmentationKeysViews, "[ViewsCountlyService] UpdateGlobalViewSegmentationInternal, ", Log);
+
+            foreach(KeyValuePair<string, object> kvp in viewSegmentation) {
+                automaticViewSegmentation[kvp.Key] = kvp.Value;
+            }
         }
 
         #region Deprecated Methods

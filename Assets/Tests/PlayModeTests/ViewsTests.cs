@@ -794,6 +794,49 @@ namespace Assets.Tests.PlayModeTests
             Assert.AreEqual(segmResult.Segmentation["bool"], true);
         }
 
+        [Test]
+        public void UpdateGlobalViewSegmentation()
+        {
+            ViewServiceSetup();
+
+            Dictionary<string, object> globalSegmentation = new Dictionary<string, object>();
+            globalSegmentation.Add("string", "Hello!");
+            globalSegmentation.Add("int", 42);
+            globalSegmentation.Add("double", 3.14);
+            globalSegmentation.Add("float", 2.5f);
+            globalSegmentation.Add("bool", true);
+
+            _viewService.SetGlobalViewSegmentation(globalSegmentation);
+
+            string viewName = "viewName";
+            _viewService.StartView(viewName);
+
+            CountlyEventModel result = Countly.Instance.Views._eventService._eventRepo.Dequeue();
+
+            Assert.NotNull(result);
+            Assert.IsTrue(result.Segmentation.ContainsKey("string"));
+            Assert.IsTrue(result.Segmentation.ContainsKey("int"));
+            Assert.IsTrue(result.Segmentation.ContainsKey("double"));
+            Assert.IsTrue(result.Segmentation.ContainsKey("float"));
+            Assert.IsTrue(result.Segmentation.ContainsKey("bool"));
+
+            Dictionary<string, object> segmentationUpdate = new Dictionary<string, object>();
+            segmentationUpdate.Add("string", "Bye Bye!");
+            segmentationUpdate.Add("New Value", 88);
+
+            _viewService.UpdateGlobalViewSegmentation(segmentationUpdate);
+
+            _viewService.StopViewWithName(viewName);
+            CountlyEventModel secondResult = Countly.Instance.Views._eventService._eventRepo.Dequeue();
+            Assert.NotNull(secondResult);
+            Assert.IsTrue(secondResult.Segmentation.ContainsKey("string"));
+            Assert.IsTrue(secondResult.Segmentation.ContainsKey("int"));
+            Assert.IsTrue(secondResult.Segmentation.ContainsKey("double"));
+            Assert.IsTrue(secondResult.Segmentation.ContainsKey("float"));
+            Assert.IsTrue(secondResult.Segmentation.ContainsKey("bool"));
+            Assert.IsTrue(secondResult.Segmentation.ContainsKey("New Value"));
+        }
+
         // Set up the view service and make sure that repository is clean
         public void ViewServiceSetup()
         {
