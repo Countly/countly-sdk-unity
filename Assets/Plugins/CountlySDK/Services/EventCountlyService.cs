@@ -17,6 +17,12 @@ namespace Plugins.CountlySDK.Services
 
         internal readonly IDictionary<string, DateTime> _timedEvents;
 
+        SafeIDGenerator safeEventIDGenerator;
+
+        internal IViewIDProvider viewIDProvider;
+
+        string previousEventID = "";
+
         internal EventCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, RequestCountlyHelper requestCountlyHelper, NonViewEventRepository nonViewEventRepo, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
         {
             Log.Debug("[EventCountlyService] Initializing.");
@@ -24,6 +30,7 @@ namespace Plugins.CountlySDK.Services
             _eventRepo = nonViewEventRepo;
             _requestCountlyHelper = requestCountlyHelper;
             _timedEvents = new Dictionary<string, DateTime>();
+            safeEventIDGenerator = configuration.SafeEventIDGenerator;
         }
 
         /// <summary>
@@ -39,7 +46,6 @@ namespace Plugins.CountlySDK.Services
         /// </summary>
         internal void AddEventsToRequestQueue()
         {
-
             Log.Debug("[EventCountlyService] AddEventsToRequestQueue: Start");
 
             if (_eventRepo.Models.Count == 0) {
@@ -85,7 +91,7 @@ namespace Plugins.CountlySDK.Services
         /// <param name="duration">set sum if needed, default value is "0"</param>
         /// <returns></returns>
         internal async Task RecordEventInternal(string key, IDictionary<string, object> segmentation = null,
-            int? count = 1, double? sum = 0, double? duration = null)
+            int? count = 1, double? sum = 0, double? duration = null, string eventIDOverride = null)
         {
             if (!CheckConsentOnKey(key)) {
                 return;
@@ -105,12 +111,46 @@ namespace Plugins.CountlySDK.Services
                 key = key.Substring(0, _configuration.MaxKeyLength);
             }
 
+            string pvid = null; // previous view id
+            string cvid = null; // current view id
+
+            string eventID;
+            if (eventIDOverride == null) {
+                eventID = safeEventIDGenerator.GenerateValue();
+            } else if (eventIDOverride.Length == 0) {
+                Log.Info("[EventCountlyService] RecordEventInternal provided eventIDOverride value is empty. Will generate a new one.");
+                eventID = safeEventIDGenerator.GenerateValue();
+            } else {
+                eventID = eventIDOverride;
+            }
+
+            if (key.Equals(CountlyEventModel.ViewEvent)) {
+                pvid = viewIDProvider.GetPreviousViewId();
+            } else {
+                cvid = viewIDProvider.GetCurrentViewId();
+            }
+
             IDictionary<string, object> segments = RemoveSegmentInvalidDataTypes(segmentation);
             segments = FixSegmentKeysAndValues(segments);
 
-            CountlyEventModel @event = new CountlyEventModel(key, segments, count, sum, duration);
-
-            await RecordEventAsync(@event);
+            if (key == CountlyEventModel.NPSEvent ||
+                key == CountlyEventModel.SurveyEvent ||
+                key == CountlyEventModel.StarRatingEvent ||
+                key == CountlyEventModel.OrientationEvent ||
+                key == CountlyEventModel.ViewEvent ||
+                key == CountlyEventModel.PushActionEvent ||
+                key == CountlyEventModel.ViewActionEvent) {
+                if (CheckConsentOnKey(key)) {
+                    CountlyEventModel @event = new CountlyEventModel(key, segments, count, sum, duration, eventID, pvid, cvid, null);
+                    await RecordEventAsync(@event);
+                }
+            } else {
+                if (CheckConsentOnKey(key)) {
+                    CountlyEventModel @event = new CountlyEventModel(key, segments, count, sum, duration, eventID, pvid, cvid, previousEventID);
+                    previousEventID = eventID;
+                    await RecordEventAsync(@event);
+                }
+            }
 
         }
 
@@ -266,7 +306,7 @@ namespace Plugins.CountlySDK.Services
             lock (LockObj) {
                 Log.Info("[EventCountlyService] RecordEventAsync : key = " + key + ", segmentation = " + segmentation + ", count = " + count + ", sum = " + sum + ", duration = " + duration);
 
-                _ = RecordEventInternal(key, segmentation, count, sum, duration);
+                _ = RecordEventInternal(key, segmentation, count, sum, duration, null);
             }
 
             await Task.CompletedTask;
