@@ -841,7 +841,7 @@ namespace Assets.Tests.PlayModeTests
         public void ViewServiceSetup()
         {
             Countly.Instance.Init(TestUtility.createBaseConfig());
-            _viewService = Countly.Instance.Views;
+            _viewService = Countly.Instance.views;
 
             Assert.IsNotNull(_viewService);
             Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);

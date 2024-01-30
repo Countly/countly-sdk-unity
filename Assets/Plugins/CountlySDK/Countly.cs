@@ -122,6 +122,12 @@ namespace Plugins.CountlySDK
         /// <returns>ViewCountlyService</returns>
         public ViewCountlyService Views { get; private set; }
 
+        /// <summary>
+        /// Exposes functionality to start and stop recording views and report positions for heat-map.
+        /// </summary>
+        /// <returns>IViewCountlyService</returns>
+        public IViewCountlyService views { get; private set; }
+
         public MetricHelper MetricHelper { get; private set; }
         internal SessionCountlyService Session { get; set; }
 
@@ -321,6 +327,7 @@ namespace Plugins.CountlySDK
             StarRating = new StarRatingCountlyService(Configuration, _logHelper, Consents, Events);
             UserDetails = new UserDetailsCountlyService(Configuration, _logHelper, RequestHelper, countlyUtils, Consents);
             Views = new ViewCountlyService(this, countlyUtils, Configuration, _logHelper, Events, Consents);
+            views = Views;
             Device = new DeviceIdCountlyService(Configuration, _logHelper, Session, RequestHelper, Events, countlyUtils, Consents);
 
             CreateListOfIBaseService();
