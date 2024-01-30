@@ -46,8 +46,6 @@ namespace Plugins.CountlySDK.Services
         readonly Dictionary<string, ViewData> viewDataMap = new Dictionary<string, ViewData>();
         readonly Dictionary<string, object> automaticViewSegmentation = new Dictionary<string, object>();
 
-        //readonly bool autoViewTracker;
-
         internal bool _isFirstView = true;
         internal readonly EventCountlyService _eventService;
         internal readonly Countly _cly;
@@ -104,13 +102,6 @@ namespace Plugins.CountlySDK.Services
         {
             lock (LockObj) {
                 Log.Info("[ViewCountlyService] Calling StartView vn[" + viewName + "] sg[" + (viewSegmentation == null ? "null" : viewSegmentation.Count.ToString()) + "]");
-
-                /*
-                if (autoViewTracker) {
-                    Log.Warning("[ViewCountlyService] StartView, manual view call will be ignored since automatic tracking is enabled.");
-                    return null;
-                }
-                */
 
                 return StartViewInternal(viewName, viewSegmentation, false);
             }
@@ -232,13 +223,6 @@ namespace Plugins.CountlySDK.Services
             lock(LockObj) {
                 Log.Info("[ViewCountlyService] Calling AddSegmentationToViewWithID for view ID: [" + viewID + "]");
 
-                /*
-                if (autoViewTracker) {
-                    Log.Warning("[ViewCountlyService] AddSegmentationToViewWithID, manual view call will be ignored since automatic tracking is enabled.");
-                    return;
-                }
-                */
-
                 AddSegmentationToViewWithIDInternal(viewID, viewSegmentation);
             }
         }
@@ -252,13 +236,6 @@ namespace Plugins.CountlySDK.Services
         {
             lock(LockObj) {
                 Log.Info("[ViewCountlyService] Calling AddSegmentationToViewWithName for Name: [" + viewName + "]");
-
-                /*
-                if (autoViewTracker) {
-                    Log.Warning("[ViewCountlyService] AddSegmentationToViewWithName, manual view call will be ignored since automatic tracking is enabled.");
-                    return;
-                }
-                */
 
                 AddSegmentationToViewWithNameInternal(viewName, viewSegmentation);
             }
