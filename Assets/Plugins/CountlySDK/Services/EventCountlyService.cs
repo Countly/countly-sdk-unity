@@ -302,12 +302,12 @@ namespace Plugins.CountlySDK.Services
         /// <param name="eventIDOverride">override event id if needed, default value is "null"</param>
         /// <returns></returns>
         public async Task RecordEventAsync(string key, IDictionary<string, object> segmentation = null,
-            int? count = 1, double? sum = 0, double? duration = null, string? eventIDOverride = null)
+            int? count = 1, double? sum = 0, double? duration = null)
         {
             lock (LockObj) {
                 Log.Info("[EventCountlyService] RecordEventAsync : key = " + key + ", segmentation = " + segmentation + ", count = " + count + ", sum = " + sum + ", duration = " + duration);
 
-                _ = RecordEventInternal(key, segmentation, count, sum, duration, eventIDOverride);
+                _ = RecordEventInternal(key, segmentation, count, sum, duration, null);
             }
 
             await Task.CompletedTask;
