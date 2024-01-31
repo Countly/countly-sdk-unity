@@ -137,7 +137,6 @@ namespace Plugins.CountlySDK
         private PushCountlyService _push;
 
         private Thread mainThread;
-        bool isOnMainThread;
 
         /// <summary>
         /// Initialize SDK at the start of your app
@@ -147,7 +146,7 @@ namespace Plugins.CountlySDK
             DontDestroyOnLoad(gameObject);
             Instance = this;
             mainThread = Thread.CurrentThread;
-
+            gameObject.AddComponent<UnityMainThreadDispatcher>();
             //Auth and Config will not be null in case initializing through countly prefab
             if (Auth != null && Config != null) {
                 Init(new CountlyConfiguration(Auth, Config));
@@ -159,7 +158,6 @@ namespace Plugins.CountlySDK
             if (IsMainThread()) {
                 InitInternal(configuration);
             } else {
-                gameObject.AddComponent<UnityMainThreadDispatcher>();
                 UnityMainThreadDispatcher.Instance().Enqueue(() => InitInternal(configuration));
             }
         }
@@ -167,11 +165,10 @@ namespace Plugins.CountlySDK
         bool IsMainThread()
         {
             if (Thread.CurrentThread.ManagedThreadId == mainThread.ManagedThreadId) {
-                isOnMainThread = true;
+                return true;
             } else {
-                isOnMainThread = false;
+                return false;
             }
-            return isOnMainThread;
         }
 
         public void InitInternal(CountlyConfiguration configuration)

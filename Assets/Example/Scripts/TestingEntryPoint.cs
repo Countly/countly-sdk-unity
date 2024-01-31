@@ -8,7 +8,6 @@ using UnityEngine;
 public class TestingEntryPoint : MonoBehaviour, INotificationListener
 {
     Thread mainThread;
-    bool isOnMainThread;
 
     private Countly countly;
     private string _appKey = "YOUR_APP_KEY";
@@ -64,11 +63,10 @@ public class TestingEntryPoint : MonoBehaviour, INotificationListener
     bool IsMainThread()
     {
         if(Thread.CurrentThread.ManagedThreadId == mainThread.ManagedThreadId) {
-            isOnMainThread = true;
+            return true;
         } else {
-            isOnMainThread = false;
+            return false;
         }
-        return isOnMainThread;
     }
 
     #region interface methods
