@@ -164,5 +164,17 @@ namespace Assets.Tests.PlayModeTests
             Countly.Instance.ClearStorage();
             UnityEngine.Object.DestroyImmediate(Countly.Instance);
         }
+
+        public static Dictionary<string, object> TestSegmentation()
+        {
+            Dictionary<string, object> segmentation = new Dictionary<string, object>();
+            segmentation.Add("string", "Hello!");
+            segmentation.Add("int", 42);
+            segmentation.Add("double", 3.14);
+            segmentation.Add("float", 2.5f);
+            segmentation.Add("bool", true);
+
+            return segmentation;
+        }
     }
 }

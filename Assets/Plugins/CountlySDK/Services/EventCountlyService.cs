@@ -307,7 +307,7 @@ namespace Plugins.CountlySDK.Services
             lock (LockObj) {
                 Log.Info("[EventCountlyService] RecordEventAsync : key = " + key + ", segmentation = " + segmentation + ", count = " + count + ", sum = " + sum + ", duration = " + duration);
 
-                _ = RecordEventInternal(key, segmentation, count, sum, duration, null);
+                _ = RecordEventInternal(key, segmentation, count, sum, duration);
             }
 
             await Task.CompletedTask;
