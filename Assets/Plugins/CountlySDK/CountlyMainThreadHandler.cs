@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class CountlyMainThreadHandler : MonoBehaviour
 {
-    private static CountlyMainThreadHandler _instance = null;
+    private static CountlyMainThreadHandler _instance;
     private Thread mainThread;
     private Action _queuedAction;
 

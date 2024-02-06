@@ -10,8 +10,8 @@ using UnityEngine;
 public class TestingEntryPoint : MonoBehaviour, INotificationListener
 {
     private Countly countly;
-    private string _appKey = "YOUR_APP_KEY";
-    private string _serverUrl = "https://try.count.ly/";
+    private readonly string _appKey = "YOUR_APP_KEY";
+    private readonly string _serverUrl = "https://try.count.ly/";
 
     private void Awake()
     {
@@ -24,8 +24,8 @@ public class TestingEntryPoint : MonoBehaviour, INotificationListener
     {
         int participants = 2;
         Thread[] threads = new Thread[participants];
-        threads[0] = new Thread(delegate () {
-
+        threads[0] = new Thread(() =>
+        {
             CountlyConfiguration configuration = new CountlyConfiguration(_appKey, _serverUrl)
                 .EnableLogging()
                 .SetParameterTamperingProtectionSalt("test-salt-checksum")
@@ -40,7 +40,8 @@ public class TestingEntryPoint : MonoBehaviour, INotificationListener
             countly.Init(configuration);
         });
 
-        threads[1] = new Thread(delegate () {
+        threads[1] = new Thread(() =>
+        {
             Debug.Log("This is another thread");
         });
 
@@ -53,15 +54,16 @@ public class TestingEntryPoint : MonoBehaviour, INotificationListener
         }
     }
 
+
     public void TestWithMultipleThreads()
     {
         int participants = 13;
-        Barrier barrier = new Barrier(participantCount: participants, postPhaseAction: (bar) => {
+        Barrier barrier = new Barrier(participantCount: participants, postPhaseAction: (_) => {
             Debug.Log("All threads reached the barrier at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
         });
 
         Thread[] threads = new Thread[participants];
-        threads[0] = new Thread(delegate () {
+        threads[0] = new Thread(() => {
             {
                 barrier.SignalAndWait();
                 Debug.Log("Thread[00] executing at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
@@ -70,7 +72,7 @@ public class TestingEntryPoint : MonoBehaviour, INotificationListener
             }
         });
 
-        threads[1] = new Thread(delegate () {
+        threads[1] = new Thread(() => {
             {
                 barrier.SignalAndWait();
                 Debug.Log("Thread[01] executing at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
@@ -86,7 +88,7 @@ public class TestingEntryPoint : MonoBehaviour, INotificationListener
             }
         });
 
-        threads[2] = new Thread(delegate () {
+        threads[2] = new Thread(() => {
             {
                 barrier.SignalAndWait();
                 Debug.Log("Thread[02] executing at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
@@ -102,7 +104,7 @@ public class TestingEntryPoint : MonoBehaviour, INotificationListener
             }
         });
 
-        threads[3] = new Thread(delegate () {
+        threads[3] = new Thread(() => {
             {
                 barrier.SignalAndWait();
                 Debug.Log("Thread[03] executing at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
@@ -111,7 +113,7 @@ public class TestingEntryPoint : MonoBehaviour, INotificationListener
             }
         });
 
-        threads[4] = new Thread(delegate () {
+        threads[4] = new Thread(() => {
             {
                 barrier.SignalAndWait();
                 Debug.Log("Thread[04] executing at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
@@ -127,52 +129,51 @@ public class TestingEntryPoint : MonoBehaviour, INotificationListener
             }
         });
 
-        threads[5] = new Thread(delegate () {
+        threads[5] = new Thread(() => {
             {
                 barrier.SignalAndWait();
                 Debug.Log("Thread[05] executing at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
-                //  RecordMultiple();
                 Debug.Log("Thread[05] finished at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
             }
         });
 
-        threads[6] = new Thread(delegate () {
+        threads[6] = new Thread(() => {
             {
                 barrier.SignalAndWait();
                 Debug.Log("Thread[06] executing at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
 
-                Countly.Instance.UserDetails.Pull("Food", new string[] { "Pizza" });
+                Countly.Instance.UserDetails.Pull("Food", new []{ "Pizza" });
                 _ = Countly.Instance.UserDetails.SaveAsync();
 
                 Debug.Log("Thread[06] finished at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
             }
         });
 
-        threads[7] = new Thread(delegate () {
+        threads[7] = new Thread(() => {
             {
                 barrier.SignalAndWait();
                 Debug.Log("Thread[07] executing at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
 
-                Countly.Instance.UserDetails.PushUnique("Mole", new string[] { "Right foot", "Left foot" });
+                Countly.Instance.UserDetails.PushUnique("Mole", new []{ "Right foot", "Left foot" });
                 _ = Countly.Instance.UserDetails.SaveAsync();
 
                 Debug.Log("Thread[07] finished at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
             }
         });
 
-        threads[8] = new Thread(delegate () {
+        threads[8] = new Thread(() => {
             {
                 barrier.SignalAndWait();
                 Debug.Log("Thread[08] executing at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
 
-                Countly.Instance.UserDetails.PushUnique("Animals", new string[] { "Lion", "Tiger" });
+                Countly.Instance.UserDetails.PushUnique("Animals", new []{ "Lion", "Tiger" });
                 _ = Countly.Instance.UserDetails.SaveAsync();
 
                 Debug.Log("Thread[08] finished at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
             }
         });
 
-        threads[9] = new Thread(delegate () {
+        threads[9] = new Thread(() => {
             {
                 barrier.SignalAndWait();
                 Debug.Log("Thread[09] executing at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
@@ -184,14 +185,14 @@ public class TestingEntryPoint : MonoBehaviour, INotificationListener
             }
         });
 
-        threads[10] = new Thread(delegate () {
+        threads[10] = new Thread(() => {
             {
                 barrier.SignalAndWait();
                 Debug.Log("Thread[10] executing at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
 
                 Countly.Instance.UserDetails.Max("Weight", 90);
                 Countly.Instance.UserDetails.SetOnce("Distance", "10KM");
-                Countly.Instance.UserDetails.Push("FootballTeams", new string[] { "Arsenal", "Chelsea", "Barcelona" });
+                Countly.Instance.UserDetails.Push("FootballTeams", new []{ "Arsenal", "Chelsea", "Barcelona" });
 
                 _ = Countly.Instance.UserDetails.SaveAsync();
 
@@ -199,7 +200,7 @@ public class TestingEntryPoint : MonoBehaviour, INotificationListener
             }
         });
 
-        threads[11] = new Thread(delegate () {
+        threads[11] = new Thread(() => {
             {
                 barrier.SignalAndWait();
                 Debug.Log("Thread[11] executing at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
@@ -221,7 +222,7 @@ public class TestingEntryPoint : MonoBehaviour, INotificationListener
             }
         });
 
-        threads[12] = new Thread(delegate () {
+        threads[12] = new Thread(() => {
             {
                 barrier.SignalAndWait();
                 Debug.Log("Thread[12] executing at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
