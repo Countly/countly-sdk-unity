@@ -58,7 +58,7 @@ namespace Plugins.CountlySDK.Services
         internal readonly Countly _cly;
         internal readonly CountlyUtils _utils;
 
-        readonly SafeIDGenerator safeViewIDGenerator;
+        internal ISafeIDGenerator safeViewIDGenerator;
 
         readonly string[] reservedSegmentationKeysViews = { "name", "visit", "start", "segment" };
         private readonly Dictionary<string, DateTime> _viewToLastViewStartTime = new Dictionary<string, DateTime>();
@@ -354,7 +354,7 @@ namespace Plugins.CountlySDK.Services
                 Log.Debug("[ViewCountlyService] Recording view as the first one in the session. [" + viewName + "]");
                 _isFirstView = false;
             }
-            _ = _eventService.RecordEventAsync(viewEventKey, viewSegmentation, 1, 0, null);
+            _ = _eventService.RecordEventInternal(viewEventKey, viewSegmentation, 1, 0, null, currentViewData.ViewID);
 
             return currentViewData.ViewID;
         }
@@ -533,8 +533,7 @@ namespace Plugins.CountlySDK.Services
 
             long viewDurationSeconds = lastElapsedDurationSeconds;
             Dictionary<string, object> segments = CreateViewEventSegmentation(vd, false, false, accumulatedEventSegm);
-            CountlyEventModel currentView = new CountlyEventModel(CountlyEventModel.ViewEvent, segments, duration: viewDurationSeconds);
-            _ = _eventService.RecordEventAsync(currentView);
+            _ = _eventService.RecordEventInternal(CountlyEventModel.ViewEvent, segments, duration: viewDurationSeconds, eventIDOverride: vd.ViewID);
         }
 
         /// <summary>

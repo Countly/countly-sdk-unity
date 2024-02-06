@@ -17,7 +17,7 @@ namespace Plugins.CountlySDK.Services
 
         internal readonly IDictionary<string, DateTime> _timedEvents;
 
-        readonly SafeIDGenerator safeEventIDGenerator;
+        internal ISafeIDGenerator safeEventIDGenerator;
 
         internal IViewIDProvider viewIDProvider;
 
@@ -299,7 +299,6 @@ namespace Plugins.CountlySDK.Services
         /// <param name="count">how many of these events have occurred, default value is "1"</param>
         /// <param name="sum">set sum if needed, default value is "0"</param>
         /// <param name="duration">set duration if needed, default value is "null"</param>
-        /// <param name="eventIDOverride">override event id if needed, default value is "null"</param>
         /// <returns></returns>
         public async Task RecordEventAsync(string key, IDictionary<string, object> segmentation = null,
             int? count = 1, double? sum = 0, double? duration = null)

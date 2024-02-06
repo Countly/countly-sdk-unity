@@ -1,16 +1,33 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using NUnit.Framework;
 using Plugins.CountlySDK;
+using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK.Services;
 using UnityEngine;
 
 namespace Assets.Tests.PlayModeTests.Scenarios
 {
+    public class CustomIdProvider : ISafeIDGenerator
+    {
+        static int viewCount = 0;
+
+        public string GenerateValue()
+        {
+            viewCount++;
+            string customValue = "idv" + viewCount.ToString();
+
+            return customValue;
+        }
+    }
+
     public class MV_ManualView
     {
         ViewCountlyService viewService;
+        readonly ISafeIDGenerator idGenerator = new CustomIdProvider();
+
         Action<ViewCountlyService, string, Dictionary<string, object>>[] allMethods = new Action<ViewCountlyService, string, Dictionary<string, object>>[]
          {
             (service, arg1, arg2) => service.RecordOpenViewAsync(arg1), // 0
@@ -49,6 +66,8 @@ namespace Assets.Tests.PlayModeTests.Scenarios
             Countly.Instance.Views._eventService._eventRepo.Clear();
 
             viewService = Countly.Instance.Views;
+            viewService.safeViewIDGenerator = idGenerator;
+            //viewService._eventService.safeEventIDGenerator = new CustomIdProvider();
 
             Assert.IsTrue(Countly.Instance.RequestHelper._requestRepo.Count == 0);
             Assert.IsTrue(viewService._eventService._eventRepo.Count == 0);
@@ -108,6 +127,60 @@ namespace Assets.Tests.PlayModeTests.Scenarios
                 Assert.IsTrue(Countly.Instance.Views._eventService._eventRepo.Count == 0); // validate that EQ is empty
                 Debug.Log($"{func.Method.Name} executed successfully with empty string values.");
             }
+        }
+
+        [Test]
+        public void MV_200B_autoStoppedView_autoClose()
+        {
+            string viewA = "viewA";
+            string viewB = "viewB";
+            //string viewC = "viewC";
+
+            viewService.StartAutoStoppedView(viewA);
+            Thread.Sleep(1000);
+
+            // eE_A d=1 id=idv1 pvid="", segm={}
+            CountlyEventModel viewEventAStart = viewService._eventService._eventRepo.Dequeue();
+            Assert.AreEqual(viewEventAStart.EventID, "idv1");
+            Assert.AreEqual(viewEventAStart.PreviousViewID, "");
+            Assert.AreEqual(viewEventAStart.Segmentation["visit"], 1);
+            Assert.AreEqual(viewEventAStart.Segmentation["start"], 1);
+
+            Debug.Log(viewEventAStart);
+
+            // eE_A d=1 id=idv1 pvid="", segm={}, (sE_B id=idv2 pvid=idv1 segm={visit="1"}
+            viewService.StartAutoStoppedView(viewB);
+            CountlyEventModel viewEventAEnd = viewService._eventService._eventRepo.Dequeue();
+
+            Assert.AreEqual(viewEventAEnd.EventID, "idv1");
+            Assert.AreEqual(viewEventAEnd.PreviousViewID, "");
+            Assert.AreEqual(viewEventAEnd.Duration, 1);
+
+            Assert.IsFalse(viewEventAEnd.Segmentation.ContainsKey("visit"));
+            Assert.IsFalse(viewEventAEnd.Segmentation.ContainsKey("start"));
+
+            Debug.Log(viewEventAEnd);
+
+            /*
+            viewService.StartAutoStoppedView(viewB);
+            CountlyEventModel viewEventAEnd = viewService._eventService._eventRepo.Dequeue();
+            Debug.Log(viewEventAEnd);
+
+            CountlyEventModel viewEventBStart = viewService._eventService._eventRepo.Dequeue();
+            Debug.Log(viewEventBStart);
+            Thread.Sleep(1000);
+
+            /*
+            viewService.StartAutoStoppedView(viewC);
+            CountlyEventModel viewEventBEnd = viewService._eventService._eventRepo.Dequeue();
+            Debug.Log(viewEventBEnd);
+            CountlyEventModel viewEventCStart = viewService._eventService._eventRepo.Dequeue();
+            Debug.Log(viewEventCStart);
+
+            viewService.StopAllViews(null);
+            CountlyEventModel viewEventCEnd = viewService._eventService._eventRepo.Dequeue();
+            Debug.Log(viewEventCEnd);
+            */
         }
 
         [TearDown]
