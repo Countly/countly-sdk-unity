@@ -13,8 +13,6 @@ using Plugins.CountlySDK.Services;
 using Plugins.iBoxDB;
 using UnityEngine;
 using Plugins.CountlySDK.Enums;
-using PimDeWitte.UnityMainThreadDispatcher;
-using System.Threading;
 
 [assembly: InternalsVisibleTo("PlayModeTests")]
 namespace Plugins.CountlySDK
@@ -136,7 +134,7 @@ namespace Plugins.CountlySDK
         private bool _logSubscribed;
         private PushCountlyService _push;
 
-        private Thread mainThread;
+        private CountlyMainThreadHandler countlyMainThreadHandler;
 
         /// <summary>
         /// Initialize SDK at the start of your app
@@ -145,8 +143,7 @@ namespace Plugins.CountlySDK
         {
             DontDestroyOnLoad(gameObject);
             Instance = this;
-            mainThread = Thread.CurrentThread;
-            gameObject.AddComponent<UnityMainThreadDispatcher>();
+            countlyMainThreadHandler = CountlyMainThreadHandler.Instance;
             //Auth and Config will not be null in case initializing through countly prefab
             if (Auth != null && Config != null) {
                 Init(new CountlyConfiguration(Auth, Config));
@@ -155,19 +152,10 @@ namespace Plugins.CountlySDK
 
         public void Init(CountlyConfiguration configuration)
         {
-            if (IsMainThread()) {
+            if (countlyMainThreadHandler.IsMainThread()) {
                 InitInternal(configuration);
             } else {
-                UnityMainThreadDispatcher.Instance().Enqueue(() => InitInternal(configuration));
-            }
-        }
-
-        bool IsMainThread()
-        {
-            if (Thread.CurrentThread.ManagedThreadId == mainThread.ManagedThreadId) {
-                return true;
-            } else {
-                return false;
+                countlyMainThreadHandler.RunOnMainThread(() => { InitInternal(configuration); });
             }
         }
 
