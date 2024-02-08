@@ -165,7 +165,6 @@ namespace Assets.Tests.PlayModeTests.Scenarios
 
             Thread.Sleep(1000);
 
-            // eE_B d=1 id=idv2 pvid=idv1, segm={}, sE_C id=idv3 pvid=idv2 segm={visit="1"}
             viewService.StartAutoStoppedView(viewC);
             CountlyEventModel viewEventBEnd = viewService._eventService._eventRepo.Dequeue();
 
@@ -180,7 +179,6 @@ namespace Assets.Tests.PlayModeTests.Scenarios
             Assert.AreEqual(viewEventCStart.PreviousViewID, "idv2");
             Assert.AreEqual(viewEventCStart.Segmentation["visit"], 1);
 
-            //eE_X d = 0 id = idv3 pvid = idv2, segm ={ }
             viewService.StopAllViews(null);
             CountlyEventModel viewEventCEnd = viewService._eventService._eventRepo.Dequeue();
             Assert.AreEqual(viewEventCEnd.EventID, "idv3");
@@ -189,7 +187,6 @@ namespace Assets.Tests.PlayModeTests.Scenarios
             Assert.IsFalse(viewEventCEnd.Segmentation.ContainsKey("visit"));
             Assert.IsFalse(viewEventCEnd.Segmentation.ContainsKey("start"));
 
-            // validating that no other event is recorded
             Assert.AreEqual(0, viewService._eventService._eventRepo.Count);
         }
 
