@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using NUnit.Framework;
 using Plugins.CountlySDK;
+using Plugins.CountlySDK.Enums;
 using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK.Services;
 using UnityEngine;
@@ -60,14 +61,17 @@ namespace Assets.Tests.PlayModeTests.Scenarios
             TestUtility.TestCleanup();
 
             testSegmentation = TestUtility.TestSegmentation();
-            Countly.Instance.Init(TestUtility.createBaseConfig());
+            CountlyConfiguration config = new CountlyConfiguration("appKey", "serverURl")
+                .SetRequiresConsent(true);
+
+            config.GiveConsent(new Consents[] { Consents.Events, Consents.Views });
+            Countly.Instance.Init(config);
 
             Countly.Instance.RequestHelper._requestRepo.Clear();
             Countly.Instance.Views._eventService._eventRepo.Clear();
 
             viewService = Countly.Instance.Views;
             viewService.safeViewIDGenerator = idGenerator;
-            //viewService._eventService.safeEventIDGenerator = new CustomIdProvider();
 
             Assert.IsTrue(Countly.Instance.RequestHelper._requestRepo.Count == 0);
             Assert.IsTrue(viewService._eventService._eventRepo.Count == 0);
@@ -129,12 +133,15 @@ namespace Assets.Tests.PlayModeTests.Scenarios
             }
         }
 
+        // 'StartAutoStoppedView' and 'StopAllViews' functions in ViewCountlyService
+        // Starting 3 auto stopping views one after another, waiting 1 sec between and stopping all views in the end
+        // Auto stopped views should stop when another view starts, and should record correctly
         [Test]
         public void MV_200B_autoStoppedView_autoClose()
         {
             string viewA = "viewA";
             string viewB = "viewB";
-            //string viewC = "viewC";
+            string viewC = "viewC";
 
             viewService.StartAutoStoppedView(viewA);
             Thread.Sleep(1000);
@@ -148,7 +155,7 @@ namespace Assets.Tests.PlayModeTests.Scenarios
 
             Debug.Log(viewEventAStart);
 
-            // eE_A d=1 id=idv1 pvid="", segm={}, (sE_B id=idv2 pvid=idv1 segm={visit="1"}
+            // eE_A d=1 id=idv1 pvid="", segm={}, sE_B id=idv2 pvid=idv1 segm={visit="1"}
             viewService.StartAutoStoppedView(viewB);
             CountlyEventModel viewEventAEnd = viewService._eventService._eventRepo.Dequeue();
 
@@ -159,28 +166,152 @@ namespace Assets.Tests.PlayModeTests.Scenarios
             Assert.IsFalse(viewEventAEnd.Segmentation.ContainsKey("visit"));
             Assert.IsFalse(viewEventAEnd.Segmentation.ContainsKey("start"));
 
-            Debug.Log(viewEventAEnd);
-
-            /*
-            viewService.StartAutoStoppedView(viewB);
-            CountlyEventModel viewEventAEnd = viewService._eventService._eventRepo.Dequeue();
-            Debug.Log(viewEventAEnd);
-
             CountlyEventModel viewEventBStart = viewService._eventService._eventRepo.Dequeue();
-            Debug.Log(viewEventBStart);
+            Assert.AreEqual(viewEventBStart.EventID, "idv2");
+            Assert.AreEqual(viewEventBStart.PreviousViewID, "idv1");
+            Assert.AreEqual(viewEventBStart.Segmentation["visit"], 1);
+
             Thread.Sleep(1000);
 
-            /*
+            // eE_B d=1 id=idv2 pvid=idv1, segm={}, sE_C id=idv3 pvid=idv2 segm={visit="1"}
             viewService.StartAutoStoppedView(viewC);
             CountlyEventModel viewEventBEnd = viewService._eventService._eventRepo.Dequeue();
-            Debug.Log(viewEventBEnd);
-            CountlyEventModel viewEventCStart = viewService._eventService._eventRepo.Dequeue();
-            Debug.Log(viewEventCStart);
 
+            Assert.AreEqual(viewEventBEnd.EventID, "idv2");
+            Assert.AreEqual(viewEventBEnd.PreviousViewID, "idv1");
+            Assert.AreEqual(viewEventBEnd.Duration, 1);
+            Assert.IsFalse(viewEventBEnd.Segmentation.ContainsKey("visit"));
+            Assert.IsFalse(viewEventBEnd.Segmentation.ContainsKey("start"));
+
+            CountlyEventModel viewEventCStart = viewService._eventService._eventRepo.Dequeue();
+            Assert.AreEqual(viewEventCStart.EventID, "idv3");
+            Assert.AreEqual(viewEventCStart.PreviousViewID, "idv2");
+            Assert.AreEqual(viewEventCStart.Segmentation["visit"], 1);
+
+            //eE_X d = 0 id = idv3 pvid = idv2, segm ={ }
             viewService.StopAllViews(null);
             CountlyEventModel viewEventCEnd = viewService._eventService._eventRepo.Dequeue();
-            Debug.Log(viewEventCEnd);
-            */
+            Assert.AreEqual(viewEventCEnd.EventID, "idv3");
+            Assert.AreEqual(viewEventCEnd.Duration, 0);
+            Assert.AreEqual(viewEventCEnd.PreviousViewID, "idv2");
+            Assert.IsFalse(viewEventCEnd.Segmentation.ContainsKey("visit"));
+            Assert.IsFalse(viewEventCEnd.Segmentation.ContainsKey("start"));
+
+            // validating that no other event is recorded
+            Assert.AreEqual(0, viewService._eventService._eventRepo.Count);
+        }
+
+        [Test]
+        public void MV_201B_autoStopped_pausedResumed()
+        {
+            viewService.StartView("viewA");
+            string viewIdB = viewService.StartAutoStoppedView("viewB");
+
+            Thread.Sleep(1000);
+
+            viewService.PauseViewWithID(viewIdB);
+
+            Thread.Sleep(1000);
+
+            viewService.ResumeViewWithID(viewIdB);
+            viewService.StopAllViews(null);
+
+            Assert.AreEqual(5, viewService._eventService._eventRepo.Count);
+        }
+
+        [Test]
+        public void MV_202B_autoStopped_stopped()
+        {
+            string viewA = "viewA";
+            string viewB = "viewB";
+
+            viewService.StartView(viewA);
+            Thread.Sleep(1000);
+            viewService.StopViewWithName(viewA);
+            string viewIdB = viewService.StartAutoStoppedView(viewB);
+            Thread.Sleep(1000);
+            viewService.StopViewWithID(viewIdB);
+            viewService.StartAutoStoppedView("viewC");
+            Thread.Sleep(1000);
+            viewService.StopAllViews(null);
+
+            Assert.AreEqual(6, viewService._eventService._eventRepo.Count);
+        }
+
+        [Test]
+        public void MV_203_startView_PausedResumed()
+        {
+            string viewIdA = viewService.StartView("viewA");
+            Thread.Sleep(1000);
+            viewService.PauseViewWithID(viewIdA);
+            Thread.Sleep(1000);
+            viewService.ResumeViewWithID(viewIdA);
+            Thread.Sleep(1000);
+            viewService.StopAllViews(null);
+
+            Assert.AreEqual(3, viewService._eventService._eventRepo.Count);
+        }
+
+        [Test]
+        public void MV_203_startView_stopped()
+        {
+            string viewA = "viewA";
+            viewService.StartView(viewA);
+            Thread.Sleep(1000);
+            viewService.StopViewWithName(viewA);
+            string viewIdB = viewService.StartView("viewB");
+            viewService.StopViewWithID(viewIdB);
+            viewService.StartView("viewC");
+            Thread.Sleep(1000);
+            viewService.StopAllViews(null);
+
+            Assert.AreEqual(6, viewService._eventService._eventRepo.Count);
+        }
+
+        [Test]
+        public void MV_300A_callingWithNoConsent_legacy()
+        {
+            Countly.Instance.Consents.RemoveAllConsent();
+            Assert.IsFalse(Countly.Instance.Consents.CheckConsent(Consents.Views));
+
+            viewService.RecordOpenViewAsync("viewTest");
+            Assert.AreEqual(0, viewService._eventService._eventRepo.Count);
+
+            viewService.RecordOpenViewAsync("viewTest", testSegmentation);
+            Assert.AreEqual(0, viewService._eventService._eventRepo.Count);
+
+            viewService.StartAutoStoppedView("viewTest");
+            Assert.AreEqual(0, viewService._eventService._eventRepo.Count);
+
+            viewService.StartAutoStoppedView("viewTest", testSegmentation);
+            Assert.AreEqual(0, viewService._eventService._eventRepo.Count);
+
+            viewService.StartView("viewTest");
+            Assert.AreEqual(0, viewService._eventService._eventRepo.Count);
+
+            viewService.StartView("viewTest", testSegmentation);
+            Assert.AreEqual(0, viewService._eventService._eventRepo.Count);
+
+            string viewId1 = viewService.StartView("viewTest");
+            viewService.PauseViewWithID(viewId1);
+            Assert.AreEqual(0, viewService._eventService._eventRepo.Count);
+
+            viewService.ResumeViewWithID(viewId1);
+            Assert.AreEqual(0, viewService._eventService._eventRepo.Count);
+
+            viewService.StopViewWithName("viewTest");
+            Assert.AreEqual(0, viewService._eventService._eventRepo.Count);
+
+            viewService.StopViewWithName("viewTest", testSegmentation);
+            Assert.AreEqual(0, viewService._eventService._eventRepo.Count);
+
+            string viewId2 = viewService.StartView("viewTest");
+            viewService.StopViewWithID(viewId2);
+            Assert.AreEqual(0, viewService._eventService._eventRepo.Count);
+
+            string viewId3 = viewService.StartView("viewTest");
+            viewService.StopViewWithID(viewId3, testSegmentation);
+            Assert.AreEqual(0, viewService._eventService._eventRepo.Count);
         }
 
         [TearDown]
