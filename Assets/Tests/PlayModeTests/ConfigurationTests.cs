@@ -146,7 +146,7 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public void NewConfigurationAndOldConfiguration()
         {
-            Object countlyPrefab = AssetDatabase.LoadAssetAtPath("Assets/Plugins/CountlySDK/Prefabs/Countly.prefab", typeof(GameObject));
+            Object countlyPrefab = AssetDatabase.LoadAssetAtPath("Assets/Countly/Plugins/CountlySDK/Prefabs/Countly.prefab", typeof(GameObject));
 
             Object.Instantiate(countlyPrefab);
 
