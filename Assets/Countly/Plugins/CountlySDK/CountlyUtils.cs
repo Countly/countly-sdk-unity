@@ -28,12 +28,16 @@ namespace Plugins.CountlySDK
 
         public static string GetUniqueDeviceId()
         {
+            string result;
             string uniqueID = SystemInfo.deviceUniqueIdentifier;
-            if(uniqueID.Length > 5) {
-                return "CLY_" + uniqueID;
+
+            if (uniqueID.Length > 5) {
+                result = uniqueID;
             } else {
-                return "CLY_" + SafeRandomVal();
+                result = SafeRandomVal();
             }
+
+            return "CLY_" + result;
         }
 
         public static string GetAppVersion()

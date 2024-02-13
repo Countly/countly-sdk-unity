@@ -2,7 +2,7 @@
     "name": "PlayModeTests",
     "rootNamespace": "",
     "references": [
-        "PluginAssembly",
+        "Countly.Core",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
     ],
