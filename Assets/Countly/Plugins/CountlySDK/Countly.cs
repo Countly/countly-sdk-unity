@@ -309,7 +309,7 @@ namespace Plugins.CountlySDK
             NonViewEventRepository nonViewEventRepo, Dao<ConfigEntity> configDao)
         {
             CountlyUtils countlyUtils = new CountlyUtils(this);
-            RequestHelper = new RequestCountlyHelper(Configuration, _logHelper, countlyUtils, requestBuilder, requestRepo);
+            RequestHelper = new RequestCountlyHelper(Configuration, _logHelper, countlyUtils, requestBuilder, requestRepo, this);
 
             Consents = new ConsentCountlyService(Configuration, _logHelper, Consents, RequestHelper);
             Events = new EventCountlyService(Configuration, _logHelper, RequestHelper, nonViewEventRepo, Consents);

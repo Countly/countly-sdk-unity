@@ -26,7 +26,16 @@ namespace Plugins.CountlySDK
 
         public static string GetUniqueDeviceId()
         {
-            return "CLY_" + UnityEngine.SystemInfo.deviceUniqueIdentifier;
+            string result;
+            string uniqueID = SystemInfo.deviceUniqueIdentifier;
+
+            if (uniqueID.Length > 5) {
+                result = uniqueID;
+            } else {
+                result = SafeRandomVal();
+            }
+
+            return "CLY_" + result;
         }
 
         public static string GetAppVersion()

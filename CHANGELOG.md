@@ -1,3 +1,6 @@
+## XX.XX.X
+* Added 'UnityWebRequest' as the networking handler for WebGL builds.
+
 ## 23.12.0
 * Added functionality to allow passing custom or overridden metrics.
 * Deprecated CountlyConfiguration constructor. A replacement constructor with parameters added.
