@@ -263,18 +263,19 @@ public class TestingEntryPoint : MonoBehaviour, INotificationListener
         countly.Location.DisableLocation();
     }
 
-    public async void SetRating()
+    public void SetRatingAsync()
     {
-        await countly.StarRating.ReportStarRatingAsync("unity", "0.1", 3);
+        _ = countly.StarRating.ReportStarRatingAsync("unity", "0.1", 3);
     }
 
-    public async void RemoteConfigAsync()
+    public void RemoteConfigAsync()
     {
-        await countly.RemoteConfigs.Update();
+        _ = countly.RemoteConfigs.Update();
 
         Dictionary<string, object> config = countly.RemoteConfigs.Configs;
         Debug.Log("RemoteConfig: " + config?.ToString());
     }
+
 
     #region interface methods
     public void OnNotificationReceived(string message)
