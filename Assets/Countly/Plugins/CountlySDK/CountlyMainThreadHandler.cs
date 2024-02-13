@@ -8,15 +8,16 @@ public class CountlyMainThreadHandler : MonoBehaviour
     private static CountlyMainThreadHandler _instance;
     private Thread mainThread;
     private Action _queuedAction;
+    private readonly object lockObject = new object(); // For thread safety
 
     public static CountlyMainThreadHandler Instance
     {
         get {
-            if(_instance == null) {
+            if (_instance == null) {
                 GameObject gameObject = Countly.Instance.gameObject;
                 _instance = gameObject.AddComponent<CountlyMainThreadHandler>();
             }
-            return _instance;   
+            return _instance;
         }
         internal set {
             _instance = value;
@@ -25,11 +26,7 @@ public class CountlyMainThreadHandler : MonoBehaviour
 
     public bool IsMainThread()
     {
-        if (Thread.CurrentThread.ManagedThreadId == mainThread.ManagedThreadId) {
-            return true;
-        } else {
-            return false;
-        }
+        return Thread.CurrentThread.ManagedThreadId == mainThread.ManagedThreadId;
     }
 
     public void RunOnMainThread(Action action)
@@ -39,7 +36,9 @@ public class CountlyMainThreadHandler : MonoBehaviour
             action.Invoke();
         } else {
             // Queue the action to be executed on the main thread
-            _instance._queuedAction = action;
+            lock (lockObject) {
+                _queuedAction = action;
+            }
         }
     }
 
@@ -52,8 +51,10 @@ public class CountlyMainThreadHandler : MonoBehaviour
     {
         // Execute any queued action on the main thread
         if (_queuedAction != null) {
-            _queuedAction.Invoke();
-            _queuedAction = null;
+            lock (lockObject) {
+                _queuedAction.Invoke();
+                _queuedAction = null;
+            }
         }
     }
 }

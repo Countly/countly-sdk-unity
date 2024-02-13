@@ -1643,7 +1643,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 1906960434}
     - target: {fileID: 8402652500399487230, guid: 50d4d41c61e965d44885fd3890c43f1a,
         type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
@@ -1652,7 +1652,7 @@ PrefabInstance:
     - target: {fileID: 8402652500399487230, guid: 50d4d41c61e965d44885fd3890c43f1a,
         type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: CountlyEntryPoint, Assembly-CSharp
+      value: TestingEntryPoint, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 8402652500479244036, guid: 50d4d41c61e965d44885fd3890c43f1a,
         type: 3}
@@ -1818,7 +1818,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 1906960434}
     - target: {fileID: 8402652500821780656, guid: 50d4d41c61e965d44885fd3890c43f1a,
         type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
@@ -1827,7 +1827,7 @@ PrefabInstance:
     - target: {fileID: 8402652500821780656, guid: 50d4d41c61e965d44885fd3890c43f1a,
         type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: CountlyEntryPoint, Assembly-CSharp
+      value: TestingEntryPoint, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 8402652500821780663, guid: 50d4d41c61e965d44885fd3890c43f1a,
         type: 3}
@@ -1923,7 +1923,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 1906960434}
     - target: {fileID: 8402652501423013235, guid: 50d4d41c61e965d44885fd3890c43f1a,
         type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
@@ -1932,7 +1932,7 @@ PrefabInstance:
     - target: {fileID: 8402652501423013235, guid: 50d4d41c61e965d44885fd3890c43f1a,
         type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: CountlyEntryPoint, Assembly-CSharp
+      value: TestingEntryPoint, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 8402652501424819529, guid: 50d4d41c61e965d44885fd3890c43f1a,
         type: 3}
@@ -2023,7 +2023,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 1906960434}
     - target: {fileID: 8402652501719930088, guid: 50d4d41c61e965d44885fd3890c43f1a,
         type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
@@ -2032,7 +2032,7 @@ PrefabInstance:
     - target: {fileID: 8402652501719930088, guid: 50d4d41c61e965d44885fd3890c43f1a,
         type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: CountlyEntryPoint, Assembly-CSharp
+      value: TestingEntryPoint, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 8402652501719930095, guid: 50d4d41c61e965d44885fd3890c43f1a,
         type: 3}

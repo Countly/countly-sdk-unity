@@ -152,10 +152,17 @@ namespace Plugins.CountlySDK
 
         public void Init(CountlyConfiguration configuration)
         {
+            // Check if the current thread is the main thread
             if (countlyMainThreadHandler.IsMainThread()) {
+                // If on the main thread, initialize directly
                 InitInternal(configuration);
             } else {
+                // If not on the main thread, schedule initialization on the main thread
+                // This ensures that SDK is initialized on the main thread
                 countlyMainThreadHandler.RunOnMainThread(() => { InitInternal(configuration); });
+
+                // Avoid potential issues with SDK initialization on non-main threads
+                Debug.LogWarning("[Countly] [Init] Initialization process is being moved to the main thread. Ensure this is intended behavior.");
             }
         }
 

@@ -247,6 +247,35 @@ public class TestingEntryPoint : MonoBehaviour, INotificationListener
         Debug.Log("All threads completed at: " + DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
     }
 
+    public void SetLocation()
+    {
+        string countryCode = "uk";
+        string city = "??";
+        string latitude = "51.5072";
+        string longitude = "0.1276";
+        string ipAddress = null;
+
+        countly.Location.SetLocation(countryCode, city, latitude + "," + longitude, ipAddress);
+    }
+
+    public void DisableLocation()
+    {
+        countly.Location.DisableLocation();
+    }
+
+    public async void SetRating()
+    {
+        await countly.StarRating.ReportStarRatingAsync("unity", "0.1", 3);
+    }
+
+    public async void RemoteConfigAsync()
+    {
+        await countly.RemoteConfigs.Update();
+
+        Dictionary<string, object> config = countly.RemoteConfigs.Configs;
+        Debug.Log("RemoteConfig: " + config?.ToString());
+    }
+
     #region interface methods
     public void OnNotificationReceived(string message)
     {

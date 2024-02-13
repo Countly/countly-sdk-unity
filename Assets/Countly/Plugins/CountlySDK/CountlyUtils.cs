@@ -16,12 +16,11 @@ namespace Plugins.CountlySDK
         internal string ServerInputUrl { get; private set; }
         internal string ServerOutputUrl { get; private set; }
 
-        static string appVersion;
+        string appVersion;
 
         public CountlyUtils(Countly countly)
         {
             _countly = countly;
-
             ServerInputUrl = _countly.Configuration.ServerUrl + "/i?";
             ServerOutputUrl = _countly.Configuration.ServerUrl + "/o/sdk?";
         }
@@ -40,12 +39,22 @@ namespace Plugins.CountlySDK
             return "CLY_" + result;
         }
 
-        public static string GetAppVersion()
+        /// <summary>
+        /// Returns the current version of the Application.
+        /// </summary>
+        public string GetAppVersion()
         {
-            if(appVersion == null) {
-                appVersion = Application.version;
+            try {
+                if (appVersion == null) {
+                    // Application.version can only be called on main thread
+                    appVersion = Application.version;
+                }
+                return appVersion;
+            } catch (Exception ex) {
+                Debug.Log("Error getting application version: " + ex.Message);
+                // Returns "Unknown" to make sure that initialization process doesn't crash
+                return "Unknown";
             }
-            return appVersion;
         }
 
         /// <summary>
