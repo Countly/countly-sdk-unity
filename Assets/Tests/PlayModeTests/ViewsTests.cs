@@ -413,12 +413,7 @@ namespace Assets.Tests.PlayModeTests
             ViewServiceSetup();
 
             // segmentation data types are string, int, double, float, bool
-            Dictionary<string, object> segmentation = new Dictionary<string, object>();
-            segmentation.Add("string", "Hello!");
-            segmentation.Add("int", 42);
-            segmentation.Add("double", 3.14);
-            segmentation.Add("float", 2.5f);
-            segmentation.Add("bool", true);
+            Dictionary<string, object> segmentation = TestUtility.TestSegmentation();
 
             string viewName = "viewName";
             _viewService.StartView(viewName, segmentation);
@@ -505,12 +500,7 @@ namespace Assets.Tests.PlayModeTests
             Countly.Instance.Views._eventService._eventRepo.Clear();
 
             // segmentation data types are string, int, double, float, bool
-            Dictionary<string, object> segmentation = new Dictionary<string, object>();
-            segmentation.Add("string", "Hello!");
-            segmentation.Add("int", 42);
-            segmentation.Add("double", 3.14);
-            segmentation.Add("float", 2.5f);
-            segmentation.Add("bool", true);
+            Dictionary<string, object> segmentation = TestUtility.TestSegmentation();
 
             _viewService.StopViewWithName(viewName, segmentation);
             Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
@@ -573,12 +563,7 @@ namespace Assets.Tests.PlayModeTests
             Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
 
             // segmentation data types are string, int, double, float, bool
-            Dictionary<string, object> segmentation = new Dictionary<string, object>();
-            segmentation.Add("string", "Hello!");
-            segmentation.Add("int", 42);
-            segmentation.Add("double", 3.14);
-            segmentation.Add("float", 2.5f);
-            segmentation.Add("bool", true);
+            Dictionary<string, object> segmentation = TestUtility.TestSegmentation();
 
             Countly.Instance.Views._eventService._eventRepo.Clear();
 
@@ -685,12 +670,7 @@ namespace Assets.Tests.PlayModeTests
         public void SetGlobalSegmentation()
         {
             ViewServiceSetup();
-            Dictionary<string, object> segmentation = new Dictionary<string, object>();
-            segmentation.Add("string", "Hello!");
-            segmentation.Add("int", 42);
-            segmentation.Add("double", 3.14);
-            segmentation.Add("float", 2.5f);
-            segmentation.Add("bool", true);
+            Dictionary<string, object> segmentation = TestUtility.TestSegmentation();
 
             _viewService.SetGlobalViewSegmentation(segmentation);
 
@@ -717,12 +697,7 @@ namespace Assets.Tests.PlayModeTests
         {
             ViewServiceSetup();
 
-            Dictionary<string, object> segmentation = new Dictionary<string, object>();
-            segmentation.Add("string", "Hello!");
-            segmentation.Add("int", 42);
-            segmentation.Add("double", 3.14);
-            segmentation.Add("float", 2.5f);
-            segmentation.Add("bool", true);
+            Dictionary<string, object> segmentation = TestUtility.TestSegmentation();
 
             string viewName = "viewName";
             string viewID = _viewService.StartView(viewName);
@@ -760,12 +735,7 @@ namespace Assets.Tests.PlayModeTests
         {
             ViewServiceSetup();
 
-            Dictionary<string, object> segmentation = new Dictionary<string, object>();
-            segmentation.Add("string", "Hello!");
-            segmentation.Add("int", 42);
-            segmentation.Add("double", 3.14);
-            segmentation.Add("float", 2.5f);
-            segmentation.Add("bool", true);
+            Dictionary<string, object> segmentation = TestUtility.TestSegmentation();
 
             string viewName = "viewName";
             _viewService.StartView(viewName);
@@ -799,12 +769,7 @@ namespace Assets.Tests.PlayModeTests
         {
             ViewServiceSetup();
 
-            Dictionary<string, object> globalSegmentation = new Dictionary<string, object>();
-            globalSegmentation.Add("string", "Hello!");
-            globalSegmentation.Add("int", 42);
-            globalSegmentation.Add("double", 3.14);
-            globalSegmentation.Add("float", 2.5f);
-            globalSegmentation.Add("bool", true);
+            Dictionary<string, object> globalSegmentation = TestUtility.TestSegmentation();
 
             _viewService.SetGlobalViewSegmentation(globalSegmentation);
 
@@ -845,6 +810,29 @@ namespace Assets.Tests.PlayModeTests
 
             Assert.IsNotNull(_viewService);
             Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
+        }
+
+        public void ViewEventValidator(CountlyEventModel eventModel, int expectedId, string expectedKey, int expectedCount, double expectedSum, int expectedDuration,
+            Dictionary<string, object> expectedSegmentation, long expectedTimestamp, int expectedHour, int expectedDayOfWeek, string expectedEventId, string expectedPreviousViewId,
+            string expectedCurrentViewId, string expectedPreviousEventId)
+        {
+            Assert.AreEqual(expectedId, eventModel.Id);
+            Assert.AreEqual(expectedKey, eventModel.Key);
+            Assert.AreEqual(expectedCount, eventModel.Count);
+            Assert.AreEqual(expectedSum, eventModel.Sum);
+            Assert.AreEqual(expectedDuration, eventModel.Duration);
+
+            foreach (var kvp in expectedSegmentation) {
+                Assert.AreEqual(kvp.Value, eventModel.Segmentation[kvp.Key]);
+            }
+
+            Assert.AreEqual(expectedTimestamp, eventModel.Timestamp);
+            Assert.AreEqual(expectedHour, eventModel.Hour);
+            Assert.AreEqual(expectedDayOfWeek, eventModel.DayOfWeek);
+            Assert.AreEqual(expectedEventId, eventModel.EventID);
+            Assert.AreEqual(expectedPreviousViewId, eventModel.PreviousViewID);
+            Assert.AreEqual(expectedCurrentViewId, eventModel.CurrentViewID);
+            Assert.AreEqual(expectedPreviousEventId, eventModel.PreviousEventID);
         }
 
         [TearDown]
