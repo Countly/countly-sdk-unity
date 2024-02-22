@@ -52,8 +52,8 @@ namespace Plugins.CountlySDK
                 return appVersion;
             } catch (Exception ex) {
                 Debug.Log("Error getting application version: " + ex.Message);
-                // Returns "Unknown" to make sure that initialization process doesn't crash
-                return "Unknown";
+                // Returns "-" to make sure that initialization process doesn't crash
+                return "-";
             }
         }
 
