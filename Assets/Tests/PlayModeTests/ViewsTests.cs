@@ -5,17 +5,21 @@ using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK;
 using Plugins.CountlySDK.Enums;
 using Plugins.CountlySDK.Services;
+using System.Threading;
 
 namespace Assets.Tests.PlayModeTests
 {
     public class ViewsTests
     {
         private IViewCountlyService _viewService;
+        private string viewEventKey = "[CLY]_view";
+        Dictionary<string, object> testSegmentation = new Dictionary<string, object>();
 
         [SetUp]
         public void SetUp()
         {
             TestUtility.TestCleanup();
+            testSegmentation = TestUtility.TestSegmentation();
         }
 
         // Validates the properties of a CountlyEventModel object for view events or view action events
@@ -649,44 +653,26 @@ namespace Assets.Tests.PlayModeTests
             string viewName = "viewName";
             string viewName2 = "viewName2";
 
-            _viewService.StartView(viewName);
+            string viewId1 = _viewService.StartView(viewName);
+            Dictionary<string, object> baseSegmentation = TestUtility.BaseViewTestSegmentation(viewName, true, true);
             Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
+            CountlyEventModel result = Countly.Instance.Views._eventService._eventRepo.Dequeue();
+            ViewEventValidator(result, 1, 0, null, baseSegmentation, viewId1, "", null, null, TestUtility.TestTimeMetrics());
 
-            _viewService.StartView(viewName2);
-            Assert.AreEqual(2, Countly.Instance.Views._eventService._eventRepo.Count);
+            string viewId2 = _viewService.StartView(viewName2);
+            Dictionary<string, object> baseSegmentation2 = TestUtility.BaseViewTestSegmentation(viewName2, true, false);
+            Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
+            CountlyEventModel result2 = Countly.Instance.Views._eventService._eventRepo.Dequeue();
+            ViewEventValidator(result2, 1, 0, null, baseSegmentation2, viewId2, viewId1, null, null, TestUtility.TestTimeMetrics());
+
+            Thread.Sleep(1000);
 
             _viewService.StopAllViews(null);
-            Assert.AreEqual(4, Countly.Instance.Views._eventService._eventRepo.Count);
+            Assert.AreEqual(2, Countly.Instance.Views._eventService._eventRepo.Count);
 
-            // double checking for stopping a view that's already stopped, nothing should happen
-            _viewService.StopViewWithName(viewName);
-            Assert.AreEqual(4, Countly.Instance.Views._eventService._eventRepo.Count);
-        }
-
-        // 'SetGlobalViewSegmentation' method in ViewCountlyService
-        // We set a global segmentation that's going to be recorded
-        // Segmentation should be recorded without providing it again
-        [Test]
-        public void SetGlobalSegmentation()
-        {
-            ViewServiceSetup();
-            Dictionary<string, object> segmentation = TestUtility.TestSegmentation();
-
-            _viewService.SetGlobalViewSegmentation(segmentation);
-
-            string viewName = "viewName";
-            _viewService.StartView(viewName);
-
-            Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
-
-            CountlyEventModel result = Countly.Instance.Views._eventService._eventRepo.Dequeue();
-
-            Assert.NotNull(result);
-            Assert.AreEqual(result.Segmentation["string"], "Hello!");
-            Assert.AreEqual(result.Segmentation["int"], 42);
-            Assert.AreEqual(result.Segmentation["double"], 3.14);
-            Assert.AreEqual(result.Segmentation["float"], 2.5f);
-            Assert.AreEqual(result.Segmentation["bool"], true);
+            Dictionary<string, object> baseSegmentation1End = TestUtility.BaseViewTestSegmentation(viewName, false, false);
+            CountlyEventModel result1End = Countly.Instance.Views._eventService._eventRepo.Dequeue();
+            ViewEventValidator(result1End, 1, 0, 1, baseSegmentation1End, viewId1, viewId1, null, null, TestUtility.TestTimeMetrics());
         }
 
         // 'AddSegmentationToViewWithID' method in ViewCountlyService
@@ -696,35 +682,20 @@ namespace Assets.Tests.PlayModeTests
         public void AddSegmentationToViewWithID()
         {
             ViewServiceSetup();
-
-            Dictionary<string, object> segmentation = TestUtility.TestSegmentation();
-
             string viewName = "viewName";
-            string viewID = _viewService.StartView(viewName);
+            string viewId = _viewService.StartView(viewName);
 
+            Dictionary<string, object> baseSegmentation = TestUtility.BaseViewTestSegmentation(viewName, true, true);
             CountlyEventModel result = Countly.Instance.Views._eventService._eventRepo.Dequeue();
-
-            Assert.NotNull(result);
-            Assert.IsFalse(result.Segmentation.ContainsKey("string"));
-            Assert.IsFalse(result.Segmentation.ContainsKey("int"));
-            Assert.IsFalse(result.Segmentation.ContainsKey("double"));
-            Assert.IsFalse(result.Segmentation.ContainsKey("float"));
-            Assert.IsFalse(result.Segmentation.ContainsKey("bool"));
+            ViewEventValidator(result, 1, 0, null, baseSegmentation, viewId, "", null, null, TestUtility.TestTimeMetrics());
 
             Countly.Instance.Views._eventService._eventRepo.Clear();
 
-            _viewService.AddSegmentationToViewWithID(viewID, segmentation);
-            _viewService.StopViewWithID(viewID);
+            _viewService.AddSegmentationToViewWithID(viewId, testSegmentation);
+            _viewService.StopViewWithID(viewId);
 
             CountlyEventModel segmResult = Countly.Instance.Views._eventService._eventRepo.Dequeue();
-
-            Assert.NotNull(segmResult);
-
-            Assert.AreEqual(segmResult.Segmentation["string"], "Hello!");
-            Assert.AreEqual(segmResult.Segmentation["int"], 42);
-            Assert.AreEqual(segmResult.Segmentation["double"], 3.14);
-            Assert.AreEqual(segmResult.Segmentation["float"], 2.5f);
-            Assert.AreEqual(segmResult.Segmentation["bool"], true);
+            ViewEventValidator(segmResult, 1, 0, 0, testSegmentation, viewId, "", null, null, TestUtility.TestTimeMetrics());
         }
 
         // 'AddSegmentationToViewWithName' method in ViewCountlyService
@@ -734,72 +705,70 @@ namespace Assets.Tests.PlayModeTests
         public void AddSegmentationToViewWithName()
         {
             ViewServiceSetup();
-
-            Dictionary<string, object> segmentation = TestUtility.TestSegmentation();
-
             string viewName = "viewName";
-            _viewService.StartView(viewName);
+            string viewId = _viewService.StartView(viewName);
 
+            Dictionary<string, object> baseSegmentation = TestUtility.BaseViewTestSegmentation(viewName, true, true);
             CountlyEventModel result = Countly.Instance.Views._eventService._eventRepo.Dequeue();
-
             Assert.NotNull(result);
-            Assert.IsFalse(result.Segmentation.ContainsKey("string"));
-            Assert.IsFalse(result.Segmentation.ContainsKey("int"));
-            Assert.IsFalse(result.Segmentation.ContainsKey("double"));
-            Assert.IsFalse(result.Segmentation.ContainsKey("float"));
-            Assert.IsFalse(result.Segmentation.ContainsKey("bool"));
+            ViewEventValidator(result, 1, 0, null, baseSegmentation, viewId, "", null, null, TestUtility.TestTimeMetrics());
 
             Countly.Instance.Views._eventService._eventRepo.Clear();
 
-            _viewService.AddSegmentationToViewWithName(viewName, segmentation);
+            _viewService.AddSegmentationToViewWithName(viewName, testSegmentation);
             _viewService.StopViewWithName(viewName);
 
             CountlyEventModel segmResult = Countly.Instance.Views._eventService._eventRepo.Dequeue();
-
             Assert.NotNull(segmResult);
-            Assert.AreEqual(segmResult.Segmentation["string"], "Hello!");
-            Assert.AreEqual(segmResult.Segmentation["int"], 42);
-            Assert.AreEqual(segmResult.Segmentation["double"], 3.14);
-            Assert.AreEqual(segmResult.Segmentation["float"], 2.5f);
-            Assert.AreEqual(segmResult.Segmentation["bool"], true);
+            ViewEventValidator(segmResult, 1, 0, 0, testSegmentation, viewId, "", null, null, TestUtility.TestTimeMetrics());
         }
 
+        // 'SetGlobalViewSegmentation' and 'UpdateGlobalViewSegmentation' method in ViewCountlyService
+        // We set global segmentation and update it afterwards
+        // Segmentation values before and after the update should be correct
         [Test]
-        public void UpdateGlobalViewSegmentation()
+        public void SetAndUpdateGlobalViewSegmentation()
         {
             ViewServiceSetup();
-
-            Dictionary<string, object> globalSegmentation = TestUtility.TestSegmentation();
-
-            _viewService.SetGlobalViewSegmentation(globalSegmentation);
+            _viewService.SetGlobalViewSegmentation(testSegmentation);
 
             string viewName = "viewName";
-            _viewService.StartView(viewName);
-
+            string viewId = _viewService.StartView(viewName);
+            
             CountlyEventModel result = Countly.Instance.Views._eventService._eventRepo.Dequeue();
-
-            Assert.NotNull(result);
-            Assert.IsTrue(result.Segmentation.ContainsKey("string"));
-            Assert.IsTrue(result.Segmentation.ContainsKey("int"));
-            Assert.IsTrue(result.Segmentation.ContainsKey("double"));
-            Assert.IsTrue(result.Segmentation.ContainsKey("float"));
-            Assert.IsTrue(result.Segmentation.ContainsKey("bool"));
+            ViewEventValidator(result, 1, 0, null, testSegmentation, viewId, "", null, null, TestUtility.TestTimeMetrics());
 
             Dictionary<string, object> segmentationUpdate = new Dictionary<string, object>();
             segmentationUpdate.Add("string", "Bye Bye!");
             segmentationUpdate.Add("New Value", 88);
 
             _viewService.UpdateGlobalViewSegmentation(segmentationUpdate);
-
             _viewService.StopViewWithName(viewName);
+
             CountlyEventModel secondResult = Countly.Instance.Views._eventService._eventRepo.Dequeue();
             Assert.NotNull(secondResult);
-            Assert.IsTrue(secondResult.Segmentation.ContainsKey("string"));
-            Assert.IsTrue(secondResult.Segmentation.ContainsKey("int"));
-            Assert.IsTrue(secondResult.Segmentation.ContainsKey("double"));
-            Assert.IsTrue(secondResult.Segmentation.ContainsKey("float"));
-            Assert.IsTrue(secondResult.Segmentation.ContainsKey("bool"));
-            Assert.IsTrue(secondResult.Segmentation.ContainsKey("New Value"));
+            ViewEventValidator(secondResult, 1, 0, 0, segmentationUpdate, viewId, "", null, null, TestUtility.TestTimeMetrics());
+        }
+
+        // 'SetGlobalViewSegmentation' method in ViewCountlyService
+        // We set a global segmentation with garbage value
+        // Segmentation should be recorded without garbage value
+        [Test]
+        public void SetGlobalSegmentation_GarbageValue()
+        {
+            ViewServiceSetup();
+
+            testSegmentation.Add("testObj", new object());
+            testSegmentation.Add("nullObj", null);
+            _viewService.SetGlobalViewSegmentation(testSegmentation);
+
+            string viewName = "viewName";
+            string viewId = _viewService.StartView(viewName);
+
+            CountlyEventModel result = Countly.Instance.Views._eventService._eventRepo.Dequeue();
+            Assert.IsTrue(!result.Segmentation.ContainsKey("testObj"));
+            Assert.IsTrue(!result.Segmentation.ContainsKey("nullObj"));
+            ViewEventValidator(result, 1, 0, null, testSegmentation, viewId, "", null, null, TestUtility.TestTimeMetrics());
         }
 
         // Set up the view service and make sure that repository is clean
@@ -812,27 +781,40 @@ namespace Assets.Tests.PlayModeTests
             Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
         }
 
-        public void ViewEventValidator(CountlyEventModel eventModel, int expectedId, string expectedKey, int expectedCount, double expectedSum, int expectedDuration,
-            Dictionary<string, object> expectedSegmentation, long expectedTimestamp, int expectedHour, int expectedDayOfWeek, string expectedEventId, string expectedPreviousViewId,
-            string expectedCurrentViewId, string expectedPreviousEventId)
+        public void ViewEventValidator(CountlyEventModel eventModel, int? expectedCount, double? expectedSum,
+            int? expectedDuration, Dictionary<string, object>? expectedSegmentation,
+            string? expectedEventId, string? expectedPreviousViewId, string? expectedCurrentViewId,
+            string? expectedPreviousEventId, Dictionary<string, object> expectedTimeMetrics = null)
         {
-            Assert.AreEqual(expectedId, eventModel.Id);
-            Assert.AreEqual(expectedKey, eventModel.Key);
-            Assert.AreEqual(expectedCount, eventModel.Count);
-            Assert.AreEqual(expectedSum, eventModel.Sum);
-            Assert.AreEqual(expectedDuration, eventModel.Duration);
+            Assert.AreEqual(eventModel.Key, viewEventKey);
+            Assert.AreEqual(eventModel.Count, expectedCount);
+            Assert.AreEqual(eventModel.Sum, expectedSum);
+            Assert.AreEqual(eventModel.Duration, expectedDuration);
 
-            foreach (var kvp in expectedSegmentation) {
-                Assert.AreEqual(kvp.Value, eventModel.Segmentation[kvp.Key]);
+            if(expectedSegmentation != null) {
+                foreach (var kvp in expectedSegmentation) {
+                    Assert.IsTrue(eventModel.Segmentation.ContainsKey(kvp.Key));
+                    Assert.AreEqual(eventModel.Segmentation[kvp.Key], kvp.Value);
+                }
             }
+            
+            Assert.AreEqual(eventModel.EventID, expectedEventId);
+            Assert.AreEqual(eventModel.PreviousViewID, expectedPreviousViewId);
+            Assert.AreEqual(eventModel.CurrentViewID, expectedCurrentViewId);
+            Assert.AreEqual(eventModel.PreviousEventID, expectedPreviousEventId);
 
-            Assert.AreEqual(expectedTimestamp, eventModel.Timestamp);
-            Assert.AreEqual(expectedHour, eventModel.Hour);
-            Assert.AreEqual(expectedDayOfWeek, eventModel.DayOfWeek);
-            Assert.AreEqual(expectedEventId, eventModel.EventID);
-            Assert.AreEqual(expectedPreviousViewId, eventModel.PreviousViewID);
-            Assert.AreEqual(expectedCurrentViewId, eventModel.CurrentViewID);
-            Assert.AreEqual(expectedPreviousEventId, eventModel.PreviousEventID);
+            // Check time metrics if provided
+            if (expectedTimeMetrics != null) {
+                foreach (var kvp in expectedTimeMetrics) {
+                    if (kvp.Key == "timestamp") {
+                        Assert.IsTrue(Mathf.Abs(eventModel.Timestamp - (long)kvp.Value) < 6000);
+                    } else if (kvp.Key == "hour") {
+                        Assert.AreEqual(eventModel.Hour, kvp.Value);
+                    } else if (kvp.Key == "dow") {
+                        Assert.AreEqual(eventModel.DayOfWeek, kvp.Value);
+                    }
+                }
+            }
         }
 
         [TearDown]

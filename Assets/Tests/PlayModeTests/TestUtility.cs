@@ -5,6 +5,7 @@ using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK.Persistance.Entities;
 using Plugins.CountlySDK.Enums;
 using System.Text.RegularExpressions;
+using UnityEngine;
 
 namespace Assets.Tests.PlayModeTests
 {
@@ -175,6 +176,26 @@ namespace Assets.Tests.PlayModeTests
             segmentation.Add("bool", true);
 
             return segmentation;
+        }
+
+        public static Dictionary<string, object> BaseViewTestSegmentation(string viewName, bool isVisit, bool isStart)
+        {
+            Dictionary<string, object> segmentation = new Dictionary<string, object>();
+            segmentation.Add("name", viewName);
+            if (isVisit) {
+                segmentation.Add("visit", 1);
+            }
+            if (isStart) {
+                segmentation.Add("start", 1);
+            }
+            segmentation.Add("segment", Application.platform.ToString().ToLower());
+
+            return segmentation;
+        }
+
+        public static Dictionary<string, object> TestTimeMetrics()
+        {
+            return TimeMetricModel.GetTimeMetricModel();
         }
     }
 }
