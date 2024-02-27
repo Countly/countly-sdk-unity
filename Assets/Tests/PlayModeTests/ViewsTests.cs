@@ -384,20 +384,21 @@ namespace Assets.Tests.PlayModeTests
             ViewServiceSetup();
 
             string viewName = "viewName";
-            _viewService.StartView(viewName);
+            string viewId = _viewService.StartView(viewName);
 
             Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
+            Dictionary<string, object> baseSegmentation = TestUtility.BaseViewTestSegmentation(viewName, true, true);
             CountlyEventModel result = Countly.Instance.Views._eventService._eventRepo.Dequeue();
 
             Assert.NotNull(result);
-            Assert.IsTrue(result.Segmentation.ContainsValue(viewName));
+            ViewEventValidator(result, 1, 0, null, baseSegmentation, viewId, "", null, null, TestUtility.TestTimeMetrics());
         }
 
         // 'StartView' method in ViewCountlyService class
         // We validate that repository is clear and, try to start a view with empty and view name
         // View with empty or null ViewName shouldn't start 
         [Test]
-        public void StartView_EmptyNullViewName()
+        public void StartView_EmptyNullWhitespaceViewName()
         {
             ViewServiceSetup();
 
@@ -405,6 +406,9 @@ namespace Assets.Tests.PlayModeTests
             Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
 
             _viewService.StartView(null);
+            Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
+
+            _viewService.StartView(" ");
             Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
         }
 
@@ -416,21 +420,14 @@ namespace Assets.Tests.PlayModeTests
         {
             ViewServiceSetup();
 
-            // segmentation data types are string, int, double, float, bool
-            Dictionary<string, object> segmentation = TestUtility.TestSegmentation();
-
             string viewName = "viewName";
-            _viewService.StartView(viewName, segmentation);
+            string viewId = _viewService.StartView(viewName, testSegmentation);
 
             Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
             CountlyEventModel result = Countly.Instance.Views._eventService._eventRepo.Dequeue();
 
             Assert.NotNull(result);
-            Assert.AreEqual(result.Segmentation["string"], "Hello!");
-            Assert.AreEqual(result.Segmentation["int"], 42);
-            Assert.AreEqual(result.Segmentation["double"], 3.14);
-            Assert.AreEqual(result.Segmentation["float"], 2.5f);
-            Assert.AreEqual(result.Segmentation["bool"], true);
+            ViewEventValidator(result, 1, 0, null, testSegmentation, viewId, "", null, null, TestUtility.TestTimeMetrics());
         }
 
         // 'StartView' method in ViewCountlyService class
@@ -446,24 +443,28 @@ namespace Assets.Tests.PlayModeTests
             segmentation.Add("garbageObject", new Object());
 
             string viewName = "viewName";
-            _viewService.StartView(viewName, segmentation);
+            string viewId = _viewService.StartView(viewName, segmentation);
 
             Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
             CountlyEventModel result = Countly.Instance.Views._eventService._eventRepo.Dequeue();
+            ViewEventValidator(result, 1, 0, null, TestUtility.BaseViewTestSegmentation(viewName, true, true), viewId, "", null, null, TestUtility.TestTimeMetrics());
 
             Assert.NotNull(result);
             Assert.IsFalse(result.Segmentation.ContainsKey("garbageObject"));
         }
 
-        // 'StopViewWithName' method in ViewCountlyService class
+        // 'StopViewWithName', 'StopViewWithID' and 'StopAllViews' methods in ViewCountlyService class
         // We validate the repository is clear, try to stop a view which is not existing
         // Repository should remain clean and nothing should be recorded
         [Test]
-        public void StopViewWithName_NoCurrentView()
+        public void StopView_NoCurrentView()
         {
             ViewServiceSetup();
 
             _viewService.StopViewWithName("viewName");
+            _viewService.StopViewWithID("viewId");
+            _viewService.StopAllViews(null);
+
             Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
         }
 
@@ -476,16 +477,20 @@ namespace Assets.Tests.PlayModeTests
             ViewServiceSetup();
 
             string viewName = "viewName";
+            string viewId = _viewService.StartView(viewName);
 
-            _viewService.StartView(viewName);
             Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
+            CountlyEventModel result = Countly.Instance.Views._eventService._eventRepo.Dequeue();
+            ViewEventValidator(result, 1, 0, null, TestUtility.BaseViewTestSegmentation(viewName, true, true), viewId, "", null, null, TestUtility.TestTimeMetrics());
 
             _viewService.StopViewWithName(viewName);
-            Assert.AreEqual(2, Countly.Instance.Views._eventService._eventRepo.Count);
+            Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
+            CountlyEventModel resultStop = Countly.Instance.Views._eventService._eventRepo.Dequeue();
+            ViewEventValidator(resultStop, 1, 0, 0, TestUtility.BaseViewTestSegmentation(viewName, false, false), viewId, "", null, null, TestUtility.TestTimeMetrics());
 
             // validation of view is already stopped 
             _viewService.StopViewWithName(viewName);
-            Assert.AreEqual(2, Countly.Instance.Views._eventService._eventRepo.Count);
+            Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
         }
 
         // 'StopViewWithName' method in ViewCountlyService class
