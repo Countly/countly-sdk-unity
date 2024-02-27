@@ -14,6 +14,7 @@ namespace Plugins.CountlySDK.Services
         private bool isQueueBeingProcessed = false;
         internal readonly NonViewEventRepository _eventRepo;
         private readonly RequestCountlyHelper _requestCountlyHelper;
+        private readonly CountlyUtils _utils;
 
         internal readonly IDictionary<string, DateTime> _timedEvents;
 
@@ -23,7 +24,7 @@ namespace Plugins.CountlySDK.Services
 
         string previousEventID = "";
 
-        internal EventCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, RequestCountlyHelper requestCountlyHelper, NonViewEventRepository nonViewEventRepo, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
+        internal EventCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, RequestCountlyHelper requestCountlyHelper, NonViewEventRepository nonViewEventRepo, ConsentCountlyService consentService, CountlyUtils utils) : base(configuration, logHelper, consentService)
         {
             Log.Debug("[EventCountlyService] Initializing.");
 
@@ -31,6 +32,7 @@ namespace Plugins.CountlySDK.Services
             _requestCountlyHelper = requestCountlyHelper;
             _timedEvents = new Dictionary<string, DateTime>();
             safeEventIDGenerator = configuration.SafeEventIDGenerator;
+            _utils = utils;
         }
 
         /// <summary>
@@ -115,10 +117,8 @@ namespace Plugins.CountlySDK.Services
             string cvid = null; // current view id
 
             string eventID;
-            if (eventIDOverride == null) {
-                eventID = safeEventIDGenerator.GenerateValue();
-            } else if (eventIDOverride.Length == 0) {
-                Log.Info("[EventCountlyService] RecordEventInternal provided eventIDOverride value is empty. Will generate a new one.");
+            if (_utils.IsNullEmptyOrWhitespace(eventIDOverride)) {
+                Log.Info("[EventCountlyService] RecordEventInternal provided eventIDOverride value is null, empty or whitespace. Will generate a new one.");
                 eventID = safeEventIDGenerator.GenerateValue();
             } else {
                 eventID = eventIDOverride;

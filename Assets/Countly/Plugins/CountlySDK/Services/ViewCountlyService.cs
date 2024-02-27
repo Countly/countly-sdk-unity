@@ -478,6 +478,7 @@ namespace Plugins.CountlySDK.Services
             }
 
             if (!_consentService.CheckConsentInternal(Consents.Views)) {
+                Log.Debug("[ViewCountlyService] PauseViewWithIDInternal, consent is not given, ignoring the request.");
                 return;
             }
 
