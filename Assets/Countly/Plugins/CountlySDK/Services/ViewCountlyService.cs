@@ -444,6 +444,7 @@ namespace Plugins.CountlySDK.Services
             Log.Debug("[ViewCountlyService] View [" + vd.ViewName + "], id:[" + vd.ViewID + "] is getting closed, reporting duration: [" + (_utils.CurrentTimestampSeconds() - vd.ViewStartTimeSeconds) + "] s, current timestamp: [" + _utils.CurrentTimestampSeconds() + "]");
 
             if (!_consentService.CheckConsentInternal(Consents.Views)) {
+                Log.Debug("[ViewCountlyService] StopViewWithIDInternal, consent is not given, ignoring the request.");
                 return;
             }
 
@@ -589,6 +590,7 @@ namespace Plugins.CountlySDK.Services
             }
 
             if (!_consentService.CheckConsentInternal(Consents.Views)) {
+                Log.Debug("[ViewCountlyService] ResumeViewWithIDInternal, consent is not given, ignoring the request.");
                 return;
             }
 
@@ -732,6 +734,7 @@ namespace Plugins.CountlySDK.Services
                 Log.Info("[ViewCountlyService] RecordOpenViewAsync : name = " + name);
 
                 if (!_consentService.CheckConsentInternal(Consents.Views)) {
+                    Log.Debug("[ViewCountlyService] RecordOpenViewAsync, consent is not given, ignoring the request.");
                     return;
                 }
 
@@ -788,6 +791,7 @@ namespace Plugins.CountlySDK.Services
                 Log.Info("[ViewCountlyService] RecordCloseViewAsync : name = " + name);
 
                 if (!_consentService.CheckConsentInternal(Consents.Views)) {
+                    Log.Debug("[ViewCountlyService] RecordCloseViewAsync, consent is not given, ignoring the request.");
                     return;
                 }
 
@@ -836,6 +840,7 @@ namespace Plugins.CountlySDK.Services
                 Log.Info("[ViewCountlyService] ReportActionAsync : type = " + type + ", x = " + x + ", y = " + y + ", width = " + width + ", height = " + height);
 
                 if (!_consentService.CheckConsentInternal(Consents.Views)) {
+                    Log.Debug("[ViewCountlyService] ReportActionAsync, consent is not given, ignoring the request.");
                     return;
                 }
 
