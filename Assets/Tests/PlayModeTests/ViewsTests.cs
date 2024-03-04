@@ -13,6 +13,7 @@ namespace Assets.Tests.PlayModeTests
     {
         private IViewCountlyService _viewService;
         private string viewEventKey = "[CLY]_view";
+        private string viewName = "viewName";
         Dictionary<string, object> testSegmentation = new Dictionary<string, object>();
 
         [SetUp]
@@ -383,7 +384,6 @@ namespace Assets.Tests.PlayModeTests
         {
             ViewServiceSetup();
 
-            string viewName = "viewName";
             string viewId = _viewService.StartView(viewName);
 
             Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
@@ -420,7 +420,6 @@ namespace Assets.Tests.PlayModeTests
         {
             ViewServiceSetup();
 
-            string viewName = "viewName";
             string viewId = _viewService.StartView(viewName, testSegmentation);
 
             Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
@@ -442,7 +441,6 @@ namespace Assets.Tests.PlayModeTests
             Dictionary<string, object> segmentation = new Dictionary<string, object>();
             segmentation.Add("garbageObject", new Object());
 
-            string viewName = "viewName";
             string viewId = _viewService.StartView(viewName, segmentation);
 
             Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
@@ -461,7 +459,7 @@ namespace Assets.Tests.PlayModeTests
         {
             ViewServiceSetup();
 
-            _viewService.StopViewWithName("viewName");
+            _viewService.StopViewWithName(viewName);
             _viewService.StopViewWithID("viewId");
             _viewService.StopAllViews(null);
 
@@ -476,14 +474,10 @@ namespace Assets.Tests.PlayModeTests
         {
             ViewServiceSetup();
 
-            string viewName = "viewName";
-            string viewId = _viewService.StartView(viewName);
-
-            Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
-            CountlyEventModel result = Countly.Instance.Views._eventService._eventRepo.Dequeue();
-            ViewEventValidator(result, 1, 0, null, TestUtility.BaseViewTestSegmentation(viewName, true, true), viewId, "", null, null, TestUtility.TestTimeMetrics());
+            string viewId = StartBaseViewWithValidation();
 
             _viewService.StopViewWithName(viewName);
+
             Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
             CountlyEventModel resultStop = Countly.Instance.Views._eventService._eventRepo.Dequeue();
             ViewEventValidator(resultStop, 1, 0, 0, TestUtility.BaseViewTestSegmentation(viewName, false, false), viewId, "", null, null, TestUtility.TestTimeMetrics());
@@ -501,27 +495,12 @@ namespace Assets.Tests.PlayModeTests
         {
             ViewServiceSetup();
 
-            string viewName = "viewName";
+            string viewId = StartBaseViewWithValidation();
 
-            _viewService.StartView(viewName);
+            _viewService.StopViewWithName(viewName, testSegmentation);
             Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
-
-            Countly.Instance.Views._eventService._eventRepo.Clear();
-
-            // segmentation data types are string, int, double, float, bool
-            Dictionary<string, object> segmentation = TestUtility.TestSegmentation();
-
-            _viewService.StopViewWithName(viewName, segmentation);
-            Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
-
-            CountlyEventModel result = Countly.Instance.Views._eventService._eventRepo.Dequeue();
-
-            Assert.NotNull(result);
-            Assert.AreEqual(result.Segmentation["string"], "Hello!");
-            Assert.AreEqual(result.Segmentation["int"], 42);
-            Assert.AreEqual(result.Segmentation["double"], 3.14);
-            Assert.AreEqual(result.Segmentation["float"], 2.5f);
-            Assert.AreEqual(result.Segmentation["bool"], true);
+            CountlyEventModel resultStop = Countly.Instance.Views._eventService._eventRepo.Dequeue();
+            ViewEventValidator(resultStop, 1, 0, 0, TestUtility.TestSegmentation(), viewId, "", null, null, TestUtility.TestTimeMetrics());
         }
 
         // 'StopViewWithID' method in ViewCountlyService
@@ -532,13 +511,12 @@ namespace Assets.Tests.PlayModeTests
         {
             ViewServiceSetup();
 
-            string viewName = "viewName";
+            string viewId = StartBaseViewWithValidation();
 
-            string viewID = _viewService.StartView(viewName);
+            _viewService.StopViewWithID(viewId);
             Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
-
-            _viewService.StopViewWithID(viewID);
-            Assert.AreEqual(2, Countly.Instance.Views._eventService._eventRepo.Count);
+            CountlyEventModel resultStop = Countly.Instance.Views._eventService._eventRepo.Dequeue();
+            ViewEventValidator(resultStop, 1, 0, 0, TestUtility.BaseViewTestSegmentation(viewName, false, false), viewId, "", null, null, TestUtility.TestTimeMetrics());
         }
 
         // 'StopViewWithID' method in ViewCountlyService
@@ -549,13 +527,16 @@ namespace Assets.Tests.PlayModeTests
         {
             ViewServiceSetup();
 
-            string viewName = "viewName";
-
-            _viewService.StartView(viewName);
-            Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
+            string viewId = StartBaseViewWithValidation();
+            Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
 
             _viewService.StopViewWithID("random view id");
+            Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
+
+            _viewService.StopViewWithID(viewId);
             Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
+            CountlyEventModel resultStop = Countly.Instance.Views._eventService._eventRepo.Dequeue();
+            ViewEventValidator(resultStop, 1, 0, 0, TestUtility.BaseViewTestSegmentation(viewName, false, false), viewId, "", null, null, TestUtility.TestTimeMetrics());
         }
 
         // 'StopViewWithID' method in ViewCountlyService
@@ -566,27 +547,13 @@ namespace Assets.Tests.PlayModeTests
         {
             ViewServiceSetup();
 
-            string viewName = "viewName";
+            string viewId = StartBaseViewWithValidation();
 
-            string viewID = _viewService.StartView(viewName);
+            _viewService.StopViewWithID(viewId, testSegmentation);
+
             Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
-
-            // segmentation data types are string, int, double, float, bool
-            Dictionary<string, object> segmentation = TestUtility.TestSegmentation();
-
-            Countly.Instance.Views._eventService._eventRepo.Clear();
-
-            _viewService.StopViewWithID(viewID, segmentation);
-            Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
-
-            CountlyEventModel result = Countly.Instance.Views._eventService._eventRepo.Dequeue();
-
-            Assert.NotNull(result);
-            Assert.AreEqual(result.Segmentation["string"], "Hello!");
-            Assert.AreEqual(result.Segmentation["int"], 42);
-            Assert.AreEqual(result.Segmentation["double"], 3.14);
-            Assert.AreEqual(result.Segmentation["float"], 2.5f);
-            Assert.AreEqual(result.Segmentation["bool"], true);
+            CountlyEventModel resultStop = Countly.Instance.Views._eventService._eventRepo.Dequeue();
+            ViewEventValidator(resultStop, 1, 0, 0, testSegmentation, viewId, "", null, null, TestUtility.TestTimeMetrics());
         }
 
         // 'PauseViewWithID' method in ViewCountlyService
@@ -597,15 +564,14 @@ namespace Assets.Tests.PlayModeTests
         {
             ViewServiceSetup();
 
-            string viewName = "viewName";
+            string viewId = StartBaseViewWithValidation();
 
-            string viewID = _viewService.StartView(viewName);
+            Thread.Sleep(1000);
+            _viewService.PauseViewWithID(viewId);
+
             Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
-
-            Countly.Instance.Views._eventService._eventRepo.Clear();
-
-            _viewService.PauseViewWithID(viewID);
-            Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
+            CountlyEventModel resultPause = Countly.Instance.Views._eventService._eventRepo.Dequeue();
+            ViewEventValidator(resultPause, 1, 0, 1, TestUtility.BaseViewTestSegmentation(viewName, false, false), viewId, "", null, null, TestUtility.TestTimeMetrics());
         }
 
         // 'PauseViewWithID' method in ViewCountlyService
@@ -616,15 +582,17 @@ namespace Assets.Tests.PlayModeTests
         {
             ViewServiceSetup();
 
-            string viewName = "viewName";
-
-            _viewService.StartView(viewName);
-            Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
-
-            Countly.Instance.Views._eventService._eventRepo.Clear();
-
+            string viewId = StartBaseViewWithValidation();
+            
             _viewService.PauseViewWithID("random view id");
             Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
+
+            Thread.Sleep(1000);
+            _viewService.PauseViewWithID(viewId);
+
+            Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
+            CountlyEventModel resultPause = Countly.Instance.Views._eventService._eventRepo.Dequeue();
+            ViewEventValidator(resultPause, 1, 0, 1, TestUtility.BaseViewTestSegmentation(viewName, false, false), viewId, "", null, null, TestUtility.TestTimeMetrics());
         }
 
         // 'ResumeViewWithID' method in ViewCountlyService
@@ -635,16 +603,24 @@ namespace Assets.Tests.PlayModeTests
         {
             ViewServiceSetup();
 
-            string viewName = "viewName";
+            string viewId = StartBaseViewWithValidation();
 
-            string viewID = _viewService.StartView(viewName);
+            Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
+
+            _viewService.PauseViewWithID(viewId);
             Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
+            CountlyEventModel resultPause = Countly.Instance.Views._eventService._eventRepo.Dequeue();
+            ViewEventValidator(resultPause, 1, 0, 0, TestUtility.BaseViewTestSegmentation(viewName, false, false), viewId, "", null, null, TestUtility.TestTimeMetrics());
+            
+            _viewService.ResumeViewWithID(viewId);
+            Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
 
-            _viewService.PauseViewWithID(viewID);
-            Assert.AreEqual(2, Countly.Instance.Views._eventService._eventRepo.Count);
+            Thread.Sleep(1000);
+            _viewService.StopViewWithID(viewId, testSegmentation);
 
-            _viewService.ResumeViewWithID(viewID);
-            Assert.AreEqual(2, Countly.Instance.Views._eventService._eventRepo.Count);
+            Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
+            CountlyEventModel resultStop = Countly.Instance.Views._eventService._eventRepo.Dequeue();
+            ViewEventValidator(resultStop, 1, 0, 1, testSegmentation, viewId, "", null, null, TestUtility.TestTimeMetrics());
         }
 
         // 'StopAllViews' method in ViewCountlyService
@@ -655,14 +631,9 @@ namespace Assets.Tests.PlayModeTests
         {
             ViewServiceSetup();
 
-            string viewName = "viewName";
             string viewName2 = "viewName2";
 
-            string viewId1 = _viewService.StartView(viewName);
-            Dictionary<string, object> baseSegmentation = TestUtility.BaseViewTestSegmentation(viewName, true, true);
-            Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
-            CountlyEventModel result = Countly.Instance.Views._eventService._eventRepo.Dequeue();
-            ViewEventValidator(result, 1, 0, null, baseSegmentation, viewId1, "", null, null, TestUtility.TestTimeMetrics());
+            string viewId1 = StartBaseViewWithValidation();
 
             string viewId2 = _viewService.StartView(viewName2);
             Dictionary<string, object> baseSegmentation2 = TestUtility.BaseViewTestSegmentation(viewName2, true, false);
@@ -687,20 +658,15 @@ namespace Assets.Tests.PlayModeTests
         public void AddSegmentationToViewWithID()
         {
             ViewServiceSetup();
-            string viewName = "viewName";
-            string viewId = _viewService.StartView(viewName);
-
-            Dictionary<string, object> baseSegmentation = TestUtility.BaseViewTestSegmentation(viewName, true, true);
-            CountlyEventModel result = Countly.Instance.Views._eventService._eventRepo.Dequeue();
-            ViewEventValidator(result, 1, 0, null, baseSegmentation, viewId, "", null, null, TestUtility.TestTimeMetrics());
-
-            Countly.Instance.Views._eventService._eventRepo.Clear();
+            string viewId = StartBaseViewWithValidation();
 
             _viewService.AddSegmentationToViewWithID(viewId, testSegmentation);
+
+            Thread.Sleep(1000);
             _viewService.StopViewWithID(viewId);
 
             CountlyEventModel segmResult = Countly.Instance.Views._eventService._eventRepo.Dequeue();
-            ViewEventValidator(segmResult, 1, 0, 0, testSegmentation, viewId, "", null, null, TestUtility.TestTimeMetrics());
+            ViewEventValidator(segmResult, 1, 0, 1, testSegmentation, viewId, "", null, null, TestUtility.TestTimeMetrics());
         }
 
         // 'AddSegmentationToViewWithName' method in ViewCountlyService
@@ -710,22 +676,16 @@ namespace Assets.Tests.PlayModeTests
         public void AddSegmentationToViewWithName()
         {
             ViewServiceSetup();
-            string viewName = "viewName";
-            string viewId = _viewService.StartView(viewName);
-
-            Dictionary<string, object> baseSegmentation = TestUtility.BaseViewTestSegmentation(viewName, true, true);
-            CountlyEventModel result = Countly.Instance.Views._eventService._eventRepo.Dequeue();
-            Assert.NotNull(result);
-            ViewEventValidator(result, 1, 0, null, baseSegmentation, viewId, "", null, null, TestUtility.TestTimeMetrics());
-
-            Countly.Instance.Views._eventService._eventRepo.Clear();
+            string viewId = StartBaseViewWithValidation();
 
             _viewService.AddSegmentationToViewWithName(viewName, testSegmentation);
+
+            Thread.Sleep(1000);
             _viewService.StopViewWithName(viewName);
 
             CountlyEventModel segmResult = Countly.Instance.Views._eventService._eventRepo.Dequeue();
             Assert.NotNull(segmResult);
-            ViewEventValidator(segmResult, 1, 0, 0, testSegmentation, viewId, "", null, null, TestUtility.TestTimeMetrics());
+            ViewEventValidator(segmResult, 1, 0, 1, testSegmentation, viewId, "", null, null, TestUtility.TestTimeMetrics());
         }
 
         // 'SetGlobalViewSegmentation' and 'UpdateGlobalViewSegmentation' method in ViewCountlyService
@@ -737,7 +697,6 @@ namespace Assets.Tests.PlayModeTests
             ViewServiceSetup();
             _viewService.SetGlobalViewSegmentation(testSegmentation);
 
-            string viewName = "viewName";
             string viewId = _viewService.StartView(viewName);
             
             CountlyEventModel result = Countly.Instance.Views._eventService._eventRepo.Dequeue();
@@ -767,13 +726,78 @@ namespace Assets.Tests.PlayModeTests
             testSegmentation.Add("nullObj", null);
             _viewService.SetGlobalViewSegmentation(testSegmentation);
 
-            string viewName = "viewName";
             string viewId = _viewService.StartView(viewName);
 
             CountlyEventModel result = Countly.Instance.Views._eventService._eventRepo.Dequeue();
             Assert.IsTrue(!result.Segmentation.ContainsKey("testObj"));
             Assert.IsTrue(!result.Segmentation.ContainsKey("nullObj"));
             ViewEventValidator(result, 1, 0, null, testSegmentation, viewId, "", null, null, TestUtility.TestTimeMetrics());
+        }
+
+        // Multiple methods in ViewCountlyService to test the flow
+        // We start, pause, stop views and add segmentations in the mean while
+        // Flow should be recorded correctly
+        [Test]
+        public void ViewFlow()
+        {
+            ViewServiceSetup();
+
+            string viewId = StartBaseViewWithValidation();
+
+            string viewId2 = _viewService.StartAutoStoppedView("viewName2");
+            Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
+            CountlyEventModel view2Start = Countly.Instance.Views._eventService._eventRepo.Dequeue();
+            ViewEventValidator(view2Start, 1, 0, null, TestUtility.BaseViewTestSegmentation("viewName2", true, false), viewId2, viewId, null, null, TestUtility.TestTimeMetrics());
+
+            Thread.Sleep(1000);
+
+            _viewService.PauseViewWithID(viewId2);
+            Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
+            CountlyEventModel view2Pause = Countly.Instance.Views._eventService._eventRepo.Dequeue();
+            ViewEventValidator(view2Pause, 1, 0, 1, TestUtility.BaseViewTestSegmentation("viewName2", false, false), viewId2, viewId, null, null, TestUtility.TestTimeMetrics());
+
+            // resuming view shouldn't record event
+            _viewService.ResumeViewWithID(viewId2);
+            Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
+
+            string viewId3 = _viewService.StartView("viewName3");
+
+            // auto stopped view should be stopped
+            Assert.AreEqual(2, Countly.Instance.Views._eventService._eventRepo.Count);
+            CountlyEventModel view2Stop = Countly.Instance.Views._eventService._eventRepo.Dequeue();
+            ViewEventValidator(view2Stop, 1, 0, 0, TestUtility.BaseViewTestSegmentation("viewName2", false, false), viewId2, viewId, null, null, TestUtility.TestTimeMetrics());
+
+            // view 3 validation
+            Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
+            CountlyEventModel view3Start = Countly.Instance.Views._eventService._eventRepo.Dequeue();
+            ViewEventValidator(view3Start, 1, 0, null, TestUtility.BaseViewTestSegmentation("viewName3", true, false), viewId3, viewId2, null, null, TestUtility.TestTimeMetrics());
+
+            Thread.Sleep(1000);
+
+            _viewService.SetGlobalViewSegmentation(testSegmentation);
+            _viewService.PauseViewWithID(viewId3);
+
+            Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
+            CountlyEventModel view3Pause = Countly.Instance.Views._eventService._eventRepo.Dequeue();
+            ViewEventValidator(view3Pause, 1, 0, 1, testSegmentation, viewId3, viewId2, null, null, TestUtility.TestTimeMetrics());
+
+            _viewService.ResumeViewWithID(viewId3);
+
+            Dictionary<string, object> updatedSegmentation = testSegmentation;
+            updatedSegmentation.Add("another string", "another object");
+            _viewService.UpdateGlobalViewSegmentation(updatedSegmentation);
+
+            _viewService.StopViewWithName(viewName);
+            Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
+            CountlyEventModel view1Stop = Countly.Instance.Views._eventService._eventRepo.Dequeue();
+            ViewEventValidator(view1Stop, 1, 0, 2, updatedSegmentation, viewId, viewId2, null, null, TestUtility.TestTimeMetrics());
+
+            Thread.Sleep(1000);
+
+            _viewService.StopAllViews(null);
+            Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
+            CountlyEventModel view3Stop = Countly.Instance.Views._eventService._eventRepo.Dequeue();
+            ViewEventValidator(view3Stop, 1, 0, 1, updatedSegmentation, viewId3, viewId2, null, null, TestUtility.TestTimeMetrics());
         }
 
         // Set up the view service and make sure that repository is clean
@@ -784,6 +808,18 @@ namespace Assets.Tests.PlayModeTests
 
             Assert.IsNotNull(_viewService);
             Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
+        }
+
+        // Set up simple view with base validation with base viewName
+        public string StartBaseViewWithValidation()
+        {
+            string viewId = _viewService.StartView(viewName);
+
+            Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
+            CountlyEventModel result = Countly.Instance.Views._eventService._eventRepo.Dequeue();
+            ViewEventValidator(result, 1, 0, null, TestUtility.BaseViewTestSegmentation(viewName, true, true), viewId, "", null, null, TestUtility.TestTimeMetrics());
+
+            return viewId;
         }
 
         public void ViewEventValidator(CountlyEventModel eventModel, int? expectedCount, double? expectedSum,
