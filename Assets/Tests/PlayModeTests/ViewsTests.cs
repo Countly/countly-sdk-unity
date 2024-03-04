@@ -12,8 +12,8 @@ namespace Assets.Tests.PlayModeTests
     public class ViewsTests
     {
         private IViewCountlyService _viewService;
-        private string viewEventKey = "[CLY]_view";
-        private string viewName = "viewName";
+        private readonly string viewEventKey = "[CLY]_view";
+        private readonly string viewName = "viewName";
         Dictionary<string, object> testSegmentation = new Dictionary<string, object>();
 
         [SetUp]
@@ -825,7 +825,7 @@ namespace Assets.Tests.PlayModeTests
         public void ViewEventValidator(CountlyEventModel eventModel, int? expectedCount, double? expectedSum,
             int? expectedDuration, Dictionary<string, object>? expectedSegmentation,
             string? expectedEventId, string? expectedPreviousViewId, string? expectedCurrentViewId,
-            string? expectedPreviousEventId, Dictionary<string, object> expectedTimeMetrics = null)
+            string? expectedPreviousEventId, Dictionary<string, object>? expectedTimeMetrics)
         {
             Assert.AreEqual(eventModel.Key, viewEventKey);
             Assert.AreEqual(eventModel.Count, expectedCount);
