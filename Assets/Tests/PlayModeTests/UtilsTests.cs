@@ -176,7 +176,8 @@ namespace Assets.Tests.PlayModeTests
                 { "key2", 42 },
                 { "key3", 3.14 },
                 { "key4", true },
-                { "key5", new object() } // Unsupported data type
+                { "key5", 1234567890123456789L},
+                { "key6", new object() } // Unsupported data type
             };
 
             RemoveUnsupportedDataTypes_base(data, true);
@@ -194,6 +195,7 @@ namespace Assets.Tests.PlayModeTests
                 { "key2", 42 },
                 { "key3", 3.14 },
                 { "key4", true },
+                { "key5", 1234567890123456789L}
             };
 
             RemoveUnsupportedDataTypes_base(data, false);
