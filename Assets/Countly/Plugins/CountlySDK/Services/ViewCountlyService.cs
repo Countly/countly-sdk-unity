@@ -8,26 +8,6 @@ using UnityEngine;
 
 namespace Plugins.CountlySDK.Services
 {
-    // interface for SDK users
-    public interface IViewModule
-    {
-        string StartView(string viewName);
-        string StartView(string viewName, Dictionary<string, object> viewSegmentation);
-        string StartAutoStoppedView(string viewName);
-        string StartAutoStoppedView(string viewName, Dictionary<string, object> viewSegmentation);
-        void StopViewWithName(string viewName);
-        void StopViewWithName(string viewName, Dictionary<string, object> viewSegmentation);
-        void StopViewWithID(string viewID);
-        void StopViewWithID(string viewID, Dictionary<string, object> viewSegmentation);
-        void PauseViewWithID(string viewID);
-        void ResumeViewWithID(string viewID);
-        void StopAllViews(Dictionary<string, object> viewSegmentation);
-        void SetGlobalViewSegmentation(Dictionary<string, object> viewSegmentation);
-        void AddSegmentationToViewWithID(string viewID, Dictionary<string, object> viewSegmentation);
-        void AddSegmentationToViewWithName(string viewName, Dictionary<string, object> viewSegmentation);
-        void UpdateGlobalViewSegmentation(Dictionary<string, object> viewSegmentation);
-    }
-
     interface IViewIDProvider
     {
         public string GetCurrentViewId();
