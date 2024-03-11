@@ -126,7 +126,7 @@ namespace Plugins.CountlySDK
         /// Exposes functionality to start and stop recording views and report positions for heat-map.
         /// </summary>
         /// <returns>IViewCountlyService</returns>
-        public IViewCountlyService views { get; private set; }
+        public IViewModule views { get; private set; }
 
         public MetricHelper MetricHelper { get; private set; }
         internal SessionCountlyService Session { get; set; }

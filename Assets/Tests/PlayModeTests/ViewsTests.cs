@@ -11,7 +11,7 @@ namespace Assets.Tests.PlayModeTests
 {
     public class ViewsTests
     {
-        private IViewCountlyService _viewService;
+        private IViewModule _viewService;
         private readonly string viewEventKey = "[CLY]_view";
 
         static string[] viewNames;

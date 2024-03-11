@@ -9,7 +9,7 @@ using UnityEngine;
 namespace Plugins.CountlySDK.Services
 {
     // interface for SDK users
-    public interface IViewCountlyService
+    public interface IViewModule
     {
         string StartView(string viewName);
         string StartView(string viewName, Dictionary<string, object> viewSegmentation);
@@ -34,7 +34,7 @@ namespace Plugins.CountlySDK.Services
         public string GetPreviousViewId();
     }
 
-    public class ViewCountlyService : AbstractBaseService, IViewCountlyService, IViewIDProvider
+    public class ViewCountlyService : AbstractBaseService, IViewModule, IViewIDProvider
     {
         private class ViewData
         {
