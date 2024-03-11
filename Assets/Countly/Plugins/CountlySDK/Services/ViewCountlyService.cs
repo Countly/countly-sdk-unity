@@ -78,6 +78,11 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public string StartView(string viewName)
         {
+            if(!_consentService.CheckConsentInternal(Consents.Views)) {
+                Log.Debug("[ViewCountlyService] StartView, consent is not given, ignoring the request.");
+                return null;
+            }
+
             lock (LockObj) {
                 Log.Info("[ViewCountlyService] Calling StartView vn[" + viewName + "]");
 
@@ -93,6 +98,11 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public string StartView(string viewName, Dictionary<string, object> viewSegmentation)
         {
+            if (!_consentService.CheckConsentInternal(Consents.Views)) {
+                Log.Debug("[ViewCountlyService] StartView, consent is not given, ignoring the request.");
+                return null;
+            }
+
             lock (LockObj) {
                 Log.Info("[ViewCountlyService] Calling StartView vn[" + viewName + "] sg[" + (viewSegmentation == null ? "null" : viewSegmentation.Count.ToString()) + "]");
 
@@ -107,6 +117,11 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public string StartAutoStoppedView(string viewName)
         {
+            if (!_consentService.CheckConsentInternal(Consents.Views)) {
+                Log.Debug("[ViewCountlyService] StartAutoStoppedView, consent is not given, ignoring the request.");
+                return null;
+            }
+
             lock (LockObj) {
                 return StartAutoStoppedView(viewName, null);
             }
@@ -119,6 +134,11 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public string StartAutoStoppedView(string viewName, Dictionary<string, object> viewSegmentation)
         {
+            if (!_consentService.CheckConsentInternal(Consents.Views)) {
+                Log.Debug("[ViewCountlyService] StartAutoStoppedView, consent is not given, ignoring the request.");
+                return null;
+            }
+
             lock (LockObj) {
                 Log.Info("[ViewCountlyService] Calling StartAutoStoppedView vn[" + viewName + "]");
 
@@ -132,6 +152,11 @@ namespace Plugins.CountlySDK.Services
         /// <param name="viewName">name of the view</param>
         public void StopViewWithName(string viewName)
         {
+            if (!_consentService.CheckConsentInternal(Consents.Views)) {
+                Log.Debug("[ViewCountlyService] StopViewWithName, consent is not given, ignoring the request.");
+                return;
+            }
+
             lock (LockObj) {
                 Log.Info("[ViewCountlyService] Calling StopViewWithName vn[" + viewName + "]");
 
@@ -146,6 +171,11 @@ namespace Plugins.CountlySDK.Services
         /// <param name="viewSegmentation">view segmentation</param>
         public void StopViewWithName(string viewName, Dictionary<string, object> viewSegmentation)
         {
+            if (!_consentService.CheckConsentInternal(Consents.Views)) {
+                Log.Debug("[ViewCountlyService] StopViewWithName, consent is not given, ignoring the request.");
+                return;
+            }
+
             lock (LockObj) {
                 Log.Info("[ViewCountlyService] Calling StopViewWithName vn[" + viewName + "] sg[" + (viewSegmentation == null ? "null" : viewSegmentation.Count.ToString()) + "]");
 
@@ -159,6 +189,11 @@ namespace Plugins.CountlySDK.Services
         /// <param name="viewID">ID of the view</param>
         public void StopViewWithID(string viewID)
         {
+            if (!_consentService.CheckConsentInternal(Consents.Views)) {
+                Log.Debug("[ViewCountlyService] StopViewWithID, consent is not given, ignoring the request.");
+                return;
+            }
+
             lock (LockObj) {
                 Log.Info("[ViewCountlyService] Calling StopViewWithID vi[" + viewID + "]");
 
@@ -173,6 +208,11 @@ namespace Plugins.CountlySDK.Services
         /// <param name="viewSegmentation">view segmentation</param>
         public void StopViewWithID(string viewID, Dictionary<string, object> viewSegmentation)
         {
+            if (!_consentService.CheckConsentInternal(Consents.Views)) {
+                Log.Debug("[ViewCountlyService] StopViewWithID, consent is not given, ignoring the request.");
+                return;
+            }
+
             lock (LockObj) {
                 Log.Info("[ViewCountlyService] Calling StopViewWithID vi[" + viewID + "] sg[" + (viewSegmentation == null ? "null" : viewSegmentation.Count.ToString()) + "]");
 
@@ -186,6 +226,11 @@ namespace Plugins.CountlySDK.Services
         /// <param name="viewID">ID of the view</param>
         public void PauseViewWithID(string viewID)
         {
+            if (!_consentService.CheckConsentInternal(Consents.Views)) {
+                Log.Debug("[ViewCountlyService] PauseViewWithID, consent is not given, ignoring the request.");
+                return;
+            }
+
             lock (LockObj) {
                 Log.Info("[ViewCountlyService] Calling PauseViewWithID vi[" + viewID + "]");
 
@@ -199,6 +244,11 @@ namespace Plugins.CountlySDK.Services
         /// <param name="viewID">ID of the view</param>
         public void ResumeViewWithID(string viewID)
         {
+            if (!_consentService.CheckConsentInternal(Consents.Views)) {
+                Log.Debug("[ViewCountlyService] ResumeViewWithID, consent is not given, ignoring the request.");
+                return;
+            }
+
             lock (LockObj) {
                 Log.Info("[ViewCountlyService] Calling ResumeViewWithID vi[" + viewID + "]");
 
@@ -212,6 +262,11 @@ namespace Plugins.CountlySDK.Services
         /// <param name="viewSegmentation">view segmentation</param>
         public void StopAllViews(Dictionary<string, object> viewSegmentation)
         {
+            if (!_consentService.CheckConsentInternal(Consents.Views)) {
+                Log.Debug("[ViewCountlyService] StopAllViews, consent is not given, ignoring the request.");
+                return;
+            }
+
             lock (LockObj) {
                 Log.Info("[ViewCountlyService] Calling StopAllViews sg[" + (viewSegmentation == null ? "null" : viewSegmentation.Count.ToString()) + "]");
 
@@ -225,6 +280,11 @@ namespace Plugins.CountlySDK.Services
         /// <param name="viewSegmentation">global view segmentation</param>
         public void SetGlobalViewSegmentation(Dictionary<string, object> viewSegmentation)
         {
+            if (!_consentService.CheckConsentInternal(Consents.Views)) {
+                Log.Debug("[ViewCountlyService] SetGlobalViewSegmentation, consent is not given, ignoring the request.");
+                return;
+            }
+
             lock (LockObj) {
                 Log.Info("[ViewCountlyService] Calling SetGlobalViewSegmentation sg[" + (viewSegmentation == null ? "null" : viewSegmentation.Count.ToString()) + "]");
 
@@ -239,6 +299,11 @@ namespace Plugins.CountlySDK.Services
         /// <param name="viewSegmentation">view segmentation</param>
         public void AddSegmentationToViewWithID(string viewID, Dictionary<string, object> viewSegmentation)
         {
+            if (!_consentService.CheckConsentInternal(Consents.Views)) {
+                Log.Debug("[ViewCountlyService] AddSegmentationToViewWithID, consent is not given, ignoring the request.");
+                return;
+            }
+
             lock (LockObj) {
                 Log.Info("[ViewCountlyService] Calling AddSegmentationToViewWithID for view ID: [" + viewID + "]");
 
@@ -253,6 +318,11 @@ namespace Plugins.CountlySDK.Services
         /// <param name="viewSegmentation"></param>
         public void AddSegmentationToViewWithName(string viewName, Dictionary<string, object> viewSegmentation)
         {
+            if (!_consentService.CheckConsentInternal(Consents.Views)) {
+                Log.Debug("[ViewCountlyService] AddSegmentationToViewWithName, consent is not given, ignoring the request.");
+                return;
+            }
+
             lock (LockObj) {
                 Log.Info("[ViewCountlyService] Calling AddSegmentationToViewWithName for Name: [" + viewName + "]");
 
@@ -266,6 +336,11 @@ namespace Plugins.CountlySDK.Services
         /// <param name="viewSegmentation"></param>
         public void UpdateGlobalViewSegmentation(Dictionary<string, object> viewSegmentation)
         {
+            if (!_consentService.CheckConsentInternal(Consents.Views)) {
+                Log.Debug("[ViewCountlyService] UpdateGlobalViewSegmentation, consent is not given, ignoring the request.");
+                return;
+            }
+
             lock (LockObj) {
                 Log.Info("[ViewCountlyService] Calling UpdateGlobalViewSegmentation sg[" + (viewSegmentation == null ? "null" : viewSegmentation.Count.ToString()) + "]");
 

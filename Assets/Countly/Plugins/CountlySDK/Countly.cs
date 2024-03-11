@@ -120,6 +120,7 @@ namespace Plugins.CountlySDK
         /// Exposes functionality to start and stop recording views and report positions for heat-map.
         /// </summary>
         /// <returns>ViewCountlyService</returns>
+        [Obsolete("Views is deprecated. Use views instead.")]
         public ViewCountlyService Views { get; private set; }
 
         /// <summary>
