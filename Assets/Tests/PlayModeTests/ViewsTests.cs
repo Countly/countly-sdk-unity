@@ -52,7 +52,7 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public void ViewsRepoInitialState()
         {
-            Countly.Instance.Init(TestUtility.createBaseConfig());
+            Countly.Instance.Init(TestUtility.CreateBaseConfig());
 
             Assert.IsNotNull(Countly.Instance.Views);
             Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
@@ -64,7 +64,7 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public async void EventConsentDependency()
         {
-            CountlyConfiguration configuration = TestUtility.createBaseConfig();
+            CountlyConfiguration configuration = TestUtility.CreateBaseConfig();
             configuration.RequiresConsent = true;
 
             configuration.GiveConsent(new Consents[] { Consents.Views });
@@ -93,7 +93,7 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public async void ViewsConsent()
         {
-            CountlyConfiguration configuration = TestUtility.createBaseConfig();
+            CountlyConfiguration configuration = TestUtility.CreateBaseConfig();
             configuration.RequiresConsent = true;
             Countly.Instance.Init(configuration);
 
@@ -116,7 +116,7 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public async void ViewNameLimit()
         {
-            CountlyConfiguration configuration = TestUtility.createBaseConfig();
+            CountlyConfiguration configuration = TestUtility.CreateBaseConfig();
             configuration.MaxKeyLength = 5;
             Countly.Instance.Init(configuration);
 
@@ -141,7 +141,7 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public async void RecordCloseViewAsync()
         {
-            Countly.Instance.Init(TestUtility.createBaseConfig());
+            Countly.Instance.Init(TestUtility.CreateBaseConfig());
             Assert.IsNotNull(Countly.Instance.Views);
             Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
 
@@ -158,7 +158,7 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public async void RecordCloseViewAsync_NullViewName()
         {
-            Countly.Instance.Init(TestUtility.createBaseConfig());
+            Countly.Instance.Init(TestUtility.CreateBaseConfig());
 
             Assert.IsNotNull(Countly.Instance.Views);
             Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
@@ -173,7 +173,7 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public async void RecordCloseViewAsync_EmptyViewName()
         {
-            Countly.Instance.Init(TestUtility.createBaseConfig());
+            Countly.Instance.Init(TestUtility.CreateBaseConfig());
 
             Assert.IsNotNull(Countly.Instance.Views);
             Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
@@ -189,7 +189,7 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public async void RecordOpenViewAsync()
         {
-            Countly.Instance.Init(TestUtility.createBaseConfig());
+            Countly.Instance.Init(TestUtility.CreateBaseConfig());
             Assert.IsNotNull(Countly.Instance.Views);
             Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
 
@@ -212,7 +212,7 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public async void RecordOpenViewAsync_NullViewName()
         {
-            Countly.Instance.Init(TestUtility.createBaseConfig());
+            Countly.Instance.Init(TestUtility.CreateBaseConfig());
 
             Assert.IsNotNull(Countly.Instance.Views);
             Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
@@ -227,7 +227,7 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public async void RecordOpenViewAsync_EmptyViewName()
         {
-            Countly.Instance.Init(TestUtility.createBaseConfig());
+            Countly.Instance.Init(TestUtility.CreateBaseConfig());
 
             Assert.IsNotNull(Countly.Instance.Views);
             Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
@@ -242,7 +242,7 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public async void RecordOpenViewAsyncWithSegment()
         {
-            Countly.Instance.Init(TestUtility.createBaseConfig());
+            Countly.Instance.Init(TestUtility.CreateBaseConfig());
 
             Assert.IsNotNull(Countly.Instance.Views);
             Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
@@ -279,7 +279,7 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public async void EventQueueThreshold_Limit()
         {
-            CountlyConfiguration configuration = TestUtility.createBaseConfig();
+            CountlyConfiguration configuration = TestUtility.CreateBaseConfig();
             configuration.EventQueueThreshold = 3;
             Countly.Instance.Init(configuration);
 
@@ -304,7 +304,7 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public async void ReportActionAsync()
         {
-            Countly.Instance.Init(TestUtility.createBaseConfig());
+            Countly.Instance.Init(TestUtility.CreateBaseConfig());
 
             Assert.IsNotNull(Countly.Instance.Views);
             Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
@@ -328,7 +328,7 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public async void StartField()
         {
-            CountlyConfiguration configuration = TestUtility.createBaseConfigConsent(new Consents[] { Consents.Crashes, Consents.Events, Consents.Clicks, Consents.StarRating, Consents.Views, Consents.Users, Consents.Push, Consents.RemoteConfig, Consents.Location });
+            CountlyConfiguration configuration = TestUtility.CreateBaseConfigConsent(new Consents[] { Consents.Crashes, Consents.Events, Consents.Clicks, Consents.StarRating, Consents.Views, Consents.Users, Consents.Push, Consents.RemoteConfig, Consents.Location });
             Countly.Instance.Init(configuration);
 
             Assert.IsNotNull(Countly.Instance.Views);
@@ -350,7 +350,7 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public async void StartField_AfterDeviceIdChangeWithoutMerge()
         {
-            CountlyConfiguration configuration = TestUtility.createBaseConfigConsent(new Consents[] { Consents.Crashes, Consents.Events, Consents.Clicks, Consents.StarRating, Consents.Views, Consents.Users, Consents.Push, Consents.RemoteConfig, Consents.Location });
+            CountlyConfiguration configuration = TestUtility.CreateBaseConfigConsent(new Consents[] { Consents.Crashes, Consents.Events, Consents.Clicks, Consents.StarRating, Consents.Views, Consents.Users, Consents.Push, Consents.RemoteConfig, Consents.Location });
             Countly.Instance.Init(configuration);
 
             Assert.IsNotNull(Countly.Instance.Views);

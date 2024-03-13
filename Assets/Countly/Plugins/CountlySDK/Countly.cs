@@ -141,6 +141,7 @@ namespace Plugins.CountlySDK
         private bool _logSubscribed;
         private PushCountlyService _push;
 
+        private CountlyMainThreadHandler countlyMainThreadHandler;
 
         /// <summary>
         /// Initialize SDK at the start of your app
@@ -149,15 +150,30 @@ namespace Plugins.CountlySDK
         {
             DontDestroyOnLoad(gameObject);
             Instance = this;
-
+            countlyMainThreadHandler = CountlyMainThreadHandler.Instance;
             //Auth and Config will not be null in case initializing through countly prefab
             if (Auth != null && Config != null) {
                 Init(new CountlyConfiguration(Auth, Config));
             }
-
         }
 
         public void Init(CountlyConfiguration configuration)
+        {
+            // Check if the current thread is the main thread
+            if (countlyMainThreadHandler.IsMainThread()) {
+                // If on the main thread, initialize directly
+                InitInternal(configuration);
+            } else {
+                // If not on the main thread, schedule initialization on the main thread
+                // This ensures that SDK is initialized on the main thread
+                countlyMainThreadHandler.RunOnMainThread(() => { InitInternal(configuration); });
+
+                // Avoid potential issues with SDK initialization on non-main threads
+                Debug.LogWarning("[Countly] [Init] Initialization process is being moved to the main thread. Ensure this is intended behavior.");
+            }
+        }
+
+        public void InitInternal(CountlyConfiguration configuration)
         {
             if (IsSDKInitialized) {
                 _logHelper.Error("SDK has already been initialized, 'Init' should not be called a second time!");
@@ -277,11 +293,11 @@ namespace Plugins.CountlySDK
                 _logHelper.Info("[Init] provided 'maxStackTraceLineLength' override:[" + configuration.MaxStackTraceLineLength + "]");
             }
 
-            if(configuration.SafeEventIDGenerator == null) {
+            if (configuration.SafeEventIDGenerator == null) {
                 configuration.SafeEventIDGenerator = new SafeIDGenerator();
             }
 
-            if(configuration.SafeViewIDGenerator == null) {
+            if (configuration.SafeViewIDGenerator == null) {
                 configuration.SafeViewIDGenerator = new SafeIDGenerator();
             }
 

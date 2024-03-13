@@ -20,7 +20,7 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public void GetAppKeyAndDeviceIdParams()
         {
-            Countly.Instance.Init(TestUtility.createBaseConfig());
+            Countly.Instance.Init(TestUtility.CreateBaseConfig());
 
             CountlyUtils utils = new CountlyUtils(Countly.Instance);
 
@@ -37,7 +37,7 @@ namespace Assets.Tests.PlayModeTests
         // Method should convert the provided array into string
         public void GetStringFromBytes_base(byte[] byteArray, string expected)
         {
-            Countly.Instance.Init(TestUtility.createBaseConfig());
+            Countly.Instance.Init(TestUtility.CreateBaseConfig());
             CountlyUtils utils = new CountlyUtils(Countly.Instance);
 
             string hexString = utils.GetStringFromBytes(byteArray);
@@ -94,7 +94,7 @@ namespace Assets.Tests.PlayModeTests
         [TestCase("invalid_url", ExpectedResult = false)] // Invalid URL without extension
         public bool TestIsPictureValid(string pictureUrl)
         {
-            Countly.Instance.Init(TestUtility.createBaseConfig());
+            Countly.Instance.Init(TestUtility.CreateBaseConfig());
             CountlyUtils utils = new CountlyUtils(Countly.Instance);
 
             bool isValid = utils.IsPictureValid(pictureUrl);
@@ -107,7 +107,7 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public void GetUniqueDeviceId_UserProvidedDeviceId()
         {
-            CountlyConfiguration configuration = TestUtility.createBaseConfig();
+            CountlyConfiguration configuration = TestUtility.CreateBaseConfig();
             configuration.DeviceId = "device_id";
             Countly.Instance.Init(configuration);
 
@@ -121,7 +121,7 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public void GetUniqueDeviceId_NullDeviceId()
         {
-            CountlyConfiguration configuration = TestUtility.createBaseConfig();
+            CountlyConfiguration configuration = TestUtility.CreateBaseConfig();
             configuration.DeviceId = null;
             Countly.Instance.Init(configuration);
 
@@ -145,7 +145,7 @@ namespace Assets.Tests.PlayModeTests
         // It should remove data if provided Dictionary contains something other than string, int, double, bool
         public void RemoveUnsupportedDataTypes_base(Dictionary<string, object> data, bool isRemovingExpected)
         {
-            Countly.Instance.Init(TestUtility.createBaseConfig());
+            Countly.Instance.Init(TestUtility.CreateBaseConfig());
             CountlyUtils utils = new CountlyUtils(Countly.Instance);
 
             if (isRemovingExpected) {
@@ -176,7 +176,8 @@ namespace Assets.Tests.PlayModeTests
                 { "key2", 42 },
                 { "key3", 3.14 },
                 { "key4", true },
-                { "key5", new object() } // Unsupported data type
+                { "key5", 1234567890123456789L},
+                { "key6", new object() } // Unsupported data type
             };
 
             RemoveUnsupportedDataTypes_base(data, true);
@@ -194,6 +195,7 @@ namespace Assets.Tests.PlayModeTests
                 { "key2", 42 },
                 { "key3", 3.14 },
                 { "key4", true },
+                { "key5", 1234567890123456789L}
             };
 
             RemoveUnsupportedDataTypes_base(data, false);
