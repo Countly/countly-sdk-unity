@@ -42,7 +42,7 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public async void SetUserDetailsAsync()
         {
-            Countly.Instance.Init(TestUtility.createBaseConfig());
+            Countly.Instance.Init(TestUtility.CreateBaseConfig());
 
             Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
 
@@ -107,7 +107,7 @@ namespace Assets.Tests.PlayModeTests
 
         public async void SetPicturePath_base(string setPictureUrl, string expectedValue)
         {
-            Countly.Instance.Init(TestUtility.createBaseConfig());
+            Countly.Instance.Init(TestUtility.CreateBaseConfig());
             Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
 
             // Ensure that the UserDetails instance is not null and request repository is empty
@@ -150,7 +150,7 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public async void TestUserProfileFieldsLimits()
         {
-            CountlyConfiguration configuration = TestUtility.createBaseConfig();
+            CountlyConfiguration configuration = TestUtility.CreateBaseConfig();
             configuration.MaxValueSize = 3;
 
             Countly.Instance.Init(configuration);

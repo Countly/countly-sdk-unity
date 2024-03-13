@@ -39,7 +39,7 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public void MigrationOnEmptyRequestRepo()
         {
-            CountlyConfiguration configuration = TestUtility.createBaseConfig();
+            CountlyConfiguration configuration = TestUtility.CreateBaseConfig();
 
             TempStorageHelper storageHelper = new TempStorageHelper(new CountlyLogHelper(configuration));
             storageHelper.OpenDB();
@@ -68,7 +68,7 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public void StoreGETRequestsAfterMigration()
         {
-            CountlyConfiguration configuration = TestUtility.createBaseConfig();
+            CountlyConfiguration configuration = TestUtility.CreateBaseConfig();
             configuration.EnableConsoleLogging = false;
 
             TempStorageHelper storageHelper = new TempStorageHelper(new CountlyLogHelper(configuration));
@@ -102,7 +102,7 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public void MultipleGETRequestsAfterMigration()
         {
-            CountlyConfiguration configuration = TestUtility.createBaseConfig();
+            CountlyConfiguration configuration = TestUtility.CreateBaseConfig();
 
             TempStorageHelper storageHelper = new TempStorageHelper(new CountlyLogHelper(configuration));
             storageHelper.OpenDB();
@@ -153,7 +153,7 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public void MultiplePostRequestsAfterMigration()
         {
-            CountlyConfiguration configuration = TestUtility.createBaseConfig();
+            CountlyConfiguration configuration = TestUtility.CreateBaseConfig();
 
             TempStorageHelper storageHelper = new TempStorageHelper(new CountlyLogHelper(configuration));
             storageHelper.OpenDB();
@@ -199,7 +199,7 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public void StorePostRequestsAfterMigration()
         {
-            CountlyConfiguration configuration = TestUtility.createBaseConfig();
+            CountlyConfiguration configuration = TestUtility.CreateBaseConfig();
 
             TempStorageHelper storageHelper = new TempStorageHelper(new CountlyLogHelper(configuration));
             storageHelper.OpenDB();
@@ -232,7 +232,7 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public void MultiplePostAndGetRequestsAfterMigration()
         {
-            CountlyConfiguration configuration = TestUtility.createBaseConfig();
+            CountlyConfiguration configuration = TestUtility.CreateBaseConfig();
             TempStorageHelper storageHelper = new TempStorageHelper(new CountlyLogHelper(configuration));
             storageHelper.OpenDB();
             storageHelper.ClearDBData();
@@ -345,7 +345,7 @@ namespace Assets.Tests.PlayModeTests
 
             FirstLaunchAppHelper.Process();
 
-            Countly.Instance.Init(TestUtility.createBaseConfig());
+            Countly.Instance.Init(TestUtility.CreateBaseConfig());
 
             Assert.AreEqual("device-id", Countly.Instance.Device.DeviceId);
             Assert.AreEqual(DeviceIdType.DeveloperProvided, Countly.Instance.Device.DeviceIdType);

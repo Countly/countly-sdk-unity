@@ -54,7 +54,7 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public async void SessionConsent()
         {
-            Countly.Instance.Init(TestUtility.createBaseConfigConsent(null));
+            Countly.Instance.Init(TestUtility.CreateBaseConfigConsent(null));
             Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
             Assert.IsNotNull(Countly.Instance.Session);
             Assert.AreEqual(0, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
@@ -75,7 +75,7 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public void SessionBegin_Default()
         {
-            Countly.Instance.Init(TestUtility.createBaseConfig());
+            Countly.Instance.Init(TestUtility.CreateBaseConfig());
             Assert.IsNotNull(Countly.Instance.Session);
             Assert.AreEqual(1, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
 
@@ -91,7 +91,7 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public void SessionBegin_WithLocation()
         {
-            CountlyConfiguration configuration = TestUtility.createBaseConfig();
+            CountlyConfiguration configuration = TestUtility.CreateBaseConfig();
             configuration.SetLocation("PK", "Lahore", "10.0,10.0", "192.168.100.51");
             Countly.Instance.Init(configuration);
             Assert.IsNotNull(Countly.Instance.Session);
@@ -110,7 +110,7 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public void SessionBegin_WithLocationDisable()
         {
-            CountlyConfiguration configuration = TestUtility.createBaseConfig();
+            CountlyConfiguration configuration = TestUtility.CreateBaseConfig();
             configuration.DisableLocation();
             Countly.Instance.Init(configuration);
             Assert.IsNotNull(Countly.Instance.Session);
@@ -129,7 +129,7 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public void SessionBegin_ConsentGivenAfterInit()
         {
-            Countly.Instance.Init(TestUtility.createBaseConfigConsent(null));
+            Countly.Instance.Init(TestUtility.CreateBaseConfigConsent(null));
             Assert.IsNotNull(Countly.Instance.Session);
             Assert.AreEqual(2, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
             Countly.Instance.Session._requestCountlyHelper._requestRepo.Clear();
@@ -150,7 +150,7 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public void SessionService_WithDisableTracking()
         {
-            CountlyConfiguration configuration = TestUtility.createBaseConfig();
+            CountlyConfiguration configuration = TestUtility.CreateBaseConfig();
             configuration.DisableAutomaticSessionTracking();
             Countly.Instance.Init(configuration);
             Assert.IsNotNull(Countly.Instance.Session);
@@ -163,7 +163,7 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public void SessionBegin_ConsentGivenAfterInitWithDisableTracking()
         {
-            CountlyConfiguration configuration = TestUtility.createBaseConfigConsent(null);
+            CountlyConfiguration configuration = TestUtility.CreateBaseConfigConsent(null);
             configuration.DisableAutomaticSessionTracking();
             Countly.Instance.Init(configuration);
             Assert.IsNotNull(Countly.Instance.Session);
@@ -181,7 +181,7 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public void SessionBegin_ConsentGivenAfterSessionBegin()
         {
-            Countly.Instance.Init(TestUtility.createBaseConfigConsent(null));
+            Countly.Instance.Init(TestUtility.CreateBaseConfigConsent(null));
             Assert.IsNotNull(Countly.Instance.Session);
             // RQ will have empty location request and consent reqeust
             Assert.AreEqual(2, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
@@ -210,7 +210,7 @@ namespace Assets.Tests.PlayModeTests
         {
             System.DateTime sessionStartTime = System.DateTime.Now;
 
-            Countly.Instance.Init(TestUtility.createBaseConfig());
+            Countly.Instance.Init(TestUtility.CreateBaseConfig());
             Assert.IsNotNull(Countly.Instance.Session);
             Assert.AreEqual(1, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
 
@@ -250,7 +250,7 @@ namespace Assets.Tests.PlayModeTests
         {
             System.DateTime sessionStartTime = System.DateTime.Now;
 
-            Countly.Instance.Init(TestUtility.createBaseConfig());
+            Countly.Instance.Init(TestUtility.CreateBaseConfig());
             Assert.IsNotNull(Countly.Instance.Session);
             Assert.AreEqual(1, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
             Countly.Instance.Session._requestCountlyHelper._requestRepo.Clear();
@@ -285,7 +285,7 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public void SessionMetrics()
         {
-            CountlyConfiguration config = TestUtility.createBaseConfig();
+            CountlyConfiguration config = TestUtility.CreateBaseConfig();
             Countly.Instance.Init(config);
             Assert.IsNotNull(Countly.Instance.Session);
             Assert.AreEqual(1, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
@@ -313,7 +313,7 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public void SessionMetricOverride()
         {
-            CountlyConfiguration config = TestUtility.createBaseConfig();
+            CountlyConfiguration config = TestUtility.CreateBaseConfig();
             Dictionary<string, string> overrides = new Dictionary<string, string>
             {
                 { "_os", "New OS" },
