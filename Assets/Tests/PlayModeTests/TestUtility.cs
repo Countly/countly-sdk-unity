@@ -8,7 +8,9 @@ using System.Text.RegularExpressions;
 
 namespace Assets.Tests.PlayModeTests
 {
+    /// <summary>
     /// Utility class for creating Countly configurations, clearing SDK queues, and managing log helpers.
+    /// </summary>
     public class TestUtility
     {
         readonly static string SERVER_URL = "https://xyz.com/";
@@ -19,32 +21,30 @@ namespace Assets.Tests.PlayModeTests
         /// Creates a basic Countly configuration with predefined server URL, app key, and device ID.
         /// </summary>
         /// <returns>CountlyConfiguration object representing the basic configuration.</returns>
-        public static CountlyConfiguration createBaseConfig()
+        public static CountlyConfiguration CreateBaseConfig()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = SERVER_URL,
-                AppKey = APP_KEY,
-                DeviceId = DEVICE_ID,
-            };
-
+            CountlyConfiguration configuration = new CountlyConfiguration(SERVER_URL, APP_KEY)
+                .SetDeviceId(DEVICE_ID);
             return configuration;
         }
-
-        public static CountlyConfiguration createBaseConfigConsent(Consents[] givenConsent)
+        
+        /// <summary>
+        /// Creates a Countly configuration with setting consent requirement to true, predefined server URL, app key, and device ID.
+        /// </summary>
+        /// <returns>CountlyConfiguration object representing the basic configuration.</returns>
+        public static CountlyConfiguration CreateBaseConfigConsent(Consents[] givenConsent)
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = SERVER_URL,
-                AppKey = APP_KEY,
-                DeviceId = DEVICE_ID,
-            };
+            CountlyConfiguration configuration = CreateBaseConfig()
+                .SetRequiresConsent(true);
 
-            configuration.RequiresConsent = true;
             configuration.GiveConsent(givenConsent);
-
             return configuration;
         }
 
+        /// <summary>
         /// Clears the queues of the Countly SDK.
+        /// </summary>
+        /// <param name="CountlyInstance"></param>
         public static void ClearSDKQueues(Countly CountlyInstance)
         {
             CountlyInstance.Views._eventService._eventRepo.Clear();
@@ -55,10 +55,10 @@ namespace Assets.Tests.PlayModeTests
         /// Creates a CountlyLogHelper instance for testing purposes, based on the provided configuration and enables or disables logging.
         /// </summary>
         /// <returns>CountlyLogHelper instance with the specified logging configuration.</returns>
-        public static CountlyLogHelper CreateLogHelper(bool enableLogging)
+        public static CountlyLogHelper CreateLogHelper()
         {
-            CountlyConfiguration config = createBaseConfig();
-            config.EnableConsoleLogging = enableLogging;
+            CountlyConfiguration config = CreateBaseConfig()
+                .EnableLogging();
             CountlyLogHelper logHelper = new CountlyLogHelper(config);
 
             return logHelper;
@@ -77,6 +77,9 @@ namespace Assets.Tests.PlayModeTests
             return entity;
         }
 
+        /// <summary>
+        /// Creates a CountlyEventModel for testing purposes
+        /// </summary>
         public static CountlyEventModel CreateEventModel(string key, int? count = null, double? sum = null, double? dur = null, Dictionary<string, object> segmentation = null, long? timestamp = null, int? dow = null, int? hour = null)
         {
             CountlyEventModel expected = new CountlyEventModel();
@@ -108,6 +111,19 @@ namespace Assets.Tests.PlayModeTests
             return expected;
         }
 
+        /// <summary>
+        /// Creates a JSON string representing an event entity with optional parameters.
+        /// </summary>
+        /// <param name="key">The key of the event.</param>
+        /// <param name="count">The count associated with the event.</param>
+        /// <param name="sum">The sum associated with the event.</param>
+        /// <param name="dur">The duration associated with the event.</param>
+        /// <param name="segmentation">The segmentation associated with the event.</param>
+        /// <param name="timestamp">The timestamp associated with the event.</param>
+        /// <param name="dow">The day of the week associated with the event.</param>
+        /// <param name="hour">The hour associated with the event.</param>
+        /// <param name="customData">Custom data associated with the event.</param>
+        /// <returns>A JSON string representing the event entity.</returns>
         public static string CreateEventEntityJSONString(string? key = null, int? count = null, double? sum = null, double? dur = null, string segmentation = null, long? timestamp = null, int? dow = null, int? hour = null, string? customData = null)
         {
             JObject jobj = new JObject();
@@ -153,12 +169,20 @@ namespace Assets.Tests.PlayModeTests
             return returnS;
         }
 
+        /// <summary>
+        /// Checks if the input string is in Base64 format.
+        /// </summary>
+        /// <param name="value">The string to check.</param>
+        /// <returns>True if the string is in Base64 format; otherwise, false.</returns>
         public static bool IsBase64String(string value)
         {
             string base64Pattern = @"^[A-Za-z0-9+/]*={0,2}$";
             return Regex.IsMatch(value, base64Pattern);
         }
 
+        /// <summary>
+        /// Cleans up test environment by clearing Countly storage and destroying its instance.
+        /// </summary>
         public static void TestCleanup()
         {
             Countly.Instance.ClearStorage();

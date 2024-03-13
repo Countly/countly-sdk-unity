@@ -35,7 +35,7 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public async void CrashConsent()
         {
-            CountlyConfiguration configuration = TestUtility.createBaseConfigConsent(new Plugins.CountlySDK.Enums.Consents[] { });
+            CountlyConfiguration configuration = TestUtility.CreateBaseConfigConsent(new Plugins.CountlySDK.Enums.Consents[] { });
             Countly.Instance.Init(configuration);
 
             Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
@@ -58,7 +58,7 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public void CrashBreadCrumbs()
         {
-            Countly.Instance.Init(TestUtility.createBaseConfig());
+            Countly.Instance.Init(TestUtility.CreateBaseConfig());
 
             Assert.IsNotNull(Countly.Instance.CrashReports);
             Assert.AreEqual(0, Countly.Instance.CrashReports._crashBreadcrumbs.Count);
@@ -75,7 +75,7 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public async void CrashLimits()
         {
-            CountlyConfiguration configuration = TestUtility.createBaseConfig();
+            CountlyConfiguration configuration = TestUtility.CreateBaseConfig();
             configuration.MaxValueSize = 5;
             configuration.MaxKeyLength = 5;
             configuration.MaxSegmentationValues = 2;
@@ -117,7 +117,7 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public async void SendCrashReportAsyncDeprecated()
         {
-            Countly.Instance.Init(TestUtility.createBaseConfig());
+            Countly.Instance.Init(TestUtility.CreateBaseConfig());
             Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
 
             Assert.IsNotNull(Countly.Instance.CrashReports);
@@ -150,7 +150,7 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public async void SendCrashReportAsync()
         {
-            Countly.Instance.Init(TestUtility.createBaseConfig());
+            Countly.Instance.Init(TestUtility.CreateBaseConfig());
             Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
 
             Assert.IsNotNull(Countly.Instance.CrashReports);
@@ -187,7 +187,7 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public void CrashBreadCrumbsLength()
         {
-            Countly.Instance.Init(TestUtility.createBaseConfig());
+            Countly.Instance.Init(TestUtility.CreateBaseConfig());
 
             Assert.IsNotNull(Countly.Instance.CrashReports);
             Assert.AreEqual(0, Countly.Instance.CrashReports._crashBreadcrumbs.Count);
@@ -209,7 +209,7 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public void LimitOfAllowedBreadCrumbs()
         {
-            CountlyConfiguration configuration = TestUtility.createBaseConfig();
+            CountlyConfiguration configuration = TestUtility.CreateBaseConfig();
             configuration.TotalBreadcrumbsAllowed = 5;
             Countly.Instance.Init(configuration);
 

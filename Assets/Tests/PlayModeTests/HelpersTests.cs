@@ -22,7 +22,7 @@ namespace Assets.Tests.PlayModeTests
         public void EventEntityToEventModel_base(EventEntity entity, CountlyEventModel expected)
         {
             // Convert the EventEntity to a CountlyEventModel using the Converter.
-            CountlyEventModel model = Converter.ConvertEventEntityToEventModel(entity, TestUtility.CreateLogHelper(true));
+            CountlyEventModel model = Converter.ConvertEventEntityToEventModel(entity, TestUtility.CreateLogHelper());
 
             // If the conversion resulted in a null CountlyEventModel, assert that the expected value is also null.
             if (expected == null) {
@@ -115,7 +115,7 @@ namespace Assets.Tests.PlayModeTests
         public void JsonToDictionary_base(string Json, Dictionary<string, object> expected)
         {
             // Convert Json into Dictionary
-            Dictionary<string, object> result = Converter.ConvertJsonToDictionary(Json, TestUtility.CreateLogHelper(true));
+            Dictionary<string, object> result = Converter.ConvertJsonToDictionary(Json, TestUtility.CreateLogHelper());
             if (expected == null) {
                 Assert.IsNull(result);
             } else {
