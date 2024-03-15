@@ -1,7 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
 namespace Plugins.CountlySDK
 {
     public interface ISafeIDGenerator
@@ -16,5 +12,18 @@ namespace Plugins.CountlySDK
             return CountlyUtils.SafeRandomVal();
         }
     }
-}
 
+    /// <summary>
+    /// CustomIdProvider class is for testing purposes
+    /// </summary>
+    public class CustomIdProvider : ISafeIDGenerator
+    {
+        private int viewCount;
+
+        public string GenerateValue()
+        {
+            viewCount++;
+            return "idv" + viewCount.ToString();
+        }
+    }
+}

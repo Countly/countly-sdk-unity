@@ -6,6 +6,7 @@ using Plugins.CountlySDK.Persistance.Entities;
 using Plugins.CountlySDK.Enums;
 using System.Text.RegularExpressions;
 using UnityEngine;
+using NUnit.Framework;
 
 namespace Assets.Tests.PlayModeTests
 {
@@ -43,12 +44,26 @@ namespace Assets.Tests.PlayModeTests
         }
 
         /// <summary>
+        /// Creates a Countly configuration for testing View functionality by setting related fields
+        /// </summary>
+        /// <returns>CountlyConfiguration object representing the basic configuration.</returns>
+        public static CountlyConfiguration CreateViewConfig(CustomIdProvider customIdProvider)
+        {
+            CountlyConfiguration configuration = CreateBaseConfig()
+                .SetRequiresConsent(true);
+            configuration.SafeViewIDGenerator = customIdProvider;
+            configuration.GiveConsent(new Consents[] { Consents.Views });
+
+            return configuration;
+        }
+
+        /// <summary>
         /// Clears the queues of the Countly SDK.
         /// </summary>
         /// <param name="CountlyInstance"></param>
         public static void ClearSDKQueues(Countly CountlyInstance)
         {
-            CountlyInstance.Views._eventService._eventRepo.Clear();
+            CountlyInstance.Events._eventRepo.Clear();
             CountlyInstance.CrashReports._requestCountlyHelper._requestRepo.Clear();
         }
 
@@ -197,6 +212,7 @@ namespace Assets.Tests.PlayModeTests
             segmentation.Add("int", 42);
             segmentation.Add("double", 3.14);
             segmentation.Add("float", 2.5f);
+            segmentation.Add("long", 1234567890123456789L);
             segmentation.Add("bool", true);
 
             return segmentation;
@@ -220,6 +236,72 @@ namespace Assets.Tests.PlayModeTests
         public static Dictionary<string, object> TestTimeMetrics()
         {
             return TimeMetricModel.GetTimeMetricModel();
+        }
+
+        public static void ValidateViewEvent(CountlyEventModel model, string name, bool isOpenView, int start = 1, bool isAction = false)
+        {
+            Assert.IsNull(model.Sum);
+            Assert.AreEqual(1, model.Count);
+            Assert.IsNull(model.Duration);
+            Assert.IsNotNull(model.Segmentation);
+
+            if (isAction) {
+                Assert.AreEqual(CountlyEventModel.ViewActionEvent, model.Key);
+            } else {
+                Assert.AreEqual(CountlyEventModel.ViewEvent, model.Key);
+                Assert.AreEqual(name, model.Segmentation["name"]);
+            }
+
+            if (isOpenView) {
+                Assert.AreEqual(1, model.Segmentation["visit"]);
+                Assert.AreEqual(start, model.Segmentation["start"]);
+            }
+        }
+
+        // Validates the properties of a CountlyEventModel object for view events or view action events
+        public static void ViewEventValidator(CountlyEventModel eventModel, int? expectedCount, double? expectedSum,
+            int? expectedDuration, Dictionary<string, object>? expectedSegmentation,
+            string? expectedEventId, string? expectedPreviousViewId, string? expectedCurrentViewId,
+            string? expectedPreviousEventId, Dictionary<string, object>? expectedTimeMetrics)
+        {
+            Assert.AreEqual(eventModel.Key, "[CLY]_view");
+            Assert.AreEqual(eventModel.Count, expectedCount);
+            Assert.AreEqual(eventModel.Sum, expectedSum);
+            Assert.AreEqual(eventModel.Duration, expectedDuration);
+
+            if (expectedSegmentation != null) {
+                foreach (var kvp in expectedSegmentation) {
+                    Assert.IsTrue(eventModel.Segmentation.ContainsKey(kvp.Key));
+                    Assert.AreEqual(eventModel.Segmentation[kvp.Key], kvp.Value);
+                }
+            }
+
+            Assert.AreEqual(eventModel.EventID, expectedEventId);
+            Assert.AreEqual(eventModel.PreviousViewID, expectedPreviousViewId);
+            Assert.AreEqual(eventModel.CurrentViewID, expectedCurrentViewId);
+            Assert.AreEqual(eventModel.PreviousEventID, expectedPreviousEventId);
+
+            // Check time metrics if provided
+            if (expectedTimeMetrics != null) {
+                foreach (var kvp in expectedTimeMetrics) {
+                    if (kvp.Key == "timestamp") {
+                        Assert.IsTrue(Mathf.Abs(eventModel.Timestamp - (long)kvp.Value) < 6000);
+                    } else if (kvp.Key == "hour") {
+                        Assert.AreEqual(eventModel.Hour, kvp.Value);
+                    } else if (kvp.Key == "dow") {
+                        Assert.AreEqual(eventModel.DayOfWeek, kvp.Value);
+                    }
+                }
+            }
+        }
+
+        public static void ValidateRQEQSize(Countly cly, int expRQSize, int expEQSize)
+        {
+            CountlyRequestModel[] requests = cly.RequestHelper._requestRepo.Models.ToArray();
+            Assert.AreEqual(expRQSize, requests.Length);
+
+            CountlyEventModel[] events = cly.Events._eventRepo.Models.ToArray();
+            Assert.AreEqual(expEQSize, events.Length);
         }
     }
 }
