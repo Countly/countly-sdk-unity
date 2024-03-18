@@ -11,8 +11,7 @@ namespace Assets.Tests.PlayModeTests
 {
     public class ViewsTests
     {
-        IViewModule views;
-        Dictionary<string, object> testSegmentation;
+        readonly Dictionary<string, object> testSegmentation;
         static string[] viewNames;
 
         public ViewsTests()
@@ -311,7 +310,8 @@ namespace Assets.Tests.PlayModeTests
 
         // 'RecordOpenViewAsync' method in ViewCountlyService.
         // We record a view. Consent is required, consent is given. The recorded view is the first view.
-        // The recorded view should be marked with te "first_view" flag 
+        // The recorded view should be marked with te "first_view" flag
+        // "isFirstView" functionality is not exposed anymore. This test is going to be removed with RecordOpenViewAsync method, in the future.
         [Test]
         public async void StartField()
         {
@@ -320,13 +320,8 @@ namespace Assets.Tests.PlayModeTests
 
             Assert.IsNotNull(Countly.Instance.Views);
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
-            //Assert.IsTrue(Countly.Instance.Views._isFirstView);
-
             await Countly.Instance.Views.RecordOpenViewAsync("first_view");
             Assert.AreEqual(1, Countly.Instance.Events._eventRepo.Count);
-            //Assert.IsFalse(Countly.Instance.Views._isFirstView);
-
-            // Dequeue the recorded event from the event repository for validation.
             CountlyEventModel model = Countly.Instance.Events._eventRepo.Dequeue();
             TestUtility.ValidateViewEvent(model, "first_view", true);
         }
@@ -334,6 +329,7 @@ namespace Assets.Tests.PlayModeTests
         // 'RecordOpenViewAsync' method in ViewCountlyService and 'ChangeDeviceIdWithoutMerge' method in DeviceIdCountlyService.
         // We validate the behavior of the "isFirstView" and view event recording after changing the device ID without merging
         // "isFirstView" field should be true again after changing the device ID.
+        // "isFirstView" functionality is not exposed anymore. This test is going to be removed with RecordOpenViewAsync method, in the future.
         [Test]
         public async void StartField_AfterDeviceIdChangeWithoutMerge()
         {
@@ -342,25 +338,15 @@ namespace Assets.Tests.PlayModeTests
 
             Assert.IsNotNull(Countly.Instance.Views);
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
-            //Assert.IsTrue(Countly.Instance.Views._isFirstView);
 
-            // Record the opening of the first view with the name "first_view".
             await Countly.Instance.Views.RecordOpenViewAsync("first_view");
             Assert.AreEqual(1, Countly.Instance.Events._eventRepo.Count);
-            //Assert.IsFalse(Countly.Instance.Views._isFirstView);
 
-            // Change the device ID without merging.
             await Countly.Instance.Device.ChangeDeviceIdWithoutMerge("new device id");
             Countly.Instance.Events._eventRepo.Clear();
 
-            // The "isFirstView" field should be true again after changing the device ID.
-            //Assert.IsTrue(Countly.Instance.Views._isFirstView);
-
-            // Record the opening of the second view with the name "second_view_open".
             await Countly.Instance.Views.RecordOpenViewAsync("second_view_open");
 
-            // The "isFirstView" field should still be true and the count of events in the event repository of the Views should be zero.
-            //Assert.IsTrue(Countly.Instance.Views._isFirstView);
             Assert.IsFalse(Countly.Instance.Consents.CheckConsent(Consents.Views));
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
         }
@@ -375,7 +361,7 @@ namespace Assets.Tests.PlayModeTests
             Countly cly = Countly.Instance;
 
             cly.Init(config);
-            views = cly.Views;
+            IViewModule views = cly.Views;
             TestUtility.ValidateRQEQSize(cly, 2, 0);
 
             string viewId = views.StartView(viewNames[0]);
@@ -395,7 +381,7 @@ namespace Assets.Tests.PlayModeTests
             Countly cly = Countly.Instance;
 
             cly.Init(config);
-            views = cly.Views;
+            IViewModule views = cly.Views;
             TestUtility.ValidateRQEQSize(cly, 2, 0);
 
             views.StartView(string.Empty);
@@ -418,7 +404,7 @@ namespace Assets.Tests.PlayModeTests
             Countly cly = Countly.Instance;
 
             cly.Init(config);
-            views = cly.Views;
+            IViewModule views = cly.Views;
             TestUtility.ValidateRQEQSize(cly, 2, 0);
 
             string viewId = views.StartView(viewNames[0], testSegmentation);
@@ -438,7 +424,7 @@ namespace Assets.Tests.PlayModeTests
             Countly cly = Countly.Instance;
 
             cly.Init(config);
-            views = cly.Views;
+            IViewModule views = cly.Views;
             TestUtility.ValidateRQEQSize(cly, 2, 0);
             // segmentation data types are string, int, double, float, bool
             Dictionary<string, object> segmentation = new Dictionary<string, object>();
@@ -462,7 +448,7 @@ namespace Assets.Tests.PlayModeTests
             Countly cly = Countly.Instance;
 
             cly.Init(config);
-            views = cly.Views;
+            IViewModule views = cly.Views;
             TestUtility.ValidateRQEQSize(cly, 2, 0);
 
             views.StopViewWithName(viewNames[0]);
@@ -482,7 +468,7 @@ namespace Assets.Tests.PlayModeTests
             Countly cly = Countly.Instance;
 
             cly.Init(config);
-            views = cly.Views;
+            IViewModule views = cly.Views;
             TestUtility.ValidateRQEQSize(cly, 2, 0);
 
             string viewId = views.StartView(viewNames[0]);
@@ -512,7 +498,7 @@ namespace Assets.Tests.PlayModeTests
             Countly cly = Countly.Instance;
 
             cly.Init(config);
-            views = cly.Views;
+            IViewModule views = cly.Views;
             TestUtility.ValidateRQEQSize(cly, 2, 0);
 
             string viewId = views.StartView(viewNames[0]);
@@ -538,7 +524,7 @@ namespace Assets.Tests.PlayModeTests
             Countly cly = Countly.Instance;
 
             cly.Init(config);
-            views = cly.Views;
+            IViewModule views = cly.Views;
             TestUtility.ValidateRQEQSize(cly, 2, 0);
 
             string viewId = views.StartView(viewNames[0]);
@@ -565,7 +551,7 @@ namespace Assets.Tests.PlayModeTests
             Countly cly = Countly.Instance;
 
             cly.Init(config);
-            views = cly.Views;
+            IViewModule views = cly.Views;
             TestUtility.ValidateRQEQSize(cly, 2, 0);
 
             string viewId = views.StartView(viewNames[0]);
@@ -595,7 +581,7 @@ namespace Assets.Tests.PlayModeTests
             Countly cly = Countly.Instance;
 
             cly.Init(config);
-            views = cly.Views;
+            IViewModule views = cly.Views;
             TestUtility.ValidateRQEQSize(cly, 2, 0);
 
             string viewId = views.StartView(viewNames[0]);
@@ -622,7 +608,7 @@ namespace Assets.Tests.PlayModeTests
             Countly cly = Countly.Instance;
 
             cly.Init(config);
-            views = cly.Views;
+            IViewModule views = cly.Views;
             TestUtility.ValidateRQEQSize(cly, 2, 0);
 
             string viewId = views.StartView(viewNames[0]);
@@ -650,7 +636,7 @@ namespace Assets.Tests.PlayModeTests
             Countly cly = Countly.Instance;
 
             cly.Init(config);
-            views = cly.Views;
+            IViewModule views = cly.Views;
             TestUtility.ValidateRQEQSize(cly, 2, 0);
 
             string viewId = views.StartView(viewNames[0]);
@@ -680,7 +666,7 @@ namespace Assets.Tests.PlayModeTests
             Countly cly = Countly.Instance;
 
             cly.Init(config);
-            views = cly.Views;
+            IViewModule views = cly.Views;
             TestUtility.ValidateRQEQSize(cly, 2, 0);
 
             string viewId = views.StartView(viewNames[0]);
@@ -717,7 +703,7 @@ namespace Assets.Tests.PlayModeTests
             Countly cly = Countly.Instance;
 
             cly.Init(config);
-            views = cly.Views;
+            IViewModule views = cly.Views;
             TestUtility.ValidateRQEQSize(cly, 2, 0);
 
             string viewId1 = views.StartView(viewNames[0]);
@@ -756,7 +742,7 @@ namespace Assets.Tests.PlayModeTests
             Countly cly = Countly.Instance;
 
             cly.Init(config);
-            views = cly.Views;
+            IViewModule views = cly.Views;
             TestUtility.ValidateRQEQSize(cly, 2, 0);
 
             string viewId = views.StartView(viewNames[0]);
@@ -787,7 +773,7 @@ namespace Assets.Tests.PlayModeTests
             Countly cly = Countly.Instance;
 
             cly.Init(config);
-            views = cly.Views;
+            IViewModule views = cly.Views;
             TestUtility.ValidateRQEQSize(cly, 2, 0);
 
             string viewId = views.StartView(viewNames[0]);
@@ -818,7 +804,7 @@ namespace Assets.Tests.PlayModeTests
             Countly cly = Countly.Instance;
 
             cly.Init(config);
-            views = cly.Views;
+            IViewModule views = cly.Views;
             TestUtility.ValidateRQEQSize(cly, 2, 0);
 
             views.SetGlobalViewSegmentation(testSegmentation);
@@ -852,7 +838,7 @@ namespace Assets.Tests.PlayModeTests
             Countly cly = Countly.Instance;
 
             cly.Init(config);
-            views = cly.Views;
+            IViewModule views = cly.Views;
             TestUtility.ValidateRQEQSize(cly, 2, 0);
 
             TestUtility.TestSegmentation().Add("testObj", new object());
@@ -880,7 +866,7 @@ namespace Assets.Tests.PlayModeTests
             Countly cly = Countly.Instance;
 
             cly.Init(config);
-            views = cly.Views;
+            IViewModule views = cly.Views;
             TestUtility.ValidateRQEQSize(cly, 2, 0);
 
             string viewId = views.StartView(viewNames[0]);

@@ -9,7 +9,6 @@ namespace Assets.Tests.PlayModeTests.Scenarios
 {
     public class MV_ManualView
     {
-        IViewModule views;
         Dictionary<string, object> testSegmentation;
         Countly cly;
 
@@ -17,7 +16,7 @@ namespace Assets.Tests.PlayModeTests.Scenarios
         public MV_ManualView()
         {
             cly = InitializeCountlySDK();
-            views = cly.Views;
+            IViewModule views = cly.Views;
             testSegmentation = TestUtility.TestSegmentation();
         }
 
@@ -38,7 +37,7 @@ namespace Assets.Tests.PlayModeTests.Scenarios
             TestUtility.ValidateRQEQSize(cly, 0, 0);
 
             cly = InitializeCountlySDK();
-            views = cly.Views;
+            IViewModule views = cly.Views;
 
             TestUtility.ValidateRQEQSize(cly, 2, 0);
 
@@ -90,7 +89,7 @@ namespace Assets.Tests.PlayModeTests.Scenarios
             TestUtility.ValidateRQEQSize(cly, 0, 0);
 
             cly = InitializeCountlySDK();
-            views = cly.Views;
+            IViewModule views = cly.Views;
 
             TestUtility.ValidateRQEQSize(cly, 2, 0);
 
@@ -133,7 +132,7 @@ namespace Assets.Tests.PlayModeTests.Scenarios
             TestUtility.ValidateRQEQSize(cly, 0, 0);
 
             cly = InitializeCountlySDK();
-            views = cly.Views;
+            IViewModule views = cly.Views;
 
             TestUtility.ValidateRQEQSize(cly, 2, 0);
 
@@ -167,7 +166,7 @@ namespace Assets.Tests.PlayModeTests.Scenarios
             TestUtility.ValidateRQEQSize(cly, 0, 0);
 
             cly = InitializeCountlySDK();
-            views = cly.Views;
+            IViewModule views = cly.Views;
             
             string viewIdA = views.StartAutoStoppedView("viewA");
             TestUtility.ValidateRQEQSize(cly, 2, 1);
@@ -211,7 +210,7 @@ namespace Assets.Tests.PlayModeTests.Scenarios
             TestUtility.ValidateRQEQSize(cly, 0, 0);
             
             cly = InitializeCountlySDK();
-            views = cly.Views;
+            IViewModule views = cly.Views;
 
             string viewIdA = views.StartView("viewA");
             TestUtility.ValidateRQEQSize(cly, 2, 1);
@@ -228,7 +227,7 @@ namespace Assets.Tests.PlayModeTests.Scenarios
 
             views.PauseViewWithID(viewIdB);
             CountlyEventModel viewBPause = cly.Events._eventRepo.Dequeue();
-            TestUtility.ViewEventValidator(viewB, 1, 0, null, TestUtility.BaseViewTestSegmentation("viewB", true, false), viewIdB, viewIdA, null, null, TestUtility.TestTimeMetrics());
+            TestUtility.ViewEventValidator(viewBPause, 1, 0, 1, TestUtility.BaseViewTestSegmentation("viewB", false, false), viewIdB, viewIdA, null, null, TestUtility.TestTimeMetrics());
             TestUtility.ValidateRQEQSize(cly, 2, 0);
 
             Thread.Sleep(1000);
@@ -255,7 +254,7 @@ namespace Assets.Tests.PlayModeTests.Scenarios
             TestUtility.ValidateRQEQSize(cly, 0, 0);
             
             cly = InitializeCountlySDK();
-            views = cly.Views;
+            IViewModule views = cly.Views;
 
             string viewIdA = views.StartAutoStoppedView("viewA");
             TestUtility.ValidateRQEQSize(cly, 2, 1);
@@ -308,7 +307,7 @@ namespace Assets.Tests.PlayModeTests.Scenarios
         {
             TestUtility.ValidateRQEQSize(cly, 0, 0);            
             cly = InitializeCountlySDK();
-            views = cly.Views;
+            IViewModule views = cly.Views;
 
             string viewIdA = views.StartView("viewA");
             TestUtility.ValidateRQEQSize(cly, 2, 1);
@@ -347,7 +346,7 @@ namespace Assets.Tests.PlayModeTests.Scenarios
         {
             TestUtility.ValidateRQEQSize(cly, 0, 0);            
             cly = InitializeCountlySDK();
-            views = cly.Views;
+            IViewModule views = cly.Views;
 
             string viewIdA = views.StartView("viewA");
             TestUtility.ValidateRQEQSize(cly, 2, 1);
@@ -404,7 +403,7 @@ namespace Assets.Tests.PlayModeTests.Scenarios
             cly = Countly.Instance;
             cly.Init(configuration);
             
-            views = cly.Views;
+            IViewModule views = cly.Views;
             testSegmentation = TestUtility.TestSegmentation();
 
             TestUtility.ValidateRQEQSize(cly, 2, 0);

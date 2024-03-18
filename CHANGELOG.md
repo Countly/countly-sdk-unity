@@ -1,5 +1,9 @@
 ## XX.XX.X
 * Added 'UnityWebRequest' as the networking handler for WebGL builds.
+* Deprecated "RecordOpenViewAsync" method in ViewCountlyService class.
+* Deprecated "RecordCloseViewAsync" method in ViewCountlyService class.
+* Deprecated "ReportActionAsync" method in ViewCountlyService class.
+* Added new view tracking functionality for replacing the deprecated methods.
 
 ## 23.12.0
 * Added functionality to allow passing custom or overridden metrics.
