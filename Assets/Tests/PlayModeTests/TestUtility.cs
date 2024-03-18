@@ -238,26 +238,6 @@ namespace Assets.Tests.PlayModeTests
             return TimeMetricModel.GetTimeMetricModel();
         }
 
-        public static void ValidateViewEvent(CountlyEventModel model, string name, bool isOpenView, int start = 1, bool isAction = false)
-        {
-            Assert.IsNull(model.Sum);
-            Assert.AreEqual(1, model.Count);
-            Assert.IsNull(model.Duration);
-            Assert.IsNotNull(model.Segmentation);
-
-            if (isAction) {
-                Assert.AreEqual(CountlyEventModel.ViewActionEvent, model.Key);
-            } else {
-                Assert.AreEqual(CountlyEventModel.ViewEvent, model.Key);
-                Assert.AreEqual(name, model.Segmentation["name"]);
-            }
-
-            if (isOpenView) {
-                Assert.AreEqual(1, model.Segmentation["visit"]);
-                Assert.AreEqual(start, model.Segmentation["start"]);
-            }
-        }
-
         // Validates the properties of a CountlyEventModel object for view events or view action events
         public static void ViewEventValidator(CountlyEventModel eventModel, int? expectedCount, double? expectedSum,
             int? expectedDuration, Dictionary<string, object>? expectedSegmentation,

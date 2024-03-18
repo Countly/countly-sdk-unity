@@ -16,7 +16,6 @@ namespace Assets.Tests.PlayModeTests.Scenarios
         public MV_ManualView()
         {
             cly = InitializeCountlySDK();
-            IViewModule views = cly.Views;
             testSegmentation = TestUtility.TestSegmentation();
         }
 
