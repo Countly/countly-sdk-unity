@@ -44,6 +44,18 @@ namespace Assets.Tests.PlayModeTests
         }
 
         /// <summary>
+        /// Creates a Countly configuration with setting consent requirement to true
+        /// </summary>
+        /// <returns>CountlyConfiguration object with no given consent</returns>
+        public static CountlyConfiguration CreateNoConsentConfig()
+        {
+            CountlyConfiguration configuration = CreateBaseConfig()
+                .SetRequiresConsent(true);
+
+            return configuration;
+        }
+
+        /// <summary>
         /// Creates a Countly configuration for testing View functionality by setting related fields
         /// </summary>
         /// <returns>CountlyConfiguration object representing the basic configuration.</returns>
@@ -242,9 +254,14 @@ namespace Assets.Tests.PlayModeTests
         public static void ViewEventValidator(CountlyEventModel eventModel, int? expectedCount, double? expectedSum,
             int? expectedDuration, Dictionary<string, object>? expectedSegmentation,
             string? expectedEventId, string? expectedPreviousViewId, string? expectedCurrentViewId,
-            string? expectedPreviousEventId, Dictionary<string, object>? expectedTimeMetrics)
+            string? expectedPreviousEventId, Dictionary<string, object>? expectedTimeMetrics, bool isAction = false)
         {
-            Assert.AreEqual(eventModel.Key, "[CLY]_view");
+            if (isAction) {
+                Assert.AreEqual(eventModel.Key, "[CLY]_action");
+            } else {
+                Assert.AreEqual(eventModel.Key, "[CLY]_view");
+            }
+
             Assert.AreEqual(eventModel.Count, expectedCount);
             Assert.AreEqual(eventModel.Sum, expectedSum);
             Assert.AreEqual(eventModel.Duration, expectedDuration);
