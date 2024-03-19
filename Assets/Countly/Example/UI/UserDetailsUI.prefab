@@ -361,7 +361,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Set Custome User Detail
+  m_Text: Set Custom User Detail
 --- !u!1 &1020519124288868264
 GameObject:
   m_ObjectHideFlags: 0
@@ -440,7 +440,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 'Custome User Detail: Increament Value '
+  m_Text: 'Custom User Detail: Increament Value '
 --- !u!1 &1020519124307674444
 GameObject:
   m_ObjectHideFlags: 0
@@ -519,7 +519,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 'Custome User Detail: Remove Values'
+  m_Text: 'Custom User Detail: Remove Values'
 --- !u!1 &1020519124355548460
 GameObject:
   m_ObjectHideFlags: 0
@@ -598,7 +598,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 'Custome User Detail: Record Multiple Values'
+  m_Text: 'Custom User Detail: Record Multiple Values'
 --- !u!1 &1020519124447763893
 GameObject:
   m_ObjectHideFlags: 0
@@ -909,7 +909,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -0.000025469326}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 300}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &1020519124537905362
@@ -927,7 +927,7 @@ MonoBehaviour:
   m_Padding:
     m_Left: 0
     m_Right: 0
-    m_Top: 100
+    m_Top: 130
     m_Bottom: 0
   m_ChildAlignment: 4
   m_Spacing: 6
@@ -1016,7 +1016,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 'Custome User Detail: Push Unique'
+  m_Text: 'Custom User Detail: Push Unique'
 --- !u!1 &1020519124716394928
 GameObject:
   m_ObjectHideFlags: 0
@@ -1603,7 +1603,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 'Custome User Detail: Multiply Value'
+  m_Text: 'Custom User Detail: Multiply Value'
 --- !u!1 &1020519125182863574
 GameObject:
   m_ObjectHideFlags: 0
@@ -1682,7 +1682,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 'Custome User Detail: Set Property Once'
+  m_Text: 'Custom User Detail: Set Property Once'
 --- !u!1 &1020519125244103158
 GameObject:
   m_ObjectHideFlags: 0
@@ -1894,7 +1894,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 'Custome User Detail: Push Value '
+  m_Text: 'Custom User Detail: Push Value '
 --- !u!1 &1020519125273150599
 GameObject:
   m_ObjectHideFlags: 0
@@ -2367,7 +2367,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: -17, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!222 &1020519125725645365
 CanvasRenderer:
@@ -2919,7 +2919,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 'Custome User Detail: Store Max Value'
+  m_Text: 'Custom User Detail: Store Max Value'
 --- !u!1 &1020519125963036611
 GameObject:
   m_ObjectHideFlags: 0
@@ -3077,4 +3077,4 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 'Custome User Detail: Store Min Value'
+  m_Text: 'Custom User Detail: Store Min Value'
