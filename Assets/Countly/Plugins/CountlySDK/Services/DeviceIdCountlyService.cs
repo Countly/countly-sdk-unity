@@ -15,9 +15,7 @@ namespace Plugins.CountlySDK.Services
         private readonly EventCountlyService _eventCountlyService;
         internal readonly RequestCountlyHelper _requestCountlyHelper;
         private readonly SessionCountlyService _sessionCountlyService;
-
         private readonly int DEVICE_TYPE_FALLBACK_VALUE = -1;
-
 
         internal DeviceIdCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, SessionCountlyService sessionCountlyService,
             RequestCountlyHelper requestCountlyHelper, EventCountlyService eventCountlyService, CountlyUtils countlyUtils, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
@@ -29,6 +27,7 @@ namespace Plugins.CountlySDK.Services
             _requestCountlyHelper = requestCountlyHelper;
             _sessionCountlyService = sessionCountlyService;
         }
+
         /// <summary>
         /// Returns the Device ID that is currently used by the SDK
         /// </summary>
@@ -80,7 +79,6 @@ namespace Plugins.CountlySDK.Services
                 }
             } else {
                 //SDK doesn't have a device id stored locally
-
                 //checking if developer provided device id is null or empty.
                 if (_countlyUtils.IsNullEmptyOrWhitespace(deviceId)) {
                     UpdateDeviceIdAndDeviceIdType(CountlyUtils.GetUniqueDeviceId(), DeviceIdType.SDKGenerated);
@@ -89,6 +87,18 @@ namespace Plugins.CountlySDK.Services
                 }
             }
         }
+
+        /// <summary>
+        /// Sets current device id to the new one
+        /// </summary>
+        /// <param name="newDeviceId">device id to set</param>
+        public void SetId(string newDeviceId)
+        {
+            lock(LockObj) {
+                SetIdInternal(newDeviceId);
+            }
+        }
+
         /// <summary>
         /// Changes Device Id.
         /// Adds currently recorded but not queued events to request queue.
@@ -174,6 +184,32 @@ namespace Plugins.CountlySDK.Services
             await Task.CompletedTask;
         }
 
+        private async void SetIdInternal(string newDeviceId)
+        {
+            if(_countlyUtils.IsNullEmptyOrWhitespace(newDeviceId)) {
+                Log.Warning("[DeviceIdCountlyService] SetId: Provided id to SetId method is null or empty. Will be ignored");
+                return;
+            }
+
+            if(DeviceId == newDeviceId) {
+                Log.Warning("[DeviceIdCountlyService] SetId: Same id provided to SetId method. Will be ignored.");
+                return;
+            }
+
+            // if current type is DEVELOPER_SUPPLIED
+            // an ID was provided by the host app previously
+            // we can assume that a device ID change with merge was executed previously
+            // now we change it without merging
+            // else
+            // SDK generated ID
+            // we change device ID with merge so that data is combined
+            if(DeviceIdType == DeviceIdType.DeveloperProvided){
+                await ChangeDeviceIdWithoutMerge(newDeviceId);
+            } else {
+                await ChangeDeviceIdWithMerge(newDeviceId);
+            }
+        }
+
         /// <summary>
         /// Updates Device ID both in app and in cache
         /// </summary>
@@ -206,8 +242,5 @@ namespace Plugins.CountlySDK.Services
                 listener.DeviceIdChanged(DeviceId, merged);
             }
         }
-
-        #region override Methods
-        #endregion
     }
 }
