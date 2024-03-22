@@ -22,8 +22,7 @@ namespace Assets.Tests.PlayModeTests
         /// <param name="consents"> an array consents</param>
         private void AssertConsentKeys(JObject consentObj, string[] keys, bool expectedValue)
         {
-            foreach (string key in keys)
-            {
+            foreach (string key in keys) {
                 Assert.AreEqual(expectedValue, consentObj.GetValue(key).ToObject<bool>());
             }
         }
@@ -38,16 +37,14 @@ namespace Assets.Tests.PlayModeTests
         {
             Assert.AreEqual("1", collection.Get(sessionKey));
             Assert.AreEqual(deviceId, collection.Get("device_id"));
-            if (checkDuration)
-            {
+            if (checkDuration) {
                 Assert.IsNotNull(collection["session_duration"]);
             }
         }
 
         private Countly ConfigureAndInitSDK(string deviceId = null, bool consentRequired = false, Consents[] consents = null, bool isAutomaticSessionTrackingDisabled = false)
         {
-            CountlyConfiguration configuration = new CountlyConfiguration
-            {
+            CountlyConfiguration configuration = new CountlyConfiguration {
                 AppKey = _appKey,
                 ServerUrl = _serverUrl,
                 RequiresConsent = consentRequired,
@@ -66,12 +63,9 @@ namespace Assets.Tests.PlayModeTests
             Assert.IsNotNull(instance.Device);
             Assert.AreEqual(type, instance.Device.DeviceIdType);
 
-            if (compareDeviceId)
-            {
+            if (compareDeviceId) {
                 Assert.AreEqual(deviceId, instance.Device.DeviceId);
-            }
-            else
-            {
+            } else {
                 Assert.IsNotEmpty(instance.Device.DeviceId);
             }
         }
@@ -156,8 +150,7 @@ namespace Assets.Tests.PlayModeTests
             Assert.IsTrue(Countly.Instance.Consents.RequiresConsent);
 
             Consents[] consents = System.Enum.GetValues(typeof(Consents)).Cast<Consents>().ToArray();
-            foreach (Consents consent in consents)
-            {
+            foreach (Consents consent in consents) {
                 Assert.IsFalse(Countly.Instance.Consents.CheckConsentInternal(consent));
             }
         }
@@ -393,12 +386,9 @@ namespace Assets.Tests.PlayModeTests
 
             ValidateDeviceIDAndType(Countly.Instance, deviceID, DeviceIdType.DeveloperProvided, true);
             Countly.Instance.Device.SetId(id);
-            if (isExpectingChange)
-            {
+            if (isExpectingChange) {
                 ValidateDeviceIDAndType(Countly.Instance, id, expectedIdType, true);
-            }
-            else
-            {
+            } else {
                 ValidateDeviceIDAndType(Countly.Instance, deviceID, expectedIdType, true);
             }
         }
@@ -418,12 +408,9 @@ namespace Assets.Tests.PlayModeTests
 
             ValidateDeviceIDAndType(Countly.Instance, deviceID, DeviceIdType.SDKGenerated, true);
             Countly.Instance.Device.SetId(id);
-            if (isExpectingChange)
-            {
+            if (isExpectingChange) {
                 ValidateDeviceIDAndType(Countly.Instance, id, expectedIdType, true);
-            }
-            else
-            {
+            } else {
                 ValidateDeviceIDAndType(Countly.Instance, deviceID, expectedIdType, true);
             }
         }
@@ -436,8 +423,7 @@ namespace Assets.Tests.PlayModeTests
         public void SetId_SameId(DeviceIdType startType)
         {
             string deviceId = "";
-            if (startType == DeviceIdType.SDKGenerated)
-            {
+            if (startType == DeviceIdType.SDKGenerated) {
                 CountlyConfiguration config = new CountlyConfiguration(_appKey, _serverUrl);
                 Countly.Instance.Init(config);
                 deviceId = Countly.Instance.Device.DeviceId; // sdk generated device id
@@ -446,9 +432,7 @@ namespace Assets.Tests.PlayModeTests
 
                 Countly.Instance.Device.SetId(deviceId);
                 ValidateDeviceIDAndType(Countly.Instance, deviceId, DeviceIdType.SDKGenerated, true);
-            }
-            else
-            {
+            } else {
                 Countly.Instance.Init(TestUtility.CreateBaseConfig());
                 deviceId = Countly.Instance.Device.DeviceId; // "test_user"
                 ValidateDeviceIDAndType(Countly.Instance, deviceId, DeviceIdType.DeveloperProvided, true);
@@ -460,8 +444,7 @@ namespace Assets.Tests.PlayModeTests
 
         private void CloseDBConnectionAndDestroyInstance(bool clearStorage = false)
         {
-            if (clearStorage)
-            {
+            if (clearStorage) {
                 PlayerPrefs.DeleteAll();
             }
 

@@ -94,7 +94,7 @@ namespace Plugins.CountlySDK.Services
         /// <param name="newDeviceId">device id to set</param>
         public void SetId(string newDeviceId)
         {
-            lock(LockObj) {
+            lock (LockObj) {
                 SetIdInternal(newDeviceId);
             }
         }
@@ -186,12 +186,12 @@ namespace Plugins.CountlySDK.Services
 
         private async void SetIdInternal(string newDeviceId)
         {
-            if(_countlyUtils.IsNullEmptyOrWhitespace(newDeviceId)) {
+            if (_countlyUtils.IsNullEmptyOrWhitespace(newDeviceId)) {
                 Log.Warning("[DeviceIdCountlyService] SetId: Provided id to SetId method is null or empty. Will be ignored");
                 return;
             }
 
-            if(DeviceId == newDeviceId) {
+            if (DeviceId == newDeviceId) {
                 Log.Warning("[DeviceIdCountlyService] SetId: Same id provided to SetId method. Will be ignored.");
                 return;
             }
@@ -203,7 +203,7 @@ namespace Plugins.CountlySDK.Services
             // else
             // SDK generated ID
             // we change device ID with merge so that data is combined
-            if(DeviceIdType == DeviceIdType.DeveloperProvided){
+            if (DeviceIdType == DeviceIdType.DeveloperProvided) {
                 await ChangeDeviceIdWithoutMerge(newDeviceId);
             } else {
                 await ChangeDeviceIdWithMerge(newDeviceId);
