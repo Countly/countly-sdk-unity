@@ -184,7 +184,7 @@ namespace Plugins.CountlySDK.Services
             await Task.CompletedTask;
         }
 
-        private async void SetIdInternal(string newDeviceId)
+        private async Task SetIdInternal(string newDeviceId)
         {
             if (_countlyUtils.IsNullEmptyOrWhitespace(newDeviceId)) {
                 Log.Warning("[DeviceIdCountlyService] SetId: Provided id to SetId method is null or empty. Will be ignored");
