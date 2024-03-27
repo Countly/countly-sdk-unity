@@ -14,16 +14,25 @@ namespace Plugins.CountlySDK.Services
         private bool isQueueBeingProcessed = false;
         internal readonly NonViewEventRepository _eventRepo;
         private readonly RequestCountlyHelper _requestCountlyHelper;
+        private readonly CountlyUtils _utils;
 
         internal readonly IDictionary<string, DateTime> _timedEvents;
 
-        internal EventCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, RequestCountlyHelper requestCountlyHelper, NonViewEventRepository nonViewEventRepo, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
+        internal ISafeIDGenerator safeEventIDGenerator;
+
+        internal IViewIDProvider viewIDProvider;
+
+        string previousEventID = "";
+
+        internal EventCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, RequestCountlyHelper requestCountlyHelper, NonViewEventRepository nonViewEventRepo, ConsentCountlyService consentService, CountlyUtils utils) : base(configuration, logHelper, consentService)
         {
             Log.Debug("[EventCountlyService] Initializing.");
 
             _eventRepo = nonViewEventRepo;
             _requestCountlyHelper = requestCountlyHelper;
             _timedEvents = new Dictionary<string, DateTime>();
+            safeEventIDGenerator = configuration.SafeEventIDGenerator;
+            _utils = utils;
         }
 
         /// <summary>
@@ -39,7 +48,6 @@ namespace Plugins.CountlySDK.Services
         /// </summary>
         internal void AddEventsToRequestQueue()
         {
-
             Log.Debug("[EventCountlyService] AddEventsToRequestQueue: Start");
 
             if (_eventRepo.Models.Count == 0) {
@@ -85,7 +93,7 @@ namespace Plugins.CountlySDK.Services
         /// <param name="duration">set sum if needed, default value is "0"</param>
         /// <returns></returns>
         internal async Task RecordEventInternal(string key, IDictionary<string, object> segmentation = null,
-            int? count = 1, double? sum = 0, double? duration = null)
+            int? count = 1, double? sum = 0, double? duration = null, string eventIDOverride = null)
         {
             if (!CheckConsentOnKey(key)) {
                 return;
@@ -105,13 +113,42 @@ namespace Plugins.CountlySDK.Services
                 key = key.Substring(0, _configuration.MaxKeyLength);
             }
 
+            string pvid = null; // previous view id
+            string cvid = null; // current view id
+            string eventID;
+
+            if (_utils.IsNullEmptyOrWhitespace(eventIDOverride)) {
+                Log.Info("[EventCountlyService] RecordEventInternal provided eventIDOverride value is null, empty or whitespace. Will generate a new one.");
+                eventID = safeEventIDGenerator.GenerateValue();
+            } else {
+                eventID = eventIDOverride;
+            }
+
+            if (viewIDProvider != null) {
+                if (key.Equals(CountlyEventModel.ViewEvent)) {
+                    pvid = viewIDProvider.GetPreviousViewId();
+                } else {
+                    cvid = viewIDProvider.GetCurrentViewId();
+                }
+            }
+
             IDictionary<string, object> segments = RemoveSegmentInvalidDataTypes(segmentation);
             segments = FixSegmentKeysAndValues(segments);
 
-            CountlyEventModel @event = new CountlyEventModel(key, segments, count, sum, duration);
-
-            await RecordEventAsync(@event);
-
+            if (key == CountlyEventModel.NPSEvent ||
+                key == CountlyEventModel.SurveyEvent ||
+                key == CountlyEventModel.StarRatingEvent ||
+                key == CountlyEventModel.OrientationEvent ||
+                key == CountlyEventModel.ViewEvent ||
+                key == CountlyEventModel.PushActionEvent ||
+                key == CountlyEventModel.ViewActionEvent) {
+                CountlyEventModel @event = new CountlyEventModel(key, segments, count, sum, duration, eventID, pvid, cvid, null);
+                await RecordEventAsync(@event);
+            } else {
+                CountlyEventModel @event = new CountlyEventModel(key, segments, count, sum, duration, eventID, pvid, cvid, previousEventID);
+                previousEventID = eventID;
+                await RecordEventAsync(@event);
+            }
         }
 
         /// <summary>
@@ -258,7 +295,7 @@ namespace Plugins.CountlySDK.Services
         /// <param name="segmentation">custom segmentation you want to set, leave null if you don't want to add anything</param>
         /// <param name="count">how many of these events have occurred, default value is "1"</param>
         /// <param name="sum">set sum if needed, default value is "0"</param>
-        /// <param name="duration">set sum if needed, default value is "0"</param>
+        /// <param name="duration">set duration if needed, default value is "null"</param>
         /// <returns></returns>
         public async Task RecordEventAsync(string key, IDictionary<string, object> segmentation = null,
             int? count = 1, double? sum = 0, double? duration = null)

@@ -135,8 +135,8 @@ namespace Plugins.CountlySDK.Models
         [Obsolete("RequiresConsent is deprecated. Use SetRequiresConsent(bool enable) instead.")]
         public bool RequiresConsent = false;
 
-        internal SafeIDGenerator SafeViewIDGenerator = null;
-        internal SafeIDGenerator SafeEventIDGenerator = null;
+        internal ISafeIDGenerator SafeViewIDGenerator = null;
+        internal ISafeIDGenerator SafeEventIDGenerator = null;
 
         internal string City = null;
         internal string Location = null;
