@@ -16,7 +16,7 @@ namespace Plugins.CountlySDK.Models
         /// <param name="count"></param>
         /// <param name="sum"></param>
         /// <param name="duration"></param>
-        public CountlyEventModel(string key, IDictionary<string, object> segmentation = null, int? count = 1, double? sum = null, double? duration = null)
+        public CountlyEventModel(string key, IDictionary<string, object> segmentation = null, int? count = 1, double? sum = null, double? duration = null, string? eventId = null, string? pvid = null, string? cvid = null, string? peid = null)
         {
             Key = key;
             Count = count ?? 1;
@@ -31,6 +31,11 @@ namespace Plugins.CountlySDK.Models
             Hour = timeModel.Hour;
             DayOfWeek = timeModel.DayOfWeek;
             Timestamp = timeModel.Timestamp;
+
+            EventID = eventId;
+            PreviousEventID = peid;
+            PreviousViewID = pvid;
+            CurrentViewID = cvid;
         }
 
         public CountlyEventModel()
@@ -56,6 +61,14 @@ namespace Plugins.CountlySDK.Models
 
         [JsonProperty("dow")] public int DayOfWeek { get; set; }
 
+        [JsonProperty("id")] public string? EventID { get; set; }
+
+        [JsonProperty("pvid")] public string? PreviousViewID { get; set; }
+
+        [JsonProperty("cvid")] public string? CurrentViewID { get; set; }
+
+        [JsonProperty("peid")] public string? PreviousEventID { get; set; }
+
         #region Reserved Event Names
 
         [JsonIgnore] public const string NPSEvent = "[CLY]_nps";
@@ -72,14 +85,12 @@ namespace Plugins.CountlySDK.Models
 
         [JsonIgnore] public const string OrientationEvent = "[CLY]_orientation";
 
-
-
         #endregion
 
 
         public override string ToString()
         {
-            return $"{nameof(Id)}: {Id}, {nameof(Key)}: {Key}, {nameof(Count)}: {Count}, {nameof(Sum)}: {Sum}, {nameof(Duration)}: {Duration}, {nameof(Segmentation)}: {Segmentation}, {nameof(Timestamp)}: {Timestamp}, {nameof(Hour)}: {Hour}, {nameof(DayOfWeek)}: {DayOfWeek},";
+            return $"{nameof(Id)}: {Id}, {nameof(Key)}: {Key}, {nameof(Count)}: {Count}, {nameof(Sum)}: {Sum}, {nameof(Duration)}: {Duration}, {nameof(Segmentation)}: {Segmentation}, {nameof(Timestamp)}: {Timestamp}, {nameof(Hour)}: {Hour}, {nameof(DayOfWeek)}: {DayOfWeek}, {nameof(EventID)}: {EventID}, {nameof(PreviousViewID)}: {PreviousViewID}, {nameof(CurrentViewID)}: {CurrentViewID}, {nameof(PreviousEventID)}: {PreviousEventID},";
         }
     }
 }

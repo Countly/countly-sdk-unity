@@ -117,11 +117,10 @@ namespace Plugins.CountlySDK
         public UserDetailsCountlyService UserDetails { get; private set; }
 
         /// <summary>
-        /// Exposes functionality to start and stop recording views and report positions for heat-map.
+        /// Exposes functionality to start and stop recording views
         /// </summary>
         /// <returns>ViewCountlyService</returns>
-        public ViewCountlyService Views { get; private set; }
-
+        public IViewModule Views { get; private set; }
         public MetricHelper MetricHelper { get; private set; }
         internal SessionCountlyService Session { get; set; }
 
@@ -322,7 +321,7 @@ namespace Plugins.CountlySDK
             RequestHelper = new RequestCountlyHelper(Configuration, _logHelper, countlyUtils, requestBuilder, requestRepo, this);
 
             Consents = new ConsentCountlyService(Configuration, _logHelper, Consents, RequestHelper);
-            Events = new EventCountlyService(Configuration, _logHelper, RequestHelper, nonViewEventRepo, Consents);
+            Events = new EventCountlyService(Configuration, _logHelper, RequestHelper, nonViewEventRepo, Consents, countlyUtils);
 
             Location = new Services.LocationService(Configuration, _logHelper, RequestHelper, Consents);
             Notifications = new NotificationsCallbackService(Configuration, _logHelper);
@@ -336,7 +335,7 @@ namespace Plugins.CountlySDK
 
             StarRating = new StarRatingCountlyService(Configuration, _logHelper, Consents, Events);
             UserDetails = new UserDetailsCountlyService(Configuration, _logHelper, RequestHelper, countlyUtils, Consents);
-            Views = new ViewCountlyService(Configuration, _logHelper, Events, Consents);
+            Views = new ViewCountlyService(this, countlyUtils, Configuration, _logHelper, Events, Consents);
             Device = new DeviceIdCountlyService(Configuration, _logHelper, Session, RequestHelper, Events, countlyUtils, Consents);
 
             CreateListOfIBaseService();
@@ -360,7 +359,7 @@ namespace Plugins.CountlySDK
             _listeners.Clear();
 
             _listeners.Add(_push);
-            _listeners.Add(Views);
+            _listeners.Add((ViewCountlyService) Views);
             _listeners.Add(Events);
             _listeners.Add(Device);
             _listeners.Add(Session);
