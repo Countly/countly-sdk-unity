@@ -1,6 +1,9 @@
 ## XX.XX.X
-* Added 'UnityWebRequest' as the networking handler for WebGL builds.
 * Added "SetID(string newDeviceId)" function for managing device id changes.
+
+## 23.12.1
+* Added 'UnityWebRequest' as the networking handler for WebGL builds.
+* Gathered SDK content under the 'Countly' folder for better structure and to avoid mixing with other files.
 
 ## 23.12.0
 * Added functionality to allow passing custom or overridden metrics.
