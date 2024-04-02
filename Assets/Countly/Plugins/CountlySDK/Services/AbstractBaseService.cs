@@ -102,7 +102,12 @@ namespace Plugins.CountlySDK.Services
                 string k = item.Key;
                 object v = item.Value;
 
-                if (k == null || k.Length == 0 || v == null) {
+                if (k == null || k.Length == 0) {
+                    Log.Warning($"[{GetType().Name}] FixSegmentKeysAndValues: Provided key is {(k == null ? "null" : "empty")}, will be skipped.");
+                    continue;
+                }
+                if (v == null) {
+                    Log.Warning($"[{GetType().Name}] FixSegmentKeysAndValues: Provided value for '{k}' is null, will be skipped.");
                     continue;
                 }
 
