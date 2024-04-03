@@ -10,9 +10,6 @@ namespace Assets.Tests.PlayModeTests
 {
     public class EventTests
     {
-        private readonly string _serverUrl = "https://xyz.com/";
-        private readonly string _appKey = "772c091355076ead703f987fee94490";
-
         private void AssertAnEvent(CountlyEventModel model, string name, double? sum, double count, double? duration, IDictionary<string, object> segmentation)
         {
             Assert.AreEqual(name, model.Key);
@@ -46,7 +43,6 @@ namespace Assets.Tests.PlayModeTests
             Countly.Instance.Init(TestUtility.CreateBaseConfig());
             Assert.IsNotNull(Countly.Instance.Events);
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
-
         }
 
         /// <summary>
@@ -57,6 +53,7 @@ namespace Assets.Tests.PlayModeTests
         {
             CountlyConfiguration configuration = TestUtility.CreateBaseConfig()
                 .SetRequiresConsent(true);
+
             Countly.Instance.Init(configuration);
 
             Assert.IsNotNull(Countly.Instance.Events);
@@ -84,6 +81,7 @@ namespace Assets.Tests.PlayModeTests
         {
             CountlyConfiguration configuration = TestUtility.CreateBaseConfig()
                 .SetRequiresConsent(true);
+
             Countly.Instance.Init(configuration);
 
             Assert.IsNotNull(Countly.Instance.Events);
@@ -235,6 +233,7 @@ namespace Assets.Tests.PlayModeTests
             CountlyEventModel model = Countly.Instance.Events._eventRepo.Dequeue();
             AssertAnEvent(model, "test_event", 0, 1, null, null);
 
+
             await Countly.Instance.Events.RecordEventAsync("test_event1", segmentation: null, count: 5, duration: null, sum: null);
             Assert.AreEqual(1, Countly.Instance.Events._eventRepo.Count);
 
@@ -273,15 +272,18 @@ namespace Assets.Tests.PlayModeTests
         public async void TestEventMethod_ReportCustomEventAsync()
         {
             Countly.Instance.Init(TestUtility.CreateBaseConfig());
-
             Assert.IsNotNull(Countly.Instance.Events);
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
+
             Dictionary<string, object> segments = new Dictionary<string, object>{
                 { "key1", "value1"},
                 { "key2", "value2"}
             };
+
             SegmentModel segmentModel = new SegmentModel(segments);
+
             await Countly.Instance.Events.RecordEventAsync("test_event", segmentation: segmentModel, sum: 23, duration: 5);
+
             CountlyEventModel model = Countly.Instance.Events._eventRepo.Dequeue();
             AssertAnEvent(model, "test_event", 23, 1, 5, segments);
         }
@@ -296,12 +298,9 @@ namespace Assets.Tests.PlayModeTests
                 .SetMaxKeyLength(4)
                 .SetMaxValueSize(6)
                 .SetMaxSegmentationValues(2);
-
             Countly.Instance.Init(configuration);
-
             Assert.IsNotNull(Countly.Instance.Events);
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
-
             Dictionary<string, object> segments = new Dictionary<string, object>{
                 { "key1", "value1"},
                 { "key2_00", "value2_00"},
@@ -325,10 +324,8 @@ namespace Assets.Tests.PlayModeTests
         public async void TestSegmentItemsDataTypesValidation()
         {
             Countly.Instance.Init(TestUtility.CreateBaseConfig());
-
             Assert.IsNotNull(Countly.Instance.Events);
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
-
             Dictionary<string, object> segments = new Dictionary<string, object>{
                 { "key1", "value1"},
                 { "key2", 1},
@@ -337,7 +334,6 @@ namespace Assets.Tests.PlayModeTests
                 { "key5", null},// invalid
                 { "key6", Countly.Instance} // invalid
             };
-
             await Countly.Instance.Events.RecordEventAsync("test_event", segmentation: segments, sum: 23, duration: 5);
             CountlyEventModel model = Countly.Instance.Events._eventRepo.Dequeue();
             Dictionary<string, object> requireSegments = new Dictionary<string, object>{
@@ -346,7 +342,6 @@ namespace Assets.Tests.PlayModeTests
                 { "key3", 10.0},
                 { "key4", true},
             };
-
             AssertAnEvent(model, "test_event", 23, 1, 5, requireSegments);
         }
 
@@ -394,7 +389,6 @@ namespace Assets.Tests.PlayModeTests
         {
             CountlyConfiguration configuration = TestUtility.CreateBaseConfig()
                 .SetRequiresConsent(true);
-
             Countly.Instance.Init(configuration);
 
             Assert.IsNotNull(Countly.Instance.Events);
@@ -624,6 +618,7 @@ namespace Assets.Tests.PlayModeTests
             model = Countly.Instance.Events._eventRepo.Dequeue();
             AssertAnEvent(model, "[CLY]_push_action", 1, 5, null, null);
         }
+
         /// <summary>
         /// It validates 'recordEvent' against push specific key '[CLY]_orientation'.
         /// </summary>
@@ -796,11 +791,11 @@ namespace Assets.Tests.PlayModeTests
             AssertAnEvent(model, "event", 1, 5, null, null);
         }
 
-        [SetUp]
-        [TearDown]
+        [SetUp][TearDown]
         public void End()
         {
-            TestUtility.TestCleanup();
+            Countly.Instance.ClearStorage();
+            UnityEngine.Object.DestroyImmediate(Countly.Instance);
         }
     }
 }
