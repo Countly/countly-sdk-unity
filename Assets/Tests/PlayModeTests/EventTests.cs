@@ -10,9 +10,6 @@ namespace Assets.Tests.PlayModeTests
 {
     public class EventTests
     {
-        private readonly string _serverUrl = "https://xyz.com/";
-        private readonly string _appKey = "772c091355076ead703f987fee94490";
-
         private void AssertAnEvent(CountlyEventModel model, string name, double? sum, double count, double? duration, IDictionary<string, object> segmentation)
         {
             Assert.AreEqual(name, model.Key);
@@ -43,15 +40,9 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public void TestEventRepoInitialState()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-            };
-
-            Countly.Instance.Init(configuration);
+            Countly.Instance.Init(TestUtility.CreateBaseConfig());
             Assert.IsNotNull(Countly.Instance.Events);
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
-
         }
 
         /// <summary>
@@ -60,11 +51,8 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public async void TestEventConsent()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-                RequiresConsent = true
-            };
+            CountlyConfiguration configuration = TestUtility.CreateBaseConfig()
+                .SetRequiresConsent(true);
 
             Countly.Instance.Init(configuration);
 
@@ -91,11 +79,8 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public void TestTimedEventsCancelationOnConsentRemoval()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-                RequiresConsent = true
-            };
+            CountlyConfiguration configuration = TestUtility.CreateBaseConfig()
+                .SetRequiresConsent(true);
 
             Countly.Instance.Init(configuration);
 
@@ -131,12 +116,7 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public async void TestTimedEventsCancelationOnDeviceIdChange()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-            };
-
-            Countly.Instance.Init(configuration);
+            Countly.Instance.Init(TestUtility.CreateBaseConfig());
 
             Countly.Instance.Events.StartEvent("test_event");
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
@@ -157,12 +137,7 @@ namespace Assets.Tests.PlayModeTests
         [UnityTest]
         public IEnumerator TestTimedEventMethods()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-            };
-
-            Countly.Instance.Init(configuration);
+            Countly.Instance.Init(TestUtility.CreateBaseConfig());
             Assert.IsNotNull(Countly.Instance.Events);
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
             Assert.AreEqual(0, Countly.Instance.Events._timedEvents.Count);
@@ -211,12 +186,7 @@ namespace Assets.Tests.PlayModeTests
         [UnityTest]
         public IEnumerator TestTimedEventWithSegmentation()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-            };
-
-            Countly.Instance.Init(configuration);
+            Countly.Instance.Init(TestUtility.CreateBaseConfig());
             Assert.IsNotNull(Countly.Instance.Events);
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
             Assert.AreEqual(0, Countly.Instance.Events._timedEvents.Count);
@@ -245,7 +215,6 @@ namespace Assets.Tests.PlayModeTests
 
             CountlyEventModel model = Countly.Instance.Events._eventRepo.Dequeue();
             AssertAnEvent(model, "test_event", 10, 5, 2.5, segmentation);
-
         }
 
         /// <summary>
@@ -254,12 +223,7 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public async void TestEventMethod_RecordEventAsync()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-            };
-
-            Countly.Instance.Init(configuration);
+            Countly.Instance.Init(TestUtility.CreateBaseConfig());
             Assert.IsNotNull(Countly.Instance.Events);
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
@@ -275,7 +239,6 @@ namespace Assets.Tests.PlayModeTests
 
             model = Countly.Instance.Events._eventRepo.Dequeue();
             AssertAnEvent(model, "test_event1", null, 5, null, null);
-
         }
 
         /// <summary>
@@ -284,11 +247,8 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public async void TestEvent_EventQueueThreshold_Limit()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-                EventQueueThreshold = 3
-            };
+            CountlyConfiguration configuration = TestUtility.CreateBaseConfig()
+                .SetEventQueueSizeToSend(3);
 
             Countly.Instance.Init(configuration);
 
@@ -311,21 +271,13 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public async void TestEventMethod_ReportCustomEventAsync()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-            };
-
-            Countly.Instance.Init(configuration);
-
+            Countly.Instance.Init(TestUtility.CreateBaseConfig());
             Assert.IsNotNull(Countly.Instance.Events);
-
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
-
             Dictionary<string, object> segments = new Dictionary<string, object>{
-            { "key1", "value1"},
-            { "key2", "value2"}
+                { "key1", "value1"},
+                { "key2", "value2"}
             };
 
             SegmentModel segmentModel = new SegmentModel(segments);
@@ -334,7 +286,6 @@ namespace Assets.Tests.PlayModeTests
 
             CountlyEventModel model = Countly.Instance.Events._eventRepo.Dequeue();
             AssertAnEvent(model, "test_event", 23, 1, 5, segments);
-
         }
 
         /// <summary>
@@ -343,40 +294,27 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public async void TestEventLimits()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-                MaxKeyLength = 4,
-                MaxValueSize = 6,
-                MaxSegmentationValues = 2
-            };
-
+            CountlyConfiguration configuration = TestUtility.CreateBaseConfig()
+                .SetMaxKeyLength(4)
+                .SetMaxValueSize(6)
+                .SetMaxSegmentationValues(2);
             Countly.Instance.Init(configuration);
-
             Assert.IsNotNull(Countly.Instance.Events);
-
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
-
-
             Dictionary<string, object> segments = new Dictionary<string, object>{
-            { "key1", "value1"},
-            { "key2_00", "value2_00"},
-            { "key3_00", "value3"}
+                { "key1", "value1"},
+                { "key2_00", "value2_00"},
+                { "key3_00", "value3"}
             };
 
             SegmentModel segmentModel = new SegmentModel(segments);
-
             await Countly.Instance.Events.RecordEventAsync("test_event", segmentation: segmentModel, sum: 23, duration: 5);
-
             CountlyEventModel model = Countly.Instance.Events._eventRepo.Dequeue();
-
             Dictionary<string, object> requireSegments = new Dictionary<string, object>{
-            { "key1", "value1"},
-            { "key2", "value2"},
+                { "key1", "value1"},
+                { "key2", "value2"},
             };
-
             AssertAnEvent(model, "test", 23, 1, 5, requireSegments);
-
         }
 
         /// <summary>
@@ -385,36 +323,25 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public async void TestSegmentItemsDataTypesValidation()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-            };
-
-            Countly.Instance.Init(configuration);
-
+            Countly.Instance.Init(TestUtility.CreateBaseConfig());
             Assert.IsNotNull(Countly.Instance.Events);
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
-
             Dictionary<string, object> segments = new Dictionary<string, object>{
-            { "key1", "value1"},
-            { "key2", 1},
-            { "key3", 10.0},
-            { "key4", true},
-            { "key5", null},// invalid
-            { "key6", Countly.Instance} // invalid
+                { "key1", "value1"},
+                { "key2", 1},
+                { "key3", 10.0},
+                { "key4", true},
+                { "key5", null},// invalid
+                { "key6", Countly.Instance} // invalid
             };
-
             await Countly.Instance.Events.RecordEventAsync("test_event", segmentation: segments, sum: 23, duration: 5);
-
             CountlyEventModel model = Countly.Instance.Events._eventRepo.Dequeue();
-
             Dictionary<string, object> requireSegments = new Dictionary<string, object>{
-            { "key1", "value1"},
-            { "key2", 1},
-            { "key3", 10.0},
-            { "key4", true},
+                { "key1", "value1"},
+                { "key2", 1},
+                { "key3", 10.0},
+                { "key4", true},
             };
-
             AssertAnEvent(model, "test_event", 23, 1, 5, requireSegments);
         }
 
@@ -424,22 +351,15 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public async void TestEventsParameters()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-            };
-
-            Countly.Instance.Init(configuration);
+            Countly.Instance.Init(TestUtility.CreateBaseConfig());
 
             Assert.IsNotNull(Countly.Instance.Events);
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
-
             Dictionary<string, object> segments = new Dictionary<string, object>{
-            { "key1", "value1"},
-            { "key2", "value2"}
+                { "key1", "value1"},
+                { "key2", "value2"}
             };
-
 
             await Countly.Instance.Events.RecordEventAsync("", segmentation: segments, sum: 23, duration: 5);
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
@@ -467,12 +387,8 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public async void TestSpecificKeysConsent()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-                RequiresConsent = true,
-            };
-
+            CountlyConfiguration configuration = TestUtility.CreateBaseConfig()
+                .SetRequiresConsent(true);
             Countly.Instance.Init(configuration);
 
             Assert.IsNotNull(Countly.Instance.Events);
@@ -501,7 +417,6 @@ namespace Assets.Tests.PlayModeTests
 
             await Countly.Instance.Events.RecordEventAsync("[CLY]_star_rating");
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
-
         }
 
         /// <summary>
@@ -510,17 +425,13 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public async void TestEventMethod_RecordEventAgainstViewKey()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-                RequiresConsent = true,
-            };
+            CountlyConfiguration configuration = TestUtility.CreateBaseConfig()
+                .SetRequiresConsent(true);
 
             Countly.Instance.Init(configuration);
 
             Assert.IsNotNull(Countly.Instance.Events);
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
-
 
             //[CLY]_view
             Countly.Instance.Consents.GiveConsent(new Consents[] { Consents.Views });
@@ -528,13 +439,11 @@ namespace Assets.Tests.PlayModeTests
             await Countly.Instance.Events.RecordEventAsync("event");
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
-
             await Countly.Instance.Events.RecordEventAsync("[CLY]_action");
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
             await Countly.Instance.Events.RecordEventAsync("[CLY]_push_action");
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
-
 
             await Countly.Instance.Events.RecordEventAsync("[CLY]_nps");
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
@@ -565,11 +474,8 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public async void TestEventMethod_RecordEventAgainstActionKey()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-                RequiresConsent = true,
-            };
+            CountlyConfiguration configuration = TestUtility.CreateBaseConfig()
+                .SetRequiresConsent(true);
 
             Countly.Instance.Init(configuration);
 
@@ -583,7 +489,6 @@ namespace Assets.Tests.PlayModeTests
 
             await Countly.Instance.Events.RecordEventAsync("[CLY]_push_action");
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
-
 
             await Countly.Instance.Events.RecordEventAsync("[CLY]_nps");
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
@@ -606,7 +511,6 @@ namespace Assets.Tests.PlayModeTests
             CountlyEventModel model = Countly.Instance.Events._eventRepo.Dequeue();
             AssertAnEvent(model, "[CLY]_action", 0, 1, null, null);
 
-
             await Countly.Instance.Events.RecordEventAsync("[CLY]_action", segmentation: null, count: 5, duration: null, sum: 1);
             Assert.AreEqual(1, Countly.Instance.Events._eventRepo.Count);
 
@@ -620,11 +524,8 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public async void TestEventMethod_RecordEventAgainstStarRatingKey()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-                RequiresConsent = true,
-            };
+            CountlyConfiguration configuration = TestUtility.CreateBaseConfig()
+                .SetRequiresConsent(true);
 
             Countly.Instance.Init(configuration);
 
@@ -638,7 +539,6 @@ namespace Assets.Tests.PlayModeTests
 
             await Countly.Instance.Events.RecordEventAsync("[CLY]_push_action");
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
-
 
             await Countly.Instance.Events.RecordEventAsync("[CLY]_nps");
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
@@ -661,13 +561,11 @@ namespace Assets.Tests.PlayModeTests
             CountlyEventModel model = Countly.Instance.Events._eventRepo.Dequeue();
             AssertAnEvent(model, "[CLY]_star_rating", 0, 1, null, null);
 
-
             await Countly.Instance.Events.RecordEventAsync("[CLY]_star_rating", segmentation: null, count: 5, duration: null, sum: 1);
             Assert.AreEqual(1, Countly.Instance.Events._eventRepo.Count);
 
             model = Countly.Instance.Events._eventRepo.Dequeue();
             AssertAnEvent(model, "[CLY]_star_rating", 1, 5, null, null);
-
         }
 
         /// <summary>
@@ -676,11 +574,8 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public async void TestEventMethod_RecordEventAgainstPushActionKey()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-                RequiresConsent = true,
-            };
+            CountlyConfiguration configuration = TestUtility.CreateBaseConfig()
+                .SetRequiresConsent(true);
 
             Countly.Instance.Init(configuration);
 
@@ -717,25 +612,21 @@ namespace Assets.Tests.PlayModeTests
             CountlyEventModel model = Countly.Instance.Events._eventRepo.Dequeue();
             AssertAnEvent(model, "[CLY]_push_action", 0, 1, null, null);
 
-
             await Countly.Instance.Events.RecordEventAsync("[CLY]_push_action", segmentation: null, count: 5, duration: null, sum: 1);
             Assert.AreEqual(1, Countly.Instance.Events._eventRepo.Count);
 
             model = Countly.Instance.Events._eventRepo.Dequeue();
             AssertAnEvent(model, "[CLY]_push_action", 1, 5, null, null);
-
         }
+
         /// <summary>
         /// It validates 'recordEvent' against push specific key '[CLY]_orientation'.
         /// </summary>
         [Test]
         public async void TestEventMethod_RecordEventAgainstOrientationKey()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-                RequiresConsent = true,
-            };
+            CountlyConfiguration configuration = TestUtility.CreateBaseConfig()
+                .SetRequiresConsent(true);
 
             Countly.Instance.Init(configuration);
 
@@ -784,11 +675,8 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public async void TestEventMethod_RecordEventAsyncWithSpecificKeys()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-                RequiresConsent = true,
-            };
+            CountlyConfiguration configuration = TestUtility.CreateBaseConfig()
+                .SetRequiresConsent(true);
 
             Countly.Instance.Init(configuration);
 
@@ -846,19 +734,16 @@ namespace Assets.Tests.PlayModeTests
 
             model = Countly.Instance.Events._eventRepo.Dequeue();
             AssertAnEvent(model, "[CLY]_nps", 1, 5, null, null);
-
         }
+
         /// <summary>
         /// It validates 'recordEvent' against specific event keys.
         /// </summary>
         [Test]
         public async void TestEventMethod_RecordEventAgainstSpecificEventKeys()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-                RequiresConsent = true,
-            };
+            CountlyConfiguration configuration = TestUtility.CreateBaseConfig()
+                .SetRequiresConsent(true);
 
             Countly.Instance.Init(configuration);
 
@@ -885,7 +770,6 @@ namespace Assets.Tests.PlayModeTests
             await Countly.Instance.Events.RecordEventAsync("[CLY]_star_rating");
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
-
             await Countly.Instance.Events.RecordEventAsync("[CLY]_push_action");
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
@@ -905,9 +789,9 @@ namespace Assets.Tests.PlayModeTests
 
             model = Countly.Instance.Events._eventRepo.Dequeue();
             AssertAnEvent(model, "event", 1, 5, null, null);
-
         }
 
+        [SetUp]
         [TearDown]
         public void End()
         {
