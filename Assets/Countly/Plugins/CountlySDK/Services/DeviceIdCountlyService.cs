@@ -95,6 +95,7 @@ namespace Plugins.CountlySDK.Services
         public void SetId(string newDeviceId)
         {
             lock (LockObj) {
+                Log.Info("[DeviceIdCountlyService] SetId: deviceId = " + newDeviceId);
                 SetIdInternal(newDeviceId);
             }
         }
