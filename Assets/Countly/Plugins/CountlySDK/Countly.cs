@@ -322,7 +322,7 @@ namespace Plugins.CountlySDK
             RequestHelper = new RequestCountlyHelper(Configuration, _logHelper, countlyUtils, requestBuilder, requestRepo, this);
 
             Consents = new ConsentCountlyService(Configuration, _logHelper, Consents, RequestHelper);
-            Events = new EventCountlyService(Configuration, _logHelper, RequestHelper, nonViewEventRepo, Consents);
+            Events = new EventCountlyService(Configuration, _logHelper, RequestHelper, nonViewEventRepo, Consents, countlyUtils);
 
             Location = new Services.LocationService(Configuration, _logHelper, RequestHelper, Consents);
             Notifications = new NotificationsCallbackService(Configuration, _logHelper);
