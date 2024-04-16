@@ -115,8 +115,8 @@ namespace Plugins.CountlySDK.Services
 
             string pvid = null; // previous view id
             string cvid = null; // current view id
-
             string eventID;
+
             if (_utils.IsNullEmptyOrWhitespace(eventIDOverride)) {
                 Log.Info("[EventCountlyService] RecordEventInternal provided eventIDOverride value is null, empty or whitespace. Will generate a new one.");
                 eventID = safeEventIDGenerator.GenerateValue();
@@ -142,18 +142,13 @@ namespace Plugins.CountlySDK.Services
                 key == CountlyEventModel.ViewEvent ||
                 key == CountlyEventModel.PushActionEvent ||
                 key == CountlyEventModel.ViewActionEvent) {
-                if (CheckConsentOnKey(key)) {
-                    CountlyEventModel @event = new CountlyEventModel(key, segments, count, sum, duration, eventID, pvid, cvid, null);
-                    await RecordEventAsync(@event);
-                }
+                CountlyEventModel @event = new CountlyEventModel(key, segments, count, sum, duration, eventID, pvid, cvid, null);
+                await RecordEventAsync(@event);
             } else {
-                if (CheckConsentOnKey(key)) {
-                    CountlyEventModel @event = new CountlyEventModel(key, segments, count, sum, duration, eventID, pvid, cvid, previousEventID);
-                    previousEventID = eventID;
-                    await RecordEventAsync(@event);
-                }
+                CountlyEventModel @event = new CountlyEventModel(key, segments, count, sum, duration, eventID, pvid, cvid, previousEventID);
+                previousEventID = eventID;
+                await RecordEventAsync(@event);
             }
-
         }
 
         /// <summary>
