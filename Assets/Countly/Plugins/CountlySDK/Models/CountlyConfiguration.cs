@@ -457,5 +457,98 @@ namespace Plugins.CountlySDK.Models
             return this;
         }
         #endregion
+
+        #region Getters
+
+        /// <summary>
+        /// Returns the URL of the Countly server to submit data to.
+        /// </summary>
+        public string GetServerUrl() { return ServerUrl; }
+
+        /// <summary>
+        /// Returns the App key for the application being tracked.
+        /// </summary>
+        public string GetAppKey() { return AppKey; }
+
+        /// <summary>
+        /// Returns the Unique ID for the device the app is running on.
+        /// </summary>
+        public string GetDeviceId() { return DeviceId; }
+
+        /// <summary>
+        /// Returns the parameter that prevents tampering.
+        /// </summary>
+        public string GetParameterTamperingProtectionSalt() { return Salt; }
+
+        /// <summary>
+        /// Returns true if it's set to send all requests made to the Countly server using HTTP POST.
+        /// </summary>
+        public bool IsForcedHttpPostEnabled() { return EnablePost; }
+
+        /// <summary>
+        /// Returns true if it's set to enable countly internal debugging logs.
+        /// </summary>
+        public bool IsLoggingEnabled() { return EnableConsoleLogging; }
+
+        /// <summary>
+        /// Returns the mode of push notification.
+        /// </summary>
+        public TestMode GetNotificationMode() { return NotificationMode; }
+
+        /// <summary>
+        /// Returns the interval for the automatic update calls
+        /// </summary>
+        public int GetUpdateSessionTimerDelay() { return SessionDuration; }
+
+        /// <summary>
+        /// Returns the maximum size of all string keys
+        /// </summary>
+        public int GetMaxKeyLength() { return MaxKeyLength; }
+
+        /// <summary>
+        /// Returns the maximum size of all values in our key-value pairs
+        /// </summary>
+        public int GetMaxValueSize() { return MaxValueSize; }
+
+        /// <summary>
+        /// Returns the maximum amount of custom (dev provided) segmentation in one event
+        /// </summary>
+        public int GetMaxSegmentationValues() { return MaxSegmentationValues; }
+
+        /// <summary>
+        /// Returns the limit for how many stack trace lines would be recorded per thread
+        /// </summary>
+        public int GetMaxStackTraceLinesPerThread() { return MaxStackTraceLinesPerThread; }
+
+        /// <summary>
+        /// Returns the limit for how many characters are allowed per stack trace line
+        /// </summary>
+        public int GetMaxStackTraceLineLength() { return MaxStackTraceLineLength; }
+
+        /// <summary>
+        /// Returns the threshold value for the number of events that can be stored locally.
+        /// </summary>
+        public int GetEventQueueSizeToSend() { return EventQueueThreshold; }
+
+        /// <summary>
+        /// Returns the limit for the number of requests that can be stored locally.
+        /// </summary>
+        public int GetMaxRequestQueueSize() { return StoredRequestLimit; }
+
+        /// <summary>
+        /// Returns the maximum amount of breadcrumbs.
+        /// </summary>
+        public int GetMaxBreadcrumbCount() { return TotalBreadcrumbsAllowed; }
+
+        /// <summary>
+        /// Returns true if uncaught crash reporting is enabled.
+        /// </summary>
+        public bool IsAutomaticCrashReportingEnabled() { return EnableAutomaticCrashReporting; }
+
+        /// <summary>
+        /// Returns true if consent is required.
+        /// </summary>
+        public bool IsConsentRequired() { return RequiresConsent; }
+        #endregion
     }
 }

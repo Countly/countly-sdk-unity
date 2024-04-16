@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -124,10 +124,12 @@ namespace Plugins.CountlySDK.Services
                 eventID = eventIDOverride;
             }
 
-            if (key.Equals(CountlyEventModel.ViewEvent)) {
-                pvid = viewIDProvider.GetPreviousViewId();
-            } else {
-                cvid = viewIDProvider.GetCurrentViewId();
+            if (viewIDProvider != null) {
+                if (key.Equals(CountlyEventModel.ViewEvent)) {
+                    pvid = viewIDProvider.GetPreviousViewId();
+                } else {
+                    cvid = viewIDProvider.GetCurrentViewId();
+                }
             }
 
             IDictionary<string, object> segments = RemoveSegmentInvalidDataTypes(segmentation);
