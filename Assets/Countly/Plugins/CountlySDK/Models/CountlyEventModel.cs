@@ -69,7 +69,6 @@ namespace Plugins.CountlySDK.Models
         [JsonProperty("peid")] public string? PreviousEventID { get; set; }
 
         #region Reserved Event Names
-        
         [JsonIgnore] public const string NPSEvent = "[CLY]_nps";
 
         [JsonIgnore] public const string ViewEvent = "[CLY]_view";
@@ -83,7 +82,6 @@ namespace Plugins.CountlySDK.Models
         [JsonIgnore] public const string PushActionEvent = "[CLY]_push_action";
 
         [JsonIgnore] public const string OrientationEvent = "[CLY]_orientation";
-        
         #endregion
 
         public override string ToString()
