@@ -283,5 +283,28 @@ namespace Plugins.CountlySDK
             }
             return type;
         }
+
+        /// <summary>
+        /// Copies all key-value pairs from the source dictionary to the destination dictionary.
+        /// </summary>
+        /// <param name="destination">The dictionary to which the key-value pairs will be copied.</param>
+        /// <param name="source">The dictionary from which the key-value pairs will be copied.</param>
+        /// <param name="logger">CountlyLogHelper to log warnings if either dictionary is null.</param>
+        public void PutAll(Dictionary<string, object> destination, Dictionary<string, object> source, CountlyLogHelper logger)
+        {
+            if (destination == null) {
+                logger?.Warning("[CountlyUtils] PutAll: Provided Dictionary " + destination + " is null.");
+                return;
+            }
+
+            if (source == null || source.Count == 0) {
+                logger?.Warning("[CountlyUtils] PutAll: Provided Dictionary " + source + " is null or empty.");
+                return;
+            }
+
+            foreach (KeyValuePair<string, object> kvp in source) {
+                destination[kvp.Key] = kvp.Value;
+            }
+        }
     }
 }
