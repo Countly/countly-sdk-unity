@@ -8,30 +8,62 @@ using UnityEngine;
 
 namespace Plugins.CountlySDK.Services
 {
-
-    public class ViewCountlyService : AbstractBaseService
+    public class ViewCountlyService : AbstractBaseService, IViewModule, IViewIDProvider
     {
+        private string currentViewID;
+        private string previousViewID;
+        private readonly string viewEventKey = "[CLY]_view";
+
         internal bool _isFirstView = true;
         internal readonly EventCountlyService _eventService;
+        internal readonly Countly _cly;
+        internal readonly CountlyUtils _utils;
+        internal ISafeIDGenerator safeViewIDGenerator;
+
         private readonly Dictionary<string, DateTime> _viewToLastViewStartTime = new Dictionary<string, DateTime>();
 
-        internal ViewCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, EventCountlyService eventService, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
+        internal ViewCountlyService(Countly countly, CountlyUtils utils, CountlyConfiguration configuration, CountlyLogHelper logHelper, EventCountlyService eventService, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
         {
             Log.Debug("[ViewCountlyService] Initializing.");
-
+            _cly = countly;
+            _utils = utils;
+            eventService.viewIDProvider = this;
             _eventService = eventService;
+            safeViewIDGenerator = configuration.SafeViewIDGenerator;
         }
+
+        #region PublicAPI
+        /// <summary>
+        /// Returns the current ViewID
+        /// </summary>
+        public string GetCurrentViewId()
+        {
+            return currentViewID == null ? "" : currentViewID;
+        }
+
+        /// <summary>
+        /// Returns the previous ViewID
+        /// </summary>
+        public string GetPreviousViewId()
+        {
+            return previousViewID == null ? "" : previousViewID;
+        }
+        #endregion
+
+        #region Deprecated Methods
         /// <summary>
         /// Start tracking a view
         /// </summary>
         /// <param name="name">name of the view</param>
         /// <returns></returns>
+        [Obsolete("RecordOpenViewAsync(string name, IDictionary<string, object> segmentation = null) is deprecated, this is going to be removed in the future.")]
         public async Task RecordOpenViewAsync(string name, IDictionary<string, object> segmentation = null)
         {
             lock (LockObj) {
                 Log.Info("[ViewCountlyService] RecordOpenViewAsync : name = " + name);
 
                 if (!_consentService.CheckConsentInternal(Consents.Views)) {
+                    Log.Debug("[ViewCountlyService] RecordOpenViewAsync, consent is not given, ignoring the request.");
                     return;
                 }
 
@@ -67,7 +99,7 @@ namespace Plugins.CountlySDK.Services
                     _viewToLastViewStartTime.Add(name, DateTime.UtcNow);
                 }
 
-                CountlyEventModel currentView = new CountlyEventModel(CountlyEventModel.ViewEvent, segmentation);
+                CountlyEventModel currentView = new CountlyEventModel(viewEventKey, segmentation, 1);
                 _ = _eventService.RecordEventAsync(currentView);
 
                 _isFirstView = false;
@@ -81,13 +113,14 @@ namespace Plugins.CountlySDK.Services
         /// </summary>
         /// <param name="name of the view"></param>
         /// <returns></returns>
-        //TODO: this performs in a non standard way. It should only be possible to close started views.
+        [Obsolete("RecordCloseViewAsync(string name) is deprecated, this is going to be removed in the future.")]
         public async Task RecordCloseViewAsync(string name)
         {
             lock (LockObj) {
                 Log.Info("[ViewCountlyService] RecordCloseViewAsync : name = " + name);
 
                 if (!_consentService.CheckConsentInternal(Consents.Views)) {
+                    Log.Debug("[ViewCountlyService] RecordCloseViewAsync, consent is not given, ignoring the request.");
                     return;
                 }
 
@@ -129,12 +162,14 @@ namespace Plugins.CountlySDK.Services
         /// <param name="width">width of screen</param>
         /// <param name="height">height of screen</param>
         /// <returns></returns>
+        [Obsolete("ReportActionAsync(string type, int x, int y, int width, int height) is deprecated, this is going to be removed in the future.")]
         public async Task ReportActionAsync(string type, int x, int y, int width, int height)
         {
             lock (LockObj) {
                 Log.Info("[ViewCountlyService] ReportActionAsync : type = " + type + ", x = " + x + ", y = " + y + ", width = " + width + ", height = " + height);
 
                 if (!_consentService.CheckConsentInternal(Consents.Views)) {
+                    Log.Debug("[ViewCountlyService] ReportActionAsync, consent is not given, ignoring the request.");
                     return;
                 }
 
@@ -159,6 +194,8 @@ namespace Plugins.CountlySDK.Services
                 _isFirstView = true;
             }
         }
+        #endregion
+
         #endregion
     }
 }
