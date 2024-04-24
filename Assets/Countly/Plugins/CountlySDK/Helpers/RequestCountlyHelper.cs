@@ -72,6 +72,8 @@ namespace Plugins.CountlySDK.Helpers
             Log.Verbose("[RequestCountlyHelper] Process queue, requests: " + requests.Length);
 
             foreach (CountlyRequestModel reqModel in requests) {
+                //add the platform and unity version in RequestData
+                reqModel.RequestData += "&pl=" + Application.platform + "&uv=" + Application.unityVersion;
                 //add the remaining request count in RequestData
                 reqModel.RequestData += "&rr=" + (requests.Length - 1);
 
