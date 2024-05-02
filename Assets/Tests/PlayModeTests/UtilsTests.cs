@@ -196,7 +196,7 @@ namespace Assets.Tests.PlayModeTests
             RemoveUnsupportedDataTypes_base(data, false);
         }
 
-        // 'PutAll' in CountlyUtils
+        // 'CopyDictionaryToDestination' in CountlyUtils
         // We put all items in a Dictionary into another Dictionary
         // All items should be placed into the destination without any problem
         [Test]
@@ -218,17 +218,25 @@ namespace Assets.Tests.PlayModeTests
                 { "key5", 1234567890123456789L }
             };
 
-            utils.PutAll(destination, source, TestUtility.CreateLogHelper());
+            utils.CopyDictionaryToDestination(destination, source, TestUtility.CreateLogHelper());
 
+            // validating that no changes have happened on source
+            Assert.AreEqual(4, source.Count);
+            Assert.AreEqual(source["key2"], 42);
+            Assert.AreEqual(source["key3"], 3.14);
+            Assert.AreEqual(source["key4"], true);
+            Assert.AreEqual(source["key5"], 1234567890123456789L);
+
+            // validating the destination
             Assert.AreEqual(5, destination.Count);
+            Assert.AreEqual("value1", destination["key1"]);
             Assert.AreEqual(source["key2"], destination["key2"]);
             Assert.AreEqual(source["key3"], destination["key3"]);
             Assert.AreEqual(source["key4"], destination["key4"]);
             Assert.AreEqual(source["key5"], destination["key5"]);
-            Assert.AreEqual("value1", destination["key1"]);
         }
 
-        // 'PutAll' in CountlyUtils
+        // 'CopyDictionaryToDestination' in CountlyUtils
         // We pass empty and null Dictionaries to put into another Dictionary
         // Nothing should break, removed or added into the destination
         [TestCase(true)]
@@ -249,13 +257,21 @@ namespace Assets.Tests.PlayModeTests
                 source = null;
             }
 
-            utils.PutAll(destination, source, TestUtility.CreateLogHelper());
+            utils.CopyDictionaryToDestination(destination, source, TestUtility.CreateLogHelper());
 
+            // validating that no changes have happened on source
+            if (isNull) {
+                Assert.IsNull(source);
+            } else {
+                Assert.IsEmpty(source);
+            }      
+
+            // validating the destination
             Assert.AreEqual("value1", destination["key1"]);
             Assert.AreEqual(1, destination.Count);
         }
 
-        // 'PutAll' in CountlyUtils
+        // 'CopyDictionaryToDestination' in CountlyUtils
         // We pass valid Dictionary into an empty destination
         // All KeyValuePairs should be added into destination
         [TestCase(true)]
@@ -279,8 +295,17 @@ namespace Assets.Tests.PlayModeTests
                 { "key5", 1234567890123456789L }
             };
 
-            utils.PutAll(destination, source, TestUtility.CreateLogHelper());
+            utils.CopyDictionaryToDestination(destination, source, TestUtility.CreateLogHelper());
 
+            // validating that no changes have happened on source
+            Assert.AreEqual(5, source.Count);
+            Assert.AreEqual(source["key1"], "value1");
+            Assert.AreEqual(source["key2"], 42);
+            Assert.AreEqual(source["key3"], 3.14);
+            Assert.AreEqual(source["key4"], true);
+            Assert.AreEqual(source["key5"], 1234567890123456789L);
+
+            // validating the destination
             if (isNull) {
                 Assert.IsNull(destination);
             } else {

@@ -290,15 +290,17 @@ namespace Plugins.CountlySDK
         /// <param name="destination">The dictionary to which the key-value pairs will be copied.</param>
         /// <param name="source">The dictionary from which the key-value pairs will be copied.</param>
         /// <param name="logger">CountlyLogHelper to log warnings if either dictionary is null.</param>
-        public void PutAll(Dictionary<string, object> destination, Dictionary<string, object> source, CountlyLogHelper logger)
+        public void CopyDictionaryToDestination(Dictionary<string, object> destination, Dictionary<string, object> source, CountlyLogHelper logger)
         {
+            logger.Verbose("[CountlyUtils] CopyDictionaryToDestination: Copying source dictionary into destination.");
+
             if (destination == null) {
-                logger?.Warning("[CountlyUtils] PutAll: Provided Dictionary " + destination + " is null.");
+                logger?.Warning("[CountlyUtils] CopyDictionaryToDestination: Provided destination is null.");
                 return;
             }
 
-            if (source == null || source.Count == 0) {
-                logger?.Warning("[CountlyUtils] PutAll: Provided Dictionary " + source + " is null or empty.");
+            if (source == null) {
+                logger?.Warning("[CountlyUtils] CopyDictionaryToDestination: Provided source is null.");
                 return;
             }
 
