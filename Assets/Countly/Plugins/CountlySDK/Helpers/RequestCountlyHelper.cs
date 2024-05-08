@@ -55,7 +55,7 @@ namespace Plugins.CountlySDK.Helpers
             if (_requestRepo.Count >= _config.GetMaxRequestQueueSize()) {
                 // Calculate how many items need to be removed from the queue to accommodate the new request.
                 int exceedAmount = _requestRepo.Count - _config.GetMaxRequestQueueSize();
-                int removeAmount = Mathf.Min(exceedAmount, countlyRequestRemoveLimit);
+                int removeAmount = Mathf.Min(exceedAmount, countlyRequestRemoveLimit) + 1;
                 Log.Warning("[RequestCountlyHelper] Request Queue is full. Dropping the oldest request.");
 
                 // Remove the calculated amount of oldest requests from the queue.
