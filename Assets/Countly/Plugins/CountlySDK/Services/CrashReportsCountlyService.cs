@@ -32,15 +32,15 @@ namespace Plugins.CountlySDK.Services
 
                 int limit = lines.Length;
 
-                if (limit > _configuration.MaxStackTraceLinesPerThread) {
-                    limit = _configuration.MaxStackTraceLinesPerThread;
+                if (limit > _configuration.GetMaxStackTraceLinesPerThread()) {
+                    limit = _configuration.GetMaxStackTraceLinesPerThread();
                 }
 
                 for (int i = 0; i < limit; ++i) {
                     string line = lines[i];
 
-                    if (line.Length > _configuration.MaxStackTraceLineLength) {
-                        line = line.Substring(0, _configuration.MaxStackTraceLineLength);
+                    if (line.Length > _configuration.GetMaxStackTraceLineLength()) {
+                        line = line.Substring(0, _configuration.GetMaxStackTraceLineLength());
                     }
 
                     if (i + 1 != limit) {
@@ -89,6 +89,7 @@ namespace Plugins.CountlySDK.Services
 
             await Task.CompletedTask;
         }
+
         /// <summary>
         /// Public method that sends crash details to the server. Set param "nonfatal" to true for Custom Logged errors
         /// </summary>
@@ -99,7 +100,7 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async Task SendCrashReportAsync(string message, string stackTrace, IDictionary<string, object> segments = null, bool nonfatal = true)
         {
-            if (_configuration.EnableAutomaticCrashReporting) {
+            if (_configuration.IsAutomaticCrashReportingEnabled()) {
                 lock (LockObj) {
                     Log.Info("[CrashReportsCountlyService] SendCrashReportAsync : message = " + message + ", stackTrace = " + stackTrace);
 
@@ -122,6 +123,7 @@ namespace Plugins.CountlySDK.Services
 
             await Task.CompletedTask;
         }
+
         internal async Task SendCrashReportInternal(CountlyExceptionDetailModel model)
         {
             Log.Debug("[CrashReportsCountlyService] SendCrashReportInternal : model = " + model.ToString());
@@ -136,7 +138,6 @@ namespace Plugins.CountlySDK.Services
 
             _requestCountlyHelper.AddToRequestQueue(requestParams);
             await _requestCountlyHelper.ProcessQueue();
-
         }
 
         /// <summary>
@@ -155,9 +156,9 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
 
-            string validBreadcrumb = value.Length > _configuration.MaxValueSize ? value.Substring(0, _configuration.MaxValueSize) : value;
+            string validBreadcrumb = value.Length > _configuration.GetMaxValueSize() ? value.Substring(0, _configuration.GetMaxValueSize()) : value;
 
-            if (_crashBreadcrumbs.Count == _configuration.TotalBreadcrumbsAllowed) {
+            if (_crashBreadcrumbs.Count >= _configuration.GetMaxBreadcrumbCount()) {
                 _crashBreadcrumbs.Dequeue();
             }
 
