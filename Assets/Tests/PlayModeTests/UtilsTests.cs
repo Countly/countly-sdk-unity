@@ -200,7 +200,7 @@ namespace Assets.Tests.PlayModeTests
         // We put all items in a Dictionary into another Dictionary
         // All items should be placed into the destination without any problem
         [Test]
-        public void PutAll_ValidDictionaries()
+        public void CopyDictionaryToDestination_ValidDictionaries()
         {
             Countly.Instance.Init(TestUtility.CreateBaseConfig());
             CountlyUtils utils = new CountlyUtils(Countly.Instance);
@@ -241,7 +241,7 @@ namespace Assets.Tests.PlayModeTests
         // Nothing should break, removed or added into the destination
         [TestCase(true)]
         [TestCase(false)]
-        public void PutAll_NullOrEmptySource(bool isNull)
+        public void CopyDictionaryToDestination_NullOrEmptySource(bool isNull)
         {
             Countly.Instance.Init(TestUtility.CreateBaseConfig());
             CountlyUtils utils = new CountlyUtils(Countly.Instance);
@@ -276,7 +276,7 @@ namespace Assets.Tests.PlayModeTests
         // All KeyValuePairs should be added into destination
         [TestCase(true)]
         [TestCase(false)]
-        public void PutAll_ValidDictionary_EmptyAndNullDestination(bool isNull)
+        public void CopyDictionaryToDestination_ValidDictionary_EmptyAndNullDestination(bool isNull)
         {
             Countly.Instance.Init(TestUtility.CreateBaseConfig());
             CountlyUtils utils = new CountlyUtils(Countly.Instance);
