@@ -3,17 +3,12 @@ using Plugins.CountlySDK;
 using Plugins.CountlySDK.Models;
 using NUnit.Framework;
 using Plugins.CountlySDK.Enums;
+using System;
 
 namespace Assets.Tests.PlayModeTests
 {
     public class UtilsTests
     {
-        [SetUp]
-        public void SetUp()
-        {
-            TestUtility.TestCleanup();
-        }
-
         // 'GetAppKeyAndDeviceIdParams' method in the CountlyUtils.
         // Retrieves a dictionary containing the "app_key" and "device_id" parameters.
         // It should return a dictionary which contains correct "app_key" and "device_id"
@@ -201,6 +196,128 @@ namespace Assets.Tests.PlayModeTests
             RemoveUnsupportedDataTypes_base(data, false);
         }
 
+        // 'CopyDictionaryToDestination' in CountlyUtils
+        // We put all items in a Dictionary into another Dictionary
+        // All items should be placed into the destination without any problem
+        [Test]
+        public void CopyDictionaryToDestination_ValidDictionaries()
+        {
+            Countly.Instance.Init(TestUtility.CreateBaseConfig());
+            CountlyUtils utils = new CountlyUtils(Countly.Instance);
+
+            Dictionary<string, object> destination = new Dictionary<string, object>
+            {
+                { "key1", "value1" }
+            };
+
+            Dictionary<string, object> source = new Dictionary<string, object>
+            {
+                { "key2", 42 },
+                { "key3", 3.14 },
+                { "key4", true },
+                { "key5", 1234567890123456789L }
+            };
+
+            utils.CopyDictionaryToDestination(destination, source, TestUtility.CreateLogHelper());
+
+            // validating that no changes have happened on source
+            Assert.AreEqual(4, source.Count);
+            Assert.AreEqual(source["key2"], 42);
+            Assert.AreEqual(source["key3"], 3.14);
+            Assert.AreEqual(source["key4"], true);
+            Assert.AreEqual(source["key5"], 1234567890123456789L);
+
+            // validating the destination
+            Assert.AreEqual(5, destination.Count);
+            Assert.AreEqual("value1", destination["key1"]);
+            Assert.AreEqual(source["key2"], destination["key2"]);
+            Assert.AreEqual(source["key3"], destination["key3"]);
+            Assert.AreEqual(source["key4"], destination["key4"]);
+            Assert.AreEqual(source["key5"], destination["key5"]);
+        }
+
+        // 'CopyDictionaryToDestination' in CountlyUtils
+        // We pass empty and null Dictionaries to put into another Dictionary
+        // Nothing should break, removed or added into the destination
+        [TestCase(true)]
+        [TestCase(false)]
+        public void CopyDictionaryToDestination_NullOrEmptySource(bool isNull)
+        {
+            Countly.Instance.Init(TestUtility.CreateBaseConfig());
+            CountlyUtils utils = new CountlyUtils(Countly.Instance);
+
+            Dictionary<string, object> destination = new Dictionary<string, object>
+            {
+                { "key1", "value1" }
+            };
+
+            Dictionary<string, object> source = new Dictionary<string, object>();
+
+            if (isNull) {
+                source = null;
+            }
+
+            utils.CopyDictionaryToDestination(destination, source, TestUtility.CreateLogHelper());
+
+            // validating that no changes have happened on source
+            if (isNull) {
+                Assert.IsNull(source);
+            } else {
+                Assert.IsEmpty(source);
+            }      
+
+            // validating the destination
+            Assert.AreEqual("value1", destination["key1"]);
+            Assert.AreEqual(1, destination.Count);
+        }
+
+        // 'CopyDictionaryToDestination' in CountlyUtils
+        // We pass valid Dictionary into an empty destination
+        // All KeyValuePairs should be added into destination
+        [TestCase(true)]
+        [TestCase(false)]
+        public void CopyDictionaryToDestination_ValidDictionary_EmptyAndNullDestination(bool isNull)
+        {
+            Countly.Instance.Init(TestUtility.CreateBaseConfig());
+            CountlyUtils utils = new CountlyUtils(Countly.Instance);
+
+            Dictionary<string, object> destination = new Dictionary<string, object>();
+            if (isNull) {
+                destination = null;
+            }
+
+            Dictionary<string, object> source = new Dictionary<string, object>
+            {
+                { "key1", "value1" },
+                { "key2", 42 },
+                { "key3", 3.14 },
+                { "key4", true },
+                { "key5", 1234567890123456789L }
+            };
+
+            utils.CopyDictionaryToDestination(destination, source, TestUtility.CreateLogHelper());
+
+            // validating that no changes have happened on source
+            Assert.AreEqual(5, source.Count);
+            Assert.AreEqual(source["key1"], "value1");
+            Assert.AreEqual(source["key2"], 42);
+            Assert.AreEqual(source["key3"], 3.14);
+            Assert.AreEqual(source["key4"], true);
+            Assert.AreEqual(source["key5"], 1234567890123456789L);
+
+            // validating the destination
+            if (isNull) {
+                Assert.IsNull(destination);
+            } else {
+                Assert.AreEqual(source.Count, destination.Count);
+                foreach (var kvp in source) {
+                    Assert.IsTrue(destination.ContainsKey(kvp.Key));
+                    Assert.AreEqual(kvp.Value, destination[kvp.Key]);
+                }
+            }
+        }
+
+        [SetUp]
         [TearDown]
         public void End()
         {
