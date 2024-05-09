@@ -5,6 +5,8 @@ using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK.Persistance.Entities;
 using Plugins.CountlySDK.Enums;
 using System.Text.RegularExpressions;
+using UnityEngine;
+using NUnit.Framework;
 
 namespace Assets.Tests.PlayModeTests
 {
@@ -27,7 +29,7 @@ namespace Assets.Tests.PlayModeTests
                 .SetDeviceId(DEVICE_ID);
             return configuration;
         }
-        
+
         /// <summary>
         /// Creates a Countly configuration with setting consent requirement to true, predefined server URL, app key, and device ID.
         /// </summary>
@@ -42,12 +44,38 @@ namespace Assets.Tests.PlayModeTests
         }
 
         /// <summary>
+        /// Creates a Countly configuration with setting consent requirement to true
+        /// </summary>
+        /// <returns>CountlyConfiguration object with no given consent</returns>
+        public static CountlyConfiguration CreateNoConsentConfig()
+        {
+            CountlyConfiguration configuration = CreateBaseConfig()
+                .SetRequiresConsent(true);
+
+            return configuration;
+        }
+
+        /// <summary>
+        /// Creates a Countly configuration for testing View functionality by setting related fields
+        /// </summary>
+        /// <returns>CountlyConfiguration object representing the basic configuration.</returns>
+        public static CountlyConfiguration CreateViewConfig(CustomIdProvider customIdProvider)
+        {
+            CountlyConfiguration configuration = CreateBaseConfig()
+                .SetRequiresConsent(true);
+            configuration.SafeViewIDGenerator = customIdProvider;
+            configuration.GiveConsent(new Consents[] { Consents.Views });
+
+            return configuration;
+        }
+
+        /// <summary>
         /// Clears the queues of the Countly SDK.
         /// </summary>
         /// <param name="CountlyInstance"></param>
         public static void ClearSDKQueues(Countly CountlyInstance)
         {
-            CountlyInstance.Views._eventService._eventRepo.Clear();
+            CountlyInstance.Events._eventRepo.Clear();
             CountlyInstance.CrashReports._requestCountlyHelper._requestRepo.Clear();
         }
 
@@ -187,6 +215,90 @@ namespace Assets.Tests.PlayModeTests
         {
             Countly.Instance.ClearStorage();
             UnityEngine.Object.DestroyImmediate(Countly.Instance);
+        }
+
+        public static Dictionary<string, object> TestSegmentation()
+        {
+            Dictionary<string, object> segmentation = new Dictionary<string, object>();
+            segmentation.Add("string", "Hello!");
+            segmentation.Add("int", 42);
+            segmentation.Add("double", 3.14);
+            segmentation.Add("float", 2.5f);
+            segmentation.Add("long", 1234567890123456789L);
+            segmentation.Add("bool", true);
+
+            return segmentation;
+        }
+
+        public static Dictionary<string, object> BaseViewTestSegmentation(string viewName, bool isVisit, bool isStart)
+        {
+            Dictionary<string, object> segmentation = new Dictionary<string, object>();
+            segmentation.Add("name", viewName);
+            if (isVisit) {
+                segmentation.Add("visit", 1);
+            }
+            if (isStart) {
+                segmentation.Add("start", 1);
+            }
+            segmentation.Add("segment", Application.platform.ToString().ToLower());
+
+            return segmentation;
+        }
+
+        public static Dictionary<string, object> TestTimeMetrics()
+        {
+            return TimeMetricModel.GetTimeMetricModel();
+        }
+
+        // Validates the properties of a CountlyEventModel object for view events or view action events
+        public static void ViewEventValidator(CountlyEventModel eventModel, int? expectedCount, double? expectedSum,
+            int? expectedDuration, Dictionary<string, object>? expectedSegmentation,
+            string? expectedEventId, string? expectedPreviousViewId, string? expectedCurrentViewId,
+            string? expectedPreviousEventId, Dictionary<string, object>? expectedTimeMetrics, bool isAction = false)
+        {
+            if (isAction) {
+                Assert.AreEqual(eventModel.Key, "[CLY]_action");
+            } else {
+                Assert.AreEqual(eventModel.Key, "[CLY]_view");
+            }
+
+            Assert.AreEqual(eventModel.Count, expectedCount);
+            Assert.AreEqual(eventModel.Sum, expectedSum);
+            Assert.AreEqual(eventModel.Duration, expectedDuration);
+
+            if (expectedSegmentation != null) {
+                foreach (var kvp in expectedSegmentation) {
+                    Assert.IsTrue(eventModel.Segmentation.ContainsKey(kvp.Key));
+                    Assert.AreEqual(eventModel.Segmentation[kvp.Key], kvp.Value);
+                }
+            }
+
+            Assert.AreEqual(eventModel.EventID, expectedEventId);
+            Assert.AreEqual(eventModel.PreviousViewID, expectedPreviousViewId);
+            Assert.AreEqual(eventModel.CurrentViewID, expectedCurrentViewId);
+            Assert.AreEqual(eventModel.PreviousEventID, expectedPreviousEventId);
+
+            // Check time metrics if provided
+            if (expectedTimeMetrics != null) {
+                foreach (var kvp in expectedTimeMetrics) {
+                    if (kvp.Key == "timestamp") {
+                        Assert.IsTrue(Mathf.Abs(eventModel.Timestamp - (long)kvp.Value) < 6000);
+                    } else if (kvp.Key == "hour") {
+                        Assert.AreEqual(eventModel.Hour, kvp.Value);
+                    } else if (kvp.Key == "dow") {
+                        Assert.AreEqual(eventModel.DayOfWeek, kvp.Value);
+                    }
+                }
+            }
+        }
+
+        public static void ValidateRQEQSize(Countly cly, int expRQSize, int expEQSize)
+        {
+            CountlyRequestModel[] requests = cly.RequestHelper._requestRepo.Models.ToArray();
+            Assert.AreEqual(expRQSize, requests.Length);
+
+            CountlyEventModel[] events = cly.Events._eventRepo.Models.ToArray();
+            Assert.AreEqual(expEQSize, events.Length);
         }
     }
 }

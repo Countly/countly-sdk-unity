@@ -10,9 +10,21 @@ namespace Plugins.CountlySDK.Services
 {
     public class ViewCountlyService : AbstractBaseService, IViewModule, IViewIDProvider
     {
+        private class ViewData
+        {
+            public string ViewID;
+            public long ViewStartTimeSeconds; // If this is 0, the view is not started yet or was paused
+            public string ViewName;
+            public bool IsAutoStoppedView; // Views started with "startAutoStoppedView" would have this as "true".
+            public bool IsAutoPaused; // This marks that this view automatically paused when going to the background
+            public Dictionary<string, object> ViewSegmentation;
+        }
+
         private string currentViewID;
         private string previousViewID;
         private readonly string viewEventKey = "[CLY]_view";
+
+        readonly Dictionary<string, ViewData> viewDataMap = new Dictionary<string, ViewData>();
 
         internal bool _isFirstView = true;
         internal readonly EventCountlyService _eventService;
@@ -99,7 +111,17 @@ namespace Plugins.CountlySDK.Services
                     _viewToLastViewStartTime.Add(name, DateTime.UtcNow);
                 }
 
-                CountlyEventModel currentView = new CountlyEventModel(viewEventKey, segmentation, 1);
+                ViewData currentViewData = new ViewData();
+                currentViewData.ViewID = safeViewIDGenerator.GenerateValue();
+                currentViewData.ViewName = name;
+                currentViewData.ViewStartTimeSeconds = _utils.CurrentTimestampSeconds();
+                currentViewData.IsAutoStoppedView = false;
+
+                viewDataMap.Add(currentViewData.ViewID, currentViewData);
+                previousViewID = currentViewID;
+                currentViewID = currentViewData.ViewID;
+
+                CountlyEventModel currentView = new CountlyEventModel(viewEventKey, segmentation, 1, null, null, currentViewData.ViewID, previousViewID, currentViewID);
                 _ = _eventService.RecordEventAsync(currentView);
 
                 _isFirstView = false;

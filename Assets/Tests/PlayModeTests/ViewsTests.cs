@@ -4,71 +4,32 @@ using UnityEngine;
 using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK;
 using Plugins.CountlySDK.Enums;
+using Plugins.CountlySDK.Services;
+using System.Threading;
 
 namespace Assets.Tests.PlayModeTests
 {
     public class ViewsTests
     {
-        // Validates the properties of a CountlyEventModel object for view events or view action events
-        private void ValidateViewEvent(CountlyEventModel model, string name, bool isOpenView, int start = 1, bool isAction = false)
+        readonly Dictionary<string, object> testSegmentation;
+        static string[] viewNames;
+
+        public ViewsTests()
         {
-            Assert.IsNull(model.Sum);
-            Assert.AreEqual(1, model.Count);
-            Assert.IsNull(model.Duration);
-            Assert.IsNotNull(model.Segmentation);
-
-            if (isAction) {
-                Assert.AreEqual(CountlyEventModel.ViewActionEvent, model.Key);
-            } else {
-                Assert.AreEqual(CountlyEventModel.ViewEvent, model.Key);
-                Assert.AreEqual(name, model.Segmentation["name"]);
-            }
-
-            if (isOpenView) {
-                Assert.AreEqual(1, model.Segmentation["visit"]);
-                Assert.AreEqual(start, model.Segmentation["start"]);
-            }
+            testSegmentation = TestUtility.TestSegmentation();
+            InitializeViewNames(10);
         }
+        #region Deprecated Function Tests        
 
-        // It validates the event repository initial state.
-        // After initializing Countly, ViewCountlyService shouldn't be "null".
-        // If no event is recorded, count in the event repository should be 0.
-        [Test]
-        public void ViewsRepoInitialState()
+        // Method to initialize the viewNames array
+        private static void InitializeViewNames(int arraySize)
         {
-            Countly.Instance.Init(TestUtility.CreateBaseConfig());
-
-            Assert.IsNotNull(Countly.Instance.Views);
-            Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
-        }
-
-        // 'RecordOpenViewAsync' method in ViewCountlyService.
-        // We validate the view interraction with of 'Event Consent'.
-        // Views Service should only record if consent is given.
-        [Test]
-        public async void EventConsentDependency()
-        {
-            CountlyConfiguration configuration = TestUtility.CreateBaseConfig();
-            configuration.RequiresConsent = true;
-
-            configuration.GiveConsent(new Consents[] { Consents.Views });
-
-            Countly.Instance.Init(configuration);
-
-            Assert.IsNotNull(Countly.Instance.Views);
-            Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
-
-            await Countly.Instance.Views.RecordOpenViewAsync("open_view");
-            Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
-
-            CountlyEventModel model = Countly.Instance.Views._eventService._eventRepo.Dequeue();
-            ValidateViewEvent(model, "open_view", true);
-
-            await Countly.Instance.Views.RecordOpenViewAsync("close_view");
-            Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
-
-            model = Countly.Instance.Views._eventService._eventRepo.Dequeue();
-            ValidateViewEvent(model, "close_view", false);
+            if (viewNames == null) {
+                viewNames = new string[arraySize];
+                for (int i = 0; i < arraySize; i++) {
+                    viewNames[i] = "viewName" + (i + 1);
+                }
+            }
         }
 
         // 'RecordOpenViewAsync' method in ViewCountlyService
@@ -77,21 +38,16 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public async void ViewsConsent()
         {
-            CountlyConfiguration configuration = TestUtility.CreateBaseConfig();
-            configuration.RequiresConsent = true;
-            Countly.Instance.Init(configuration);
-
-            Countly.Instance.Views._eventService._eventRepo.Clear();
-            Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
-
-            Assert.IsNotNull(Countly.Instance.Views);
-            Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
+            CountlyConfiguration config = TestUtility.CreateNoConsentConfig();
+            Countly cly = Countly.Instance;
+            cly.Init(config);
+            IViewModule views = cly.Views;
+            TestUtility.ValidateRQEQSize(cly, 2, 0);
 
             await Countly.Instance.Views.RecordCloseViewAsync("close_view");
-            Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
-
+            TestUtility.ValidateRQEQSize(cly, 2, 0);
             await Countly.Instance.Views.RecordOpenViewAsync("open_view");
-            Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
+            TestUtility.ValidateRQEQSize(cly, 2, 0);
         }
 
         // 'RecordOpenViewAsync' method in ViewCountlyService
@@ -100,161 +56,139 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public async void ViewNameLimit()
         {
-            CountlyConfiguration configuration = TestUtility.CreateBaseConfig();
-            configuration.MaxKeyLength = 5;
-            Countly.Instance.Init(configuration);
+            CountlyConfiguration config = TestUtility.CreateViewConfig(new CustomIdProvider())
+                .SetMaxKeyLength(5);
+            Countly cly = Countly.Instance;
 
-            Countly.Instance.ClearStorage();
-            Assert.IsNotNull(Countly.Instance.Views);
-            Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
+            cly.Init(config);
+            IViewModule views = cly.Views;
+            IViewIDProvider iDGenerator = cly.Views;
+            TestUtility.ValidateRQEQSize(cly, 2, 0);
 
-            await Countly.Instance.Views.RecordOpenViewAsync("open_view");
-            await Countly.Instance.Views.RecordCloseViewAsync("close_view");
-            Assert.AreEqual(2, Countly.Instance.Views._eventService._eventRepo.Count);
+            await views.RecordOpenViewAsync("open_view");
+            await views.RecordCloseViewAsync("close_view");
+            TestUtility.ValidateRQEQSize(cly, 2, 2);
 
-            CountlyEventModel model = Countly.Instance.Views._eventService._eventRepo.Dequeue();
-            ValidateViewEvent(model, "open_", true);
+            CountlyEventModel model = cly.Events._eventRepo.Dequeue();
+            TestUtility.ViewEventValidator(model, 1, null, null, TestUtility.BaseViewTestSegmentation("open_", true, true), iDGenerator.GetCurrentViewId(), null, iDGenerator.GetCurrentViewId(), null, TestUtility.TestTimeMetrics());
 
-            model = Countly.Instance.Views._eventService._eventRepo.Dequeue();
-            ValidateViewEvent(model, "close", false);
+            model = cly.Events._eventRepo.Dequeue();
+            TestUtility.ViewEventValidator(model, 1, null, null, TestUtility.BaseViewTestSegmentation("close", false, false), null, null, null, null, TestUtility.TestTimeMetrics());
+            TestUtility.ValidateRQEQSize(cly, 2, 0);
         }
 
         // 'RecordCloseViewAsync' method in ViewCountlyService.
         // We close a view. Verify that the event is correctly recorded in the Views repository
-        // If a valid view name is provided, it should be recorded and EventModel should be validated by ValidateViewEvent
+        // If a valid view name is provided, it should be recorded and EventModel should be validated
         [Test]
         public async void RecordCloseViewAsync()
         {
-            Countly.Instance.Init(TestUtility.CreateBaseConfig());
-            Assert.IsNotNull(Countly.Instance.Views);
-            Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
+            CountlyConfiguration config = TestUtility.CreateViewConfig(new CustomIdProvider());
+            Countly cly = Countly.Instance;
+            cly.Init(config);
+            IViewModule views = cly.Views;
+            IViewIDProvider iDGenerator = cly.Views;
+            TestUtility.ValidateRQEQSize(cly, 2, 0);
 
-            await Countly.Instance.Views.RecordCloseViewAsync("close_view");
-            Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
+            await views.RecordCloseViewAsync("close_view");
+            TestUtility.ValidateRQEQSize(cly, 2, 1);
 
-            CountlyEventModel model = Countly.Instance.Views._eventService._eventRepo.Dequeue();
-            ValidateViewEvent(model, "close_view", false);
+            CountlyEventModel model = cly.Events._eventRepo.Dequeue();
+            TestUtility.ViewEventValidator(model, 1, null, null, TestUtility.BaseViewTestSegmentation("close_view", false, false), null, null, null, null, TestUtility.TestTimeMetrics());
+            TestUtility.ValidateRQEQSize(cly, 2, 0);
         }
 
-        // 'RecordCloseViewAsync' method in ViewCountlyService.
+        // 'RecordCloseViewAsync' method in ViewCountlyService. 
         // Close a view, verify that the event is correctly recorded in the Views repository
         // If a null view name is provided, it shouldn't be recorded. 
         [Test]
-        public async void RecordCloseViewAsync_NullViewName()
+        public async void RecordCloseViewAsync_NullAndEmptyViewName()
         {
-            Countly.Instance.Init(TestUtility.CreateBaseConfig());
+            CountlyConfiguration config = TestUtility.CreateViewConfig(new CustomIdProvider());
+            Countly cly = Countly.Instance;
+            cly.Init(config);
+            IViewModule views = cly.Views;
+            TestUtility.ValidateRQEQSize(cly, 2, 0);
 
-            Assert.IsNotNull(Countly.Instance.Views);
-            Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
-
-            await Countly.Instance.Views.RecordCloseViewAsync(null);
-            Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
-        }
-
-        // 'RecordCloseViewAsync' method in ViewCountlyService.
-        // Close a view, verify that the event is correctly recorded in the Views repository
-        // If an empty view name is provided, it shouldn't be recorded. 
-        [Test]
-        public async void RecordCloseViewAsync_EmptyViewName()
-        {
-            Countly.Instance.Init(TestUtility.CreateBaseConfig());
-
-            Assert.IsNotNull(Countly.Instance.Views);
-            Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
-
-            await Countly.Instance.Views.RecordCloseViewAsync("");
-            Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
+            await views.RecordCloseViewAsync(null);
+            await views.RecordCloseViewAsync("");
+            TestUtility.ValidateRQEQSize(cly, 2, 0);
         }
 
         // 'RecordOpenViewAsync' method in ViewCountlyService.
         // Open a view and verify that the event is correctly recorded in the Views repository
-        // If a valid view name is provided, it should be recorded and EventModel should be validated by ValidateViewEvent
+        // If a valid view name is provided, it should be recorded and EventModel should be validated
         // It's possible to open 2 views at the same time
         [Test]
         public async void RecordOpenViewAsync()
         {
-            Countly.Instance.Init(TestUtility.CreateBaseConfig());
-            Assert.IsNotNull(Countly.Instance.Views);
-            Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
+            CountlyConfiguration config = TestUtility.CreateViewConfig(new CustomIdProvider());
+            Countly cly = Countly.Instance;
+            cly.Init(config);
+            IViewModule views = cly.Views;
+            IViewIDProvider iDGenerator = cly.Views;
+            TestUtility.ValidateRQEQSize(cly, 2, 0);
 
-            //record the first view
-            await Countly.Instance.Views.RecordOpenViewAsync("open_view");
-            Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
-            CountlyEventModel model = Countly.Instance.Views._eventService._eventRepo.Dequeue();
-            ValidateViewEvent(model, "open_view", true);
+            await views.RecordOpenViewAsync("open_view");
+            await views.RecordCloseViewAsync("open_view_2");
+            TestUtility.ValidateRQEQSize(cly, 2, 2);
 
-            //record the second view and make sure it's not marked as a start view
-            await Countly.Instance.Views.RecordOpenViewAsync("open_view_2");
-            Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
-            model = Countly.Instance.Views._eventService._eventRepo.Dequeue();
-            ValidateViewEvent(model, "open_view_2", true, 0);
+            CountlyEventModel model = cly.Events._eventRepo.Dequeue();
+            TestUtility.ViewEventValidator(model, 1, null, null, TestUtility.BaseViewTestSegmentation("open_view", true, true), iDGenerator.GetCurrentViewId(), null, iDGenerator.GetCurrentViewId(), null, TestUtility.TestTimeMetrics());
+            model = cly.Events._eventRepo.Dequeue();
+            TestUtility.ViewEventValidator(model, 1, null, null, TestUtility.BaseViewTestSegmentation("open_view_2", false, false), null, null, null, null, TestUtility.TestTimeMetrics());
         }
 
         // 'RecordOpenViewAsync' method in ViewCountlyService.
         // Open a view and verify that the event is correctly recorded in the Views repository
         // If an null view name is provided, it shouldn't be recorded. 
         [Test]
-        public async void RecordOpenViewAsync_NullViewName()
+        public async void RecordOpenViewAsync_NullAndEmptyViewName()
         {
-            Countly.Instance.Init(TestUtility.CreateBaseConfig());
+            CountlyConfiguration config = TestUtility.CreateViewConfig(new CustomIdProvider());
+            Countly cly = Countly.Instance;
+            cly.Init(config);
+            IViewModule views = cly.Views;
+            TestUtility.ValidateRQEQSize(cly, 2, 0);
 
-            Assert.IsNotNull(Countly.Instance.Views);
-            Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
-
-            await Countly.Instance.Views.RecordOpenViewAsync(null);
-            Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
-        }
-
-        // 'RecordOpenViewAsync' method in ViewCountlyService.
-        // Open a view and verify that the event is correctly recorded in the Views repository
-        // If an empty view name is provided, it shouldn't be recorded. 
-        [Test]
-        public async void RecordOpenViewAsync_EmptyViewName()
-        {
-            Countly.Instance.Init(TestUtility.CreateBaseConfig());
-
-            Assert.IsNotNull(Countly.Instance.Views);
-            Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
-
-            await Countly.Instance.Views.RecordOpenViewAsync("");
-            Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
+            await views.RecordOpenViewAsync(null);
+            await views.RecordOpenViewAsync("");
+            TestUtility.ValidateRQEQSize(cly, 2, 0);
         }
 
         // 'RecordOpenViewAsync' method in ViewCountlyService.
         // Open a view with segmentation  and verify that verifies the event is correctly recorded in the Views repository 
-        // If a valid view name and segmentation is provided, it should be recorded and EventModel should be validated by ValidateViewEvent
+        // If a valid view name and segmentation is provided, it should be recorded and EventModel should be validated
         [Test]
         public async void RecordOpenViewAsyncWithSegment()
         {
-            Countly.Instance.Init(TestUtility.CreateBaseConfig());
-
-            Assert.IsNotNull(Countly.Instance.Views);
-            Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
+            CountlyConfiguration config = TestUtility.CreateViewConfig(new CustomIdProvider());
+            Countly cly = Countly.Instance;
+            cly.Init(config);
+            IViewModule views = cly.Views;
+            IViewIDProvider iDGenerator = cly.Views;
+            TestUtility.ValidateRQEQSize(cly, 2, 0);
 
             Dictionary<string, object> segmentations = new Dictionary<string, object> {
-                { "name", "new_open_view" }, // override name
                 { "key1", "value1" },
                 { "key2", null }, // invalid value
-                { "", "value2" }, // invalid key
-                { "visit", null } // override existing key with invalid value
+                { "key3", "" }, // invalid value
+                { "key4", new object() }, // invalid value
             };
 
             await Countly.Instance.Views.RecordOpenViewAsync("open_view", segmentations);
-            Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
+            TestUtility.ValidateRQEQSize(cly, 2, 1);
+            CountlyEventModel model = cly.Events._eventRepo.Dequeue();
+            TestUtility.ViewEventValidator(model, 1, null, null, TestUtility.BaseViewTestSegmentation("open_view", true, true), iDGenerator.GetCurrentViewId(), null, iDGenerator.GetCurrentViewId(), null, TestUtility.TestTimeMetrics());
 
-            CountlyEventModel model = Countly.Instance.Views._eventService._eventRepo.Dequeue();
-
-            ValidateViewEvent(model, "open_view", true);
             Assert.AreEqual("value1", model.Segmentation["key1"]);
             Assert.IsFalse(model.Segmentation.ContainsKey("key2"));
             Assert.IsFalse(model.Segmentation.ContainsKey(""));
 
             await Countly.Instance.Views.RecordOpenViewAsync("open_view_2");
-            Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
-
-            model = Countly.Instance.Views._eventService._eventRepo.Dequeue();
-
-            ValidateViewEvent(model, "open_view_2", true, 0);
+            TestUtility.ValidateRQEQSize(cly, 2, 1);
+            model = cly.Events._eventRepo.Dequeue();
+            TestUtility.ViewEventValidator(model, 1, null, null, TestUtility.BaseViewTestSegmentation("open_view_2", true, false), iDGenerator.GetCurrentViewId(), iDGenerator.GetPreviousViewId(), iDGenerator.GetCurrentViewId(), null, TestUtility.TestTimeMetrics());
         }
 
         // 'RecordOpenViewAsync' method in ViewCountlyService.
@@ -263,23 +197,21 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public async void EventQueueThreshold_Limit()
         {
-            CountlyConfiguration configuration = TestUtility.CreateBaseConfig();
-            configuration.EventQueueThreshold = 3;
-            Countly.Instance.Init(configuration);
-
-            Assert.IsNotNull(Countly.Instance.Views);
-            Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
+            CountlyConfiguration config = TestUtility.CreateViewConfig(new CustomIdProvider())
+                .SetEventQueueSizeToSend(1);
+            Countly cly = Countly.Instance;
+            cly.Init(config);
+            IViewModule views = cly.Views;
+            TestUtility.ValidateRQEQSize(cly, 2, 0);
 
             await Countly.Instance.Views.RecordOpenViewAsync("open_view");
-            Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
+            TestUtility.ValidateRQEQSize(cly, 3, 0);
 
             await Countly.Instance.Views.RecordCloseViewAsync("open_view");
-            Assert.AreEqual(2, Countly.Instance.Views._eventService._eventRepo.Count);
+            TestUtility.ValidateRQEQSize(cly, 4, 0);
 
             await Countly.Instance.Views.ReportActionAsync("action", 10, 10, 100, 100);
-            Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
-
-            //todo: add verification in the RQ
+            TestUtility.ValidateRQEQSize(cly, 5, 0);
         }
 
         // 'ReportActionAsync' method in ViewCountlyService.
@@ -288,16 +220,25 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public async void ReportActionAsync()
         {
-            Countly.Instance.Init(TestUtility.CreateBaseConfig());
+            CountlyConfiguration config = TestUtility.CreateViewConfig(new CustomIdProvider());
+            Countly cly = Countly.Instance;
+            cly.Init(config);
+            IViewModule views = cly.Views;
+            TestUtility.ValidateRQEQSize(cly, 2, 0);
 
-            Assert.IsNotNull(Countly.Instance.Views);
-            Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
+            Dictionary<string, object> action = new Dictionary<string, object>
+            {
+                { "type", "action" },
+                { "x", 10 },
+                { "y", 20 },
+                { "width", 100 },
+                { "height", 100 }
+            };
 
             await Countly.Instance.Views.ReportActionAsync("action", 10, 20, 100, 100);
-            Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
-
-            CountlyEventModel model = Countly.Instance.Views._eventService._eventRepo.Dequeue();
-            ValidateViewEvent(model, "", false, 0, true);
+            TestUtility.ValidateRQEQSize(cly, 2, 1);
+            CountlyEventModel model = cly.Events._eventRepo.Dequeue();
+            TestUtility.ViewEventValidator(model, 1, null, null, action, null, null, null, null, TestUtility.TestTimeMetrics(), true);
 
             Assert.AreEqual("action", model.Segmentation["type"]);
             Assert.AreEqual(10, model.Segmentation["x"]);
@@ -306,66 +247,39 @@ namespace Assets.Tests.PlayModeTests
             Assert.AreEqual(100, model.Segmentation["height"]);
         }
 
-        // 'RecordOpenViewAsync' method in ViewCountlyService.
-        // We record a view. Consent is required, consent is given. The recorded view is the first view.
-        // The recorded view should be marked with te "first_view" flag 
-        [Test]
-        public async void StartField()
-        {
-            CountlyConfiguration configuration = TestUtility.CreateBaseConfigConsent(new Consents[] { Consents.Crashes, Consents.Events, Consents.Clicks, Consents.StarRating, Consents.Views, Consents.Users, Consents.Push, Consents.RemoteConfig, Consents.Location });
-            Countly.Instance.Init(configuration);
-
-            Assert.IsNotNull(Countly.Instance.Views);
-            Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
-            Assert.IsTrue(Countly.Instance.Views._isFirstView);
-
-            await Countly.Instance.Views.RecordOpenViewAsync("first_view");
-            Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
-            Assert.IsFalse(Countly.Instance.Views._isFirstView);
-
-            // Dequeue the recorded event from the event repository for validation.
-            CountlyEventModel model = Countly.Instance.Views._eventService._eventRepo.Dequeue();
-            ValidateViewEvent(model, "first_view", true);
-        }
-
         // 'RecordOpenViewAsync' method in ViewCountlyService and 'ChangeDeviceIdWithoutMerge' method in DeviceIdCountlyService.
         // We validate the behavior of the "isFirstView" and view event recording after changing the device ID without merging
         // "isFirstView" field should be true again after changing the device ID.
         [Test]
         public async void StartField_AfterDeviceIdChangeWithoutMerge()
         {
-            CountlyConfiguration configuration = TestUtility.CreateBaseConfigConsent(new Consents[] { Consents.Crashes, Consents.Events, Consents.Clicks, Consents.StarRating, Consents.Views, Consents.Users, Consents.Push, Consents.RemoteConfig, Consents.Location });
-            Countly.Instance.Init(configuration);
+            CountlyConfiguration config = TestUtility.CreateViewConfig(new CustomIdProvider());
+            Countly cly = Countly.Instance;
+            cly.Init(config);
+            IViewModule views = cly.Views;
+            IViewIDProvider iDGenerator = cly.Views;
+            TestUtility.ValidateRQEQSize(cly, 2, 0);
 
-            Assert.IsNotNull(Countly.Instance.Views);
-            Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
-            Assert.IsTrue(Countly.Instance.Views._isFirstView);
-
-            // Record the opening of the first view with the name "first_view".
             await Countly.Instance.Views.RecordOpenViewAsync("first_view");
-            Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
-            Assert.IsFalse(Countly.Instance.Views._isFirstView);
+            TestUtility.ValidateRQEQSize(cly, 2, 1);
+            CountlyEventModel model = cly.Events._eventRepo.Dequeue();
+            TestUtility.ViewEventValidator(model, 1, null, null, TestUtility.BaseViewTestSegmentation("first_view", true, true), iDGenerator.GetCurrentViewId(), null, iDGenerator.GetCurrentViewId(), null, TestUtility.TestTimeMetrics());
 
-            // Change the device ID without merging.
             await Countly.Instance.Device.ChangeDeviceIdWithoutMerge("new device id");
-            Countly.Instance.Views._eventService._eventRepo.Clear();
+            TestUtility.ValidateRQEQSize(cly, 2, 0);
 
-            // The "isFirstView" field should be true again after changing the device ID.
-            Assert.IsTrue(Countly.Instance.Views._isFirstView);
-
-            // Record the opening of the second view with the name "second_view_open".
             await Countly.Instance.Views.RecordOpenViewAsync("second_view_open");
-
-            // The "isFirstView" field should still be true and the count of events in the event repository of the Views should be zero.
-            Assert.IsTrue(Countly.Instance.Views._isFirstView);
+            TestUtility.ValidateRQEQSize(cly, 2, 0);
             Assert.IsFalse(Countly.Instance.Consents.CheckConsent(Consents.Views));
-            Assert.AreEqual(0, Countly.Instance.Views._eventService._eventRepo.Count);
         }
+        #endregion
 
+        [SetUp]
         [TearDown]
         public void End()
         {
             Countly.Instance.ClearStorage();
+            TestUtility.TestCleanup();
             Object.DestroyImmediate(Countly.Instance);
         }
     }
