@@ -27,6 +27,7 @@ namespace Plugins.CountlySDK.Helpers
         internal readonly RequestRepository _requestRepo;
 
         private readonly MonoBehaviour _monoBehaviour;
+        private readonly int countlyRequestRemoveLimit = 100;
 
         internal RequestCountlyHelper(CountlyConfiguration config, CountlyLogHelper log, CountlyUtils countlyUtils, RequestBuilder requestBuilder, RequestRepository requestRepo, MonoBehaviour monoBehaviour)
         {
@@ -38,6 +39,11 @@ namespace Plugins.CountlySDK.Helpers
             _monoBehaviour = monoBehaviour;
         }
 
+        /// <summary>
+        /// Adds a Countly request to the queue, ensuring that the queue size does not exceed the maximum limit.
+        /// If the queue size exceeds the limit, it removes the oldest requests to make space for the new one.
+        /// </summary>
+        /// <param name="request">The Countly request model to be added to the queue.</param>
         internal void AddRequestToQueue(CountlyRequestModel request)
         {
             Log.Verbose("[RequestCountlyHelper] AddRequestToQueue: " + request.ToString());
@@ -46,11 +52,17 @@ namespace Plugins.CountlySDK.Helpers
                 return;
             }
 
-            if (_requestRepo.Count == _config.StoredRequestLimit) {
-
+            if (_requestRepo.Count >= _config.GetMaxRequestQueueSize()) {
+                // Calculate how many items need to be removed from the queue to accommodate the new request.
+                int exceedAmount = _requestRepo.Count - _config.GetMaxRequestQueueSize();
+                int removeAmount = Mathf.Min(exceedAmount, countlyRequestRemoveLimit) + 1;
                 Log.Warning("[RequestCountlyHelper] Request Queue is full. Dropping the oldest request.");
 
-                _requestRepo.Dequeue();
+                // Remove the calculated amount of oldest requests from the queue.
+                while (removeAmount > 0) {
+                    _requestRepo.Dequeue();
+                    removeAmount--;
+                }
             }
 
             _requestRepo.Enqueue(request);
@@ -94,7 +106,7 @@ namespace Plugins.CountlySDK.Helpers
         private async Task<CountlyResponse> ProcessRequest(CountlyRequestModel model)
         {
             Log.Verbose("[RequestCountlyHelper] Process request, request: " + model);
-            bool shouldPost = _config.EnablePost || model.RequestData.Length > 2000;
+            bool shouldPost = _config.IsForcedHttpPostEnabled() || model.RequestData.Length > 2000;
 
 #if UNITY_WEBGL
             // There is not HTTP GET for webGL. We always do a HTTP POST
@@ -119,10 +131,10 @@ namespace Plugins.CountlySDK.Helpers
 
         private string AddChecksum(string query)
         {
-            if (!string.IsNullOrEmpty(_config.Salt)) {
+            if (!string.IsNullOrEmpty(_config.GetParameterTamperingProtectionSalt())) {
                 // Create a SHA256
                 using (SHA256 sha256Hash = SHA256.Create()) {
-                    byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(query + _config.Salt));
+                    byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(query + _config.GetParameterTamperingProtectionSalt()));
                     string hex = _countlyUtils.GetStringFromBytes(bytes);
 
                     query += "&checksum256=" + hex;
@@ -134,10 +146,10 @@ namespace Plugins.CountlySDK.Helpers
         }
 
         /// <summary>
-        ///     Makes an Asynchronous GET request to the Countly server.
+        /// Makes an Asynchronous GET request to the Countly server.
         /// </summary>
-        /// <param name="url"></param>
-        /// <param name="addToRequestQueue"></param>
+        /// <param name="uri"></param>
+        /// <param name="data"></param>
         /// <returns></returns>
         internal async Task<CountlyResponse> GetAsync(string uri, string data)
         {
@@ -174,7 +186,6 @@ namespace Plugins.CountlySDK.Helpers
                         countlyResponse.IsSuccess = IsSuccess(countlyResponse);
                     }
                 }
-
             }
 
             Log.Verbose("[RequestCountlyHelper] GetAsync request: " + url + " params: " + query + " response: " + countlyResponse.ToString());
@@ -183,12 +194,10 @@ namespace Plugins.CountlySDK.Helpers
         }
 
         /// <summary>
-        ///     Makes an Asynchronous POST request to the Countly server.
+        /// Makes an Asynchronous POST request to the Countly server.
         /// </summary>
         /// <param name="uri"></param>
         /// <param name="data"></param>
-        /// <param name="contentType"></param>
-        /// <param name="addToRequestQueue"></param>
         /// <returns></returns>
         internal async Task<CountlyResponse> PostAsync(string uri, string data)
         {
@@ -231,7 +240,6 @@ namespace Plugins.CountlySDK.Helpers
                         countlyResponse.IsSuccess = IsSuccess(countlyResponse);
                     }
                 }
-
             }
 
             Log.Verbose("[RequestCountlyHelper] PostAsync request: " + uri + " body: " + data + " response: " + countlyResponse.ToString());
@@ -242,7 +250,6 @@ namespace Plugins.CountlySDK.Helpers
         /// <summary>
         /// Asynchronously initiates a request routine, combining URL and data, and starts a coroutine to process the request with checksum validation.
         /// </summary>
-        /// <param name="shouldPost"></param>
         /// <param name="uri"></param>
         /// <param name="data"></param>
         /// <returns></returns>
@@ -260,8 +267,7 @@ namespace Plugins.CountlySDK.Helpers
         /// <summary>
         /// Processes a UnityWebRequest coroutine, handling response and errors, and invoking a callback with the CountlyResponse.
         /// </summary>
-        /// <param name="shouldPost"></param>
-        /// <param name="url"></param>
+        /// <param name="uri"></param>
         /// <param name="data"></param>
         /// <param name="callback"></param>
         /// <returns></returns>
