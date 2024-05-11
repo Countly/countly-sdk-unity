@@ -29,7 +29,7 @@ namespace Assets.Tests.PlayModeTests
                 .SetDeviceId(DEVICE_ID);
             return configuration;
         }
-        
+
         /// <summary>
         /// Creates a Countly configuration with setting consent requirement to true, predefined server URL, app key, and device ID.
         /// </summary>

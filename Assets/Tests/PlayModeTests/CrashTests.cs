@@ -75,18 +75,18 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public async void CrashLimits()
         {
-            CountlyConfiguration configuration = TestUtility.CreateBaseConfig();
-            configuration.MaxValueSize = 5;
-            configuration.MaxKeyLength = 5;
-            configuration.MaxSegmentationValues = 2;
-            configuration.MaxStackTraceLineLength = 5;
-            configuration.MaxStackTraceLinesPerThread = 2;
-            Countly.Instance.Init(configuration);
-            Countly.Instance.ClearStorage();
+            CountlyConfiguration configuration = TestUtility.CreateBaseConfig()
+                .SetMaxValueSize(5)
+                .SetMaxKeyLength(5)
+                .SetMaxSegmentationValues(2)
+                .SetMaxStackTraceLineLength(5)
+                .SetMaxStackTraceLinesPerThread(2);
 
+            Countly.Instance.Init(configuration);
+            Assert.AreEqual(1, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
+            Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
 
             Assert.IsNotNull(Countly.Instance.CrashReports);
-            Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
 
             Dictionary<string, object> seg = new Dictionary<string, object>
             {
@@ -96,6 +96,8 @@ namespace Assets.Tests.PlayModeTests
             };
 
             await Countly.Instance.CrashReports.SendCrashReportAsync("message", "StackTrace_1\nStackTrace_2\nStackTrace_3", seg);
+
+            // TODO: Instead use ValidateRQEQSize from TestUtility
             Assert.AreEqual(1, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
 
             // Dequeue the sent request and parse its data for further verification.
@@ -243,7 +245,7 @@ namespace Assets.Tests.PlayModeTests
 
         // Performs cleanup after each test.
         // Clears Countly storage and destroys the Countly instance to ensure a clean state for subsequent tests.
-        [TearDown]
+        [SetUp][TearDown]
         public void End()
         {
             Countly.Instance.ClearStorage();
