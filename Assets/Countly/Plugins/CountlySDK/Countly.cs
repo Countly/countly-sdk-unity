@@ -117,7 +117,7 @@ namespace Plugins.CountlySDK
         public UserDetailsCountlyService UserDetails { get; private set; }
 
         /// <summary>
-        /// Exposes functionality to start and stop recording views
+        /// Exposes functionality to start, pause, resume and stop views with option of adding segmentation
         /// </summary>
         /// <returns>ViewCountlyService</returns>
         public IViewModule Views { get; private set; }
