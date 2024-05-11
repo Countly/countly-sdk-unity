@@ -8,12 +8,6 @@ using UnityEngine;
 
 namespace Plugins.CountlySDK.Services
 {
-    interface IViewIDProvider
-    {
-        public string GetCurrentViewId();
-        public string GetPreviousViewId();
-    }
-
     public class ViewCountlyService : AbstractBaseService, IViewModule, IViewIDProvider
     {
         private class ViewData
@@ -398,9 +392,7 @@ namespace Plugins.CountlySDK.Services
             Dictionary<string, object> accumulatedEventSegm = new Dictionary<string, object>(automaticViewSegmentation);
 
             if (customViewSegmentation != null) {
-                foreach (KeyValuePair<string, object> kvp in customViewSegmentation) {
-                    accumulatedEventSegm.Add(kvp.Key, kvp.Value);
-                }
+                _utils.CopyDictionaryToDestination(accumulatedEventSegm, customViewSegmentation, Log);
             }
 
             Dictionary<string, object> viewSegmentation = CreateViewEventSegmentation(currentViewData, _isFirstView, true, accumulatedEventSegm);
@@ -577,15 +569,11 @@ namespace Plugins.CountlySDK.Services
 
             Dictionary<string, object> accumulatedEventSegm = new Dictionary<string, object>(automaticViewSegmentation);
             if (filteredCustomViewSegmentation != null) {
-                foreach (KeyValuePair<string, object> kvp in filteredCustomViewSegmentation) {
-                    accumulatedEventSegm.Add(kvp.Key, kvp.Value);
-                }
+                _utils.CopyDictionaryToDestination(accumulatedEventSegm, filteredCustomViewSegmentation, Log);
             }
 
             if (vd.ViewSegmentation != null) {
-                foreach (KeyValuePair<string, object> kvp in vd.ViewSegmentation) {
-                    accumulatedEventSegm.Add(kvp.Key, kvp.Value);
-                }
+                _utils.CopyDictionaryToDestination(accumulatedEventSegm, vd.ViewSegmentation, Log);
             }
 
             long viewDurationSeconds = lastElapsedDurationSeconds;
@@ -605,9 +593,7 @@ namespace Plugins.CountlySDK.Services
         {
             Dictionary<string, object> viewSegmentation = new Dictionary<string, object>();
             if (customViewSegmentation != null) {
-                foreach (KeyValuePair<string, object> kvp in customViewSegmentation) {
-                    viewSegmentation.Add(kvp.Key, kvp.Value);
-                }
+                _utils.CopyDictionaryToDestination(viewSegmentation, customViewSegmentation, Log);
             }
 
             viewSegmentation.Add("name", vd.ViewName);
@@ -689,9 +675,7 @@ namespace Plugins.CountlySDK.Services
                     Log.Warning("[ViewCountlyService] SetGlobalViewSegmentationInternal, You have provided an unsupported data type in your View Segmentation. Removing the unsupported values.");
                 }
 
-                foreach (KeyValuePair<string, object> kvp in viewSegmentation) {
-                    automaticViewSegmentation.Add(kvp.Key, kvp.Value);
-                }
+                _utils.CopyDictionaryToDestination(automaticViewSegmentation, viewSegmentation, Log);
             }
         }
 
@@ -724,9 +708,7 @@ namespace Plugins.CountlySDK.Services
             if (vd.ViewSegmentation == null) {
                 vd.ViewSegmentation = new Dictionary<string, object>(viewSegmentation);
             } else {
-                foreach (KeyValuePair<string, object> kvp in viewSegmentation) {
-                    vd.ViewSegmentation.Add(kvp.Key, kvp.Value);
-                }
+                _utils.CopyDictionaryToDestination(vd.ViewSegmentation, vd.ViewSegmentation, Log);
             }
         }
 
@@ -771,9 +753,7 @@ namespace Plugins.CountlySDK.Services
 
             _utils.RemoveReservedKeysFromSegmentation(viewSegmentation, reservedSegmentationKeysViews, "[ViewsCountlyService] UpdateGlobalViewSegmentationInternal, ", Log);
 
-            foreach (KeyValuePair<string, object> kvp in viewSegmentation) {
-                automaticViewSegmentation[kvp.Key] = kvp.Value;
-            }
+            _utils.CopyDictionaryToDestination(automaticViewSegmentation, viewSegmentation, Log);
         }
         #endregion
         #region Deprecated Methods
