@@ -117,9 +117,8 @@ namespace Plugins.CountlySDK
         public UserDetailsCountlyService UserDetails { get; private set; }
 
         /// <summary>
-        /// Exposes functionality to start, pause, resume and stop views with option of adding segmentation
+        /// Exposes functionality for managing view lifecycle with segmentation options. Includes global view segmentation and adding segmentation to ongoing views.
         /// </summary>
-        /// <returns>ViewCountlyService</returns>
         public IViewModule Views { get; private set; }
         public MetricHelper MetricHelper { get; private set; }
         internal SessionCountlyService Session { get; set; }
