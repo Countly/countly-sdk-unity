@@ -19,7 +19,7 @@ namespace Assets.Tests.PlayModeTests
             testSegmentation = TestUtility.TestSegmentation();
             InitializeViewNames(10);
         }
-#region Deprecated Function Tests        
+        #region Deprecated Function Tests        
 
         // Method to initialize the viewNames array
         private static void InitializeViewNames(int arraySize)
@@ -31,7 +31,7 @@ namespace Assets.Tests.PlayModeTests
                 }
             }
         }
-        
+
         // 'RecordOpenViewAsync' method in ViewCountlyService
         // Validating how Views Service performs if no "views" consent is given.
         // If no consent is given, Views Service shouldn't record anything
@@ -176,7 +176,7 @@ namespace Assets.Tests.PlayModeTests
             TestUtility.ValidateRQEQSize(cly, 2, 1);
             CountlyEventModel model = cly.Events._eventRepo.Dequeue();
             TestUtility.ViewEventValidator(model, 1, null, null, segmentations, null, null, null, null, TestUtility.TestTimeMetrics());
-            
+
             Assert.AreEqual("value1", model.Segmentation["key1"]);
             Assert.IsFalse(model.Segmentation.ContainsKey("key2"));
             Assert.IsFalse(model.Segmentation.ContainsKey(""));
@@ -235,7 +235,7 @@ namespace Assets.Tests.PlayModeTests
             TestUtility.ValidateRQEQSize(cly, 2, 1);
             CountlyEventModel model = cly.Events._eventRepo.Dequeue();
             TestUtility.ViewEventValidator(model, 1, null, null, action, null, null, null, null, TestUtility.TestTimeMetrics(), true);
-            
+
             Assert.AreEqual("action", model.Segmentation["type"]);
             Assert.AreEqual(10, model.Segmentation["x"]);
             Assert.AreEqual(20, model.Segmentation["y"]);
@@ -259,7 +259,7 @@ namespace Assets.Tests.PlayModeTests
             TestUtility.ValidateRQEQSize(cly, 2, 1);
             CountlyEventModel model = cly.Events._eventRepo.Dequeue();
             TestUtility.ViewEventValidator(model, 1, null, null, TestUtility.BaseViewTestSegmentation("first_view", true, true), null, null, null, null, TestUtility.TestTimeMetrics());
-            
+
             await Countly.Instance.Device.ChangeDeviceIdWithoutMerge("new device id");
             TestUtility.ValidateRQEQSize(cly, 2, 0);
 
@@ -267,7 +267,7 @@ namespace Assets.Tests.PlayModeTests
             TestUtility.ValidateRQEQSize(cly, 2, 0);
             Assert.IsFalse(Countly.Instance.Consents.CheckConsent(Consents.Views));
         }
-#endregion
+        #endregion
         // 'StartView' method in ViewCountlyService class
         // We validate that repository is clear and, start a view with view name
         // View should be recorded with correct view name
@@ -560,7 +560,7 @@ namespace Assets.Tests.PlayModeTests
             TestUtility.ValidateRQEQSize(cly, 2, 1);
             CountlyEventModel result = cly.Events._eventRepo.Dequeue();
             TestUtility.ViewEventValidator(result, 1, 0, null, TestUtility.BaseViewTestSegmentation(viewNames[0], true, true), viewId, "", null, null, TestUtility.TestTimeMetrics());
-            
+
             views.PauseViewWithID("random view id");
             TestUtility.ValidateRQEQSize(cly, 2, 0);
 
@@ -597,7 +597,7 @@ namespace Assets.Tests.PlayModeTests
             TestUtility.ValidateRQEQSize(cly, 2, 1);
             CountlyEventModel resultPause = cly.Events._eventRepo.Dequeue();
             TestUtility.ViewEventValidator(resultPause, 1, 0, 0, TestUtility.BaseViewTestSegmentation(viewNames[0], false, false), viewId, "", null, null, TestUtility.TestTimeMetrics());
-            
+
             views.ResumeViewWithID(viewId);
             TestUtility.ValidateRQEQSize(cly, 2, 0);
 
@@ -671,11 +671,48 @@ namespace Assets.Tests.PlayModeTests
             views.AddSegmentationToViewWithID(viewId, TestUtility.TestSegmentation());
 
             Thread.Sleep(1000);
-            
+
             views.StopViewWithID(viewId);
             TestUtility.ValidateRQEQSize(cly, 2, 1);
             CountlyEventModel segmResult = cly.Events._eventRepo.Dequeue();
             TestUtility.ViewEventValidator(segmResult, 1, 0, 1, testSegmentation, viewId, "", null, null, TestUtility.TestTimeMetrics());
+
+            TestUtility.ValidateRQEQSize(cly, 2, 0);
+        }
+
+        // 'AddSegmentationToViewWithID' method in ViewCountlyService
+        // We provide 'null' values for 'AddSegmentationToViewWithID' method
+        // Nothing should crash and no value should be recorded
+        [Test]
+        public void AddSegmentationToViewWithID_NullValues()
+        {
+            CountlyConfiguration config = TestUtility.CreateViewConfig(new CustomIdProvider());
+            Countly cly = Countly.Instance;
+
+            cly.Init(config);
+            IViewModule views = cly.Views;
+            TestUtility.ValidateRQEQSize(cly, 2, 0);
+
+            string viewId = views.StartView(viewNames[0]);
+            TestUtility.ValidateRQEQSize(cly, 2, 1);
+
+            CountlyEventModel result = cly.Events._eventRepo.Dequeue();
+            TestUtility.ViewEventValidator(result, 1, 0, null, TestUtility.BaseViewTestSegmentation(viewNames[0], true, true), viewId, "", null, null, TestUtility.TestTimeMetrics());
+
+            // null
+            views.AddSegmentationToViewWithID(null, null);
+            TestUtility.ValidateRQEQSize(cly, 2, 0);
+            // empty
+            views.AddSegmentationToViewWithID("", new Dictionary<string, object>());
+            TestUtility.ValidateRQEQSize(cly, 2, 0);
+
+            Thread.Sleep(1000);
+
+            views.StopViewWithID(viewId);
+            TestUtility.ValidateRQEQSize(cly, 2, 1);
+
+            CountlyEventModel segmResult = cly.Events._eventRepo.Dequeue();
+            TestUtility.ViewEventValidator(segmResult, 1, 0, 1, TestUtility.BaseViewTestSegmentation(viewNames[0], false, false), viewId, "", null, null, TestUtility.TestTimeMetrics());
 
             TestUtility.ValidateRQEQSize(cly, 2, 0);
         }
@@ -708,6 +745,41 @@ namespace Assets.Tests.PlayModeTests
 
             CountlyEventModel segmResult = cly.Events._eventRepo.Dequeue();
             TestUtility.ViewEventValidator(segmResult, 1, 0, 1, testSegmentation, viewId, "", null, null, TestUtility.TestTimeMetrics());
+            TestUtility.ValidateRQEQSize(cly, 2, 0);
+        }
+
+        // 'AddSegmentationToViewWithName' method in ViewCountlyService
+        // We provide null and empty values to segmentation to 'AddSegmentationToViewWithName' method
+        // Nothing should crash and no value should be recorded
+        [Test]
+        public void AddSegmentationToViewWithName_NullEmptyValues()
+        {
+            CountlyConfiguration config = TestUtility.CreateViewConfig(new CustomIdProvider());
+            Countly cly = Countly.Instance;
+
+            cly.Init(config);
+            IViewModule views = cly.Views;
+            TestUtility.ValidateRQEQSize(cly, 2, 0);
+
+            string viewId = views.StartView(viewNames[0]);
+            TestUtility.ValidateRQEQSize(cly, 2, 1);
+
+            CountlyEventModel result = cly.Events._eventRepo.Dequeue();
+            TestUtility.ViewEventValidator(result, 1, 0, null, TestUtility.BaseViewTestSegmentation(viewNames[0], true, true), viewId, "", null, null, TestUtility.TestTimeMetrics());
+
+            // null
+            views.AddSegmentationToViewWithName(null, null);
+            TestUtility.ValidateRQEQSize(cly, 2, 0);
+            // empty
+            views.AddSegmentationToViewWithName("", new Dictionary<string, object>());
+            TestUtility.ValidateRQEQSize(cly, 2, 0);
+
+            Thread.Sleep(1000);
+            views.StopViewWithName(viewNames[0]);
+            TestUtility.ValidateRQEQSize(cly, 2, 1);
+
+            CountlyEventModel segmResult = cly.Events._eventRepo.Dequeue();
+            TestUtility.ViewEventValidator(segmResult, 1, 0, 1, TestUtility.BaseViewTestSegmentation(viewNames[0], false, false), viewId, "", null, null, TestUtility.TestTimeMetrics());
             TestUtility.ValidateRQEQSize(cly, 2, 0);
         }
 
@@ -847,7 +919,8 @@ namespace Assets.Tests.PlayModeTests
             TestUtility.ValidateRQEQSize(cly, 2, 0);
         }
 
-        [SetUp][TearDown]
+        [SetUp]
+        [TearDown]
         public void End()
         {
             TestUtility.TestCleanup();
