@@ -1,5 +1,5 @@
 ## XX.XX.X
-* Added "SetID(string newDeviceId)" function for managing device id changes.
+* Added "SetID(string newDeviceId)" function in "Countly.Instance.Device" for managing device id changes.
 * Added the following calls in "Countly.Instance.Views":
   * "StartView" for starting a view.
   * "StartAutoStoppedView" for starting an auto-stopped view.
