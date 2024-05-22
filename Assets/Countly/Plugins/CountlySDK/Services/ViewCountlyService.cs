@@ -66,10 +66,11 @@ namespace Plugins.CountlySDK.Services
         }
 
         /// <summary>
-        /// Starts a view which would not close automatically
+        /// Manually starts a view with the given name.
+        /// It can be used to open multiple views in parallel.
         /// </summary>
-        /// <param name="viewName"></param>
-        /// <returns></returns>
+        /// <param name="viewName">Name of the view</param>
+        /// <returns>ViewId</returns>
         public string StartView(string viewName)
         {
             if(!_consentService.CheckConsentInternal(Consents.Views)) {
@@ -85,11 +86,12 @@ namespace Plugins.CountlySDK.Services
         }
 
         /// <summary>
-        /// Starts a view which would not close automatically
+        /// Manually starts a view with the given name.
+        /// It can be used to open multiple views in parallel.
         /// </summary>
-        /// <param name="viewName">name of the view</param>
-        /// <param name="viewSegmentation">segmentation that will be added to the view, set 'null' if none should be added</param>
-        /// <returns></returns>
+        /// <param name="viewName">Name of the view</param>
+        /// <param name="viewSegmentation">Segmentation that will be added to the view, set 'null' if none should be added</param>
+        /// <returns>ViewId</returns>
         public string StartView(string viewName, Dictionary<string, object> viewSegmentation)
         {
             if (!_consentService.CheckConsentInternal(Consents.Views)) {
@@ -105,10 +107,12 @@ namespace Plugins.CountlySDK.Services
         }
 
         /// <summary>
-        /// Starts a view which would be closed automaticly
+        /// Manually starts a view with the given name. Starting any other view or calling this again, 
+        /// closes the one that's opened automatically. <br/>
+        /// This ensures a 'one view at a time' flow.
         /// </summary>
-        /// <param name="viewName"></param>
-        /// <returns></returns>
+        /// <param name="viewName">Name of the view</param>
+        /// <returns>ViewId</returns>
         public string StartAutoStoppedView(string viewName)
         {
             if (!_consentService.CheckConsentInternal(Consents.Views)) {
@@ -122,10 +126,13 @@ namespace Plugins.CountlySDK.Services
         }
 
         /// <summary>
-        /// Starts a view which would be closed automaticly
+        /// Manually starts a view with the given name. Starting any other view or calling this again, 
+        /// closes the one that's opened automatically. <br/>
+        /// This ensures a 'one view at a time' flow.
         /// </summary>
-        /// <param name="viewName"></param>
-        /// <returns></returns>
+        /// <param name="viewName">Name of the view</param>
+        /// <param name="viewSegmentation">Segmentation that will be added to the view, set 'null' if none should be added</param>
+        /// <returns>ViewId</returns>
         public string StartAutoStoppedView(string viewName, Dictionary<string, object> viewSegmentation)
         {
             if (!_consentService.CheckConsentInternal(Consents.Views)) {
@@ -141,9 +148,10 @@ namespace Plugins.CountlySDK.Services
         }
 
         /// <summary>
-        /// Stops a view with the given name if it was open
+        /// Stops a view with the given name if it is open
+        /// If multiple views with same name are open, last opened view will be closed.
         /// </summary>
-        /// <param name="viewName">name of the view</param>
+        /// <param name="viewName">Name of the view</param>
         public void StopViewWithName(string viewName)
         {
             if (!_consentService.CheckConsentInternal(Consents.Views)) {
@@ -159,10 +167,11 @@ namespace Plugins.CountlySDK.Services
         }
 
         /// <summary>
-        /// Stops a view with the given name if it was open
+        /// Stops a view with the given name if it is open
+        /// If multiple views with same name are open, last opened view will be closed.
         /// </summary>
-        /// <param name="viewName">name of the view</param>
-        /// <param name="viewSegmentation">view segmentation</param>
+        /// <param name="viewName">Name of the view</param>
+        /// <param name="viewSegmentation">Segmentation that will be added to the view, set 'null' if none should be added</param>
         public void StopViewWithName(string viewName, Dictionary<string, object> viewSegmentation)
         {
             if (!_consentService.CheckConsentInternal(Consents.Views)) {
@@ -178,7 +187,7 @@ namespace Plugins.CountlySDK.Services
         }
 
         /// <summary>
-        /// Stops a view with the given ID if it was open
+        /// Stops a view with the given ID if it is open
         /// </summary>
         /// <param name="viewID">ID of the view</param>
         public void StopViewWithID(string viewID)
@@ -196,10 +205,10 @@ namespace Plugins.CountlySDK.Services
         }
 
         /// <summary>
-        /// Stops a view with the given ID if it was open
+        /// Stops a view with the given ID if it is open
         /// </summary>
         /// <param name="viewID">ID of the view</param>
-        /// <param name="viewSegmentation">view segmentation</param>
+        /// <param name="viewSegmentation">Segmentation that will be added to the view, set 'null' if none should be added</param>
         public void StopViewWithID(string viewID, Dictionary<string, object> viewSegmentation)
         {
             if (!_consentService.CheckConsentInternal(Consents.Views)) {
@@ -253,7 +262,7 @@ namespace Plugins.CountlySDK.Services
         /// <summary>
         /// Stops all views and records a segmentation if set
         /// </summary>
-        /// <param name="viewSegmentation">view segmentation</param>
+        /// <param name="viewSegmentation">Segmentation that will be added, set 'null' if none should be added</param>
         public void StopAllViews(Dictionary<string, object> viewSegmentation)
         {
             if (!_consentService.CheckConsentInternal(Consents.Views)) {
@@ -271,7 +280,7 @@ namespace Plugins.CountlySDK.Services
         /// <summary>
         /// Set a segmentation to be recorded with all views
         /// </summary>
-        /// <param name="viewSegmentation">global view segmentation</param>
+        /// <param name="viewSegmentation">Global View Segmentation</param>
         public void SetGlobalViewSegmentation(Dictionary<string, object> viewSegmentation)
         {
             if (!_consentService.CheckConsentInternal(Consents.Views)) {
@@ -287,10 +296,10 @@ namespace Plugins.CountlySDK.Services
         }
 
         /// <summary>
-        /// Updates the segmentation of a view with view id
+        /// Updates the segmentation of a view with view id.
         /// </summary>
         /// <param name="viewID">ID of the view</param>
-        /// <param name="viewSegmentation">view segmentation</param>
+        /// <param name="viewSegmentation">Segmentation that will be added to the view</param>
         public void AddSegmentationToViewWithID(string viewID, Dictionary<string, object> viewSegmentation)
         {
             if (!_consentService.CheckConsentInternal(Consents.Views)) {
@@ -306,10 +315,11 @@ namespace Plugins.CountlySDK.Services
         }
 
         /// <summary>
-        /// Updates the segmentation of a view with view name
+        /// Updates the segmentation of a view with view name.
+        /// If multiple views with same name are open, last opened view will be updated.
         /// </summary>
-        /// <param name="viewName"></param>
-        /// <param name="viewSegmentation"></param>
+        /// <param name="viewName">Name of the view</param>
+        /// <param name="viewSegmentation">Segmentation that will be added to the view</param>
         public void AddSegmentationToViewWithName(string viewName, Dictionary<string, object> viewSegmentation)
         {
             if (!_consentService.CheckConsentInternal(Consents.Views)) {
@@ -327,7 +337,7 @@ namespace Plugins.CountlySDK.Services
         /// <summary>
         /// Updates the global segmentation
         /// </summary>
-        /// <param name="viewSegmentation"></param>
+        /// <param name="viewSegmentation">Segmentation that will be added to the view</param>
         public void UpdateGlobalViewSegmentation(Dictionary<string, object> viewSegmentation)
         {
             if (!_consentService.CheckConsentInternal(Consents.Views)) {
@@ -757,12 +767,19 @@ namespace Plugins.CountlySDK.Services
         }
         #endregion
         #region Deprecated Methods
+
         /// <summary>
-        /// Start tracking a view
+        /// Records the opening of a view. This method is deprecated.
         /// </summary>
-        /// <param name="name">name of the view</param>
-        /// <returns></returns>
-        [Obsolete("RecordOpenViewAsync(string name, IDictionary<string, object> segmentation = null) is deprecated, this is going to be removed in the future.")]
+        /// <remarks>
+        /// This method must be used in conjunction with <see cref="RecordCloseViewAsync"/>.
+        /// Do not use with <see cref="StopView"/> as it will not function correctly.
+        /// Please use <see cref="StartView"/> and <see cref="StopView"/> for new implementations.
+        /// </remarks>
+        /// <param name="viewName">The name of the view to open.</param>
+        /// <param name="viewSegmentation">Optional segmentation data for the view.</param>
+        /// <returns>A task representing the asynchronous operation.</returns>
+        [Obsolete("RecordOpenViewAsync(string name, IDictionary<string, object> segmentation = null) is deprecated and will be removed in the future. Please use StartView instead.")]
         public async Task RecordOpenViewAsync(string name, IDictionary<string, object> segmentation = null)
         {
             lock (LockObj) {
@@ -815,11 +832,15 @@ namespace Plugins.CountlySDK.Services
         }
 
         /// <summary>
-        /// Stop tracking a view
+        /// Records the closing of a view. This method is deprecated.
         /// </summary>
-        /// <param name="name of the view"></param>
-        /// <returns></returns>
-        [Obsolete("RecordCloseViewAsync(string name) is deprecated, this is going to be removed in the future.")]
+        /// <remarks>
+        /// This method should only be used to close views that were opened using <see cref="RecordOpenViewAsync"/>.
+        /// Do not use to close views started with <see cref="StartView"/>.
+        /// </remarks>
+        /// <param name="viewName">The name of the view to close.</param>
+        /// <returns>A task representing the asynchronous operation.</returns>
+        [Obsolete("RecordCloseViewAsync(string name) is deprecated and will be removed in the future. Please use StopView instead.")]
         public async Task RecordCloseViewAsync(string name)
         {
             lock (LockObj) {
@@ -860,15 +881,19 @@ namespace Plugins.CountlySDK.Services
         }
 
         /// <summary>
-        /// Reports a particular action with the specified details
+        /// Reports a particular action with the specified details.
         /// </summary>
-        /// <param name="type"> type of action</param>
-        /// <param name="x">x-coordinate</param>
-        /// <param name="y">y-coordinate</param>
-        /// <param name="width">width of screen</param>
-        /// <param name="height">height of screen</param>
-        /// <returns></returns>
-        [Obsolete("ReportActionAsync(string type, int x, int y, int width, int height) is deprecated, this is going to be removed in the future.")]
+        /// <remarks>
+        /// <para>This method is deprecated and will be removed in a future release. There is no direct replacement for this method.</para>
+        /// <para>Consider re-evaluating the need for this functionality or implementing a custom solution as needed.</para>
+        /// </remarks>
+        /// <param name="type">The type of action.</param>
+        /// <param name="x">The x-coordinate.</param>
+        /// <param name="y">The y-coordinate.</param>
+        /// <param name="width">The width of the screen.</param>
+        /// <param name="height">The height of the screen.</param>
+        /// <returns>A task representing the asynchronous operation.</returns>
+        [Obsolete("ReportActionAsync(string type, int x, int y, int width, int height) is deprecated and will be removed in the future.")]
         public async Task ReportActionAsync(string type, int x, int y, int width, int height)
         {
             lock (LockObj) {

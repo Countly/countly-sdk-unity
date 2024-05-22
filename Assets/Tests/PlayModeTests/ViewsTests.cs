@@ -783,6 +783,68 @@ namespace Assets.Tests.PlayModeTests
             TestUtility.ValidateRQEQSize(cly, 2, 0);
         }
 
+        // Opening multiple views with same name to test functionality
+        // We open the views, update the global segmentation, and singular view segmentation
+        // Views should open, nothing should break and segmentation should be able to update
+        [Test]
+        public void MultipleViewsWithSameName()
+        {
+            CountlyConfiguration config = TestUtility.CreateViewConfig(new CustomIdProvider());
+            Countly cly = Countly.Instance;
+
+            cly.Init(config);
+            IViewModule views = cly.Views;
+            TestUtility.ValidateRQEQSize(cly, 2, 0);
+
+            string viewId1 = views.StartView(viewNames[0]);
+            TestUtility.ValidateRQEQSize(cly, 2, 1);
+            CountlyEventModel result = cly.Events._eventRepo.Dequeue();
+            TestUtility.ViewEventValidator(result, 1, 0, null, TestUtility.BaseViewTestSegmentation(viewNames[0], true, true), viewId1, "", null, null, TestUtility.TestTimeMetrics());
+
+            string viewId2 = views.StartView(viewNames[0]);
+            TestUtility.ValidateRQEQSize(cly, 2, 1);
+            CountlyEventModel result2 = cly.Events._eventRepo.Dequeue();
+            TestUtility.ViewEventValidator(result2, 1, 0, null, TestUtility.BaseViewTestSegmentation(viewNames[0], false, false), viewId2, viewId1  , null, null, TestUtility.TestTimeMetrics());
+
+            string viewId3 = views.StartView(viewNames[0]);
+            TestUtility.ValidateRQEQSize(cly, 2, 1);
+            CountlyEventModel result3 = cly.Events._eventRepo.Dequeue();
+            TestUtility.ViewEventValidator(result3, 1, 0, null, TestUtility.BaseViewTestSegmentation(viewNames[0], false, false), viewId3, viewId2, null, null, TestUtility.TestTimeMetrics());
+
+            Dictionary<string, object> globalUpdate = new Dictionary<string, object>();
+            globalUpdate.Add("string", "Bye Bye!");
+            globalUpdate.Add("New Value", 88);
+
+            views.UpdateGlobalViewSegmentation(globalUpdate);
+            TestUtility.ValidateRQEQSize(cly, 2, 0);
+
+            Dictionary<string, object> singularUpdate = new Dictionary<string, object>();
+            singularUpdate.Add("console", "xbox");
+
+            views.AddSegmentationToViewWithName(viewNames[0], singularUpdate);
+            TestUtility.ValidateRQEQSize(cly, 2, 0);
+            views.StopViewWithName(viewNames[0]);
+            TestUtility.ValidateRQEQSize(cly, 2, 1);
+
+            Dictionary<string, object> finalSegmentation = new Dictionary<string, object>();
+            finalSegmentation.Add("console", "xbox");
+            finalSegmentation.Add("string", "Bye Bye!");
+            finalSegmentation.Add("New Value", 88);
+
+            CountlyEventModel firstResult = cly.Events._eventRepo.Dequeue();
+            TestUtility.ViewEventValidator(firstResult, 1, 0, 0, finalSegmentation, viewId3, viewId2, null, null, TestUtility.TestTimeMetrics());
+            TestUtility.ValidateRQEQSize(cly, 2, 0);
+
+            views.StopAllViews(null);
+            TestUtility.ValidateRQEQSize(cly, 2, 2);
+
+            CountlyEventModel secondResult = cly.Events._eventRepo.Dequeue();
+            TestUtility.ViewEventValidator(secondResult, 1, 0, 0, globalUpdate, viewId1, viewId2, null, null, TestUtility.TestTimeMetrics());
+
+            CountlyEventModel thirdResult = cly.Events._eventRepo.Dequeue();
+            TestUtility.ViewEventValidator(thirdResult, 1, 0, 0, globalUpdate, viewId2, viewId2, null, null, TestUtility.TestTimeMetrics());
+        }
+
         // 'SetGlobalViewSegmentation' and 'UpdateGlobalViewSegmentation' method in ViewCountlyService
         // We set global segmentation and update it afterwards
         // Segmentation values before and after the update should be correct
