@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using Plugins.CountlySDK.Enums;
 using Plugins.CountlySDK.Helpers;
 using Plugins.CountlySDK.Models;
@@ -79,7 +80,7 @@ namespace Plugins.CountlySDK.Services
             }
 
             lock (LockObj) {
-                Log.Info("[ViewCountlyService] Calling StartView vn[" + viewName + "]");
+                Log.Info("[ViewCountlyService] StartView, vn[" + viewName + "]");
 
                 return StartViewInternal(viewName, null, false);
             }
@@ -100,8 +101,10 @@ namespace Plugins.CountlySDK.Services
             }
 
             lock (LockObj) {
-                Log.Info("[ViewCountlyService] Calling StartView vn[" + viewName + "] sg[" + (viewSegmentation == null ? "null" : viewSegmentation.Count.ToString()) + "]");
+                // to provide a clean dictionary in log and internal method
+                _utils.RemoveUnsupportedDataTypes(viewSegmentation, Log);
 
+                Log.Info("[ViewCountlyService] StartView, vn[" + viewName + "] sg[" + (viewSegmentation == null ? "null" : JsonConvert.SerializeObject(viewSegmentation)) + "]");
                 return StartViewInternal(viewName, viewSegmentation, false);
             }
         }
@@ -141,7 +144,7 @@ namespace Plugins.CountlySDK.Services
             }
 
             lock (LockObj) {
-                Log.Info("[ViewCountlyService] Calling StartAutoStoppedView vn[" + viewName + "]");
+                Log.Info("[ViewCountlyService] StartAutoStoppedView, vn[" + viewName + "]");
 
                 return StartViewInternal(viewName, viewSegmentation, true);
             }
@@ -160,7 +163,7 @@ namespace Plugins.CountlySDK.Services
             }
 
             lock (LockObj) {
-                Log.Info("[ViewCountlyService] Calling StopViewWithName vn[" + viewName + "]");
+                Log.Info("[ViewCountlyService] StopViewWithName, vn[" + viewName + "]");
 
                 StopViewWithNameInternal(viewName, null);
             }
@@ -180,8 +183,10 @@ namespace Plugins.CountlySDK.Services
             }
 
             lock (LockObj) {
-                Log.Info("[ViewCountlyService] Calling StopViewWithName vn[" + viewName + "] sg[" + (viewSegmentation == null ? "null" : viewSegmentation.Count.ToString()) + "]");
+                // to provide a clean dictionary in log and internal method
+                _utils.RemoveUnsupportedDataTypes(viewSegmentation, Log);
 
+                Log.Info("[ViewCountlyService] StopViewWithName, vn[" + viewName + "] sg[" + (viewSegmentation == null ? "null" : JsonConvert.SerializeObject(viewSegmentation)) + "]");
                 StopViewWithNameInternal(viewName, viewSegmentation);
             }
         }
@@ -198,7 +203,7 @@ namespace Plugins.CountlySDK.Services
             }
 
             lock (LockObj) {
-                Log.Info("[ViewCountlyService] Calling StopViewWithID vi[" + viewID + "]");
+                Log.Info("[ViewCountlyService] StopViewWithID, vi[" + viewID + "]");
 
                 StopViewWithIDInternal(viewID, null);
             }
@@ -217,8 +222,10 @@ namespace Plugins.CountlySDK.Services
             }
 
             lock (LockObj) {
-                Log.Info("[ViewCountlyService] Calling StopViewWithID vi[" + viewID + "] sg[" + (viewSegmentation == null ? "null" : viewSegmentation.Count.ToString()) + "]");
+                // to provide a clean dictionary in log and internal method
+                _utils.RemoveUnsupportedDataTypes(viewSegmentation, Log);
 
+                Log.Info("[ViewCountlyService] StopViewWithID, vi[" + viewID + "] sg[" + (viewSegmentation == null ? "null" : JsonConvert.SerializeObject(viewSegmentation)) + "]");
                 StopViewWithIDInternal(viewID, viewSegmentation);
             }
         }
@@ -235,7 +242,7 @@ namespace Plugins.CountlySDK.Services
             }
 
             lock (LockObj) {
-                Log.Info("[ViewCountlyService] Calling PauseViewWithID vi[" + viewID + "]");
+                Log.Info("[ViewCountlyService] PauseViewWithID, vi[" + viewID + "]");
 
                 PauseViewWithIDInternal(viewID, false);
             }
@@ -253,7 +260,7 @@ namespace Plugins.CountlySDK.Services
             }
 
             lock (LockObj) {
-                Log.Info("[ViewCountlyService] Calling ResumeViewWithID vi[" + viewID + "]");
+                Log.Info("[ViewCountlyService] ResumeViewWithID, vi[" + viewID + "]");
 
                 ResumeViewWithIDInternal(viewID);
             }
@@ -271,8 +278,10 @@ namespace Plugins.CountlySDK.Services
             }
 
             lock (LockObj) {
-                Log.Info("[ViewCountlyService] Calling StopAllViews sg[" + (viewSegmentation == null ? "null" : viewSegmentation.Count.ToString()) + "]");
+                // to provide a clean dictionary in log and internal method
+                _utils.RemoveUnsupportedDataTypes(viewSegmentation, Log);
 
+                Log.Info("[ViewCountlyService] StopAllViews, sg[" + (viewSegmentation == null ? "null" : JsonConvert.SerializeObject(viewSegmentation)) + "]");
                 StopAllViewsInternal(viewSegmentation);
             }
         }
@@ -289,8 +298,10 @@ namespace Plugins.CountlySDK.Services
             }
 
             lock (LockObj) {
-                Log.Info("[ViewCountlyService] Calling SetGlobalViewSegmentation sg[" + (viewSegmentation == null ? "null" : viewSegmentation.Count.ToString()) + "]");
+                // to provide a clean dictionary in log and internal method
+                _utils.RemoveUnsupportedDataTypes(viewSegmentation, Log);
 
+                Log.Info("[ViewCountlyService] SetGlobalViewSegmentation, sg[" + (viewSegmentation == null ? "null" : JsonConvert.SerializeObject(viewSegmentation)) + "]");
                 SetGlobalViewSegmentationInternal(viewSegmentation);
             }
         }
@@ -308,7 +319,7 @@ namespace Plugins.CountlySDK.Services
             }
 
             lock (LockObj) {
-                Log.Info("[ViewCountlyService] Calling AddSegmentationToViewWithID for view ID: [" + viewID + "]");
+                Log.Info("[ViewCountlyService] AddSegmentationToViewWithID, for view ID: [" + viewID + "]");
 
                 AddSegmentationToViewWithIDInternal(viewID, viewSegmentation);
             }
@@ -328,7 +339,7 @@ namespace Plugins.CountlySDK.Services
             }
 
             lock (LockObj) {
-                Log.Info("[ViewCountlyService] Calling AddSegmentationToViewWithName for Name: [" + viewName + "]");
+                Log.Info("[ViewCountlyService] AddSegmentationToViewWithName, for Name: [" + viewName + "]");
 
                 AddSegmentationToViewWithNameInternal(viewName, viewSegmentation);
             }
@@ -346,10 +357,12 @@ namespace Plugins.CountlySDK.Services
             }
 
             lock (LockObj) {
-                Log.Info("[ViewCountlyService] Calling UpdateGlobalViewSegmentation sg[" + (viewSegmentation == null ? "null" : viewSegmentation.Count.ToString()) + "]");
+                // to provide a clean dictionary in log and internal method
+                _utils.RemoveUnsupportedDataTypes(viewSegmentation, Log);
+                Log.Info("[ViewCountlyService] UpdateGlobalViewSegmentation, sg[" + (viewSegmentation == null ? "null" : JsonConvert.SerializeObject(viewSegmentation)) + "]");
 
                 if (viewSegmentation == null) {
-                    Log.Warning("[ViewCountlyService] When updating segmentation values, they can't be 'null'.");
+                    Log.Warning("[ViewCountlyService] UpdateGlobalViewSegmentation, when updating segmentation values, they can't be 'null'. Ignoring request.");
                     return;
                 }
 
@@ -368,24 +381,24 @@ namespace Plugins.CountlySDK.Services
         private string StartViewInternal(string viewName, Dictionary<string, object> customViewSegmentation, bool viewShouldBeAutomaticallyStopped)
         {
             if (!_cly.IsSDKInitialized) {
-                Log.Warning("Countly.Instance.Init() must be called before startViewInternal");
+                Log.Warning("[ViewCountlyService] StartViewInternal, Countly.Instance.Init() must be called before StartViewInternal");
                 return null;
             }
 
             if (_utils.IsNullEmptyOrWhitespace(viewName)) {
-                Log.Warning("[ViewCountlyService] StartViewInternal, Trying to record view with null or empty view name, ignoring request");
+                Log.Warning("[ViewCountlyService] StartViewInternal, trying to record view with null or empty view name, ignoring request");
                 return null;
             }
 
-            _utils.TruncateSegmentationValues(customViewSegmentation, _configuration.MaxSegmentationValues, "[ViewCountlyService] StartViewInternal, ", Log);
-            _utils.RemoveReservedKeysFromSegmentation(customViewSegmentation, reservedSegmentationKeysViews, "[ViewCountlyService] AutoCloseRequiredViews, ", Log);
+            _utils.TruncateSegmentationValues(customViewSegmentation, _configuration.GetMaxSegmentationValues(), "[ViewCountlyService] StartViewInternal, ", Log);
+            _utils.RemoveReservedKeysFromSegmentation(customViewSegmentation, reservedSegmentationKeysViews, "[ViewCountlyService] StartViewInternal, ", Log);
 
             int segmCount = 0;
             if (customViewSegmentation != null) {
                 segmCount = customViewSegmentation.Count;
             }
 
-            Log.Debug("[ViewCountlyService] Recording view with name: [" + viewName + "], previous view ID:[" + currentViewID + "] custom view segment count:[" + segmCount + "], first:[" + _isFirstView + "], autoStop:[" + viewShouldBeAutomaticallyStopped + "]");
+            Log.Debug("[ViewCountlyService] StartViewInternal, recording view with name: [" + viewName + "], previous view ID:[" + currentViewID + "] custom view segment count:[" + segmCount + "], first:[" + _isFirstView + "], autoStop:[" + viewShouldBeAutomaticallyStopped + "]");
 
             AutoCloseRequiredViews(false, null);
 
@@ -408,7 +421,7 @@ namespace Plugins.CountlySDK.Services
             Dictionary<string, object> viewSegmentation = CreateViewEventSegmentation(currentViewData, _isFirstView, true, accumulatedEventSegm);
 
             if (_isFirstView) {
-                Log.Debug("[ViewCountlyService] Recording view as the first one in the session. [" + viewName + "]");
+                Log.Debug("[ViewCountlyService] StartViewInternal, recording view as the first one in the session. [" + viewName + "]");
                 _isFirstView = false;
             }
             _ = _eventService.RecordEventInternal(viewEventKey, viewSegmentation, 1, 0, null, currentViewData.ViewID);
@@ -424,7 +437,7 @@ namespace Plugins.CountlySDK.Services
         private void StopViewWithNameInternal(string viewName, Dictionary<string, object> customViewSegmentation)
         {
             if (_utils.IsNullEmptyOrWhitespace(viewName)) {
-                Log.Warning("[ViewCountlyService] StopViewWithNameInternal, Trying to record view with null or empty view name, ignoring request");
+                Log.Warning("[ViewCountlyService] StopViewWithNameInternal, trying to record view with null or empty view name, ignoring request");
                 return;
             }
 
@@ -440,7 +453,7 @@ namespace Plugins.CountlySDK.Services
             }
 
             if (viewID == null) {
-                Log.Warning("[ViewCountlyService] StopViewWithNameInternal, No view entry found with the provided name :[" + viewName + "]");
+                Log.Warning("[ViewCountlyService] StopViewWithNameInternal, no view entry found with the provided name :[" + viewName + "]");
                 return;
             }
 
@@ -454,7 +467,7 @@ namespace Plugins.CountlySDK.Services
         /// <param name="customViewSegmentation"></param>
         private void AutoCloseRequiredViews(bool closeAllViews, Dictionary<string, object> customViewSegmentation)
         {
-            Log.Debug("[ViewCountlyService] AutoCloseRequiredViews");
+            Log.Debug("[ViewCountlyService] AutoCloseRequiredViews, closing required views.");
             List<string> viewsToRemove = new List<string>(1);
 
             foreach (var entry in viewDataMap) {
@@ -483,7 +496,7 @@ namespace Plugins.CountlySDK.Services
         private void StopViewWithIDInternal(string viewID, Dictionary<string, object> customViewSegmentation)
         {
             if (_utils.IsNullEmptyOrWhitespace(viewID)) {
-                Log.Warning("[ViewCountlyService] StopViewWithIDInternal, Trying to record view with null or empty view ID, ignoring request");
+                Log.Warning("[ViewCountlyService] StopViewWithIDInternal, trying to record view with null or empty view ID, ignoring request");
                 return;
             }
 
@@ -505,7 +518,7 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
 
-            _utils.TruncateSegmentationValues(customViewSegmentation, _configuration.MaxSegmentationValues, "[ViewCountlyService] StopViewWithIDInternal", Log);
+            _utils.TruncateSegmentationValues(customViewSegmentation, _configuration.GetMaxSegmentationValues(), "[ViewCountlyService] StopViewWithIDInternal", Log);
 
             RecordViewEndEvent(vd, customViewSegmentation, "StopViewWithIDInternal");
 
@@ -520,7 +533,7 @@ namespace Plugins.CountlySDK.Services
         private void PauseViewWithIDInternal(string viewID, bool pausedAutomatically)
         {
             if (_utils.IsNullEmptyOrWhitespace(viewID)) {
-                Log.Warning("[ViewCountlyService] PauseViewWithIDInternal, Trying to record view with null or empty view ID, ignoring request");
+                Log.Warning("[ViewCountlyService] PauseViewWithIDInternal, trying to record view with null or empty view ID, ignoring request");
                 return;
             }
 
@@ -625,7 +638,7 @@ namespace Plugins.CountlySDK.Services
         private void ResumeViewWithIDInternal(string viewID)
         {
             if (_utils.IsNullEmptyOrWhitespace(viewID)) {
-                Log.Warning("[ViewCountlyService] ResumeViewWithIDInternal, Trying to record view with null or empty view ID, ignoring request");
+                Log.Warning("[ViewCountlyService] ResumeViewWithIDInternal, trying to record view with null or empty view ID, ignoring request");
                 return;
             }
 
@@ -673,7 +686,7 @@ namespace Plugins.CountlySDK.Services
         /// <param name="viewSegmentation"></param>
         private void SetGlobalViewSegmentationInternal(Dictionary<string, object> viewSegmentation)
         {
-            Log.Debug("[ViewCountlyService] Calling SetGlobalViewSegmentationInternal with[" + (viewSegmentation == null ? "null" : viewSegmentation.Count.ToString()) + "] entries");
+            Log.Debug("[ViewCountlyService] SetGlobalViewSegmentationInternal, with[" + (viewSegmentation == null ? "null" : viewSegmentation.Count.ToString()) + "] entries");
 
             automaticViewSegmentation.Clear();
 
@@ -682,7 +695,7 @@ namespace Plugins.CountlySDK.Services
                 _utils.RemoveReservedKeysFromSegmentation(viewSegmentation, reservedSegmentationKeysViews, "[ViewCountlyService] SetGlobalViewSegmentationInternal, ", Log);
 
                 if (_utils.RemoveUnsupportedDataTypes(viewSegmentation, Log)) {
-                    Log.Warning("[ViewCountlyService] SetGlobalViewSegmentationInternal, You have provided an unsupported data type in your View Segmentation. Removing the unsupported values.");
+                    Log.Warning("[ViewCountlyService] SetGlobalViewSegmentationInternal, you have provided an unsupported data type in your View Segmentation. Removing the unsupported values.");
                 }
 
                 _utils.CopyDictionaryToDestination(automaticViewSegmentation, viewSegmentation, Log);
@@ -712,7 +725,7 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
 
-            _utils.TruncateSegmentationValues(viewSegmentation, _cly.Configuration.MaxSegmentationValues, "[ViewsCountlyService] AddSegmentationToViewWithID", Log);
+            _utils.TruncateSegmentationValues(viewSegmentation, _cly.Configuration.GetMaxSegmentationValues(), "[ViewsCountlyService] AddSegmentationToViewWithID", Log);
             _utils.RemoveReservedKeysFromSegmentation(viewSegmentation, reservedSegmentationKeysViews, "[ViewsCountlyService] AddSegmentationToViewWithID, ", Log);
 
             if (vd.ViewSegmentation == null) {
@@ -741,11 +754,11 @@ namespace Plugins.CountlySDK.Services
             }
 
             if (viewID == null) {
-                Log.Warning("[ViewsCountlyService] AddSegmentationToViewWithName, No view entry found with the provided name :[" + viewName + "]");
+                Log.Warning("[ViewsCountlyService] AddSegmentationToViewWithNameInternal, no view entry found with the provided name :[" + viewName + "]");
                 return;
             }
 
-            Log.Info("[ViewsCountlyService] Will add segmentation for view: [" + viewName + "] with ID:[" + viewID + "]");
+            Log.Info("[ViewsCountlyService] AddSegmentationToViewWithNameInternal, will add segmentation for view: [" + viewName + "] with ID:[" + viewID + "]");
 
             AddSegmentationToViewWithIDInternal(viewID, viewSegmentation);
         }
@@ -758,7 +771,7 @@ namespace Plugins.CountlySDK.Services
         {
             if (_utils.RemoveUnsupportedDataTypes(viewSegmentation, Log)) {
                 //found an unsupported type, print warning
-                Log.Warning("[ViewsCountlyService] UpdateGlobalViewSegmentationInternal, You have provided an unsupported data type in your View Segmentation. Removing the unsupported values.");
+                Log.Warning("[ViewsCountlyService] UpdateGlobalViewSegmentationInternal, you have provided an unsupported data type in your View Segmentation. Removing the unsupported values.");
             }
 
             _utils.RemoveReservedKeysFromSegmentation(viewSegmentation, reservedSegmentationKeysViews, "[ViewsCountlyService] UpdateGlobalViewSegmentationInternal, ", Log);
@@ -795,8 +808,8 @@ namespace Plugins.CountlySDK.Services
                 }
 
                 if (name.Length > _configuration.MaxKeyLength) {
-                    Log.Verbose("[ViewCountlyService] RecordOpenViewAsync : Max allowed key length is " + _configuration.MaxKeyLength);
-                    name = name.Substring(0, _configuration.MaxKeyLength);
+                    Log.Verbose("[ViewCountlyService] RecordOpenViewAsync, max allowed key length is " + _configuration.GetMaxKeyLength());
+                    name = name.Substring(0, _configuration.GetMaxKeyLength());
                 }
 
                 IDictionary<string, object> openViewSegment = new Dictionary<string, object>
@@ -844,7 +857,7 @@ namespace Plugins.CountlySDK.Services
         public async Task RecordCloseViewAsync(string name)
         {
             lock (LockObj) {
-                Log.Info("[ViewCountlyService] RecordCloseViewAsync : name = " + name);
+                Log.Info("[ViewCountlyService] RecordCloseViewAsync, name = " + name);
 
                 if (!_consentService.CheckConsentInternal(Consents.Views)) {
                     Log.Debug("[ViewCountlyService] RecordCloseViewAsync, consent is not given, ignoring the request.");
@@ -855,9 +868,9 @@ namespace Plugins.CountlySDK.Services
                     return;
                 }
 
-                if (name.Length > _configuration.MaxKeyLength) {
-                    Log.Verbose("[ViewCountlyService] RecordCloseViewAsync : Max allowed key length is " + _configuration.MaxKeyLength);
-                    name = name.Substring(0, _configuration.MaxKeyLength);
+                if (name.Length > _configuration.GetMaxKeyLength()) {
+                    Log.Verbose("[ViewCountlyService] RecordCloseViewAsync, max allowed key length is " + _configuration.GetMaxKeyLength());
+                    name = name.Substring(0, _configuration.GetMaxKeyLength());
                 }
 
                 double? duration = null;
