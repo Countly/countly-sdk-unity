@@ -214,11 +214,11 @@ namespace Assets.Tests.PlayModeTests
             Assert.AreEqual(0, Countly.Instance.StarRating._eventCountlyService._eventRepo.Count);
         }
 
+        [SetUp]
         [TearDown]
         public void End()
         {
-            Countly.Instance.ClearStorage();
-            Object.DestroyImmediate(Countly.Instance);
+            TestUtility.TestCleanup();
         }
     }
 }

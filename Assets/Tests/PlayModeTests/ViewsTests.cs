@@ -278,9 +278,7 @@ namespace Assets.Tests.PlayModeTests
         [TearDown]
         public void End()
         {
-            Countly.Instance.ClearStorage();
             TestUtility.TestCleanup();
-            Object.DestroyImmediate(Countly.Instance);
         }
     }
 }

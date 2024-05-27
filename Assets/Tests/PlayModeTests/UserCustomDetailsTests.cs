@@ -612,12 +612,11 @@ namespace Assets.Tests.PlayModeTests
 
         }
 
+        [SetUp]
         [TearDown]
         public void End()
         {
-            Countly.Instance.ClearStorage();
-            Object.DestroyImmediate(Countly.Instance);
+            TestUtility.TestCleanup();
         }
-
     }
 }

@@ -350,11 +350,6 @@ namespace Assets.Tests.PlayModeTests
         }
 
         [SetUp]
-        public void SetUp()
-        {
-            TestUtility.TestCleanup();
-        }
-
         [TearDown]
         public void End()
         {

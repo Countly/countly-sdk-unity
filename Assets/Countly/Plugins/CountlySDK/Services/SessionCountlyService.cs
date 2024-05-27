@@ -24,6 +24,8 @@ namespace Plugins.CountlySDK.Services
         private readonly EventCountlyService _eventService;
         internal readonly RequestCountlyHelper _requestCountlyHelper;
 
+        bool _isSessionExtendingStopped = false;
+
         internal SessionCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, EventCountlyService eventService,
             RequestCountlyHelper requestCountlyHelper, LocationService locationService, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
         {
@@ -71,10 +73,18 @@ namespace Plugins.CountlySDK.Services
         /// </summary>
         private void InitSessionTimer()
         {
-            _sessionTimer = new Timer { Interval = _configuration.SessionDuration * 1000 };
+            _sessionTimer = new Timer { Interval = _configuration.GetUpdateSessionTimerDelay() * 1000 };
             _sessionTimer.Elapsed += SessionTimerOnElapsedAsync;
             _sessionTimer.AutoReset = true;
             _sessionTimer.Start();
+        }
+
+        /// <summary>
+        /// Stops extending a session
+        /// </summary>
+        internal void StopSessionExtending()
+        {
+            _isSessionExtendingStopped = true;
         }
 
         /// <summary>
@@ -84,13 +94,17 @@ namespace Plugins.CountlySDK.Services
         /// <param name="elapsedEventArgs"> Provides data for <code>Timer.Elapsed</code>event.</param>
         private async void SessionTimerOnElapsedAsync(object sender, ElapsedEventArgs elapsedEventArgs)
         {
+            if(_isSessionExtendingStopped) {
+                return;
+            }
+
             lock (LockObj) {
                 Log.Debug("[SessionCountlyService] SessionTimerOnElapsedAsync");
 
                 _eventService.AddEventsToRequestQueue();
                 _ = _requestCountlyHelper.ProcessQueue();
 
-                if (!_configuration.IsAutomaticSessionTrackingDisabled) {
+                if (!_configuration.IsAutomaticSessionTrackingDisabled && !_isSessionExtendingStopped) {
                     _ = ExtendSessionAsync();
                 }
             }

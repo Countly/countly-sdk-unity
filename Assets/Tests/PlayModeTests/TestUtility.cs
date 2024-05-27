@@ -214,6 +214,7 @@ namespace Assets.Tests.PlayModeTests
         public static void TestCleanup()
         {
             Countly.Instance.ClearStorage();
+            Countly.Instance.Session?.StopSessionExtending();
             UnityEngine.Object.DestroyImmediate(Countly.Instance);
         }
 
