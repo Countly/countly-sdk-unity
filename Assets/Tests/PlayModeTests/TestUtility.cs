@@ -18,7 +18,6 @@ namespace Assets.Tests.PlayModeTests
         readonly static string SERVER_URL = "https://xyz.com/";
         readonly static string APP_KEY = "772c091355076ead703f987fee94490";
         readonly static string DEVICE_ID = "test_user";
-
         /// <summary>
         /// Creates a basic Countly configuration with predefined server URL, app key, and device ID.
         /// </summary>
@@ -214,7 +213,7 @@ namespace Assets.Tests.PlayModeTests
         public static void TestCleanup()
         {
             Countly.Instance.ClearStorage();
-            Countly.Instance.Session?.StopSessionExtending();
+            Countly.Instance.Session?.StopInternalTimer();
             UnityEngine.Object.DestroyImmediate(Countly.Instance);
         }
 

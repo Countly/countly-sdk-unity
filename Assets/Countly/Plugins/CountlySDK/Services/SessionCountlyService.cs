@@ -19,13 +19,10 @@ namespace Plugins.CountlySDK.Services
         /// </summary>
         /// <returns>bool</returns>
         internal bool IsSessionInitiated { get; private set; }
-
         private readonly LocationService _locationService;
         private readonly EventCountlyService _eventService;
         internal readonly RequestCountlyHelper _requestCountlyHelper;
-
-        bool _isSessionExtendingStopped = false;
-
+        private System.Threading.CancellationTokenSource _cancellationTokenSource = new System.Threading.CancellationTokenSource();
         internal SessionCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, EventCountlyService eventService,
             RequestCountlyHelper requestCountlyHelper, LocationService locationService, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
         {
@@ -82,9 +79,11 @@ namespace Plugins.CountlySDK.Services
         /// <summary>
         /// Stops extending a session
         /// </summary>
-        internal void StopSessionExtending()
+        internal void StopInternalTimer()
         {
-            _isSessionExtendingStopped = true;
+            _sessionTimer?.Stop();
+
+            _cancellationTokenSource.Cancel(); // Cancel any ongoing async operations
         }
 
         /// <summary>
@@ -94,8 +93,8 @@ namespace Plugins.CountlySDK.Services
         /// <param name="elapsedEventArgs"> Provides data for <code>Timer.Elapsed</code>event.</param>
         private async void SessionTimerOnElapsedAsync(object sender, ElapsedEventArgs elapsedEventArgs)
         {
-            if(_isSessionExtendingStopped) {
-                return;
+            if (_cancellationTokenSource.IsCancellationRequested) {
+                return; // Exit if cancellation is requested
             }
 
             lock (LockObj) {
@@ -104,7 +103,7 @@ namespace Plugins.CountlySDK.Services
                 _eventService.AddEventsToRequestQueue();
                 _ = _requestCountlyHelper.ProcessQueue();
 
-                if (!_configuration.IsAutomaticSessionTrackingDisabled && !_isSessionExtendingStopped) {
+                if (!_configuration.IsAutomaticSessionTrackingDisabled) {
                     _ = ExtendSessionAsync();
                 }
             }
@@ -132,10 +131,7 @@ namespace Plugins.CountlySDK.Services
             //Session initiated
             IsSessionInitiated = true;
 
-            Dictionary<string, object> requestParams =
-                new Dictionary<string, object>();
-
-
+            Dictionary<string, object> requestParams = new Dictionary<string, object>();
             requestParams.Add("begin_session", 1);
 
             /* If location is disabled or no location consent is given,
@@ -182,14 +178,10 @@ namespace Plugins.CountlySDK.Services
                 Log.Warning("[SessionCountlyService] EndSessionAsync: The session isn't started yet!");
                 return;
             }
-
+            
             IsSessionInitiated = false;
-
             _eventService.AddEventsToRequestQueue();
-
-
-            Dictionary<string, object> requestParams =
-                new Dictionary<string, object>
+            Dictionary<string, object> requestParams = new Dictionary<string, object>
                 {
                     {"end_session", 1},
                     {"session_duration",  Convert.ToInt32((DateTime.Now - _lastSessionRequestTime).TotalSeconds)}
@@ -217,8 +209,7 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
 
-            Dictionary<string, object> requestParams =
-                new Dictionary<string, object>
+            Dictionary<string, object> requestParams = new Dictionary<string, object>
                 {
                     {
                         "session_duration",  Convert.ToInt32((DateTime.Now - _lastSessionRequestTime).TotalSeconds)
@@ -229,7 +220,6 @@ namespace Plugins.CountlySDK.Services
 
             _requestCountlyHelper.AddToRequestQueue(requestParams);
             await _requestCountlyHelper.ProcessQueue();
-
         }
 
         #region override Methods
@@ -241,7 +231,6 @@ namespace Plugins.CountlySDK.Services
                     await BeginSessionAsync();
                 }
             }
-
         }
         #endregion
     }
