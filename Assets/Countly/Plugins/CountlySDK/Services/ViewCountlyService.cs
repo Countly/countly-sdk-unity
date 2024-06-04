@@ -780,7 +780,6 @@ namespace Plugins.CountlySDK.Services
         }
         #endregion
         #region Deprecated Methods
-
         /// <summary>
         /// Records the opening of a view. This method is deprecated.
         /// </summary>
@@ -835,6 +834,14 @@ namespace Plugins.CountlySDK.Services
                     _viewToLastViewStartTime.Add(name, DateTime.UtcNow);
                 }
 
+                ViewData currentViewData = new ViewData();
+                currentViewData.ViewID = safeViewIDGenerator.GenerateValue();
+                currentViewData.ViewName = name;
+                currentViewData.ViewStartTimeSeconds = _utils.CurrentTimestampSeconds();
+                currentViewData.IsAutoStoppedView = false;
+
+                viewDataMap.Add(currentViewData.ViewID, currentViewData);
+
                 CountlyEventModel currentView = new CountlyEventModel(viewEventKey, segmentation, 1);
                 _ = _eventService.RecordEventAsync(currentView);
 
@@ -857,6 +864,21 @@ namespace Plugins.CountlySDK.Services
         public async Task RecordCloseViewAsync(string name)
         {
             lock (LockObj) {
+                string viewID = null;
+                foreach (KeyValuePair<string, ViewData> entry in viewDataMap) {
+                    string key = entry.Key;
+                    ViewData vd = entry.Value;
+
+                    if (vd != null && name.Equals(vd.ViewName)) {
+                        viewID = key;
+                    }
+                }
+
+                if (viewID == null) {
+                    Log.Warning("[ViewCountlyService] RecordCloseViewAsync, no view entry found with the provided name :[" + name + "]");
+                    return;
+                }
+
                 Log.Info("[ViewCountlyService] RecordCloseViewAsync, name = " + name);
 
                 if (!_consentService.CheckConsentInternal(Consents.Views)) {

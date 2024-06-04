@@ -66,21 +66,18 @@ namespace Assets.Tests.PlayModeTests
 
             await views.RecordOpenViewAsync("open_view");
             await views.RecordCloseViewAsync("close_view");
-            TestUtility.ValidateRQEQSize(cly, 2, 2);
+            TestUtility.ValidateRQEQSize(cly, 2, 1);
 
             CountlyEventModel model = cly.Events._eventRepo.Dequeue();
             TestUtility.ViewEventValidator(model, 1, null, null, TestUtility.BaseViewTestSegmentation("open_", true, true), null, null, null, null, TestUtility.TestTimeMetrics());
-
-            model = cly.Events._eventRepo.Dequeue();
-            TestUtility.ViewEventValidator(model, 1, null, null, TestUtility.BaseViewTestSegmentation("close", false, false), null, null, null, null, TestUtility.TestTimeMetrics());
             TestUtility.ValidateRQEQSize(cly, 2, 0);
         }
 
         // 'RecordCloseViewAsync' method in ViewCountlyService.
-        // We close a view. Verify that the event is correctly recorded in the Views repository
-        // If a valid view name is provided, it should be recorded and EventModel should be validated
+        // We try to close a view that's not existing
+        // If view does not exist nothing should be recorded, nothing should crash
         [Test]
-        public async void RecordCloseViewAsync()
+        public async void RecordCloseViewAsync_NoOpenView()
         {
             CountlyConfiguration config = TestUtility.CreateViewConfig(new CustomIdProvider());
             Countly cly = Countly.Instance;
@@ -89,10 +86,6 @@ namespace Assets.Tests.PlayModeTests
             TestUtility.ValidateRQEQSize(cly, 2, 0);
 
             await views.RecordCloseViewAsync("close_view");
-            TestUtility.ValidateRQEQSize(cly, 2, 1);
-
-            CountlyEventModel model = cly.Events._eventRepo.Dequeue();
-            TestUtility.ViewEventValidator(model, 1, null, null, TestUtility.BaseViewTestSegmentation("close_view", false, false), null, null, null, null, TestUtility.TestTimeMetrics());
             TestUtility.ValidateRQEQSize(cly, 2, 0);
         }
 
@@ -128,12 +121,10 @@ namespace Assets.Tests.PlayModeTests
 
             await views.RecordOpenViewAsync("open_view");
             await views.RecordCloseViewAsync("open_view_2");
-            TestUtility.ValidateRQEQSize(cly, 2, 2);
+            TestUtility.ValidateRQEQSize(cly, 2, 1);
 
             CountlyEventModel model = cly.Events._eventRepo.Dequeue();
             TestUtility.ViewEventValidator(model, 1, null, null, TestUtility.BaseViewTestSegmentation("open_view", true, true), null, null, null, null, TestUtility.TestTimeMetrics());
-            model = cly.Events._eventRepo.Dequeue();
-            TestUtility.ViewEventValidator(model, 1, null, null, TestUtility.BaseViewTestSegmentation("open_view_2", false, false), null, null, null, null, TestUtility.TestTimeMetrics());
         }
 
         // 'RecordOpenViewAsync' method in ViewCountlyService.
@@ -804,7 +795,7 @@ namespace Assets.Tests.PlayModeTests
             string viewId2 = views.StartView(viewNames[0]);
             TestUtility.ValidateRQEQSize(cly, 2, 1);
             CountlyEventModel result2 = cly.Events._eventRepo.Dequeue();
-            TestUtility.ViewEventValidator(result2, 1, 0, null, TestUtility.BaseViewTestSegmentation(viewNames[0], false, false), viewId2, viewId1  , null, null, TestUtility.TestTimeMetrics());
+            TestUtility.ViewEventValidator(result2, 1, 0, null, TestUtility.BaseViewTestSegmentation(viewNames[0], false, false), viewId2, viewId1, null, null, TestUtility.TestTimeMetrics());
 
             string viewId3 = views.StartView(viewNames[0]);
             TestUtility.ValidateRQEQSize(cly, 2, 1);

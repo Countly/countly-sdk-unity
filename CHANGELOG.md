@@ -16,6 +16,7 @@
   * "RecordOpenViewAsync": Use "StartView" instead.
   * "RecordCloseViewAsync": Use "StopView" instead.
   * "ReportActionAsync": This will be removed in the future.
+* Fixed a bug that allowed to make it possible to close non-started views.
 
 ## 23.12.1
 * Added 'UnityWebRequest' as the networking handler for WebGL builds.
