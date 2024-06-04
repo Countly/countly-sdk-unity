@@ -842,6 +842,9 @@ namespace Plugins.CountlySDK.Services
 
                 viewDataMap.Add(currentViewData.ViewID, currentViewData);
 
+                previousViewID = currentViewID;
+                currentViewID = currentViewData.ViewID;
+
                 CountlyEventModel currentView = new CountlyEventModel(viewEventKey, segmentation, 1);
                 _ = _eventService.RecordEventAsync(currentView);
 
