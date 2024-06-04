@@ -908,7 +908,7 @@ namespace Plugins.CountlySDK.Services
                     {"name", name},
                     {"segment", _configuration.metricHelper.OS},
                 };
-
+                viewDataMap.Remove(viewID);
                 CountlyEventModel currentView = new CountlyEventModel(CountlyEventModel.ViewEvent, segment, 1, null, duration);
                 _ = _eventService.RecordEventAsync(currentView);
             }
