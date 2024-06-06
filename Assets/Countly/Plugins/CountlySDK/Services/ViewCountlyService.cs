@@ -795,62 +795,8 @@ namespace Plugins.CountlySDK.Services
         public async Task RecordOpenViewAsync(string name, IDictionary<string, object> segmentation = null)
         {
             lock (LockObj) {
-                Log.Info("[ViewCountlyService] RecordOpenViewAsync : name = " + name);
-
-                if (!_consentService.CheckConsentInternal(Consents.Views)) {
-                    Log.Debug("[ViewCountlyService] RecordOpenViewAsync, consent is not given, ignoring the request.");
-                    return;
-                }
-
-                if (string.IsNullOrEmpty(name)) {
-                    return;
-                }
-
-                if (name.Length > _configuration.MaxKeyLength) {
-                    Log.Verbose("[ViewCountlyService] RecordOpenViewAsync, max allowed key length is " + _configuration.GetMaxKeyLength());
-                    name = name.Substring(0, _configuration.GetMaxKeyLength());
-                }
-
-                IDictionary<string, object> openViewSegment = new Dictionary<string, object>
-                {
-                    {"name", name},
-                    {"segment", _configuration.metricHelper.OS},
-                    {"visit", 1},
-                    {"start", _isFirstView ? 1 : 0}
-                };
-
-                if (segmentation != null) {
-                    segmentation = RemoveSegmentInvalidDataTypes(segmentation);
-                    segmentation = FixSegmentKeysAndValues(segmentation);
-
-                    foreach (KeyValuePair<string, object> item in openViewSegment) {
-                        segmentation[item.Key] = item.Value;
-                    }
-                } else {
-                    segmentation = openViewSegment;
-                }
-
-                if (!_viewToLastViewStartTime.ContainsKey(name)) {
-                    _viewToLastViewStartTime.Add(name, DateTime.UtcNow);
-                }
-
-                ViewData currentViewData = new ViewData();
-                currentViewData.ViewID = safeViewIDGenerator.GenerateValue();
-                currentViewData.ViewName = name;
-                currentViewData.ViewStartTimeSeconds = _utils.CurrentTimestampSeconds();
-                currentViewData.IsAutoStoppedView = false;
-
-                viewDataMap.Add(currentViewData.ViewID, currentViewData);
-
-                previousViewID = currentViewID;
-                currentViewID = currentViewData.ViewID;
-
-                CountlyEventModel currentView = new CountlyEventModel(viewEventKey, segmentation, 1);
-                _ = _eventService.RecordEventAsync(currentView);
-
-                _isFirstView = false;
+                StartView(name, (Dictionary<string, object>)segmentation);
             }
-
             await Task.CompletedTask;
         }
 
@@ -867,53 +813,7 @@ namespace Plugins.CountlySDK.Services
         public async Task RecordCloseViewAsync(string name)
         {
             lock (LockObj) {
-                string viewID = null;
-                foreach (KeyValuePair<string, ViewData> entry in viewDataMap) {
-                    string key = entry.Key;
-                    ViewData vd = entry.Value;
-
-                    if (vd != null && name.Equals(vd.ViewName)) {
-                        viewID = key;
-                    }
-                }
-
-                if (viewID == null) {
-                    Log.Warning("[ViewCountlyService] RecordCloseViewAsync, no view entry found with the provided name :[" + name + "]");
-                    return;
-                }
-
-                Log.Info("[ViewCountlyService] RecordCloseViewAsync, name = " + name);
-
-                if (!_consentService.CheckConsentInternal(Consents.Views)) {
-                    Log.Debug("[ViewCountlyService] RecordCloseViewAsync, consent is not given, ignoring the request.");
-                    return;
-                }
-
-                if (string.IsNullOrEmpty(name)) {
-                    return;
-                }
-
-                if (name.Length > _configuration.GetMaxKeyLength()) {
-                    Log.Verbose("[ViewCountlyService] RecordCloseViewAsync, max allowed key length is " + _configuration.GetMaxKeyLength());
-                    name = name.Substring(0, _configuration.GetMaxKeyLength());
-                }
-
-                double? duration = null;
-                if (_viewToLastViewStartTime.ContainsKey(name)) {
-                    DateTime lastViewStartTime = _viewToLastViewStartTime[name];
-                    duration = (DateTime.UtcNow - lastViewStartTime).TotalSeconds;
-
-                    _viewToLastViewStartTime.Remove(name);
-                }
-
-                IDictionary<string, object> segment = new Dictionary<string, object>
-                {
-                    {"name", name},
-                    {"segment", _configuration.metricHelper.OS},
-                };
-                viewDataMap.Remove(viewID);
-                CountlyEventModel currentView = new CountlyEventModel(CountlyEventModel.ViewEvent, segment, 1, null, duration);
-                _ = _eventService.RecordEventAsync(currentView);
+                StopViewWithName(name);
             }
             await Task.CompletedTask;
         }
