@@ -22,7 +22,7 @@ namespace Plugins.CountlySDK.Services
         private readonly LocationService _locationService;
         private readonly EventCountlyService _eventService;
         internal readonly RequestCountlyHelper _requestCountlyHelper;
-        private System.Threading.CancellationTokenSource _cancellationTokenSource = new System.Threading.CancellationTokenSource();
+
         internal SessionCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, EventCountlyService eventService,
             RequestCountlyHelper requestCountlyHelper, LocationService locationService, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
         {
@@ -75,17 +75,22 @@ namespace Plugins.CountlySDK.Services
             _sessionTimer.AutoReset = true;
             _sessionTimer.Start();
         }
-
         /// <summary>
-        /// Stops extending a session
+        /// Stops the timer and unsubscribes from the Elapsed event
         /// </summary>
-        internal void StopInternalTimer()
+        internal void StopSessionTimer()
         {
-            _sessionTimer?.Stop();
+            if (_sessionTimer != null)
+            {
+                // Unsubscribe from the Elapsed event
+                _sessionTimer.Elapsed -= SessionTimerOnElapsedAsync;
 
-            _cancellationTokenSource.Cancel(); // Cancel any ongoing async operations
+                // Stop and dispose the timer
+                _sessionTimer.Stop();
+                _sessionTimer.Dispose();
+                _sessionTimer = null;
+            }
         }
-
         /// <summary>
         /// Extends the session after the session duration is elapsed
         /// </summary>
@@ -93,11 +98,13 @@ namespace Plugins.CountlySDK.Services
         /// <param name="elapsedEventArgs"> Provides data for <code>Timer.Elapsed</code>event.</param>
         private async void SessionTimerOnElapsedAsync(object sender, ElapsedEventArgs elapsedEventArgs)
         {
-            if (_cancellationTokenSource.IsCancellationRequested) {
-                return; // Exit if cancellation is requested
-            }
-
             lock (LockObj) {
+
+                if (!IsSessionInitiated || _sessionTimer == null) {
+                    Log.Debug("[SessionCountlyService] SessionTimerOnElapsedAsync: Session is not initiated or session timer is null");
+                    return;
+                }
+
                 Log.Debug("[SessionCountlyService] SessionTimerOnElapsedAsync");
 
                 _eventService.AddEventsToRequestQueue();

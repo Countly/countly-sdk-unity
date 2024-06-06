@@ -212,8 +212,9 @@ namespace Assets.Tests.PlayModeTests
         /// </summary>
         public static void TestCleanup()
         {
+            _ = Countly.Instance.Session?.EndSessionAsync();
+            Countly.Instance.Session?.StopSessionTimer();
             Countly.Instance.ClearStorage();
-            Countly.Instance.Session?.StopInternalTimer();
             UnityEngine.Object.DestroyImmediate(Countly.Instance);
         }
 
