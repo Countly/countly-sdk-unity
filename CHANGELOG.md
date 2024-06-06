@@ -1,5 +1,21 @@
 ## XX.XX.X
-* Added "SetID(string newDeviceId)" function for managing device id changes.
+* Added "SetID(string newDeviceId)" function in "Countly.Instance.Device" for managing device id changes.
+* Added the following calls in "Countly.Instance.Views":
+  * "StartView" for starting a view.
+  * "StartAutoStoppedView" for starting an auto-stopped view.
+  * "StopViewWithName" for stopping a view by name.
+  * "StopViewWithID" for stopping a view by ID.
+  * "PauseViewWithID" for pausing a view by ID.
+  * "ResumeViewWithID" for resuming a paused view by ID.
+  * "StopAllViews" for stopping all views.
+  * "SetGlobalViewSegmentation" for setting global view segmentation data.
+  * "AddSegmentationToViewWithID" for adding segmentation data to a view by ID.
+  * "AddSegmentationToViewWithName" for adding segmentation data to a view by name.
+  * "UpdateGlobalViewSegmentation" for updating global view segmentation data.
+* Deprecated the following calls from "Countly.Instance.Views":
+  * "RecordOpenViewAsync": Use "StartView" instead.
+  * "RecordCloseViewAsync": Use "StopView" instead.
+  * "ReportActionAsync": This will be removed in the future.
 
 ## 23.12.1
 * Added 'UnityWebRequest' as the networking handler for WebGL builds.

@@ -117,11 +117,9 @@ namespace Plugins.CountlySDK
         public UserDetailsCountlyService UserDetails { get; private set; }
 
         /// <summary>
-        /// Exposes functionality to start and stop recording views and report positions for heat-map.
+        /// Exposes functionality for managing view lifecycle with segmentation options. Includes global view segmentation and adding segmentation to ongoing views.
         /// </summary>
-        /// <returns>ViewCountlyService</returns>
-        public ViewCountlyService Views { get; private set; }
-
+        public IViewModule Views { get; private set; }
         public MetricHelper MetricHelper { get; private set; }
         internal SessionCountlyService Session { get; set; }
 
@@ -360,7 +358,7 @@ namespace Plugins.CountlySDK
             _listeners.Clear();
 
             _listeners.Add(_push);
-            _listeners.Add(Views);
+            _listeners.Add((ViewCountlyService) Views);
             _listeners.Add(Events);
             _listeners.Add(Device);
             _listeners.Add(Session);
