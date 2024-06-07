@@ -132,17 +132,21 @@ namespace Assets.Tests.PlayModeTests
             IViewModule views = cly.Views;
             TestUtility.ValidateRQEQSize(cly, 2, 0);
 
-            Dictionary<string, object> segmentations = new Dictionary<string, object> {
+            Dictionary<string, object> providedSegmentations = new Dictionary<string, object> {
                 { "key1", "value1" },
                 { "key2", null }, // invalid value
                 { "key3", "" }, // invalid value
                 { "key4", new object() }, // invalid value
             };
 
-            await Countly.Instance.Views.RecordOpenViewAsync("open_view", segmentations);
+            Dictionary<string, object> expectedSegmentations = new Dictionary<string, object> {
+                { "key1", "value1" },
+            };
+
+            await Countly.Instance.Views.RecordOpenViewAsync("open_view", providedSegmentations);
             TestUtility.ValidateRQEQSize(cly, 2, 1);
             CountlyEventModel model = cly.Events._eventRepo.Dequeue();
-            TestUtility.ViewEventValidator(model, 1, 0, null, segmentations, "idv1", "", null, null, TestUtility.TestTimeMetrics());
+            TestUtility.ViewEventValidator(model, 1, 0, null, expectedSegmentations, "idv1", "", null, null, TestUtility.TestTimeMetrics());
 
             Assert.AreEqual("value1", model.Segmentation["key1"]);
             Assert.IsFalse(model.Segmentation.ContainsKey("key2"));

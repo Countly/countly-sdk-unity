@@ -393,12 +393,7 @@ namespace Plugins.CountlySDK.Services
             _utils.TruncateSegmentationValues(customViewSegmentation, _configuration.GetMaxSegmentationValues(), "[ViewCountlyService] StartViewInternal, ", Log);
             _utils.RemoveReservedKeysFromSegmentation(customViewSegmentation, reservedSegmentationKeysViews, "[ViewCountlyService] StartViewInternal, ", Log);
 
-            int segmCount = 0;
-            if (customViewSegmentation != null) {
-                segmCount = customViewSegmentation.Count;
-            }
-
-            Log.Debug("[ViewCountlyService] StartViewInternal, recording view with name: [" + viewName + "], previous view ID:[" + currentViewID + "] custom view segment count:[" + segmCount + "], first:[" + _isFirstView + "], autoStop:[" + viewShouldBeAutomaticallyStopped + "]");
+            Log.Debug("[ViewCountlyService] StartViewInternal, recording view with name: [" + viewName + "], previous view ID:[" + currentViewID + "], custom view segmentation:[" + customViewSegmentation?.ToString() + "], first:[" + _isFirstView + "], autoStop:[" + viewShouldBeAutomaticallyStopped + "]");
 
             AutoCloseRequiredViews(false, null);
 
@@ -795,7 +790,8 @@ namespace Plugins.CountlySDK.Services
         public async Task RecordOpenViewAsync(string name, IDictionary<string, object> segmentation = null)
         {
             lock (LockObj) {
-                StartView(name, (Dictionary<string, object>)segmentation);
+                Log.Info("[ViewCountlyService] RecordOpenViewAsync: name = " + name);
+                StartViewInternal(name, (Dictionary<string, object>)segmentation, false);
             }
             await Task.CompletedTask;
         }
@@ -813,7 +809,8 @@ namespace Plugins.CountlySDK.Services
         public async Task RecordCloseViewAsync(string name)
         {
             lock (LockObj) {
-                StopViewWithName(name);
+                Log.Info("[ViewCountlyService] RecordCloseViewAsync: name = " + name);
+                StopViewWithNameInternal(name, null);
             }
             await Task.CompletedTask;
         }
