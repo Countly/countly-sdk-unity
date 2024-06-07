@@ -23,6 +23,8 @@ namespace Plugins.CountlySDK.Services
         private readonly EventCountlyService _eventService;
         internal readonly RequestCountlyHelper _requestCountlyHelper;
 
+        bool _isSessionExtendingStopped = false;
+
         internal SessionCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, EventCountlyService eventService,
             RequestCountlyHelper requestCountlyHelper, LocationService locationService, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
         {
@@ -75,11 +77,15 @@ namespace Plugins.CountlySDK.Services
             _sessionTimer.AutoReset = true;
             _sessionTimer.Start();
         }
+
         /// <summary>
-        /// Stops the timer and unsubscribes from the Elapsed event
+        /// Stops the timer and unsubscribes from the Elapsed event.
+        /// This exists for preventing session extending after tests.
         /// </summary>
         internal void StopSessionTimer()
         {
+            _isSessionExtendingStopped = true;
+
             if (_sessionTimer != null)
             {
                 // Unsubscribe from the Elapsed event
@@ -88,9 +94,9 @@ namespace Plugins.CountlySDK.Services
                 // Stop and dispose the timer
                 _sessionTimer.Stop();
                 _sessionTimer.Dispose();
-                _sessionTimer = null;
             }
         }
+
         /// <summary>
         /// Extends the session after the session duration is elapsed
         /// </summary>
@@ -100,8 +106,7 @@ namespace Plugins.CountlySDK.Services
         {
             lock (LockObj) {
 
-                if (!IsSessionInitiated || _sessionTimer == null) {
-                    Log.Debug("[SessionCountlyService] SessionTimerOnElapsedAsync: Session is not initiated or session timer is null");
+                if (_isSessionExtendingStopped) {
                     return;
                 }
 
