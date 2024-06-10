@@ -390,6 +390,11 @@ namespace Plugins.CountlySDK.Services
                 return null;
             }
 
+            if (viewName.Length > _configuration.GetMaxKeyLength()) {
+                Log.Verbose("[ViewCountlyService] StartViewInternal, max allowed key length is " + _configuration.GetMaxKeyLength());
+                viewName = viewName.Substring(0, _configuration.GetMaxKeyLength());
+            }
+
             _utils.TruncateSegmentationValues(customViewSegmentation, _configuration.GetMaxSegmentationValues(), "[ViewCountlyService] StartViewInternal, ", Log);
             _utils.RemoveReservedKeysFromSegmentation(customViewSegmentation, reservedSegmentationKeysViews, "[ViewCountlyService] StartViewInternal, ", Log);
 
@@ -434,6 +439,11 @@ namespace Plugins.CountlySDK.Services
             if (_utils.IsNullEmptyOrWhitespace(viewName)) {
                 Log.Warning("[ViewCountlyService] StopViewWithNameInternal, trying to record view with null or empty view name, ignoring request");
                 return;
+            }
+
+            if (viewName.Length > _configuration.GetMaxKeyLength()) {
+                Log.Verbose("[ViewCountlyService] StopViewWithNameInternal, max allowed key length is " + _configuration.GetMaxKeyLength());
+                viewName = viewName.Substring(0, _configuration.GetMaxKeyLength());
             }
 
             string viewID = null;
