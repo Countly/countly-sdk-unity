@@ -40,13 +40,14 @@ namespace Assets.Tests.PlayModeTests
         {
             CountlyConfiguration config = TestUtility.CreateNoConsentConfig();
             Countly cly = Countly.Instance;
+
             cly.Init(config);
-            IViewModule views = cly.Views;
             TestUtility.ValidateRQEQSize(cly, 2, 0);
 
-            await Countly.Instance.Views.RecordCloseViewAsync("close_view");
+            await cly.Views.RecordOpenViewAsync(viewNames[0]);
             TestUtility.ValidateRQEQSize(cly, 2, 0);
-            await Countly.Instance.Views.RecordOpenViewAsync("open_view");
+
+            await cly.Views.RecordCloseViewAsync(viewNames[0]);
             TestUtility.ValidateRQEQSize(cly, 2, 0);
         }
 
@@ -59,10 +60,9 @@ namespace Assets.Tests.PlayModeTests
             CountlyConfiguration config = TestUtility.CreateViewConfig(new CustomIdProvider());
             Countly cly = Countly.Instance;
             cly.Init(config);
-            IViewModule views = cly.Views;
-            TestUtility.ValidateRQEQSize(cly, 2, 0);
 
-            await views.RecordCloseViewAsync("close_view");
+            TestUtility.ValidateRQEQSize(cly, 2, 0);
+            await cly.Views.RecordCloseViewAsync(viewNames[0]);
             TestUtility.ValidateRQEQSize(cly, 2, 0);
         }
 
@@ -75,11 +75,10 @@ namespace Assets.Tests.PlayModeTests
             CountlyConfiguration config = TestUtility.CreateViewConfig(new CustomIdProvider());
             Countly cly = Countly.Instance;
             cly.Init(config);
-            IViewModule views = cly.Views;
             TestUtility.ValidateRQEQSize(cly, 2, 0);
 
-            await views.RecordCloseViewAsync(null);
-            await views.RecordCloseViewAsync("");
+            await cly.Views.RecordCloseViewAsync(null);
+            await cly.Views.RecordCloseViewAsync("");
             TestUtility.ValidateRQEQSize(cly, 2, 0);
         }
 
@@ -93,15 +92,15 @@ namespace Assets.Tests.PlayModeTests
             CountlyConfiguration config = TestUtility.CreateViewConfig(new CustomIdProvider());
             Countly cly = Countly.Instance;
             cly.Init(config);
-            IViewModule views = cly.Views;
-            TestUtility.ValidateRQEQSize(cly, 2, 0);
 
-            await views.RecordOpenViewAsync("open_view");
-            await views.RecordCloseViewAsync("open_view_2");
+            TestUtility.ValidateRQEQSize(cly, 2, 0);
+            await cly.Views.RecordOpenViewAsync(viewNames[0]);
+            await cly.Views.RecordCloseViewAsync(viewNames[1]);
             TestUtility.ValidateRQEQSize(cly, 2, 1);
 
             CountlyEventModel model = cly.Events._eventRepo.Dequeue();
-            TestUtility.ViewEventValidator(model, 1, 0, null, TestUtility.BaseViewTestSegmentation("open_view", true, true), "idv1", "", null, null, TestUtility.TestTimeMetrics());        }
+            TestUtility.ViewEventValidator(model, 1, 0, null, TestUtility.BaseViewTestSegmentation(viewNames[0], true, true), "idv1", "", null, null, TestUtility.TestTimeMetrics());
+        }
 
         // 'RecordOpenViewAsync' method in ViewCountlyService.
         // Open a view and verify that the event is correctly recorded in the Views repository
@@ -112,11 +111,10 @@ namespace Assets.Tests.PlayModeTests
             CountlyConfiguration config = TestUtility.CreateViewConfig(new CustomIdProvider());
             Countly cly = Countly.Instance;
             cly.Init(config);
-            IViewModule views = cly.Views;
             TestUtility.ValidateRQEQSize(cly, 2, 0);
 
-            await views.RecordOpenViewAsync(null);
-            await views.RecordOpenViewAsync("");
+            await cly.Views.RecordOpenViewAsync(null);
+            await cly.Views.RecordOpenViewAsync("");
             TestUtility.ValidateRQEQSize(cly, 2, 0);
         }
 
@@ -129,7 +127,6 @@ namespace Assets.Tests.PlayModeTests
             CountlyConfiguration config = TestUtility.CreateViewConfig(new CustomIdProvider());
             Countly cly = Countly.Instance;
             cly.Init(config);
-            IViewModule views = cly.Views;
             TestUtility.ValidateRQEQSize(cly, 2, 0);
 
             Dictionary<string, object> providedSegmentations = new Dictionary<string, object> {
@@ -143,7 +140,7 @@ namespace Assets.Tests.PlayModeTests
                 { "key1", "value1" },
             };
 
-            await Countly.Instance.Views.RecordOpenViewAsync("open_view", providedSegmentations);
+            await Countly.Instance.Views.RecordOpenViewAsync(viewNames[0], providedSegmentations);
             TestUtility.ValidateRQEQSize(cly, 2, 1);
             CountlyEventModel model = cly.Events._eventRepo.Dequeue();
             TestUtility.ViewEventValidator(model, 1, 0, null, expectedSegmentations, "idv1", "", null, null, TestUtility.TestTimeMetrics());
@@ -152,10 +149,10 @@ namespace Assets.Tests.PlayModeTests
             Assert.IsFalse(model.Segmentation.ContainsKey("key2"));
             Assert.IsFalse(model.Segmentation.ContainsKey(""));
 
-            await Countly.Instance.Views.RecordOpenViewAsync("open_view_2");
+            await Countly.Instance.Views.RecordOpenViewAsync(viewNames[1]);
             TestUtility.ValidateRQEQSize(cly, 2, 1);
             model = cly.Events._eventRepo.Dequeue();
-            TestUtility.ViewEventValidator(model, 1, 0, null, TestUtility.BaseViewTestSegmentation("open_view_2", false, false), "idv2", "idv1", null, null, TestUtility.TestTimeMetrics());
+            TestUtility.ViewEventValidator(model, 1, 0, null, TestUtility.BaseViewTestSegmentation(viewNames[1], false, false), "idv2", "idv1", null, null, TestUtility.TestTimeMetrics());
         }
 
         // 'RecordOpenViewAsync' method in ViewCountlyService.
@@ -168,15 +165,12 @@ namespace Assets.Tests.PlayModeTests
                 .SetEventQueueSizeToSend(1);
             Countly cly = Countly.Instance;
             cly.Init(config);
-            IViewModule views = cly.Views;
+
             TestUtility.ValidateRQEQSize(cly, 2, 0);
-
-            await Countly.Instance.Views.RecordOpenViewAsync("open_view");
+            await Countly.Instance.Views.RecordOpenViewAsync(viewNames[0]);
             TestUtility.ValidateRQEQSize(cly, 3, 0);
-
-            await Countly.Instance.Views.RecordCloseViewAsync("open_view");
+            await Countly.Instance.Views.RecordCloseViewAsync(viewNames[0]);
             TestUtility.ValidateRQEQSize(cly, 4, 0);
-
             await Countly.Instance.Views.ReportActionAsync("action", 10, 10, 100, 100);
             TestUtility.ValidateRQEQSize(cly, 5, 0);
         }
@@ -190,11 +184,9 @@ namespace Assets.Tests.PlayModeTests
             CountlyConfiguration config = TestUtility.CreateViewConfig(new CustomIdProvider());
             Countly cly = Countly.Instance;
             cly.Init(config);
-            IViewModule views = cly.Views;
             TestUtility.ValidateRQEQSize(cly, 2, 0);
 
-            Dictionary<string, object> action = new Dictionary<string, object>
-            {
+            Dictionary<string, object> action = new Dictionary<string, object> {
                 { "type", "action" },
                 { "x", 10 },
                 { "y", 20 },
@@ -216,28 +208,42 @@ namespace Assets.Tests.PlayModeTests
 
         // 'RecordOpenViewAsync' method in ViewCountlyService and 'ChangeDeviceIdWithoutMerge' method in DeviceIdCountlyService.
         // We validate the behavior of the "isFirstView" and view event recording after changing the device ID without merging
-        // "isFirstView" field should be true again after changing the device ID.
+        // When a view is started afterwards, it should be count as first view
         [Test]
         public async void StartField_AfterDeviceIdChangeWithoutMerge()
         {
             CountlyConfiguration config = TestUtility.CreateViewConfig(new CustomIdProvider());
             Countly cly = Countly.Instance;
             cly.Init(config);
-            IViewModule views = cly.Views;
             TestUtility.ValidateRQEQSize(cly, 2, 0);
 
-            await Countly.Instance.Views.RecordOpenViewAsync("first_view");
+            await Countly.Instance.Views.RecordOpenViewAsync(viewNames[0]);
             TestUtility.ValidateRQEQSize(cly, 2, 1);
             CountlyEventModel model = cly.Events._eventRepo.Dequeue();
-            TestUtility.ViewEventValidator(model, 1, 0, null, TestUtility.BaseViewTestSegmentation("first_view", true, true), "idv1", "", null, null, TestUtility.TestTimeMetrics());
+            TestUtility.ViewEventValidator(model, 1, 0, null, TestUtility.BaseViewTestSegmentation(viewNames[0], true, true), "idv1", "", null, null, TestUtility.TestTimeMetrics());
 
             await Countly.Instance.Device.ChangeDeviceIdWithoutMerge("new device id");
-            TestUtility.ValidateRQEQSize(cly, 2, 0);
+            Countly.Instance.Consents.GiveConsentAll();
 
-            await Countly.Instance.Views.RecordOpenViewAsync("second_view_open");
-            TestUtility.ValidateRQEQSize(cly, 2, 0);
-            Assert.IsFalse(Countly.Instance.Consents.CheckConsent(Consents.Views));
+            await Countly.Instance.Views.RecordOpenViewAsync(viewNames[1]);
+            TestUtility.ValidateRQEQSize(cly, 4, 1);
+            CountlyEventModel secondModel = cly.Events._eventRepo.Dequeue();
+            // BaseViewTestSegmentation(string viewName, bool isVisit, bool isStart) passing true in here means that this is first view
+            TestUtility.ViewEventValidator(secondModel, 1, 0, null, TestUtility.BaseViewTestSegmentation(viewNames[1], true, true), "idv2", "idv1", null, null, TestUtility.TestTimeMetrics());
+            
+            Thread.Sleep(1000);
+
+            await Countly.Instance.Views.RecordCloseViewAsync(viewNames[0]);
+            TestUtility.ValidateRQEQSize(cly, 4, 1);
+            CountlyEventModel resultStop = cly.Events._eventRepo.Dequeue();
+            TestUtility.ViewEventValidator(resultStop, 1, 0, 1, TestUtility.BaseViewTestSegmentation(viewNames[0], false, false), "idv1", "idv1", null, null, TestUtility.TestTimeMetrics());
+            
+            await Countly.Instance.Views.RecordCloseViewAsync(viewNames[1]);
+            TestUtility.ValidateRQEQSize(cly, 4, 1);
+            CountlyEventModel resultStop2 = cly.Events._eventRepo.Dequeue();
+            TestUtility.ViewEventValidator(resultStop2, 1, 0, 1, TestUtility.BaseViewTestSegmentation(viewNames[1], false, false), "idv2", "idv1", null, null, TestUtility.TestTimeMetrics());
         }
+
         #endregion
         // 'StartView' method in ViewCountlyService class
         // We validate that repository is clear and, start a view with view name
@@ -247,12 +253,10 @@ namespace Assets.Tests.PlayModeTests
         {
             CountlyConfiguration config = TestUtility.CreateViewConfig(new CustomIdProvider());
             Countly cly = Countly.Instance;
-
             cly.Init(config);
-            IViewModule views = cly.Views;
             TestUtility.ValidateRQEQSize(cly, 2, 0);
 
-            string viewId = views.StartView(viewNames[0]);
+            string viewId = cly.Views.StartView(viewNames[0]);
             TestUtility.ValidateRQEQSize(cly, 2, 1);
             CountlyEventModel result = cly.Events._eventRepo.Dequeue();
             TestUtility.ViewEventValidator(result, 1, 0, null, TestUtility.BaseViewTestSegmentation(viewNames[0], true, true), viewId, "", null, null, TestUtility.TestTimeMetrics());            TestUtility.ValidateRQEQSize(cly, 2, 0);
@@ -272,13 +276,16 @@ namespace Assets.Tests.PlayModeTests
             TestUtility.ValidateRQEQSize(cly, 2, 0);
 
             views.StartView(string.Empty);
-            Assert.AreEqual(0, cly.Events._eventRepo.Count);
+            TestUtility.ValidateRQEQSize(cly, 2, 0);
 
             views.StartView(null);
-            Assert.AreEqual(0, cly.Events._eventRepo.Count);
+            TestUtility.ValidateRQEQSize(cly, 2, 0);
 
             views.StartView(" ");
-            Assert.AreEqual(0, cly.Events._eventRepo.Count);
+            TestUtility.ValidateRQEQSize(cly, 2, 0);
+
+            views.StartView("");
+            TestUtility.ValidateRQEQSize(cly, 2, 0);
         }
 
         // 'StartView' method in ViewCountlyService class
@@ -298,7 +305,6 @@ namespace Assets.Tests.PlayModeTests
             TestUtility.ValidateRQEQSize(cly, 2, 1);
             CountlyEventModel result = cly.Events._eventRepo.Dequeue();
             TestUtility.ViewEventValidator(result, 1, 0, null, testSegmentation, viewId, "", null, null, TestUtility.TestTimeMetrics());
-            TestUtility.ValidateRQEQSize(cly, 2, 0);
         }
 
         // 'StartView' method in ViewCountlyService class
@@ -333,7 +339,6 @@ namespace Assets.Tests.PlayModeTests
         {
             CountlyConfiguration config = TestUtility.CreateViewConfig(new CustomIdProvider());
             Countly cly = Countly.Instance;
-
             cly.Init(config);
             IViewModule views = cly.Views;
             TestUtility.ValidateRQEQSize(cly, 2, 0);
@@ -347,25 +352,22 @@ namespace Assets.Tests.PlayModeTests
 
         // 'StopViewWithName' method in ViewCountlyService class
         // We validate the repository is clear, stop a view that is open
-        // View should be stopped and a stopped view shouldn't be able to stop again
+        // View should be stopped and trying to stop a view that's already stopped shouldn't record anything
         [Test]
         public void StopViewWithName_OpenView()
         {
             CountlyConfiguration config = TestUtility.CreateViewConfig(new CustomIdProvider());
             Countly cly = Countly.Instance;
-
             cly.Init(config);
             IViewModule views = cly.Views;
             TestUtility.ValidateRQEQSize(cly, 2, 0);
 
             string viewId = views.StartView(viewNames[0]);
             TestUtility.ValidateRQEQSize(cly, 2, 1);
-
             CountlyEventModel result = cly.Events._eventRepo.Dequeue();
             TestUtility.ViewEventValidator(result, 1, 0, null, TestUtility.BaseViewTestSegmentation(viewNames[0], true, true), viewId, "", null, null, TestUtility.TestTimeMetrics());
 
             views.StopViewWithName(viewNames[0]);
-
             TestUtility.ValidateRQEQSize(cly, 2, 1);
             CountlyEventModel resultStop = cly.Events._eventRepo.Dequeue();
             TestUtility.ViewEventValidator(resultStop, 1, 0, 0, TestUtility.BaseViewTestSegmentation(viewNames[0], false, false), viewId, "", null, null, TestUtility.TestTimeMetrics());
