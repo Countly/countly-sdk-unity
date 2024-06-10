@@ -783,16 +783,22 @@ namespace Plugins.CountlySDK.Services
         /// Do not use with <see cref="StopView"/> as it will not function correctly.
         /// Please use <see cref="StartView"/> and <see cref="StopView"/> for new implementations.
         /// </remarks>
-        /// <param name="viewName">The name of the view to open.</param>
-        /// <param name="viewSegmentation">Optional segmentation data for the view.</param>
+        /// <param name="name">The name of the view to open.</param>
+        /// <param name="segmentation">Optional segmentation data for the view.</param>
         /// <returns>A task representing the asynchronous operation.</returns>
         [Obsolete("RecordOpenViewAsync(string name, IDictionary<string, object> segmentation = null) is deprecated and will be removed in the future. Please use StartView instead.")]
         public async Task RecordOpenViewAsync(string name, IDictionary<string, object> segmentation = null)
         {
+            if (!_consentService.CheckConsentInternal(Consents.Views)) {
+                Log.Debug("[ViewCountlyService] RecordOpenViewAsync, consent is not given, ignoring the request.");
+                return;
+            }
+
             lock (LockObj) {
                 Log.Info("[ViewCountlyService] RecordOpenViewAsync: name = " + name);
                 StartViewInternal(name, (Dictionary<string, object>)segmentation, false);
             }
+
             await Task.CompletedTask;
         }
 
@@ -803,15 +809,21 @@ namespace Plugins.CountlySDK.Services
         /// This method should only be used to close views that were opened using <see cref="RecordOpenViewAsync"/>.
         /// Do not use to close views started with <see cref="StartView"/>.
         /// </remarks>
-        /// <param name="viewName">The name of the view to close.</param>
+        /// <param name="name">The name of the view to close.</param>
         /// <returns>A task representing the asynchronous operation.</returns>
         [Obsolete("RecordCloseViewAsync(string name) is deprecated and will be removed in the future. Please use StopView instead.")]
         public async Task RecordCloseViewAsync(string name)
         {
+            if (!_consentService.CheckConsentInternal(Consents.Views)) {
+                Log.Debug("[ViewCountlyService] RecordCloseViewAsync, consent is not given, ignoring the request.");
+                return;
+            }
+
             lock (LockObj) {
                 Log.Info("[ViewCountlyService] RecordCloseViewAsync: name = " + name);
                 StopViewWithNameInternal(name, null);
             }
+
             await Task.CompletedTask;
         }
 
