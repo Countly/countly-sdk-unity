@@ -114,7 +114,7 @@ namespace Plugins.CountlySDK
         /// Exposes functionality to set and change custom user properties and interact with custom property modifiers.
         /// </summary>
         /// <returns>UserDetailsCountlyService</returns>
-        public UserDetailsCountlyService UserDetails { get; private set; }
+        public IUserDetailModule UserDetails { get; private set; }
 
         /// <summary>
         /// Exposes functionality for managing view lifecycle with segmentation options. Includes global view segmentation and adding segmentation to ongoing views.
@@ -365,7 +365,7 @@ namespace Plugins.CountlySDK
             _listeners.Add(Location);
             _listeners.Add(Consents);
             _listeners.Add(StarRating);
-            _listeners.Add(UserDetails);
+            _listeners.Add((UserDetailsCountlyService) UserDetails);
             _listeners.Add(CrashReports);
             _listeners.Add(RemoteConfigs);
             _listeners.Add(Initialization);

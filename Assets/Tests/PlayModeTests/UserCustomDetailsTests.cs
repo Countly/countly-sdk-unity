@@ -5,15 +5,11 @@ using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 using Plugins.CountlySDK;
 using Plugins.CountlySDK.Models;
-using UnityEngine;
 
 namespace Assets.Tests.PlayModeTests
 {
     public class UserCustomDetailsTests
     {
-        private readonly string _serverUrl = "https://xyz.com/";
-        private readonly string _appKey = "772c091355076ead703f987fee94490";
-
         void AssertlUserDetailRequest(NameValueCollection collection, CountlyUserDetailsModel userInfo, IDictionary<string, object> customInfo)
         {
             JObject userDetailJson = JObject.Parse(collection["user_details"]);
@@ -36,23 +32,22 @@ namespace Assets.Tests.PlayModeTests
             }
         }
 
-        /// <summary>
-        /// It check the working of method 'SetUserDetailsAsync'.
-        /// </summary>
+        // 'SetUserDetailsAsync' method in Countly.Instance.UserDetails
+        // We call the method first with a null value then a valid user details value
+        // Null value shouldn't record anything, valid values should be recorded correctly
         [Test]
         public async void SetUserDetailsAsync()
         {
             Countly.Instance.Init(TestUtility.CreateBaseConfig());
-
-            Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
-
             Assert.IsNotNull(Countly.Instance.UserDetails);
-            Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
+            TestUtility.ValidateRQEQSize(Countly.Instance, 1, 0);
+            Countly.Instance.RequestHelper._requestRepo.Clear();
+            TestUtility.ValidateRQEQSize(Countly.Instance, 0, 0);
 
             CountlyUserDetailsModel userDetails = null;
 
             await Countly.Instance.UserDetails.SetUserDetailsAsync(userDetails);
-            Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
+            TestUtility.ValidateRQEQSize(Countly.Instance, 0, 0);
 
             userDetails = new CountlyUserDetailsModel("Full Name", "username", "useremail@email.com", "Organization",
                     "222-222-222",
@@ -63,61 +58,33 @@ namespace Assets.Tests.PlayModeTests
                         { "Height", "5.9" },
                     });
             await Countly.Instance.UserDetails.SetUserDetailsAsync(userDetails);
-            Assert.AreEqual(1, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
 
-            CountlyRequestModel requestModel = Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Dequeue();
+            TestUtility.ValidateRQEQSize(Countly.Instance, 1, 0);
+            CountlyRequestModel requestModel = Countly.Instance.RequestHelper._requestRepo.Dequeue();
 
             NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
             AssertlUserDetailRequest(collection, userDetails, userDetails.Custom);
         }
 
-        /// <summary>
-        /// 'SetUserDetailAsync' method in UserDetailsCountlyService
-        /// we pass an invalid URL to the user profiles property
-        /// This value should then be used in the end request. It should not be rejected
-        /// </summary>
-        [Test]
-        public async void SetPicturePath_invalidUrl()
-        {
-            SetPicturePath_base("Invalid URL", "Invalid URL");
-        }
-
-
-        /// <summary>
-        /// 'SetUserDetailAsync' method in UserDetailsCountlyService
-        /// we pass an 'null' URL to the user profiles property
-        /// This value should then be used in the end request. It should not be rejected
-        /// </summary>
-        [Test]
-        public async void SetPicturePath_nullUrl()
-        {
-            SetPicturePath_base(null, null);
-        }
-
-        /// <summary>
-        /// 'SetUserDetailAsync' method in UserDetailsCountlyService
-        /// we pass an empty string URL to the user profiles property
-        /// This value should then be used in the end request. It should not be rejected.
-        /// </summary>
-        [Test]
-        public async void SetPicturePath_emptyUrl()
-        {
-            SetPicturePath_base("", "");
-        }
-
-        public async void SetPicturePath_base(string setPictureUrl, string expectedValue)
+        // 'SetUserDetailAsync' method in Countly.Instance.UserDetails
+        // We pass invalid URLs to the user profiles property as null, empty and non url string
+        // Nothing should break and picture url should be recorded
+        [TestCase("Invalid URL", "Invalid URL")]
+        [TestCase(null, null)]
+        [TestCase("", "")]
+        public async void SetPicturePath(string setPictureUrl, string expectedValue)
         {
             Countly.Instance.Init(TestUtility.CreateBaseConfig());
-            Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
+            Countly.Instance.RequestHelper._requestRepo.Clear();
 
             // Ensure that the UserDetails instance is not null and request repository is empty
             Assert.IsNotNull(Countly.Instance.UserDetails);
-            Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
+            TestUtility.ValidateRQEQSize(Countly.Instance, 0, 0);
 
             // Attempt to set user details with a null user model
             CountlyUserDetailsModel userDetails = null;
             await Countly.Instance.UserDetails.SetUserDetailsAsync(userDetails);
-            Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
+            TestUtility.ValidateRQEQSize(Countly.Instance, 0, 0);
 
             // Initialize userDetails and assign an invalid picture URL to the user model
             userDetails = new CountlyUserDetailsModel("FirstName", "LastName", "name@email.com", "Company",
@@ -129,9 +96,10 @@ namespace Assets.Tests.PlayModeTests
                         { "Team", "Arsenal" },
                     });
             await Countly.Instance.UserDetails.SetUserDetailsAsync(userDetails);
+
             // Ensure that a request is added, retrieve and parse it for verification
-            Assert.AreEqual(1, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
-            CountlyRequestModel requestModel = Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Dequeue();
+            TestUtility.ValidateRQEQSize(Countly.Instance, 1, 0);
+            CountlyRequestModel requestModel = Countly.Instance.RequestHelper._requestRepo.Dequeue();
             NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
 
             // Parse the "user_details" JSON from the request data
@@ -144,26 +112,26 @@ namespace Assets.Tests.PlayModeTests
             }
         }
 
-        /// <summary>
-        /// It validate user profile fields limits.
-        /// </summary>
+        // 'SetUserDetailAsync' method in Countly.Instance.UserDetails
+        // We check configuration limits for user profile fields
+        // Nothing should break and values should be recorded within limits
         [Test]
         public async void TestUserProfileFieldsLimits()
         {
-            CountlyConfiguration configuration = TestUtility.CreateBaseConfig();
-            configuration.MaxValueSize = 3;
+            CountlyConfiguration configuration = TestUtility.CreateBaseConfig()
+                .SetMaxValueSize(3);
 
+            // Initialize, ensure that the UserDetails instance is not null and request repository is empty
             Countly.Instance.Init(configuration);
-            Countly.Instance.ClearStorage();
-
+            Countly.Instance.RequestHelper._requestRepo.Clear();
             Assert.IsNotNull(Countly.Instance.UserDetails);
-            Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
+            TestUtility.ValidateRQEQSize(Countly.Instance, 0, 0);
 
             CountlyUserDetailsModel userDetails = null;
 
             await Countly.Instance.UserDetails.SetUserDetailsAsync(userDetails);
-            Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
-
+            TestUtility.ValidateRQEQSize(Countly.Instance, 0, 0);
+            
             userDetails = new CountlyUserDetailsModel("Full Name", "username", "useremail@email.com", "Organization",
                     "222-222-222",
                     "12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890" +
@@ -178,11 +146,9 @@ namespace Assets.Tests.PlayModeTests
                         { "Height", "5.9" },
                     });
             await Countly.Instance.UserDetails.SetUserDetailsAsync(userDetails);
-            Assert.AreEqual(1, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
-
-            CountlyRequestModel requestModel = Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Dequeue();
-
-
+            TestUtility.ValidateRQEQSize(Countly.Instance, 1, 0);
+            
+            CountlyRequestModel requestModel = Countly.Instance.RequestHelper._requestRepo.Dequeue();
             NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
 
             userDetails = new CountlyUserDetailsModel("Ful", "use", "use", "Org",
@@ -197,66 +163,53 @@ namespace Assets.Tests.PlayModeTests
             AssertlUserDetailRequest(collection, userDetails, userDetails.Custom);
         }
 
-        /// <summary>
-        /// It check the working of method 'SetUserDetailsAsync'.
-        /// </summary>
+        // 'SetCustomUserDetails' method in Countly.Instance.UserDetails
+        // We record valid custom detail values
+        // Nothing should break, values should be recorded correctly
         [Test]
-        public void SetCustomUserDetailsAsync()
+        public void SetCustomUserDetails()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-                EnablePost = true
-            };
-
-            Countly.Instance.Init(configuration);
-            Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
-
+            // Initialize, ensure that the UserDetails instance is not null and request repository is empty
+            Countly.Instance.Init(TestUtility.CreateBaseConfig());
+            Countly.Instance.RequestHelper._requestRepo.Clear();
             Assert.IsNotNull(Countly.Instance.UserDetails);
-            Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
+            TestUtility.ValidateRQEQSize(Countly.Instance, 0, 0);
 
             Dictionary<string, object> userCustomDetail = null;
-
             Countly.Instance.UserDetails.SetCustomUserDetails(userCustomDetail);
-            Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
+            TestUtility.ValidateRQEQSize(Countly.Instance, 0, 0);
 
             userCustomDetail = new Dictionary<string, object> {
                         { "Hair", "Black" },
                         { "Height", "5.9" },
             };
             Countly.Instance.UserDetails.SetCustomUserDetails(userCustomDetail);
-            Assert.AreEqual(1, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
+            TestUtility.ValidateRQEQSize(Countly.Instance, 1, 0);
 
-            CountlyRequestModel requestModel = Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Dequeue();
+            CountlyRequestModel requestModel = Countly.Instance.RequestHelper._requestRepo.Dequeue();
             NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
-
             AssertlUserDetailRequest(collection, null, userCustomDetail);
         }
 
-
-        /// <summary>
-        /// It validate user detail segments limits.
-        /// </summary>
+        // 'SetCustomUserDetails' method in Countly.Instance.UserDetails
+        // We check configuration internal limits for custom detail fields
+        // Nothing should break, values should be recorded correctly within limits
         [Test]
         public void UserDetailSegmentLimits()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-                MaxKeyLength = 5,
-                MaxValueSize = 6,
-                EnablePost = true
-            };
+            CountlyConfiguration configuration = TestUtility.CreateBaseConfig()
+                .SetMaxKeyLength(5)
+                .SetMaxValueSize(6);
 
+            // Initialize, ensure that the UserDetails instance is not null and request repository is empty
             Countly.Instance.Init(configuration);
-            Countly.Instance.ClearStorage();
-
+            Countly.Instance.RequestHelper._requestRepo.Clear();
             Assert.IsNotNull(Countly.Instance.UserDetails);
-            Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
+            TestUtility.ValidateRQEQSize(Countly.Instance, 0, 0);
 
             Dictionary<string, object> userCustomDetail = null;
             Countly.Instance.UserDetails.SetCustomUserDetails(userCustomDetail);
-            Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
+            TestUtility.ValidateRQEQSize(Countly.Instance, 0, 0);
 
             userCustomDetail = new Dictionary<string, object> {
                         { "Hair", "Black_1" },
@@ -264,9 +217,9 @@ namespace Assets.Tests.PlayModeTests
             };
 
             Countly.Instance.UserDetails.SetCustomUserDetails(userCustomDetail);
-            Assert.AreEqual(1, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
+            TestUtility.ValidateRQEQSize(Countly.Instance, 1, 0);
 
-            CountlyRequestModel requestModel = Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Dequeue();
+            CountlyRequestModel requestModel = Countly.Instance.RequestHelper._requestRepo.Dequeue();
             NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
             JObject custom = JObject.Parse(collection["user_details"]);
 
@@ -281,106 +234,91 @@ namespace Assets.Tests.PlayModeTests
             AssertlUserDetailRequest(collection, null, userCustomDetail);
         }
 
-        /// <summary>
-        /// It validate custom user detail segments key and value limits.
-        /// </summary>
+        // User detail methods in Countly.Instance.UserDetails
+        // We check configuration internal limits for custom detail segments key and value limits.
+        // Nothing should break, values should be recorded correctly within limits
         [Test]
         public void CustomUserDetailSegmentLimits()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-                MaxKeyLength = 5,
-                MaxValueSize = 4,
-                EnablePost = true
-            };
+            CountlyConfiguration configuration = TestUtility.CreateBaseConfig()
+                .SetMaxKeyLength(5)
+                .SetMaxValueSize(4)
+                .EnableForcedHttpPost();
 
+            // Initialize, ensure that the UserDetails instance is not null and request repository is empty
             Countly.Instance.Init(configuration);
-            Countly.Instance.ClearStorage();
-
+            Countly.Instance.RequestHelper._requestRepo.Clear();
             Assert.IsNotNull(Countly.Instance.UserDetails);
-            Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
-
+            TestUtility.ValidateRQEQSize(Countly.Instance, 0, 0);
 
             Countly.Instance.UserDetails.IncrementBy("IncrementBy", 5);
-            Assert.IsTrue(Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Incre"));
-            Dictionary<string, object> dic = Countly.Instance.UserDetails.CustomDataProperties["Incre"] as Dictionary<string, object>;
+            Assert.IsTrue(Countly.Instance.UserDetails.ContainsCustomDataKey("Incre"));
+            Dictionary<string, object> dic = Countly.Instance.UserDetails.RetrieveCustomDataValue("Incre") as Dictionary<string, object>;
             Assert.AreEqual(5, dic["$inc"]);
 
             Countly.Instance.UserDetails.Increment("Increment");
-            Assert.IsTrue(Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Incre"));
-            dic = Countly.Instance.UserDetails.CustomDataProperties["Incre"] as Dictionary<string, object>;
+            Assert.IsTrue(Countly.Instance.UserDetails.ContainsCustomDataKey("Incre"));
+            dic = Countly.Instance.UserDetails.RetrieveCustomDataValue("Incre") as Dictionary<string, object>;
             Assert.AreEqual(1, dic["$inc"]);
 
             Countly.Instance.UserDetails.SetOnce("SetOnce", "100KM");
-            Assert.IsTrue(Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("SetOn"));
-            dic = Countly.Instance.UserDetails.CustomDataProperties["SetOn"] as Dictionary<string, object>;
-            Assert.AreEqual("100K", dic["$setOnce"]);
+            Assert.IsTrue(Countly.Instance.UserDetails.ContainsCustomDataKey("SetOn"));
+            dic = Countly.Instance.UserDetails.RetrieveCustomDataValue("SetOn") as Dictionary<string, object>;
+            Assert.AreEqual("100K", dic[key: "$setOnce"]);
 
             Countly.Instance.UserDetails.Set("Set", "6000.0");
-            Assert.IsTrue(Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Set"));
-            string height = (string)Countly.Instance.UserDetails.CustomDataProperties["Set"];
+            Assert.IsTrue(Countly.Instance.UserDetails.ContainsCustomDataKey("Set"));
+            string height = (string)Countly.Instance.UserDetails.RetrieveCustomDataValue("Set");
             Assert.AreEqual("6000", height);
 
             Countly.Instance.UserDetails.Pull("Pull", new string[] { "50KM", "100KM" });
-            Assert.IsTrue(Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Pull"));
-            dic = Countly.Instance.UserDetails.CustomDataProperties["Pull"] as Dictionary<string, object>;
+            Assert.IsTrue(Countly.Instance.UserDetails.ContainsCustomDataKey("Pull"));
+            dic = Countly.Instance.UserDetails.RetrieveCustomDataValue("Pull") as Dictionary<string, object>;
             Assert.AreEqual("50KM", ((string[])dic["$pull"])[0]);
             Assert.AreEqual("100K", ((string[])dic["$pull"])[1]);
 
             Countly.Instance.UserDetails.PushUnique("PushUnique", new string[] { "2900.0" });
-            Assert.IsTrue(Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("PushU"));
-            dic = Countly.Instance.UserDetails.CustomDataProperties["PushU"] as Dictionary<string, object>;
+            Assert.IsTrue(Countly.Instance.UserDetails.ContainsCustomDataKey("PushU"));
+            dic = Countly.Instance.UserDetails.RetrieveCustomDataValue("PushU") as Dictionary<string, object>;
             Assert.AreEqual(new string[] { "2900" }, dic["$addToSet"]);
-            Countly.Instance.UserDetails.CustomDataProperties.Clear();
 
             Countly.Instance.UserDetails.Push("Push", new string[] { "6000.0" });
-            Assert.IsTrue(Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Push"));
-            dic = Countly.Instance.UserDetails.CustomDataProperties["Push"] as Dictionary<string, object>;
+            Assert.IsTrue(Countly.Instance.UserDetails.ContainsCustomDataKey("Push"));
+            dic = Countly.Instance.UserDetails.RetrieveCustomDataValue("Push") as Dictionary<string, object>;
             Assert.AreEqual("6000", ((string[])dic["$push"])[0]);
-            Countly.Instance.UserDetails.CustomDataProperties.Clear();
 
             Countly.Instance.UserDetails.Min("Min", 10.0);
-            Assert.IsTrue(Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Min"));
-            dic = Countly.Instance.UserDetails.CustomDataProperties["Min"] as Dictionary<string, object>;
+            Assert.IsTrue(Countly.Instance.UserDetails.ContainsCustomDataKey("Min"));
+            dic = Countly.Instance.UserDetails.RetrieveCustomDataValue("Min") as Dictionary<string, object>;
             Assert.AreEqual(10.0, dic["$min"]);
-            Countly.Instance.UserDetails.CustomDataProperties.Clear();
 
             Countly.Instance.UserDetails.Max("Max", 10000.0);
-            Assert.IsTrue(Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Max"));
-            dic = Countly.Instance.UserDetails.CustomDataProperties["Max"] as Dictionary<string, object>;
+            Assert.IsTrue(Countly.Instance.UserDetails.ContainsCustomDataKey("Max"));
+            dic = Countly.Instance.UserDetails.RetrieveCustomDataValue("Max") as Dictionary<string, object>;
             Assert.AreEqual(10000.0, dic["$max"]);
 
             Countly.Instance.UserDetails.Multiply("Multiply", 10.0);
-            Assert.IsTrue(Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Multi"));
-            dic = Countly.Instance.UserDetails.CustomDataProperties["Multi"] as Dictionary<string, object>;
+            Assert.IsTrue(Countly.Instance.UserDetails.ContainsCustomDataKey("Multi"));
+            dic = Countly.Instance.UserDetails.RetrieveCustomDataValue("Multi") as Dictionary<string, object>;
             Assert.AreEqual(10.0, dic["$mul"]);
-            Countly.Instance.UserDetails.CustomDataProperties.Clear();
-
         }
 
-        /// <summary>
-        /// It validate custom user detail invalid keys.
-        /// </summary>
+        // User detail methods in Countly.Instance.UserDetails
+        // We validate custom user detail methods with invalid keys
+        // Nothing should be recorded and nothing should break
         [Test]
         public async void CustomUserDetailInvalidKeys()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-                MaxKeyLength = 5,
-                MaxValueSize = 4,
-                EnablePost = true
-            };
+            CountlyConfiguration configuration = TestUtility.CreateBaseConfig()
+                .SetMaxKeyLength(5)
+                .SetMaxValueSize(4)
+                .EnableForcedHttpPost();
 
+            // Initialize, ensure that the UserDetails instance is not null and request repository is empty
             Countly.Instance.Init(configuration);
-            Countly.Instance.ClearStorage();
-            Countly.Instance.UserDetails.CustomDataProperties.Clear();
-            Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Clear();
-
+            Countly.Instance.RequestHelper._requestRepo.Clear();
             Assert.IsNotNull(Countly.Instance.UserDetails);
-            Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
-
+            TestUtility.ValidateRQEQSize(Countly.Instance, 0, 0);
 
             Countly.Instance.UserDetails.IncrementBy("", 5);
             Countly.Instance.UserDetails.Increment("");
@@ -404,220 +342,153 @@ namespace Assets.Tests.PlayModeTests
             Countly.Instance.UserDetails.Max(null, 10000.0);
             Countly.Instance.UserDetails.Multiply(null, 10.0);
 
-            Assert.AreEqual(0, Countly.Instance.UserDetails.CustomDataProperties.Count);
-
             await Countly.Instance.UserDetails.SaveAsync();
-            Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
-
-
+            TestUtility.ValidateRQEQSize(Countly.Instance, 0, 0);
         }
 
-        /// <summary>
-        /// It validates the user's custom properties set with method 'UserCustomDetails'.
-        /// Case 1: If invalid custom detail is provided, no request will add to the request queue.
-        /// Case 2: If valid custom detail is provided, a request that have custom detail, should be added in the request queue.
-        /// </summary>
-        [Test]
-        public void UserDetailMethod_UserCustomDetails()
-        {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-                EnablePost = true,
-            };
-
-            Countly.Instance.Init(configuration);
-            Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
-
-            Assert.IsNotNull(Countly.Instance.UserDetails);
-            Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
-
-            Dictionary<string, object> InvalidUserDetails = null;
-            Countly.Instance.UserDetails.SetCustomUserDetails(InvalidUserDetails);
-            Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
-
-            Dictionary<string, object> userCustomDetail = new Dictionary<string, object> {
-                        { "Hair", "Black" },
-                        { "Height", "5.9" },
-            };
-
-            Countly.Instance.UserDetails.SetCustomUserDetails(userCustomDetail);
-            Assert.AreEqual(1, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
-
-            CountlyRequestModel requestModel = Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Dequeue();
-            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
-            AssertlUserDetailRequest(collection, null, userCustomDetail);
-        }
-
-
-        /// <summary>
-        /// It validates the user's custom properties set via 'SetOnce' and 'Set' methods.
-        /// </summary>
+        // 'SetOnce' and 'Set' methods in Countly.Instance.UserDetails
+        // We validate the user's custom properties set via these methods
+        // Nothing should break, values should be recorded correctly
         [Test]
         public void UserCustomProperty_SetOnceAndSet()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey
-            };
-
-            Countly.Instance.Init(configuration);
-            Countly.Instance.ClearStorage();
-
+            // Initialize, ensure that the UserDetails instance is not null and request repository is empty
+            Countly.Instance.Init(TestUtility.CreateBaseConfig());
+            Countly.Instance.RequestHelper._requestRepo.Clear();
             Assert.IsNotNull(Countly.Instance.UserDetails);
-            Assert.AreEqual(0, Countly.Instance.UserDetails._requestCountlyHelper._requestRepo.Count);
-
+            TestUtility.ValidateRQEQSize(Countly.Instance, 0, 0);
 
             Countly.Instance.UserDetails.SetOnce("Distance", "100KM");
-            Assert.IsTrue(Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Distance"));
-            Dictionary<string, object> dic = Countly.Instance.UserDetails.CustomDataProperties["Distance"] as Dictionary<string, object>;
+            Assert.IsTrue(Countly.Instance.UserDetails.ContainsCustomDataKey("Distance"));
+            Dictionary<string, object> dic = Countly.Instance.UserDetails.RetrieveCustomDataValue("Distance") as Dictionary<string, object>;
             Assert.AreEqual("100KM", dic["$setOnce"]);
 
             Countly.Instance.UserDetails.Set("Height", "5.9125");
-            Assert.IsTrue(Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Height"));
-            string height = (string)Countly.Instance.UserDetails.CustomDataProperties["Height"];
+            Assert.IsTrue(Countly.Instance.UserDetails.ContainsCustomDataKey("Height"));
+            string height = (string)Countly.Instance.UserDetails.RetrieveCustomDataValue("Height");
             Assert.AreEqual("5.9125", height);
         }
 
-        /// <summary>
-        /// It validates the user's custom properties set via 'IncrementBy' and 'Increment' methods.
-        /// </summary>
+        // 'IncrementBy' and 'Increment' methods in Countly.Instance.UserDetails
+        // We validate the user's custom properties set via these methods
+        // Nothing should break, values should be recorded correctly
         [Test]
         public void UserCustomProperty_IncrementBy()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-            };
-
-            Countly.Instance.Init(configuration);
-
+            // Initialize, ensure that the UserDetails instance is not null and request repository is empty
+            Countly.Instance.Init(TestUtility.CreateBaseConfig());
+            Countly.Instance.RequestHelper._requestRepo.Clear();
             Assert.IsNotNull(Countly.Instance.UserDetails);
+            TestUtility.ValidateRQEQSize(Countly.Instance, 0, 0);
 
             Countly.Instance.UserDetails.IncrementBy("Distance", 5);
-            Assert.IsTrue(Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Distance"));
-            Dictionary<string, object> dic = Countly.Instance.UserDetails.CustomDataProperties["Distance"] as Dictionary<string, object>;
+            Assert.IsTrue(Countly.Instance.UserDetails.ContainsCustomDataKey("Distance"));
+            Dictionary<string, object> dic = Countly.Instance.UserDetails.RetrieveCustomDataValue("Distance") as Dictionary<string, object>;
             Assert.AreEqual(5, dic["$inc"]);
 
             Countly.Instance.UserDetails.Increment("Height");
-            Assert.IsTrue(Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Height"));
-            Dictionary<string, object> dic1 = Countly.Instance.UserDetails.CustomDataProperties["Height"] as Dictionary<string, object>;
+            Assert.IsTrue(Countly.Instance.UserDetails.ContainsCustomDataKey("Height"));
+            Dictionary<string, object> dic1 = Countly.Instance.UserDetails.RetrieveCustomDataValue("Height") as Dictionary<string, object>;
             Assert.AreEqual(1, dic1["$inc"]);
         }
 
-        /// <summary>
-        /// It validates the user's custom property set via 'Pull'.
-        /// </summary>
+        // 'Pull' method in Countly.Instance.UserDetails
+        // We validate the user's custom property set via 'Pull'
+        // Nothing should break, values should be recorded correctly
         [Test]
         public void UserCustomProperty_Pull()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-            };
-
-            Countly.Instance.Init(configuration);
-
+            // Initialize, ensure that the UserDetails instance is not null and request repository is empty
+            Countly.Instance.Init(TestUtility.CreateBaseConfig());
+            Countly.Instance.RequestHelper._requestRepo.Clear();
             Assert.IsNotNull(Countly.Instance.UserDetails);
+            TestUtility.ValidateRQEQSize(Countly.Instance, 0, 0);
 
             Countly.Instance.UserDetails.Pull("Distance", new string[] { "5" });
-            Assert.IsTrue(Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Distance"));
-            Dictionary<string, object> dic = Countly.Instance.UserDetails.CustomDataProperties["Distance"] as Dictionary<string, object>;
+            Assert.IsTrue(Countly.Instance.UserDetails.ContainsCustomDataKey("Distance"));
+            Dictionary<string, object> dic = Countly.Instance.UserDetails.RetrieveCustomDataValue("Distance") as Dictionary<string, object>;
             Assert.AreEqual(new string[] { "5" }, dic["$pull"]);
         }
 
-        /// <summary>
-        /// It validates the user's custom properties set via 'PushUnique' and 'Push' methods.
-        /// </summary>
+        // 'PushUnique' and 'Push' methods in Countly.Instance.UserDetails
+        // We validate the user's custom property set via these methods
+        // Nothing should break, values should be recorded correctly
         [Test]
         public void UserCustomProperty_PushUniqueAndPush()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-            };
-
-            Countly.Instance.Init(configuration);
-
+            // Initialize, ensure that the UserDetails instance is not null and request repository is empty
+            Countly.Instance.Init(TestUtility.CreateBaseConfig());
+            Countly.Instance.RequestHelper._requestRepo.Clear();
             Assert.IsNotNull(Countly.Instance.UserDetails);
+            TestUtility.ValidateRQEQSize(Countly.Instance, 0, 0);
 
             Countly.Instance.UserDetails.PushUnique("Age", new string[] { "29" });
-            Assert.IsTrue(Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Age"));
-            Dictionary<string, object> dic = Countly.Instance.UserDetails.CustomDataProperties["Age"] as Dictionary<string, object>;
+            Assert.IsTrue(Countly.Instance.UserDetails.ContainsCustomDataKey("Age"));
+            Dictionary<string, object> dic = Countly.Instance.UserDetails.RetrieveCustomDataValue("Age") as Dictionary<string, object>;
             Assert.AreEqual(new string[] { "29" }, dic["$addToSet"]);
 
             Countly.Instance.UserDetails.Push("Height", new string[] { "6" });
-            Assert.IsTrue(Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Height"));
-            Dictionary<string, object> dic2 = Countly.Instance.UserDetails.CustomDataProperties["Height"] as Dictionary<string, object>;
+            Assert.IsTrue(Countly.Instance.UserDetails.ContainsCustomDataKey("Height"));
+            Dictionary<string, object> dic2 = Countly.Instance.UserDetails.RetrieveCustomDataValue("Height") as Dictionary<string, object>;
             Assert.AreEqual(new string[] { "6" }, dic2["$push"]);
         }
 
-        /// <summary>
-        /// It validates the user's custom properties set via 'Min' and 'Max' methods.
-        /// </summary>
+        // 'Min' and 'Max' methods in Countly.Instance.UserDetails
+        // We validate the user's custom property set via these methods
+        // Nothing should break, values should be recorded correctly
         [Test]
         public void UserCustomProperty_MinAndMax()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-            };
-
-            Countly.Instance.Init(configuration);
-
+            // Initialize, ensure that the UserDetails instance is not null and request repository is empty
+            Countly.Instance.Init(TestUtility.CreateBaseConfig());
+            Countly.Instance.RequestHelper._requestRepo.Clear();
             Assert.IsNotNull(Countly.Instance.UserDetails);
+            TestUtility.ValidateRQEQSize(Countly.Instance, 0, 0);
 
             Countly.Instance.UserDetails.Min("Distance", 10.0);
-            Assert.IsTrue(Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Distance"));
-            Dictionary<string, object> dic = Countly.Instance.UserDetails.CustomDataProperties["Distance"] as Dictionary<string, object>;
+            Assert.IsTrue(Countly.Instance.UserDetails.ContainsCustomDataKey("Distance"));
+            Dictionary<string, object> dic = Countly.Instance.UserDetails.RetrieveCustomDataValue("Distance") as Dictionary<string, object>;
             Assert.AreEqual(10.0, dic["$min"]);
 
             Countly.Instance.UserDetails.Max("Distance", 100.0);
-            Assert.IsTrue(Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Distance"));
-            Dictionary<string, object> dic1 = Countly.Instance.UserDetails.CustomDataProperties["Distance"] as Dictionary<string, object>;
+            Assert.IsTrue(Countly.Instance.UserDetails.ContainsCustomDataKey("Distance"));
+            Dictionary<string, object> dic1 = Countly.Instance.UserDetails.RetrieveCustomDataValue("Distance") as Dictionary<string, object>;
             Assert.AreEqual(100.0, dic1["$max"]);
         }
-
-        /// <summary>
-        /// It validates the user's custom properties befor and after calling SaveAsync'.
-        /// </summary>
+        
+        // 'SaveAsync' method in Countly.Instance.UserDetails
+        // We validate the user's custom properties before and after calling 'SaveAsync'.
+        // Nothing should break, values should be recorded correctly
         [Test]
         public async void UserDetailService_SaveAsync()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-            };
-
-            Countly.Instance.Init(configuration);
-
+            // Initialize, ensure that the UserDetails instance is not null and request repository is empty
+            Countly.Instance.Init(TestUtility.CreateBaseConfig());
+            Countly.Instance.RequestHelper._requestRepo.Clear();
             Assert.IsNotNull(Countly.Instance.UserDetails);
+            TestUtility.ValidateRQEQSize(Countly.Instance, 0, 0);
 
             Countly.Instance.UserDetails.Multiply("Distance", 2);
-            Assert.IsTrue(Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Distance"));
-            Dictionary<string, object> dic = Countly.Instance.UserDetails.CustomDataProperties["Distance"] as Dictionary<string, object>;
+            Assert.IsTrue(Countly.Instance.UserDetails.ContainsCustomDataKey("Distance"));
+            Dictionary<string, object> dic = Countly.Instance.UserDetails.RetrieveCustomDataValue("Distance") as Dictionary<string, object>;
             Assert.AreEqual(2, dic["$mul"]);
 
             Countly.Instance.UserDetails.Push("Age", new string[] { "29" });
-            Assert.IsTrue(Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Age"));
-            Dictionary<string, object> dic2 = Countly.Instance.UserDetails.CustomDataProperties["Age"] as Dictionary<string, object>;
+            Assert.IsTrue(Countly.Instance.UserDetails.ContainsCustomDataKey("Age"));
+            Dictionary<string, object> dic2 = Countly.Instance.UserDetails.RetrieveCustomDataValue("Age") as Dictionary<string, object>;
             Assert.AreEqual(new string[] { "29" }, dic2["$push"]);
 
             await Countly.Instance.UserDetails.SaveAsync();
 
-            Assert.AreEqual(false, Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Age"));
-            Assert.AreEqual(false, Countly.Instance.UserDetails.CustomDataProperties.ContainsKey("Distance"));
-            Assert.AreEqual(0, Countly.Instance.UserDetails.CustomDataProperties.Count);
-
-
+            Assert.AreEqual(false, Countly.Instance.UserDetails.ContainsCustomDataKey("Age"));
+            Assert.AreEqual(false, Countly.Instance.UserDetails.ContainsCustomDataKey("Distance"));
         }
 
+        [SetUp]
         [TearDown]
         public void End()
         {
-            Countly.Instance.ClearStorage();
-            Object.DestroyImmediate(Countly.Instance);
+            TestUtility.TestCleanup();
         }
-
     }
 }

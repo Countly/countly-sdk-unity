@@ -9,10 +9,9 @@ using Plugins.CountlySDK.Models;
 
 namespace Plugins.CountlySDK.Services
 {
-    public class UserDetailsCountlyService : AbstractBaseService
+    public class UserDetailsCountlyService : AbstractBaseService, IUserDetailModule
     {
         internal Dictionary<string, object> CustomDataProperties { get; private set; }
-
         private readonly CountlyUtils _countlyUtils;
         internal readonly RequestCountlyHelper _requestCountlyHelper;
         internal UserDetailsCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, RequestCountlyHelper requestCountlyHelper, CountlyUtils countlyUtils, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
@@ -30,7 +29,6 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         private void AddCustomDetailToRequestQueue(IDictionary<string, object> segments)
         {
-
             IDictionary<string, object> customDetail = FixSegmentKeysAndValues(segments);
 
             Dictionary<string, object> requestParams =
@@ -71,7 +69,6 @@ namespace Plugins.CountlySDK.Services
                     Log.Warning($"[UserDetailsCountlyService] SetUserDetailAsync: Picture format for URL '{userDetailsModel.PictureUrl}' is not as expected. Expected formats are .png, .gif, or .jpeg");
                 }
 
-
                 userDetailsModel.Name = TrimValue("Name", userDetailsModel.Name);
                 userDetailsModel.Phone = TrimValue("Phone", userDetailsModel.Phone);
                 userDetailsModel.Email = TrimValue("Email", userDetailsModel.Email);
@@ -99,6 +96,7 @@ namespace Plugins.CountlySDK.Services
 
             await Task.CompletedTask;
         }
+
         /// <summary>
         /// Sets information about user with custom properties.
         /// In custom properties you can provide any string key values to be stored with user.
@@ -144,7 +142,6 @@ namespace Plugins.CountlySDK.Services
             await Task.CompletedTask;
         }
 
-
         /// <summary>
         /// Sets custom provide key/value as custom property.
         /// </summary>
@@ -152,7 +149,6 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value">string with value for the property</param>
         public void Set(string key, string value)
         {
-
             if (string.IsNullOrEmpty(key)) {
                 Log.Warning("[UserDetailsCountlyService] Set : key '" + key + "'isn't valid.");
 
@@ -298,7 +294,6 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
 
-
             lock (LockObj) {
                 Log.Info("[UserDetailsCountlyService] Push : key = " + key + ", value = " + value);
 
@@ -319,7 +314,6 @@ namespace Plugins.CountlySDK.Services
 
                 return;
             }
-
 
             lock (LockObj) {
                 Log.Info("[UserDetailsCountlyService] PushUnique : key = " + key + ", value = " + value);
@@ -348,7 +342,6 @@ namespace Plugins.CountlySDK.Services
             }
         }
 
-
         /// <summary>
         /// Create a property
         /// </summary>
@@ -374,7 +367,14 @@ namespace Plugins.CountlySDK.Services
             CustomDataProperties.Add(key, value);
         }
 
-        #region override Methods
-        #endregion
+        public bool ContainsCustomDataKey(string key)
+        {
+            return CustomDataProperties.ContainsKey(key);
+        }
+
+        public object RetrieveCustomDataValue(string key)
+        {
+            return CustomDataProperties.ContainsKey(key) ? CustomDataProperties[key] : null;
+        }
     }
 }
