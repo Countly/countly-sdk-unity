@@ -148,7 +148,7 @@ namespace Plugins.CountlySDK.Services
         public void StopViewWithName(string viewName, Dictionary<string, object> viewSegmentation)
         {
             lock (LockObj) {
-                Log.Info("[ViewCountlyService] StopViewWithName, vn[" + viewName + "] sg[" + (viewSegmentation == null ? "null" : JsonConvert.SerializeObject(viewSegmentation, new JsonSerializerSettings { Error = (sender, args) => { args.ErrorContext.Handled = true; } })) + "]");
+                Log.Info("[ViewCountlyService] StopViewWithName, vn[" + viewName + "] sg[" + (viewSegmentation == null ? "null" : JsonConvert.SerializeObject(viewSegmentation, new JsonSerializerSettings { Error = (_, args) => { args.ErrorContext.Handled = true; } })) + "]");
                 StopViewWithNameInternal(viewName, viewSegmentation);
             }
         }
@@ -173,7 +173,7 @@ namespace Plugins.CountlySDK.Services
         public void StopViewWithID(string viewID, Dictionary<string, object> viewSegmentation)
         {
             lock (LockObj) {
-                Log.Info("[ViewCountlyService] StopViewWithID, vi[" + viewID + "] sg[" + (viewSegmentation == null ? "null" : JsonConvert.SerializeObject(viewSegmentation, new JsonSerializerSettings { Error = (sender, args) => { args.ErrorContext.Handled = true; } })) + "]");
+                Log.Info("[ViewCountlyService] StopViewWithID, vi[" + viewID + "] sg[" + (viewSegmentation == null ? "null" : JsonConvert.SerializeObject(viewSegmentation, new JsonSerializerSettings { Error = (_, args) => { args.ErrorContext.Handled = true; } })) + "]");
                 StopViewWithIDInternal(viewID, viewSegmentation);
             }
         }
@@ -209,7 +209,7 @@ namespace Plugins.CountlySDK.Services
         public void StopAllViews(Dictionary<string, object> viewSegmentation)
         {
             lock (LockObj) {
-                Log.Info("[ViewCountlyService] StopAllViews, sg[" + (viewSegmentation == null ? "null" : JsonConvert.SerializeObject(viewSegmentation, new JsonSerializerSettings { Error = (sender, args) => { args.ErrorContext.Handled = true; } })) + "]");
+                Log.Info("[ViewCountlyService] StopAllViews, sg[" + (viewSegmentation == null ? "null" : JsonConvert.SerializeObject(viewSegmentation, new JsonSerializerSettings { Error = (_, args) => { args.ErrorContext.Handled = true; } })) + "]");
                 StopAllViewsInternal(viewSegmentation);
             }
         }
@@ -221,7 +221,7 @@ namespace Plugins.CountlySDK.Services
         public void SetGlobalViewSegmentation(Dictionary<string, object> viewSegmentation)
         {
             lock (LockObj) {
-                Log.Info("[ViewCountlyService] SetGlobalViewSegmentation, sg[" + (viewSegmentation == null ? "null" : JsonConvert.SerializeObject(viewSegmentation, new JsonSerializerSettings { Error = (sender, args) => { args.ErrorContext.Handled = true; } })) + "]");
+                Log.Info("[ViewCountlyService] SetGlobalViewSegmentation, sg[" + (viewSegmentation == null ? "null" : JsonConvert.SerializeObject(viewSegmentation, new JsonSerializerSettings { Error = (_, args) => { args.ErrorContext.Handled = true; } })) + "]");
                 SetGlobalViewSegmentationInternal(viewSegmentation);
             }
         }
@@ -260,7 +260,7 @@ namespace Plugins.CountlySDK.Services
         public void UpdateGlobalViewSegmentation(Dictionary<string, object> viewSegmentation)
         {
             lock (LockObj) {
-                Log.Info("[ViewCountlyService] UpdateGlobalViewSegmentation, sg[" + (viewSegmentation == null ? "null" : JsonConvert.SerializeObject(viewSegmentation, new JsonSerializerSettings { Error = (sender, args) => { args.ErrorContext.Handled = true; } })) + "]");
+                Log.Info("[ViewCountlyService] UpdateGlobalViewSegmentation, sg[" + (viewSegmentation == null ? "null" : JsonConvert.SerializeObject(viewSegmentation, new JsonSerializerSettings { Error = (_, args) => { args.ErrorContext.Handled = true; } })) + "]");
                 UpdateGlobalViewSegmentationInternal(viewSegmentation);
             }
         }
