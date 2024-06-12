@@ -23,7 +23,7 @@ namespace Plugins.CountlySDK.Services
         private readonly EventCountlyService _eventService;
         internal readonly RequestCountlyHelper _requestCountlyHelper;
 
-        bool _isSessionExtendingStopped = false;
+        bool isInternalTimerStopped;
 
         internal SessionCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, EventCountlyService eventService,
             RequestCountlyHelper requestCountlyHelper, LocationService locationService, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
@@ -84,7 +84,7 @@ namespace Plugins.CountlySDK.Services
         /// </summary>
         internal void StopSessionTimer()
         {
-            _isSessionExtendingStopped = true;
+            isInternalTimerStopped = true;
 
             if (_sessionTimer != null)
             {
@@ -106,7 +106,7 @@ namespace Plugins.CountlySDK.Services
         {
             lock (LockObj) {
 
-                if (_isSessionExtendingStopped) {
+                if (isInternalTimerStopped) {
                     return;
                 }
 
