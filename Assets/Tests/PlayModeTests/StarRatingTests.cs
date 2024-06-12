@@ -204,8 +204,8 @@ namespace Assets.Tests.PlayModeTests
             Assert.IsNotNull(Countly.Instance.StarRating);
             Assert.AreEqual(0, Countly.Instance.StarRating._eventCountlyService._eventRepo.Count);
 
-            await Countly.Instance.Views.RecordCloseViewAsync("close_view");
-            Assert.AreEqual(1, Countly.Instance.Events._eventRepo.Count);
+            Countly.Instance.Views.StartView("view");
+            Assert.AreEqual(1, Countly.Instance.StarRating._eventCountlyService._eventRepo.Count);
 
             await Countly.Instance.StarRating.ReportStarRatingAsync("android", "0.1", 4);
             Assert.AreEqual(2, Countly.Instance.StarRating._eventCountlyService._eventRepo.Count);
