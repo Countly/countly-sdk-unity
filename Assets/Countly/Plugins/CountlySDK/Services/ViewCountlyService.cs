@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -45,7 +45,7 @@ namespace Plugins.CountlySDK.Services
             _utils = utils;
             eventService.viewIDProvider = this;
             _eventService = eventService;
-            safeViewIDGenerator = configuration.SafeViewIDGenerator; 
+            safeViewIDGenerator = configuration.SafeViewIDGenerator;
         }
 
         #region PublicAPI
@@ -74,14 +74,8 @@ namespace Plugins.CountlySDK.Services
         /// <returns>ViewId</returns>
         public string StartView(string viewName)
         {
-            if(!_consentService.CheckConsentInternal(Consents.Views)) {
-                Log.Debug("[ViewCountlyService] StartView, consent is not given, ignoring the request.");
-                return null;
-            }
-
             lock (LockObj) {
                 Log.Info("[ViewCountlyService] StartView, vn[" + viewName + "]");
-
                 return StartViewInternal(viewName, null, false);
             }
         }
@@ -95,16 +89,8 @@ namespace Plugins.CountlySDK.Services
         /// <returns>ViewId</returns>
         public string StartView(string viewName, Dictionary<string, object> viewSegmentation)
         {
-            if (!_consentService.CheckConsentInternal(Consents.Views)) {
-                Log.Debug("[ViewCountlyService] StartView, consent is not given, ignoring the request.");
-                return null;
-            }
-
             lock (LockObj) {
-                // to provide a clean dictionary in log and internal method
-                _utils.RemoveUnsupportedDataTypes(viewSegmentation, Log);
-
-                Log.Info("[ViewCountlyService] StartView, vn[" + viewName + "] sg[" + (viewSegmentation == null ? "null" : JsonConvert.SerializeObject(viewSegmentation)) + "]");
+                Log.Info("[ViewCountlyService] StartView, vn[" + viewName + "] sg[" + (viewSegmentation == null ? "null" : JsonConvert.SerializeObject(viewSegmentation, new JsonSerializerSettings { Error = (_, args) => { args.ErrorContext.Handled = true; } })) + "]");
                 return StartViewInternal(viewName, viewSegmentation, false);
             }
         }
@@ -118,12 +104,8 @@ namespace Plugins.CountlySDK.Services
         /// <returns>ViewId</returns>
         public string StartAutoStoppedView(string viewName)
         {
-            if (!_consentService.CheckConsentInternal(Consents.Views)) {
-                Log.Debug("[ViewCountlyService] StartAutoStoppedView, consent is not given, ignoring the request.");
-                return null;
-            }
-
             lock (LockObj) {
+                Log.Info("[ViewCountlyService] StartAutoStoppedView, vn[" + viewName + "]");
                 return StartAutoStoppedView(viewName, null);
             }
         }
@@ -138,14 +120,8 @@ namespace Plugins.CountlySDK.Services
         /// <returns>ViewId</returns>
         public string StartAutoStoppedView(string viewName, Dictionary<string, object> viewSegmentation)
         {
-            if (!_consentService.CheckConsentInternal(Consents.Views)) {
-                Log.Debug("[ViewCountlyService] StartAutoStoppedView, consent is not given, ignoring the request.");
-                return null;
-            }
-
             lock (LockObj) {
-                Log.Info("[ViewCountlyService] StartAutoStoppedView, vn[" + viewName + "]");
-
+                Log.Info("[ViewCountlyService] StartAutoStoppedView, vn[" + viewName + "] sg[" + (viewSegmentation == null ? "null" : JsonConvert.SerializeObject(viewSegmentation, new JsonSerializerSettings { Error = (_, args) => { args.ErrorContext.Handled = true; } })) + "]");
                 return StartViewInternal(viewName, viewSegmentation, true);
             }
         }
@@ -157,14 +133,8 @@ namespace Plugins.CountlySDK.Services
         /// <param name="viewName">Name of the view</param>
         public void StopViewWithName(string viewName)
         {
-            if (!_consentService.CheckConsentInternal(Consents.Views)) {
-                Log.Debug("[ViewCountlyService] StopViewWithName, consent is not given, ignoring the request.");
-                return;
-            }
-
             lock (LockObj) {
                 Log.Info("[ViewCountlyService] StopViewWithName, vn[" + viewName + "]");
-
                 StopViewWithNameInternal(viewName, null);
             }
         }
@@ -177,16 +147,8 @@ namespace Plugins.CountlySDK.Services
         /// <param name="viewSegmentation">Segmentation that will be added to the view, set 'null' if none should be added</param>
         public void StopViewWithName(string viewName, Dictionary<string, object> viewSegmentation)
         {
-            if (!_consentService.CheckConsentInternal(Consents.Views)) {
-                Log.Debug("[ViewCountlyService] StopViewWithName, consent is not given, ignoring the request.");
-                return;
-            }
-
             lock (LockObj) {
-                // to provide a clean dictionary in log and internal method
-                _utils.RemoveUnsupportedDataTypes(viewSegmentation, Log);
-
-                Log.Info("[ViewCountlyService] StopViewWithName, vn[" + viewName + "] sg[" + (viewSegmentation == null ? "null" : JsonConvert.SerializeObject(viewSegmentation)) + "]");
+                Log.Info("[ViewCountlyService] StopViewWithName, vn[" + viewName + "] sg[" + (viewSegmentation == null ? "null" : JsonConvert.SerializeObject(viewSegmentation, new JsonSerializerSettings { Error = (_, args) => { args.ErrorContext.Handled = true; } })) + "]");
                 StopViewWithNameInternal(viewName, viewSegmentation);
             }
         }
@@ -197,14 +159,8 @@ namespace Plugins.CountlySDK.Services
         /// <param name="viewID">ID of the view</param>
         public void StopViewWithID(string viewID)
         {
-            if (!_consentService.CheckConsentInternal(Consents.Views)) {
-                Log.Debug("[ViewCountlyService] StopViewWithID, consent is not given, ignoring the request.");
-                return;
-            }
-
             lock (LockObj) {
                 Log.Info("[ViewCountlyService] StopViewWithID, vi[" + viewID + "]");
-
                 StopViewWithIDInternal(viewID, null);
             }
         }
@@ -216,16 +172,8 @@ namespace Plugins.CountlySDK.Services
         /// <param name="viewSegmentation">Segmentation that will be added to the view, set 'null' if none should be added</param>
         public void StopViewWithID(string viewID, Dictionary<string, object> viewSegmentation)
         {
-            if (!_consentService.CheckConsentInternal(Consents.Views)) {
-                Log.Debug("[ViewCountlyService] StopViewWithID, consent is not given, ignoring the request.");
-                return;
-            }
-
             lock (LockObj) {
-                // to provide a clean dictionary in log and internal method
-                _utils.RemoveUnsupportedDataTypes(viewSegmentation, Log);
-
-                Log.Info("[ViewCountlyService] StopViewWithID, vi[" + viewID + "] sg[" + (viewSegmentation == null ? "null" : JsonConvert.SerializeObject(viewSegmentation)) + "]");
+                Log.Info("[ViewCountlyService] StopViewWithID, vi[" + viewID + "] sg[" + (viewSegmentation == null ? "null" : JsonConvert.SerializeObject(viewSegmentation, new JsonSerializerSettings { Error = (_, args) => { args.ErrorContext.Handled = true; } })) + "]");
                 StopViewWithIDInternal(viewID, viewSegmentation);
             }
         }
@@ -236,14 +184,8 @@ namespace Plugins.CountlySDK.Services
         /// <param name="viewID">ID of the view</param>
         public void PauseViewWithID(string viewID)
         {
-            if (!_consentService.CheckConsentInternal(Consents.Views)) {
-                Log.Debug("[ViewCountlyService] PauseViewWithID, consent is not given, ignoring the request.");
-                return;
-            }
-
             lock (LockObj) {
                 Log.Info("[ViewCountlyService] PauseViewWithID, vi[" + viewID + "]");
-
                 PauseViewWithIDInternal(viewID, false);
             }
         }
@@ -254,14 +196,8 @@ namespace Plugins.CountlySDK.Services
         /// <param name="viewID">ID of the view</param>
         public void ResumeViewWithID(string viewID)
         {
-            if (!_consentService.CheckConsentInternal(Consents.Views)) {
-                Log.Debug("[ViewCountlyService] ResumeViewWithID, consent is not given, ignoring the request.");
-                return;
-            }
-
             lock (LockObj) {
                 Log.Info("[ViewCountlyService] ResumeViewWithID, vi[" + viewID + "]");
-
                 ResumeViewWithIDInternal(viewID);
             }
         }
@@ -272,16 +208,8 @@ namespace Plugins.CountlySDK.Services
         /// <param name="viewSegmentation">Segmentation that will be added, set 'null' if none should be added</param>
         public void StopAllViews(Dictionary<string, object> viewSegmentation)
         {
-            if (!_consentService.CheckConsentInternal(Consents.Views)) {
-                Log.Debug("[ViewCountlyService] StopAllViews, consent is not given, ignoring the request.");
-                return;
-            }
-
             lock (LockObj) {
-                // to provide a clean dictionary in log and internal method
-                _utils.RemoveUnsupportedDataTypes(viewSegmentation, Log);
-
-                Log.Info("[ViewCountlyService] StopAllViews, sg[" + (viewSegmentation == null ? "null" : JsonConvert.SerializeObject(viewSegmentation)) + "]");
+                Log.Info("[ViewCountlyService] StopAllViews, sg[" + (viewSegmentation == null ? "null" : JsonConvert.SerializeObject(viewSegmentation, new JsonSerializerSettings { Error = (_, args) => { args.ErrorContext.Handled = true; } })) + "]");
                 StopAllViewsInternal(viewSegmentation);
             }
         }
@@ -292,16 +220,8 @@ namespace Plugins.CountlySDK.Services
         /// <param name="viewSegmentation">Global View Segmentation</param>
         public void SetGlobalViewSegmentation(Dictionary<string, object> viewSegmentation)
         {
-            if (!_consentService.CheckConsentInternal(Consents.Views)) {
-                Log.Debug("[ViewCountlyService] SetGlobalViewSegmentation, consent is not given, ignoring the request.");
-                return;
-            }
-
             lock (LockObj) {
-                // to provide a clean dictionary in log and internal method
-                _utils.RemoveUnsupportedDataTypes(viewSegmentation, Log);
-
-                Log.Info("[ViewCountlyService] SetGlobalViewSegmentation, sg[" + (viewSegmentation == null ? "null" : JsonConvert.SerializeObject(viewSegmentation)) + "]");
+                Log.Info("[ViewCountlyService] SetGlobalViewSegmentation, sg[" + (viewSegmentation == null ? "null" : JsonConvert.SerializeObject(viewSegmentation, new JsonSerializerSettings { Error = (_, args) => { args.ErrorContext.Handled = true; } })) + "]");
                 SetGlobalViewSegmentationInternal(viewSegmentation);
             }
         }
@@ -313,14 +233,8 @@ namespace Plugins.CountlySDK.Services
         /// <param name="viewSegmentation">Segmentation that will be added to the view</param>
         public void AddSegmentationToViewWithID(string viewID, Dictionary<string, object> viewSegmentation)
         {
-            if (!_consentService.CheckConsentInternal(Consents.Views)) {
-                Log.Debug("[ViewCountlyService] AddSegmentationToViewWithID, consent is not given, ignoring the request.");
-                return;
-            }
-
             lock (LockObj) {
                 Log.Info("[ViewCountlyService] AddSegmentationToViewWithID, for view ID: [" + viewID + "]");
-
                 AddSegmentationToViewWithIDInternal(viewID, viewSegmentation);
             }
         }
@@ -333,14 +247,8 @@ namespace Plugins.CountlySDK.Services
         /// <param name="viewSegmentation">Segmentation that will be added to the view</param>
         public void AddSegmentationToViewWithName(string viewName, Dictionary<string, object> viewSegmentation)
         {
-            if (!_consentService.CheckConsentInternal(Consents.Views)) {
-                Log.Debug("[ViewCountlyService] AddSegmentationToViewWithName, consent is not given, ignoring the request.");
-                return;
-            }
-
             lock (LockObj) {
                 Log.Info("[ViewCountlyService] AddSegmentationToViewWithName, for Name: [" + viewName + "]");
-
                 AddSegmentationToViewWithNameInternal(viewName, viewSegmentation);
             }
         }
@@ -351,21 +259,8 @@ namespace Plugins.CountlySDK.Services
         /// <param name="viewSegmentation">Segmentation that will be added to the view</param>
         public void UpdateGlobalViewSegmentation(Dictionary<string, object> viewSegmentation)
         {
-            if (!_consentService.CheckConsentInternal(Consents.Views)) {
-                Log.Debug("[ViewCountlyService] UpdateGlobalViewSegmentation, consent is not given, ignoring the request.");
-                return;
-            }
-
             lock (LockObj) {
-                // to provide a clean dictionary in log and internal method
-                _utils.RemoveUnsupportedDataTypes(viewSegmentation, Log);
-                Log.Info("[ViewCountlyService] UpdateGlobalViewSegmentation, sg[" + (viewSegmentation == null ? "null" : JsonConvert.SerializeObject(viewSegmentation)) + "]");
-
-                if (viewSegmentation == null) {
-                    Log.Warning("[ViewCountlyService] UpdateGlobalViewSegmentation, when updating segmentation values, they can't be 'null'. Ignoring request.");
-                    return;
-                }
-
+                Log.Info("[ViewCountlyService] UpdateGlobalViewSegmentation, sg[" + (viewSegmentation == null ? "null" : JsonConvert.SerializeObject(viewSegmentation, new JsonSerializerSettings { Error = (_, args) => { args.ErrorContext.Handled = true; } })) + "]");
                 UpdateGlobalViewSegmentationInternal(viewSegmentation);
             }
         }
@@ -385,20 +280,25 @@ namespace Plugins.CountlySDK.Services
                 return null;
             }
 
+            if(!_consentService.CheckConsentInternal(Consents.Views)) {
+                Log.Debug("[ViewCountlyService] StartView, consent is not given, ignoring the request.");
+                return null;
+            }
+
             if (_utils.IsNullEmptyOrWhitespace(viewName)) {
                 Log.Warning("[ViewCountlyService] StartViewInternal, trying to record view with null or empty view name, ignoring request");
                 return null;
             }
 
+            if (viewName.Length > _configuration.GetMaxKeyLength()) {
+                Log.Verbose("[ViewCountlyService] StartViewInternal, max allowed key length is " + _configuration.GetMaxKeyLength());
+                viewName = viewName.Substring(0, _configuration.GetMaxKeyLength());
+            }
+
             _utils.TruncateSegmentationValues(customViewSegmentation, _configuration.GetMaxSegmentationValues(), "[ViewCountlyService] StartViewInternal, ", Log);
             _utils.RemoveReservedKeysFromSegmentation(customViewSegmentation, reservedSegmentationKeysViews, "[ViewCountlyService] StartViewInternal, ", Log);
 
-            int segmCount = 0;
-            if (customViewSegmentation != null) {
-                segmCount = customViewSegmentation.Count;
-            }
-
-            Log.Debug("[ViewCountlyService] StartViewInternal, recording view with name: [" + viewName + "], previous view ID:[" + currentViewID + "] custom view segment count:[" + segmCount + "], first:[" + _isFirstView + "], autoStop:[" + viewShouldBeAutomaticallyStopped + "]");
+            Log.Debug("[ViewCountlyService] StartViewInternal, recording view with name: [" + viewName + "], previous view ID:[" + currentViewID + "], custom view segmentation:[" + customViewSegmentation?.ToString() + "], first:[" + _isFirstView + "], autoStop:[" + viewShouldBeAutomaticallyStopped + "]");
 
             AutoCloseRequiredViews(false, null);
 
@@ -436,9 +336,23 @@ namespace Plugins.CountlySDK.Services
         /// <param name="customViewSegmentation"></param>
         private void StopViewWithNameInternal(string viewName, Dictionary<string, object> customViewSegmentation)
         {
+            if (!_consentService.CheckConsentInternal(Consents.Views)) {
+                Log.Debug("[ViewCountlyService] StopViewWithNameInternal, consent is not given, ignoring the request.");
+                return;
+            }
+
             if (_utils.IsNullEmptyOrWhitespace(viewName)) {
                 Log.Warning("[ViewCountlyService] StopViewWithNameInternal, trying to record view with null or empty view name, ignoring request");
                 return;
+            }
+
+            if (viewName.Length > _configuration.GetMaxKeyLength()) {
+                Log.Verbose("[ViewCountlyService] StopViewWithNameInternal, max allowed key length is " + _configuration.GetMaxKeyLength());
+                viewName = viewName.Substring(0, _configuration.GetMaxKeyLength());
+            }
+
+            if (_utils.RemoveUnsupportedDataTypes(customViewSegmentation, Log)) {
+                Log.Warning("[ViewsCountlyService] StopViewWithNameInternal, you have provided an unsupported data type in your View Segmentation. Removing the unsupported values.");
             }
 
             string viewID = null;
@@ -467,6 +381,11 @@ namespace Plugins.CountlySDK.Services
         /// <param name="customViewSegmentation"></param>
         private void AutoCloseRequiredViews(bool closeAllViews, Dictionary<string, object> customViewSegmentation)
         {
+            if (!_consentService.CheckConsentInternal(Consents.Views)) {
+                Log.Debug("[ViewCountlyService] AutoCloseRequiredViews, consent is not given, ignoring the request.");
+                return;
+            }
+
             Log.Debug("[ViewCountlyService] AutoCloseRequiredViews, closing required views.");
             List<string> viewsToRemove = new List<string>(1);
 
@@ -495,6 +414,11 @@ namespace Plugins.CountlySDK.Services
         /// <param name="viewSegmentation">view segmentation</param>
         private void StopViewWithIDInternal(string viewID, Dictionary<string, object> customViewSegmentation)
         {
+            if (!_consentService.CheckConsentInternal(Consents.Views)) {
+                Log.Debug("[ViewCountlyService] StopViewWithIDInternal, consent is not given, ignoring the request.");
+                return;
+            }
+
             if (_utils.IsNullEmptyOrWhitespace(viewID)) {
                 Log.Warning("[ViewCountlyService] StopViewWithIDInternal, trying to record view with null or empty view ID, ignoring request");
                 return;
@@ -510,18 +434,14 @@ namespace Plugins.CountlySDK.Services
                 Log.Warning("[ViewCountlyService] StopViewWithIDInternal, view id:[" + viewID + "] has a 'null' value. This should not be happening");
                 return;
             }
-
-            Log.Debug("[ViewCountlyService] View [" + vd.ViewName + "], id:[" + vd.ViewID + "] is getting closed, reporting duration: [" + (_utils.CurrentTimestampSeconds() - vd.ViewStartTimeSeconds) + "] s, current timestamp: [" + _utils.CurrentTimestampSeconds() + "]");
-
-            if (!_consentService.CheckConsentInternal(Consents.Views)) {
-                Log.Debug("[ViewCountlyService] StopViewWithIDInternal, consent is not given, ignoring the request.");
-                return;
+            
+            if (_utils.RemoveUnsupportedDataTypes(customViewSegmentation, Log)) {
+                Log.Warning("[ViewsCountlyService] StopViewWithIDInternal, you have provided an unsupported data type in your View Segmentation. Removing the unsupported values.");
             }
 
+            Log.Debug("[ViewCountlyService] View [" + vd.ViewName + "], id:[" + vd.ViewID + "] is getting closed, reporting duration: [" + (_utils.CurrentTimestampSeconds() - vd.ViewStartTimeSeconds) + "] s, current timestamp: [" + _utils.CurrentTimestampSeconds() + "]");
             _utils.TruncateSegmentationValues(customViewSegmentation, _configuration.GetMaxSegmentationValues(), "[ViewCountlyService] StopViewWithIDInternal", Log);
-
             RecordViewEndEvent(vd, customViewSegmentation, "StopViewWithIDInternal");
-
             viewDataMap.Remove(vd.ViewID);
         }
 
@@ -532,6 +452,11 @@ namespace Plugins.CountlySDK.Services
         /// <param name="pausedAutomatically"></param>
         private void PauseViewWithIDInternal(string viewID, bool pausedAutomatically)
         {
+            if (!_consentService.CheckConsentInternal(Consents.Views)) {
+                Log.Debug("[ViewCountlyService] PauseViewWithIDInternal, consent is not given, ignoring the request.");
+                return;
+            }
+
             if (_utils.IsNullEmptyOrWhitespace(viewID)) {
                 Log.Warning("[ViewCountlyService] PauseViewWithIDInternal, trying to record view with null or empty view ID, ignoring request");
                 return;
@@ -548,11 +473,6 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
 
-            if (!_consentService.CheckConsentInternal(Consents.Views)) {
-                Log.Debug("[ViewCountlyService] PauseViewWithIDInternal, consent is not given, ignoring the request.");
-                return;
-            }
-
             Log.Debug("[ViewCountlyService] PauseViewWithIDInternal, pausing view for ID:[" + viewID + "], name:[" + vd.ViewName + "]");
 
             if (vd.ViewStartTimeSeconds == 0) {
@@ -561,9 +481,7 @@ namespace Plugins.CountlySDK.Services
             }
 
             vd.IsAutoPaused = pausedAutomatically;
-
             RecordViewEndEvent(vd, null, "PauseViewWithIDInternal");
-
             vd.ViewStartTimeSeconds = 0;
         }
 
@@ -637,6 +555,11 @@ namespace Plugins.CountlySDK.Services
         /// <param name="viewID"></param>
         private void ResumeViewWithIDInternal(string viewID)
         {
+            if (!_consentService.CheckConsentInternal(Consents.Views)) {
+                Log.Debug("[ViewCountlyService] ResumeViewWithIDInternal, consent is not given, ignoring the request.");
+                return;
+            }
+
             if (_utils.IsNullEmptyOrWhitespace(viewID)) {
                 Log.Warning("[ViewCountlyService] ResumeViewWithIDInternal, trying to record view with null or empty view ID, ignoring request");
                 return;
@@ -650,11 +573,6 @@ namespace Plugins.CountlySDK.Services
             ViewData vd = viewDataMap[viewID];
             if (vd == null) {
                 Log.Warning("[ViewCountlyService] ResumeViewWithIDInternal, view id:[" + viewID + "] has a 'null' value. This should not be happening");
-                return;
-            }
-
-            if (!_consentService.CheckConsentInternal(Consents.Views)) {
-                Log.Debug("[ViewCountlyService] ResumeViewWithIDInternal, consent is not given, ignoring the request.");
                 return;
             }
 
@@ -675,7 +593,16 @@ namespace Plugins.CountlySDK.Services
         /// <param name="viewSegmentation"></param>
         private void StopAllViewsInternal(Dictionary<string, object> viewSegmentation)
         {
+            if (!_consentService.CheckConsentInternal(Consents.Views)) {
+                Log.Debug("[ViewCountlyService] StopAllViewsInternal, consent is not given, ignoring the request.");
+                return;
+            }
+
             Log.Debug("[ViewCountlyService] StopAllViewsInternal");
+
+            if (_utils.RemoveUnsupportedDataTypes(viewSegmentation, Log)) {
+                Log.Warning("[ViewsCountlyService] StopAllViewsInternal, you have provided an unsupported data type in your View Segmentation. Removing the unsupported values.");
+            }
 
             AutoCloseRequiredViews(true, viewSegmentation);
         }
@@ -686,6 +613,11 @@ namespace Plugins.CountlySDK.Services
         /// <param name="viewSegmentation"></param>
         private void SetGlobalViewSegmentationInternal(Dictionary<string, object> viewSegmentation)
         {
+            if (!_consentService.CheckConsentInternal(Consents.Views)) {
+                Log.Debug("[ViewCountlyService] SetGlobalViewSegmentation, consent is not given, ignoring the request.");
+                return;
+            }
+
             Log.Debug("[ViewCountlyService] SetGlobalViewSegmentationInternal, with[" + (viewSegmentation == null ? "null" : viewSegmentation.Count.ToString()) + "] entries");
 
             automaticViewSegmentation.Clear();
@@ -709,24 +641,29 @@ namespace Plugins.CountlySDK.Services
         /// <param name="viewSegmentation"></param>
         private void AddSegmentationToViewWithIDInternal(string viewID, Dictionary<string, object> viewSegmentation)
         {
+            if (!_consentService.CheckConsentInternal(Consents.Views)) {
+                Log.Debug("[ViewCountlyService] AddSegmentationToViewWithIDInternal, consent is not given, ignoring the request.");
+                return;
+            }
+
             if (_utils.IsNullEmptyOrWhitespace(viewID) || viewSegmentation == null) {
-                Log.Warning("[ViewsCountlyService] AddSegmentationToViewWithID, null or empty parameters provided");
+                Log.Warning("[ViewsCountlyService] AddSegmentationToViewWithIDInternal, null or empty parameters provided");
                 return;
             }
 
             if (!viewDataMap.ContainsKey(viewID)) {
-                Log.Warning("[ViewsCountlyService] AddSegmentationToViewWithID, there is no view with the provided view id");
+                Log.Warning("[ViewsCountlyService] AddSegmentationToViewWithIDInternal, there is no view with the provided view id");
                 return;
             }
 
             ViewData vd = viewDataMap[viewID];
             if (vd == null) {
-                Log.Warning("[ViewsCountlyService] AddSegmentationToViewWithID, view id:[" + viewID + "] has a 'null' view data. This should not be happening");
+                Log.Warning("[ViewsCountlyService] AddSegmentationToViewWithIDInternal, view id:[" + viewID + "] has a 'null' view data. This should not be happening");
                 return;
             }
 
-            _utils.TruncateSegmentationValues(viewSegmentation, _cly.Configuration.GetMaxSegmentationValues(), "[ViewsCountlyService] AddSegmentationToViewWithID", Log);
-            _utils.RemoveReservedKeysFromSegmentation(viewSegmentation, reservedSegmentationKeysViews, "[ViewsCountlyService] AddSegmentationToViewWithID, ", Log);
+            _utils.TruncateSegmentationValues(viewSegmentation, _cly.Configuration.GetMaxSegmentationValues(), "[ViewsCountlyService] AddSegmentationToViewWithIDInternal", Log);
+            _utils.RemoveReservedKeysFromSegmentation(viewSegmentation, reservedSegmentationKeysViews, "[ViewsCountlyService] AddSegmentationToViewWithIDInternal, ", Log);
 
             if (vd.ViewSegmentation == null) {
                 vd.ViewSegmentation = new Dictionary<string, object>(viewSegmentation);
@@ -742,6 +679,11 @@ namespace Plugins.CountlySDK.Services
         /// <param name="viewSegmentation"></param>
         private void AddSegmentationToViewWithNameInternal(string viewName, Dictionary<string, object> viewSegmentation)
         {
+            if (!_consentService.CheckConsentInternal(Consents.Views)) {
+                Log.Debug("[ViewCountlyService] AddSegmentationToViewWithNameInternal, consent is not given, ignoring the request.");
+                return;
+            }
+
             string viewID = null;
 
             foreach (var entry in viewDataMap) {
@@ -769,18 +711,26 @@ namespace Plugins.CountlySDK.Services
         /// <param name="viewSegmentation"></param>
         private void UpdateGlobalViewSegmentationInternal(Dictionary<string, object> viewSegmentation)
         {
+            if (!_consentService.CheckConsentInternal(Consents.Views)) {
+                Log.Debug("[ViewCountlyService] UpdateGlobalViewSegmentationInternal, consent is not given, ignoring the request.");
+                return;
+            }
+
+            if (viewSegmentation == null) {
+                Log.Warning("[ViewCountlyService] UpdateGlobalViewSegmentationInternal, when updating segmentation values, they can't be 'null'. Ignoring request.");
+                return;
+            }
+
             if (_utils.RemoveUnsupportedDataTypes(viewSegmentation, Log)) {
                 //found an unsupported type, print warning
                 Log.Warning("[ViewsCountlyService] UpdateGlobalViewSegmentationInternal, you have provided an unsupported data type in your View Segmentation. Removing the unsupported values.");
             }
-
+            
             _utils.RemoveReservedKeysFromSegmentation(viewSegmentation, reservedSegmentationKeysViews, "[ViewsCountlyService] UpdateGlobalViewSegmentationInternal, ", Log);
-
             _utils.CopyDictionaryToDestination(automaticViewSegmentation, viewSegmentation, Log);
         }
         #endregion
         #region Deprecated Methods
-
         /// <summary>
         /// Records the opening of a view. This method is deprecated.
         /// </summary>
@@ -789,56 +739,20 @@ namespace Plugins.CountlySDK.Services
         /// Do not use with <see cref="StopView"/> as it will not function correctly.
         /// Please use <see cref="StartView"/> and <see cref="StopView"/> for new implementations.
         /// </remarks>
-        /// <param name="viewName">The name of the view to open.</param>
-        /// <param name="viewSegmentation">Optional segmentation data for the view.</param>
+        /// <param name="name">The name of the view to open.</param>
+        /// <param name="segmentation">Optional segmentation data for the view.</param>
         /// <returns>A task representing the asynchronous operation.</returns>
         [Obsolete("RecordOpenViewAsync(string name, IDictionary<string, object> segmentation = null) is deprecated and will be removed in the future. Please use StartView instead.")]
         public async Task RecordOpenViewAsync(string name, IDictionary<string, object> segmentation = null)
         {
+            if (!_consentService.CheckConsentInternal(Consents.Views)) {
+                Log.Debug("[ViewCountlyService] RecordOpenViewAsync, consent is not given, ignoring the request.");
+                return;
+            }
+
             lock (LockObj) {
-                Log.Info("[ViewCountlyService] RecordOpenViewAsync : name = " + name);
-
-                if (!_consentService.CheckConsentInternal(Consents.Views)) {
-                    Log.Debug("[ViewCountlyService] RecordOpenViewAsync, consent is not given, ignoring the request.");
-                    return;
-                }
-
-                if (string.IsNullOrEmpty(name)) {
-                    return;
-                }
-
-                if (name.Length > _configuration.MaxKeyLength) {
-                    Log.Verbose("[ViewCountlyService] RecordOpenViewAsync, max allowed key length is " + _configuration.GetMaxKeyLength());
-                    name = name.Substring(0, _configuration.GetMaxKeyLength());
-                }
-
-                IDictionary<string, object> openViewSegment = new Dictionary<string, object>
-                {
-                    {"name", name},
-                    {"segment", _configuration.metricHelper.OS},
-                    {"visit", 1},
-                    {"start", _isFirstView ? 1 : 0}
-                };
-
-                if (segmentation != null) {
-                    segmentation = RemoveSegmentInvalidDataTypes(segmentation);
-                    segmentation = FixSegmentKeysAndValues(segmentation);
-
-                    foreach (KeyValuePair<string, object> item in openViewSegment) {
-                        segmentation[item.Key] = item.Value;
-                    }
-                } else {
-                    segmentation = openViewSegment;
-                }
-
-                if (!_viewToLastViewStartTime.ContainsKey(name)) {
-                    _viewToLastViewStartTime.Add(name, DateTime.UtcNow);
-                }
-
-                CountlyEventModel currentView = new CountlyEventModel(viewEventKey, segmentation, 1);
-                _ = _eventService.RecordEventAsync(currentView);
-
-                _isFirstView = false;
+                Log.Info("[ViewCountlyService] RecordOpenViewAsync: name = " + name);
+                StartViewInternal(name, (Dictionary<string, object>)segmentation, false);
             }
 
             await Task.CompletedTask;
@@ -851,45 +765,21 @@ namespace Plugins.CountlySDK.Services
         /// This method should only be used to close views that were opened using <see cref="RecordOpenViewAsync"/>.
         /// Do not use to close views started with <see cref="StartView"/>.
         /// </remarks>
-        /// <param name="viewName">The name of the view to close.</param>
+        /// <param name="name">The name of the view to close.</param>
         /// <returns>A task representing the asynchronous operation.</returns>
         [Obsolete("RecordCloseViewAsync(string name) is deprecated and will be removed in the future. Please use StopView instead.")]
         public async Task RecordCloseViewAsync(string name)
         {
-            lock (LockObj) {
-                Log.Info("[ViewCountlyService] RecordCloseViewAsync, name = " + name);
-
-                if (!_consentService.CheckConsentInternal(Consents.Views)) {
-                    Log.Debug("[ViewCountlyService] RecordCloseViewAsync, consent is not given, ignoring the request.");
-                    return;
-                }
-
-                if (string.IsNullOrEmpty(name)) {
-                    return;
-                }
-
-                if (name.Length > _configuration.GetMaxKeyLength()) {
-                    Log.Verbose("[ViewCountlyService] RecordCloseViewAsync, max allowed key length is " + _configuration.GetMaxKeyLength());
-                    name = name.Substring(0, _configuration.GetMaxKeyLength());
-                }
-
-                double? duration = null;
-                if (_viewToLastViewStartTime.ContainsKey(name)) {
-                    DateTime lastViewStartTime = _viewToLastViewStartTime[name];
-                    duration = (DateTime.UtcNow - lastViewStartTime).TotalSeconds;
-
-                    _viewToLastViewStartTime.Remove(name);
-                }
-
-                IDictionary<string, object> segment = new Dictionary<string, object>
-                {
-                    {"name", name},
-                    {"segment", _configuration.metricHelper.OS},
-                };
-
-                CountlyEventModel currentView = new CountlyEventModel(CountlyEventModel.ViewEvent, segment, 1, null, duration);
-                _ = _eventService.RecordEventAsync(currentView);
+            if (!_consentService.CheckConsentInternal(Consents.Views)) {
+                Log.Debug("[ViewCountlyService] RecordCloseViewAsync, consent is not given, ignoring the request.");
+                return;
             }
+
+            lock (LockObj) {
+                Log.Info("[ViewCountlyService] RecordCloseViewAsync: name = " + name);
+                StopViewWithNameInternal(name, null);
+            }
+
             await Task.CompletedTask;
         }
 
