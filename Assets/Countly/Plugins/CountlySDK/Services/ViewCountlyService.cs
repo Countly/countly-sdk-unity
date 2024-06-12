@@ -90,7 +90,7 @@ namespace Plugins.CountlySDK.Services
         public string StartView(string viewName, Dictionary<string, object> viewSegmentation)
         {
             lock (LockObj) {
-                Log.Info("[ViewCountlyService] StartView, vn[" + viewName + "] sg[" + (viewSegmentation == null ? "null" : JsonConvert.SerializeObject(viewSegmentation, new JsonSerializerSettings { Error = (sender, args) => { args.ErrorContext.Handled = true; } })) + "]");
+                Log.Info("[ViewCountlyService] StartView, vn[" + viewName + "] sg[" + (viewSegmentation == null ? "null" : JsonConvert.SerializeObject(viewSegmentation, new JsonSerializerSettings { Error = (_, args) => { args.ErrorContext.Handled = true; } })) + "]");
                 return StartViewInternal(viewName, viewSegmentation, false);
             }
         }
@@ -121,7 +121,7 @@ namespace Plugins.CountlySDK.Services
         public string StartAutoStoppedView(string viewName, Dictionary<string, object> viewSegmentation)
         {
             lock (LockObj) {
-                Log.Info("[ViewCountlyService] StartAutoStoppedView, vn[" + viewName + "] sg[" + (viewSegmentation == null ? "null" : JsonConvert.SerializeObject(viewSegmentation, new JsonSerializerSettings { Error = (sender, args) => { args.ErrorContext.Handled = true; } })) + "]");
+                Log.Info("[ViewCountlyService] StartAutoStoppedView, vn[" + viewName + "] sg[" + (viewSegmentation == null ? "null" : JsonConvert.SerializeObject(viewSegmentation, new JsonSerializerSettings { Error = (_, args) => { args.ErrorContext.Handled = true; } })) + "]");
                 return StartViewInternal(viewName, viewSegmentation, true);
             }
         }
