@@ -17,7 +17,6 @@ namespace Assets.Tests.PlayModeTests
         private readonly string _serverUrl = "https://xyz.com/";
         private readonly string _appKey = "772c091355076ead703f987fee94490";
 
-
         /// <summary>
         /// Assert an array of keys against the expected value in consnet reqeust json.
         /// </summary>
@@ -669,12 +668,12 @@ namespace Assets.Tests.PlayModeTests
             Consents[] consents = System.Enum.GetValues(typeof(Consents)).Cast<Consents>().ToArray();
             Assert.IsTrue(listener.Validate(2, consents, true));
         }
+
+        [SetUp]
         [TearDown]
         public void End()
         {
-            Countly.Instance.ClearStorage();
-            Object.DestroyImmediate(Countly.Instance);
-
+            TestUtility.TestCleanup();
         }
 
         private class ConsentTestHelperClass : AbstractBaseService

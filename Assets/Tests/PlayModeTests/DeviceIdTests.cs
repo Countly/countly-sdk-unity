@@ -466,6 +466,7 @@ namespace Assets.Tests.PlayModeTests
             Object.DestroyImmediate(Countly.Instance);
         }
 
+        [SetUp]
         [TearDown]
         public void End()
         {

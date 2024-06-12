@@ -96,11 +96,11 @@ namespace Assets.Tests.PlayModeTests
             AssertLocation(latitude + "," + longitude, city, ipAddress, countryCode, Countly.Instance.Configuration.IsLocationDisabled);
         }
 
+        [SetUp]
         [TearDown]
         public void End()
         {
-            Countly.Instance.ClearStorage();
-            Object.DestroyImmediate(Countly.Instance);
+            TestUtility.TestCleanup();
         }
     }
 }
