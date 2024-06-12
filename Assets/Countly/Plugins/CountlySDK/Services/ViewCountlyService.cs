@@ -45,7 +45,7 @@ namespace Plugins.CountlySDK.Services
             _utils = utils;
             eventService.viewIDProvider = this;
             _eventService = eventService;
-            safeViewIDGenerator = configuration.SafeViewIDGenerator; 
+            safeViewIDGenerator = configuration.SafeViewIDGenerator;
         }
 
         #region PublicAPI
