@@ -243,13 +243,11 @@ namespace Assets.Tests.PlayModeTests
             Assert.AreEqual("bread_crumbs_9", Countly.Instance.CrashReports._crashBreadcrumbs.Dequeue());
         }
 
-        // Performs cleanup after each test.
-        // Clears Countly storage and destroys the Countly instance to ensure a clean state for subsequent tests.
-        [SetUp][TearDown]
+        [SetUp]
+        [TearDown]
         public void End()
         {
-            Countly.Instance.ClearStorage();
-            Object.DestroyImmediate(Countly.Instance);
+            TestUtility.TestCleanup();
         }
     }
 }

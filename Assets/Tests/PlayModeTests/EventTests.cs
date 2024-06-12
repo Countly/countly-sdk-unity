@@ -805,8 +805,7 @@ namespace Assets.Tests.PlayModeTests
         [TearDown]
         public void End()
         {
-            Countly.Instance.ClearStorage();
-            UnityEngine.Object.DestroyImmediate(Countly.Instance);
+            TestUtility.TestCleanup();
         }
     }
 }
