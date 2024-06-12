@@ -189,7 +189,7 @@ namespace Plugins.CountlySDK.Services
         private async Task SetUserDetailsInternal(CountlyUserDetailsModel userDetailsModel)
         {
             lock (LockObj) {
-                Log.Info("[UserDetailsCountlyService] SetUserDetailsInternal " + (userDetailsModel != null));
+                Log.Info("[UserDetailsCountlyService] SetUserDetailsInternal, " + (userDetailsModel != null));
 
                 if (!_consentService.CheckConsentInternal(Consents.Users)) {
                     Log.Debug("[UserDetailsCountlyService] SetUserDetailsInternal, consent is not given, ignoring the request.");
@@ -197,12 +197,12 @@ namespace Plugins.CountlySDK.Services
                 }
 
                 if (userDetailsModel == null) {
-                    Log.Warning("[UserDetailsCountlyService] SetUserDetailsInternal : The parameter 'userDetailsModel' can't be null.");
+                    Log.Warning("[UserDetailsCountlyService] SetUserDetailsInternal, The parameter 'userDetailsModel' can't be null.");
                     return;
                 }
 
                 if (!_countlyUtils.IsPictureValid(userDetailsModel.PictureUrl)) {
-                    Log.Warning($"[UserDetailsCountlyService] SetUserDetailsInternal: Picture format for URL '{userDetailsModel.PictureUrl}' is not as expected. Expected formats are .png, .gif, or .jpeg");
+                    Log.Warning($"[UserDetailsCountlyService] SetUserDetailsInternal, Picture format for URL '{userDetailsModel.PictureUrl}' is not as expected. Expected formats are .png, .gif, or .jpeg");
                 }
 
                 userDetailsModel.Name = TrimValue("Name", userDetailsModel.Name);
@@ -245,7 +245,7 @@ namespace Plugins.CountlySDK.Services
             }
 
             if (segments == null || segments.Count == 0) {
-                Log.Warning("[UserDetailsCountlyService] AddCustomDetailToRequestQueue : Provided custom detail 'customDetail' can't be null or empty.");
+                Log.Warning("[UserDetailsCountlyService] AddCustomDetailToRequestQueue, Provided custom detail 'customDetail' can't be null or empty.");
                 return;
             }
 
@@ -303,12 +303,12 @@ namespace Plugins.CountlySDK.Services
             }
 
             if (string.IsNullOrEmpty(key)) {
-                Log.Warning("[UserDetailsCountlyService] " + (setOnce ? "SetOnce" : "Set") + " : key '" + key + "' isn't valid.");
+                Log.Warning("[UserDetailsCountlyService] SetInternal, key '" + key + "' isn't valid.");
                 return;
             }
 
             lock (LockObj) {
-                Log.Info("[UserDetailsCountlyService] " + (setOnce ? "SetOnce" : "Set") + " : key = " + key + ", value = " + value);
+                Log.Info("[UserDetailsCountlyService] SetInternal, key = " + key + ", value = " + value);
 
                 if (setOnce) {
                     AddToCustomData(key, new Dictionary<string, object> { { "$setOnce", TrimValue(key, value) } });
@@ -354,12 +354,12 @@ namespace Plugins.CountlySDK.Services
             }
 
             if (string.IsNullOrEmpty(key)) {
-                Log.Warning("[UserDetailsCountlyService] MultiplyInternal : key '" + key + "'isn't valid.");
+                Log.Warning("[UserDetailsCountlyService] MultiplyInternal, key '" + key + "'isn't valid.");
                 return;
             }
 
             lock (LockObj) {
-                Log.Info("[UserDetailsCountlyService] Multiply : key = " + key + ", value = " + value);
+                Log.Info("[UserDetailsCountlyService] MultiplyInternal, key = " + key + ", value = " + value);
                 AddToCustomData(key, new Dictionary<string, object> { { "$mul", value } });
             }
         }
