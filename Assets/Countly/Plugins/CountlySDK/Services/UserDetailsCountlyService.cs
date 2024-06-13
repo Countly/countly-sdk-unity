@@ -62,7 +62,7 @@ namespace Plugins.CountlySDK.Services
         public void Set(string key, string value)
         {
             Log.Info("[UserDetailsCountlyService] Set," + " key: " + key + " value: " + value);
-            SetInternal(key, value, false);
+            SetInternal(key, value);
         }
 
         /// <summary>
@@ -73,7 +73,7 @@ namespace Plugins.CountlySDK.Services
         public void SetOnce(string key, string value)
         {
             Log.Info("[UserDetailsCountlyService] SetOnce," + " key: " + key + " value: " + value);
-            SetInternal(key, value, true);
+            SetOnceInternal(key, value);
         }
 
         /// <summary>
@@ -139,7 +139,7 @@ namespace Plugins.CountlySDK.Services
         public void Push(string key, string[] value)
         {
             Log.Info("[UserDetailsCountlyService] Push," + " key: " + key + " value: " + value);
-            PushInternal(key, value, false);
+            PushInternal(key, value);
         }
 
         /// <summary>
@@ -151,7 +151,7 @@ namespace Plugins.CountlySDK.Services
         public void PushUnique(string key, string[] value)
         {
             Log.Info("[UserDetailsCountlyService] PushUnique," + " key: " + key + " value: " + value);
-            PushInternal(key, value, true);
+            PushUniqueInternal(key, value);
         }
 
         /// <summary>
@@ -295,7 +295,7 @@ namespace Plugins.CountlySDK.Services
         /// </summary>
         /// <param name="key">string with key for the property</param>
         /// <param name="value">string with value for the property</param>
-        private void SetInternal(string key, string value, bool setOnce)
+        private void SetInternal(string key, string value)
         {
             if (!ValidateRequest(key)) {
                 return;
@@ -303,12 +303,24 @@ namespace Plugins.CountlySDK.Services
 
             lock (LockObj) {
                 Log.Info("[UserDetailsCountlyService] SetInternal, key = " + key + ", value = " + value);
+                AddToCustomData(key, TrimValue(key, value));
+            }
+        }
 
-                if (setOnce) {
-                    AddToCustomData(key, new Dictionary<string, object> { { "$setOnce", TrimValue(key, value) } });
-                } else {
-                    AddToCustomData(key, TrimValue(key, value));
-                }
+        /// <summary>
+        /// Set value only if property does not exist yet.
+        /// </summary>
+        /// <param name="key">string with key for the property</param>
+        /// <param name="value">string with value for the property</param>
+        private void SetOnceInternal(string key, string value)
+        {
+            if (!ValidateRequest(key)) {
+                return;
+            }
+
+            lock (LockObj) {
+                Log.Info("[UserDetailsCountlyService] SetInternal, key = " + key + ", value = " + value);
+                AddToCustomData(key, new Dictionary<string, object> { { "$setOnce", TrimValue(key, value) } });
             }
         }
 
@@ -385,8 +397,7 @@ namespace Plugins.CountlySDK.Services
         /// </summary>
         /// <param name="key">The key for the custom data.</param>
         /// <param name="value">The array of values to be added.</param>
-        /// <param name="pushUnique">Boolean flag indicating if the values should be added uniquely or not.</param>
-        private void PushInternal(string key, string[] value, bool pushUnique)
+        private void PushInternal(string key, string[] value)
         {
             if (!ValidateRequest(key)) {
                 return;
@@ -394,12 +405,25 @@ namespace Plugins.CountlySDK.Services
 
             lock (LockObj) {
                 Log.Info("[UserDetailsCountlyService] PushInternal, key = " + key + ", value = " + string.Join(", ", value));
+                AddToCustomData(key, new Dictionary<string, object> { { "$push", TrimValues(value) } });
+            }
+        }
 
-                if (pushUnique) {
-                    AddToCustomData(key, new Dictionary<string, object> { { "$addToSet", TrimValues(value) } });
-                } else {
-                    AddToCustomData(key, new Dictionary<string, object> { { "$push", TrimValues(value) } });
-                }
+        /// <summary>
+        /// Create array property, if property does not exist and add value to array, only if value is not yet in the array
+        /// You can only use it on array properties or properties that do not exist yet.
+        /// </summary>
+        /// <param name="key">The key for the custom data.</param>
+        /// <param name="value">The array of values to be added.</param>
+        private void PushUniqueInternal(string key, string[] value)
+        {
+            if (!ValidateRequest(key)) {
+                return;
+            }
+
+            lock (LockObj) {
+                Log.Info("[UserDetailsCountlyService] PushInternal, key = " + key + ", value = " + string.Join(", ", value));
+                AddToCustomData(key, new Dictionary<string, object> { { "$addToSet", TrimValues(value) } });
             }
         }
 
@@ -446,6 +470,10 @@ namespace Plugins.CountlySDK.Services
             CustomDataProperties.Add(key, value);
         }
 
+        /// <summary>
+        /// Checks if an internal call is providing valid key and has consent 
+        /// </summary>
+        /// <param name="key">property name</param>
         private bool ValidateRequest(string key)
         {
             if (!_consentService.CheckConsentInternal(Consents.Users)) {
