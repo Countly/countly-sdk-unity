@@ -25,7 +25,7 @@ namespace Plugins.CountlySDK.Services
 
         #region PublicAPI
         /// <summary>
-        /// Sets information about user.
+        /// Add user custom detail to request queue.
         /// </summary>
         /// <param name="userDetailsModel">User Model with the specified params</param>
         public async Task SetUserDetailsAsync(CountlyUserDetailsModel userDetailsModel)
@@ -297,13 +297,7 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value">string with value for the property</param>
         private void SetInternal(string key, string value, bool setOnce)
         {
-            if (!_consentService.CheckConsentInternal(Consents.Users)) {
-                Log.Debug("[UserDetailsCountlyService] SetInternal, consent is not given, ignoring the request.");
-                return;
-            }
-
-            if (string.IsNullOrEmpty(key)) {
-                Log.Warning("[UserDetailsCountlyService] SetInternal, key '" + key + "' isn't valid.");
+            if (!ValidateRequest(key)) {
                 return;
             }
 
@@ -325,13 +319,7 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value">The amount by which to increment.</param>
         private void IncrementInternal(string key, double value)
         {
-            if (!_consentService.CheckConsentInternal(Consents.Users)) {
-                Log.Debug("[UserDetailsCountlyService] IncrementInternal, consent is not given, ignoring the request.");
-                return;
-            }
-
-            if (string.IsNullOrEmpty(key)) {
-                Log.Warning("[UserDetailsCountlyService] IncrementInternal, key '" + key + "' isn't valid.");
+            if (!ValidateRequest(key)) {
                 return;
             }
 
@@ -348,13 +336,7 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value">double value by which to multiply</param>
         private void MultiplyInternal(string key, double value)
         {
-            if (!_consentService.CheckConsentInternal(Consents.Users)) {
-                Log.Debug("[UserDetailsCountlyService] MultiplyInternal, consent is not given, ignoring the request.");
-                return;
-            }
-
-            if (string.IsNullOrEmpty(key)) {
-                Log.Warning("[UserDetailsCountlyService] MultiplyInternal, key '" + key + "'isn't valid.");
+            if (!ValidateRequest(key)) {
                 return;
             }
 
@@ -371,13 +353,7 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value">double value to check for max</param>
         private void MaxInternal(string key, double value)
         {
-            if (!_consentService.CheckConsentInternal(Consents.Users)) {
-                Log.Debug("[UserDetailsCountlyService] MaxInternal, consent is not given, ignoring the request.");
-                return;
-            }
-
-            if (string.IsNullOrEmpty(key)) {
-                Log.Warning("[UserDetailsCountlyService] MaxInternal, key '" + key + "'isn't valid.");
+            if (!ValidateRequest(key)) {
                 return;
             }
 
@@ -394,13 +370,7 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value">double value to check for min</param>
         private void MinInternal(string key, double value)
         {
-            if (!_consentService.CheckConsentInternal(Consents.Users)) {
-                Log.Debug("[UserDetailsCountlyService] MinInternal, consent is not given, ignoring the request.");
-                return;
-            }
-
-            if (string.IsNullOrEmpty(key)) {
-                Log.Warning("[UserDetailsCountlyService] MinInternal, key '" + key + "'isn't valid.");
+            if (!ValidateRequest(key)) {
                 return;
             }
 
@@ -418,13 +388,7 @@ namespace Plugins.CountlySDK.Services
         /// <param name="pushUnique">Boolean flag indicating if the values should be added uniquely or not.</param>
         private void PushInternal(string key, string[] value, bool pushUnique)
         {
-            if (!_consentService.CheckConsentInternal(Consents.Users)) {
-                Log.Debug("[UserDetailsCountlyService] PushInternal, consent is not given, ignoring the request.");
-                return;
-            }
-            
-            if (string.IsNullOrEmpty(key)) {
-                Log.Warning("[UserDetailsCountlyService] PushInternal, key '" + key + "' isn't valid.");
+            if (!ValidateRequest(key)) {
                 return;
             }
 
@@ -446,13 +410,7 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value">array with values to remove from array</param>
         private void PullInternal(string key, string[] value)
         {
-            if (!_consentService.CheckConsentInternal(Consents.Users)) {
-                Log.Debug("[UserDetailsCountlyService] PullInternal, consent is not given, ignoring the request.");
-                return;
-            }
-
-            if (string.IsNullOrEmpty(key)) {
-                Log.Warning("[UserDetailsCountlyService] PullInternal, key '" + key + "'isn't valid.");
+            if (!ValidateRequest(key)) {
                 return;
             }
 
@@ -472,7 +430,7 @@ namespace Plugins.CountlySDK.Services
         {
             Log.Debug("[UserDetailsCountlyService] AddToCustomData: " + key + ", " + value);
 
-            if (!_consentService.CheckConsentInternal(Consents.Users)) {
+            if (!ValidateRequest(key)) {
                 return;
             }
 
@@ -486,6 +444,21 @@ namespace Plugins.CountlySDK.Services
             }
 
             CustomDataProperties.Add(key, value);
+        }
+
+        private bool ValidateRequest(string key)
+        {
+            if (!_consentService.CheckConsentInternal(Consents.Users)) {
+                Log.Debug("[UserDetailsCountlyService] ValidateRequest, Consent is not given, ignoring the request.");
+                return false;
+            }
+
+            if (string.IsNullOrEmpty(key)) {
+                Log.Warning("[UserDetailsCountlyService] ValidateRequest, provided key isn't valid.");
+                return false;
+            }
+
+            return true;
         }
         #endregion
     }
