@@ -476,13 +476,14 @@ namespace Plugins.CountlySDK.Services
         /// <param name="key">property name</param>
         private bool ValidateRequest(string key)
         {
+            string caller = new System.Diagnostics.StackTrace().GetFrame(1).GetMethod().Name;
             if (!_consentService.CheckConsentInternal(Consents.Users)) {
-                Log.Debug("[UserDetailsCountlyService] ValidateRequest, Consent is not given, ignoring the request.");
+                Log.Debug($"[UserDetailsCountlyService] {caller}, Consent is not given, ignoring the request.");
                 return false;
             }
 
             if (string.IsNullOrEmpty(key)) {
-                Log.Warning("[UserDetailsCountlyService] ValidateRequest, provided key isn't valid.");
+                Log.Warning($"[UserDetailsCountlyService] {caller}, provided key isn't valid.");
                 return false;
             }
 
