@@ -32,7 +32,7 @@ namespace Plugins.CountlySDK.Services
             int i = 0;
             List<string> toRemove = new List<string>();
             foreach (KeyValuePair<string, object> item in segments) {
-                if (++i > _configuration.MaxSegmentationValues) {
+                if (++i > _configuration.GetMaxSegmentationValues()) {
                     toRemove.Add(item.Key);
                     continue;
                 }
@@ -44,7 +44,9 @@ namespace Plugins.CountlySDK.Services
                     || type == typeof(float)
                     || type == typeof(double)
                     || type == typeof(string)
-                    || type == typeof(long));
+                    || type == typeof(long)
+                    || (type.IsArray && IsValidElementType(type.GetElementType()))
+                    || (IsListType(type) && IsValidElementType(type.GetGenericArguments()[0])));
 
                 if (!isValidDataType) {
                     toRemove.Add(item.Key);
@@ -59,11 +61,26 @@ namespace Plugins.CountlySDK.Services
             return segments;
         }
 
+        private bool IsValidElementType(Type type)
+        {
+            return type == typeof(int)
+                || type == typeof(bool)
+                || type == typeof(float)
+                || type == typeof(double)
+                || type == typeof(string)
+                || type == typeof(long);
+        }
+
+        private bool IsListType(Type type)
+        {
+            return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>);
+        }
+
         protected string TrimKey(string k)
         {
-            if (k.Length > _configuration.MaxKeyLength) {
-                Log.Warning("[" + GetType().Name + "] TrimKey : Max allowed key length is " + _configuration.MaxKeyLength + ". " + k + " will be truncated.");
-                k = k.Substring(0, _configuration.MaxKeyLength);
+            if (k.Length > _configuration.GetMaxKeyLength()) {
+                Log.Warning("[" + GetType().Name + "] TrimKey : Max allowed key length is " + _configuration.GetMaxKeyLength() + ". " + k + " will be truncated.");
+                k = k.Substring(0, _configuration.GetMaxKeyLength());
             }
 
             return k;
@@ -72,9 +89,9 @@ namespace Plugins.CountlySDK.Services
         protected string[] TrimValues(string[] values)
         {
             for (int i = 0; i < values.Length; ++i) {
-                if (values[i].Length > _configuration.MaxValueSize) {
-                    Log.Warning("[" + GetType().Name + "] TrimKey : Max allowed value length is " + _configuration.MaxKeyLength + ". " + values[i] + " will be truncated.");
-                    values[i] = values[i].Substring(0, _configuration.MaxValueSize);
+                if (values[i].Length > _configuration.GetMaxValueSize()) {
+                    Log.Warning("[" + GetType().Name + "] TrimKey : Max allowed value length is " + _configuration.GetMaxKeyLength() + ". " + values[i] + " will be truncated.");
+                    values[i] = values[i].Substring(0, _configuration.GetMaxValueSize());
                 }
             }
 
@@ -83,9 +100,9 @@ namespace Plugins.CountlySDK.Services
 
         protected string TrimValue(string fieldName, string v)
         {
-            if (v != null && v.Length > _configuration.MaxValueSize) {
-                Log.Warning("[" + GetType().Name + "] TrimValue : Max allowed '" + fieldName + "' length is " + _configuration.MaxValueSize + ". " + v + " will be truncated.");
-                v = v.Substring(0, _configuration.MaxValueSize);
+            if (v != null && v.Length > _configuration.GetMaxValueSize()) {
+                Log.Warning("[" + GetType().Name + "] TrimValue : Max allowed '" + fieldName + "' length is " + _configuration.GetMaxValueSize() + ". " + v + " will be truncated.");
+                v = v.Substring(0, _configuration.GetMaxValueSize());
             }
 
             return v;

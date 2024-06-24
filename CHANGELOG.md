@@ -1,4 +1,5 @@
 ## XX.XX.X
+* Added support for string key and Array/List value to all user given segmentations.
 * Added "SetID(string newDeviceId)" function in "Countly.Instance.Device" for managing device id changes.
 * Added the following calls in "Countly.Instance.Views":
   * "StartView" for starting a view.
