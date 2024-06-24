@@ -61,7 +61,7 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value">string with value for the property</param>
         public void Set(string key, string value)
         {
-            Log.Info("[UserDetailsCountlyService] Set," + " key: " + key + " value: " + value);
+            Log.Info("[UserDetailsCountlyService] Set," + "key:[" + key + "]" +  " value:[" + value + "]");
             SetInternal(key, value);
         }
 
@@ -72,7 +72,7 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value">string value to set</param>
         public void SetOnce(string key, string value)
         {
-            Log.Info("[UserDetailsCountlyService] SetOnce," + " key: " + key + " value: " + value);
+            Log.Info("[UserDetailsCountlyService] SetOnce," + "key:[" + key + "]" +  " value:[" + value + "]");
             SetOnceInternal(key, value);
         }
 
@@ -82,7 +82,7 @@ namespace Plugins.CountlySDK.Services
         /// <param name="key">string with property name to increment</param>
         public void Increment(string key)
         {
-            Log.Info("[UserDetailsCountlyService] Increment," + " key: " + key);
+            Log.Info("[UserDetailsCountlyService] Increment," + "key:[" + key + "]");
             IncrementInternal(key, 1);
         }
 
@@ -93,7 +93,7 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value">double value by which to increment</param>
         public void IncrementBy(string key, double value)
         {
-            Log.Info("[UserDetailsCountlyService] IncrementBy," + " key: " + key + " value: " + value);
+            Log.Info("[UserDetailsCountlyService] IncrementBy," + "key:[" + key + "]" +  " value:[" + value + "]");
             IncrementInternal(key, value);
         }
 
@@ -104,7 +104,7 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value">double value by which to multiply</param>
         public void Multiply(string key, double value)
         {
-            Log.Info("[UserDetailsCountlyService] Multiply," + " key: " + key + " value: " + value);
+            Log.Info("[UserDetailsCountlyService] Multiply," + "key:[" + key + "]" +  " value:[" + value + "]");
             MultiplyInternal(key, value);
         }
 
@@ -115,7 +115,7 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value">double value to check for max</param>
         public void Max(string key, double value)
         {
-            Log.Info("[UserDetailsCountlyService] Max," + " key: " + key + " value: " + value);
+            Log.Info("[UserDetailsCountlyService] Max," + "key:[" + key + "]" +  " value:[" + value + "]");
             MaxInternal(key, value);
         }
 
@@ -126,7 +126,7 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value">double value to check for min</param>
         public void Min(string key, double value)
         {
-            Log.Info("[UserDetailsCountlyService] Min," + " key: " + key + " value: " + value);
+            Log.Info("[UserDetailsCountlyService] Min," + "key:[" + key + "]" +  " value:[" + value + "]");
             MinInternal(key, value);
         }
 
@@ -138,7 +138,7 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value">array with values to add</param>
         public void Push(string key, string[] value)
         {
-            Log.Info("[UserDetailsCountlyService] Push," + " key: " + key + " value: " + value);
+            Log.Info("[UserDetailsCountlyService] Push," + "key:[" + key + "]" +  " value:[" + value + "]");
             PushInternal(key, value);
         }
 
@@ -150,7 +150,7 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value">array with values to add</param>
         public void PushUnique(string key, string[] value)
         {
-            Log.Info("[UserDetailsCountlyService] PushUnique," + " key: " + key + " value: " + value);
+            Log.Info("[UserDetailsCountlyService] PushUnique," + "key:[" + key + "]" +  " value:[" + value + "]");
             PushUniqueInternal(key, value);
         }
 
@@ -161,7 +161,7 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value">array with values to remove from array</param>
         public void Pull(string key, string[] value)
         {
-            Log.Info("[UserDetailsCountlyService] Pull," + " key: " + key + " value: " + value);
+            Log.Info("[UserDetailsCountlyService] Pull," + "key:[" + key + "]" +  " value:[" + value + "]");
             PullInternal(key, value);
         }
 
@@ -297,12 +297,12 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value">string with value for the property</param>
         private void SetInternal(string key, string value)
         {
-            if (!ValidateRequest(key)) {
+            if (!ValidateConsentAndKey(key, "SetInternal")) {
                 return;
             }
 
             lock (LockObj) {
-                Log.Info("[UserDetailsCountlyService] SetInternal, key = " + key + ", value = " + value);
+                Log.Info("[UserDetailsCountlyService] SetInternal, key:[" + key + "]" +  " value:[" + value + "]");
                 AddToCustomData(key, TrimValue(key, value));
             }
         }
@@ -314,12 +314,12 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value">string with value for the property</param>
         private void SetOnceInternal(string key, string value)
         {
-            if (!ValidateRequest(key)) {
+            if (!ValidateConsentAndKey(key, "SetOnceInternal")) {
                 return;
             }
 
             lock (LockObj) {
-                Log.Info("[UserDetailsCountlyService] SetInternal, key = " + key + ", value = " + value);
+                Log.Info("[UserDetailsCountlyService] SetOnceInternal, key:[" + key + "]" +  " value:[" + value + "]");
                 AddToCustomData(key, new Dictionary<string, object> { { "$setOnce", TrimValue(key, value) } });
             }
         }
@@ -331,12 +331,12 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value">The amount by which to increment.</param>
         private void IncrementInternal(string key, double value)
         {
-            if (!ValidateRequest(key)) {
+            if (!ValidateConsentAndKey(key, "IncrementInternal")) {
                 return;
             }
 
             lock (LockObj) {
-                Log.Info("[UserDetailsCountlyService] IncrementInternal, key = " + key + (value == 1 ? "" : ", value = " + value));
+                Log.Info("[UserDetailsCountlyService] IncrementInternal, key:[" + key + "]" +  " value:[" + value + "]");
                 AddToCustomData(key, new Dictionary<string, object> { { "$inc", value } });
             }
         }
@@ -348,12 +348,12 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value">double value by which to multiply</param>
         private void MultiplyInternal(string key, double value)
         {
-            if (!ValidateRequest(key)) {
+            if (!ValidateConsentAndKey(key, "MultiplyInternal")) {
                 return;
             }
 
             lock (LockObj) {
-                Log.Info("[UserDetailsCountlyService] MultiplyInternal, key = " + key + ", value = " + value);
+                Log.Info("[UserDetailsCountlyService] MultiplyInternal, key:[" + key + "]" +  " value:[" + value + "]");
                 AddToCustomData(key, new Dictionary<string, object> { { "$mul", value } });
             }
         }
@@ -365,12 +365,12 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value">double value to check for max</param>
         private void MaxInternal(string key, double value)
         {
-            if (!ValidateRequest(key)) {
+            if (!ValidateConsentAndKey(key, "MaxInternal")) {
                 return;
             }
 
             lock (LockObj) {
-                Log.Info("[UserDetailsCountlyService] MaxInternal, key = " + key + ", value = " + value);
+                Log.Info("[UserDetailsCountlyService] MaxInternal, key:[" + key + "]" +  " value:[" + value + "]");
                 AddToCustomData(key, new Dictionary<string, object> { { "$max", value } });
             }
         }
@@ -382,12 +382,12 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value">double value to check for min</param>
         private void MinInternal(string key, double value)
         {
-            if (!ValidateRequest(key)) {
+            if (!ValidateConsentAndKey(key, "MinInternal")) {
                 return;
             }
 
             lock (LockObj) {
-                Log.Info("[UserDetailsCountlyService] MinInternal, key = " + key + ", value = " + value);
+                Log.Info("[UserDetailsCountlyService] MinInternal, key:[" + key + "]" +  " value:[" + value + "]");
                 AddToCustomData(key, new Dictionary<string, object> { { "$min", value } });
             }
         }
@@ -399,12 +399,12 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value">The array of values to be added.</param>
         private void PushInternal(string key, string[] value)
         {
-            if (!ValidateRequest(key)) {
+            if (!ValidateConsentAndKey(key, "PushInternal")) {
                 return;
             }
 
             lock (LockObj) {
-                Log.Info("[UserDetailsCountlyService] PushInternal, key = " + key + ", value = " + string.Join(", ", value));
+                Log.Info("[UserDetailsCountlyService] PushInternal, key:[" + key + "]" + " value:[" + string.Join(", ", value) + "]");
                 AddToCustomData(key, new Dictionary<string, object> { { "$push", TrimValues(value) } });
             }
         }
@@ -417,12 +417,12 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value">The array of values to be added.</param>
         private void PushUniqueInternal(string key, string[] value)
         {
-            if (!ValidateRequest(key)) {
+            if (!ValidateConsentAndKey(key)) {
                 return;
             }
 
             lock (LockObj) {
-                Log.Info("[UserDetailsCountlyService] PushInternal, key = " + key + ", value = " + string.Join(", ", value));
+                Log.Info("[UserDetailsCountlyService] PushInternal, key:[" + key + "]" + " value:[" + string.Join(", ", value) + "]");
                 AddToCustomData(key, new Dictionary<string, object> { { "$addToSet", TrimValues(value) } });
             }
         }
@@ -434,12 +434,12 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value">array with values to remove from array</param>
         private void PullInternal(string key, string[] value)
         {
-            if (!ValidateRequest(key)) {
+            if (!ValidateConsentAndKey(key, "PullInternal")) {
                 return;
             }
 
             lock (LockObj) {
-                Log.Info("[UserDetailsCountlyService] PullInternal, key = " + key + ", value = " + value);
+                Log.Info("[UserDetailsCountlyService] PullInternal, key:[" + key + "]" +  " value:[" + value + "]");
                 value = TrimValues(value);
                 AddToCustomData(key, new Dictionary<string, object> { { "$pull", value } });
             }
@@ -452,9 +452,9 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value">property value</param>
         private void AddToCustomData(string key, object value)
         {
-            Log.Debug("[UserDetailsCountlyService] AddToCustomData: " + key + ", " + value);
+            Log.Debug("[UserDetailsCountlyService] AddToCustomData, key:[" + key + "]" +  " value:[" + value + "]");
 
-            if (!ValidateRequest(key)) {
+            if (!ValidateConsentAndKey(key, "AddToCustomData")) {
                 return;
             }
 
@@ -471,19 +471,18 @@ namespace Plugins.CountlySDK.Services
         }
 
         /// <summary>
-        /// Checks if an internal call is providing valid key and has consent 
+        /// Checks if an internal call is providing valid key and has consent
         /// </summary>
         /// <param name="key">property name</param>
-        private bool ValidateRequest(string key)
+        private bool ValidateConsentAndKey(string key, string caller = null)
         {
-            string caller = new System.Diagnostics.StackTrace().GetFrame(1).GetMethod().Name;
             if (!_consentService.CheckConsentInternal(Consents.Users)) {
-                Log.Debug($"[UserDetailsCountlyService] {caller}, Consent is not given, ignoring the request.");
+                Log.Debug($"[UserDetailsCountlyService][{caller}] Consent is not given, ignoring the request.");
                 return false;
             }
 
             if (string.IsNullOrEmpty(key)) {
-                Log.Warning($"[UserDetailsCountlyService] {caller}, provided key isn't valid.");
+                Log.Warning($"[UserDetailsCountlyService][{caller}] Provided key isn't valid.");
                 return false;
             }
 
