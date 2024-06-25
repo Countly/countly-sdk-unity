@@ -269,6 +269,10 @@ namespace Assets.Tests.PlayModeTests
             Assert.AreEqual("bread_crumbs_9", Countly.Instance.CrashReports._crashBreadcrumbs.Dequeue());
         }
 
+        // 'SendCrashReportAsync' method in CrashReportsCountlyService
+        // We provide segmentation with crash and check every supported data type
+        // string, bool, float, double, string, long and, their list and arrays are supported types
+        // Supported data types should be recorded, unsupported types should be removed correctly
         [Test]
         public async void CrashSegmentationDataTypes()
         {
@@ -295,7 +299,9 @@ namespace Assets.Tests.PlayModeTests
                 { "FloatList", new List<float> { 1.1f, 2.2f, 3.3f } },
                 { "DoubleList", new List<double> { 1.1, 2.2, 3.3 } },
                 { "StringList", new List<string> { "a", "b", "c" } },
-                { "LongList", new List<long> { 10000000000L, 20000000000L, 30000000000L } }
+                { "LongList", new List<long> { 10000000000L, 20000000000L, 30000000000L } },
+                { "Unsupported Object", new object() }, // invalid
+                { "Unsupported Dictionary", new Dictionary<string, object>() } // invalid
             };
 
             Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
@@ -304,7 +310,31 @@ namespace Assets.Tests.PlayModeTests
             TestUtility.ValidateRQEQSize(cly, 1, 0);
             CountlyRequestModel requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
             NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
-            AssertCrashRequest(collection, "message", "StackTrace_1\nStackTrace_2\nStackTrace_3", true, seg);
+
+            Dictionary<string, object> expectedSegm = new Dictionary<string, object>
+            {
+                { "Time", 1234455 },
+                { "Retry Attempts", 10 },
+                { "Temp", 100.0f },
+                { "IsSuccess", true },
+                { "Message", "Test message" },
+                { "Average", 75.5 },
+                { "LargeNumber", 12345678901234L },
+                { "IntArray", new int[] { 1, 2, 3 } },
+                { "BoolArray", new bool[] { true, false, true } },
+                { "FloatArray", new float[] { 1.1f, 2.2f, 3.3f } },
+                { "DoubleArray", new double[] { 1.1, 2.2, 3.3 } },
+                { "StringArray", new string[] { "a", "b", "c" } },
+                { "LongArray", new long[] { 10000000000L, 20000000000L, 30000000000L } },
+                { "IntList", new List<int> { 1, 2, 3 } },
+                { "BoolList", new List<bool> { true, false, true } },
+                { "FloatList", new List<float> { 1.1f, 2.2f, 3.3f } },
+                { "DoubleList", new List<double> { 1.1, 2.2, 3.3 } },
+                { "StringList", new List<string> { "a", "b", "c" } },
+                { "LongList", new List<long> { 10000000000L, 20000000000L, 30000000000L } }
+            };
+
+            AssertCrashRequest(collection, "message", "StackTrace_1\nStackTrace_2\nStackTrace_3", true, expectedSegm);
         }
 
         [SetUp]

@@ -351,9 +351,7 @@ namespace Plugins.CountlySDK.Services
                 viewName = viewName.Substring(0, _configuration.GetMaxKeyLength());
             }
 
-            if (_utils.RemoveUnsupportedDataTypes(customViewSegmentation, Log)) {
-                Log.Warning("[ViewsCountlyService] StopViewWithNameInternal, you have provided an unsupported data type in your View Segmentation. Removing the unsupported values.");
-            }
+            customViewSegmentation = (Dictionary<string, object>)RemoveSegmentInvalidDataTypes(customViewSegmentation);
 
             string viewID = null;
 
@@ -435,9 +433,7 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
             
-            if (_utils.RemoveUnsupportedDataTypes(customViewSegmentation, Log)) {
-                Log.Warning("[ViewsCountlyService] StopViewWithIDInternal, you have provided an unsupported data type in your View Segmentation. Removing the unsupported values.");
-            }
+            customViewSegmentation = (Dictionary<string, object>)RemoveSegmentInvalidDataTypes(customViewSegmentation);
 
             Log.Debug("[ViewCountlyService] View [" + vd.ViewName + "], id:[" + vd.ViewID + "] is getting closed, reporting duration: [" + (_utils.CurrentTimestampSeconds() - vd.ViewStartTimeSeconds) + "] s, current timestamp: [" + _utils.CurrentTimestampSeconds() + "]");
             _utils.TruncateSegmentationValues(customViewSegmentation, _configuration.GetMaxSegmentationValues(), "[ViewCountlyService] StopViewWithIDInternal", Log);
@@ -600,9 +596,7 @@ namespace Plugins.CountlySDK.Services
 
             Log.Debug("[ViewCountlyService] StopAllViewsInternal");
 
-            if (_utils.RemoveUnsupportedDataTypes(viewSegmentation, Log)) {
-                Log.Warning("[ViewsCountlyService] StopAllViewsInternal, you have provided an unsupported data type in your View Segmentation. Removing the unsupported values.");
-            }
+            viewSegmentation = (Dictionary<string, object>)RemoveSegmentInvalidDataTypes(viewSegmentation);
 
             AutoCloseRequiredViews(true, viewSegmentation);
         }
@@ -619,17 +613,11 @@ namespace Plugins.CountlySDK.Services
             }
 
             Log.Debug("[ViewCountlyService] SetGlobalViewSegmentationInternal, with[" + (viewSegmentation == null ? "null" : viewSegmentation.Count.ToString()) + "] entries");
-
             automaticViewSegmentation.Clear();
 
             if (viewSegmentation != null) {
-
                 _utils.RemoveReservedKeysFromSegmentation(viewSegmentation, reservedSegmentationKeysViews, "[ViewCountlyService] SetGlobalViewSegmentationInternal, ", Log);
-
-                if (_utils.RemoveUnsupportedDataTypes(viewSegmentation, Log)) {
-                    Log.Warning("[ViewCountlyService] SetGlobalViewSegmentationInternal, you have provided an unsupported data type in your View Segmentation. Removing the unsupported values.");
-                }
-
+                viewSegmentation = (Dictionary<string, object>)RemoveSegmentInvalidDataTypes(viewSegmentation);
                 _utils.CopyDictionaryToDestination(automaticViewSegmentation, viewSegmentation, Log);
             }
         }
@@ -721,10 +709,7 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
 
-            if (_utils.RemoveUnsupportedDataTypes(viewSegmentation, Log)) {
-                //found an unsupported type, print warning
-                Log.Warning("[ViewsCountlyService] UpdateGlobalViewSegmentationInternal, you have provided an unsupported data type in your View Segmentation. Removing the unsupported values.");
-            }
+            viewSegmentation = (Dictionary<string, object>)RemoveSegmentInvalidDataTypes(viewSegmentation);
             
             _utils.RemoveReservedKeysFromSegmentation(viewSegmentation, reservedSegmentationKeysViews, "[ViewsCountlyService] UpdateGlobalViewSegmentationInternal, ", Log);
             _utils.CopyDictionaryToDestination(automaticViewSegmentation, viewSegmentation, Log);

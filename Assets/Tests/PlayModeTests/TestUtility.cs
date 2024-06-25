@@ -7,6 +7,8 @@ using Plugins.CountlySDK.Enums;
 using System.Text.RegularExpressions;
 using UnityEngine;
 using NUnit.Framework;
+using System;
+using System.Collections;
 
 namespace Assets.Tests.PlayModeTests
 {
@@ -268,9 +270,30 @@ namespace Assets.Tests.PlayModeTests
             Assert.AreEqual(eventModel.Duration, expectedDuration);
 
             if (expectedSegmentation != null) {
-                foreach (var kvp in expectedSegmentation) {
-                    Assert.IsTrue(eventModel.Segmentation.ContainsKey(kvp.Key));
-                    Assert.AreEqual(eventModel.Segmentation[kvp.Key], kvp.Value);
+                foreach (KeyValuePair<string, object> entry in expectedSegmentation) {
+                    string key = entry.Key;
+                    object expectedValue = entry.Value;
+
+                    // Check if key exists in custom
+                    Assert.IsTrue(eventModel.Segmentation.ContainsKey(key), $"Key '{key}' not found in custom");
+
+                    // Get actual value from custom
+                    object actualValue = eventModel.Segmentation[key];
+
+                    // Compare expected and actual values
+                    if (expectedValue is Array || expectedValue is IList) {
+                        // Convert expected value to JArray for comparison
+                        JArray expectedArray = JArray.FromObject(expectedValue);
+                        JArray actualArray = (JArray)actualValue;
+
+                        for(int i = 0; i < actualArray.Count; i++)
+                        {
+                            Assert.AreEqual(expectedArray[i].ToString(), actualArray[i].ToString());
+                        }
+                    } else {
+                        // Compare single values as strings
+                        Assert.AreEqual(expectedValue.ToString(), actualValue.ToString(), $"Mismatch for key '{key}'");
+                    }
                 }
             }
 

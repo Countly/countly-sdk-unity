@@ -345,6 +345,9 @@ namespace Assets.Tests.PlayModeTests
 
         /// <summary>
         /// It validates the data type of segment items.
+        /// We provide segmentation with crash and check every supported data type
+        /// string, bool, float, double, string, long and, their list and arrays are supported types
+        /// Supported data types should be recorded, unsupported types should be removed correctly
         /// </summary>
         [Test]
         public async void TestSegmentItemsDataTypesValidation()
@@ -378,7 +381,7 @@ namespace Assets.Tests.PlayModeTests
 
             CountlyEventModel model = Countly.Instance.Events._eventRepo.Dequeue();
 
-            Dictionary<string, object> requireSegments = new Dictionary<string, object>{
+            Dictionary<string, object> expectedSegm = new Dictionary<string, object>{
                 { "key1", "value1"},
                 { "key2", 1},
                 { "key3", 10.0},
@@ -397,7 +400,7 @@ namespace Assets.Tests.PlayModeTests
                 { "LongList", new List<long> { 10000000000L, 20000000000L, 30000000000L } }
             };
 
-            AssertAnEvent(model, "test_event", 23, 1, 5, requireSegments);
+            AssertAnEvent(model, "test_event", 23, 1, 5, expectedSegm);
         }
 
         /// <summary>

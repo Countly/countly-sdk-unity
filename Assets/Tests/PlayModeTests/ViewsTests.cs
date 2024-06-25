@@ -953,6 +953,105 @@ namespace Assets.Tests.PlayModeTests
             TestUtility.ValidateRQEQSize(cly, 2, 0);
         }
 
+        // Multiple methods in ViewCountlyService
+        // We provide segmentation with view and check every supported data type
+        // string, bool, float, double, string, long and, their list and arrays are supported types
+        // Supported data types should be recorded, unsupported types should be removed correctly
+        [Test]
+        public void ViewMethodsSegmentationDataTypes()
+        {
+            Dictionary<string, object> seg = new Dictionary<string, object>
+            {
+                { "Time", 1234455 },
+                { "Retry Attempts", 10 },
+                { "Temp", 100.0f },
+                { "IsSuccess", true },
+                { "Message", "Test message" },
+                { "Average", 75.5 },
+                { "LargeNumber", 12345678901234L },
+                { "IntArray", new int[] { 1, 2, 3 } },
+                { "BoolArray", new bool[] { true, false, true } },
+                { "FloatArray", new float[] { 1.1f, 2.2f, 3.3f } },
+                { "DoubleArray", new double[] { 1.1, 2.2, 3.3 } },
+                { "StringArray", new string[] { "a", "b", "c" } },
+                { "LongArray", new long[] { 10000000000L, 20000000000L, 30000000000L } },
+                { "IntList", new List<int> { 1, 2, 3 } },
+                { "BoolList", new List<bool> { true, false, true } },
+                { "FloatList", new List<float> { 1.1f, 2.2f, 3.3f } },
+                { "DoubleList", new List<double> { 1.1, 2.2, 3.3 } },
+                { "StringList", new List<string> { "a", "b", "c" } },
+                { "LongList", new List<long> { 10000000000L, 20000000000L, 30000000000L } },
+                { "Unsupported Object", new object() }, // invalid
+                { "Unsupported Dictionary", new Dictionary<string, object>() } // invalid
+            };
+            
+            Dictionary<string, object> expectedSegm = new Dictionary<string, object>
+            {
+                { "Time", 1234455 },
+                { "Retry Attempts", 10 },
+                { "Temp", 100.0f },
+                { "IsSuccess", true },
+                { "Message", "Test message" },
+                { "Average", 75.5 },
+                { "LargeNumber", 12345678901234L },
+                { "IntArray", new int[] { 1, 2, 3 } },
+                { "BoolArray", new bool[] { true, false, true } },
+                { "FloatArray", new float[] { 1.1f, 2.2f, 3.3f } },
+                { "DoubleArray", new double[] { 1.1, 2.2, 3.3 } },
+                { "StringArray", new string[] { "a", "b", "c" } },
+                { "LongArray", new long[] { 10000000000L, 20000000000L, 30000000000L } },
+                { "IntList", new List<int> { 1, 2, 3 } },
+                { "BoolList", new List<bool> { true, false, true } },
+                { "FloatList", new List<float> { 1.1f, 2.2f, 3.3f } },
+                { "DoubleList", new List<double> { 1.1, 2.2, 3.3 } },
+                { "StringList", new List<string> { "a", "b", "c" } },
+                { "LongList", new List<long> { 10000000000L, 20000000000L, 30000000000L } }
+            };
+
+            CountlyConfiguration config = TestUtility.CreateViewConfig(new CustomIdProvider());
+            Countly cly = Countly.Instance;
+
+            cly.Init(config);
+            IViewModule views = cly.Views;
+            TestUtility.ValidateRQEQSize(cly, 2, 0);
+
+            // start and stop regular view
+            string viewId1 = views.StartView(viewNames[0], seg);
+            TestUtility.ValidateRQEQSize(cly, 2, 1);
+            CountlyEventModel view1 = cly.Events._eventRepo.Dequeue();
+            TestUtility.ViewEventValidator(view1, 1, 0, null, expectedSegm, viewId1, "", null, null, TestUtility.TestTimeMetrics());
+            Thread.Sleep(1000);
+            views.StopViewWithName(viewNames[0]);
+            TestUtility.ValidateRQEQSize(cly, 2, 1);
+            CountlyEventModel view1Stop = cly.Events._eventRepo.Dequeue();
+            TestUtility.ViewEventValidator(view1Stop, 1, 0, 1, TestUtility.BaseViewTestSegmentation(viewNames[0], false, false), viewId1, "", null, null, TestUtility.TestTimeMetrics());
+
+            // stop view with segmentation
+            string viewId2 = views.StartView(viewNames[1]);
+            TestUtility.ValidateRQEQSize(cly, 2, 1);
+            CountlyEventModel view2 = cly.Events._eventRepo.Dequeue();
+            TestUtility.ViewEventValidator(view2, 1, 0, null, TestUtility.BaseViewTestSegmentation(viewNames[1], false, false), viewId2, viewId1, null, null, TestUtility.TestTimeMetrics());
+            Thread.Sleep(1000);
+            views.StopViewWithID(viewId2, seg);
+            TestUtility.ValidateRQEQSize(cly, 2, 1);
+            CountlyEventModel view2Stop = cly.Events._eventRepo.Dequeue();
+            TestUtility.ViewEventValidator(view2Stop, 1, 0, 1, expectedSegm, viewId2, viewId1, null, null, TestUtility.TestTimeMetrics());
+
+            // set global segmentation
+            string viewId3 = views.StartView(viewNames[1]);
+            TestUtility.ValidateRQEQSize(cly, 2, 1);
+            CountlyEventModel view3 = cly.Events._eventRepo.Dequeue();
+            TestUtility.ViewEventValidator(view3, 1, 0, null, TestUtility.BaseViewTestSegmentation(viewNames[1], false, false), viewId3, viewId2, null, null, TestUtility.TestTimeMetrics());
+            
+            Thread.Sleep(1000);
+            views.SetGlobalViewSegmentation(seg);
+
+            views.StopViewWithID(viewId3);
+            TestUtility.ValidateRQEQSize(cly, 2, 1);
+            CountlyEventModel view3Stop = cly.Events._eventRepo.Dequeue();
+            TestUtility.ViewEventValidator(view3Stop, 1, 0, 1, expectedSegm, viewId3, viewId2, null, null, TestUtility.TestTimeMetrics());            
+        }
+
         [SetUp]
         [TearDown]
         public void End()
