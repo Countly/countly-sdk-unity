@@ -25,7 +25,7 @@ namespace Plugins.CountlySDK.Services
 
         #region PublicAPI
         /// <summary>
-        /// Save minimal value between existing and provided.
+        /// Add user custom detail to request queue.
         /// </summary>
         /// <param name="userDetailsModel">User Model with the specified params</param>
         public async Task SetUserDetailsAsync(CountlyUserDetailsModel userDetailsModel)
