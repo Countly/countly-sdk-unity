@@ -6,7 +6,7 @@ using NUnit.Framework;
 using Plugins.CountlySDK;
 using Plugins.CountlySDK.Models;
 
-namespace Assets.Tests.PlayModeTests
+namespace Assets.Tests.PlayModeTests.LegacyTests
 {
     public class UserCustomDetailsTests
     {

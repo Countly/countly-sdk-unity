@@ -9,7 +9,7 @@ using Plugins.CountlySDK.Models;
 
 namespace Plugins.CountlySDK.Services
 {
-    public class UserDetailsCountlyService : AbstractBaseService, IUserDetailModule
+    public class UserDetailsCountlyService : AbstractBaseService
     {
         internal Dictionary<string, object> CustomDataProperties { get; private set; }
         private readonly CountlyUtils _countlyUtils;
