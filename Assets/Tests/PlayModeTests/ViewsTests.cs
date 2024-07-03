@@ -230,14 +230,14 @@ namespace Assets.Tests.PlayModeTests
             CountlyEventModel secondModel = cly.Events._eventRepo.Dequeue();
             // BaseViewTestSegmentation(string viewName, bool isVisit, bool isStart) passing true in here means that this is first view
             TestUtility.ViewEventValidator(secondModel, 1, 0, null, TestUtility.BaseViewTestSegmentation(viewNames[1], true, true), "idv2", "idv1", null, null, TestUtility.TestTimeMetrics());
-            
+
             Thread.Sleep(1000);
 
             await Countly.Instance.Views.RecordCloseViewAsync(viewNames[0]);
             TestUtility.ValidateRQEQSize(cly, 4, 1);
             CountlyEventModel resultStop = cly.Events._eventRepo.Dequeue();
             TestUtility.ViewEventValidator(resultStop, 1, 0, 1, TestUtility.BaseViewTestSegmentation(viewNames[0], false, false), "idv1", "idv1", null, null, TestUtility.TestTimeMetrics());
-            
+
             await Countly.Instance.Views.RecordCloseViewAsync(viewNames[1]);
             TestUtility.ValidateRQEQSize(cly, 4, 1);
             CountlyEventModel resultStop2 = cly.Events._eventRepo.Dequeue();
@@ -259,7 +259,8 @@ namespace Assets.Tests.PlayModeTests
             string viewId = cly.Views.StartView(viewNames[0]);
             TestUtility.ValidateRQEQSize(cly, 2, 1);
             CountlyEventModel result = cly.Events._eventRepo.Dequeue();
-            TestUtility.ViewEventValidator(result, 1, 0, null, TestUtility.BaseViewTestSegmentation(viewNames[0], true, true), viewId, "", null, null, TestUtility.TestTimeMetrics());            TestUtility.ValidateRQEQSize(cly, 2, 0);
+            TestUtility.ViewEventValidator(result, 1, 0, null, TestUtility.BaseViewTestSegmentation(viewNames[0], true, true), viewId, "", null, null, TestUtility.TestTimeMetrics());
+            TestUtility.ValidateRQEQSize(cly, 2, 0);
         }
 
         // 'StartView' method in ViewCountlyService class
@@ -958,8 +959,11 @@ namespace Assets.Tests.PlayModeTests
         // string, bool, float, double, string, long and, their list and arrays are supported types
         // Supported data types should be recorded, unsupported types should be removed correctly
         [Test]
-        public void ViewMethodsSegmentationDataTypes()
+        public void SegmentationDataTypeValidation()
         {
+            CountlyConfiguration config = TestUtility.CreateViewConfig(new CustomIdProvider());
+            Countly cly = Countly.Instance;
+
             Dictionary<string, object> seg = new Dictionary<string, object>
             {
                 { "Time", 1234455 },
@@ -981,10 +985,12 @@ namespace Assets.Tests.PlayModeTests
                 { "DoubleList", new List<double> { 1.1, 2.2, 3.3 } },
                 { "StringList", new List<string> { "a", "b", "c" } },
                 { "LongList", new List<long> { 10000000000L, 20000000000L, 30000000000L } },
+                { "MixedList", new List<object> { 1, "string", 2.3, true, new int[] { 1, 2, 3 }, new object(), Countly.Instance } }, // mixed list
+                { "MixedArray", new object[] { 1, "string", 2.3, true, new int[] { 1, 2, 3 }, new object(), Countly.Instance } }, // mixed array
                 { "Unsupported Object", new object() }, // invalid
                 { "Unsupported Dictionary", new Dictionary<string, object>() } // invalid
             };
-            
+
             Dictionary<string, object> expectedSegm = new Dictionary<string, object>
             {
                 { "Time", 1234455 },
@@ -1007,9 +1013,6 @@ namespace Assets.Tests.PlayModeTests
                 { "StringList", new List<string> { "a", "b", "c" } },
                 { "LongList", new List<long> { 10000000000L, 20000000000L, 30000000000L } }
             };
-
-            CountlyConfiguration config = TestUtility.CreateViewConfig(new CustomIdProvider());
-            Countly cly = Countly.Instance;
 
             cly.Init(config);
             IViewModule views = cly.Views;
@@ -1042,14 +1045,14 @@ namespace Assets.Tests.PlayModeTests
             TestUtility.ValidateRQEQSize(cly, 2, 1);
             CountlyEventModel view3 = cly.Events._eventRepo.Dequeue();
             TestUtility.ViewEventValidator(view3, 1, 0, null, TestUtility.BaseViewTestSegmentation(viewNames[1], false, false), viewId3, viewId2, null, null, TestUtility.TestTimeMetrics());
-            
+
             Thread.Sleep(1000);
             views.SetGlobalViewSegmentation(seg);
 
             views.StopViewWithID(viewId3);
             TestUtility.ValidateRQEQSize(cly, 2, 1);
             CountlyEventModel view3Stop = cly.Events._eventRepo.Dequeue();
-            TestUtility.ViewEventValidator(view3Stop, 1, 0, 1, expectedSegm, viewId3, viewId2, null, null, TestUtility.TestTimeMetrics());            
+            TestUtility.ViewEventValidator(view3Stop, 1, 0, 1, expectedSegm, viewId3, viewId2, null, null, TestUtility.TestTimeMetrics());
         }
 
         [SetUp]

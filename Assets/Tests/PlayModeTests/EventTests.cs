@@ -350,7 +350,7 @@ namespace Assets.Tests.PlayModeTests
         /// Supported data types should be recorded, unsupported types should be removed correctly
         /// </summary>
         [Test]
-        public async void TestSegmentItemsDataTypesValidation()
+        public async void SegmentationDataTypeValidation()
         {
             Countly.Instance.Init(TestUtility.CreateBaseConfig());
             Assert.IsNotNull(Countly.Instance.Events);
@@ -363,6 +363,8 @@ namespace Assets.Tests.PlayModeTests
                 { "key4", true},
                 { "key5", null}, // invalid
                 { "key6", Countly.Instance}, // invalid
+                { "MixedList", new List<object> { 1, "string", 2.3, true, new int[] { 1, 2, 3 }, new object(), Countly.Instance } }, // mixed list
+                { "MixedArray", new object[] { 1, "string", 2.3, true, new int[] { 1, 2, 3 }, new object(), Countly.Instance } }, // mixed array
                 { "IntArray", new int[] { 1, 2, 3 } },
                 { "BoolArray", new bool[] { true, false, true } },
                 { "FloatArray", new float[] { 1.1f, 2.2f, 3.3f } },

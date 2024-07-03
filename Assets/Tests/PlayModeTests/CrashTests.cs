@@ -274,7 +274,7 @@ namespace Assets.Tests.PlayModeTests
         // string, bool, float, double, string, long and, their list and arrays are supported types
         // Supported data types should be recorded, unsupported types should be removed correctly
         [Test]
-        public async void CrashSegmentationDataTypes()
+        public async void SegmentationDataTypeValidation()
         {
             Countly.Instance.Init(TestUtility.CreateBaseConfig());
             Countly cly = Countly.Instance;
@@ -300,6 +300,8 @@ namespace Assets.Tests.PlayModeTests
                 { "DoubleList", new List<double> { 1.1, 2.2, 3.3 } },
                 { "StringList", new List<string> { "a", "b", "c" } },
                 { "LongList", new List<long> { 10000000000L, 20000000000L, 30000000000L } },
+                { "MixedList", new List<object> { 1, "string", 2.3, true, new int[] { 1, 2, 3 }, new object(), Countly.Instance } }, // mixed list
+                { "MixedArray", new object[] { 1, "string", 2.3, true, new int[] { 1, 2, 3 }, new object(), Countly.Instance } }, // mixed array
                 { "Unsupported Object", new object() }, // invalid
                 { "Unsupported Dictionary", new Dictionary<string, object>() } // invalid
             };
