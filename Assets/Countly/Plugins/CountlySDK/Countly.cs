@@ -114,6 +114,7 @@ namespace Plugins.CountlySDK
         /// Exposes functionality to set and change custom user properties and interact with custom property modifiers.
         /// </summary>
         /// <returns>UserDetailsCountlyService</returns>
+        [Obsolete("UserDetailsCountlyService is deprecated and will be removed in the future. Please use UserProfile instead.")]
         public UserDetailsCountlyService UserDetails { get; private set; }
 
         /// <summary>
