@@ -50,7 +50,7 @@ namespace Plugins.CountlySDK.Services
 
                 if (!isValidDataType) {
                     toRemove.Add(item.Key);
-                    Log.Warning("[" + moduleName + "] RemoveSegmentInvalidDataTypes: In segmentation Data type '" + type + "' of item '" + item.Key + "' isn't valid.");
+                    Log.Warning("[" + moduleName + "] RemoveSegmentInvalidDataTypes: In provided segmentation, value: " + item.Value + " for key: " + item.Key + " is not an allowed data type. Will be removed.");
                 }
             }
 
