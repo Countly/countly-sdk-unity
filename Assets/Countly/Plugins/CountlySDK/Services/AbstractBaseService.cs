@@ -50,7 +50,7 @@ namespace Plugins.CountlySDK.Services
 
                 if (!isValidDataType) {
                     toRemove.Add(item.Key);
-                    Log.Warning("[" + moduleName + "] RemoveSegmentInvalidDataTypes: In provided segmentation, value: " + item.Value + " for key: " + item.Key + " is not an allowed data type. Will be removed.");
+                    Log.Warning("[" + moduleName + "][RemoveSegmentInvalidDataTypes]: In provided segmentation, value: " + item.Value + " for key: " + item.Key + " is not an allowed data type. Will be removed.");
                 }
             }
 
@@ -79,7 +79,7 @@ namespace Plugins.CountlySDK.Services
         protected string TrimKey(string k)
         {
             if (k.Length > _configuration.GetMaxKeyLength()) {
-                Log.Warning("[" + GetType().Name + "] TrimKey : Max allowed key length is " + _configuration.GetMaxKeyLength() + ". " + k + " will be truncated.");
+                Log.Warning("[" + GetType().Name + "][TrimKey] : Max allowed key length is " + _configuration.GetMaxKeyLength() + ". " + k + " will be truncated.");
                 k = k.Substring(0, _configuration.GetMaxKeyLength());
             }
 
@@ -90,7 +90,7 @@ namespace Plugins.CountlySDK.Services
         {
             for (int i = 0; i < values.Length; ++i) {
                 if (values[i].Length > _configuration.GetMaxValueSize()) {
-                    Log.Warning("[" + GetType().Name + "] TrimKey : Max allowed value length is " + _configuration.GetMaxKeyLength() + ". " + values[i] + " will be truncated.");
+                    Log.Warning("[" + GetType().Name + "][TrimValues] : Max allowed value length is " + _configuration.GetMaxKeyLength() + ". " + values[i] + " will be truncated.");
                     values[i] = values[i].Substring(0, _configuration.GetMaxValueSize());
                 }
             }
@@ -101,7 +101,7 @@ namespace Plugins.CountlySDK.Services
         protected string TrimValue(string fieldName, string v)
         {
             if (v != null && v.Length > _configuration.GetMaxValueSize()) {
-                Log.Warning("[" + GetType().Name + "] TrimValue : Max allowed '" + fieldName + "' length is " + _configuration.GetMaxValueSize() + ". " + v + " will be truncated.");
+                Log.Warning("[" + GetType().Name + "][TrimValue] : Max allowed '" + fieldName + "' length is " + _configuration.GetMaxValueSize() + ". " + v + " will be truncated.");
                 v = v.Substring(0, _configuration.GetMaxValueSize());
             }
 
@@ -120,11 +120,11 @@ namespace Plugins.CountlySDK.Services
                 object v = item.Value;
 
                 if (k == null || k.Length == 0) {
-                    Log.Warning($"[{GetType().Name}] FixSegmentKeysAndValues: Provided key is {(k == null ? "null" : "empty")}, will be skipped.");
+                    Log.Warning($"[{GetType().Name}][FixSegmentKeysAndValues]: Provided key is {(k == null ? "null" : "empty")}, will be skipped.");
                     continue;
                 }
                 if (v == null) {
-                    Log.Warning($"[{GetType().Name}] FixSegmentKeysAndValues: Provided value for '{k}' is null, will be skipped.");
+                    Log.Warning($"[{GetType().Name}][FixSegmentKeysAndValues]: Provided value for '{k}' is null, will be skipped.");
                     continue;
                 }
 
