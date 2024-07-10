@@ -46,7 +46,15 @@ namespace Plugins.CountlySDK.Services
         /// <summary>
         /// Add all recorded events to request queue
         /// </summary>
-        internal void AddEventsToRequestQueue()
+        internal void AddEventsToRequestQueue(){
+            AddEventsToRequestQueue(false);
+        }
+
+        /// <summary>
+        /// Add all recorded events to request queue
+        /// </summary>
+        /// <param name="forced">Set to true if adding directly to the queue</param>
+        internal void AddEventsToRequestQueue(bool forced)
         {
             Log.Debug("[EventCountlyService] AddEventsToRequestQueue: Start");
 
@@ -72,7 +80,11 @@ namespace Plugins.CountlySDK.Services
                     }
                 };
 
-            _requestCountlyHelper.AddToRequestQueue(requestParams);
+            if (forced) {
+                _requestCountlyHelper.AddRequestDirectlyToQueue(requestParams);
+            } else {
+                _requestCountlyHelper.AddToRequestQueue(requestParams);
+            }
 
             Log.Debug("[EventCountlyService] AddEventsToRequestQueue: Remove events from event queue, count: " + count);
             for (int i = 0; i < count; ++i) {
@@ -167,7 +179,7 @@ namespace Plugins.CountlySDK.Services
             _eventRepo.Enqueue(@event);
 
             if (_eventRepo.Count >= _configuration.EventQueueThreshold) {
-                AddEventsToRequestQueue();
+                AddEventsToRequestQueue(false);
                 await _requestCountlyHelper.ProcessQueue();
             }
         }
