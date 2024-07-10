@@ -5,6 +5,8 @@ using UnityEngine.TestTools;
 using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK;
 using Plugins.CountlySDK.Enums;
+using Newtonsoft.Json.Linq;
+using System;
 
 namespace Assets.Tests.PlayModeTests
 {
@@ -13,8 +15,8 @@ namespace Assets.Tests.PlayModeTests
         private void AssertAnEvent(CountlyEventModel model, string name, double? sum, double count, double? duration, IDictionary<string, object> segmentation)
         {
             Assert.AreEqual(name, model.Key);
-            Assert.AreEqual(model.Sum, sum);
-            Assert.AreEqual(model.Count, count);
+            Assert.AreEqual(sum, model.Sum);
+            Assert.AreEqual(count, model.Count);
 
             if (duration != null) {
                 Assert.IsTrue(duration <= model.Duration);
@@ -23,14 +25,34 @@ namespace Assets.Tests.PlayModeTests
             }
 
             if (segmentation != null) {
-                foreach (KeyValuePair<string, object> entry in model.Segmentation) {
-                    Assert.AreEqual(segmentation[entry.Key], entry.Value);
-                }
-
                 Assert.AreEqual(segmentation.Count, model.Segmentation.Count);
 
-            } else {
-                Assert.IsNull(model.Segmentation);
+                foreach (KeyValuePair<string, object> entry in segmentation) {
+                    string key = entry.Key;
+                    object expectedValue = entry.Value;
+
+                    // Check if key exists in model.Segmentation
+                    Assert.IsTrue(model.Segmentation.ContainsKey(key), $"Key '{key}' not found in segmentation");
+
+                    // Get actual value from model.Segmentation
+                    object actualValue = model.Segmentation[key];
+
+                    // Compare expected and actual values
+                    if (expectedValue is Array || expectedValue is IList) {
+                        // Convert expected value to JArray for comparison
+                        JArray expectedArray = JArray.FromObject(expectedValue);
+                        JArray actualArray = JArray.FromObject(actualValue);
+
+                        Assert.AreEqual(expectedArray.Count, actualArray.Count, $"Mismatch in array/list size for key '{key}'");
+
+                        for (int i = 0; i < expectedArray.Count; i++) {
+                            Assert.AreEqual(expectedArray[i].ToString(), actualArray[i].ToString(), $"Mismatch in array/list element at index {i} for key '{key}'");
+                        }
+                    } else {
+                        // Compare single values as strings
+                        Assert.AreEqual(expectedValue.ToString(), actualValue.ToString(), $"Mismatch for key '{key}'");
+                    }
+                }
             }
         }
 
@@ -323,9 +345,12 @@ namespace Assets.Tests.PlayModeTests
 
         /// <summary>
         /// It validates the data type of segment items.
+        /// We provide segmentation with crash and check every supported data type
+        /// string, bool, float, double, string, long and, their list and arrays are supported types
+        /// Supported data types should be recorded, unsupported types should be removed correctly
         /// </summary>
         [Test]
-        public async void TestSegmentItemsDataTypesValidation()
+        public async void SegmentationDataTypeValidation()
         {
             Countly.Instance.Init(TestUtility.CreateBaseConfig());
             Assert.IsNotNull(Countly.Instance.Events);
@@ -336,22 +361,48 @@ namespace Assets.Tests.PlayModeTests
                 { "key2", 1},
                 { "key3", 10.0},
                 { "key4", true},
-                { "key5", null},// invalid
-                { "key6", Countly.Instance} // invalid
+                { "key5", null}, // invalid
+                { "key6", Countly.Instance}, // invalid
+                { "MixedList", new List<object> { 1, "string", 2.3, true, new int[] { 1, 2, 3 }, new object(), Countly.Instance } }, // mixed list
+                { "MixedArray", new object[] { 1, "string", 2.3, true, new int[] { 1, 2, 3 }, new object(), Countly.Instance } }, // mixed array
+                { "IntArray", new int[] { 1, 2, 3 } },
+                { "BoolArray", new bool[] { true, false, true } },
+                { "FloatArray", new float[] { 1.1f, 2.2f, 3.3f } },
+                { "DoubleArray", new double[] { 1.1, 2.2, 3.3 } },
+                { "StringArray", new string[] { "a", "b", "c" } },
+                { "LongArray", new long[] { 10000000000L, 20000000000L, 30000000000L } },
+                { "IntList", new List<int> { 1, 2, 3 } },
+                { "BoolList", new List<bool> { true, false, true } },
+                { "FloatList", new List<float> { 1.1f, 2.2f, 3.3f } },
+                { "DoubleList", new List<double> { 1.1, 2.2, 3.3 } },
+                { "StringList", new List<string> { "a", "b", "c" } },
+                { "LongList", new List<long> { 10000000000L, 20000000000L, 30000000000L } }
             };
 
             await Countly.Instance.Events.RecordEventAsync("test_event", segmentation: segments, sum: 23, duration: 5);
 
             CountlyEventModel model = Countly.Instance.Events._eventRepo.Dequeue();
 
-            Dictionary<string, object> requireSegments = new Dictionary<string, object>{
+            Dictionary<string, object> expectedSegm = new Dictionary<string, object>{
                 { "key1", "value1"},
                 { "key2", 1},
                 { "key3", 10.0},
                 { "key4", true},
+                { "IntArray", new int[] { 1, 2, 3 } },
+                { "BoolArray", new bool[] { true, false, true } },
+                { "FloatArray", new float[] { 1.1f, 2.2f, 3.3f } },
+                { "DoubleArray", new double[] { 1.1, 2.2, 3.3 } },
+                { "StringArray", new string[] { "a", "b", "c" } },
+                { "LongArray", new long[] { 10000000000L, 20000000000L, 30000000000L } },
+                { "IntList", new List<int> { 1, 2, 3 } },
+                { "BoolList", new List<bool> { true, false, true } },
+                { "FloatList", new List<float> { 1.1f, 2.2f, 3.3f } },
+                { "DoubleList", new List<double> { 1.1, 2.2, 3.3 } },
+                { "StringList", new List<string> { "a", "b", "c" } },
+                { "LongList", new List<long> { 10000000000L, 20000000000L, 30000000000L } }
             };
 
-            AssertAnEvent(model, "test_event", 23, 1, 5, requireSegments);
+            AssertAnEvent(model, "test_event", 23, 1, 5, expectedSegm);
         }
 
         /// <summary>
