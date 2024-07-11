@@ -37,7 +37,6 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
     private readonly CountlyConfiguration config;
     private readonly CountlyUtils utils;
     internal readonly RequestCountlyHelper requestHelper;
-
     internal UserProfile(Countly countly, CountlyConfiguration configuration, CountlyLogHelper logHelper, RequestCountlyHelper requestCountlyHelper, CountlyUtils countlyUtils, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
     {
         Log.Debug("[UserProfile] Initializing.");
@@ -524,6 +523,16 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
         }
 
         return true;
+    }
+    #endregion
+    #region Override Methods
+    internal override void OnInitializationCompleted()
+    {
+        if(config.GetUserProperties() != null){
+            Log.Info("[UserProfile] User properties set during the initialization. Provided property amount: " + config.GetUserProperties().Count());
+            SetPropertiesInternal(config.GetUserProperties());
+            SaveInternal();
+        }   
     }
     #endregion
 }

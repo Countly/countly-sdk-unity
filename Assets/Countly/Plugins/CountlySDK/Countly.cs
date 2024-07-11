@@ -98,6 +98,11 @@ namespace Plugins.CountlySDK
         public IViewModule Views { get; private set; }
 
         /// <summary>
+        /// Exposes functionality to set and change custom user properties and interact with custom property modifiers.
+        /// </summary>
+        public IUserProfileModule UserProfile { get; private set; }
+
+        /// <summary>
         /// Add callbacks to listen to push notification events for when a notification is received and when it is clicked.
         /// </summary>
         /// <returns>NotificationsCallbackService</returns>
@@ -316,6 +321,7 @@ namespace Plugins.CountlySDK
             RemoteConfigs = new RemoteConfigCountlyService(Configuration, _logHelper, RequestHelper, countlyUtils, configDao, Consents, requestBuilder);
             StarRating = new StarRatingCountlyService(Configuration, _logHelper, Consents, Events);
             UserDetails = new UserDetailsCountlyService(Configuration, _logHelper, RequestHelper, countlyUtils, Consents);
+            UserProfile = new UserProfile(this, Configuration, _logHelper, RequestHelper, countlyUtils, Consents);
             Views = new ViewCountlyService(this, countlyUtils, Configuration, _logHelper, Events, Consents);
             Device = new DeviceIdCountlyService(Configuration, _logHelper, Session, RequestHelper, Events, countlyUtils, Consents);
 
@@ -347,6 +353,7 @@ namespace Plugins.CountlySDK
             _listeners.Add(Consents);
             _listeners.Add(StarRating);
             _listeners.Add(UserDetails);
+            _listeners.Add((UserProfile)UserProfile);
             _listeners.Add(CrashReports);
             _listeners.Add(RemoteConfigs);
             _listeners.Add(Initialization);

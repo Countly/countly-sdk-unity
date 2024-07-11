@@ -150,6 +150,7 @@ namespace Plugins.CountlySDK.Models
         internal List<INotificationListener> NotificationEventListeners;
         internal Dictionary<string, Consents[]> ConsentGroups { get; private set; }
         internal Dictionary<string, string> overridenMetrics;
+        private Dictionary<string, object> providedUserProperties = null;
         internal MetricHelper metricHelper;
 
         /// <summary>
@@ -456,8 +457,17 @@ namespace Plugins.CountlySDK.Models
 
             return this;
         }
-        #endregion
 
+        /// <summary>
+        /// Sets user properties that would be sent as soon as possible
+        /// </summary>
+        /// <returns>Modified instance of the CountlyConfiguration</returns>
+        public CountlyConfiguration SetUserProperties(Dictionary<string, object> userProperties)
+        {
+            providedUserProperties = userProperties;
+            return this;
+        }
+        #endregion
         #region Getters
 
         /// <summary>
@@ -549,6 +559,12 @@ namespace Plugins.CountlySDK.Models
         /// Returns true if consent is required.
         /// </summary>
         public bool IsConsentRequired() { return RequiresConsent; }
+
+        /// <summary>
+        /// Returns provided user properties set.
+        /// </summary>
+        /// <returns></returns>
+        public Dictionary<string, object> GetUserProperties() { return providedUserProperties; }
         #endregion
     }
 }
