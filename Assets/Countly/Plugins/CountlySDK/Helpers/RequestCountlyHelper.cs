@@ -129,22 +129,6 @@ namespace Plugins.CountlySDK.Helpers
             AddRequestToQueue(requestModel);
         }
 
-        /// <summary>
-        /// Internal function to add everything in the repo to the queue
-        /// </summary>
-        internal void AddRequestDirectlyToQueue(Dictionary<string, object> queryParams)
-        {
-            Log.Verbose("[RequestCountlyHelper] FlushAndSendRequest: Flushing the queue and sending new request.");
-            CountlyRequestModel request = _requestBuilder.BuildRequest(_countlyUtils.GetBaseParams(), queryParams);
-            _requestRepo.Enqueue(request);
-
-            // Send all requests currently in the queue
-            while (_requestRepo.Count > 0)
-            {
-                _requestRepo.Dequeue();
-            }
-        }
-
         private string AddChecksum(string query)
         {
             if (!string.IsNullOrEmpty(_config.GetParameterTamperingProtectionSalt())) {

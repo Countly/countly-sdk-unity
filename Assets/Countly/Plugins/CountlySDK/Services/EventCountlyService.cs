@@ -12,18 +12,13 @@ namespace Plugins.CountlySDK.Services
     public class EventCountlyService : AbstractBaseService
     {
         private bool isQueueBeingProcessed = false;
+        string previousEventID = "";
         internal readonly NonViewEventRepository _eventRepo;
+        internal readonly IDictionary<string, DateTime> _timedEvents;
+        internal ISafeIDGenerator safeEventIDGenerator;
+        internal IViewIDProvider viewIDProvider;
         private readonly RequestCountlyHelper _requestCountlyHelper;
         private readonly CountlyUtils _utils;
-
-        internal readonly IDictionary<string, DateTime> _timedEvents;
-
-        internal ISafeIDGenerator safeEventIDGenerator;
-
-        internal IViewIDProvider viewIDProvider;
-
-        string previousEventID = "";
-
         internal EventCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, RequestCountlyHelper requestCountlyHelper, NonViewEventRepository nonViewEventRepo, ConsentCountlyService consentService, CountlyUtils utils) : base(configuration, logHelper, consentService)
         {
             Log.Debug("[EventCountlyService] Initializing.");
@@ -46,15 +41,7 @@ namespace Plugins.CountlySDK.Services
         /// <summary>
         /// Add all recorded events to request queue
         /// </summary>
-        internal void AddEventsToRequestQueue(){
-            AddEventsToRequestQueue(false);
-        }
-
-        /// <summary>
-        /// Add all recorded events to request queue
-        /// </summary>
-        /// <param name="forced">Set to true if adding directly to the queue</param>
-        internal void AddEventsToRequestQueue(bool forced)
+        internal void AddEventsToRequestQueue()
         {
             Log.Debug("[EventCountlyService] AddEventsToRequestQueue: Start");
 
@@ -80,11 +67,7 @@ namespace Plugins.CountlySDK.Services
                     }
                 };
 
-            if (forced) {
-                _requestCountlyHelper.AddRequestDirectlyToQueue(requestParams);
-            } else {
-                _requestCountlyHelper.AddToRequestQueue(requestParams);
-            }
+            _requestCountlyHelper.AddToRequestQueue(requestParams);
 
             Log.Debug("[EventCountlyService] AddEventsToRequestQueue: Remove events from event queue, count: " + count);
             for (int i = 0; i < count; ++i) {
@@ -147,6 +130,9 @@ namespace Plugins.CountlySDK.Services
             IDictionary<string, object> segments = RemoveSegmentInvalidDataTypes(segmentation);
             segments = FixSegmentKeysAndValues(segments);
 
+            //before each event is recorded, check if user profile data needs to be saved
+            Countly.Instance.UserProfile.Save();
+
             if (key == CountlyEventModel.NPSEvent ||
                 key == CountlyEventModel.SurveyEvent ||
                 key == CountlyEventModel.StarRatingEvent ||
@@ -179,7 +165,7 @@ namespace Plugins.CountlySDK.Services
             _eventRepo.Enqueue(@event);
 
             if (_eventRepo.Count >= _configuration.EventQueueThreshold) {
-                AddEventsToRequestQueue(false);
+                AddEventsToRequestQueue();
                 await _requestCountlyHelper.ProcessQueue();
             }
         }

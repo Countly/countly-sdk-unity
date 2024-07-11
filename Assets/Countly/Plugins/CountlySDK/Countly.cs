@@ -321,7 +321,7 @@ namespace Plugins.CountlySDK
             RemoteConfigs = new RemoteConfigCountlyService(Configuration, _logHelper, RequestHelper, countlyUtils, configDao, Consents, requestBuilder);
             StarRating = new StarRatingCountlyService(Configuration, _logHelper, Consents, Events);
             UserDetails = new UserDetailsCountlyService(Configuration, _logHelper, RequestHelper, countlyUtils, Consents);
-            UserProfile = new UserProfile(this, Configuration, _logHelper, RequestHelper, countlyUtils, Consents);
+            UserProfile = new UserProfile(this, Configuration, _logHelper, RequestHelper, countlyUtils, Consents, Events);
             Views = new ViewCountlyService(this, countlyUtils, Configuration, _logHelper, Events, Consents);
             Device = new DeviceIdCountlyService(Configuration, _logHelper, Session, RequestHelper, Events, countlyUtils, Consents);
 

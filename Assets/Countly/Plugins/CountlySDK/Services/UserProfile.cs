@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Plugins.CountlySDK;
@@ -32,12 +33,14 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
     readonly string[] NamedFields = { NAME_KEY, USERNAME_KEY, EMAIL_KEY, ORG_KEY, PHONE_KEY, PICTURE_KEY, GENDER_KEY, BYEAR_KEY };
     #endregion
 
-    internal Dictionary<string, object> CustomDataProperties { get; private set; }
+    internal Dictionary<string, object> CustomDataProperties = new Dictionary<string, object>();
+    internal Dictionary<string, JObject> CustomMods = new Dictionary<string, JObject>();
     private readonly Countly cly;
     private readonly CountlyConfiguration config;
     private readonly CountlyUtils utils;
     internal readonly RequestCountlyHelper requestHelper;
-    internal UserProfile(Countly countly, CountlyConfiguration configuration, CountlyLogHelper logHelper, RequestCountlyHelper requestCountlyHelper, CountlyUtils countlyUtils, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
+    internal readonly EventCountlyService eventService;
+    internal UserProfile(Countly countly, CountlyConfiguration configuration, CountlyLogHelper logHelper, RequestCountlyHelper requestCountlyHelper, CountlyUtils countlyUtils, ConsentCountlyService consentService, EventCountlyService events) : base(configuration, logHelper, consentService)
     {
         Log.Debug("[UserProfile] Initializing.");
 
@@ -45,7 +48,7 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
         config = configuration;
         utils = countlyUtils;
         requestHelper = requestCountlyHelper;
-        CustomDataProperties = new Dictionary<string, object>();
+        eventService = events;
     }
 
     #region PublicAPI
@@ -109,9 +112,9 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
     /// </summary>
     /// <param name="key">string with property name for array property</param>
     /// <param name="value">string with value to remove from array</param>
-    public void Pull(string key, string[] value)
+    public void Pull(string key, string value)
     {
-        Log.Info("[UserProfile] Calling Pull with key: " + key + " and value: " + value.ToString());
+        Log.Info("[UserProfile] Calling Pull with key: " + key + " and value: " + value);
         PullInternal(key, value);
     }
 
@@ -121,9 +124,9 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
     /// </summary>
     /// <param name="key">string with property name for array property</param>
     /// <param name="value">string with value to add to array</param>
-    public void Push(string key, string[] value)
+    public void Push(string key, string value)
     {
-        Log.Info("[UserProfile] Calling Push with key: " + key + " and value: " + value.ToString());
+        Log.Info("[UserProfile] Calling Push with key: " + key + " and value: " + value);
         PushInternal(key, value);
     }
 
@@ -133,9 +136,9 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
     /// </summary>
     /// <param name="key">string with property name for array property</param>
     /// <param name="value">string with value to add to array</param>
-    public void PushUnique(string key, string[] value)
+    public void PushUnique(string key, string value)
     {
-        Log.Info("[UserProfile] Calling PushUnique with key: " + key + " and value: " + value.ToString());
+        Log.Info("[UserProfile] Calling PushUnique with key: " + key + " and value: " + value);
         PushUniqueInternal(key, value);
     }
 
@@ -187,7 +190,7 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
     /// <param name="value">value for the user property to be set. The value should be the allowed data type.</param>
     public void SetProperty(string key, object value)
     {
-        Log.Info("[UserProfile] Calling SetProperty with key: " + key + " and value: " + value);
+        Log.Info("[UserProfile] Calling SetProperty with key:[" + key + "]" + " and value:[" + value + "]");
         SetPropertyInternal(key, value);
     }
     #endregion
@@ -199,7 +202,7 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
         }
 
         Log.Info("[UserProfile] IncrementInternal, key:[" + key + "]" + " value:[" + value + "]");
-        AddToCustomData(key, new Dictionary<string, object> { { "$inc", value } });
+        ModifyCustomData(key, value, "$inc");
     }
 
     private void MaxInternal(string key, double value)
@@ -209,7 +212,7 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
         }
 
         Log.Info("[UserProfile] MaxInternal, key:[" + key + "]" + " value:[" + value + "]");
-        AddToCustomData(key, new Dictionary<string, object> { { "$max", value } });
+        ModifyCustomData(key, value, "$max");
     }
 
     private void MinInternal(string key, double value)
@@ -219,7 +222,7 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
         }
 
         Log.Info("[UserProfile] MinInternal, key:[" + key + "]" + " value:[" + value + "]");
-        AddToCustomData(key, new Dictionary<string, object> { { "$min", value } });
+        ModifyCustomData(key, value, "$min");
     }
 
     private void MultiplyInternal(string key, double value)
@@ -229,38 +232,37 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
         }
 
         Log.Info("[UserProfile] MultiplyInternal, key:[" + key + "]" + " value:[" + value + "]");
-        AddToCustomData(key, new Dictionary<string, object> { { "$mul", value } });
+        ModifyCustomData(key, value, "$mul");
     }
 
-    private void PullInternal(string key, string[] value)
+    private void PullInternal(string key, string value)
     {
         if (!ValidateConsentAndKey(key, "PullInternal")) {
             return;
         }
 
         Log.Info("[UserProfile] PullInternal, key:[" + key + "]" + " value:[" + value + "]");
-        value = TrimValues(value);
-        AddToCustomData(key, new Dictionary<string, object> { { "$pull", value } });
+        ModifyCustomData(key, value, "$pull");
     }
 
-    private void PushInternal(string key, string[] value)
+    private void PushInternal(string key, string value)
     {
         if (!ValidateConsentAndKey(key, "PushInternal")) {
             return;
         }
 
-        Log.Info("[UserProfile] PushInternal, key:[" + key + "]" + " value:[" + string.Join(", ", value) + "]");
-        AddToCustomData(key, new Dictionary<string, object> { { "$push", TrimValues(value) } });
+        Log.Info("[UserProfile] PushInternal, key:[" + key + "]" + " value:[" + value + "]");
+        ModifyCustomData(key, value, "$push");
     }
 
-    private void PushUniqueInternal(string key, string[] value)
+    private void PushUniqueInternal(string key, string value)
     {
         if (!ValidateConsentAndKey(key)) {
             return;
         }
 
-        Log.Info("[UserProfile] PushUniqueInternal, key:[" + key + "]" + " value:[" + string.Join(", ", value) + "]");
-        AddToCustomData(key, new Dictionary<string, object> { { "$addToSet", TrimValues(value) } });
+        Log.Info("[UserProfile] PushUniqueInternal, key:[" + key + "]" + " value:[" + value + "]");
+        ModifyCustomData(key, value, "$addToSet");
     }
 
     private void SaveInternal()
@@ -269,17 +271,34 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
             Log.Debug("[UserProfile] SaveInternal, consent is not given, ignoring the request.");
             return;
         }
-        string cachedUserData = GetDataForRequest();
-        if (utils.IsNullEmptyOrWhitespace(cachedUserData)) {
+
+        Dictionary<string, object> cachedUserData = GetDataForRequest();
+
+        if (cachedUserData.Count <= 0) {
             Log.Debug("[UserProfile] SaveInternal, no user data to save");
             return;
         }
-        
-        Dictionary<string, object> requestParams = Converter.ConvertJsonToDictionary(cachedUserData, Log);
-        cly.Events.AddEventsToRequestQueue(true);
-        requestHelper.AddRequestDirectlyToQueue(requestParams);
+
+        // Serialize the dictionary to a JSON string
+        string jsonData;
+        try {
+            jsonData = JsonConvert.SerializeObject(cachedUserData);
+        } catch (JsonException ex) {
+            Log.Error($"[UserProfile] SaveInternal, failed to serialize cached user data: {ex.Message}");
+            return;
+        }
+
+        // Create a new dictionary to hold the modified data
+        var modifiedData = new Dictionary<string, object>(cachedUserData) {
+            { "user_details", jsonData }
+        };
+
+        cly.Events.AddEventsToRequestQueue();
+        requestHelper.AddToRequestQueue(modifiedData);
+
         _ = requestHelper.ProcessQueue();
         ClearInternal();
+        Log.Warning("[UserProfile] SaveInternal, exit");
     }
 
     private void SetDataInternal(Dictionary<string, object> userData)
@@ -332,7 +351,9 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
 
         if (userData.TryGetValue(CUSTOM_KEY, out object custom) && custom is Dictionary<string, object>) {
             Dictionary<string, object> customDictionary = (Dictionary<string, object>)FixSegmentKeysAndValues((IDictionary<string, object>)custom);
-            utils.CopyDictionaryToDestination(CustomDataProperties, customDictionary, Log);
+            foreach (KeyValuePair<string, object> item in customDictionary) {
+                CustomDataProperties.Add(item.Key, item.Value);
+            }
         }
     }
 
@@ -361,12 +382,18 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
         }
 
         // set user data
-        FixSegmentKeysAndValues(namedFields);
-        SetDataInternal(namedFields);
+        if (namedFields.Count > 0) {
+            FixSegmentKeysAndValues(namedFields);
+            SetDataInternal(namedFields);
+        }
 
         // set custom data
-        FixSegmentKeysAndValues(customFields);
-        utils.CopyDictionaryToDestination(CustomDataProperties, customFields, Log);
+        if (customFields.Count > 0) {
+            FixSegmentKeysAndValues(customFields);
+            foreach (KeyValuePair<string, object> item in customFields) {
+                CustomDataProperties[item.Key] = item.Value;
+            }
+        }
     }
 
     private void SetPropertyInternal(string key, object value)
@@ -375,9 +402,8 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
             return;
         }
 
-        Dictionary<string, object> data = new Dictionary<string, object>();
-        data.Add(key, value);
-
+        Dictionary<string, object> data = new Dictionary<string, object>() { { key, value } };
+        Log.Info("[UserProfile][SetPropertyInternal], key:[" + key + "]" + " value:[" + value + "]");
         SetPropertiesInternal(data);
     }
 
@@ -388,28 +414,49 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
         }
 
         Log.Info("[UserProfile] SetOnceInternal, key:[" + key + "]" + " value:[" + value + "]");
-        AddToCustomData(key, new Dictionary<string, object> { { "$setOnce", TrimValue(key, value) } });
+        ModifyCustomData(key, value, "$setOnce");
     }
     #endregion
     #region Helper Methods
-    private void AddToCustomData(string key, object value)
+    void ModifyCustomData(string key, object value, string mod)
     {
-        Log.Debug("[UserProfile] AddToCustomData, key:[" + key + "]" + " value:[" + value + "]");
-
-        if (!ValidateConsentAndKey(key, "AddToCustomData")) {
-            return;
-        }
-
-        key = TrimKey(key);
-
-        if (CustomDataProperties.ContainsKey(key)) {
-            string item = CustomDataProperties.Select(x => x.Key).FirstOrDefault(x => x.Equals(key, StringComparison.OrdinalIgnoreCase));
-            if (item != null) {
-                CustomDataProperties.Remove(item);
+        try {
+            if (!(value is double || value is int || value is string)) {
+                Console.WriteLine("[UserProfile][ModifyCustomData], provided an unsupported type for 'value'");
+                return;
             }
-        }
 
-        CustomDataProperties.Add(key, value);
+            object truncatedValue;
+            string truncatedKey = TrimKey(key);
+
+            if (value is string stringValue) {
+                truncatedValue = TrimValue(truncatedKey, stringValue);
+            } else {
+                truncatedValue = value;
+            }
+
+            CustomMods ??= new Dictionary<string, JObject>();
+
+            JObject ob;
+            if (mod != "$pull" && mod != "$push" && mod != "$addToSet") {
+                ob = new JObject { [mod] = JToken.FromObject(truncatedValue) };
+            } else {
+                if (CustomMods.ContainsKey(truncatedKey)) {
+                    ob = CustomMods[truncatedKey];
+                } else {
+                    ob = new JObject();
+                }
+
+                if (ob[mod] is JArray existingArray) {
+                    existingArray.Add(JToken.FromObject(truncatedValue));
+                } else {
+                    ob[mod] = new JArray(truncatedValue);
+                }
+            }
+            CustomMods[truncatedKey] = ob;
+        } catch (Exception e) {
+            Log.Error($"[UserProfile][ModifyCustomData], an exception occured during modifying the custom data. Exception: {e}");
+        }
     }
 
     private void ClearInternal()
@@ -425,6 +472,7 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
         Gender = null;
         BirthYear = 0;
         CustomDataProperties = new Dictionary<string, object>();
+        CustomMods = new Dictionary<string, JObject>();
     }
 
     private string ConvertToJSON()
@@ -432,46 +480,60 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
         JObject json = new JObject();
 
         try {
-            if (utils.IsNullEmptyOrWhitespace(Name)) {
-                json.Add(NAME_KEY, null);
-            } else {
-                json.Add(NAME_KEY, Name);
+            if (Name != null) {
+                if (Name == "") {
+                    json.Add(NAME_KEY, null);
+                } else {
+                    json.Add(NAME_KEY, Name);
+                }
             }
 
-            if (utils.IsNullEmptyOrWhitespace(Username)) {
-                json.Add(USERNAME_KEY, null);
-            } else {
-                json.Add(USERNAME_KEY, Username);
+            if (Username != null) {
+                if (Username == "") {
+                    json.Add(USERNAME_KEY, null);
+                } else {
+                    json.Add(USERNAME_KEY, Username);
+                }
             }
 
-            if (utils.IsNullEmptyOrWhitespace(Email)) {
-                json.Add(EMAIL_KEY, null);
-            } else {
-                json.Add(EMAIL_KEY, Email);
+            if (Email != null) {
+                if (Email == "") {
+                    json.Add(EMAIL_KEY, null);
+                } else {
+                    json.Add(EMAIL_KEY, Email);
+                }
             }
 
-            if (utils.IsNullEmptyOrWhitespace(Organization)) {
-                json.Add(ORG_KEY, null);
-            } else {
-                json.Add(ORG_KEY, Organization);
+            if (Organization != null) {
+                if (Organization == "") {
+                    json.Add(ORG_KEY, null);
+                } else {
+                    json.Add(ORG_KEY, Organization);
+                }
             }
 
-            if (utils.IsNullEmptyOrWhitespace(Phone)) {
-                json.Add(PHONE_KEY, null);
-            } else {
-                json.Add(PHONE_KEY, Phone);
+            if (Phone != null) {
+                if (Phone == "") {
+                    json.Add(PHONE_KEY, null);
+                } else {
+                    json.Add(PHONE_KEY, Phone);
+                }
             }
 
-            if (utils.IsNullEmptyOrWhitespace(PictureUrl) || !utils.IsPictureValid(PictureUrl)) {
-                json.Add(PICTURE_KEY, null);
-            } else {
-                json.Add(PICTURE_KEY, PictureUrl);
+            if (PictureUrl != null) {
+                if (PictureUrl == "") {
+                    json.Add(PICTURE_KEY, null);
+                } else if (utils.IsPictureValid(PictureUrl)) {
+                    json.Add(PICTURE_KEY, PictureUrl);
+                }
             }
 
-            if (utils.IsNullEmptyOrWhitespace(Gender)) {
-                json.Add(GENDER_KEY, null);
-            } else {
-                json.Add(GENDER_KEY, Gender);
+            if (Gender != null) {
+                if (Gender == "") {
+                    json.Add(GENDER_KEY, null);
+                } else {
+                    json.Add(GENDER_KEY, Gender);
+                }
             }
 
             if (BirthYear != 0) {
@@ -482,32 +544,48 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
                 }
             }
 
-            JObject ob;
-            if (CustomDataProperties != null) {
+            JObject ob = null;
+
+            if (CustomDataProperties.Count > 0) {
                 utils.TruncateSegmentationValues(CustomDataProperties, config.GetMaxSegmentationValues(), "[UserProfile][ConvertToJSON]", Log);
                 ob = JObject.FromObject(CustomDataProperties);
-            } else {
-                ob = new JObject();
             }
 
-            json.Add(CUSTOM_KEY, ob);
+            if (CustomMods.Count > 0) {
+                foreach (KeyValuePair<string, JObject> entry in CustomMods) {
+                    ob[entry.Key] = entry.Value;
+                }
+            }
+
+            if (ob != null) {
+                json.Add(CUSTOM_KEY, ob);
+            }
 
         } catch (JsonException e) {
             Log.Warning($"[UserProfile] Got exception converting an UserData to JSON. Exception:{e}");
         }
 
-        return json.ToString();
+        if (json.Count > 0) {
+            Log.Warning("Returning Json:" + json.ToString());
+            return json.ToString();
+        } else {
+            return null;
+        }
     }
 
-    private string GetDataForRequest()
+    private Dictionary<string, object> GetDataForRequest()
     {
         string json = ConvertToJSON();
-        if (utils.IsNullEmptyOrWhitespace(json)) {
-            json += "&user_details=" + json;
-        } else {
-            json = "";
+        if (json != null) {
+            try {
+                Dictionary<string, object> data = JsonConvert.DeserializeObject<Dictionary<string, object>>(json);
+                return data;
+            } catch (JsonException ex) {
+                Log.Error($"[UserProfile] SaveInternal, failed to deserialize cached user data: {ex.Message}");
+                return new Dictionary<string, object>();
+            }
         }
-        return json;
+        return new Dictionary<string, object>();
     }
 
     private bool ValidateConsentAndKey(string key, string caller = null)
@@ -528,11 +606,11 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
     #region Override Methods
     internal override void OnInitializationCompleted()
     {
-        if(config.GetUserProperties() != null){
+        if (config.GetUserProperties() != null) {
             Log.Info("[UserProfile] User properties set during the initialization. Provided property amount: " + config.GetUserProperties().Count());
             SetPropertiesInternal(config.GetUserProperties());
             SaveInternal();
-        }   
+        }
     }
     #endregion
 }

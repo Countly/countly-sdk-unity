@@ -150,7 +150,7 @@ namespace Plugins.CountlySDK.Models
         internal List<INotificationListener> NotificationEventListeners;
         internal Dictionary<string, Consents[]> ConsentGroups { get; private set; }
         internal Dictionary<string, string> overridenMetrics;
-        private Dictionary<string, object> providedUserProperties = null;
+        private Dictionary<string, object> providedUserProperties;
         internal MetricHelper metricHelper;
 
         /// <summary>

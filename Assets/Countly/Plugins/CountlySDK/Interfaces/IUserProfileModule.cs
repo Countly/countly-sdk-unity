@@ -9,9 +9,9 @@ public interface IUserProfileModule
     public void Max(string key, double value);
     public void Min(string key, double value);
     public void Multiply(string key, double value);
-    public void Pull(string key, string[] value);
-    public void Push(string key, string[] value);
-    public void PushUnique(string key, string[] value);
+    public void Pull(string key, string value);
+    public void Push(string key, string value);
+    public void PushUnique(string key, string value);
     public void Save();
     public void SetOnce(string key, string value);
     public void SetData(Dictionary<string, object> userData);
