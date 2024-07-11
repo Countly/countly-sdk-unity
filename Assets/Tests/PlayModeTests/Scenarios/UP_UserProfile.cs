@@ -98,12 +98,14 @@ namespace Assets.Tests.PlayModeTests.Scenarios
             TestUtility.ValidateRQEQSize(Countly.Instance, 2, 0);
         }
 
+        // RecordEventAsync with UserProfile changes
+        // We record events without consent requirement, between events we record user profile data
+        // With each event, if user data information is recorded, it should flush EQ and send user profile data
         [Test]
         public void UP_203_CNR_A_Events()
         {
             CountlyConfiguration config = TestUtility.CreateBaseConfig()
-                .SetRequiresConsent(false)
-                .EnableLogging();
+                .SetRequiresConsent(false);
             Countly.Instance.Init(config);
             TestUtility.ValidateRQEQSize(Countly.Instance, 1, 0);
 
@@ -119,6 +121,52 @@ namespace Assets.Tests.PlayModeTests.Scenarios
             TestUtility.ValidateRQEQSize(Countly.Instance, 7, 1);
         }
 
+        // RecordEventAsync with UserProfile changes
+        // We record events with consent requirement, between events we record user profile data
+        // With each event, if user data information is recorded, it should flush EQ and send user profile data
+        [Test]
+        public void UP_205_CR_CG_A()
+        {
+            Consents[] consent = new Consents[] { Consents.Crashes, Consents.Events, Consents.Clicks, Consents.StarRating, Consents.Views, Consents.Users, Consents.Push, Consents.RemoteConfig, Consents.Location, Consents.Feedback, Consents.Sessions };
+            CountlyConfiguration config = TestUtility.CreateBaseConfigConsent(consent);
+            Countly.Instance.Init(config);
+            TestUtility.ValidateRQEQSize(Countly.Instance, 2, 0);
+
+            _ = Countly.Instance.Events.RecordEventAsync("BasicEventA");
+            _ = Countly.Instance.Events.RecordEventAsync("BasicEventB");
+            SendSameData();
+            _ = Countly.Instance.Events.RecordEventAsync("BasicEventC");
+            SendSameData();
+            _ = Countly.Instance.Events.RecordEventAsync("BasicEventD");
+            SendSameData();
+            _ = Countly.Instance.Events.RecordEventAsync("BasicEventE");
+
+            TestUtility.ValidateRQEQSize(Countly.Instance, 8, 1);
+        }
+
+        // RecordEventAsync with UserProfile changes
+        // We record events with consent requirement, however provide no consent. Between events we record user profile data
+        // Since no consent is provided, events and user profile calls should not record anything
+        [Test]
+        public void UP_206_CR_CNG_A()
+        {
+            Consents[] consent = new Consents[] { };
+            CountlyConfiguration config = TestUtility.CreateBaseConfigConsent(consent);
+            Countly.Instance.Init(config);
+            TestUtility.ValidateRQEQSize(Countly.Instance, 2, 0);
+
+            _ = Countly.Instance.Events.RecordEventAsync("BasicEventA");
+            _ = Countly.Instance.Events.RecordEventAsync("BasicEventB");
+            SendSameData();
+            _ = Countly.Instance.Events.RecordEventAsync("BasicEventC");
+            SendSameData();
+            _ = Countly.Instance.Events.RecordEventAsync("BasicEventD");
+            SendSameData();
+            _ = Countly.Instance.Events.RecordEventAsync("BasicEventE");
+
+            TestUtility.ValidateRQEQSize(Countly.Instance, 2, 0);
+        }
+        
         [SetUp]
         [TearDown]
         public void End()
