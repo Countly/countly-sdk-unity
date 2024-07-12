@@ -298,7 +298,6 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
 
         _ = requestHelper.ProcessQueue();
         ClearInternal();
-        Log.Warning("[UserProfile] SaveInternal, exit");
     }
 
     private void SetDataInternal(Dictionary<string, object> userData)
@@ -566,7 +565,6 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
         }
 
         if (json.Count > 0) {
-            Log.Warning("Returning Json:" + json.ToString());
             return json.ToString();
         } else {
             return null;
@@ -606,11 +604,17 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
     #region Override Methods
     internal override void OnInitializationCompleted()
     {
-        if (config.GetUserProperties() != null) {
-            Log.Info("[UserProfile] User properties set during the initialization. Provided property amount: " + config.GetUserProperties().Count());
+        if (config.GetUserProperties().Count() > 0) {
+            Log.Info("[UserProfile][OnInitializationCompleted] User properties set during the initialization. Provided property amount: " + config.GetUserProperties().Count());
             SetPropertiesInternal(config.GetUserProperties());
             SaveInternal();
         }
+    }
+
+    internal override void DeviceIdChanged(string deviceId, bool merged)
+    {
+        Log.Info($"[UserProfile][DeviceIdChanged] DeviceId change has occured. New DeviceId: [{deviceId}], Merged: [{merged}]. Calling Save");
+        SaveInternal();
     }
     #endregion
 }

@@ -167,6 +167,38 @@ namespace Assets.Tests.PlayModeTests.Scenarios
             TestUtility.ValidateRQEQSize(Countly.Instance, 2, 0);
         }
         
+        [Test]
+        public void UP_207_CNR_M()
+        {
+            CountlyConfiguration config = TestUtility.CreateBaseConfig()
+                .EnableLogging();
+            config.DisableAutomaticSessionTracking();
+            Countly.Instance.Init(config);
+            Countly cly = Countly.Instance;
+            _ = cly.Session.BeginSessionAsync();
+            TestUtility.ValidateRQEQSize(cly, 1, 0);
+
+            _ = Countly.Instance.Events.RecordEventAsync("BasicEventA");
+            _ = Countly.Instance.Events.RecordEventAsync("BasicEventB");
+            SendSameData();
+            _ = cly.Session.EndSessionAsync();
+            TestUtility.ValidateRQEQSize(cly, 4, 0);
+
+            _ = Countly.Instance.Events.RecordEventAsync("BasicEventC");
+            SendUserData();
+            _ = cly.Session.EndSessionAsync();
+            _ = cly.Device.ChangeDeviceIdWithMerge("merge_id");
+            TestUtility.ValidateRQEQSize(cly, 7, 0);
+
+            SendSameData();
+            _ = cly.Device.ChangeDeviceIdWithoutMerge("non_merge_id");
+            TestUtility.ValidateRQEQSize(cly, 8, 0);
+
+            SendSameData();
+            _ = Countly.Instance.Events.RecordEventAsync("BasicEventD");
+            TestUtility.ValidateRQEQSize(cly, 9, 1);
+        }
+
         [SetUp]
         [TearDown]
         public void End()
