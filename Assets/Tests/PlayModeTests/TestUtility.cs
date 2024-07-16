@@ -301,5 +301,19 @@ namespace Assets.Tests.PlayModeTests
             CountlyEventModel[] events = cly.Events._eventRepo.Models.ToArray();
             Assert.AreEqual(expEQSize, events.Length);
         }
+
+        public static CountlyRequestModel ExtractUserDetailsRequest(IEnumerable<CountlyRequestModel> requests)
+        {
+            List<CountlyRequestModel> userDetailsRequests = new List<CountlyRequestModel>();
+            foreach (var request in requests) {
+                if (request.RequestData.Contains("user_details")) {
+                    return request;
+                }
+                else{
+                    continue;
+                }
+            }
+            return null;
+        }
     }
 }

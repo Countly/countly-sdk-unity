@@ -4,6 +4,8 @@ using Plugins.CountlySDK;
 using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK.Enums;
 using System.Threading;
+using System.Diagnostics;
+using UnityEngine;
 
 namespace Assets.Tests.PlayModeTests.Scenarios
 {
@@ -215,26 +217,32 @@ namespace Assets.Tests.PlayModeTests.Scenarios
             Countly cly = Countly.Instance;
             _ = cly.Session.BeginSessionAsync();
             TestUtility.ValidateRQEQSize(cly, 2, 0);
+            cly.RequestHelper._requestRepo.Clear();
 
             _ = Countly.Instance.Events.RecordEventAsync("BasicEventA");
             _ = Countly.Instance.Events.RecordEventAsync("BasicEventB");
             SendSameData();
             _ = cly.Session.EndSessionAsync();
-            TestUtility.ValidateRQEQSize(cly, 5, 0);
+            TestUtility.ValidateRQEQSize(cly, 3, 0);
+            // Extract and validate user_details requests
+            CountlyRequestModel up1 = TestUtility.ExtractUserDetailsRequest(cly.RequestHelper._requestRepo.Models);
+            UnityEngine.Debug.Log(up1.ToString());
 
             _ = Countly.Instance.Events.RecordEventAsync("BasicEventC");
             SendUserData();
             _ = cly.Session.EndSessionAsync();
             _ = cly.Device.ChangeDeviceIdWithMerge("merge_id");
-            TestUtility.ValidateRQEQSize(cly, 8, 0);
+            TestUtility.ValidateRQEQSize(cly, 6, 0);
+            CountlyRequestModel up2 = TestUtility.ExtractUserDetailsRequest(cly.RequestHelper._requestRepo.Models);
+            UnityEngine.Debug.Log(up2.ToString());
 
             SendSameData();
             _ = cly.Device.ChangeDeviceIdWithoutMerge("non_merge_id");
-            TestUtility.ValidateRQEQSize(cly, 8, 0);
+            TestUtility.ValidateRQEQSize(cly, 6, 0);
 
             SendSameData();
             _ = Countly.Instance.Events.RecordEventAsync("BasicEventD");
-            TestUtility.ValidateRQEQSize(cly, 8, 0);
+            TestUtility.ValidateRQEQSize(cly, 6, 0);
         }
 
         // DeviceID changes with UserProfile changes
