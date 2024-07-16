@@ -289,7 +289,7 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
         }
 
         // Create a new dictionary to hold the modified data
-        var modifiedData = new Dictionary<string, object>() {
+        var modifiedData = new Dictionary<string, object> {
             { "user_details", jsonData }
         };
 
