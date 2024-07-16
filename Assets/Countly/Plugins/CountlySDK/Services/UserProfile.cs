@@ -289,7 +289,7 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
         }
 
         // Create a new dictionary to hold the modified data
-        var modifiedData = new Dictionary<string, object>(cachedUserData) {
+        var modifiedData = new Dictionary<string, object>() {
             { "user_details", jsonData }
         };
 
@@ -556,7 +556,7 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
                 }
             }
 
-            if (ob != null) {
+            if (ob != null && ob.Count > 0) {
                 json.Add(CUSTOM_KEY, ob);
             }
 
@@ -579,7 +579,7 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
                 Dictionary<string, object> data = JsonConvert.DeserializeObject<Dictionary<string, object>>(json);
                 return data;
             } catch (JsonException ex) {
-                Log.Error($"[UserProfile] SaveInternal, failed to deserialize cached user data: {ex.Message}");
+                Log.Error($"[UserProfile][GetDataForRequest], failed to deserialize cached user data: {ex.Message}");
                 return new Dictionary<string, object>();
             }
         }
@@ -605,7 +605,7 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
     internal override void OnInitializationCompleted()
     {
         if (config.GetUserProperties().Count() > 0) {
-            Log.Info("[UserProfile][OnInitializationCompleted] User properties set during the initialization. Provided property amount: " + config.GetUserProperties().Count());
+            Log.Info("[UserProfile][OnInitializationCompleted] User profile data set during the initialization. Provided property amount: " + config.GetUserProperties().Count());
             SetPropertiesInternal(config.GetUserProperties());
             SaveInternal();
         }

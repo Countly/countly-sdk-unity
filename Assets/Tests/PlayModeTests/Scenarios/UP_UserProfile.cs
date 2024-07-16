@@ -271,7 +271,7 @@ namespace Assets.Tests.PlayModeTests.Scenarios
             _ = Countly.Instance.Events.RecordEventAsync("BasicEventD");
             TestUtility.ValidateRQEQSize(cly, 3, 0);
         }
-        
+
         // Manual session elapse with UserProfile changes
         // We start a manual session with an update timer of 5 seconds, and record User Profile data, wait 6 seconds after that.
         // User Data request should automaticly be created after 6 seconds
