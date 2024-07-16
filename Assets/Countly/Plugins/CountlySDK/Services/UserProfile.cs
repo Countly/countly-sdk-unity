@@ -401,7 +401,7 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
             return;
         }
 
-        Dictionary<string, object> data = new Dictionary<string, object>() { { key, value } };
+        Dictionary<string, object> data = new Dictionary<string, object> { { key, value } };
         Log.Info("[UserProfile][SetPropertyInternal], key:[" + key + "]" + " value:[" + value + "]");
         SetPropertiesInternal(data);
     }

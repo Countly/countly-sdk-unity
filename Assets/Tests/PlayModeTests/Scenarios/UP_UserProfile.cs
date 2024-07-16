@@ -3,6 +3,7 @@ using NUnit.Framework;
 using Plugins.CountlySDK;
 using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK.Enums;
+using System.Threading;
 
 namespace Assets.Tests.PlayModeTests.Scenarios
 {
@@ -166,12 +167,14 @@ namespace Assets.Tests.PlayModeTests.Scenarios
 
             TestUtility.ValidateRQEQSize(Countly.Instance, 2, 0);
         }
-        
+
+        // DeviceID changes with UserProfile changes
+        // We record events and User Profile data without consent requirement. We also change device id with and without merge
+        // Since consent is not required, events, device id change with merge and events should be recorded correctly
         [Test]
         public void UP_207_CNR_M()
         {
-            CountlyConfiguration config = TestUtility.CreateBaseConfig()
-                .EnableLogging();
+            CountlyConfiguration config = TestUtility.CreateBaseConfig();
             config.DisableAutomaticSessionTracking();
             Countly.Instance.Init(config);
             Countly cly = Countly.Instance;
@@ -197,6 +200,94 @@ namespace Assets.Tests.PlayModeTests.Scenarios
             SendSameData();
             _ = Countly.Instance.Events.RecordEventAsync("BasicEventD");
             TestUtility.ValidateRQEQSize(cly, 9, 1);
+        }
+
+        // DeviceID changes with UserProfile changes
+        // We record events and User Profile data with consent requirement. We also change device id with and without merge
+        // Since consent is required, events, device id change with merge and events should be recorded correctly and post id change events shouldn't be recorded
+        [Test]
+        public void UP_208_CR_CG_M()
+        {
+            Consents[] consent = new Consents[] { Consents.Crashes, Consents.Events, Consents.Clicks, Consents.StarRating, Consents.Views, Consents.Users, Consents.Push, Consents.RemoteConfig, Consents.Location, Consents.Feedback, Consents.Sessions };
+            CountlyConfiguration config = TestUtility.CreateBaseConfigConsent(consent);
+            config.DisableAutomaticSessionTracking();
+            Countly.Instance.Init(config);
+            Countly cly = Countly.Instance;
+            _ = cly.Session.BeginSessionAsync();
+            TestUtility.ValidateRQEQSize(cly, 2, 0);
+
+            _ = Countly.Instance.Events.RecordEventAsync("BasicEventA");
+            _ = Countly.Instance.Events.RecordEventAsync("BasicEventB");
+            SendSameData();
+            _ = cly.Session.EndSessionAsync();
+            TestUtility.ValidateRQEQSize(cly, 5, 0);
+
+            _ = Countly.Instance.Events.RecordEventAsync("BasicEventC");
+            SendUserData();
+            _ = cly.Session.EndSessionAsync();
+            _ = cly.Device.ChangeDeviceIdWithMerge("merge_id");
+            TestUtility.ValidateRQEQSize(cly, 8, 0);
+
+            SendSameData();
+            _ = cly.Device.ChangeDeviceIdWithoutMerge("non_merge_id");
+            TestUtility.ValidateRQEQSize(cly, 8, 0);
+
+            SendSameData();
+            _ = Countly.Instance.Events.RecordEventAsync("BasicEventD");
+            TestUtility.ValidateRQEQSize(cly, 8, 0);
+        }
+
+        // DeviceID changes with UserProfile changes
+        // We record events and User Profile data with consent requirement. However we don't provide consent. We also change device id with and without merge
+        // Since consent is required and not given, nothing except the, session and device id change with merge, should be recorded
+        [Test]
+        public void UP_209_CR_CNG_M()
+        {
+            Consents[] consent = new Consents[] { };
+            CountlyConfiguration config = TestUtility.CreateBaseConfigConsent(consent);
+            config.DisableAutomaticSessionTracking();
+            Countly.Instance.Init(config);
+            Countly cly = Countly.Instance;
+            _ = cly.Session.BeginSessionAsync();
+            TestUtility.ValidateRQEQSize(cly, 2, 0);
+
+            _ = Countly.Instance.Events.RecordEventAsync("BasicEventA");
+            _ = Countly.Instance.Events.RecordEventAsync("BasicEventB");
+            SendSameData();
+            _ = cly.Session.EndSessionAsync();
+            TestUtility.ValidateRQEQSize(cly, 2, 0);
+
+            _ = Countly.Instance.Events.RecordEventAsync("BasicEventC");
+            SendUserData();
+            _ = cly.Session.EndSessionAsync();
+            _ = cly.Device.ChangeDeviceIdWithMerge("merge_id");
+            TestUtility.ValidateRQEQSize(cly, 3, 0);
+
+            SendSameData();
+            _ = cly.Device.ChangeDeviceIdWithoutMerge("non_merge_id");
+            TestUtility.ValidateRQEQSize(cly, 3, 0);
+
+            SendSameData();
+            _ = Countly.Instance.Events.RecordEventAsync("BasicEventD");
+            TestUtility.ValidateRQEQSize(cly, 3, 0);
+        }
+        
+        // Manual session elapse with UserProfile changes
+        // We start a manual session with an update timer of 5 seconds, and record User Profile data, wait 6 seconds after that.
+        // User Data request should automaticly be created after 6 seconds
+        [Test]
+        public void UP_210_CNR_M_duration()
+        {
+            Countly cly = Countly.Instance;
+            CountlyConfiguration config = TestUtility.CreateBaseConfig()
+                .SetUpdateSessionTimerDelay(5);
+            config.DisableAutomaticSessionTracking();
+            cly.Init(config);
+            _ = cly.Session.BeginSessionAsync();
+            TestUtility.ValidateRQEQSize(cly, 1, 0);
+            SendUserData();
+            Thread.Sleep(6000);
+            TestUtility.ValidateRQEQSize(cly, 2, 0);
         }
 
         [SetUp]
