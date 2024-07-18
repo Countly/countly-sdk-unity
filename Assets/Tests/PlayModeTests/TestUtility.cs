@@ -307,12 +307,9 @@ namespace Assets.Tests.PlayModeTests
         {
             string requestData = null;
 
-            List<CountlyRequestModel> userDetailsRequests = new List<CountlyRequestModel>();
             foreach (var request in requests) {
                 if (request.RequestData.Contains("user_details")) {
                     requestData = request.RequestData;
-                } else {
-                    continue;
                 }
             }
 
