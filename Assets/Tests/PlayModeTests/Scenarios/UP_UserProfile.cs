@@ -22,7 +22,6 @@ namespace Assets.Tests.PlayModeTests.Scenarios
                 { "organization", "Trust Electric Ltd" },
                 { "phone", "+90 822 140 2546" },
                 { "picture", "http://images2.fanpop.com/images/photos/3300000/Nikola-Tesla-nikola-tesla-3365940-600-738.jpg" },
-                { "picturePath", "" },
                 { "gender", "M" },
                 { "byear", 1919 },
                 { "special_value", "something special" },

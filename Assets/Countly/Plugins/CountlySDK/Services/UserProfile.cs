@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using Newtonsoft.Json;
@@ -312,6 +313,8 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
             return;
         }
 
+        Log.Debug("[UserProfile][SetDataInternal] Start");
+
         if (userData.TryGetValue(NAME_KEY, out object nameValue) && nameValue is string name) {
             Name = TrimValue(NAME_KEY, name);
         }
@@ -333,10 +336,14 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
         }
 
         if (userData.TryGetValue(PICTURE_KEY, out object pictureValue) && pictureValue is string pictureUrl) {
-            if (!utils.IsPictureValid(pictureUrl)) {
+            if (utils.IsPictureValid(pictureUrl)) {
+                if (pictureUrl.Length > 4096) {
+                    PictureUrl = pictureUrl.Substring(0, 4096);
+                } else {
+                    PictureUrl = pictureUrl;
+                }
+            } else {
                 Log.Warning($"[UserDetailsCountlyService] SetUserDetailsInternal, Picture format for URL '{pictureUrl}' is not as expected. Expected formats are .png, .gif, or .jpeg");
-            } else if (pictureUrl != null && pictureUrl.Length > 4096) {
-                PictureUrl = pictureUrl.Substring(0, 4096);
             }
         }
 
@@ -367,6 +374,8 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
             Log.Debug("[UserProfile][SetPropertiesInternal] Provided data is empty, ignoring the request.");
             return;
         }
+
+        Log.Debug("[UserProfile][SetPropertiesInternal] Start");
 
         Dictionary<string, object> namedFields = new Dictionary<string, object>();
         Dictionary<string, object> customFields = new Dictionary<string, object>();

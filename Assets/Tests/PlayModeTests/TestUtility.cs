@@ -7,6 +7,7 @@ using Plugins.CountlySDK.Enums;
 using System.Text.RegularExpressions;
 using UnityEngine;
 using NUnit.Framework;
+using Newtonsoft.Json;
 
 namespace Assets.Tests.PlayModeTests
 {
@@ -305,30 +306,44 @@ namespace Assets.Tests.PlayModeTests
         // Extracts user profile request from the provided requests
         public static Dictionary<string, object> ExtractAndDeserializeUserDetails(IEnumerable<CountlyRequestModel> requests)
         {
-            string requestData = null;
-
-            foreach (var request in requests) {
-                if (request.RequestData.Contains("user_details")) {
-                    requestData = request.RequestData;
-                }
-            }
+            string NAME_KEY = "name";
+            string USERNAME_KEY = "username";
+            string EMAIL_KEY = "email";
+            string ORG_KEY = "organization";
+            string PHONE_KEY = "phone";
+            string PICTURE_KEY = "picture";
+            string GENDER_KEY = "gender";
+            string BYEAR_KEY = "byear";
+            string CUSTOM_KEY = "custom";
 
             var userDetails = new Dictionary<string, object>();
-            // Extract the user_details section from the requestData
-            var match = Regex.Match(requestData, @"user_details=([^&]+)");
-            if (match.Success) {
-                // URL decode and deserialize the user_details JSON
-                string userDetailsJson = System.Web.HttpUtility.UrlDecode(match.Groups[1].Value);
-                var userDetailsObj = JObject.Parse(userDetailsJson);
 
-                // Convert JObject to Dictionary<string, object>
-                foreach (var property in userDetailsObj.Properties()) {
-                    if (property.Name == "custom" && property.Value is JObject customObj) {
-                        foreach (var customProperty in customObj.Properties()) {
-                            userDetails[customProperty.Name] = ConvertJTokenToValue(customProperty.Value);
+            foreach (var request in requests) {
+                var match = Regex.Match(request.RequestData, @"user_details=([^&]+)");
+                if (match.Success) {
+                    string userDetailsJson = System.Web.HttpUtility.UrlDecode(match.Groups[1].Value);
+
+                    try {
+                        var userDetailsObj = JObject.Parse(userDetailsJson);
+
+                        // Ensure specific keys are always recorded
+                        foreach (string key in new[] { NAME_KEY, USERNAME_KEY, EMAIL_KEY, ORG_KEY, PHONE_KEY, PICTURE_KEY, GENDER_KEY, BYEAR_KEY }) {
+                            if (userDetailsObj[key] != null) {
+                                userDetails[key] = ConvertJTokenToValue(userDetailsObj[key]);
+                            }
                         }
-                    } else {
-                        userDetails[property.Name] = ConvertJTokenToValue(property.Value);
+
+                        // Handle custom properties
+                        if (userDetailsObj[CUSTOM_KEY] is JObject customObj) {
+                            foreach (var customProperty in customObj.Properties()) {
+                                userDetails[customProperty.Name] = ConvertJTokenToValue(customProperty.Value);
+                            }
+                        }
+
+                        break; // Exit loop once processed the first matching request
+                    } catch (JsonReaderException ex) {
+                        UnityEngine.Debug.Log($"Error parsing userDetailsJson: {ex.Message}");
+                        continue; // Move to the next request
                     }
                 }
             }
