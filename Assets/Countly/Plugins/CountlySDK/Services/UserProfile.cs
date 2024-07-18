@@ -198,6 +198,11 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
     #region Internal Calls
     private void IncrementInternal(string key, double value)
     {
+        if (!cly.IsSDKInitialized) {
+            Log.Warning("[UserProfile][IncrementInternal], Countly.Instance.Init() must be called before IncrementInternal");
+            return;
+        }
+        
         if (!ValidateConsentAndKey(key, "IncrementInternal")) {
             return;
         }
@@ -208,6 +213,11 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
 
     private void MaxInternal(string key, double value)
     {
+        if (!cly.IsSDKInitialized) {
+            Log.Warning("[UserProfile][MaxInternal], Countly.Instance.Init() must be called before MaxInternal");
+            return;
+        }
+
         if (!ValidateConsentAndKey(key, "MaxInternal")) {
             return;
         }
@@ -218,6 +228,11 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
 
     private void MinInternal(string key, double value)
     {
+        if (!cly.IsSDKInitialized) {
+            Log.Warning("[UserProfile][MinInternal], Countly.Instance.Init() must be called before MinInternal");
+            return;
+        }
+
         if (!ValidateConsentAndKey(key, "MinInternal")) {
             return;
         }
@@ -228,6 +243,11 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
 
     private void MultiplyInternal(string key, double value)
     {
+        if (!cly.IsSDKInitialized) {
+            Log.Warning("[UserProfile][MultiplyInternal], Countly.Instance.Init() must be called before MultiplyInternal");
+            return;
+        }
+
         if (!ValidateConsentAndKey(key, "MultiplyInternal")) {
             return;
         }
@@ -238,6 +258,11 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
 
     private void PullInternal(string key, string value)
     {
+        if (!cly.IsSDKInitialized) {
+            Log.Warning("[UserProfile][PullInternal], Countly.Instance.Init() must be called before PullInternal");
+            return;
+        }
+
         if (!ValidateConsentAndKey(key, "PullInternal")) {
             return;
         }
@@ -248,6 +273,11 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
 
     private void PushInternal(string key, string value)
     {
+        if (!cly.IsSDKInitialized) {
+            Log.Warning("[UserProfile][PushInternal], Countly.Instance.Init() must be called before PushInternal");
+            return;
+        }
+
         if (!ValidateConsentAndKey(key, "PushInternal")) {
             return;
         }
@@ -258,6 +288,11 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
 
     private void PushUniqueInternal(string key, string value)
     {
+        if (!cly.IsSDKInitialized) {
+            Log.Warning("[UserProfile][PushUniqueInternal], Countly.Instance.Init() must be called before PushUniqueInternal");
+            return;
+        }
+
         if (!ValidateConsentAndKey(key)) {
             return;
         }
@@ -268,6 +303,11 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
 
     private void SaveInternal()
     {
+        if (!cly.IsSDKInitialized) {
+            Log.Warning("[UserProfile][SaveInternal], Countly.Instance.Init() must be called before SaveInternal");
+            return;
+        }
+
         if (!_consentService.CheckConsentInternal(Consents.Users)) {
             Log.Debug("[UserProfile] SaveInternal, consent is not given, ignoring the request.");
             return;
@@ -303,6 +343,11 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
 
     private void SetDataInternal(Dictionary<string, object> userData)
     {
+        if (!cly.IsSDKInitialized) {
+            Log.Warning("[UserProfile][SetDataInternal], Countly.Instance.Init() must be called before SetDataInternal");
+            return;
+        }
+
         if (!_consentService.CheckConsentInternal(Consents.Users)) {
             Log.Debug("[UserProfile][SetDataInternal] Consent is not given, ignoring the request.");
             return;
@@ -365,6 +410,11 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
 
     private void SetPropertiesInternal(Dictionary<string, object> data)
     {
+        if (!cly.IsSDKInitialized) {
+            Log.Warning("[UserProfile][SetPropertiesInternal], Countly.Instance.Init() must be called before SetPropertiesInternal");
+            return;
+        }
+
         if (!_consentService.CheckConsentInternal(Consents.Users)) {
             Log.Debug("[UserProfile][SetPropertiesInternal] Consent is not given, ignoring the request.");
             return;
@@ -406,6 +456,11 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
 
     private void SetPropertyInternal(string key, object value)
     {
+        if (!cly.IsSDKInitialized) {
+            Log.Warning("[UserProfile][SetPropertyInternal], Countly.Instance.Init() must be called before SetPropertyInternal");
+            return;
+        }
+
         if (!ValidateConsentAndKey(key, "SetPropertyInternal")) {
             return;
         }
@@ -417,6 +472,11 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
 
     private void SetOnceInternal(string key, string value)
     {
+        if (!cly.IsSDKInitialized) {
+            Log.Warning("[UserProfile][SetOnceInternal], Countly.Instance.Init() must be called before SetOnceInternal");
+            return;
+        }
+
         if (!ValidateConsentAndKey(key, "SetOnceInternal")) {
             return;
         }

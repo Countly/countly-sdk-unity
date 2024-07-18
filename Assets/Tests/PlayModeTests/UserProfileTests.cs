@@ -16,7 +16,7 @@ namespace Assets.Tests.PlayModeTests
     CG: Consent Given
     CNG: Consent Not Given
     ***************************************************************/
-    
+
     public class UserProfileTests
     {
         private Dictionary<string, object> ExpectedUserProperty()
@@ -111,6 +111,34 @@ namespace Assets.Tests.PlayModeTests
             Dictionary<string, object> up1 = TestUtility.ExtractAndDeserializeUserDetails(cly.RequestHelper._requestRepo.Models);
             TestUtility.ValidateUserDetails(up1, ExpectedUserProperty());
             cly.RequestHelper._requestRepo.Clear();
+        }
+        
+        // 'Save' in Countly.Instance.UserProfile
+        // We initialize the sdk and call save afterwards without recording any user profile data
+        // Calling 'Save' should not record any request
+        [Test]
+        public void SaveWithNoRecordedValue_A_CNR()
+        {
+            Countly cly = Countly.Instance;
+            cly.Init(TestUtility.CreateBaseConfig());
+
+            TestUtility.ValidateRQEQSize(cly, 1, 0);
+            cly.UserProfile.Save();
+            TestUtility.ValidateRQEQSize(cly, 1, 0);
+        }
+
+        // 'Save' in Countly.Instance.UserProfile
+        // We initialize the sdk and record user profile values afterwards. Then we call save.
+        // Calling 'Save' should record an User Profile request
+        [Test]
+        public void SaveWithRecordedValue_A_CNR()
+        {
+            Countly cly = Countly.Instance;
+            cly.Init(TestUtility.CreateBaseConfig());
+
+            TestUtility.ValidateRQEQSize(cly, 1, 0);
+            cly.UserProfile.Save();
+            TestUtility.ValidateRQEQSize(cly, 1, 0);
         }
 
         [SetUp]
