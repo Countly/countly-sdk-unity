@@ -24,8 +24,18 @@ namespace Assets.Tests.PlayModeTests.Scenarios
                 { "picture", "http://images2.fanpop.com/images/photos/3300000/Nikola-Tesla-nikola-tesla-3365940-600-738.jpg" },
                 { "gender", "M" },
                 { "byear", 1919 },
-                { "special_value", "something special" },
-                { "not_special_value", "something special cooking" }
+                { "Boolean", true },
+                { "Integer", 26 },
+                { "Float", 3.1f },
+                { "String", "something special cooking" },
+                { "IntArray", new int[] { 1, 2, 3 } },
+                { "BoolArray", new bool[] { true, false, true } },
+                { "FloatArray", new float[] { 1.1f, 2.2f, 3.3f } },
+                { "StringArray", new string[] { "a", "b", "c" } },
+                { "IntList", new List<int> { 1, 2, 3 } },
+                { "BoolList", new List<bool> { true, false, true } },
+                { "FloatList", new List<float> { 1.1f, 2.2f, 3.3f } },
+                { "StringList", new List<string> { "a", "b", "c" } }
             };
 
             Countly.Instance.UserProfile.SetProperties(userProperties);

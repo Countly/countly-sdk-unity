@@ -287,8 +287,7 @@ namespace Assets.Tests.PlayModeTests
                         JArray expectedArray = JArray.FromObject(expectedValue);
                         JArray actualArray = (JArray)actualValue;
 
-                        for(int i = 0; i < actualArray.Count; i++)
-                        {
+                        for (int i = 0; i < actualArray.Count; i++) {
                             Assert.AreEqual(expectedArray[i].ToString(), actualArray[i].ToString());
                         }
                     } else {
@@ -383,20 +382,63 @@ namespace Assets.Tests.PlayModeTests
 
         private static object ConvertJTokenToValue(JToken token)
         {
-            if (token.Type == JTokenType.Object) {
-                var dict = new Dictionary<string, object>();
-                foreach (var property in token.Children<JProperty>()) {
-                    dict[property.Name] = ConvertJTokenToValue(property.Value);
-                }
-                return dict;
-            } else if (token.Type == JTokenType.Array) {
-                var list = new List<object>();
-                foreach (var item in token.Children()) {
-                    list.Add(ConvertJTokenToValue(item));
-                }
-                return list;
-            } else {
-                return token.ToObject<object>();
+            switch (token.Type) {
+                case JTokenType.Object:
+                    var dict = new Dictionary<string, object>();
+                    foreach (var property in token.Children<JProperty>()) {
+                        dict[property.Name] = ConvertJTokenToValue(property.Value);
+                    }
+                    return dict;
+
+                case JTokenType.Array:
+                    var firstItem = token.First;
+                    if (firstItem != null) {
+                        switch (firstItem.Type) {
+                            case JTokenType.Integer:
+                                return token.ToObject<int[]>();
+
+                            case JTokenType.Float:
+                                return token.ToObject<float[]>();
+
+                            case JTokenType.String:
+                                return token.ToObject<string[]>();
+
+                            case JTokenType.Boolean:
+                                return token.ToObject<bool[]>();
+
+                            case JTokenType.Date:
+                                return token.ToObject<DateTime[]>();
+
+                            case JTokenType.Object:
+                                var list = new List<object>();
+                                foreach (var item in token.Children()) {
+                                    list.Add(ConvertJTokenToValue(item));
+                                }
+                                return list;
+
+                            default:
+                                return token.ToObject<object[]>();
+                        }
+                    }
+                    return new object[0]; // Empty array if no items
+
+                case JTokenType.Integer:
+                    return token.ToObject<int>();
+
+                case JTokenType.Float:
+                    return token.ToObject<float>();
+
+                case JTokenType.String:
+                    return token.ToString();
+
+                case JTokenType.Boolean:
+                    return token.ToObject<bool>();
+
+                case JTokenType.Date:
+                    return token.ToObject<DateTime>();
+
+                default:
+                    return token.ToObject<object>();
             }
         }
     }
