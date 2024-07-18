@@ -6,6 +6,8 @@ using Plugins.CountlySDK;
 using System.Web;
 using System.Collections.Specialized;
 using Newtonsoft.Json.Linq;
+using System;
+using System.Collections;
 
 namespace Assets.Tests.PlayModeTests
 {
@@ -21,10 +23,34 @@ namespace Assets.Tests.PlayModeTests
             Assert.AreEqual(stackTrace, crashObj.GetValue("_error").ToString());
 
             JObject custom = crashObj["_custom"].ToObject<JObject>();
+
             if (segmentation != null) {
                 Assert.AreEqual(segmentation.Count, custom.Count);
+
                 foreach (KeyValuePair<string, object> entry in segmentation) {
-                    Assert.AreEqual(entry.Value, custom.GetValue(entry.Key).ToString());
+                    string key = entry.Key;
+                    object expectedValue = entry.Value;
+
+                    // Check if key exists in custom
+                    Assert.IsTrue(custom.ContainsKey(key), $"Key '{key}' not found in custom");
+
+                    // Get actual value from custom
+                    JToken actualValue = custom[key];
+
+                    // Compare expected and actual values
+                    if (expectedValue is Array || expectedValue is IList) {
+                        // Convert expected value to JArray for comparison
+                        JArray expectedArray = JArray.FromObject(expectedValue);
+                        JArray actualArray = (JArray)actualValue;
+
+                        for(int i = 0; i < actualArray.Count; i++)
+                        {
+                            Assert.AreEqual(expectedArray[i].ToString(), actualArray[i].ToString());
+                        }
+                    } else {
+                        // Compare single values as strings
+                        Assert.AreEqual(expectedValue.ToString(), actualValue.ToString(), $"Mismatch for key '{key}'");
+                    }
                 }
             }
         }
@@ -241,6 +267,76 @@ namespace Assets.Tests.PlayModeTests
             Assert.AreEqual("bread_crumbs_7", Countly.Instance.CrashReports._crashBreadcrumbs.Dequeue());
             Assert.AreEqual("bread_crumbs_8", Countly.Instance.CrashReports._crashBreadcrumbs.Dequeue());
             Assert.AreEqual("bread_crumbs_9", Countly.Instance.CrashReports._crashBreadcrumbs.Dequeue());
+        }
+
+        // 'SendCrashReportAsync' method in CrashReportsCountlyService
+        // We provide segmentation with crash and check every supported data type
+        // string, bool, float, double, string, long and, their list and arrays are supported types
+        // Supported data types should be recorded, unsupported types should be removed correctly
+        [Test]
+        public async void SegmentationDataTypeValidation()
+        {
+            Countly.Instance.Init(TestUtility.CreateBaseConfig());
+            Countly cly = Countly.Instance;
+
+            Dictionary<string, object> seg = new Dictionary<string, object>
+            {
+                { "Time", 1234455 },
+                { "Retry Attempts", 10 },
+                { "Temp", 100.0f },
+                { "IsSuccess", true },
+                { "Message", "Test message" },
+                { "Average", 75.5 },
+                { "LargeNumber", 12345678901234L },
+                { "IntArray", new int[] { 1, 2, 3 } },
+                { "BoolArray", new bool[] { true, false, true } },
+                { "FloatArray", new float[] { 1.1f, 2.2f, 3.3f } },
+                { "DoubleArray", new double[] { 1.1, 2.2, 3.3 } },
+                { "StringArray", new string[] { "a", "b", "c" } },
+                { "LongArray", new long[] { 10000000000L, 20000000000L, 30000000000L } },
+                { "IntList", new List<int> { 1, 2, 3 } },
+                { "BoolList", new List<bool> { true, false, true } },
+                { "FloatList", new List<float> { 1.1f, 2.2f, 3.3f } },
+                { "DoubleList", new List<double> { 1.1, 2.2, 3.3 } },
+                { "StringList", new List<string> { "a", "b", "c" } },
+                { "LongList", new List<long> { 10000000000L, 20000000000L, 30000000000L } },
+                { "MixedList", new List<object> { 1, "string", 2.3, true, new int[] { 1, 2, 3 }, new object(), Countly.Instance } }, // mixed list
+                { "MixedArray", new object[] { 1, "string", 2.3, true, new int[] { 1, 2, 3 }, new object(), Countly.Instance } }, // mixed array
+                { "Unsupported Object", new object() }, // invalid
+                { "Unsupported Dictionary", new Dictionary<string, object>() } // invalid
+            };
+
+            Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
+            Assert.IsNotNull(Countly.Instance.CrashReports);
+            await Countly.Instance.CrashReports.SendCrashReportAsync("message", "StackTrace_1\nStackTrace_2\nStackTrace_3", seg);
+            TestUtility.ValidateRQEQSize(cly, 1, 0);
+            CountlyRequestModel requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
+            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+
+            Dictionary<string, object> expectedSegm = new Dictionary<string, object>
+            {
+                { "Time", 1234455 },
+                { "Retry Attempts", 10 },
+                { "Temp", 100.0f },
+                { "IsSuccess", true },
+                { "Message", "Test message" },
+                { "Average", 75.5 },
+                { "LargeNumber", 12345678901234L },
+                { "IntArray", new int[] { 1, 2, 3 } },
+                { "BoolArray", new bool[] { true, false, true } },
+                { "FloatArray", new float[] { 1.1f, 2.2f, 3.3f } },
+                { "DoubleArray", new double[] { 1.1, 2.2, 3.3 } },
+                { "StringArray", new string[] { "a", "b", "c" } },
+                { "LongArray", new long[] { 10000000000L, 20000000000L, 30000000000L } },
+                { "IntList", new List<int> { 1, 2, 3 } },
+                { "BoolList", new List<bool> { true, false, true } },
+                { "FloatList", new List<float> { 1.1f, 2.2f, 3.3f } },
+                { "DoubleList", new List<double> { 1.1, 2.2, 3.3 } },
+                { "StringList", new List<string> { "a", "b", "c" } },
+                { "LongList", new List<long> { 10000000000L, 20000000000L, 30000000000L } }
+            };
+
+            AssertCrashRequest(collection, "message", "StackTrace_1\nStackTrace_2\nStackTrace_3", true, expectedSegm);
         }
 
         [SetUp]
