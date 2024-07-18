@@ -6,6 +6,7 @@ using Plugins.CountlySDK.Enums;
 using System.Threading;
 using System.Diagnostics;
 using UnityEngine;
+using NUnit.Framework.Internal;
 
 namespace Assets.Tests.PlayModeTests.Scenarios
 {
@@ -45,12 +46,42 @@ namespace Assets.Tests.PlayModeTests.Scenarios
             Countly.Instance.UserProfile.Pull("k12345", "morning");
         }
 
+        private Dictionary<string, object> ExpectedUserData()
+        {
+            var expectedUserDetails = new Dictionary<string, object>
+            {
+                { "a12345", "My Property" },
+                { "b12345", new Dictionary<string, object> { { "$inc", 1.0 } } },
+                { "c12345", new Dictionary<string, object> { { "$inc", 10.0 } } },
+                { "d12345", new Dictionary<string, object> { { "$mul", 20.0 } } },
+                { "e12345", new Dictionary<string, object> { { "$max", 100.0 } } },
+                { "f12345", new Dictionary<string, object> { { "$min", 50.0 } } },
+                { "g12345", new Dictionary<string, object> { { "$setOnce", "200" } } },
+                { "h12345", new Dictionary<string, object> { { "$addToSet", new List<string> { "morning" } } } },
+                { "i12345", new Dictionary<string, object> { { "$push", new List<string> { "morning" } } } },
+                { "k12345", new Dictionary<string, object> { { "$pull", new List<string> { "morning" } } } }
+            };
+
+            return expectedUserDetails;
+        }
+
         private void SendSameData()
         {
             Countly.Instance.UserProfile.SetProperty("a12345", "1");
             Countly.Instance.UserProfile.SetProperty("a12345", "2");
             Countly.Instance.UserProfile.SetProperty("a12345", "3");
             Countly.Instance.UserProfile.SetProperty("a12345", "4");
+        }
+
+        private Dictionary<string, object> ExpectedSameData()
+        {
+            // Example expected user details for validation
+            var expectedUserDetails = new Dictionary<string, object>
+            {
+                { "a12345", "4" }
+            };
+
+            return expectedUserDetails;
         }
 
         // UserProfile calls in Countly.Instance.UserProfile
@@ -225,24 +256,27 @@ namespace Assets.Tests.PlayModeTests.Scenarios
             _ = cly.Session.EndSessionAsync();
             TestUtility.ValidateRQEQSize(cly, 3, 0);
             // Extract and validate user_details requests
-            CountlyRequestModel up1 = TestUtility.ExtractUserDetailsRequest(cly.RequestHelper._requestRepo.Models);
-            UnityEngine.Debug.Log(up1.ToString());
+            Dictionary<string, object> up1 = TestUtility.ExtractAndDeserializeUserDetails(cly.RequestHelper._requestRepo.Models);
+            TestUtility.ValidateUserDetails(up1, ExpectedSameData());
+            cly.RequestHelper._requestRepo.Clear();
 
             _ = Countly.Instance.Events.RecordEventAsync("BasicEventC");
             SendUserData();
             _ = cly.Session.EndSessionAsync();
             _ = cly.Device.ChangeDeviceIdWithMerge("merge_id");
-            TestUtility.ValidateRQEQSize(cly, 6, 0);
-            CountlyRequestModel up2 = TestUtility.ExtractUserDetailsRequest(cly.RequestHelper._requestRepo.Models);
-            UnityEngine.Debug.Log(up2.ToString());
+            TestUtility.ValidateRQEQSize(cly, 3, 0);
+            // Extract and validate user_details requests
+            Dictionary<string, object> up2 = TestUtility.ExtractAndDeserializeUserDetails(cly.RequestHelper._requestRepo.Models);
+            TestUtility.ValidateUserDetails(up2, ExpectedUserData());
+            cly.RequestHelper._requestRepo.Clear();
 
             SendSameData();
             _ = cly.Device.ChangeDeviceIdWithoutMerge("non_merge_id");
-            TestUtility.ValidateRQEQSize(cly, 6, 0);
+            TestUtility.ValidateRQEQSize(cly, 0, 0);
 
             SendSameData();
             _ = Countly.Instance.Events.RecordEventAsync("BasicEventD");
-            TestUtility.ValidateRQEQSize(cly, 6, 0);
+            TestUtility.ValidateRQEQSize(cly, 0, 0);
         }
 
         // DeviceID changes with UserProfile changes

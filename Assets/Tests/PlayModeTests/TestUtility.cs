@@ -302,18 +302,68 @@ namespace Assets.Tests.PlayModeTests
             Assert.AreEqual(expEQSize, events.Length);
         }
 
-        public static CountlyRequestModel ExtractUserDetailsRequest(IEnumerable<CountlyRequestModel> requests)
+        // Extracts user profile request from the provided requests
+        public static Dictionary<string, object> ExtractAndDeserializeUserDetails(IEnumerable<CountlyRequestModel> requests)
         {
+            string requestData = null;
+
             List<CountlyRequestModel> userDetailsRequests = new List<CountlyRequestModel>();
             foreach (var request in requests) {
                 if (request.RequestData.Contains("user_details")) {
-                    return request;
-                }
-                else{
+                    requestData = request.RequestData;
+                } else {
                     continue;
                 }
             }
-            return null;
+
+            var userDetails = new Dictionary<string, object>();
+            // Extract the user_details section from the requestData
+            var match = Regex.Match(requestData, @"user_details=([^&]+)");
+            if (match.Success) {
+                // URL decode and deserialize the user_details JSON
+                string userDetailsJson = System.Web.HttpUtility.UrlDecode(match.Groups[1].Value);
+                var userDetailsObj = JObject.Parse(userDetailsJson);
+
+                // Convert JObject to Dictionary<string, object>
+                foreach (var property in userDetailsObj.Properties()) {
+                    if (property.Name == "custom" && property.Value is JObject customObj) {
+                        foreach (var customProperty in customObj.Properties()) {
+                            userDetails[customProperty.Name] = ConvertJTokenToValue(customProperty.Value);
+                        }
+                    } else {
+                        userDetails[property.Name] = ConvertJTokenToValue(property.Value);
+                    }
+                }
+            }
+
+            return userDetails;
+        }
+
+        public static void ValidateUserDetails(Dictionary<string, object> actualUserDetails, Dictionary<string, object> expectedUserDetails)
+        {
+            foreach (string key in expectedUserDetails.Keys) {
+                Assert.IsTrue(actualUserDetails.ContainsKey(key), $"Key {key} is missing in actual user details.");
+                Assert.AreEqual(expectedUserDetails[key], actualUserDetails[key], $"Value for key {key} does not match.");
+            }
+        }
+
+        private static object ConvertJTokenToValue(JToken token)
+        {
+            if (token.Type == JTokenType.Object) {
+                var dict = new Dictionary<string, object>();
+                foreach (var property in token.Children<JProperty>()) {
+                    dict[property.Name] = ConvertJTokenToValue(property.Value);
+                }
+                return dict;
+            } else if (token.Type == JTokenType.Array) {
+                var list = new List<object>();
+                foreach (var item in token.Children()) {
+                    list.Add(ConvertJTokenToValue(item));
+                }
+                return list;
+            } else {
+                return token.ToObject<object>();
+            }
         }
     }
 }
