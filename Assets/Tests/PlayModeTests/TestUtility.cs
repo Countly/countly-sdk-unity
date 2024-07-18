@@ -365,8 +365,7 @@ namespace Assets.Tests.PlayModeTests
 
                         break; // Exit loop once processed the first matching request
                     } catch (JsonReaderException ex) {
-                        UnityEngine.Debug.Log($"Error parsing userDetailsJson: {ex.Message}");
-                        continue; // Move to the next request
+                        Debug.Log($"Error parsing userDetailsJson: {ex.Message}");
                     }
                 }
             }
