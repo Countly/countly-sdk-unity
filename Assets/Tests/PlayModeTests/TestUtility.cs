@@ -7,6 +7,8 @@ using Plugins.CountlySDK.Enums;
 using System.Text.RegularExpressions;
 using UnityEngine;
 using NUnit.Framework;
+using System;
+using System.Collections;
 using Newtonsoft.Json;
 
 namespace Assets.Tests.PlayModeTests
