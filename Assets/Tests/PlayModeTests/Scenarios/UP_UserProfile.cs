@@ -141,18 +141,37 @@ namespace Assets.Tests.PlayModeTests.Scenarios
             CountlyConfiguration config = TestUtility.CreateBaseConfig()
                 .SetRequiresConsent(false);
             Countly.Instance.Init(config);
-            TestUtility.ValidateRQEQSize(Countly.Instance, 1, 0);
+            Countly cly = Countly.Instance;
+            TestUtility.ValidateRQEQSize(cly, 1, 0);
 
             _ = Countly.Instance.Events.RecordEventAsync("BasicEventA");
             _ = Countly.Instance.Events.RecordEventAsync("BasicEventB");
             SendSameData();
             _ = Countly.Instance.Events.RecordEventAsync("BasicEventC");
+            
+            // Extract and validate user_details requests
+            TestUtility.ValidateRQEQSize(cly, 3, 1);
+            Dictionary<string, object> up1 = TestUtility.ExtractAndDeserializeUserDetails(cly.RequestHelper._requestRepo.Models);
+            TestUtility.ValidateUserDetails(up1, ExpectedSameData());
+            cly.RequestHelper._requestRepo.Clear();
+
             SendSameData();
             _ = Countly.Instance.Events.RecordEventAsync("BasicEventD");
+            
+            // Extract and validate user_details requests
+            TestUtility.ValidateRQEQSize(cly, 2, 1);
+            Dictionary<string, object> up2 = TestUtility.ExtractAndDeserializeUserDetails(cly.RequestHelper._requestRepo.Models);
+            TestUtility.ValidateUserDetails(up2, ExpectedSameData());
+            cly.RequestHelper._requestRepo.Clear();
+
             SendSameData();
             _ = Countly.Instance.Events.RecordEventAsync("BasicEventE");
 
-            TestUtility.ValidateRQEQSize(Countly.Instance, 7, 1);
+            // Extract and validate user_details requests
+            TestUtility.ValidateRQEQSize(cly, 2, 1);
+            Dictionary<string, object> up3 = TestUtility.ExtractAndDeserializeUserDetails(cly.RequestHelper._requestRepo.Models);
+            TestUtility.ValidateUserDetails(up3, ExpectedSameData());
+            cly.RequestHelper._requestRepo.Clear();
         }
 
         // RecordEventAsync with UserProfile changes
@@ -164,18 +183,37 @@ namespace Assets.Tests.PlayModeTests.Scenarios
             Consents[] consent = new Consents[] { Consents.Crashes, Consents.Events, Consents.Clicks, Consents.StarRating, Consents.Views, Consents.Users, Consents.Push, Consents.RemoteConfig, Consents.Location, Consents.Feedback, Consents.Sessions };
             CountlyConfiguration config = TestUtility.CreateBaseConfigConsent(consent);
             Countly.Instance.Init(config);
-            TestUtility.ValidateRQEQSize(Countly.Instance, 2, 0);
+            Countly cly = Countly.Instance;
+            TestUtility.ValidateRQEQSize(cly, 2, 0);
 
             _ = Countly.Instance.Events.RecordEventAsync("BasicEventA");
             _ = Countly.Instance.Events.RecordEventAsync("BasicEventB");
             SendSameData();
             _ = Countly.Instance.Events.RecordEventAsync("BasicEventC");
+
+            // Extract and validate user_details requests
+            TestUtility.ValidateRQEQSize(cly, 4, 1);
+            Dictionary<string, object> up1 = TestUtility.ExtractAndDeserializeUserDetails(cly.RequestHelper._requestRepo.Models);
+            TestUtility.ValidateUserDetails(up1, ExpectedSameData());
+            cly.RequestHelper._requestRepo.Clear();
+
             SendSameData();
             _ = Countly.Instance.Events.RecordEventAsync("BasicEventD");
+
+            // Extract and validate user_details requests
+            TestUtility.ValidateRQEQSize(cly, 2, 1);
+            Dictionary<string, object> up2 = TestUtility.ExtractAndDeserializeUserDetails(cly.RequestHelper._requestRepo.Models);
+            TestUtility.ValidateUserDetails(up2, ExpectedSameData());
+            cly.RequestHelper._requestRepo.Clear();
+
             SendSameData();
             _ = Countly.Instance.Events.RecordEventAsync("BasicEventE");
 
-            TestUtility.ValidateRQEQSize(Countly.Instance, 8, 1);
+            // Extract and validate user_details requests
+            TestUtility.ValidateRQEQSize(cly, 2, 1);
+            Dictionary<string, object> up3 = TestUtility.ExtractAndDeserializeUserDetails(cly.RequestHelper._requestRepo.Models);
+            TestUtility.ValidateUserDetails(up3, ExpectedSameData());
+            cly.RequestHelper._requestRepo.Clear();
         }
 
         // RecordEventAsync with UserProfile changes
@@ -218,21 +256,38 @@ namespace Assets.Tests.PlayModeTests.Scenarios
             _ = Countly.Instance.Events.RecordEventAsync("BasicEventB");
             SendSameData();
             _ = cly.Session.EndSessionAsync();
+
+            // Extract and validate user_details requests
             TestUtility.ValidateRQEQSize(cly, 4, 0);
+            Dictionary<string, object> up1 = TestUtility.ExtractAndDeserializeUserDetails(cly.RequestHelper._requestRepo.Models);
+            TestUtility.ValidateUserDetails(up1, ExpectedSameData());
+            cly.RequestHelper._requestRepo.Clear();
 
             _ = Countly.Instance.Events.RecordEventAsync("BasicEventC");
             SendUserData();
             _ = cly.Session.EndSessionAsync();
             _ = cly.Device.ChangeDeviceIdWithMerge("merge_id");
-            TestUtility.ValidateRQEQSize(cly, 7, 0);
+            // Extract and validate user_details requests
+            TestUtility.ValidateRQEQSize(cly, 3, 0);
+            Dictionary<string, object> up2 = TestUtility.ExtractAndDeserializeUserDetails(cly.RequestHelper._requestRepo.Models);
+            TestUtility.ValidateUserDetails(up2, ExpectedUserData());
+            cly.RequestHelper._requestRepo.Clear();
 
             SendSameData();
             _ = cly.Device.ChangeDeviceIdWithoutMerge("non_merge_id");
-            TestUtility.ValidateRQEQSize(cly, 8, 0);
+            // Extract and validate user_details requests
+            TestUtility.ValidateRQEQSize(cly, 1, 0);
+            Dictionary<string, object> up3 = TestUtility.ExtractAndDeserializeUserDetails(cly.RequestHelper._requestRepo.Models);
+            TestUtility.ValidateUserDetails(up3, ExpectedSameData());
+            cly.RequestHelper._requestRepo.Clear();
 
             SendSameData();
             _ = Countly.Instance.Events.RecordEventAsync("BasicEventD");
-            TestUtility.ValidateRQEQSize(cly, 9, 1);
+            // Extract and validate user_details requests
+            TestUtility.ValidateRQEQSize(cly, 1, 1);
+            Dictionary<string, object> up4 = TestUtility.ExtractAndDeserializeUserDetails(cly.RequestHelper._requestRepo.Models);
+            TestUtility.ValidateUserDetails(up4, ExpectedSameData());
+            cly.RequestHelper._requestRepo.Clear();
         }
 
         // DeviceID changes with UserProfile changes
@@ -254,8 +309,8 @@ namespace Assets.Tests.PlayModeTests.Scenarios
             _ = Countly.Instance.Events.RecordEventAsync("BasicEventB");
             SendSameData();
             _ = cly.Session.EndSessionAsync();
-            TestUtility.ValidateRQEQSize(cly, 3, 0);
             // Extract and validate user_details requests
+            TestUtility.ValidateRQEQSize(cly, 3, 0);
             Dictionary<string, object> up1 = TestUtility.ExtractAndDeserializeUserDetails(cly.RequestHelper._requestRepo.Models);
             TestUtility.ValidateUserDetails(up1, ExpectedSameData());
             cly.RequestHelper._requestRepo.Clear();
@@ -264,8 +319,8 @@ namespace Assets.Tests.PlayModeTests.Scenarios
             SendUserData();
             _ = cly.Session.EndSessionAsync();
             _ = cly.Device.ChangeDeviceIdWithMerge("merge_id");
-            TestUtility.ValidateRQEQSize(cly, 3, 0);
             // Extract and validate user_details requests
+            TestUtility.ValidateRQEQSize(cly, 3, 0);
             Dictionary<string, object> up2 = TestUtility.ExtractAndDeserializeUserDetails(cly.RequestHelper._requestRepo.Models);
             TestUtility.ValidateUserDetails(up2, ExpectedUserData());
             cly.RequestHelper._requestRepo.Clear();
@@ -329,7 +384,11 @@ namespace Assets.Tests.PlayModeTests.Scenarios
             TestUtility.ValidateRQEQSize(cly, 1, 0);
             SendUserData();
             Thread.Sleep(6000);
+            // Extract and validate user_details requests
             TestUtility.ValidateRQEQSize(cly, 2, 0);
+            Dictionary<string, object> up1 = TestUtility.ExtractAndDeserializeUserDetails(cly.RequestHelper._requestRepo.Models);
+            TestUtility.ValidateUserDetails(up1, ExpectedUserData());
+            cly.RequestHelper._requestRepo.Clear();
         }
 
         [SetUp]
