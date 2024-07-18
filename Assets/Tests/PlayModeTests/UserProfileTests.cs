@@ -226,7 +226,6 @@ namespace Assets.Tests.PlayModeTests
             cly.UserProfile.Save();
 
             TestUtility.ValidateRQEQSize(cly, 3, 0);
-            // which should return an empty dictionary since there are no user profile requests
             Dictionary<string, object> up1 = TestUtility.ExtractAndDeserializeUserDetails(cly.RequestHelper._requestRepo.Models);
             TestUtility.ValidateUserDetails(up1, ExpectedUserData());
         }
