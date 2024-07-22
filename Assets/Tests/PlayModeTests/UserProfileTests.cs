@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Assets.Tests.PlayModeTests.Scenarios;
 using NUnit.Framework;
 using Plugins.CountlySDK;
 using Plugins.CountlySDK.Enums;
@@ -187,13 +188,13 @@ namespace Assets.Tests.PlayModeTests
             TestUtility.ValidateUserDetails(up1, ExpectedUserProperty());
             cly.RequestHelper._requestRepo.Clear();
         }
-        
+
         // 'Save' in Countly.Instance.UserProfile
         // We initialize the sdk with consent requirement however not give consent. We try to record user profile data and call save
         // Since consent is not provided calling 'Save' should not record any request
         [Test]
         public void SaveWithRecordedValue_CR_CNG()
-        { 
+        {
             CountlyConfiguration config = TestUtility.CreateBaseConfig()
                 .SetRequiresConsent(true);
 
@@ -209,13 +210,13 @@ namespace Assets.Tests.PlayModeTests
             Dictionary<string, object> up1 = TestUtility.ExtractAndDeserializeUserDetails(cly.RequestHelper._requestRepo.Models);
             Assert.IsTrue(up1.Count == 0);
         }
-        
+
         // 'Save' in Countly.Instance.UserProfile
         // We initialize the sdk with consent requirement and give consent. We try to record user profile data and call save
         // Since consent is provided calling 'Save' should record an User Profile request
         [Test]
         public void SaveWithRecordedValue_CR_CG()
-        { 
+        {
             Consents[] consent = new Consents[] { Consents.Crashes, Consents.Events, Consents.Clicks, Consents.StarRating, Consents.Views, Consents.Users, Consents.Push, Consents.RemoteConfig, Consents.Location, Consents.Feedback, Consents.Sessions };
             CountlyConfiguration config = TestUtility.CreateBaseConfigConsent(consent);
 
@@ -228,6 +229,83 @@ namespace Assets.Tests.PlayModeTests
             TestUtility.ValidateRQEQSize(cly, 3, 0);
             Dictionary<string, object> up1 = TestUtility.ExtractAndDeserializeUserDetails(cly.RequestHelper._requestRepo.Models);
             TestUtility.ValidateUserDetails(up1, ExpectedUserData());
+        }
+
+        // Recording an Event while User Profile Data is set
+        // We initialize the sdk, set user profile data and record an event
+        // When we record the event it should create an User Profile request
+        [Test]
+        public void EventWithRecordedValue_A_CNR()
+        {
+            Countly cly = Countly.Instance;
+            cly.Init(TestUtility.CreateBaseConfig());
+
+            cly.UserProfile.SetProperties(ExpectedUserProperty());
+            _ = cly.Events.RecordEventAsync("EventA");
+
+            TestUtility.ValidateRQEQSize(cly, 2, 1);
+            Dictionary<string, object> up1 = TestUtility.ExtractAndDeserializeUserDetails(cly.RequestHelper._requestRepo.Models);
+            TestUtility.ValidateUserDetails(up1, ExpectedUserProperty());
+            cly.RequestHelper._requestRepo.Clear();
+        }
+
+        // Recording an Event while User Profile Data is set
+        // We initialize the sdk, with consent requirement, however not provide it. then set user profile data and record an event
+        // Since consent is not provided event or user profile request should not be created
+        [Test]
+        public void EventWithRecordedValue_A_CR_CNG()
+        {
+            CountlyConfiguration config = TestUtility.CreateBaseConfig()
+                .SetRequiresConsent(true);
+
+            Countly cly = Countly.Instance;
+            cly.Init(config);
+            // 1 request for session and 1 for consents
+            TestUtility.ValidateRQEQSize(cly, 2, 0);
+            cly.RequestHelper._requestRepo.Clear();
+
+            cly.UserProfile.SetProperties(ExpectedUserProperty());
+            _ = cly.Events.RecordEventAsync("EventA");
+
+            TestUtility.ValidateRQEQSize(cly, 0, 0);
+        }
+
+        // Starting a View while User Profile Data is set
+        // We initialize the sdk, set user profile data and start a view
+        // Starting a view should record a view event and create an user profile request
+        [Test]
+        public void ViewWithRecordedValue_A_CNR()
+        {
+            Countly cly = Countly.Instance;
+            cly.Init(TestUtility.CreateBaseConfig());
+
+            cly.UserProfile.SetProperties(ExpectedUserProperty());
+            cly.Views.StartView("viewA");
+
+            TestUtility.ValidateRQEQSize(cly, 2, 1);
+            Dictionary<string, object> up1 = TestUtility.ExtractAndDeserializeUserDetails(cly.RequestHelper._requestRepo.Models);
+            TestUtility.ValidateUserDetails(up1, ExpectedUserProperty());
+            cly.RequestHelper._requestRepo.Clear();
+        }
+
+        // Starting a View while User Profile Data is set
+        // We initialize the sdk, with consent requirement, however not provide it. then set user profile data and start a view
+        // Since consent is not provided starting a view should not record a view event and create an user profile request
+        [Test]
+        public void ViewWithRecordedValue_A_CR_CNG()
+        {
+            CountlyConfiguration config = TestUtility.CreateBaseConfig()
+                .SetRequiresConsent(true);
+
+            Countly cly = Countly.Instance;
+            cly.Init(config);
+            // 1 request for session and 1 for consents
+            TestUtility.ValidateRQEQSize(cly, 2, 0);
+            cly.RequestHelper._requestRepo.Clear();
+
+            cly.UserProfile.SetProperties(ExpectedUserProperty());
+            cly.Views.StartView("viewA");
+            TestUtility.ValidateRQEQSize(cly, 0, 0);
         }
 
         [SetUp]
