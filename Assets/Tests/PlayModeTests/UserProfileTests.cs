@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using Assets.Tests.PlayModeTests.Scenarios;
 using NUnit.Framework;
 using Plugins.CountlySDK;
@@ -306,6 +308,146 @@ namespace Assets.Tests.PlayModeTests
             cly.UserProfile.SetProperties(ExpectedUserProperty());
             cly.Views.StartView("viewA");
             TestUtility.ValidateRQEQSize(cly, 0, 0);
+        }
+
+        // Changing Device ID with merge while User Profile Data is set
+        // We initialize the sdk, record user profile data and change the device id
+        // Changing device id should create a request for device id change and user profile data
+        [Test]
+        public void ChangeDeviceIdWithMergeWithRecordedValue_A_CNR()
+        {
+            Countly cly = Countly.Instance;
+            cly.Init(TestUtility.CreateBaseConfig());
+
+            cly.UserProfile.SetProperties(ExpectedUserProperty());
+            _ = cly.Device.ChangeDeviceIdWithMerge("new_deviceid");
+
+            TestUtility.ValidateRQEQSize(cly, 3, 0);
+            Dictionary<string, object> up1 = TestUtility.ExtractAndDeserializeUserDetails(cly.RequestHelper._requestRepo.Models);
+            TestUtility.ValidateUserDetails(up1, ExpectedUserProperty());
+            cly.RequestHelper._requestRepo.Clear();
+        }
+
+        // Changing Device ID with merge while User Profile Data is set
+        // We initialize the sdk, record user profile data and change the device id
+        // Changing device id should create a request for device id change and user profile data
+        [Test]
+        public void ChangeDeviceIdWithMergeWithRecordedValue_A_CR_CNG()
+        {
+            CountlyConfiguration config = TestUtility.CreateBaseConfig()
+                .SetRequiresConsent(true);
+
+            Countly cly = Countly.Instance;
+            cly.Init(config);
+            // 1 request for session and 1 for consents
+            TestUtility.ValidateRQEQSize(cly, 2, 0);
+            cly.RequestHelper._requestRepo.Clear();
+
+            cly.UserProfile.SetProperties(ExpectedUserProperty());
+            _ = cly.Device.ChangeDeviceIdWithMerge("new_deviceid");
+            TestUtility.ValidateRQEQSize(cly, 1, 0);
+            Assert.AreEqual(0, TestUtility.ExtractAndDeserializeUserDetails(cly.RequestHelper._requestRepo.Models).Count);
+            cly.RequestHelper._requestRepo.Clear();
+        }
+
+        // Changing Device ID without merge while User Profile Data is set
+        // We initialize the sdk, record user profile data and change the device id
+        // Changing device id itself should not create a request for device id but it should create one for user profile data
+        [Test]
+        public void ChangeDeviceIdWithoutMergeWithRecordedValue_A_CNR()
+        {
+            Countly cly = Countly.Instance;
+            cly.Init(TestUtility.CreateBaseConfig());
+            TestUtility.ValidateRQEQSize(cly, 1, 0);
+            cly.RequestHelper._requestRepo.Clear();
+
+            cly.UserProfile.SetProperties(ExpectedUserProperty());
+            _ = cly.Device.ChangeDeviceIdWithoutMerge("new_deviceid");
+
+            // 1 for end session, 1 for start session, 1 for user profile, changing without merge itself should not create a request
+            TestUtility.ValidateRQEQSize(cly, 3, 0);
+            Dictionary<string, object> up1 = TestUtility.ExtractAndDeserializeUserDetails(cly.RequestHelper._requestRepo.Models);
+            TestUtility.ValidateUserDetails(up1, ExpectedUserProperty());
+            cly.RequestHelper._requestRepo.Clear();
+        }
+
+        // Manual Session Timer with User Profile data is set
+        // We initialize the sdk with manual session with a timer delay of 3 seconds, begin session, record user profile data and wait 4 seconds
+        // When session timer is elapsed, it should automaticly create an user profile request
+        [Test]
+        public void SessionTimerElapseWithRecordedValue_M_CNR()
+        {
+            CountlyConfiguration config = TestUtility.CreateBaseConfig()
+                .SetUpdateSessionTimerDelay(3);
+            config.DisableAutomaticSessionTracking();
+            Countly cly = Countly.Instance;
+            cly.Init(config);
+            _ = cly.Session.BeginSessionAsync();
+            TestUtility.ValidateRQEQSize(cly, 1, 0);
+            cly.RequestHelper._requestRepo.Clear();
+            cly.UserProfile.SetProperties(ExpectedUserProperty());
+
+            Thread.Sleep(4000);
+
+            TestUtility.ValidateRQEQSize(cly, 1, 0);
+            Dictionary<string, object> up1 = TestUtility.ExtractAndDeserializeUserDetails(cly.RequestHelper._requestRepo.Models);
+            TestUtility.ValidateUserDetails(up1, ExpectedUserProperty());
+            cly.RequestHelper._requestRepo.Clear();
+        }
+
+        // Manual Session Timer with User Profile data is set
+        // We initialize the sdk with consent requirement, however not provide it.
+        // We start manual session with a timer delay of 3 seconds, try to record user profile data and wait 4 seconds
+        // After 4 seconds it should create no request since there is no consent provided
+        [Test]
+        public void SessionTimerElapseWithRecordedValue_M_CR_CNG()
+        {
+            CountlyConfiguration config = TestUtility.CreateBaseConfig()
+                .SetRequiresConsent(true)
+                .SetUpdateSessionTimerDelay(3);
+
+            config.DisableAutomaticSessionTracking();
+            Countly cly = Countly.Instance;
+            cly.Init(config);
+            _ = cly.Session.BeginSessionAsync();
+
+            TestUtility.ValidateRQEQSize(cly, 2, 0);
+            cly.RequestHelper._requestRepo.Clear();
+
+            cly.UserProfile.SetProperties(ExpectedUserProperty());
+
+            Thread.Sleep(4000);
+
+            TestUtility.ValidateRQEQSize(cly, 0, 0);
+            Assert.AreEqual(0, TestUtility.ExtractAndDeserializeUserDetails(cly.RequestHelper._requestRepo.Models).Count);
+        }
+
+        // Manual Session Timer with User Profile data is set
+        // We initialize the sdk with consent requirement, and provide consent.
+        // We start manual session with a timer delay of 3 seconds, record user profile data and wait 4 seconds
+        // When session timer is elapsed, it should automaticly create an user profile request
+        [Test]
+        public void SessionTimerElapseWithRecordedValue_M_CR_CG()
+        {
+            Consents[] consent = new Consents[] { Consents.Crashes, Consents.Events, Consents.Clicks, Consents.StarRating, Consents.Views, Consents.Users, Consents.Push, Consents.RemoteConfig, Consents.Location, Consents.Feedback, Consents.Sessions };
+            CountlyConfiguration config = TestUtility.CreateBaseConfigConsent(consent)
+                .SetUpdateSessionTimerDelay(3);
+            config.DisableAutomaticSessionTracking();
+            Countly cly = Countly.Instance;
+            cly.Init(config);
+            _ = cly.Session.BeginSessionAsync();
+
+            TestUtility.ValidateRQEQSize(cly, 2, 0);
+            cly.RequestHelper._requestRepo.Clear();
+
+            cly.UserProfile.SetProperties(ExpectedUserProperty());
+
+            Thread.Sleep(4000);
+
+            TestUtility.ValidateRQEQSize(cly, 1, 0);
+            Dictionary<string, object> up1 = TestUtility.ExtractAndDeserializeUserDetails(cly.RequestHelper._requestRepo.Models);
+            TestUtility.ValidateUserDetails(up1, ExpectedUserProperty());
+            cly.RequestHelper._requestRepo.Clear();
         }
 
         [SetUp]
