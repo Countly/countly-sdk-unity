@@ -399,13 +399,6 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
         if (userData.TryGetValue(BYEAR_KEY, out object birthYearValue) && birthYearValue is int birthYear) {
             BirthYear = birthYear;
         }
-
-        if (userData.TryGetValue(CUSTOM_KEY, out object custom) && custom is Dictionary<string, object>) {
-            Dictionary<string, object> customDictionary = (Dictionary<string, object>)FixSegmentKeysAndValues((IDictionary<string, object>)custom);
-            foreach (KeyValuePair<string, object> item in customDictionary) {
-                CustomDataProperties.Add(item.Key, item.Value);
-            }
-        }
     }
 
     private void SetPropertiesInternal(Dictionary<string, object> data)
