@@ -4,8 +4,6 @@ using Plugins.CountlySDK;
 using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK.Enums;
 using System.Threading;
-using System.Diagnostics;
-using UnityEngine;
 using NUnit.Framework.Internal;
 
 namespace Assets.Tests.PlayModeTests.Scenarios
@@ -95,55 +93,69 @@ namespace Assets.Tests.PlayModeTests.Scenarios
 
         // UserProfile calls in Countly.Instance.UserProfile
         // We initialize SDK without consent requirement, check the RQ and EQ sizes, then call public methods
-        // Methods we call should record nothing in the RQ and EQ
+        // User Profile calls should record nothing in the RQ and EQ
+        // Expected Request Queue: There can be begin session request
         [Test]
         public void UP_200_CNR_A()
         {
             CountlyConfiguration config = TestUtility.CreateBaseConfig()
                 .SetRequiresConsent(false);
             Countly.Instance.Init(config);
+
+            // begin session request
             TestUtility.ValidateRQEQSize(Countly.Instance, 1, 0);
 
+            Countly.Instance.RequestHelper._requestRepo.Clear();
             SendUserData();
             SendUserProperty();
-            TestUtility.ValidateRQEQSize(Countly.Instance, 1, 0);
+            TestUtility.ValidateRQEQSize(Countly.Instance, 0, 0);
         }
 
         // UserProfile calls in Countly.Instance.UserProfile
         // We initialize SDK with consent requirement and give consents, check the RQ and EQ sizes, then call public methods
-        // Methods we call should record nothing in the RQ and EQ
+        // User Profile calls should record nothing in the RQ and EQ
+        // Expected Request Queue: There can be begin session and consent request
         [Test]
         public void UP_201_CR_CG_A()
         {
             Consents[] consent = new Consents[] { Consents.Crashes, Consents.Events, Consents.Clicks, Consents.StarRating, Consents.Views, Consents.Users, Consents.Push, Consents.RemoteConfig, Consents.Location, Consents.Feedback, Consents.Sessions };
             CountlyConfiguration config = TestUtility.CreateBaseConfigConsent(consent);
             Countly.Instance.Init(config);
+
+            // consent and begin session requests
             TestUtility.ValidateRQEQSize(Countly.Instance, 2, 0);
+            Countly.Instance.RequestHelper._requestRepo.Clear();
 
             SendUserData();
             SendUserProperty();
-            TestUtility.ValidateRQEQSize(Countly.Instance, 2, 0);
+            TestUtility.ValidateRQEQSize(Countly.Instance, 0, 0);
         }
 
         // UserProfile calls in Countly.Instance.UserProfile
         // We initialize SDK with consent requirement and give no consent, check the RQ and EQ sizes, then call public methods
-        // Methods we call should record nothing in the RQ and EQ
+        // User Profile calls should record nothing in the RQ and EQ
+        // Expected Request Queue: There can be begin session and location request
         [Test]
         public void UP_202_CR_CNG_A()
         {
-            Consents[] consent = new Consents[] { };
-            CountlyConfiguration config = TestUtility.CreateBaseConfigConsent(consent);
+            CountlyConfiguration config = TestUtility.CreateBaseConfig()
+                .SetRequiresConsent(true);
             Countly.Instance.Init(config);
+
+            // begin session and location request
             TestUtility.ValidateRQEQSize(Countly.Instance, 2, 0);
+            Countly.Instance.RequestHelper._requestRepo.Clear();
 
             SendUserData();
             SendUserProperty();
-            TestUtility.ValidateRQEQSize(Countly.Instance, 2, 0);
+            TestUtility.ValidateRQEQSize(Countly.Instance, 0, 0);
         }
 
         // RecordEventAsync with UserProfile changes
         // We record events without consent requirement, between events we record user profile data
         // With each event, if user data information is recorded, it should flush EQ and send user profile data
+        // Expected Request Queue: -Begin session -Event A and B -User Property a12345 = 4 -Event C -User Property a12345 = 4 -Event D -User Property a12345 = 4 (we clear the queue in the test as we validate)
+        // Expected Event Queue: -Event E
         [Test]
         public void UP_203_CNR_A_Events()
         {
@@ -151,23 +163,25 @@ namespace Assets.Tests.PlayModeTests.Scenarios
                 .SetRequiresConsent(false);
             Countly.Instance.Init(config);
             Countly cly = Countly.Instance;
+            // begin session request
             TestUtility.ValidateRQEQSize(cly, 1, 0);
+            cly.RequestHelper._requestRepo.Clear();
 
             _ = Countly.Instance.Events.RecordEventAsync("BasicEventA");
             _ = Countly.Instance.Events.RecordEventAsync("BasicEventB");
             SendSameData();
             _ = Countly.Instance.Events.RecordEventAsync("BasicEventC");
-            
-            // Extract and validate user_details requests
-            TestUtility.ValidateRQEQSize(cly, 3, 1);
+
+            // Extract and validate user_details requests: RQ: Event A & B, User Profile, EQ: Event C
+            TestUtility.ValidateRQEQSize(cly, 2, 1);
             Dictionary<string, object> up1 = TestUtility.ExtractAndDeserializeUserDetails(cly.RequestHelper._requestRepo.Models);
             TestUtility.ValidateUserDetails(up1, ExpectedSameData());
             cly.RequestHelper._requestRepo.Clear();
 
             SendSameData();
             _ = Countly.Instance.Events.RecordEventAsync("BasicEventD");
-            
-            // Extract and validate user_details requests
+
+            // Extract and validate user_details requests: RQ: Event C, User Profile, EQ: Event D
             TestUtility.ValidateRQEQSize(cly, 2, 1);
             Dictionary<string, object> up2 = TestUtility.ExtractAndDeserializeUserDetails(cly.RequestHelper._requestRepo.Models);
             TestUtility.ValidateUserDetails(up2, ExpectedSameData());
@@ -176,7 +190,7 @@ namespace Assets.Tests.PlayModeTests.Scenarios
             SendSameData();
             _ = Countly.Instance.Events.RecordEventAsync("BasicEventE");
 
-            // Extract and validate user_details requests
+            // Extract and validate user_details requests: RQ: Event D, User Profile, EQ: Event E
             TestUtility.ValidateRQEQSize(cly, 2, 1);
             Dictionary<string, object> up3 = TestUtility.ExtractAndDeserializeUserDetails(cly.RequestHelper._requestRepo.Models);
             TestUtility.ValidateUserDetails(up3, ExpectedSameData());
@@ -186,6 +200,8 @@ namespace Assets.Tests.PlayModeTests.Scenarios
         // RecordEventAsync with UserProfile changes
         // We record events with consent requirement, between events we record user profile data
         // With each event, if user data information is recorded, it should flush EQ and send user profile data
+        // Expected Request Queue: -Begin session -Event A and B -User Property a12345 = 4 -Event C -User Property a12345 = 4 -Event D -User Property a12345 = 4 (we clear the queue in the test as we validate)
+        // Expected Event Queue: -Event E
         [Test]
         public void UP_205_CR_CG_A()
         {
@@ -193,15 +209,18 @@ namespace Assets.Tests.PlayModeTests.Scenarios
             CountlyConfiguration config = TestUtility.CreateBaseConfigConsent(consent);
             Countly.Instance.Init(config);
             Countly cly = Countly.Instance;
+
+            // consent and session requests
             TestUtility.ValidateRQEQSize(cly, 2, 0);
+            cly.RequestHelper._requestRepo.Clear();
 
             _ = Countly.Instance.Events.RecordEventAsync("BasicEventA");
             _ = Countly.Instance.Events.RecordEventAsync("BasicEventB");
             SendSameData();
             _ = Countly.Instance.Events.RecordEventAsync("BasicEventC");
 
-            // Extract and validate user_details requests
-            TestUtility.ValidateRQEQSize(cly, 4, 1);
+            // Extract and validate user_details requests: Event A & B and user profile requests
+            TestUtility.ValidateRQEQSize(cly, 2, 1);
             Dictionary<string, object> up1 = TestUtility.ExtractAndDeserializeUserDetails(cly.RequestHelper._requestRepo.Models);
             TestUtility.ValidateUserDetails(up1, ExpectedSameData());
             cly.RequestHelper._requestRepo.Clear();
@@ -209,7 +228,7 @@ namespace Assets.Tests.PlayModeTests.Scenarios
             SendSameData();
             _ = Countly.Instance.Events.RecordEventAsync("BasicEventD");
 
-            // Extract and validate user_details requests
+            // Extract and validate user_details requests: RQ: Event C and User Profile, EQ: Event D
             TestUtility.ValidateRQEQSize(cly, 2, 1);
             Dictionary<string, object> up2 = TestUtility.ExtractAndDeserializeUserDetails(cly.RequestHelper._requestRepo.Models);
             TestUtility.ValidateUserDetails(up2, ExpectedSameData());
@@ -218,7 +237,7 @@ namespace Assets.Tests.PlayModeTests.Scenarios
             SendSameData();
             _ = Countly.Instance.Events.RecordEventAsync("BasicEventE");
 
-            // Extract and validate user_details requests
+            // Extract and validate user_details requests: RQ: Event D and User Profile, EQ: Event E
             TestUtility.ValidateRQEQSize(cly, 2, 1);
             Dictionary<string, object> up3 = TestUtility.ExtractAndDeserializeUserDetails(cly.RequestHelper._requestRepo.Models);
             TestUtility.ValidateUserDetails(up3, ExpectedSameData());
@@ -228,13 +247,17 @@ namespace Assets.Tests.PlayModeTests.Scenarios
         // RecordEventAsync with UserProfile changes
         // We record events with consent requirement, however provide no consent. Between events we record user profile data
         // Since no consent is provided, events and user profile calls should not record anything
+        // Expected Request Queue: There can be begin session and location request (we clear queue before we start recording events)
         [Test]
         public void UP_206_CR_CNG_A()
         {
             Consents[] consent = new Consents[] { };
             CountlyConfiguration config = TestUtility.CreateBaseConfigConsent(consent);
             Countly.Instance.Init(config);
+
+            // begin session and location request
             TestUtility.ValidateRQEQSize(Countly.Instance, 2, 0);
+            Countly.Instance.RequestHelper._requestRepo.Clear();
 
             _ = Countly.Instance.Events.RecordEventAsync("BasicEventA");
             _ = Countly.Instance.Events.RecordEventAsync("BasicEventB");
@@ -245,12 +268,14 @@ namespace Assets.Tests.PlayModeTests.Scenarios
             SendSameData();
             _ = Countly.Instance.Events.RecordEventAsync("BasicEventE");
 
-            TestUtility.ValidateRQEQSize(Countly.Instance, 2, 0);
+            TestUtility.ValidateRQEQSize(Countly.Instance, 0, 0);
         }
 
         // DeviceID changes with UserProfile changes
         // We record events and User Profile data without consent requirement. We also change device id with and without merge
         // Since consent is not required, events, device id change with merge and events should be recorded correctly
+        // Expected Request Queue: -Begin session -Event A and B -User Property a12345 = 4 -End Session -Event C -User Data -Merge ID -User Property a12345 = 4 -User Property a12345 = 4
+        // Expected Event Queue: -Event D
         [Test]
         public void UP_207_CNR_M()
         {
@@ -259,15 +284,17 @@ namespace Assets.Tests.PlayModeTests.Scenarios
             Countly.Instance.Init(config);
             Countly cly = Countly.Instance;
             _ = cly.Session.BeginSessionAsync();
-            TestUtility.ValidateRQEQSize(cly, 1, 0);
+            // begin session request
+            TestUtility.ValidateRQEQSize(cly, expRQSize: 1, 0);
+            cly.RequestHelper._requestRepo.Clear();
 
             _ = Countly.Instance.Events.RecordEventAsync("BasicEventA");
             _ = Countly.Instance.Events.RecordEventAsync("BasicEventB");
             SendSameData();
             _ = cly.Session.EndSessionAsync();
 
-            // Extract and validate user_details requests
-            TestUtility.ValidateRQEQSize(cly, 4, 0);
+            // Extract and validate user_details requests: Event A & B, User Profile and End Session Requests
+            TestUtility.ValidateRQEQSize(cly, 3, 0);
             Dictionary<string, object> up1 = TestUtility.ExtractAndDeserializeUserDetails(cly.RequestHelper._requestRepo.Models);
             TestUtility.ValidateUserDetails(up1, ExpectedSameData());
             cly.RequestHelper._requestRepo.Clear();
@@ -276,7 +303,7 @@ namespace Assets.Tests.PlayModeTests.Scenarios
             SendUserData();
             _ = cly.Session.EndSessionAsync();
             _ = cly.Device.ChangeDeviceIdWithMerge("merge_id");
-            // Extract and validate user_details requests
+            // Extract and validate user_details requests: Event C, User Profile and Change Device Id with Merge Requests
             TestUtility.ValidateRQEQSize(cly, 3, 0);
             Dictionary<string, object> up2 = TestUtility.ExtractAndDeserializeUserDetails(cly.RequestHelper._requestRepo.Models);
             TestUtility.ValidateUserDetails(up2, ExpectedUserData());
@@ -284,7 +311,7 @@ namespace Assets.Tests.PlayModeTests.Scenarios
 
             SendSameData();
             _ = cly.Device.ChangeDeviceIdWithoutMerge("non_merge_id");
-            // Extract and validate user_details requests
+            // Extract and validate user_details requests: User Profile Request
             TestUtility.ValidateRQEQSize(cly, 1, 0);
             Dictionary<string, object> up3 = TestUtility.ExtractAndDeserializeUserDetails(cly.RequestHelper._requestRepo.Models);
             TestUtility.ValidateUserDetails(up3, ExpectedSameData());
@@ -292,7 +319,7 @@ namespace Assets.Tests.PlayModeTests.Scenarios
 
             SendSameData();
             _ = Countly.Instance.Events.RecordEventAsync("BasicEventD");
-            // Extract and validate user_details requests
+            // Extract and validate user_details requests: RQ: User Profile, EQ: Event D
             TestUtility.ValidateRQEQSize(cly, 1, 1);
             Dictionary<string, object> up4 = TestUtility.ExtractAndDeserializeUserDetails(cly.RequestHelper._requestRepo.Models);
             TestUtility.ValidateUserDetails(up4, ExpectedSameData());
@@ -302,6 +329,7 @@ namespace Assets.Tests.PlayModeTests.Scenarios
         // DeviceID changes with UserProfile changes
         // We record events and User Profile data with consent requirement. We also change device id with and without merge
         // Since consent is required, events, device id change with merge and events should be recorded correctly and post id change events shouldn't be recorded
+        // Expected Request Queue: -Begin session -Event A and B -User Property a12345 = 4 -End Session -Event C -User Data -Merge ID
         [Test]
         public void UP_208_CR_CG_M()
         {
@@ -311,6 +339,8 @@ namespace Assets.Tests.PlayModeTests.Scenarios
             Countly.Instance.Init(config);
             Countly cly = Countly.Instance;
             _ = cly.Session.BeginSessionAsync();
+
+            // consent and session requests
             TestUtility.ValidateRQEQSize(cly, 2, 0);
             cly.RequestHelper._requestRepo.Clear();
 
@@ -318,8 +348,10 @@ namespace Assets.Tests.PlayModeTests.Scenarios
             _ = Countly.Instance.Events.RecordEventAsync("BasicEventB");
             SendSameData();
             _ = cly.Session.EndSessionAsync();
-            // Extract and validate user_details requests
+
+            // Extract and validate user_details requests: Event A & B, User Profile and End Session Requests
             TestUtility.ValidateRQEQSize(cly, 3, 0);
+
             Dictionary<string, object> up1 = TestUtility.ExtractAndDeserializeUserDetails(cly.RequestHelper._requestRepo.Models);
             TestUtility.ValidateUserDetails(up1, ExpectedSameData());
             cly.RequestHelper._requestRepo.Clear();
@@ -328,8 +360,10 @@ namespace Assets.Tests.PlayModeTests.Scenarios
             SendUserData();
             _ = cly.Session.EndSessionAsync();
             _ = cly.Device.ChangeDeviceIdWithMerge("merge_id");
-            // Extract and validate user_details requests
+
+            // Extract and validate user_details requests: Event C, User Profile, Change Device Id with Merge Requests 
             TestUtility.ValidateRQEQSize(cly, 3, 0);
+
             Dictionary<string, object> up2 = TestUtility.ExtractAndDeserializeUserDetails(cly.RequestHelper._requestRepo.Models);
             TestUtility.ValidateUserDetails(up2, ExpectedUserData());
             cly.RequestHelper._requestRepo.Clear();
@@ -345,12 +379,13 @@ namespace Assets.Tests.PlayModeTests.Scenarios
 
         // DeviceID changes with UserProfile changes
         // We record events and User Profile data with consent requirement. However we don't provide consent. We also change device id with and without merge
-        // Since consent is required and not given, nothing except the, session and device id change with merge, should be recorded
+        // Since consent is required and not given, no events or user profile data should be recorded.
+        // Expected Request Queue: Consent Request, Location Request, Device Id Change with Merge Request
         [Test]
         public void UP_209_CR_CNG_M()
         {
-            Consents[] consent = new Consents[] { };
-            CountlyConfiguration config = TestUtility.CreateBaseConfigConsent(consent);
+            CountlyConfiguration config = TestUtility.CreateBaseConfig()
+                .SetRequiresConsent(true);
             config.DisableAutomaticSessionTracking();
             Countly.Instance.Init(config);
             Countly cly = Countly.Instance;
@@ -375,12 +410,15 @@ namespace Assets.Tests.PlayModeTests.Scenarios
 
             SendSameData();
             _ = Countly.Instance.Events.RecordEventAsync("BasicEventD");
+
+            // consent, location, and device id change with merge requests 
             TestUtility.ValidateRQEQSize(cly, 3, 0);
         }
 
         // Manual session elapse with UserProfile changes
         // We start a manual session with an update timer of 5 seconds, and record User Profile data, wait 6 seconds after that.
         // User Data request should automaticly be created after 6 seconds
+        // Expected Request Queue: Session Request, User Profile Request with all the data
         [Test]
         public void UP_210_CNR_M_duration()
         {
@@ -390,7 +428,10 @@ namespace Assets.Tests.PlayModeTests.Scenarios
             config.DisableAutomaticSessionTracking();
             cly.Init(config);
             _ = cly.Session.BeginSessionAsync();
+
+            // session request
             TestUtility.ValidateRQEQSize(cly, 1, 0);
+
             SendUserData();
             Thread.Sleep(6000);
             // Extract and validate user_details requests
