@@ -438,7 +438,17 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
     {
         try {
             if (!(value is double || value is int || value is string)) {
-                Console.WriteLine("[UserProfile] ModifyCustomData, Provided an unsupported type for 'value'");
+                Log.Warning("[UserProfile] ModifyCustomData, Provided an unsupported type for 'value'");
+                return;
+            }
+
+            if (key == null || key == " ") {
+                Log.Warning("[UserProfile] ModifyCustomData, Provided key is null or whitespace. Will be ignored.");
+                return;
+            }
+
+            if (value == null || (value is string v && v == " ")) {
+                Log.Warning("[UserProfile] ModifyCustomData, Provided value is null or whitespace. Will be ignored.");
                 return;
             }
 

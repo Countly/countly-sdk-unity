@@ -450,6 +450,81 @@ namespace Assets.Tests.PlayModeTests
             cly.RequestHelper._requestRepo.Clear();
         }
 
+        [Test]
+        public void Increment_BadKey_CNR()
+        {
+            Countly cly = Countly.Instance;
+            CountlyConfiguration config = TestUtility.CreateBaseConfig();
+            cly.Init(config);
+            TestUtility.ValidateRQEQSize(cly, 1, 0);
+            cly.RequestHelper._requestRepo.Clear();
+
+            cly.UserProfile.Increment(null);
+            cly.UserProfile.Increment(" ");
+            cly.UserProfile.Save();
+            TestUtility.ValidateRQEQSize(cly, 0, 0);
+        }
+
+        [Test]
+        public void IncrementBy_BadKey_CNR()
+        {
+            Countly cly = Countly.Instance;
+            CountlyConfiguration config = TestUtility.CreateBaseConfig();
+            cly.Init(config);
+            TestUtility.ValidateRQEQSize(cly, 1, 0);
+            cly.RequestHelper._requestRepo.Clear();
+
+            cly.UserProfile.IncrementBy(null, 10);
+            cly.UserProfile.IncrementBy(" ", 10);
+            cly.UserProfile.Save();
+            TestUtility.ValidateRQEQSize(cly, 0, 0);
+        }
+
+        [Test]
+        public void Max_BadKey_CNR()
+        {
+            Countly cly = Countly.Instance;
+            CountlyConfiguration config = TestUtility.CreateBaseConfig();
+            cly.Init(config);
+            TestUtility.ValidateRQEQSize(cly, 1, 0);
+            cly.RequestHelper._requestRepo.Clear();
+
+            cly.UserProfile.Max(null, 10);
+            cly.UserProfile.Max(" ", 10);
+            cly.UserProfile.Save();
+            TestUtility.ValidateRQEQSize(cly, 0, 0);
+        }
+
+        [Test]
+        public void Min_BadKey_CNR()
+        {
+            Countly cly = Countly.Instance;
+            CountlyConfiguration config = TestUtility.CreateBaseConfig();
+            cly.Init(config);
+            TestUtility.ValidateRQEQSize(cly, 1, 0);
+            cly.RequestHelper._requestRepo.Clear();
+
+            cly.UserProfile.Min(null, 10);
+            cly.UserProfile.Min(" ", 10);
+            cly.UserProfile.Save();
+            TestUtility.ValidateRQEQSize(cly, 0, 0);
+        }
+
+        [Test]
+        public void Multiply_BadKey_CNR()
+        {
+            Countly cly = Countly.Instance;
+            CountlyConfiguration config = TestUtility.CreateBaseConfig();
+            cly.Init(config);
+            TestUtility.ValidateRQEQSize(cly, 1, 0);
+            cly.RequestHelper._requestRepo.Clear();
+
+            cly.UserProfile.Multiply(null, 10);
+            cly.UserProfile.Multiply(" ", 10);
+            cly.UserProfile.Save();
+            TestUtility.ValidateRQEQSize(cly, 0, 0);
+        }
+
         [SetUp]
         [TearDown]
         public void End()
