@@ -293,7 +293,7 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
             return;
         }
 
-        if (!ValidateConsentAndKey(key)) {
+        if (!ValidateConsentAndKey(key, "PushUniqueInternal")) {
             return;
         }
 
