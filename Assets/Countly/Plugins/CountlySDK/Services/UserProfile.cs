@@ -59,7 +59,7 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
     /// <param name="key">string with property name to increment</param>
     public void Increment(string key)
     {
-        Log.Info($"[UserProfile] Calling Increment with key: [{key}]");
+        Log.Info($"[UserProfile] Increment, with key: [{key}]");
         IncrementInternal(key, 1);
     }
 
@@ -70,7 +70,7 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
     /// <param name="value">value by which to increment</param>
     public void IncrementBy(string key, double value)
     {
-        Log.Info($"[UserProfile] Calling IncrementBy with key: [{key}] and value: [{value}]");
+        Log.Info($"[UserProfile] IncrementBy, with key: [{key}] and value: [{value}]");
         IncrementInternal(key, value);
     }
 
@@ -81,7 +81,7 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
     /// <param name="value">value to check for max</param>
     public void Max(string key, double value)
     {
-        Log.Info($"[UserProfile] Calling Max with key: [{key}] and value: [{value}]");
+        Log.Info($"[UserProfile] Max, with key: [{key}] and value: [{value}]");
         MaxInternal(key, value);
     }
 
@@ -92,7 +92,7 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
     /// <param name="value">value to check for min</param>
     public void Min(string key, double value)
     {
-        Log.Info($"[UserProfile] Calling Min with key: [{key}] and value: [{value}]");
+        Log.Info($"[UserProfile] Min, with key: [{key}] and value: [{value}]");
         MinInternal(key, value);
     }
 
@@ -103,7 +103,7 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
     /// <param name="value">value by which to multiply</param>
     public void Multiply(string key, double value)
     {
-        Log.Info($"[UserProfile] Calling Multiply with key: [{key}] and value: [{value}]");
+        Log.Info($"[UserProfile] Multiply, with key: [{key}] and value: [{value}]");
         MultiplyInternal(key, value);
     }
 
@@ -115,7 +115,7 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
     /// <param name="value">string with value to remove from array</param>
     public void Pull(string key, string value)
     {
-        Log.Info($"[UserProfile] Calling Pull with key: [{key}] and value: [{value}]");
+        Log.Info($"[UserProfile] Pull, with key: [{key}] and value: [{value}]");
         PullInternal(key, value);
     }
 
@@ -127,7 +127,7 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
     /// <param name="value">string with value to add to array</param>
     public void Push(string key, string value)
     {
-        Log.Info($"[UserProfile] Calling Push with key: [{key}] and value: [{value}]");
+        Log.Info($"[UserProfile] Push, with key: [{key}] and value: [{value}]");
         PushInternal(key, value);
     }
 
@@ -139,7 +139,7 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
     /// <param name="value">string with value to add to array</param>
     public void PushUnique(string key, string value)
     {
-        Log.Info($"[UserProfile] Calling PushUnique with key: [{key}] and value: [{value}]");
+        Log.Info($"[UserProfile] PushUnique, with key: [{key}] and value: [{value}]");
         PushUniqueInternal(key, value);
     }
 
@@ -148,7 +148,7 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
     /// </summary>
     public void Save()
     {
-        Log.Info("[UserProfile] Calling Save");
+        Log.Info("[UserProfile] Save");
         SaveInternal();
     }
 
@@ -158,7 +158,7 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
     /// <param name="userData">Dictionary with user data</param>
     public void SetData(Dictionary<string, object> userData)
     {
-        Log.Info("[UserProfile] Calling SetData for " + userData.Count + " amount of values");
+        Log.Info("[UserProfile] SetData, for " + userData.Count + " amount of values");
         SetDataInternal(userData);
     }
 
@@ -169,7 +169,7 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
     /// <param name="value">value string value to set</param>
     public void SetOnce(string key, string value)
     {
-        Log.Info($"[UserProfile] Calling SetOnce with key: [{key}] and value: [{value}]");
+        Log.Info($"[UserProfile] SetOnce, with key: [{key}] and value: [{value}]");
         SetOnceInternal(key, value);
     }
 
@@ -180,7 +180,7 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
     /// <param name="data">Dictionary with data to set</param>
     public void SetProperties(Dictionary<string, object> data)
     {
-        Log.Info("[UserProfile] Calling SetProperties for " + data.Count + " amount of values");
+        Log.Info("[UserProfile] SetProperties, for " + data.Count + " amount of values");
         SetPropertiesInternal(data);
     }
 
@@ -191,7 +191,7 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
     /// <param name="value">value for the user property to be set. The value should be the allowed data type.</param>
     public void SetProperty(string key, object value)
     {
-        Log.Info($"[UserProfile] Calling SetProperty with key: [{key}] and value: [{value}]");
+        Log.Info($"[UserProfile] SetProperty, with key: [{key}] and value: [{value}]");
         SetPropertyInternal(key, value);
     }
     #endregion
@@ -199,7 +199,7 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
     private void IncrementInternal(string key, double value)
     {
         if (!cly.IsSDKInitialized) {
-            Log.Warning("[UserProfile][IncrementInternal], Countly.Instance.Init() must be called before IncrementInternal");
+            Log.Warning("[UserProfile] IncrementInternal, Countly.Instance.Init() must be called before IncrementInternal");
             return;
         }
         
@@ -207,14 +207,14 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
             return;
         }
 
-        Log.Info($"[UserProfile][IncrementInternal] key: [{key}] and value: [{value}]");
+        Log.Info($"[UserProfile] IncrementInternal, key: [{key}] and value: [{value}]");
         ModifyCustomData(key, value, "$inc");
     }
 
     private void MaxInternal(string key, double value)
     {
         if (!cly.IsSDKInitialized) {
-            Log.Warning("[UserProfile][MaxInternal], Countly.Instance.Init() must be called before MaxInternal");
+            Log.Warning("[UserProfile] MaxInternal, Countly.Instance.Init() must be called before MaxInternal");
             return;
         }
 
@@ -222,14 +222,14 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
             return;
         }
 
-        Log.Info($"[UserProfile][MaxInternal] key: [{key}] and value: [{value}]");
+        Log.Info($"[UserProfile] MaxInternal, key: [{key}] and value: [{value}]");
         ModifyCustomData(key, value, "$max");
     }
 
     private void MinInternal(string key, double value)
     {
         if (!cly.IsSDKInitialized) {
-            Log.Warning("[UserProfile][MinInternal], Countly.Instance.Init() must be called before MinInternal");
+            Log.Warning("[UserProfile] MinInternal, Countly.Instance.Init() must be called before MinInternal");
             return;
         }
 
@@ -237,14 +237,14 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
             return;
         }
 
-        Log.Info($"[UserProfile][MinInternal] key: [{key}] and value: [{value}]");
+        Log.Info($"[UserProfile] MinInternal, key: [{key}] and value: [{value}]");
         ModifyCustomData(key, value, "$min");
     }
 
     private void MultiplyInternal(string key, double value)
     {
         if (!cly.IsSDKInitialized) {
-            Log.Warning("[UserProfile][MultiplyInternal], Countly.Instance.Init() must be called before MultiplyInternal");
+            Log.Warning("[UserProfile] MultiplyInternal, Countly.Instance.Init() must be called before MultiplyInternal");
             return;
         }
 
@@ -252,14 +252,14 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
             return;
         }
 
-        Log.Info($"[UserProfile][MultiplyInternal] key: [{key}] and value: [{value}]");
+        Log.Info($"[UserProfile] MultiplyInternal, key: [{key}] and value: [{value}]");
         ModifyCustomData(key, value, "$mul");
     }
 
     private void PullInternal(string key, string value)
     {
         if (!cly.IsSDKInitialized) {
-            Log.Warning("[UserProfile][PullInternal], Countly.Instance.Init() must be called before PullInternal");
+            Log.Warning("[UserProfile] PullInternal, Countly.Instance.Init() must be called before PullInternal");
             return;
         }
 
@@ -267,14 +267,14 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
             return;
         }
 
-        Log.Info($"[UserProfile][PullInternal] key: [{key}] and value: [{value}]");
+        Log.Info($"[UserProfile] PullInternal, key: [{key}] and value: [{value}]");
         ModifyCustomData(key, value, "$pull");
     }
 
     private void PushInternal(string key, string value)
     {
         if (!cly.IsSDKInitialized) {
-            Log.Warning("[UserProfile][PushInternal], Countly.Instance.Init() must be called before PushInternal");
+            Log.Warning("[UserProfile] PushInternal, Countly.Instance.Init() must be called before PushInternal");
             return;
         }
 
@@ -282,14 +282,14 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
             return;
         }
 
-        Log.Info($"[UserProfile][PushInternal] key: [{key}] and value: [{value}]");
+        Log.Info($"[UserProfile] PushInternal, key: [{key}] and value: [{value}]");
         ModifyCustomData(key, value, "$push");
     }
 
     private void PushUniqueInternal(string key, string value)
     {
         if (!cly.IsSDKInitialized) {
-            Log.Warning("[UserProfile][PushUniqueInternal], Countly.Instance.Init() must be called before PushUniqueInternal");
+            Log.Warning("[UserProfile] PushUniqueInternal, Countly.Instance.Init() must be called before PushUniqueInternal");
             return;
         }
 
@@ -297,26 +297,26 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
             return;
         }
 
-        Log.Info($"[UserProfile][PushUniqueInternal] key: [{key}] and value: [{value}]");
+        Log.Info($"[UserProfile] PushUniqueInternal, key: [{key}] and value: [{value}]");
         ModifyCustomData(key, value, "$addToSet");
     }
 
     private void SaveInternal()
     {
         if (!cly.IsSDKInitialized) {
-            Log.Warning("[UserProfile][SaveInternal], Countly.Instance.Init() must be called before SaveInternal");
+            Log.Warning("[UserProfile] SaveInternal, Countly.Instance.Init() must be called before SaveInternal");
             return;
         }
 
         if (!_consentService.CheckConsentInternal(Consents.Users)) {
-            Log.Debug("[UserProfile][SaveInternal] Consent is not given, ignoring the request.");
+            Log.Debug("[UserProfile] SaveInternal, Consent is not given, ignoring the request.");
             return;
         }
 
         Dictionary<string, object> cachedUserData = GetDataForRequest();
 
         if (cachedUserData.Count <= 0) {
-            Log.Debug("[UserProfile][SaveInternal] No user data to save");
+            Log.Debug("[UserProfile] SaveInternal, No user data to save");
             return;
         }
 
@@ -325,7 +325,7 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
         try {
             jsonData = JsonConvert.SerializeObject(cachedUserData);
         } catch (JsonException ex) {
-            Log.Error($"[UserProfile][SaveInternal] failed to serialize cached user data: {ex.Message}");
+            Log.Error($"[UserProfile] SaveInternal, failed to serialize cached user data: {ex.Message}");
             return;
         }
 
@@ -344,21 +344,21 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
     private void SetDataInternal(Dictionary<string, object> userData)
     {
         if (!cly.IsSDKInitialized) {
-            Log.Warning("[UserProfile][SetDataInternal] Countly.Instance.Init() must be called before SetDataInternal");
+            Log.Warning("[UserProfile] SetDataInternal, Countly.Instance.Init() must be called before SetDataInternal");
             return;
         }
 
         if (!_consentService.CheckConsentInternal(Consents.Users)) {
-            Log.Debug("[UserProfile][SetDataInternal] Consent is not given, ignoring the request.");
+            Log.Debug("[UserProfile] SetDataInternal, Consent is not given, ignoring the request.");
             return;
         }
 
         if (userData.Count <= 0) {
-            Log.Debug("[UserProfile][SetDataInternal] Provided userData is empty, ignoring the request.");
+            Log.Debug("[UserProfile] SetDataInternal, Provided userData is empty, ignoring the request.");
             return;
         }
 
-        Log.Debug("[UserProfile][SetDataInternal] Start");
+        Log.Debug("[UserProfile] SetDataInternal, Start");
 
         if (userData.TryGetValue(NAME_KEY, out object nameValue) && nameValue is string name) {
             Name = TrimValue(NAME_KEY, name);
@@ -388,7 +388,7 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
                     PictureUrl = pictureUrl;
                 }
             } else {
-                Log.Warning($"[UserDetailsCountlyService][SetDataInternal] Picture format for URL '{pictureUrl}' is not as expected. Expected formats are .png, .gif, or .jpeg");
+                Log.Warning($"[UserDetailsCountlyService] SetDataInternal, Picture format for URL '{pictureUrl}' is not as expected. Expected formats are .png, .gif, or .jpeg");
             }
         }
 
@@ -404,21 +404,21 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
     private void SetPropertiesInternal(Dictionary<string, object> data)
     {
         if (!cly.IsSDKInitialized) {
-            Log.Warning("[UserProfile][SetPropertiesInternal] Countly.Instance.Init() must be called before SetPropertiesInternal");
+            Log.Warning("[UserProfile] SetPropertiesInternal, Countly.Instance.Init() must be called before SetPropertiesInternal");
             return;
         }
 
         if (!_consentService.CheckConsentInternal(Consents.Users)) {
-            Log.Debug("[UserProfile][SetPropertiesInternal] Consent is not given, ignoring the request.");
+            Log.Debug("[UserProfile] SetPropertiesInternal, Consent is not given, ignoring the request.");
             return;
         }
 
         if (data.Count <= 0) {
-            Log.Debug("[UserProfile][SetPropertiesInternal] Provided data is empty, ignoring the request.");
+            Log.Debug("[UserProfile] SetPropertiesInternal, Provided data is empty, ignoring the request.");
             return;
         }
 
-        Log.Debug("[UserProfile][SetPropertiesInternal] Start");
+        Log.Debug("[UserProfile] SetPropertiesInternal, Start");
 
         Dictionary<string, object> namedFields = new Dictionary<string, object>();
         Dictionary<string, object> customFields = new Dictionary<string, object>();
@@ -450,7 +450,7 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
     private void SetPropertyInternal(string key, object value)
     {
         if (!cly.IsSDKInitialized) {
-            Log.Warning("[UserProfile][SetPropertyInternal] Countly.Instance.Init() must be called before SetPropertyInternal");
+            Log.Warning("[UserProfile] SetPropertyInternal, Countly.Instance.Init() must be called before SetPropertyInternal");
             return;
         }
 
@@ -459,14 +459,14 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
         }
 
         Dictionary<string, object> data = new Dictionary<string, object> { { key, value } };
-        Log.Info($"[UserProfile][SetPropertyInternal] key: [{key}] and value: [{value}]");
+        Log.Info($"[UserProfile] SetPropertyInternal, key: [{key}] and value: [{value}]");
         SetPropertiesInternal(data);
     }
 
     private void SetOnceInternal(string key, string value)
     {
         if (!cly.IsSDKInitialized) {
-            Log.Warning("[UserProfile][SetOnceInternal] Countly.Instance.Init() must be called before SetOnceInternal");
+            Log.Warning("[UserProfile] SetOnceInternal, Countly.Instance.Init() must be called before SetOnceInternal");
             return;
         }
 
@@ -474,7 +474,7 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
             return;
         }
 
-        Log.Info($"[UserProfile][SetOnceInternal] key: [{key}] and value: [{value}]");
+        Log.Info($"[UserProfile] SetOnceInternal, key: [{key}] and value: [{value}]");
         ModifyCustomData(key, value, "$setOnce");
     }
     #endregion
@@ -483,7 +483,7 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
     {
         try {
             if (!(value is double || value is int || value is string)) {
-                Console.WriteLine("[UserProfile][ModifyCustomData] Provided an unsupported type for 'value'");
+                Console.WriteLine("[UserProfile] ModifyCustomData, Provided an unsupported type for 'value'");
                 return;
             }
 
@@ -516,13 +516,13 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
             }
             CustomMods[truncatedKey] = ob;
         } catch (Exception e) {
-            Log.Error($"[UserProfile][ModifyCustomData] An exception occured during modifying the custom data. Exception: {e}");
+            Log.Error($"[UserProfile] ModifyCustomData, An exception occured during modifying the custom data. Exception: {e}");
         }
     }
 
     private void ClearInternal()
     {
-        Log.Debug("[UserProfile][ClearInternal] Start");
+        Log.Debug("[UserProfile] ClearInternal, Start");
 
         Name = null;
         Username = null;
@@ -608,7 +608,7 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
             JObject ob = null;
 
             if (CustomDataProperties.Count > 0) {
-                utils.TruncateSegmentationValues(CustomDataProperties, config.GetMaxSegmentationValues(), "[UserProfile][ConvertToJSON]", Log);
+                utils.TruncateSegmentationValues(CustomDataProperties, config.GetMaxSegmentationValues(), "[UserProfile] ConvertToJSON", Log);
                 ob = JObject.FromObject(CustomDataProperties);
             }
 
@@ -623,7 +623,7 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
             }
 
         } catch (JsonException e) {
-            Log.Warning($"[UserProfile][ConvertToJSON] Got exception converting an UserData to JSON. Exception:{e}");
+            Log.Warning($"[UserProfile] ConvertToJSON, Got exception converting an UserData to JSON. Exception:{e}");
         }
 
         if (json.Count > 0) {
@@ -641,7 +641,7 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
                 Dictionary<string, object> data = JsonConvert.DeserializeObject<Dictionary<string, object>>(json);
                 return data;
             } catch (JsonException ex) {
-                Log.Error($"[UserProfile][GetDataForRequest] Failed to deserialize cached user data: {ex.Message}");
+                Log.Error($"[UserProfile] GetDataForRequest, Failed to deserialize cached user data: {ex.Message}");
                 return new Dictionary<string, object>();
             }
         }
@@ -651,12 +651,12 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
     private bool ValidateConsentAndKey(string key, string caller = null)
     {
         if (!_consentService.CheckConsentInternal(Consents.Users)) {
-            Log.Debug($"[UserProfile][{caller}] Consent is not given, ignoring the request.");
+            Log.Debug($"[UserProfile] {caller}, Consent is not given, ignoring the request.");
             return false;
         }
 
         if (string.IsNullOrEmpty(key)) {
-            Log.Warning($"[UserProfile][{caller}] Provided key isn't valid.");
+            Log.Warning($"[UserProfile] {caller}, Provided key isn't valid.");
             return false;
         }
 
@@ -667,7 +667,7 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
     internal override void OnInitializationCompleted()
     {
         if (config.GetUserProperties().Count() > 0) {
-            Log.Info("[UserProfile][OnInitializationCompleted] User profile data set during the initialization. Provided property amount: " + config.GetUserProperties().Count());
+            Log.Info("[UserProfile] OnInitializationCompleted, User profile data set during the initialization. Provided property amount: " + config.GetUserProperties().Count());
             SetPropertiesInternal(config.GetUserProperties());
             SaveInternal();
         }
@@ -675,7 +675,7 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
 
     internal override void DeviceIdChanged(string deviceId, bool merged)
     {
-        Log.Info($"[UserProfile][DeviceIdChanged] DeviceId change has occured. New DeviceId: [{deviceId}], Merged: [{merged}]. Calling Save");
+        Log.Info($"[UserProfile] DeviceIdChanged, DeviceId change has occured. New DeviceId: [{deviceId}], Merged: [{merged}]. Calling Save");
         SaveInternal();
     }
     #endregion
