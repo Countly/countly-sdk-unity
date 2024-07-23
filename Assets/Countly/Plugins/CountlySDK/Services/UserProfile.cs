@@ -491,64 +491,34 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
         CustomMods = new Dictionary<string, JObject>();
     }
 
+    private void AddStringPropertyToJSON(JObject json, string key, string value)
+    {
+        if (value != null) {
+            if (value == "") {
+                json.Add(key, null);
+            } else {
+                json.Add(key, value);
+            }
+        }
+    }
+
     private string ConvertToJSON()
     {
         JObject json = new JObject();
 
         try {
-            if (Name != null) {
-                if (Name == "") {
-                    json.Add(NAME_KEY, null);
-                } else {
-                    json.Add(NAME_KEY, Name);
-                }
-            }
-
-            if (Username != null) {
-                if (Username == "") {
-                    json.Add(USERNAME_KEY, null);
-                } else {
-                    json.Add(USERNAME_KEY, Username);
-                }
-            }
-
-            if (Email != null) {
-                if (Email == "") {
-                    json.Add(EMAIL_KEY, null);
-                } else {
-                    json.Add(EMAIL_KEY, Email);
-                }
-            }
-
-            if (Organization != null) {
-                if (Organization == "") {
-                    json.Add(ORG_KEY, null);
-                } else {
-                    json.Add(ORG_KEY, Organization);
-                }
-            }
-
-            if (Phone != null) {
-                if (Phone == "") {
-                    json.Add(PHONE_KEY, null);
-                } else {
-                    json.Add(PHONE_KEY, Phone);
-                }
-            }
+            AddStringPropertyToJSON(json, NAME_KEY, Name);
+            AddStringPropertyToJSON(json, USERNAME_KEY, Username);
+            AddStringPropertyToJSON(json, EMAIL_KEY, Email);
+            AddStringPropertyToJSON(json, ORG_KEY, Organization);
+            AddStringPropertyToJSON(json, PHONE_KEY, Phone);
+            AddStringPropertyToJSON(json, GENDER_KEY, Gender);
 
             if (PictureUrl != null) {
                 if (PictureUrl == "") {
                     json.Add(PICTURE_KEY, null);
                 } else if (utils.IsPictureValid(PictureUrl)) {
                     json.Add(PICTURE_KEY, PictureUrl);
-                }
-            }
-
-            if (Gender != null) {
-                if (Gender == "") {
-                    json.Add(GENDER_KEY, null);
-                } else {
-                    json.Add(GENDER_KEY, Gender);
                 }
             }
 
