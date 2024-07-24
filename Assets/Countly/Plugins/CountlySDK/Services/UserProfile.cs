@@ -158,7 +158,7 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
     /// <param name="userData">Dictionary with user data</param>
     public void SetData(Dictionary<string, object> userData)
     {
-        Log.Info("[UserProfile] SetData, for " + userData.Count + " amount of values");
+        Log.Info("[UserProfile] SetData, for " + (userData?.Count ?? 0) + " amount of values");
         SetDataInternal(userData);
     }
 
@@ -180,7 +180,7 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
     /// <param name="data">Dictionary with data to set</param>
     public void SetProperties(Dictionary<string, object> data)
     {
-        Log.Info("[UserProfile] SetProperties, for " + data.Count + " amount of values");
+        Log.Info("[UserProfile] SetProperties, for " + (data?.Count ?? 0) + " amount of values");
         SetPropertiesInternal(data);
     }
 
@@ -318,7 +318,7 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
             return;
         }
 
-        if (userData.Count <= 0) {
+        if (userData == null || userData.Count <= 0) {
             Log.Debug("[UserProfile] SetDataInternal, Provided userData is empty, ignoring the request.");
             return;
         }
@@ -378,8 +378,8 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
             return;
         }
 
-        if (data.Count <= 0) {
-            Log.Debug("[UserProfile] SetPropertiesInternal, Provided data is empty, ignoring the request.");
+        if (data == null || data.Count <= 0) {
+            Log.Debug("[UserProfile] SetPropertiesInternal, Provided data is empty, or null ignoring the request.");
             return;
         }
 

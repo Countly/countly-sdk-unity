@@ -449,78 +449,199 @@ namespace Assets.Tests.PlayModeTests
             TestUtility.ValidateUserDetails(up1, ExpectedUserProperty());
             cly.RequestHelper._requestRepo.Clear();
         }
+        
+        // Initializes Countly and returns the Countly instance with clear repository
+        private Countly BaseInit()
+        {
+            Countly cly = Countly.Instance;
+            CountlyConfiguration config = TestUtility.CreateBaseConfig();
+            cly.Init(config);
 
+            // session request
+            TestUtility.ValidateRQEQSize(cly, 1, 0);
+            cly.RequestHelper._requestRepo.Clear();
+
+            return cly;
+        }
+
+        // 'Increment' in Countly.Instance.UserProfile
+        // We initialize the sdk with no consent requirement, try to record user profile data with 'Increment' and call save
+        // Since we call 'Increment' with bad keys, it should not record any user profile data
         [Test]
         public void Increment_BadKey_CNR()
         {
-            Countly cly = Countly.Instance;
-            CountlyConfiguration config = TestUtility.CreateBaseConfig();
-            cly.Init(config);
-            TestUtility.ValidateRQEQSize(cly, 1, 0);
-            cly.RequestHelper._requestRepo.Clear();
-
+            Countly cly = BaseInit();
+            
             cly.UserProfile.Increment(null);
             cly.UserProfile.Increment(" ");
+            cly.UserProfile.Increment("");
+
             cly.UserProfile.Save();
             TestUtility.ValidateRQEQSize(cly, 0, 0);
         }
-
+        
+        // 'IncrementBy' in Countly.Instance.UserProfile
+        // We initialize the sdk with no consent requirement, try to record user profile data with 'IncrementBy' and call save
+        // Since we call 'IncrementBy' with bad keys, it should not record any user profile data
         [Test]
         public void IncrementBy_BadKey_CNR()
         {
-            Countly cly = Countly.Instance;
-            CountlyConfiguration config = TestUtility.CreateBaseConfig();
-            cly.Init(config);
-            TestUtility.ValidateRQEQSize(cly, 1, 0);
-            cly.RequestHelper._requestRepo.Clear();
+            Countly cly = BaseInit();
 
             cly.UserProfile.IncrementBy(null, 10);
             cly.UserProfile.IncrementBy(" ", 10);
+            cly.UserProfile.IncrementBy("", 10);
+
             cly.UserProfile.Save();
             TestUtility.ValidateRQEQSize(cly, 0, 0);
         }
 
+        // 'Max' in Countly.Instance.UserProfile
+        // We initialize the sdk with no consent requirement, try to record user profile data with 'Max' and call save
+        // Since we call 'Max' with bad keys, it should not record any user profile data
         [Test]
         public void Max_BadKey_CNR()
         {
-            Countly cly = Countly.Instance;
-            CountlyConfiguration config = TestUtility.CreateBaseConfig();
-            cly.Init(config);
-            TestUtility.ValidateRQEQSize(cly, 1, 0);
-            cly.RequestHelper._requestRepo.Clear();
+            Countly cly = BaseInit();
 
             cly.UserProfile.Max(null, 10);
             cly.UserProfile.Max(" ", 10);
+            cly.UserProfile.Max("", 10);
+
             cly.UserProfile.Save();
             TestUtility.ValidateRQEQSize(cly, 0, 0);
         }
-
+        
+        // 'Min' in Countly.Instance.UserProfile
+        // We initialize the sdk with no consent requirement, try to record user profile data with 'Min' and call save
+        // Since we call 'Min' with bad keys, it should not record any user profile data
         [Test]
         public void Min_BadKey_CNR()
         {
-            Countly cly = Countly.Instance;
-            CountlyConfiguration config = TestUtility.CreateBaseConfig();
-            cly.Init(config);
-            TestUtility.ValidateRQEQSize(cly, 1, 0);
-            cly.RequestHelper._requestRepo.Clear();
+            Countly cly = BaseInit();
 
             cly.UserProfile.Min(null, 10);
             cly.UserProfile.Min(" ", 10);
+            cly.UserProfile.Min("", 10);
+
             cly.UserProfile.Save();
             TestUtility.ValidateRQEQSize(cly, 0, 0);
         }
 
+        // 'Multiply' in Countly.Instance.UserProfile
+        // We initialize the sdk with no consent requirement, try to record user profile data with 'Multiply' and call save
+        // Since we call 'Multiply' with bad keys, it should not record any user profile data
         [Test]
         public void Multiply_BadKey_CNR()
         {
-            Countly cly = Countly.Instance;
-            CountlyConfiguration config = TestUtility.CreateBaseConfig();
-            cly.Init(config);
-            TestUtility.ValidateRQEQSize(cly, 1, 0);
-            cly.RequestHelper._requestRepo.Clear();
+            Countly cly = BaseInit();
 
             cly.UserProfile.Multiply(null, 10);
             cly.UserProfile.Multiply(" ", 10);
+            cly.UserProfile.Multiply("", 10);
+
+            cly.UserProfile.Save();
+            TestUtility.ValidateRQEQSize(cly, 0, 0);
+        }
+
+        // 'Pull' in Countly.Instance.UserProfile
+        // We initialize the sdk with no consent requirement, try to record user profile data with 'Pull' and call save
+        // Since we call 'Pull' with bad keys and values, it should not record any user profile data
+        [Test]
+        public void Pull_BadKeyAndValue_CNR()
+        {
+            Countly cly = BaseInit();
+
+            cly.UserProfile.Pull(null, "value1");
+            cly.UserProfile.Pull(" ", "value2");
+            cly.UserProfile.Pull("", "value2");
+
+            cly.UserProfile.Pull("Key1", null);
+            cly.UserProfile.Pull("Key2", " ");
+            cly.UserProfile.Save();
+            TestUtility.ValidateRQEQSize(cly, 0, 0);
+        }
+
+        // 'Push' in Countly.Instance.UserProfile
+        // We initialize the sdk with no consent requirement, try to record user profile data with 'Push' and call save
+        // Since we call 'Push' with bad keys and values, it should not record any user profile data
+        [Test]
+        public void Push_BadKeyAndValue_CNR()
+        {
+            Countly cly = BaseInit();
+
+            cly.UserProfile.Push(null, "value1");
+            cly.UserProfile.Push(" ", "value2");
+            cly.UserProfile.Push("", "value2");
+
+            cly.UserProfile.Push("Key1", null);
+            cly.UserProfile.Push("Key2", " ");
+            cly.UserProfile.Save();
+            TestUtility.ValidateRQEQSize(cly, 0, 0);
+        }
+
+        // 'PushUnique' in Countly.Instance.UserProfile
+        // We initialize the sdk with no consent requirement, try to record user profile data with 'PushUnique' and call save
+        // Since we call 'PushUnique' with bad keys and values, it should not record any user profile data
+        [Test]
+        public void PushUnique_BadKeyAndValue_CNR()
+        {
+            Countly cly = BaseInit();
+
+            cly.UserProfile.PushUnique(null, "value1");
+            cly.UserProfile.PushUnique(" ", "value2");
+            cly.UserProfile.PushUnique("", "value2");
+
+            cly.UserProfile.PushUnique("Key1", null);
+            cly.UserProfile.PushUnique("Key2", " ");
+            cly.UserProfile.Save();
+            TestUtility.ValidateRQEQSize(cly, 0, 0);
+        }
+
+        // 'SetOnce' in Countly.Instance.UserProfile
+        // We initialize the sdk with no consent requirement, try to record user profile data with 'SetOnce' and call save
+        // Since we call 'SetOnce' with bad keys and values, it should not record any user profile data
+        [Test]
+        public void SetOnce_BadKeyAndValue_CNR()
+        {
+            Countly cly = BaseInit();
+
+            cly.UserProfile.SetOnce(null, "value1");
+            cly.UserProfile.SetOnce(" ", "value2");
+            cly.UserProfile.SetOnce("", "value2");
+
+            cly.UserProfile.SetOnce("Key1", null);
+            cly.UserProfile.SetOnce("Key2", " ");
+            cly.UserProfile.Save();
+            TestUtility.ValidateRQEQSize(cly, 0, 0);
+        }
+
+        // 'SetProperty' in Countly.Instance.UserProfile
+        // We initialize the sdk with no consent requirement, try to record user profile data with 'SetProperty' and call save
+        // Since we call 'SetProperty' with bad keys and values, it should not record any user profile data
+        [Test]
+        public void SetProperty_BadKeyAndValue_CNR()
+        {
+            Countly cly = BaseInit();
+
+            cly.UserProfile.SetProperty(null, "value1");
+            cly.UserProfile.SetProperty("", "value2");
+
+            cly.UserProfile.SetProperty("Key1", null);
+            cly.UserProfile.Save();
+            TestUtility.ValidateRQEQSize(cly, 0, 0);
+        }
+
+        // 'SetProperties' in Countly.Instance.UserProfile
+        // We initialize the sdk with no consent requirement, try to record user profile data with 'SetProperties' and call save
+        // Since we call 'SetProperties' with bad keys and values, it should not record any user profile data
+        [Test]
+        public void SetProperties_BadKeyAndValue_CNR()
+        {
+            Countly cly = BaseInit();
+
+            cly.UserProfile.SetProperties(null);
+            cly.UserProfile.SetProperties(new Dictionary<string, object>());
             cly.UserProfile.Save();
             TestUtility.ValidateRQEQSize(cly, 0, 0);
         }
