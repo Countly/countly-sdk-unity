@@ -19,6 +19,7 @@
   * "ReportActionAsync": This will be removed in the future.
 * Fixed a bug that allowed to make it possible to close non-started views.
 * Fixed issues that allowed to record User Profiles without consent.
+* Fixed a bug that caused requests being stuck in the queue for WebGL build targets.
 
 ## 23.12.1
 * Added 'UnityWebRequest' as the networking handler for WebGL builds.
