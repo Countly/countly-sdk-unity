@@ -357,7 +357,7 @@ namespace Assets.Tests.PlayModeTests
         public void ChangeDeviceIdWithoutMergeWithRecordedValue_A_CNR()
         {
             Countly cly = Countly.Instance;
-            cly.Init(TestUtility.CreateBaseConfig());
+            cly.Init(TestUtility.CreateBaseConfig().EnableLogging());
             TestUtility.ValidateRQEQSize(cly, 1, 0);
             cly.RequestHelper._requestRepo.Clear();
 
@@ -743,15 +743,15 @@ namespace Assets.Tests.PlayModeTests
                 { "byear", 0 }
             };
 
-            cly.UserProfile.SetData(null);
+            cly.UserProfile.SetProperties(null);
             cly.UserProfile.Save();
             TestUtility.ValidateRQEQSize(cly, 0, 0);
 
-            cly.UserProfile.SetData(new Dictionary<string, object>());
+            cly.UserProfile.SetProperties(new Dictionary<string, object>());
             cly.UserProfile.Save();
             TestUtility.ValidateRQEQSize(cly, 0, 0);
 
-            cly.UserProfile.SetData(badData);
+            cly.UserProfile.SetProperties(badData);
             cly.UserProfile.Save();
             TestUtility.ValidateRQEQSize(cly, 0, 0);         
         }

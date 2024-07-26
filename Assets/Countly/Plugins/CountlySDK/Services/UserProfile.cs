@@ -108,8 +108,8 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
     }
 
     /// <summary>
-    /// Create array property, if property does not exist and remove value from array.
-    /// You can only use it on array properties or properties that do not exist yet.
+    /// Removes existing property from array.
+    /// You can only use it on array properties
     /// </summary>
     /// <param name="key">string with property name for array property</param>
     /// <param name="value">string with value to remove from array</param>
@@ -153,16 +153,6 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
     }
 
     /// <summary>
-    /// Sets user data values.
-    /// </summary>
-    /// <param name="userData">Dictionary with user data</param>
-    public void SetData(Dictionary<string, object> userData)
-    {
-        Log.Info("[UserProfile] SetData, for " + (userData?.Count ?? 0) + " amount of values");
-        SetDataInternal(userData);
-    }
-
-    /// <summary>
     /// Set value only if property does not exist yet.
     /// </summary>
     /// <param name="key">string with property name to set</param>
@@ -180,7 +170,7 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
     /// <param name="data">Dictionary with data to set</param>
     public void SetProperties(Dictionary<string, object> data)
     {
-        Log.Info("[UserProfile] SetProperties, for " + (data?.Count ?? 0) + " amount of values");
+        LogSegmentation(data, "[UserProfile] SetProperties,");
         SetPropertiesInternal(data);
     }
 
@@ -323,7 +313,7 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
             return;
         }
 
-        Log.Debug("[UserProfile] SetDataInternal, Start");
+        LogSegmentation(userData, "[UserProfile] SetDataInternal,");
 
         if (userData.TryGetValue(NAME_KEY, out object nameValue) && nameValue is string name) {
             Name = TrimValue(NAME_KEY, name);
@@ -348,6 +338,7 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
         if (userData.TryGetValue(PICTURE_KEY, out object pictureValue) && pictureValue is string pictureUrl) {
             if (utils.IsPictureValid(pictureUrl)) {
                 if (pictureUrl.Length > 4096) {
+                    Log.Warning($"[UserDetailsCountlyService] SetDataInternal, Provided PictureURL length is more than 4096. Will be cropped.");
                     PictureUrl = pictureUrl.Substring(0, 4096);
                 } else {
                     PictureUrl = pictureUrl;
@@ -383,7 +374,7 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
             return;
         }
 
-        Log.Debug("[UserProfile] SetPropertiesInternal, Start");
+        LogSegmentation(data, "[UserProfile] SetPropertiesInternal,");
 
         Dictionary<string, object> namedFields = new Dictionary<string, object>();
         Dictionary<string, object> customFields = new Dictionary<string, object>();
@@ -437,7 +428,7 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
     void ModifyCustomData(string key, object value, string mod)
     {
         try {
-            if (!(value is double || value is int || value is string)) {
+            if (!(value is double || value is int || value is string || value is bool)) {
                 Log.Warning("[UserProfile] ModifyCustomData, Provided an unsupported type for 'value'");
                 return;
             }
@@ -501,13 +492,16 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
         CustomMods = new Dictionary<string, JObject>();
     }
 
-    private void AddStringPropertyToJSON(JObject json, string key, string value)
+    private void AddStringPropertyToJSON(JObject json, string key, object value)
     {
-        if (value != null) {
-            if (value == "") {
-                json.Add(key, null);
+        if (value != null && value is string val) {
+            json.Add(key, val);
+        }
+        if(value != null && value is int v){
+            if (v > 0) {
+                json.Add(BYEAR_KEY, v);
             } else {
-                json.Add(key, value);
+                Log.Warning("[UserProfile] AddStringPropertyToJSON, Provided value for BirthYear is not valid");
             }
         }
     }
@@ -523,22 +517,8 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
             AddStringPropertyToJSON(json, ORG_KEY, Organization);
             AddStringPropertyToJSON(json, PHONE_KEY, Phone);
             AddStringPropertyToJSON(json, GENDER_KEY, Gender);
-
-            if (PictureUrl != null) {
-                if (PictureUrl == "") {
-                    json.Add(PICTURE_KEY, null);
-                } else if (utils.IsPictureValid(PictureUrl)) {
-                    json.Add(PICTURE_KEY, PictureUrl);
-                }
-            }
-
-            if (BirthYear != 0) {
-                if (BirthYear > 0) {
-                    json.Add(BYEAR_KEY, BirthYear);
-                } else {
-                    json.Add(BYEAR_KEY, null);
-                }
-            }
+            AddStringPropertyToJSON(json, PICTURE_KEY, PictureUrl);
+            AddStringPropertyToJSON(json, BYEAR_KEY, BirthYear);
 
             JObject ob = null;
 
@@ -607,7 +587,7 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
     internal override void OnInitializationCompleted()
     {
         if (config.GetUserProperties().Count() > 0) {
-            Log.Info("[UserProfile] OnInitializationCompleted, User profile data set during the initialization. Provided property amount: " + config.GetUserProperties().Count());
+            LogSegmentation(config.GetUserProperties(), "[UserProfile] OnInitializationCompleted,");
             SetPropertiesInternal(config.GetUserProperties());
             SaveInternal();
         }

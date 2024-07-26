@@ -1,6 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using Plugins.CountlySDK.Enums;
 using Plugins.CountlySDK.Models;
 
@@ -13,7 +15,6 @@ namespace Plugins.CountlySDK.Services
         protected CountlyLogHelper Log { get; private set; }
         protected readonly CountlyConfiguration _configuration;
         protected readonly ConsentCountlyService _consentService;
-
 
         protected AbstractBaseService(CountlyConfiguration configuration, CountlyLogHelper logHelper, ConsentCountlyService consentService)
         {
@@ -71,6 +72,24 @@ namespace Plugins.CountlySDK.Services
                 || type == typeof(long);
         }
 
+        private bool IsValidDataType(object value)
+        {
+            if (value == null) {
+                return false;
+            }
+
+            Type type = value.GetType();
+
+            return type == typeof(int)
+                || type == typeof(bool)
+                || type == typeof(float)
+                || type == typeof(double)
+                || type == typeof(string)
+                || type == typeof(long)
+                || (type.IsArray && IsValidElementType(type.GetElementType()))
+                || (IsListType(type) && IsValidElementType(type.GetGenericArguments()[0]));
+        }
+
         private bool IsListType(Type type)
         {
             return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>);
@@ -103,6 +122,11 @@ namespace Plugins.CountlySDK.Services
             if (v != null && v.Length > _configuration.GetMaxValueSize()) {
                 Log.Warning($"[{GetType().Name}][TrimValue]: Max allowed length for [{fieldName}] is {_configuration.GetMaxValueSize()}. Value: [{v}] will be truncated.");
                 v = v.Substring(0, _configuration.GetMaxValueSize());
+            }
+
+            if (v == " " || v == "") {
+                v = "";
+                Log.Warning($"[{GetType().Name}] TrimValue, Provided value for [{fieldName}] is null or whitespace. This will be removed at server-side");
             }
 
             return v;
@@ -139,6 +163,43 @@ namespace Plugins.CountlySDK.Services
 
             return segmentation;
         }
+
+        protected void LogSegmentation(Dictionary<string, object> data, string prefix)
+        {
+            if (data != null && data.Count > 0) {
+                StringBuilder validEntries = new StringBuilder();
+                StringBuilder invalidEntries = new StringBuilder();
+
+                foreach (var kvp in data) {
+                    string valueType = kvp.Value?.GetType().ToString() ?? "null";
+                    string valueStr = kvp.Value?.ToString() ?? "null";
+
+                    if (IsValidDataType(kvp.Value)) {
+                        if (kvp.Value is Array array) {
+                            valueStr = "{" + string.Join(", ", array.Cast<object>()) + "}";
+                        } else if (IsListType(kvp.Value.GetType())) {
+                            var list = kvp.Value as System.Collections.IEnumerable;
+                            valueStr = "{" + string.Join(", ", list.Cast<object>()) + "}";
+                        }
+
+                        validEntries.AppendLine($"Key: {kvp.Key}, Value: {valueStr}, Type: {valueType}");
+                    } else {
+                        invalidEntries.AppendLine($"Key: {kvp.Key}, Value: {valueStr}, Type: {valueType}");
+                    }
+                }
+
+                if (validEntries.Length > 0) {
+                    Log.Info($"{prefix} Valid Entries:\n{validEntries}");
+                }
+
+                if (invalidEntries.Length > 0) {
+                    Log.Warning($"{prefix} Invalid Entries (skipped):\n{invalidEntries}");
+                }
+            } else {
+                Log.Info($"{prefix} No values provided");
+            }
+        }
+
         internal virtual void OnInitializationCompleted() { }
         internal virtual void DeviceIdChanged(string deviceId, bool merged) { }
         internal virtual void ConsentChanged(List<Consents> updatedConsents, bool newConsentValue, ConsentChangedAction action) { }

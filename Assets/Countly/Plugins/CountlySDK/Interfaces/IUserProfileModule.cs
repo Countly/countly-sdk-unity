@@ -14,7 +14,6 @@ public interface IUserProfileModule
     public void PushUnique(string key, string value);
     public void Save();
     public void SetOnce(string key, string value);
-    public void SetData(Dictionary<string, object> userData);
     public void SetProperties(Dictionary<string, object> data);
     public void SetProperty(string key, object value);
 }
