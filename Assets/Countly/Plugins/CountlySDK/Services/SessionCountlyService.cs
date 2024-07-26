@@ -28,7 +28,7 @@ namespace Plugins.CountlySDK.Services
         bool isInternalTimerStopped;
 
         internal SessionCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, EventCountlyService eventService,
-            RequestCountlyHelper requestCountlyHelper, LocationService locationService, ConsentCountlyService consentService, MonoBehaviour monoBehaviour) : base(configuration, logHelper, consentService)
+            RequestCountlyHelper requestCountlyHelper, LocationService locationService, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
         {
             Log.Debug("[SessionCountlyService] Initializing.");
             if (configuration.IsAutomaticSessionTrackingDisabled) {
@@ -38,7 +38,6 @@ namespace Plugins.CountlySDK.Services
             _eventService = eventService;
             _locationService = locationService;
             _requestCountlyHelper = requestCountlyHelper;
-            _monoBehaviour = monoBehaviour;
 
             if (_configuration.IsAutomaticSessionTrackingDisabled) {
                 Log.Verbose("[Countly][CountlyConfiguration] Automatic session tracking disabled!");
@@ -75,34 +74,10 @@ namespace Plugins.CountlySDK.Services
         /// </summary>
         private void InitSessionTimer()
         {
-#if UNITY_WEBGL
-            _monoBehaviour.StartCoroutine(SessionTimerCoroutine());
-#else
             _sessionTimer = new Timer { Interval = _configuration.GetUpdateSessionTimerDelay() * 1000 };
             _sessionTimer.Elapsed += SessionTimerOnElapsedAsync;
             _sessionTimer.AutoReset = true;
             _sessionTimer.Start();
-#endif
-        }
-
-        private IEnumerator SessionTimerCoroutine()
-        {
-            Log.Debug("[SessionCountlyService] SessionTimerCoroutine, Start");
-
-            if (isInternalTimerStopped) {
-                yield break;
-            }
-
-            yield return new WaitForSeconds(_configuration.GetUpdateSessionTimerDelay());
-
-            _eventService.AddEventsToRequestQueue();
-            _ = _requestCountlyHelper.ProcessQueue();
-
-            if (!_configuration.IsAutomaticSessionTrackingDisabled) {
-                _ = ExtendSessionAsync();
-            }
-
-            Log.Debug("[SessionCountlyService] SessionTimerCoroutine, Coroutine completed.");
         }
 
         /// <summary>
