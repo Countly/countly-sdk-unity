@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Timers;
@@ -7,7 +6,6 @@ using Newtonsoft.Json;
 using Plugins.CountlySDK.Enums;
 using Plugins.CountlySDK.Helpers;
 using Plugins.CountlySDK.Models;
-using UnityEngine;
 
 namespace Plugins.CountlySDK.Services
 {
@@ -24,7 +22,7 @@ namespace Plugins.CountlySDK.Services
         private readonly LocationService _locationService;
         private readonly EventCountlyService _eventService;
         internal readonly RequestCountlyHelper _requestCountlyHelper;
-        private readonly MonoBehaviour _monoBehaviour;
+
         bool isInternalTimerStopped;
 
         internal SessionCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, EventCountlyService eventService,
@@ -88,10 +86,8 @@ namespace Plugins.CountlySDK.Services
         {
             isInternalTimerStopped = true;
 
-            #if UNITY_WEBGL
-            _monoBehaviour.StopCoroutine(SessionTimerCoroutine());
-            #else
-            if (_sessionTimer != null) {
+            if (_sessionTimer != null)
+            {
                 // Unsubscribe from the Elapsed event
                 _sessionTimer.Elapsed -= SessionTimerOnElapsedAsync;
 
@@ -99,7 +95,6 @@ namespace Plugins.CountlySDK.Services
                 _sessionTimer.Stop();
                 _sessionTimer.Dispose();
             }
-            #endif
         }
 
         /// <summary>
@@ -195,7 +190,7 @@ namespace Plugins.CountlySDK.Services
                 Log.Warning("[SessionCountlyService] EndSessionAsync: The session isn't started yet!");
                 return;
             }
-
+            
             IsSessionInitiated = false;
             _eventService.AddEventsToRequestQueue();
             Dictionary<string, object> requestParams = new Dictionary<string, object>
@@ -204,9 +199,11 @@ namespace Plugins.CountlySDK.Services
                     {"session_duration",  Convert.ToInt32((DateTime.Now - _lastSessionRequestTime).TotalSeconds)}
                 };
 
+
             _requestCountlyHelper.AddToRequestQueue(requestParams);
             await _requestCountlyHelper.ProcessQueue();
         }
+
 
         /// <summary>
         /// Extends a session by another session duration provided in configuration. By default session duration is 60 seconds.
@@ -235,10 +232,6 @@ namespace Plugins.CountlySDK.Services
 
             _requestCountlyHelper.AddToRequestQueue(requestParams);
             await _requestCountlyHelper.ProcessQueue();
-            
-            #if UNITY_WEBGL
-            _monoBehaviour.StartCoroutine(SessionTimerCoroutine());
-            #endif
         }
 
         #region override Methods
