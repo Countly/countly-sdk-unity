@@ -124,11 +124,6 @@ namespace Plugins.CountlySDK.Services
                 v = v.Substring(0, _configuration.GetMaxValueSize());
             }
 
-            if (v == " " || v == "") {
-                v = "";
-                Log.Warning($"[{GetType().Name}] TrimValue, Provided value for [{fieldName}] is null or whitespace. This will be removed at server-side");
-            }
-
             return v;
         }
 

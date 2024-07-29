@@ -316,23 +316,23 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
         LogSegmentation(userData, "[UserProfile] SetDataInternal,");
 
         if (userData.TryGetValue(NAME_KEY, out object nameValue) && nameValue is string name) {
-            Name = TrimValue(NAME_KEY, name);
+            Name = TrimValue(NAME_KEY, name.Trim());
         }
 
         if (userData.TryGetValue(USERNAME_KEY, out object usernameValue) && usernameValue is string username) {
-            Username = TrimValue(USERNAME_KEY, username);
+            Username = TrimValue(USERNAME_KEY, username.Trim());
         }
 
         if (userData.TryGetValue(EMAIL_KEY, out object emailValue) && emailValue is string email) {
-            Email = TrimValue(EMAIL_KEY, email);
+            Email = TrimValue(EMAIL_KEY, email.Trim());
         }
 
         if (userData.TryGetValue(ORG_KEY, out object orgValue) && orgValue is string organization) {
-            Organization = TrimValue(ORG_KEY, organization);
+            Organization = TrimValue(ORG_KEY, organization.Trim());
         }
 
         if (userData.TryGetValue(PHONE_KEY, out object phoneValue) && phoneValue is string phone) {
-            Phone = TrimValue(PHONE_KEY, phone);
+            Phone = TrimValue(PHONE_KEY, phone.Trim());
         }
 
         if (userData.TryGetValue(PICTURE_KEY, out object pictureValue) && pictureValue is string pictureUrl) {
@@ -341,7 +341,7 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
                     Log.Warning($"[UserDetailsCountlyService] SetDataInternal, Provided PictureURL length is more than 4096. Will be cropped.");
                     PictureUrl = pictureUrl.Substring(0, 4096);
                 } else {
-                    PictureUrl = pictureUrl;
+                    PictureUrl = pictureUrl.Trim();
                 }
             } else {
                 Log.Warning($"[UserDetailsCountlyService] SetDataInternal, Picture format for URL '{pictureUrl}' is not as expected. Expected formats are .png, .gif, or .jpeg");
@@ -349,7 +349,7 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
         }
 
         if (userData.TryGetValue(GENDER_KEY, out object genderValue) && genderValue is string gender) {
-            Gender = TrimValue(GENDER_KEY, gender);
+            Gender = TrimValue(GENDER_KEY, gender.Trim());
         }
 
         if (userData.TryGetValue(BYEAR_KEY, out object birthYearValue) && birthYearValue is int birthYear) {
