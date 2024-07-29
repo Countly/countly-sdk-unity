@@ -187,6 +187,7 @@ namespace Assets.Tests.PlayModeTests
 
             TestUtility.ValidateRQEQSize(cly, 2, 0);
             Dictionary<string, object> up1 = TestUtility.ExtractAndDeserializeUserDetails(cly.RequestHelper._requestRepo.Models);
+            
             TestUtility.ValidateUserDetails(up1, ExpectedUserProperty());
             cly.RequestHelper._requestRepo.Clear();
         }
@@ -224,12 +225,16 @@ namespace Assets.Tests.PlayModeTests
 
             Countly cly = Countly.Instance;
             cly.Init(config);
+            cly.RequestHelper._requestRepo.Clear();
 
             SendUserData();
             cly.UserProfile.Save();
 
-            TestUtility.ValidateRQEQSize(cly, 3, 0);
+            TestUtility.ValidateRQEQSize(cly, 1, 0);
             Dictionary<string, object> up1 = TestUtility.ExtractAndDeserializeUserDetails(cly.RequestHelper._requestRepo.Models);
+            foreach (KeyValuePair<string, object> entry in up1) {
+                Debug.Log($"Key: {entry.Key}, Value: {entry.Value}");
+            }
             TestUtility.ValidateUserDetails(up1, ExpectedUserData());
         }
 
@@ -449,7 +454,7 @@ namespace Assets.Tests.PlayModeTests
             TestUtility.ValidateUserDetails(up1, ExpectedUserProperty());
             cly.RequestHelper._requestRepo.Clear();
         }
-        
+
         // Initializes Countly and returns the Countly instance with clear repository
         private Countly BaseInit()
         {
@@ -471,7 +476,7 @@ namespace Assets.Tests.PlayModeTests
         public void Increment_BadKey_CNR()
         {
             Countly cly = BaseInit();
-            
+
             cly.UserProfile.Increment(null);
             cly.UserProfile.Save();
             TestUtility.ValidateRQEQSize(cly, 0, 0);
@@ -484,7 +489,7 @@ namespace Assets.Tests.PlayModeTests
             cly.UserProfile.Save();
             TestUtility.ValidateRQEQSize(cly, 0, 0);
         }
-        
+
         // 'IncrementBy' in Countly.Instance.UserProfile
         // We initialize the sdk with no consent requirement, try to record user profile data with 'IncrementBy' and call save
         // Since we call 'IncrementBy' with bad keys, it should not record any user profile data
@@ -526,7 +531,7 @@ namespace Assets.Tests.PlayModeTests
             cly.UserProfile.Save();
             TestUtility.ValidateRQEQSize(cly, 0, 0);
         }
-        
+
         // 'Min' in Countly.Instance.UserProfile
         // We initialize the sdk with no consent requirement, try to record user profile data with 'Min' and call save
         // Since we call 'Min' with bad keys, it should not record any user profile data
@@ -595,7 +600,7 @@ namespace Assets.Tests.PlayModeTests
 
             cly.UserProfile.Pull("Key2", " ");
             cly.UserProfile.Save();
-            TestUtility.ValidateRQEQSize(cly, 0, 0);
+            TestUtility.ValidateRQEQSize(cly, 1, 0);
         }
 
         // 'Push' in Countly.Instance.UserProfile
@@ -613,7 +618,7 @@ namespace Assets.Tests.PlayModeTests
             cly.UserProfile.Push(" ", "value2");
             cly.UserProfile.Save();
             TestUtility.ValidateRQEQSize(cly, 0, 0);
-            
+
             cly.UserProfile.Push("", "value2");
             cly.UserProfile.Save();
             TestUtility.ValidateRQEQSize(cly, 0, 0);
@@ -624,7 +629,7 @@ namespace Assets.Tests.PlayModeTests
 
             cly.UserProfile.Push("Key2", " ");
             cly.UserProfile.Save();
-            TestUtility.ValidateRQEQSize(cly, 0, 0);
+            TestUtility.ValidateRQEQSize(cly, 1, 0);
         }
 
         // 'PushUnique' in Countly.Instance.UserProfile
@@ -653,7 +658,7 @@ namespace Assets.Tests.PlayModeTests
 
             cly.UserProfile.PushUnique("Key2", " ");
             cly.UserProfile.Save();
-            TestUtility.ValidateRQEQSize(cly, 0, 0);
+            TestUtility.ValidateRQEQSize(cly, 1, 0);
         }
 
         // 'SetOnce' in Countly.Instance.UserProfile
@@ -682,7 +687,7 @@ namespace Assets.Tests.PlayModeTests
 
             cly.UserProfile.SetOnce("Key2", " ");
             cly.UserProfile.Save();
-            TestUtility.ValidateRQEQSize(cly, 0, 0);
+            TestUtility.ValidateRQEQSize(cly, 1, 0);
         }
 
         // 'SetProperty' in Countly.Instance.UserProfile
@@ -753,7 +758,7 @@ namespace Assets.Tests.PlayModeTests
 
             cly.UserProfile.SetProperties(badData);
             cly.UserProfile.Save();
-            TestUtility.ValidateRQEQSize(cly, 0, 0);         
+            TestUtility.ValidateRQEQSize(cly, 0, 0);
         }
 
         [SetUp]

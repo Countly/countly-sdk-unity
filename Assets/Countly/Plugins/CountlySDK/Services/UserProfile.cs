@@ -409,6 +409,11 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
             return;
         }
 
+        if (utils.IsNullEmptyOrWhitespace(key)) {
+            Log.Info($"[UserProfile] SetPropertyInternal, Provided key is null, empty or whitespace. Ignoring.");
+            return;
+        }
+
         Dictionary<string, object> data = new Dictionary<string, object> { { key, value } };
         Log.Info($"[UserProfile] SetPropertyInternal, key: [{key}] and value: [{value}]");
         SetPropertiesInternal(data);
@@ -428,26 +433,30 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
     void ModifyCustomData(string key, object value, string mod)
     {
         try {
-            if (!(value is double || value is int || value is string || value is bool)) {
-                Log.Warning("[UserProfile] ModifyCustomData, Provided an unsupported type for 'value'");
+            if (utils.IsNullEmptyOrWhitespace(key)) {
+                Log.Warning($"[UserProfile] ModifyCustomData, Provided key is null, empty or whitespace. Will be ignored.");
                 return;
             }
 
-            if (key == null || key == " ") {
-                Log.Warning("[UserProfile] ModifyCustomData, Provided key is null or whitespace. Will be ignored.");
+            if (value == null || !(value is double || value is int || value is string || value is bool)) {
+                Log.Warning($"[UserProfile] ModifyCustomData, Provided 'value' is {(value == null ? "null" : "an unsupported type")}");
                 return;
             }
 
-            if (value == null || (value is string v && v == " ")) {
-                Log.Warning("[UserProfile] ModifyCustomData, Provided value is null or whitespace. Will be ignored.");
-                return;
+            string trimmedKey = key.Trim();
+            if (key != trimmedKey) {
+                Log.Warning($"[UserProfile] ModifyCustomData, Provided key: [{key}], for value: [{value}] has been trimmed.");
             }
 
+            string truncatedKey = TrimKey(trimmedKey);
             object truncatedValue;
-            string truncatedKey = TrimKey(key);
 
             if (value is string stringValue) {
-                truncatedValue = TrimValue(truncatedKey, stringValue);
+                string trimmed = stringValue.Trim();
+                if (stringValue != trimmed) {
+                    Log.Warning($"[UserProfile] ModifyCustomData, Provided value: [{value}], for key: [{key}] has been trimmed. Current value: [{trimmed}]");
+                }
+                truncatedValue = TrimValue(truncatedKey, trimmed);
             } else {
                 truncatedValue = value;
             }
@@ -497,11 +506,9 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
         if (value != null && value is string val) {
             json.Add(key, val);
         }
-        if(value != null && value is int v){
+        if (value != null && value is int v) {
             if (v > 0) {
                 json.Add(BYEAR_KEY, v);
-            } else {
-                Log.Warning("[UserProfile] AddStringPropertyToJSON, Provided value for BirthYear is not valid");
             }
         }
     }
@@ -520,7 +527,7 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
             AddStringPropertyToJSON(json, PICTURE_KEY, PictureUrl);
             AddStringPropertyToJSON(json, BYEAR_KEY, BirthYear);
 
-            JObject ob = null;
+            JObject ob = new JObject();
 
             if (CustomDataProperties.Count > 0) {
                 utils.TruncateSegmentationValues(CustomDataProperties, config.GetMaxSegmentationValues(), "[UserProfile] ConvertToJSON", Log);
