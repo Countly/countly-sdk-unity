@@ -85,6 +85,16 @@ namespace Plugins.CountlySDK.Services
 #endif
         }
 
+        private void SendRequestsAndExtendSession()
+        {
+            _eventService.AddEventsToRequestQueue();
+            _ = _requestCountlyHelper.ProcessQueue();
+
+            if (!_configuration.IsAutomaticSessionTrackingDisabled) {
+                _ = ExtendSessionAsync();
+            }
+        }
+
         private IEnumerator SessionTimerCoroutine()
         {
             Log.Debug("[SessionCountlyService] SessionTimerCoroutine, Start");
@@ -94,14 +104,7 @@ namespace Plugins.CountlySDK.Services
             }
 
             yield return new WaitForSeconds(_configuration.GetUpdateSessionTimerDelay());
-
-            _eventService.AddEventsToRequestQueue();
-            _ = _requestCountlyHelper.ProcessQueue();
-
-            if (!_configuration.IsAutomaticSessionTrackingDisabled) {
-                _ = ExtendSessionAsync();
-            }
-
+            SendRequestsAndExtendSession();
             Log.Debug("[SessionCountlyService] SessionTimerCoroutine, Coroutine completed.");
         }
 
@@ -141,13 +144,7 @@ namespace Plugins.CountlySDK.Services
                 }
 
                 Log.Debug("[SessionCountlyService] SessionTimerOnElapsedAsync");
-
-                _eventService.AddEventsToRequestQueue();
-                _ = _requestCountlyHelper.ProcessQueue();
-
-                if (!_configuration.IsAutomaticSessionTrackingDisabled) {
-                    _ = ExtendSessionAsync();
-                }
+                SendRequestsAndExtendSession();
             }
 
             await Task.CompletedTask;
