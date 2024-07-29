@@ -6,8 +6,8 @@ public interface IUserProfileModule
 {
     public void Increment(string key);
     public void IncrementBy(string key, double value);
-    public void Max(string key, double value);
-    public void Min(string key, double value);
+    public void SaveMax(string key, double value);
+    public void SaveMin(string key, double value);
     public void Multiply(string key, double value);
     public void Pull(string key, string value);
     public void Push(string key, string value);

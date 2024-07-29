@@ -79,7 +79,7 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
     /// </summary>
     /// <param name="key">string with property name to check for max</param>
     /// <param name="value">value to check for max</param>
-    public void Max(string key, double value)
+    public void SaveMax(string key, double value)
     {
         Log.Info($"[UserProfile] Max, with key: [{key}] and value: [{value}]");
         MaxInternal(key, value);
@@ -90,7 +90,7 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
     /// </summary>
     /// <param name="key">string with property name to check for min</param>
     /// <param name="value">value to check for min</param>
-    public void Min(string key, double value)
+    public void SaveMin(string key, double value)
     {
         Log.Info($"[UserProfile] Min, with key: [{key}] and value: [{value}]");
         MinInternal(key, value);

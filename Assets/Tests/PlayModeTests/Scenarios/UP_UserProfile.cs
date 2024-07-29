@@ -45,8 +45,8 @@ namespace Assets.Tests.PlayModeTests.Scenarios
             Countly.Instance.UserProfile.Increment("b12345");
             Countly.Instance.UserProfile.IncrementBy("c12345", 10);
             Countly.Instance.UserProfile.Multiply("d12345", 20);
-            Countly.Instance.UserProfile.Max("e12345", 100);
-            Countly.Instance.UserProfile.Min("f12345", 50);
+            Countly.Instance.UserProfile.SaveMax("e12345", 100);
+            Countly.Instance.UserProfile.SaveMin("f12345", 50);
             Countly.Instance.UserProfile.SetOnce("g12345", "200");
             Countly.Instance.UserProfile.PushUnique("h12345", "morning");
             Countly.Instance.UserProfile.Push("i12345", "morning");
