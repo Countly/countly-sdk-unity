@@ -410,7 +410,7 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
         }
 
         if (utils.IsNullEmptyOrWhitespace(key)) {
-            Log.Info($"[UserProfile] SetPropertyInternal, Provided key is null, empty or whitespace. Ignoring.");
+            Log.Warning($"[UserProfile] SetPropertyInternal, Provided key is null, empty or whitespace. Ignoring.");
             return;
         }
 
@@ -445,7 +445,7 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
 
             string trimmedKey = key.Trim();
             if (key != trimmedKey) {
-                Log.Warning($"[UserProfile] ModifyCustomData, Provided key: [{key}], for value: [{value}] has been trimmed.");
+                Log.Verbose($"[UserProfile] ModifyCustomData, Provided key: [{key}], for value: [{value}] has been trimmed.");
             }
 
             string truncatedKey = TrimKey(trimmedKey);
@@ -454,7 +454,7 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
             if (value is string stringValue) {
                 string trimmed = stringValue.Trim();
                 if (stringValue != trimmed) {
-                    Log.Warning($"[UserProfile] ModifyCustomData, Provided value: [{value}], for key: [{key}] has been trimmed. Current value: [{trimmed}]");
+                    Log.Verbose($"[UserProfile] ModifyCustomData, Provided value: [{value}], for key: [{key}] has been trimmed. Current value: [{trimmed}]");
                 }
                 truncatedValue = TrimValue(truncatedKey, trimmed);
             } else {

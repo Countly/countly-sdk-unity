@@ -4,15 +4,14 @@
 * Added "Countly.Instance.UserProfile" with following calls and functionality
   * "Increment" for incrementing custom property value by 1
   * "IncrementBy" for incrementing custom property value by provided value.
-  * "Max" for saving maximal value between existing and provided.
-  * "Min" for saving minimal value between existing and provided.
+  * "SaveMax" for saving maximal value between existing and provided.
+  * "SaveMin" for saving minimal value between existing and provided.
   * "Multiply" for multiplying custom property value by provided value.
   * "Pull" for removing value from array.
   * "Push" for inserting value to array which can have duplicates.
   * "PushUnique" for inserting value to array of unique values.
   * "Save" for sending provided values to server.
   * "SetOnce" for setting value if it does not exist.
-  * "SetData" for setting user profile data.
   * "SetProperties" for setting either custom user properties or predefined user properties.
   * "SetProperty" for setting a single user property. It can be either a custom one or one of the predefined ones.
 * Added the following calls in "Countly.Instance.Views":
