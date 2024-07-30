@@ -44,7 +44,7 @@ namespace Plugins.CountlySDK.Helpers
         /// <param name="request">The Countly request model to be added to the queue.</param>
         internal void AddRequestToQueue(CountlyRequestModel request)
         {
-            Log.Verbose("[RequestCountlyHelper] AddRequestToQueue: " + request.ToString());
+            Log.Verbose($"[RequestCountlyHelper] AddRequestToQueue, Request: [{request.ToString()}]");
 
             if (_config.EnableTestMode) {
                 return;
@@ -82,7 +82,7 @@ namespace Plugins.CountlySDK.Helpers
 
             try {
                 requests = _requestRepo.Models.ToArray();
-                Log.Verbose("[RequestCountlyHelper] ProcessQueue, requests: " + requests.Length);
+                Log.Verbose("[RequestCountlyHelper] ProcessQueue, request count: " + requests.Length);
             } catch (Exception ex) {
                 Log.Warning($"[RequestCountlyHelper] ProcessQueue, exception occurred while converting Models to array. Exception: {ex}");
                 _isQueueBeingProcess = false;
@@ -91,6 +91,7 @@ namespace Plugins.CountlySDK.Helpers
 
             // make sure that flag is corrected and exit
             if (requests.Length == 0) {
+                Log.Verbose("[RequestCountlyHelper] ProcessQueue, Request Queue is empty. Returning.");
                 _isQueueBeingProcess = false;
                 return;
             }
@@ -102,7 +103,7 @@ namespace Plugins.CountlySDK.Helpers
                 CountlyResponse response = await ProcessRequest(reqModel);
 
                 if (!response.IsSuccess) {
-                    Log.Verbose("[RequestCountlyHelper] ProcessQueue: Request failed, " + response.ToString());
+                    Log.Verbose($"[RequestCountlyHelper] ProcessQueue: Request failed. Response: [{response.ToString()}]");
                     _isQueueBeingProcess = false;
                     break;
                 }
@@ -119,7 +120,7 @@ namespace Plugins.CountlySDK.Helpers
         /// </summary>
         private async Task<CountlyResponse> ProcessRequest(CountlyRequestModel model)
         {
-            Log.Verbose("[RequestCountlyHelper] Process request, request: " + model);
+            Log.Verbose($"[RequestCountlyHelper] Process request, request: [{model}]");
             bool shouldPost = _config.IsForcedHttpPostEnabled() || model.RequestData.Length > 2000;
 
 #if UNITY_WEBGL
@@ -170,7 +171,7 @@ namespace Plugins.CountlySDK.Helpers
         /// <returns></returns>
         internal async Task<CountlyResponse> GetAsync(string uri, string data)
         {
-            Log.Verbose("[RequestCountlyHelper] GetAsync, calling with request: " + uri + " params: " + data);
+            Log.Verbose($"[RequestCountlyHelper] GetAsync, calling with request: [{uri}], params: [{data}]");
 
             CountlyResponse countlyResponse = new CountlyResponse();
             string query = AddChecksum(data);
@@ -343,6 +344,8 @@ namespace Plugins.CountlySDK.Helpers
                     Log.Debug($"[RequestCountlyHelper] IsSuccess : Returned request is not a JSON object. Exception: [{ex}]");
                     return false;
                 }
+            } else {
+                Log.Debug($"[RequestCountlyHelper] IsSuccess, Status Code: [{countlyResponse.StatusCode}] is not in between 200-299. Returning false.");
             }
             return false;
         }
