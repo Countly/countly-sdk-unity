@@ -82,7 +82,7 @@ namespace Plugins.CountlySDK.Helpers
 
             try {
                 requests = _requestRepo.Models.ToArray();
-                Log.Verbose("[RequestCountlyHelper] ProcessQueue, request count: " + requests.Length);
+                Log.Verbose($"[RequestCountlyHelper] ProcessQueue, request count: [{requests.Length}]");
             } catch (Exception ex) {
                 Log.Warning($"[RequestCountlyHelper] ProcessQueue, exception occurred while converting Models to array. Exception: {ex}");
                 _isQueueBeingProcess = false;
