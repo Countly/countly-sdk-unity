@@ -87,6 +87,7 @@ namespace Plugins.CountlySDK.Services
 
         private void SendRequestsAndExtendSession()
         {
+            Countly.Instance.UserProfile.Save();
             _eventService.AddEventsToRequestQueue();
             _ = _requestCountlyHelper.ProcessQueue();
 
