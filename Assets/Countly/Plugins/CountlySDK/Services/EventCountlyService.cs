@@ -12,18 +12,13 @@ namespace Plugins.CountlySDK.Services
     public class EventCountlyService : AbstractBaseService
     {
         private bool isQueueBeingProcessed = false;
+        string previousEventID = "";
         internal readonly NonViewEventRepository _eventRepo;
+        internal readonly IDictionary<string, DateTime> _timedEvents;
+        internal ISafeIDGenerator safeEventIDGenerator;
+        internal IViewIDProvider viewIDProvider;
         private readonly RequestCountlyHelper _requestCountlyHelper;
         private readonly CountlyUtils _utils;
-
-        internal readonly IDictionary<string, DateTime> _timedEvents;
-
-        internal ISafeIDGenerator safeEventIDGenerator;
-
-        internal IViewIDProvider viewIDProvider;
-
-        string previousEventID = "";
-
         internal EventCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, RequestCountlyHelper requestCountlyHelper, NonViewEventRepository nonViewEventRepo, ConsentCountlyService consentService, CountlyUtils utils) : base(configuration, logHelper, consentService)
         {
             Log.Debug("[EventCountlyService] Initializing.");
@@ -134,6 +129,9 @@ namespace Plugins.CountlySDK.Services
 
             IDictionary<string, object> segments = RemoveSegmentInvalidDataTypes(segmentation);
             segments = FixSegmentKeysAndValues(segments);
+
+            //before each event is recorded, check if user profile data needs to be saved
+            Countly.Instance.UserProfile.Save();
 
             if (key == CountlyEventModel.NPSEvent ||
                 key == CountlyEventModel.SurveyEvent ||

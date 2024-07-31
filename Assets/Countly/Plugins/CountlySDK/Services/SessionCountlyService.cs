@@ -220,6 +220,7 @@ namespace Plugins.CountlySDK.Services
 
             IsSessionInitiated = false;
             _eventService.AddEventsToRequestQueue();
+            Countly.Instance.UserProfile.Save();
             Dictionary<string, object> requestParams = new Dictionary<string, object>
                 {
                     {"end_session", 1},

@@ -1,6 +1,19 @@
 ## XX.XX.X
 * Added support for string key and Array/List value to all user given segmentations.
 * Added "SetID(string newDeviceId)" function in "Countly.Instance.Device" for managing device id changes.
+* Added "Countly.Instance.UserProfile" with following calls and functionality
+  * "Increment" for incrementing custom property value by 1
+  * "IncrementBy" for incrementing custom property value by provided value.
+  * "SaveMax" for saving maximal value between existing and provided.
+  * "SaveMin" for saving minimal value between existing and provided.
+  * "Multiply" for multiplying custom property value by provided value.
+  * "Pull" for removing value from array.
+  * "Push" for inserting value to array which can have duplicates.
+  * "PushUnique" for inserting value to array of unique values.
+  * "Save" for sending provided values to server.
+  * "SetOnce" for setting value if it does not exist.
+  * "SetProperties" for setting either custom user properties or predefined user properties.
+  * "SetProperty" for setting a single user property. It can be either a custom one or one of the predefined ones.
 * Added the following calls in "Countly.Instance.Views":
   * "StartView" for starting a view.
   * "StartAutoStoppedView" for starting an auto-stopped view.
@@ -17,6 +30,7 @@
   * "RecordOpenViewAsync": Use "StartView" instead.
   * "RecordCloseViewAsync": Use "StopView" instead.
   * "ReportActionAsync": This will be removed in the future.
+* Deprecated "Countly.Instance.UserDetails" added "Countly.Instance.UserProfile" as replacement, mentioned above. 
 * Fixed a bug that allowed to make it possible to close non-started views.
 * Fixed issues that allowed to record User Profiles without consent.
 * Fixed a bug that caused requests being stuck in the queue for WebGL build targets.
