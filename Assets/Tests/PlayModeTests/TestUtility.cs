@@ -9,6 +9,7 @@ using UnityEngine;
 using NUnit.Framework;
 using System;
 using System.Collections;
+using Newtonsoft.Json;
 
 namespace Assets.Tests.PlayModeTests
 {
@@ -286,8 +287,7 @@ namespace Assets.Tests.PlayModeTests
                         JArray expectedArray = JArray.FromObject(expectedValue);
                         JArray actualArray = (JArray)actualValue;
 
-                        for(int i = 0; i < actualArray.Count; i++)
-                        {
+                        for (int i = 0; i < actualArray.Count; i++) {
                             Assert.AreEqual(expectedArray[i].ToString(), actualArray[i].ToString());
                         }
                     } else {
@@ -323,6 +323,123 @@ namespace Assets.Tests.PlayModeTests
 
             CountlyEventModel[] events = cly.Events._eventRepo.Models.ToArray();
             Assert.AreEqual(expEQSize, events.Length);
+        }
+
+        // Extracts user profile request from the provided requests
+        public static Dictionary<string, object> ExtractAndDeserializeUserDetails(IEnumerable<CountlyRequestModel> requests)
+        {
+            string NAME_KEY = "name";
+            string USERNAME_KEY = "username";
+            string EMAIL_KEY = "email";
+            string ORG_KEY = "organization";
+            string PHONE_KEY = "phone";
+            string PICTURE_KEY = "picture";
+            string GENDER_KEY = "gender";
+            string BYEAR_KEY = "byear";
+            string CUSTOM_KEY = "custom";
+
+            var userDetails = new Dictionary<string, object>();
+
+            foreach (var request in requests) {
+                var match = Regex.Match(request.RequestData, @"user_details=([^&]+)");
+                if (match.Success) {
+                    string userDetailsJson = System.Web.HttpUtility.UrlDecode(match.Groups[1].Value);
+
+                    try {
+                        var userDetailsObj = JObject.Parse(userDetailsJson);
+
+                        // Ensure specific keys are always recorded
+                        foreach (string key in new[] { NAME_KEY, USERNAME_KEY, EMAIL_KEY, ORG_KEY, PHONE_KEY, PICTURE_KEY, GENDER_KEY, BYEAR_KEY }) {
+                            if (userDetailsObj[key] != null) {
+                                userDetails[key] = ConvertJTokenToValue(userDetailsObj[key]);
+                            }
+                        }
+
+                        // Handle custom properties
+                        if (userDetailsObj[CUSTOM_KEY] is JObject customObj) {
+                            foreach (var customProperty in customObj.Properties()) {
+                                userDetails[customProperty.Name] = ConvertJTokenToValue(customProperty.Value);
+                            }
+                        }
+
+                        break; // Exit loop once processed the first matching request
+                    } catch (JsonReaderException ex) {
+                        Debug.Log($"Error parsing userDetailsJson: {ex.Message}");
+                    }
+                }
+            }
+
+            return userDetails;
+        }
+
+        public static void ValidateUserDetails(Dictionary<string, object> actualUserDetails, Dictionary<string, object> expectedUserDetails)
+        {
+            foreach (string key in expectedUserDetails.Keys) {
+                Assert.IsTrue(actualUserDetails.ContainsKey(key), $"Key {key} is missing in actual user details.");
+                Assert.AreEqual(expectedUserDetails[key], actualUserDetails[key], $"Value for key {key} does not match.");
+            }
+        }
+
+        private static object ConvertJTokenToValue(JToken token)
+        {
+            switch (token.Type) {
+                case JTokenType.Object:
+                    var dict = new Dictionary<string, object>();
+                    foreach (var property in token.Children<JProperty>()) {
+                        dict[property.Name] = ConvertJTokenToValue(property.Value);
+                    }
+                    return dict;
+
+                case JTokenType.Array:
+                    var firstItem = token.First;
+                    if (firstItem != null) {
+                        switch (firstItem.Type) {
+                            case JTokenType.Integer:
+                                return token.ToObject<int[]>();
+
+                            case JTokenType.Float:
+                                return token.ToObject<float[]>();
+
+                            case JTokenType.String:
+                                return token.ToObject<string[]>();
+
+                            case JTokenType.Boolean:
+                                return token.ToObject<bool[]>();
+
+                            case JTokenType.Date:
+                                return token.ToObject<DateTime[]>();
+
+                            case JTokenType.Object:
+                                var list = new List<object>();
+                                foreach (var item in token.Children()) {
+                                    list.Add(ConvertJTokenToValue(item));
+                                }
+                                return list;
+
+                            default:
+                                return token.ToObject<object[]>();
+                        }
+                    }
+                    return new object[0]; // Empty array if no items
+
+                case JTokenType.Integer:
+                    return token.ToObject<int>();
+
+                case JTokenType.Float:
+                    return token.ToObject<float>();
+
+                case JTokenType.String:
+                    return token.ToString();
+
+                case JTokenType.Boolean:
+                    return token.ToObject<bool>();
+
+                case JTokenType.Date:
+                    return token.ToObject<DateTime>();
+
+                default:
+                    return token.ToObject<object>();
+            }
         }
     }
 }

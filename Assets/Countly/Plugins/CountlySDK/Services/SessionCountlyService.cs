@@ -113,6 +113,8 @@ namespace Plugins.CountlySDK.Services
                 Log.Debug("[SessionCountlyService] SessionTimerOnElapsedAsync");
 
                 _eventService.AddEventsToRequestQueue();
+                Countly.Instance.UserProfile.Save();
+                
                 _ = _requestCountlyHelper.ProcessQueue();
 
                 if (!_configuration.IsAutomaticSessionTrackingDisabled) {
@@ -193,6 +195,7 @@ namespace Plugins.CountlySDK.Services
             
             IsSessionInitiated = false;
             _eventService.AddEventsToRequestQueue();
+            Countly.Instance.UserProfile.Save();
             Dictionary<string, object> requestParams = new Dictionary<string, object>
                 {
                     {"end_session", 1},
