@@ -1,4 +1,4 @@
-## XX.XX.X
+## 24.8.0
 * Added support for string key and Array/List value to all user given segmentations.
 * Added "SetID(string newDeviceId)" function in "Countly.Instance.Device" for managing device id changes.
 * Added "Countly.Instance.UserProfile" with following calls and functionality
