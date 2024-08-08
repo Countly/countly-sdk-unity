@@ -1,23 +1,18 @@
-﻿using System.Collections.Generic;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using UnityEngine;
 using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK;
-using Newtonsoft.Json;
 using System.Web;
 using System.Collections.Specialized;
-using Newtonsoft.Json.Linq;
 using Plugins.CountlySDK.Helpers;
-using UnityEditor.PackageManager.Requests;
-using System.Linq;
 using iBoxDB.LocalServer;
 using Plugins.CountlySDK.Persistance.Entities;
 using Plugins.CountlySDK.Persistance.Repositories;
 using Plugins.iBoxDB;
 using Plugins.CountlySDK.Enums;
-using Assets.Tests.PlayModeTests;
 
-namespace Tests
+
+namespace Assets.Tests.PlayModeTests
 {
     public class MigrationTests
     {
@@ -44,7 +39,7 @@ namespace Tests
         [Test]
         public void MigrationOnEmptyRequestRepo()
         {
-            CountlyConfiguration configuration = TestUtility.createBaseConfig();
+            CountlyConfiguration configuration = TestUtility.CreateBaseConfig();
 
             TempStorageHelper storageHelper = new TempStorageHelper(new CountlyLogHelper(configuration));
             storageHelper.OpenDB();
@@ -73,7 +68,7 @@ namespace Tests
         [Test]
         public void StoreGETRequestsAfterMigration()
         {
-            CountlyConfiguration configuration = TestUtility.createBaseConfig();
+            CountlyConfiguration configuration = TestUtility.CreateBaseConfig();
             configuration.EnableConsoleLogging = false;
 
             TempStorageHelper storageHelper = new TempStorageHelper(new CountlyLogHelper(configuration));
@@ -107,7 +102,7 @@ namespace Tests
         [Test]
         public void MultipleGETRequestsAfterMigration()
         {
-            CountlyConfiguration configuration = TestUtility.createBaseConfig();
+            CountlyConfiguration configuration = TestUtility.CreateBaseConfig();
 
             TempStorageHelper storageHelper = new TempStorageHelper(new CountlyLogHelper(configuration));
             storageHelper.OpenDB();
@@ -158,7 +153,7 @@ namespace Tests
         [Test]
         public void MultiplePostRequestsAfterMigration()
         {
-            CountlyConfiguration configuration = TestUtility.createBaseConfig();
+            CountlyConfiguration configuration = TestUtility.CreateBaseConfig();
 
             TempStorageHelper storageHelper = new TempStorageHelper(new CountlyLogHelper(configuration));
             storageHelper.OpenDB();
@@ -204,7 +199,7 @@ namespace Tests
         [Test]
         public void StorePostRequestsAfterMigration()
         {
-            CountlyConfiguration configuration = TestUtility.createBaseConfig();
+            CountlyConfiguration configuration = TestUtility.CreateBaseConfig();
 
             TempStorageHelper storageHelper = new TempStorageHelper(new CountlyLogHelper(configuration));
             storageHelper.OpenDB();
@@ -237,7 +232,7 @@ namespace Tests
         [Test]
         public void MultiplePostAndGetRequestsAfterMigration()
         {
-            CountlyConfiguration configuration = TestUtility.createBaseConfig();
+            CountlyConfiguration configuration = TestUtility.CreateBaseConfig();
             TempStorageHelper storageHelper = new TempStorageHelper(new CountlyLogHelper(configuration));
             storageHelper.OpenDB();
             storageHelper.ClearDBData();
@@ -350,7 +345,7 @@ namespace Tests
 
             FirstLaunchAppHelper.Process();
 
-            Countly.Instance.Init(TestUtility.createBaseConfig());
+            Countly.Instance.Init(TestUtility.CreateBaseConfig());
 
             Assert.AreEqual("device-id", Countly.Instance.Device.DeviceId);
             Assert.AreEqual(DeviceIdType.DeveloperProvided, Countly.Instance.Device.DeviceIdType);
@@ -363,11 +358,11 @@ namespace Tests
             Assert.AreEqual(Countly.Instance.StorageHelper.SchemaVersion, Countly.Instance.StorageHelper.CurrentVersion);
         }
 
+        [SetUp]
         [TearDown]
         public void End()
         {
-            Countly.Instance.ClearStorage();
-            Object.DestroyImmediate(Countly.Instance);
+            TestUtility.TestCleanup();
         }
 
         private class TempStorageHelper

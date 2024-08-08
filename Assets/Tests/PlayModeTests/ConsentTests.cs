@@ -8,16 +8,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using Newtonsoft.Json.Linq;
-using System.Threading.Tasks;
 using System.Collections.Specialized;
 
-namespace Tests
+namespace Assets.Tests.PlayModeTests
 {
     public class ConsentTests
     {
         private readonly string _serverUrl = "https://xyz.com/";
         private readonly string _appKey = "772c091355076ead703f987fee94490";
-
 
         /// <summary>
         /// Assert an array of keys against the expected value in consnet reqeust json.
@@ -58,7 +56,7 @@ namespace Tests
         /// Result: All features should work.
         /// </summary>
         [Test]
-        public void TestDefaultStateOfConsents()
+        public void DefaultStateOfConsents()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 AppKey = _appKey,
@@ -76,7 +74,7 @@ namespace Tests
         /// Result: Consent request should not send.
         /// </summary>
         [Test]
-        public void TestConsentsRequest_RequiresConsent_IsFalse()
+        public void ConsentsRequest_RequiresConsent_IsFalse()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 AppKey = _appKey,
@@ -107,7 +105,7 @@ namespace Tests
         /// It validates the initial consent request that generates after SDK initialization
         /// </summary>
         [Test]
-        public void TestConsentRequest()
+        public void ConsentRequest()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 AppKey = _appKey,
@@ -130,10 +128,33 @@ namespace Tests
         }
 
         /// <summary>
+        /// It validates the initial consent request that generates after SDK initialization using new CountlyConfiguration constructor and setter
+        /// </summary>
+        [Test]
+        public void ConsentRequest_NewConstructor()
+        {
+            CountlyConfiguration configuration = new CountlyConfiguration(_appKey, _serverUrl)
+                .SetRequiresConsent(true);
+
+            configuration.GiveConsent(new Consents[] { Consents.Crashes, Consents.Events, Consents.Clicks, Consents.StarRating, Consents.Views, Consents.Users, Consents.Push, Consents.RemoteConfig, Consents.Location, Consents.Feedback, Consents.Sessions });
+            Countly.Instance.Init(configuration);
+
+            Assert.IsNotNull(Countly.Instance.Consents);
+
+            CountlyRequestModel requestModel = Countly.Instance.Consents._requestCountlyHelper._requestRepo.Dequeue();
+
+            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            JObject consentObj = JObject.Parse(collection.Get("consent"));
+
+            Assert.AreEqual(11, consentObj.Count);
+            AssertConsentKeys(consentObj, new string[] { "push", "users", "views", "clicks", "events", "crashes", "sessions", "location", "feedback", "star-rating", "remote-config" }, true);
+        }
+
+        /// <summary>
         /// It validates the consent request when consent of a specific feature is given/removed multiple times.
         /// </summary>
         [Test]
-        public void TestConsentRequest_WithConsentIsGivenorRemovedMultipleTimes()
+        public void ConsentRequest_WithConsentIsGivenorRemovedMultipleTimes()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 AppKey = _appKey,
@@ -199,7 +220,7 @@ namespace Tests
         /// Result: All features shouldn't work.
         /// </summary>
         [Test]
-        public void TestConsentDefaultValuesWithRequiresConsentTrue()
+        public void ConsentDefaultValuesWithRequiresConsentTrue()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 AppKey = _appKey,
@@ -219,7 +240,7 @@ namespace Tests
         /// Result: All features should work.
         /// </summary>
         [Test]
-        public void TestConsentDefaultValuesWithRequiresConsentFalse()
+        public void ConsentDefaultValuesWithRequiresConsentFalse()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 AppKey = _appKey,
@@ -258,7 +279,7 @@ namespace Tests
         /// Result: Only Consents of group 'GroupA' should work.
         /// </summary>
         [Test]
-        public void TestConsentsGivenDuringInit()
+        public void ConsentsGivenDuringInit()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 AppKey = _appKey,
@@ -285,7 +306,7 @@ namespace Tests
         /// Case: If 'RequiresConsent' is set in the configuration. Consents are given or removed using 'GiveConsentAll' and 'RemoveAllConsent' after initialization.
         /// </summary>
         [Test]
-        public void TestGiveAndRemoveAllConsent()
+        public void GiveAndRemoveAllConsent()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 AppKey = _appKey,
@@ -312,7 +333,7 @@ namespace Tests
         /// Case: If 'RequiresConsent' is set in the configuration and consents are given using multiple groups during initialization.
         /// </summary>
         [Test]
-        public void TestConfigGiveConsents()
+        public void ConfigGiveConsents()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 AppKey = _appKey,
@@ -345,7 +366,7 @@ namespace Tests
         /// Case: If 'RequiresConsent' is set in the configuration and individual consents are given to multiple features after initialization.
         /// </summary>
         [Test]
-        public void TestGiveIndividualConsents()
+        public void GiveIndividualConsents()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 AppKey = _appKey,
@@ -374,7 +395,7 @@ namespace Tests
         /// Case: If 'RequiresConsent' is set in the configuration and individual consents are given to multiple features during initialization and removed a few consents after initialization.
         /// </summary>
         [Test]
-        public void TestRemovalIndividualConsents()
+        public void RemovalIndividualConsents()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 AppKey = _appKey,
@@ -397,7 +418,7 @@ namespace Tests
         /// Case: If 'RequiresConsent' is set in the configuration and consents are given to multiple groups during and after initialization.
         /// </summary>
         [Test]
-        public void TestGiveConsentToGroup()
+        public void GiveConsentToGroup()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 AppKey = _appKey,
@@ -429,7 +450,7 @@ namespace Tests
         /// Case: If 'RequiresConsent' is set in the configuration and consents are removed of multiple groups after initialization.
         /// </summary>
         [Test]
-        public void TestRemoveConsentOfGroup()
+        public void RemoveConsentOfGroup()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 AppKey = _appKey,
@@ -466,7 +487,7 @@ namespace Tests
         /// Result: User's location should reset to the default value.
         /// </summary>
         [Test]
-        public void TestLocationConsentChangedListener()
+        public void LocationConsentChangedListener()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 AppKey = _appKey,
@@ -512,7 +533,7 @@ namespace Tests
         /// Result: 'ConsentChanged' should call with distinct modified consents list on listeners. There shouldn't any duplicates entries.
         /// </summary>
         [Test]
-        public void TestListenerOnMultipleConsentOfSameFeature()
+        public void ListenerOnMultipleConsentOfSameFeature()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 AppKey = _appKey,
@@ -539,7 +560,7 @@ namespace Tests
         /// Result: 'ConsentChanged' should call with a modified consents list on listeners.
         /// </summary>
         [Test]
-        public void TestListenerOnConsentChanged()
+        public void ListenerOnConsentChanged()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 AppKey = _appKey,
@@ -571,7 +592,7 @@ namespace Tests
         /// Result: 'ConsentChanged' should call with a modified consents list on listeners.
         /// </summary>
         [Test]
-        public void TestListenerOnConsentGroups()
+        public void ListenerOnConsentGroups()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 AppKey = _appKey,
@@ -617,7 +638,7 @@ namespace Tests
         /// Result: 'ConsentChanged' should call with a modified consents list containing all consents on listeners.
         /// </summary>
         [Test]
-        public void TestListenerOnAllConsentRemovalAndGiven()
+        public void ListenerOnAllConsentRemovalAndGiven()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 AppKey = _appKey,
@@ -647,12 +668,12 @@ namespace Tests
             Consents[] consents = System.Enum.GetValues(typeof(Consents)).Cast<Consents>().ToArray();
             Assert.IsTrue(listener.Validate(2, consents, true));
         }
+
+        [SetUp]
         [TearDown]
         public void End()
         {
-            Countly.Instance.ClearStorage();
-            Object.DestroyImmediate(Countly.Instance);
-
+            TestUtility.TestCleanup();
         }
 
         private class ConsentTestHelperClass : AbstractBaseService

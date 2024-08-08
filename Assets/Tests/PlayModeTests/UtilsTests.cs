@@ -2,12 +2,10 @@ using System.Collections.Generic;
 using Plugins.CountlySDK;
 using Plugins.CountlySDK.Models;
 using NUnit.Framework;
-using Assets.Tests.PlayModeTests;
-using UnityEngine;
-using Plugins.CountlySDK.Services;
 using Plugins.CountlySDK.Enums;
+using System;
 
-namespace Tests
+namespace Assets.Tests.PlayModeTests
 {
     public class UtilsTests
     {
@@ -17,7 +15,7 @@ namespace Tests
         [Test]
         public void GetAppKeyAndDeviceIdParams()
         {
-            Countly.Instance.Init(TestUtility.createBaseConfig());
+            Countly.Instance.Init(TestUtility.CreateBaseConfig());
 
             CountlyUtils utils = new CountlyUtils(Countly.Instance);
 
@@ -34,7 +32,7 @@ namespace Tests
         // Method should convert the provided array into string
         public void GetStringFromBytes_base(byte[] byteArray, string expected)
         {
-            Countly.Instance.Init(TestUtility.createBaseConfig());
+            Countly.Instance.Init(TestUtility.CreateBaseConfig());
             CountlyUtils utils = new CountlyUtils(Countly.Instance);
 
             string hexString = utils.GetStringFromBytes(byteArray);
@@ -77,7 +75,6 @@ namespace Tests
             GetStringFromBytes_base(byteArray, expectedResult);
         }
 
-
         // 'IsPictureValid' method in CountlyUtils
         // We provide URLs with different extensions, empty URL, null URL and invalid URL
         // 'IsPictureValid' should return true if provided URL is valid, else false
@@ -92,7 +89,7 @@ namespace Tests
         [TestCase("invalid_url", ExpectedResult = false)] // Invalid URL without extension
         public bool TestIsPictureValid(string pictureUrl)
         {
-            Countly.Instance.Init(TestUtility.createBaseConfig());
+            Countly.Instance.Init(TestUtility.CreateBaseConfig());
             CountlyUtils utils = new CountlyUtils(Countly.Instance);
 
             bool isValid = utils.IsPictureValid(pictureUrl);
@@ -105,7 +102,7 @@ namespace Tests
         [Test]
         public void GetUniqueDeviceId_UserProvidedDeviceId()
         {
-            CountlyConfiguration configuration = TestUtility.createBaseConfig();
+            CountlyConfiguration configuration = TestUtility.CreateBaseConfig();
             configuration.DeviceId = "device_id";
             Countly.Instance.Init(configuration);
 
@@ -119,7 +116,7 @@ namespace Tests
         [Test]
         public void GetUniqueDeviceId_NullDeviceId()
         {
-            CountlyConfiguration configuration = TestUtility.createBaseConfig();
+            CountlyConfiguration configuration = TestUtility.CreateBaseConfig();
             configuration.DeviceId = null;
             Countly.Instance.Init(configuration);
 
@@ -138,11 +135,193 @@ namespace Tests
             Assert.IsTrue(generatedValue.Length > 4);
         }
 
+        // 'RemoveUnsupportedDataTypes' in CountlyUtils
+        // Removes unsuppored data types and returns true if something is removed
+        // It should remove data if provided Dictionary contains something other than string, int, double, bool
+        public void RemoveUnsupportedDataTypes_base(Dictionary<string, object> data, bool isRemovingExpected)
+        {
+            Countly.Instance.Init(TestUtility.CreateBaseConfig());
+            CountlyUtils utils = new CountlyUtils(Countly.Instance);
+
+            if (isRemovingExpected) {
+                Assert.IsTrue(utils.RemoveUnsupportedDataTypes(data, null));
+            } else {
+                Assert.IsFalse(utils.RemoveUnsupportedDataTypes(data, null));
+            }
+        }
+
+        // 'RemoveUnsupportedDataTypes' in CountlyUtils
+        // Removes unsuppored data types and returns true if something is removed
+        // It should return false since provided data is null and nothing can be removed
+        [Test]
+        public void RemoveUnsupportedDataTypes_Null()
+        {
+            RemoveUnsupportedDataTypes_base(null, false);
+        }
+
+        // 'RemoveUnsupportedDataTypes' in CountlyUtils
+        // Removes unsuppored data types and returns true if something is removed
+        // It should return true since provided data contains unsupported data type
+        [Test]
+        public void RemoveUnsupportedDataTypes_UnsupportedDataType()
+        {
+            Dictionary<string, object> data = new Dictionary<string, object>
+            {
+                { "key1", "value1" },
+                { "key2", 42 },
+                { "key3", 3.14 },
+                { "key4", true },
+                { "key5", 1234567890123456789L},
+                { "key6", new object() } // Unsupported data type
+            };
+
+            RemoveUnsupportedDataTypes_base(data, true);
+        }
+
+        // 'RemoveUnsupportedDataTypes' in CountlyUtils
+        // Removes unsuppored data types and returns true if something is removed
+        // It should return false since provided data does not contain unsupported data type
+        [Test]
+        public void RemoveUnsupportedDataTypes_SupportedDataType()
+        {
+            Dictionary<string, object> data = new Dictionary<string, object>
+            {
+                { "key1", "value1" },
+                { "key2", 42 },
+                { "key3", 3.14 },
+                { "key4", true },
+                { "key5", 1234567890123456789L}
+            };
+
+            RemoveUnsupportedDataTypes_base(data, false);
+        }
+
+        // 'CopyDictionaryToDestination' in CountlyUtils
+        // We put all items in a Dictionary into another Dictionary
+        // All items should be placed into the destination without any problem
+        [Test]
+        public void CopyDictionaryToDestination_ValidDictionaries()
+        {
+            Countly.Instance.Init(TestUtility.CreateBaseConfig());
+            CountlyUtils utils = new CountlyUtils(Countly.Instance);
+
+            Dictionary<string, object> destination = new Dictionary<string, object>
+            {
+                { "key1", "value1" }
+            };
+
+            Dictionary<string, object> source = new Dictionary<string, object>
+            {
+                { "key2", 42 },
+                { "key3", 3.14 },
+                { "key4", true },
+                { "key5", 1234567890123456789L }
+            };
+
+            utils.CopyDictionaryToDestination(destination, source, TestUtility.CreateLogHelper());
+
+            // validating that no changes have happened on source
+            Assert.AreEqual(4, source.Count);
+            Assert.AreEqual(source["key2"], 42);
+            Assert.AreEqual(source["key3"], 3.14);
+            Assert.AreEqual(source["key4"], true);
+            Assert.AreEqual(source["key5"], 1234567890123456789L);
+
+            // validating the destination
+            Assert.AreEqual(5, destination.Count);
+            Assert.AreEqual("value1", destination["key1"]);
+            Assert.AreEqual(source["key2"], destination["key2"]);
+            Assert.AreEqual(source["key3"], destination["key3"]);
+            Assert.AreEqual(source["key4"], destination["key4"]);
+            Assert.AreEqual(source["key5"], destination["key5"]);
+        }
+
+        // 'CopyDictionaryToDestination' in CountlyUtils
+        // We pass empty and null Dictionaries to put into another Dictionary
+        // Nothing should break, removed or added into the destination
+        [TestCase(true)]
+        [TestCase(false)]
+        public void CopyDictionaryToDestination_NullOrEmptySource(bool isNull)
+        {
+            Countly.Instance.Init(TestUtility.CreateBaseConfig());
+            CountlyUtils utils = new CountlyUtils(Countly.Instance);
+
+            Dictionary<string, object> destination = new Dictionary<string, object>
+            {
+                { "key1", "value1" }
+            };
+
+            Dictionary<string, object> source = new Dictionary<string, object>();
+
+            if (isNull) {
+                source = null;
+            }
+
+            utils.CopyDictionaryToDestination(destination, source, TestUtility.CreateLogHelper());
+
+            // validating that no changes have happened on source
+            if (isNull) {
+                Assert.IsNull(source);
+            } else {
+                Assert.IsEmpty(source);
+            }      
+
+            // validating the destination
+            Assert.AreEqual("value1", destination["key1"]);
+            Assert.AreEqual(1, destination.Count);
+        }
+
+        // 'CopyDictionaryToDestination' in CountlyUtils
+        // We pass valid Dictionary into an empty destination
+        // All KeyValuePairs should be added into destination
+        [TestCase(true)]
+        [TestCase(false)]
+        public void CopyDictionaryToDestination_ValidDictionary_EmptyAndNullDestination(bool isNull)
+        {
+            Countly.Instance.Init(TestUtility.CreateBaseConfig());
+            CountlyUtils utils = new CountlyUtils(Countly.Instance);
+
+            Dictionary<string, object> destination = new Dictionary<string, object>();
+            if (isNull) {
+                destination = null;
+            }
+
+            Dictionary<string, object> source = new Dictionary<string, object>
+            {
+                { "key1", "value1" },
+                { "key2", 42 },
+                { "key3", 3.14 },
+                { "key4", true },
+                { "key5", 1234567890123456789L }
+            };
+
+            utils.CopyDictionaryToDestination(destination, source, TestUtility.CreateLogHelper());
+
+            // validating that no changes have happened on source
+            Assert.AreEqual(5, source.Count);
+            Assert.AreEqual(source["key1"], "value1");
+            Assert.AreEqual(source["key2"], 42);
+            Assert.AreEqual(source["key3"], 3.14);
+            Assert.AreEqual(source["key4"], true);
+            Assert.AreEqual(source["key5"], 1234567890123456789L);
+
+            // validating the destination
+            if (isNull) {
+                Assert.IsNull(destination);
+            } else {
+                Assert.AreEqual(source.Count, destination.Count);
+                foreach (var kvp in source) {
+                    Assert.IsTrue(destination.ContainsKey(kvp.Key));
+                    Assert.AreEqual(kvp.Value, destination[kvp.Key]);
+                }
+            }
+        }
+
+        [SetUp]
         [TearDown]
         public void End()
         {
-            Countly.Instance.ClearStorage();
-            Object.DestroyImmediate(Countly.Instance);
+            TestUtility.TestCleanup();
         }
     }
 }

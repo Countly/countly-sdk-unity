@@ -3,7 +3,7 @@ using UnityEngine;
 using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK;
 
-namespace Tests
+namespace Assets.Tests.PlayModeTests
 {
     public class LocationTests
     {
@@ -96,11 +96,11 @@ namespace Tests
             AssertLocation(latitude + "," + longitude, city, ipAddress, countryCode, Countly.Instance.Configuration.IsLocationDisabled);
         }
 
+        [SetUp]
         [TearDown]
         public void End()
         {
-            Countly.Instance.ClearStorage();
-            Object.DestroyImmediate(Countly.Instance);
+            TestUtility.TestCleanup();
         }
     }
 }

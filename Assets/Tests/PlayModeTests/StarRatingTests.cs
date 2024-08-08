@@ -5,7 +5,7 @@ using Plugins.CountlySDK;
 using Plugins.CountlySDK.Enums;
 using System.Collections.Generic;
 
-namespace Tests
+namespace Assets.Tests.PlayModeTests
 {
     public class StarRatingTests
     {
@@ -14,7 +14,6 @@ namespace Tests
 
         private void AssertStarRatingModel(CountlyEventModel model, IDictionary<string, object> segmentation)
         {
-
             Assert.AreEqual(CountlyEventModel.StarRatingEvent, model.Key);
             Assert.IsNull(model.Sum);
             Assert.AreEqual(1, model.Count);
@@ -205,8 +204,8 @@ namespace Tests
             Assert.IsNotNull(Countly.Instance.StarRating);
             Assert.AreEqual(0, Countly.Instance.StarRating._eventCountlyService._eventRepo.Count);
 
-            await Countly.Instance.Views.RecordCloseViewAsync("close_view");
-            Assert.AreEqual(1, Countly.Instance.Views._eventService._eventRepo.Count);
+            Countly.Instance.Views.StartView("view");
+            Assert.AreEqual(1, Countly.Instance.StarRating._eventCountlyService._eventRepo.Count);
 
             await Countly.Instance.StarRating.ReportStarRatingAsync("android", "0.1", 4);
             Assert.AreEqual(2, Countly.Instance.StarRating._eventCountlyService._eventRepo.Count);
@@ -215,11 +214,11 @@ namespace Tests
             Assert.AreEqual(0, Countly.Instance.StarRating._eventCountlyService._eventRepo.Count);
         }
 
+        [SetUp]
         [TearDown]
         public void End()
         {
-            Countly.Instance.ClearStorage();
-            Object.DestroyImmediate(Countly.Instance);
+            TestUtility.TestCleanup();
         }
     }
 }

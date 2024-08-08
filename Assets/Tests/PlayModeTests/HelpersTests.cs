@@ -3,17 +3,10 @@ using Plugins.CountlySDK.Persistance.Entities;
 using NUnit.Framework;
 using Plugins.CountlySDK.Helpers;
 using System.Collections.Generic;
-using Assets.Tests.PlayModeTests;
-using System.Linq;
-using UnityEngine;
-using Newtonsoft.Json;
-using static UnityEngine.Networking.UnityWebRequest;
 using Newtonsoft.Json.Linq;
-using UnityEditor.UIElements;
-using System.Text;
-using System.Net.NetworkInformation;
 
-namespace Tests
+
+namespace Assets.Tests.PlayModeTests
 {
     public class HelpersTests
     {
@@ -23,7 +16,7 @@ namespace Tests
         public void EventEntityToEventModel_base(EventEntity entity, CountlyEventModel expected)
         {
             // Convert the EventEntity to a CountlyEventModel using the Converter.
-            CountlyEventModel model = Converter.ConvertEventEntityToEventModel(entity, TestUtility.CreateLogHelper(true));
+            CountlyEventModel model = Converter.ConvertEventEntityToEventModel(entity, TestUtility.CreateLogHelper());
 
             // If the conversion resulted in a null CountlyEventModel, assert that the expected value is also null.
             if (expected == null) {
@@ -116,7 +109,7 @@ namespace Tests
         public void JsonToDictionary_base(string Json, Dictionary<string, object> expected)
         {
             // Convert Json into Dictionary
-            Dictionary<string, object> result = Converter.ConvertJsonToDictionary(Json, TestUtility.CreateLogHelper(true));
+            Dictionary<string, object> result = Converter.ConvertJsonToDictionary(Json, TestUtility.CreateLogHelper());
             if (expected == null) {
                 Assert.IsNull(result);
             } else {
@@ -178,6 +171,137 @@ namespace Tests
                 }
             };
             JsonToDictionary_base(json, expected);
+        }
+
+
+        // 'MetricHelper' default values
+        // no override provided
+        // all values should be valid and not "null"
+        [Test]
+        public void MetricHelper_defaultValues()
+        {
+            MetricHelper defaultMetricHelper = new MetricHelper();
+
+            Assert.NotNull(defaultMetricHelper.OS);
+            Assert.NotNull(defaultMetricHelper.OSVersion);
+            Assert.NotNull(defaultMetricHelper.AppVersion);
+            Assert.NotNull(defaultMetricHelper.Density);
+            Assert.NotNull(defaultMetricHelper.Resolution);
+            Assert.NotNull(defaultMetricHelper.Device);
+            Assert.NotNull(defaultMetricHelper.Locale);
+        }
+
+        // 'MetricHelper' override functionality
+        // Providing a null dictionary to MetricHelper
+        // MetricHelper should return default values
+        [Test]
+        public void MetricHelper_nullOverride()
+        {
+            MetricHelper expectedMetrics = new MetricHelper();
+            expectedMetrics.overridenMetrics = null;
+
+            MetricHelper defaultMetricHelper = new MetricHelper();
+
+            Assert.AreEqual(expectedMetrics.OS, defaultMetricHelper.OS);
+            Assert.AreEqual(expectedMetrics.OSVersion, defaultMetricHelper.OSVersion);
+            Assert.AreEqual(expectedMetrics.AppVersion, defaultMetricHelper.AppVersion);
+            Assert.AreEqual(expectedMetrics.Density, defaultMetricHelper.Density);
+            Assert.AreEqual(expectedMetrics.Resolution, defaultMetricHelper.Resolution);
+            Assert.AreEqual(expectedMetrics.Device, defaultMetricHelper.Device);
+            Assert.AreEqual(expectedMetrics.Locale, defaultMetricHelper.Locale);
+        }
+
+        // 'MetricHelper' override functionality
+        // Providing an empty dictionary to MetricHelper
+        // MetricHelper should return default values
+        [Test]
+        public void MetricHelper_emptyOverride()
+        {
+            MetricHelper expectedMetrics = new MetricHelper();
+            expectedMetrics.overridenMetrics = new Dictionary<string, string>();
+            MetricHelper defaultMetricHelper = new MetricHelper();
+
+            Assert.AreEqual(expectedMetrics.OS, defaultMetricHelper.OS);
+            Assert.AreEqual(expectedMetrics.OSVersion, defaultMetricHelper.OSVersion);
+            Assert.AreEqual(expectedMetrics.AppVersion, defaultMetricHelper.AppVersion);
+            Assert.AreEqual(expectedMetrics.Density, defaultMetricHelper.Density);
+            Assert.AreEqual(expectedMetrics.Resolution, defaultMetricHelper.Resolution);
+            Assert.AreEqual(expectedMetrics.Device, defaultMetricHelper.Device);
+            Assert.AreEqual(expectedMetrics.Locale, defaultMetricHelper.Locale);
+        }
+
+        // 'MetricHelper' override functionality
+        // Providing a dictionary with valid keys to MetricHelper
+        // It should return overriden values instead of default
+        [Test]
+        public void MetricHelper_overridenMetrics()
+        {
+            Dictionary<string, string> overrides = new Dictionary<string, string>
+            {
+                { "_os", "NotWindows" },
+                { "_os_version", "NineThousand" },
+                { "_device", "Calculator"},
+                { "_resolution", "144p"},
+                { "_app_version","1" },
+                { "_density", "unknown"},
+                { "_locale", "English"}
+            };
+
+            MetricHelper expectedMetrics = new MetricHelper();
+            expectedMetrics.overridenMetrics = overrides;
+
+            Assert.AreEqual(expectedMetrics.OS, "NotWindows");
+            Assert.AreEqual(expectedMetrics.OSVersion, "NineThousand");
+            Assert.AreEqual(expectedMetrics.AppVersion, "1");
+            Assert.AreEqual(expectedMetrics.Density, "unknown");
+            Assert.AreEqual(expectedMetrics.Resolution, "144p");
+            Assert.AreEqual(expectedMetrics.Device, "Calculator");
+            Assert.AreEqual(expectedMetrics.Locale, "English");
+        }
+
+        // 'buildMetricJSON' function in MetricHelper
+        // Providing a dictionary with a custom metric to MetricHelper
+        // Custom metric should be in the JSON built by MetricHelper
+        [Test]
+        public void MetricHelper_customMetric()
+        {
+            Dictionary<string, string> overrides = new Dictionary<string, string>
+            {
+                { "CustomMetric1", "Kobe" },
+                { "CustomMetric2", "Jordan" },
+                { "_os", "NotWindows"},
+                { "_os_version", "NineThousand" },
+                { "_device", "Calculator"},
+                { "_resolution", "144p"},
+                { "_app_version","1" },
+                { "_density", "unknown"},
+                { "_locale", "English"}
+            };
+
+            MetricHelper expectedMetrics = new MetricHelper(overrides);
+            string metricJSON = expectedMetrics.buildMetricJSON();
+
+            Dictionary<string, object> metrics = Converter.ConvertJsonToDictionary(metricJSON, null);
+
+            Assert.IsTrue(metrics.ContainsKey("CustomMetric1"));
+            Assert.IsTrue(metrics.ContainsKey("CustomMetric2"));
+
+            Assert.AreEqual(metrics["CustomMetric1"], "Kobe");
+            Assert.AreEqual(metrics["CustomMetric2"], "Jordan");
+            Assert.AreEqual(metrics["_os"], "NotWindows");
+            Assert.AreEqual(metrics["_os_version"], "NineThousand");
+            Assert.AreEqual(metrics["_app_version"], "1");
+            Assert.AreEqual(metrics["_density"], "unknown");
+            Assert.AreEqual(metrics["_resolution"], "144p");
+            Assert.AreEqual(metrics["_device"], "Calculator");
+            Assert.AreEqual(metrics["_locale"], "English");
+        }
+
+        [SetUp]
+        [TearDown]
+        public void End()
+        {
+            TestUtility.TestCleanup();
         }
     }
 }

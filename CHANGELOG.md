@@ -1,3 +1,68 @@
+## 24.8.0
+* Added support for string key and Array/List value to all user given segmentations.
+* Added "SetID(string newDeviceId)" function in "Countly.Instance.Device" for managing device id changes.
+* Added "Countly.Instance.UserProfile" with following calls and functionality
+  * "Increment" for incrementing custom property value by 1
+  * "IncrementBy" for incrementing custom property value by provided value.
+  * "SaveMax" for saving maximal value between existing and provided.
+  * "SaveMin" for saving minimal value between existing and provided.
+  * "Multiply" for multiplying custom property value by provided value.
+  * "Pull" for removing value from array.
+  * "Push" for inserting value to array which can have duplicates.
+  * "PushUnique" for inserting value to array of unique values.
+  * "Save" for sending provided values to server.
+  * "SetOnce" for setting value if it does not exist.
+  * "SetProperties" for setting either custom user properties or predefined user properties.
+  * "SetProperty" for setting a single user property. It can be either a custom one or one of the predefined ones.
+* Added the following calls in "Countly.Instance.Views":
+  * "StartView" for starting a view.
+  * "StartAutoStoppedView" for starting an auto-stopped view.
+  * "StopViewWithName" for stopping a view by name.
+  * "StopViewWithID" for stopping a view by ID.
+  * "PauseViewWithID" for pausing a view by ID.
+  * "ResumeViewWithID" for resuming a paused view by ID.
+  * "StopAllViews" for stopping all views.
+  * "SetGlobalViewSegmentation" for setting global view segmentation data.
+  * "AddSegmentationToViewWithID" for adding segmentation data to a view by ID.
+  * "AddSegmentationToViewWithName" for adding segmentation data to a view by name.
+  * "UpdateGlobalViewSegmentation" for updating global view segmentation data.
+* Deprecated the following calls from "Countly.Instance.Views":
+  * "RecordOpenViewAsync": Use "StartView" instead.
+  * "RecordCloseViewAsync": Use "StopView" instead.
+  * "ReportActionAsync": This will be removed in the future.
+* Deprecated "Countly.Instance.UserDetails" added "Countly.Instance.UserProfile" as replacement, mentioned above. 
+* Fixed a bug that allowed to make it possible to close non-started views.
+* Fixed issues that allowed to record User Profiles without consent.
+* Fixed a bug that caused requests being stuck in the queue for WebGL build targets.
+
+## 23.12.1
+* Added 'UnityWebRequest' as the networking handler for WebGL builds.
+* Gathered SDK content under the 'Countly' folder for better structure and to avoid mixing with other files.
+
+## 23.12.0
+* Added functionality to allow passing custom or overridden metrics.
+* Deprecated CountlyConfiguration constructor. A replacement constructor with parameters added.
+* Deprecated "ServerUrl" string in "CountlyConfiguration" class.
+* Deprecated "AppKey" string in "CountlyConfiguration" class.
+* Deprecated "DeviceId" string in "CountlyConfiguration" class. A setter method is added.
+* Deprecated "Salt" string in "CountlyConfiguration" class. A setter method is added.
+* Deprecated "RequiresConsent" bool in CountlyConfiguration class. A setter method is added.
+* Deprecated "EnablePost" bool in "CountlyConfiguration" class. A setter method is added.
+* Deprecated "EnableTestMode" bool in "CountlyConfiguration" class.
+* Deprecated "EnableConsoleLogging" bool in "CountlyConfiguration" class. A setter method is added.
+* Deprecated "EnableManualSessionHandling" bool in "CountlyConfiguration" class.
+* Deprecated "EnableAutomaticCrashReporting" bool in "CountlyConfiguration" class. A setter method is added.
+* Deprecated "SessionDuration" integer in "CountlyConfiguration" class. A setter method is added.
+* Deprecated "MaxKeyLength" integer in "CountlyConfiguration" class. A setter method is added.
+* Deprecated "MaxValueSize" integer in "CountlyConfiguration" class. A setter method is added.
+* Deprecated "MaxSegmentationValues" integer in "CountlyConfiguration" class. A setter method is added.
+* Deprecated "MaxStackTraceLinesPerThread" integer in "CountlyConfiguration" class. A setter method is added.
+* Deprecated "MaxStackTraceLineLength" integer in "CountlyConfiguration" class. A setter method is added.
+* Deprecated "EventQueueThreshold" integer in "CountlyConfiguration" class. A setter method is added.
+* Deprecated "StoredRequestLimit" integer in "CountlyConfiguration" class. A setter method is added.
+* Deprecated "TotalBreadcrumbsAllowed" integer in "CountlyConfiguration" class. A setter method is added.
+* Deprecated "NotificationMode" enum in "CountlyConfiguration" class. A setter method is added.
+
 ## 23.06.1
 * Added app version metric to every request sent.
 * Fixed a bug that caused build issues when not running inside the editor.
