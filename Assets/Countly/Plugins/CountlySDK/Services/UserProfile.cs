@@ -280,7 +280,7 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
         try {
             jsonData = JsonConvert.SerializeObject(cachedUserData);
         } catch (JsonException ex) {
-            Log.Error($"[UserProfile] SaveInternal, failed to serialize cached user data: {ex.Message}");
+            Log.Error($"[UserProfile] SaveInternal, failed to serialize cached user data: [{ex.Message}]");
             return;
         }
 
@@ -344,7 +344,7 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
                     PictureUrl = pictureUrl.Trim();
                 }
             } else {
-                Log.Warning($"[UserDetailsCountlyService] SetDataInternal, Picture format for URL '{pictureUrl}' is not as expected. Expected formats are .png, .gif, or .jpeg");
+                Log.Warning($"[UserDetailsCountlyService] SetDataInternal, Picture format for URL [{pictureUrl}] is not as expected. Expected formats are .png, .gif, or .jpeg");
             }
         }
 
@@ -481,7 +481,7 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
             }
             CustomMods[truncatedKey] = ob;
         } catch (Exception e) {
-            Log.Error($"[UserProfile] ModifyCustomData, An exception occured during modifying the custom data. Exception: {e}");
+            Log.Error($"[UserProfile] ModifyCustomData, Exception occured during modifying the custom data. Exception: [{e}]");
         }
     }
 
@@ -545,7 +545,7 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
             }
 
         } catch (JsonException e) {
-            Log.Warning($"[UserProfile] ConvertToJSON, Got exception converting an UserData to JSON. Exception:{e}");
+            Log.Warning($"[UserProfile] ConvertToJSON, Got exception converting an UserData to JSON. Exception: [{e}]");
         }
 
         if (json.Count > 0) {
@@ -563,7 +563,7 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
                 Dictionary<string, object> data = JsonConvert.DeserializeObject<Dictionary<string, object>>(json);
                 return data;
             } catch (JsonException ex) {
-                Log.Error($"[UserProfile] GetDataForRequest, Failed to deserialize cached user data: {ex.Message}");
+                Log.Error($"[UserProfile] GetDataForRequest, Failed to deserialize cached user data: [{ex.Message}]");
                 return new Dictionary<string, object>();
             }
         }

@@ -41,7 +41,7 @@ namespace Plugins.CountlySDK.Services
             _monoBehaviour = monoBehaviour;
 
             if (_configuration.IsAutomaticSessionTrackingDisabled) {
-                Log.Verbose("[Countly][CountlyConfiguration] Automatic session tracking disabled!");
+                Log.Verbose("[SessionCountlyService] Automatic session tracking disabled!");
             }
         }
 
@@ -117,9 +117,9 @@ namespace Plugins.CountlySDK.Services
         {
             isInternalTimerStopped = true;
 
-            #if UNITY_WEBGL
+#if UNITY_WEBGL
             _monoBehaviour.StopCoroutine(SessionTimerCoroutine());
-            #else
+#else
             if (_sessionTimer != null) {
                 // Unsubscribe from the Elapsed event
                 _sessionTimer.Elapsed -= SessionTimerOnElapsedAsync;
@@ -128,7 +128,7 @@ namespace Plugins.CountlySDK.Services
                 _sessionTimer.Stop();
                 _sessionTimer.Dispose();
             }
-            #endif
+#endif
         }
 
         /// <summary>
@@ -163,7 +163,7 @@ namespace Plugins.CountlySDK.Services
             }
 
             if (IsSessionInitiated) {
-                Log.Warning("[SessionCountlyService] BeginSessionAsync: The session has already started!");
+                Log.Warning("[SessionCountlyService] BeginSessionAsync, Session has already started!");
                 return;
             }
 
@@ -215,7 +215,7 @@ namespace Plugins.CountlySDK.Services
             }
 
             if (!IsSessionInitiated) {
-                Log.Warning("[SessionCountlyService] EndSessionAsync: The session isn't started yet!");
+                Log.Warning("[SessionCountlyService] EndSessionAsync, Session isn't started yet!");
                 return;
             }
 
@@ -244,7 +244,7 @@ namespace Plugins.CountlySDK.Services
             }
 
             if (!IsSessionInitiated) {
-                Log.Warning("[SessionCountlyService] ExtendSessionAsync: The session isn't started yet!");
+                Log.Warning("[SessionCountlyService] ExtendSessionAsync, Session isn't started yet!");
                 return;
             }
 
@@ -259,10 +259,10 @@ namespace Plugins.CountlySDK.Services
 
             _requestCountlyHelper.AddToRequestQueue(requestParams);
             await _requestCountlyHelper.ProcessQueue();
-            
-            #if UNITY_WEBGL
+
+#if UNITY_WEBGL
             _monoBehaviour.StartCoroutine(SessionTimerCoroutine());
-            #endif
+#endif
         }
 
         #region override Methods

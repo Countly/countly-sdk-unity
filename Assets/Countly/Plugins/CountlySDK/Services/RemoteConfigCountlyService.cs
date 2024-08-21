@@ -25,7 +25,6 @@ namespace Plugins.CountlySDK.Services
         /// Get the remote config values.
         /// </summary>
         public Dictionary<string, object> Configs { private set; get; }
-
         private readonly StringBuilder _requestStringBuilder = new StringBuilder();
 
         internal RemoteConfigCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, RequestCountlyHelper requestCountlyHelper, CountlyUtils countlyUtils, Dao<ConfigEntity> configDao, ConsentCountlyService consentService, RequestBuilder requestBuilder) : base(configuration, logHelper, consentService)
@@ -42,7 +41,6 @@ namespace Plugins.CountlySDK.Services
             } else {
                 _configDao.RemoveAll();
             }
-
         }
 
         /// <summary>
@@ -71,8 +69,7 @@ namespace Plugins.CountlySDK.Services
                 config = Converter.ConvertJsonToDictionary(allConfigs[0].Json, Log);
             }
 
-            Log.Debug("[RemoteConfigCountlyService] FetchConfigFromDB : Configs = " + config);
-
+            Log.Debug($"[RemoteConfigCountlyService] FetchConfigFromDB, Configs: [{config}]");
             return config;
         }
 
@@ -91,21 +88,19 @@ namespace Plugins.CountlySDK.Services
             }
 
             Dictionary<string, object> requestParams = _countlyUtils.GetBaseParams();
-
             requestParams.Add("method", "fetch_remote_config");
-
             string metricsJSON = _configuration.metricHelper.buildMetricJSON();
             requestParams.Add("metrics", metricsJSON);
-
             string data = _requestBuilder.BuildQueryString(requestParams);
 
             CountlyResponse response;
-            if (_configuration.EnablePost) {
+            if (_configuration.IsForcedHttpPostEnabled()) {
                 response = await Task.Run(() => _requestCountlyHelper.PostAsync(_countlyUtils.ServerInputUrl, data));
             } else {
                 response = await Task.Run(() => _requestCountlyHelper.GetAsync(_countlyUtils.ServerInputUrl, data));
 
             }
+
             if (response.IsSuccess) {
                 _configDao.RemoveAll();
                 ConfigEntity configEntity = new ConfigEntity {
@@ -115,8 +110,7 @@ namespace Plugins.CountlySDK.Services
                 _configDao.Save(configEntity);
                 Configs = Converter.ConvertJsonToDictionary(response.Data, Log);
 
-                Log.Debug("[RemoteConfigCountlyService] UpdateConfig: " + response.ToString());
-
+                Log.Debug($"[RemoteConfigCountlyService] UpdateConfig, response: [{response}]");
             }
 
             return response;

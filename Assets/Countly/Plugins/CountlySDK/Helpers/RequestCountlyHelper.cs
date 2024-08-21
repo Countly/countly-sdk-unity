@@ -54,7 +54,7 @@ namespace Plugins.CountlySDK.Helpers
                 // Calculate how many items need to be removed from the queue to accommodate the new request.
                 int exceedAmount = _requestRepo.Count - _config.GetMaxRequestQueueSize();
                 int removeAmount = Mathf.Min(exceedAmount, countlyRequestRemoveLimit) + 1;
-                Log.Warning("[RequestCountlyHelper] Request Queue is full. Dropping the oldest request.");
+                Log.Warning("[RequestCountlyHelper] AddRequestToQueue, Request Queue is full. Dropping the oldest request.");
 
                 // Remove the calculated amount of oldest requests from the queue.
                 while (removeAmount > 0) {
@@ -103,7 +103,7 @@ namespace Plugins.CountlySDK.Helpers
                 CountlyResponse response = await ProcessRequest(reqModel);
 
                 if (!response.IsSuccess) {
-                    Log.Verbose($"[RequestCountlyHelper] ProcessQueue: Request failed. Response: [{response.ToString()}]");
+                    Log.Verbose($"[RequestCountlyHelper] ProcessQueue, Request failed. Response: [{response.ToString()}]");
                     _isQueueBeingProcess = false;
                     break;
                 }
@@ -120,7 +120,7 @@ namespace Plugins.CountlySDK.Helpers
         /// </summary>
         private async Task<CountlyResponse> ProcessRequest(CountlyRequestModel model)
         {
-            Log.Verbose($"[RequestCountlyHelper] Process request, request: [{model}]");
+            Log.Verbose($"[RequestCountlyHelper] ProcessRequest, request: [{model}]");
             bool shouldPost = _config.IsForcedHttpPostEnabled() || model.RequestData.Length > 2000;
 
 #if UNITY_WEBGL
@@ -143,7 +143,6 @@ namespace Plugins.CountlySDK.Helpers
         internal void AddToRequestQueue(Dictionary<string, object> queryParams)
         {
             CountlyRequestModel requestModel = _requestBuilder.BuildRequest(_countlyUtils.GetBaseParams(), queryParams);
-
             AddRequestToQueue(requestModel);
         }
 
@@ -154,12 +153,10 @@ namespace Plugins.CountlySDK.Helpers
                 using (SHA256 sha256Hash = SHA256.Create()) {
                     byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(query + _config.GetParameterTamperingProtectionSalt()));
                     string hex = _countlyUtils.GetStringFromBytes(bytes);
-
                     query += "&checksum256=" + hex;
-                    Log.Debug($"[RequestCountlyHelper] AddChecksum, Checksum added query = [{query}]");
+                    Log.Debug($"[RequestCountlyHelper] AddChecksum, Checksum added query: [{query}]");
                 }
             }
-
             return query;
         }
 
@@ -341,7 +338,7 @@ namespace Plugins.CountlySDK.Helpers
                         return true;
                     }
                 } catch (JsonException ex) {
-                    Log.Debug($"[RequestCountlyHelper] IsSuccess : Returned request is not a JSON object. Exception: [{ex}]");
+                    Log.Debug($"[RequestCountlyHelper] IsSuccess, Returned request is not a JSON object. Exception: [{ex}]");
                     return false;
                 }
             } else {

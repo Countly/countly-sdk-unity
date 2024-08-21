@@ -41,7 +41,7 @@ namespace Plugins.CountlySDK.Helpers
         {
             get {
                 if (!_firstLaunchApp.HasValue) {
-                    Debug.LogWarning("[FirstLaunchAppHelper] IsFirstLaunchApp : Process should be called when session begins");
+                    Debug.LogWarning("[FirstLaunchAppHelper] IsFirstLaunchApp, Process should be called when session begins");
                     Process();
                 }
                 return _firstLaunchApp.Value;

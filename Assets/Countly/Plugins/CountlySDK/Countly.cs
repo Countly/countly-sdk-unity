@@ -158,20 +158,20 @@ namespace Plugins.CountlySDK
                 countlyMainThreadHandler.RunOnMainThread(() => { InitInternal(configuration); });
 
                 // Avoid potential issues with SDK initialization on non-main threads
-                Debug.LogWarning("[Countly][Init] Initialization process is being moved to the main thread. Ensure this is intended behavior.");
+                Debug.LogWarning("[Countly] Init, Initialization process is being moved to the main thread. Ensure this is intended behavior.");
             }
         }
 
         public void InitInternal(CountlyConfiguration configuration)
         {
             if (IsSDKInitialized) {
-                _logHelper.Error("[Countly][InitInternal] SDK has already been initialized, 'Init' should not be called a second time!");
+                _logHelper.Error("[Countly] InitInternal, SDK has already been initialized, 'Init' should not be called a second time!");
                 return;
             }
 
             Configuration = configuration;
             _logHelper = new CountlyLogHelper(Configuration);
-            _logHelper.Info("[Countly][InitInternal] Initializing Countly [SdkName: " + Constants.SdkName + " SdkVersion: " + Constants.SdkVersion + "]");
+            _logHelper.Info($"[Countly] InitInternal, Initializing Countly, SdkName: [{Constants.SdkName}], SdkVersion: [{Constants.SdkVersion}]");
             configuration.metricHelper = new MetricHelper(configuration.overridenMetrics);
 
             if (configuration.Parent != null) {
@@ -190,93 +190,92 @@ namespace Plugins.CountlySDK
                 configuration.ServerUrl = configuration.GetServerUrl().Remove(configuration.GetServerUrl().Length - 1);
             }
 
-            _logHelper.Debug("[Countly][InitInternal] SDK initialized with the URL:[" + configuration.GetServerUrl() + "] and the appKey:[" + configuration.GetAppKey() + "]");
+            _logHelper.Debug($"[Countly] InitInternal, SDK initialized with the URL: [{configuration.GetServerUrl()}] and the appKey: [{configuration.GetAppKey()}]");
 
             if (configuration.GetUpdateSessionTimerDelay() < 1) {
-                _logHelper.Error("[Countly][InitInternal] provided session duration is less than 1. Replacing it with 1.");
+                _logHelper.Error("[Countly] InitInternal, Invalid session duration: less than 1. Setting it to the minimum allowed value of 1.");
                 configuration.SetUpdateSessionTimerDelay(1);
             }
-            _logHelper.Debug("[Countly][InitInternal] session duration set to [" + configuration.GetUpdateSessionTimerDelay() + "]");
+            _logHelper.Debug($"[Countly] InitInternal, Final session duration: [{configuration.GetUpdateSessionTimerDelay()}]");
 
             if (configuration.IsForcedHttpPostEnabled()) {
-                _logHelper.Debug("[Countly][InitInternal] Setting HTTP POST to be forced");
+                _logHelper.Debug("[Countly] InitInternal, Forced HTTP POST enabled.");
             }
 
             if (configuration.GetParameterTamperingProtectionSalt() != null) {
-                _logHelper.Debug("[Countly][InitInternal] Enabling tamper protection");
+                _logHelper.Debug("[Countly] InitInternal, Parameter Tampering Protection enabled.");
             }
 
             if (configuration.GetNotificationMode() != TestMode.None) {
-                _logHelper.Debug("[Countly][InitInternal] Enabling push notification");
+                _logHelper.Debug("[Countly] InitInternal, Push Notifications enabled.");
             }
 
             if (configuration.EnableTestMode) {
-                _logHelper.Warning("[Countly][InitInternal] Enabling test mode");
+                _logHelper.Warning("[Countly] InitInternal, Test mode enabled.");
             }
 
             if (configuration.IsAutomaticCrashReportingEnabled()) {
-                _logHelper.Debug("[Countly][InitInternal] Enabling automatic crash reporting");
+                _logHelper.Debug("[Countly] InitInternal, Automatic Crash Reporting enabled.");
             }
 
-            // Have a look at the SDK limit values
             if (configuration.GetEventQueueSizeToSend() < 1) {
-                _logHelper.Error("[Countly][InitInternal] provided event queue size is less than 1. Replacing it with 1.");
+                _logHelper.Error("[Countly] InitInternal, Invalid Event Queue Size: less than 1. Setting it to the minimum allowed value of 1.");
                 configuration.SetEventQueueSizeToSend(1);
             }
-            _logHelper.Debug("[Countly][InitInternal] event queue size set to [" + configuration.GetEventQueueSizeToSend() + "]");
+            _logHelper.Debug($"[Countly] InitInternal, Final Event Queue Size: [{configuration.GetEventQueueSizeToSend()}]");
 
             if (configuration.GetMaxRequestQueueSize() < 1) {
-                _logHelper.Error("[Countly][InitInternal] provided request queue size is less than 1. Replacing it with 1.");
+                _logHelper.Error("[Countly] InitInternal, Invalid Request Queue Size: less than 1. Setting it to the minimum allowed value of 1.");
                 configuration.SetMaxRequestQueueSize(1);
             }
-            _logHelper.Debug("[Countly][InitInternal] request queue size set to [" + configuration.GetMaxRequestQueueSize() + "]");
+            _logHelper.Debug($"[Countly] InitInternal, Final Request Queue Size: [{configuration.GetMaxRequestQueueSize()}]");
 
             if (configuration.GetMaxKeyLength() != MaxKeyLengthDefault) {
                 if (configuration.GetMaxKeyLength() < 1) {
                     configuration.SetMaxKeyLength(1);
-                    _logHelper.Warning("[Countly][InitInternal] provided 'maxKeyLength' is less than '1'. Setting it to '1'.");
+                    _logHelper.Warning("[Countly] InitInternal, 'maxKeyLength' provided is less than 1. Resetting to 1.");
                 }
-                _logHelper.Info("[Countly][InitInternal] provided 'maxKeyLength' override:[" + configuration.GetMaxKeyLength() + "]");
+                _logHelper.Info($"[Countly] InitInternal, 'maxKeyLength' overridden: [{configuration.GetMaxKeyLength()}]");
             }
 
             if (configuration.GetMaxValueSize() != MaxValueSizeDefault) {
                 if (configuration.GetMaxValueSize() < 1) {
                     configuration.SetMaxValueSize(1);
-                    _logHelper.Warning("[Countly][InitInternal] provided 'maxValueSize' is less than '1'. Setting it to '1'.");
+                    _logHelper.Warning("[Countly] InitInternal, 'maxValueSize' provided is less than 1. Resetting to 1.");
                 }
-                _logHelper.Info("[Countly][InitInternal] provided 'maxValueSize' override:[" + configuration.GetMaxValueSize() + "]");
+                _logHelper.Info($"[Countly] InitInternal, 'maxValueSize' overridden: [{configuration.GetMaxValueSize()}]");
             }
 
             if (configuration.GetMaxSegmentationValues() != MaxSegmentationValuesDefault) {
                 if (configuration.GetMaxSegmentationValues() < 1) {
                     configuration.SetMaxSegmentationValues(1);
-                    _logHelper.Warning("[Countly][InitInternal] provided 'maxSegmentationValues' is less than '1'. Setting it to '1'.");
+                    _logHelper.Warning("[Countly] InitInternal, 'maxSegmentationValues' provided is less than 1. Resetting to 1.");
                 }
-                _logHelper.Info("[Countly][InitInternal] provided 'maxSegmentationValues' override:[" + configuration.GetMaxSegmentationValues() + "]");
+                _logHelper.Info($"[Countly] InitInternal, 'maxSegmentationValues' overridden: [{configuration.GetMaxSegmentationValues()}]");
             }
 
             if (configuration.GetMaxBreadcrumbCount() != MaxBreadcrumbCountDefault) {
                 if (configuration.GetMaxBreadcrumbCount() < 1) {
                     configuration.SetMaxBreadcrumbCount(1);
-                    _logHelper.Warning("[Countly][InitInternal] provided 'maxBreadcrumbCount' is less than '1'. Setting it to '1'.");
+                    _logHelper.Warning("[Countly] InitInternal, 'maxBreadcrumbCount' provided is less than 1. Resetting to 1.");
                 }
-                _logHelper.Info("[Countly][InitInternal] provided 'maxBreadcrumbCount' override:[" + configuration.GetMaxBreadcrumbCount() + "]");
+                _logHelper.Info($"[Countly] InitInternal, 'maxBreadcrumbCount' overridden: [{configuration.GetMaxBreadcrumbCount()}]");
             }
 
             if (configuration.GetMaxStackTraceLinesPerThread() != MaxStackTraceLinesPerThreadDefault) {
                 if (configuration.GetMaxStackTraceLinesPerThread() < 1) {
                     configuration.SetMaxStackTraceLinesPerThread(1);
-                    _logHelper.Warning("[Countly][InitInternal] provided 'maxStackTraceLinesPerThread' is less than '1'. Setting it to '1'.");
+                    _logHelper.Warning("[Countly] InitInternal, 'maxStackTraceLinesPerThread' provided is less than 1. Resetting to 1.");
                 }
-                _logHelper.Info("[Countly][InitInternal] provided 'maxStackTraceLinesPerThread' override:[" + configuration.GetMaxStackTraceLinesPerThread() + "]");
+                _logHelper.Info($"[Countly] InitInternal, 'maxStackTraceLinesPerThread' overridden: [{configuration.GetMaxStackTraceLinesPerThread()}]");
             }
 
             if (configuration.GetMaxStackTraceLineLength() != MaxStackTraceLineLengthDefault) {
                 if (configuration.GetMaxStackTraceLineLength() < 1) {
                     configuration.SetMaxStackTraceLineLength(1);
-                    _logHelper.Warning("[Countly][InitInternal] provided 'maxStackTraceLineLength' is less than '1'. Setting it to '1'.");
+                    _logHelper.Warning("[Countly] InitInternal, 'maxStackTraceLineLength' provided is less than 1. Resetting to 1.");
                 }
-                _logHelper.Info("[Countly][InitInternal] provided 'maxStackTraceLineLength' override:[" + configuration.GetMaxStackTraceLineLength() + "]");
+                _logHelper.Info($"[Countly] InitInternal, 'maxStackTraceLineLength' overridden: [{configuration.GetMaxStackTraceLineLength()}]");
             }
 
             if (configuration.SafeEventIDGenerator == null) {
@@ -301,7 +300,7 @@ namespace Plugins.CountlySDK
             Init(requestBuilder, StorageHelper.RequestRepo, StorageHelper.EventRepo, StorageHelper.ConfigDao);
             Device.InitDeviceId(configuration.GetDeviceId());
             OnInitialisationComplete();
-            _logHelper.Debug("[Countly][InitInternal] Finished Initializing SDK.");
+            _logHelper.Debug("[Countly] InitInternal, Finished Initializing SDK.");
         }
 
         private void Init(RequestBuilder requestBuilder, RequestRepository requestRepo,
@@ -406,7 +405,7 @@ namespace Plugins.CountlySDK
                 return;
             }
 
-            _logHelper?.Debug("[Countly] OnApplicationFocus: " + hasFocus);
+            _logHelper?.Debug($"[Countly] OnApplicationFocus, Application focus state changed: [{hasFocus}]");
 
             if (hasFocus) {
                 SubscribeAppLog();
@@ -422,7 +421,7 @@ namespace Plugins.CountlySDK
                     return;
                 }
 
-                _logHelper?.Debug("[Countly] OnApplicationPause: " + pauseStatus);
+                _logHelper?.Debug($"[Countly] OnApplicationPause, Application pause status: [{pauseStatus}]");
 
                 if (CrashReports != null) {
                     CrashReports.IsApplicationInBackground = pauseStatus;
