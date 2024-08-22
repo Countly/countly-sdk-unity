@@ -67,7 +67,7 @@ namespace Plugins.CountlySDK.Services
                     if (storedDIDType == DEVICE_TYPE_FALLBACK_VALUE) {
                         Log.Error("[DeviceIdCountlyService] InitDeviceId, SDK doesn't have device ID type stored. There should have been one.");
                     } else {
-                        Log.Error($"[DeviceIdCountlyService] InitDeviceId, The stored device id type wasn't valid [storedDeviceId: {storedDeviceId}]. SDK will assign a new type");
+                        Log.Error($"[DeviceIdCountlyService] InitDeviceId, The stored device id type wasn't valid storedDeviceId: [{storedDeviceId}]. SDK will assign a new type");
                     }
 
                     if (_countlyUtils.IsNullEmptyOrWhitespace(deviceId)) {
