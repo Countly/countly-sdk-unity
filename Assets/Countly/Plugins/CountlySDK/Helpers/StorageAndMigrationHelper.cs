@@ -87,12 +87,9 @@ namespace Plugins.CountlySDK.Helpers
         internal void OpenDB()
         {
             _logHelper.Debug("[CountlyStorageHelper] OpenDB");
-
             _db = BuildDatabase(_dbNumber);
             DB.AutoBox auto = _db.Open();
-
-            _logHelper.Debug("[CountlyStorageHelper] OpenDB path: " + Application.persistentDataPath + "/db3.box");
-
+            _logHelper.Debug($"[CountlyStorageHelper] OpenDB, path: [{Application.persistentDataPath + "/db3.box"}]");
             EventSegmentDao = new SegmentDao(auto, EntityType.NonViewEventSegments.ToString(), _logHelper);
 
             ConfigDao = new Dao<ConfigEntity>(auto, EntityType.Configs.ToString(), _logHelper);
@@ -101,20 +98,16 @@ namespace Plugins.CountlySDK.Helpers
 
             if (CurrentVersion < 1) {
                 EventNrInSameSessionDao = new Dao<EventNumberInSameSessionEntity>(auto, EntityType.EventNumberInSameSessions.ToString(), _logHelper);
-
                 Dao<EventEntity> viewDao = new Dao<EventEntity>(auto, EntityType.ViewEvents.ToString(), _logHelper);
                 SegmentDao viewSegmentDao = new SegmentDao(auto, EntityType.ViewEventSegments.ToString(), _logHelper);
-
                 ViewRepo = new ViewEventRepository(viewDao, viewSegmentDao, _logHelper);
                 ViewRepo.Initialize();
             }
 
             RequestRepo = new RequestRepository(RequestDao, _logHelper);
             EventRepo = new NonViewEventRepository(EventDao, EventSegmentDao, _logHelper);
-
             EventRepo.Initialize();
             RequestRepo.Initialize();
-
         }
 
         /// <summary>
@@ -123,7 +116,6 @@ namespace Plugins.CountlySDK.Helpers
         internal void CloseDB()
         {
             _logHelper.Debug("[CountlyStorageHelper] CloseDB");
-
             _db.Close();
         }
 
@@ -132,7 +124,7 @@ namespace Plugins.CountlySDK.Helpers
         /// </summary>
         internal void RunMigration(IDictionary<string, object> migrationParams)
         {
-            _logHelper.Verbose("[CountlyStorageHelper] RunMigration : currentVersion = " + CurrentVersion);
+            _logHelper.Verbose($"[CountlyStorageHelper] RunMigration, currentVersion: [{CurrentVersion}]");
 
             /*
              * Schema Version = 1 :
@@ -181,7 +173,6 @@ namespace Plugins.CountlySDK.Helpers
                 EventRepo.Enqueue(ViewRepo.Dequeue());
             }
             _logHelper.Verbose("[CountlyStorageHelper] Migration_CopyViewDataIntoEventData");
-
         }
 
         /// <summary>
@@ -221,7 +212,7 @@ namespace Plugins.CountlySDK.Helpers
 
                 bool result = RequestRepo.Update(request);
                 if (!result) {
-                    _logHelper.Warning("[CountlyStorageHelper] Migration_MigrateOldRequests: updating the request failed");
+                    _logHelper.Warning("[CountlyStorageHelper] Migration_MigrateOldRequests, Updating the request has failed!");
                     //we failed to update the old request,
 
                     RequestRepo.DeleteEntry(request);

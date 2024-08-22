@@ -43,39 +43,38 @@ namespace Plugins.CountlySDK.Services
         /// </summary>
         internal void AddEventsToRequestQueue()
         {
-            Log.Debug("[EventCountlyService] AddEventsToRequestQueue: Start");
+            Log.Debug("[EventCountlyService] AddEventsToRequestQueue, Start");
 
             if (_eventRepo.Models.Count == 0) {
-                Log.Debug("[EventCountlyService] AddEventsToRequestQueue: Event queue is empty!");
+                Log.Debug("[EventCountlyService] AddEventsToRequestQueue, Event queue is empty!");
                 return;
             }
 
             if (isQueueBeingProcessed) {
-                Log.Verbose("[EventCountlyService] AddEventsToRequestQueue: Event queue being processed!");
+                Log.Verbose("[EventCountlyService] AddEventsToRequestQueue, Event queue being processed!");
                 return;
             }
             isQueueBeingProcessed = true;
 
             int count = _eventRepo.Models.Count;
-            //Send all at once
-            Dictionary<string, object> requestParams =
-                new Dictionary<string, object>
+            // Send all at once
+            Dictionary<string, object> requestParams = new Dictionary<string, object>
+            {
                 {
-                    {
-                        "events", JsonConvert.SerializeObject(_eventRepo.Models, Formatting.Indented,
-                            new JsonSerializerSettings {NullValueHandling = NullValueHandling.Ignore})
-                    }
-                };
+                    "events", JsonConvert.SerializeObject(_eventRepo.Models, Formatting.Indented,
+                        new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore })
+                }
+            };
 
             _requestCountlyHelper.AddToRequestQueue(requestParams);
 
-            Log.Debug("[EventCountlyService] AddEventsToRequestQueue: Remove events from event queue, count: " + count);
+            Log.Debug($"[EventCountlyService] AddEventsToRequestQueue, Remove events from event queue, count: [{count}]");
             for (int i = 0; i < count; ++i) {
                 _eventRepo.Dequeue();
             }
 
             isQueueBeingProcessed = false;
-            Log.Debug("[EventCountlyService] AddEventsToRequestQueue: End");
+            Log.Debug("[EventCountlyService] AddEventsToRequestQueue, End");
         }
 
         // <summary>
@@ -95,7 +94,7 @@ namespace Plugins.CountlySDK.Services
             }
 
             if (string.IsNullOrEmpty(key) || string.IsNullOrWhiteSpace(key)) {
-                Log.Warning("[EventCountlyService] RecordEventInternal : The event key '" + key + "'isn't valid.");
+                Log.Warning($"[EventCountlyService] RecordEventInternal, Event key ['{key}'] isn't valid.");
                 return;
             }
 
@@ -103,9 +102,9 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
 
-            if (key.Length > _configuration.MaxKeyLength) {
-                Log.Warning("[EventCountlyService] RecordEventInternal : Max allowed key length is " + _configuration.MaxKeyLength);
-                key = key.Substring(0, _configuration.MaxKeyLength);
+            if (key.Length > _configuration.GetMaxKeyLength()) {
+                Log.Warning($"[EventCountlyService] RecordEventInternal, Max allowed key length is [{_configuration.GetMaxKeyLength()}]");
+                key = key.Substring(0, _configuration.GetMaxKeyLength());
             }
 
             string pvid = null; // previous view id
@@ -113,7 +112,7 @@ namespace Plugins.CountlySDK.Services
             string eventID;
 
             if (_utils.IsNullEmptyOrWhitespace(eventIDOverride)) {
-                Log.Info("[EventCountlyService] RecordEventInternal provided eventIDOverride value is null, empty or whitespace. Will generate a new one.");
+                Log.Info("[EventCountlyService] RecordEventInternal, provided eventIDOverride value is null, empty or whitespace. Will generate a new one.");
                 eventID = safeEventIDGenerator.GenerateValue();
             } else {
                 eventID = eventIDOverride;
@@ -156,7 +155,7 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         internal async Task RecordEventAsync(CountlyEventModel @event)
         {
-            Log.Debug("[EventCountlyService] RecordEventAsync : " + @event.ToString());
+            Log.Debug($"[EventCountlyService] RecordEventAsync, event: [{@event.ToString()}]");
 
             if (_configuration.EnableTestMode) {
                 return;
@@ -164,7 +163,7 @@ namespace Plugins.CountlySDK.Services
 
             _eventRepo.Enqueue(@event);
 
-            if (_eventRepo.Count >= _configuration.EventQueueThreshold) {
+            if (_eventRepo.Count >= _configuration.GetEventQueueSizeToSend()) {
                 AddEventsToRequestQueue();
                 await _requestCountlyHelper.ProcessQueue();
             }
@@ -197,26 +196,25 @@ namespace Plugins.CountlySDK.Services
         public void StartEvent(string key)
         {
             lock (LockObj) {
-                Log.Info("[EventCountlyService] StartEvent : key = " + key);
+                Log.Info($"[EventCountlyService] StartEvent, key: [{key}]");
 
                 if (!_consentService.CheckConsentInternal(Consents.Events)) {
                     return;
                 }
 
                 if (string.IsNullOrEmpty(key) || string.IsNullOrWhiteSpace(key)) {
-                    Log.Warning("[EventCountlyService] StartEvent : The event key '" + key + "' isn't valid.");
+                    Log.Warning($"[EventCountlyService] StartEvent, The event key: [{key}] isn't valid.");
                     return;
                 }
 
                 if (_timedEvents.ContainsKey(key)) {
-                    Log.Warning("[EventCountlyService] StartEvent : Event with key '" + key + "' has already started.");
+                    Log.Warning($"[EventCountlyService] StartEvent, Event with key: [{key}] has already started.");
                     return;
                 }
 
                 TimeMetricModel timeModel = TimeMetricModel.GetTimeZoneInfoForRequest();
                 _timedEvents.Add(key, DateTime.Now);
             }
-
         }
 
         /// <summary>
@@ -227,25 +225,24 @@ namespace Plugins.CountlySDK.Services
         public void CancelEvent(string key)
         {
             lock (LockObj) {
-                Log.Info("[EventCountlyService] CancelEvent : key = " + key);
+                Log.Info($"[EventCountlyService] CancelEvent, key: [{key}]");
 
                 if (!_consentService.CheckConsentInternal(Consents.Events)) {
                     return;
                 }
 
                 if (string.IsNullOrEmpty(key) || string.IsNullOrWhiteSpace(key)) {
-                    Log.Warning("[EventCountlyService] CancelEvent : The event key '" + key + "' isn't valid.");
+                    Log.Warning($"[EventCountlyService] CancelEvent, The event key: [{key}] isn't valid.");
                     return;
                 }
 
                 if (!_timedEvents.ContainsKey(key)) {
-                    Log.Warning("[EventCountlyService] CancelEvent : Time event with key '" + key + "' doesn't exist.");
+                    Log.Warning($"[EventCountlyService] CancelEvent, Time event with key: [{key}] doesn't exist.");
                     return;
                 }
 
                 _timedEvents.Remove(key);
             }
-
         }
 
         /// <summary>
@@ -259,19 +256,19 @@ namespace Plugins.CountlySDK.Services
         public void EndEvent(string key, IDictionary<string, object> segmentation = null, int? count = 1, double? sum = 0)
         {
             lock (LockObj) {
-                Log.Info("[EventCountlyService] EndEvent : key = " + key + ", segmentation = " + segmentation + ", count = " + count + ", sum = " + sum);
+                Log.Info($"[EventCountlyService] EndEvent, key: [{key}], segmentation: [{segmentation}], count: [{count}], sum: [{sum}]");
 
                 if (!_consentService.CheckConsentInternal(Consents.Events)) {
                     return;
                 }
 
                 if (string.IsNullOrEmpty(key) || string.IsNullOrWhiteSpace(key)) {
-                    Log.Warning("[EventCountlyService] EndEvent : The event key '" + key + "' isn't valid.");
+                    Log.Warning($"[EventCountlyService] EndEvent, The event key: [{key}] isn't valid.");
                     return;
                 }
 
                 if (!_timedEvents.ContainsKey(key)) {
-                    Log.Warning("[EventCountlyService] EndEvent : Time event with key '" + key + "' doesn't exist.");
+                    Log.Warning($"[EventCountlyService] EndEvent, Time event with key: [{key}] doesn't exist.");
                     return;
                 }
 
@@ -280,10 +277,8 @@ namespace Plugins.CountlySDK.Services
 
                 CountlyEventModel @event = new CountlyEventModel(key, segmentation, count, sum, duration);
                 _ = RecordEventAsync(@event);
-
                 _timedEvents.Remove(key);
             }
-
         }
 
         /// <summary>
@@ -299,7 +294,7 @@ namespace Plugins.CountlySDK.Services
             int? count = 1, double? sum = 0, double? duration = null)
         {
             lock (LockObj) {
-                Log.Info("[EventCountlyService] RecordEventAsync : key = " + key + ", segmentation = " + segmentation + ", count = " + count + ", sum = " + sum + ", duration = " + duration);
+                Log.Info($"[EventCountlyService] RecordEventAsync, key: [{key}], segmentation: [{segmentation}], count: [{count}], sum: [{sum}], duration: [{duration}]");
 
                 _ = RecordEventInternal(key, segmentation, count, sum, duration);
             }

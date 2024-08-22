@@ -8,43 +8,37 @@ public class CountlyLogHelper
     {
         _configuration = configuration;
     }
-
     internal void Info(string message)
     {
-        if (_configuration.EnableConsoleLogging) {
+        if (_configuration.IsLoggingEnabled()) {
             UnityEngine.Debug.Log("[Info]" + TAG + message);
         }
 
     }
-
     internal void Debug(string message)
     {
-        if (_configuration.EnableConsoleLogging) {
+        if (_configuration.IsLoggingEnabled()) {
             UnityEngine.Debug.Log("[Debug]" + TAG + message);
         }
 
     }
-
     internal void Verbose(string message)
     {
-        if (_configuration.EnableConsoleLogging) {
+        if (_configuration.IsLoggingEnabled()) {
             UnityEngine.Debug.Log("[Verbose]" + TAG + message);
         }
 
     }
-
     internal void Error(string message)
     {
-        if (_configuration.EnableConsoleLogging) {
+        if (_configuration.IsLoggingEnabled()) {
             UnityEngine.Debug.LogError("[Error]" + TAG + message);
         }
     }
-
     internal void Warning(string message)
     {
-        if (_configuration.EnableConsoleLogging) {
+        if (_configuration.IsLoggingEnabled()) {
             UnityEngine.Debug.LogWarning("[Warning]" + TAG + message);
         }
     }
-
 }

@@ -195,7 +195,7 @@ namespace Plugins.CountlySDK
 
             foreach (string rKey in reservedKeys) {
                 if (segmentation.ContainsKey(rKey)) {
-                    logger.Warning($"{messagePrefix} provided segmentation contains protected key [{rKey}]");
+                    logger.Warning($"{messagePrefix} provided segmentation contains protected key: [{rKey}]");
                     segmentation.Remove(rKey);
                 }
             }
@@ -256,7 +256,7 @@ namespace Plugins.CountlySDK
             }
 
             if (removed & logger != null) {
-                logger.Warning("[Utils] Unsupported data types were removed from provided segmentation");
+                logger.Warning("[Utils] RemoveUnsupportedDataTypes, Unsupported data types were removed from provided segmentation!");
             }
 
             return removed;
@@ -292,15 +292,15 @@ namespace Plugins.CountlySDK
         /// <param name="logger">CountlyLogHelper to log warnings if either dictionary is null.</param>
         public void CopyDictionaryToDestination(Dictionary<string, object> destination, Dictionary<string, object> source, CountlyLogHelper logger)
         {
-            logger.Verbose("[CountlyUtils] CopyDictionaryToDestination: Copying source dictionary into destination.");
+            logger.Verbose("[CountlyUtils] CopyDictionaryToDestination, Copying source dictionary into destination.");
 
             if (destination == null) {
-                logger?.Warning("[CountlyUtils] CopyDictionaryToDestination: Provided destination is null.");
+                logger?.Warning("[CountlyUtils] CopyDictionaryToDestination, Provided destination is null.");
                 return;
             }
 
             if (source == null) {
-                logger?.Warning("[CountlyUtils] CopyDictionaryToDestination: Provided source is null.");
+                logger?.Warning("[CountlyUtils] CopyDictionaryToDestination, Provided source is null.");
                 return;
             }
 

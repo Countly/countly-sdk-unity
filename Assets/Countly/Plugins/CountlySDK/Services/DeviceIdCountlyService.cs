@@ -65,9 +65,9 @@ namespace Plugins.CountlySDK.Services
                     DeviceIdType = (DeviceIdType)storedDIDType;
                 } else {
                     if (storedDIDType == DEVICE_TYPE_FALLBACK_VALUE) {
-                        Log.Error("[DeviceIdCountlyService] InitDeviceId: SDK doesn't have device ID type stored. There should have been one.");
+                        Log.Error("[DeviceIdCountlyService] InitDeviceId, SDK doesn't have device ID type stored. There should have been one.");
                     } else {
-                        Log.Error("[DeviceIdCountlyService] InitDeviceId: The stored device id type wasn't valid ['" + storedDeviceId + "']. SDK will assign a new type");
+                        Log.Error($"[DeviceIdCountlyService] InitDeviceId, The stored device id type wasn't valid storedDeviceId: [{storedDeviceId}]. SDK will assign a new type");
                     }
 
                     if (_countlyUtils.IsNullEmptyOrWhitespace(deviceId)) {
@@ -95,8 +95,8 @@ namespace Plugins.CountlySDK.Services
         public void SetId(string newDeviceId)
         {
             lock (LockObj) {
-                Log.Info("[DeviceIdCountlyService] SetId: deviceId = " + newDeviceId);
-                SetIdInternal(newDeviceId);
+                Log.Info($"[DeviceIdCountlyService] SetId, deviceId: [{newDeviceId}]");
+                _ = SetIdInternal(newDeviceId);
             }
         }
 
@@ -111,7 +111,7 @@ namespace Plugins.CountlySDK.Services
         public async Task ChangeDeviceIdWithoutMerge(string deviceId)
         {
             lock (LockObj) {
-                Log.Info("[DeviceIdCountlyService] ChangeDeviceIdWithoutMerge: deviceId = " + deviceId);
+                Log.Info($"[DeviceIdCountlyService] ChangeDeviceIdWithoutMerge, deviceId: [{deviceId}]");
 
                 //Ignore call if new and old device id are same
                 if (DeviceId == deviceId) {
@@ -160,7 +160,7 @@ namespace Plugins.CountlySDK.Services
         public async Task ChangeDeviceIdWithMerge(string deviceId)
         {
             lock (LockObj) {
-                Log.Info("[DeviceIdCountlyService] ChangeDeviceIdWithMerge: deviceId = " + deviceId);
+                Log.Info($"[DeviceIdCountlyService] ChangeDeviceIdWithMerge, deviceId: [{deviceId}]");
 
                 //Ignore call if new and old device id are same
                 if (DeviceId == deviceId) {
@@ -188,12 +188,12 @@ namespace Plugins.CountlySDK.Services
         private async Task SetIdInternal(string newDeviceId)
         {
             if (_countlyUtils.IsNullEmptyOrWhitespace(newDeviceId)) {
-                Log.Warning("[DeviceIdCountlyService] SetId: Provided id to SetId method is null or empty. Will be ignored");
+                Log.Warning("[DeviceIdCountlyService] SetId, Provided id to SetId method is null or empty. Will be ignored.");
                 return;
             }
 
             if (DeviceId == newDeviceId) {
-                Log.Warning("[DeviceIdCountlyService] SetId: Same id provided to SetId method. Will be ignored.");
+                Log.Warning("[DeviceIdCountlyService] SetId, Same id provided to SetId method. Will be ignored.");
                 return;
             }
 
@@ -226,7 +226,7 @@ namespace Plugins.CountlySDK.Services
             PlayerPrefs.SetString(Constants.DeviceIDKey, DeviceId);
             PlayerPrefs.SetInt(Constants.DeviceIDTypeKey, (int)DeviceIdType);
 
-            Log.Debug("[DeviceIdCountlyService] UpdateDeviceId: " + newDeviceId);
+            Log.Debug($"[DeviceIdCountlyService] UpdateDeviceId, new device id: [{newDeviceId}]");
         }
 
         /// <summary>

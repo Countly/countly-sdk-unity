@@ -14,7 +14,6 @@ namespace Plugins.CountlySDK.Services
     {
         internal bool IsApplicationInBackground { get; set; }
         internal readonly Queue<string> _crashBreadcrumbs = new Queue<string>();
-
         internal readonly RequestCountlyHelper _requestCountlyHelper;
 
         internal CrashReportsCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, RequestCountlyHelper requestCountlyHelper, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
@@ -66,17 +65,17 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         [Obsolete("SendCrashReportAsync(string message, string stackTrace, LogType type, IDictionary<string, object> segments = null, bool nonfatal = true) is deprecated, this is going to be removed in the future.")]
         public async Task SendCrashReportAsync(string message, string stackTrace, LogType type,
-            IDictionary<string, object> segments = null, bool nonfatal = true)
+        IDictionary<string, object> segments = null, bool nonfatal = true)
         {
             lock (LockObj) {
-                Log.Info("[CrashReportsCountlyService] SendCrashReportAsync : message = " + message + ", stackTrace = " + stackTrace);
+                Log.Info($"[CrashReportsCountlyService] SendCrashReportAsync, message: [{message}], stackTrace: [{stackTrace}]");
 
                 if (!_consentService.CheckConsentInternal(Consents.Crashes)) {
                     return;
                 }
 
                 if (string.IsNullOrEmpty(message) || string.IsNullOrWhiteSpace(message)) {
-                    Log.Warning("[CrashReportsCountlyService] SendCrashReportAsync : The parameter 'message' can't be null or empty");
+                    Log.Warning("[CrashReportsCountlyService] SendCrashReportAsync, The parameter 'message' can't be null or empty");
                     return;
                 }
 
@@ -102,14 +101,14 @@ namespace Plugins.CountlySDK.Services
         {
             if (_configuration.IsAutomaticCrashReportingEnabled()) {
                 lock (LockObj) {
-                    Log.Info("[CrashReportsCountlyService] SendCrashReportAsync : message = " + message + ", stackTrace = " + stackTrace);
+                    Log.Info($"[CrashReportsCountlyService] SendCrashReportAsync, message: [{message}], stackTrace: [{stackTrace}]");
 
                     if (!_consentService.CheckConsentInternal(Consents.Crashes)) {
                         return;
                     }
 
                     if (string.IsNullOrEmpty(message) || string.IsNullOrWhiteSpace(message)) {
-                        Log.Warning("[CrashReportsCountlyService] SendCrashReportAsync : The parameter 'message' can't be null or empty");
+                        Log.Warning("[CrashReportsCountlyService] SendCrashReportAsync, The parameter 'message' can't be null or empty");
                         return;
                     }
 
@@ -126,13 +125,13 @@ namespace Plugins.CountlySDK.Services
 
         internal async Task SendCrashReportInternal(CountlyExceptionDetailModel model)
         {
-            Log.Debug("[CrashReportsCountlyService] SendCrashReportInternal : model = " + model.ToString());
+            Log.Debug($"[CrashReportsCountlyService] SendCrashReportInternal, model: [{model}]");
 
             Dictionary<string, object> requestParams = new Dictionary<string, object>
             {
                 {
                     "crash", JsonConvert.SerializeObject(model, Formatting.Indented,
-                        new JsonSerializerSettings {NullValueHandling = NullValueHandling.Ignore})
+                    new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore })
                 }
             };
 
@@ -146,7 +145,7 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value">a bread crumb for the crash report</param>
         public void AddBreadcrumbs(string value)
         {
-            Log.Info("[CrashReportsCountlyService] AddBreadcrumbs : " + value);
+            Log.Info($"[CrashReportsCountlyService] AddBreadcrumbs, value: [{value}]");
 
             if (!_consentService.CheckConsentInternal(Consents.Crashes)) {
                 return;
