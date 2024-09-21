@@ -1,12 +1,22 @@
-apply plugin: 'com.android.library'
-
-dependencies {
-    implementation fileTree(dir: 'bin', include: ['*.jar'])
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'com.google.firebase:firebase-messaging:20.2.4'
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.6.1'
+    }
 }
 
+apply plugin: 'com.android.library'
+
 android {
+    namespace 'com.Countly.CountlyDotNetSDK'
+    compileSdkVersion 34
+    defaultConfig {
+        minSdkVersion 21
+        targetSdkVersion 34
+    }
     sourceSets {
         main {
             manifest.srcFile 'AndroidManifest.xml'
@@ -15,14 +25,14 @@ android {
             jniLibs.srcDirs = ['libs']
         }
     }
-
-    compileSdkVersion 30
-    buildToolsVersion '29.0.2'
-    defaultConfig {
-        targetSdkVersion 19
+    // Add this block
+    repositories {
+        google()
+        mavenCentral()
     }
+}
 
-    lintOptions {
-        abortOnError false
-    }
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'com.google.firebase:firebase-messaging:24.0.1'
 }
