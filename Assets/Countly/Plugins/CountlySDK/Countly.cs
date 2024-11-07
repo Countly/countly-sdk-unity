@@ -107,7 +107,6 @@ namespace Plugins.CountlySDK
         /// </summary>
         /// <returns>NotificationsCallbackService</returns>
         public NotificationsCallbackService Notifications { get; set; }
-        public CountlyAuthModel Auth;
         public CountlyConfigModel Config;
         internal SessionCountlyService Session { get; set; }
         internal InitializationCountlyService Initialization { get; private set; }
@@ -140,10 +139,6 @@ namespace Plugins.CountlySDK
             DontDestroyOnLoad(gameObject);
             Instance = this;
             countlyMainThreadHandler = CountlyMainThreadHandler.Instance;
-            //Auth and Config will not be null in case initializing through countly prefab
-            if (Auth != null && Config != null) {
-                Init(new CountlyConfiguration(Auth, Config));
-            }
         }
 
         public void Init(CountlyConfiguration configuration)
@@ -187,7 +182,7 @@ namespace Plugins.CountlySDK
             }
 
             if (configuration.GetServerUrl()[configuration.GetServerUrl().Length - 1] == '/') {
-                configuration.ServerUrl = configuration.GetServerUrl().Remove(configuration.GetServerUrl().Length - 1);
+                configuration.SetServerUrl(configuration.GetServerUrl().Remove(configuration.GetServerUrl().Length - 1));
             }
 
             _logHelper.Debug($"[Countly] InitInternal, SDK initialized with the URL: [{configuration.GetServerUrl()}] and the appKey: [{configuration.GetAppKey()}]");
@@ -208,10 +203,6 @@ namespace Plugins.CountlySDK
 
             if (configuration.GetNotificationMode() != TestMode.None) {
                 _logHelper.Debug("[Countly] InitInternal, Push Notifications enabled.");
-            }
-
-            if (configuration.EnableTestMode) {
-                _logHelper.Warning("[Countly] InitInternal, Test mode enabled.");
             }
 
             if (configuration.IsAutomaticCrashReportingEnabled()) {

@@ -102,8 +102,8 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public void GetUniqueDeviceId_UserProvidedDeviceId()
         {
-            CountlyConfiguration configuration = TestUtility.CreateBaseConfig();
-            configuration.DeviceId = "device_id";
+            CountlyConfiguration configuration = TestUtility.CreateBaseConfig()
+                .SetDeviceId("device_id");
             Countly.Instance.Init(configuration);
 
             Assert.AreEqual(DeviceIdType.DeveloperProvided, Countly.Instance.Device.DeviceIdType);
@@ -116,8 +116,8 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public void GetUniqueDeviceId_NullDeviceId()
         {
-            CountlyConfiguration configuration = TestUtility.CreateBaseConfig();
-            configuration.DeviceId = null;
+            CountlyConfiguration configuration = TestUtility.CreateBaseConfig()
+                .SetDeviceId(null);
             Countly.Instance.Init(configuration);
 
             Assert.AreEqual(DeviceIdType.SDKGenerated, Countly.Instance.Device.DeviceIdType);
@@ -325,4 +325,3 @@ namespace Assets.Tests.PlayModeTests
         }
     }
 }
-

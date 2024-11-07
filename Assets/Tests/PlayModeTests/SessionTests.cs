@@ -30,7 +30,6 @@ namespace Assets.Tests.PlayModeTests
 
             if (duration != null) {
                 Assert.GreaterOrEqual(duration, Convert.ToDouble(collection.Get("session_duration")));
-
             }
 
             if (hasMetrics) {

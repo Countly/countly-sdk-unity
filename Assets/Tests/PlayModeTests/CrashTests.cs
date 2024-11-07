@@ -139,39 +139,6 @@ namespace Assets.Tests.PlayModeTests
             AssertCrashRequest(collection, "message", "Stack\nStack", true, segmentation);
         }
 
-        // 'SendCrashReportAsync' deprecated method in CrashReportsCountlyService.
-        // We verify if a CrashReport is sent with empty, null or whitespace messages
-        // Deprecated function with LogType variable should still have the functionality and valid message should be sent. 
-        [Test]
-        public async void SendCrashReportAsyncDeprecated()
-        {
-            Countly.Instance.Init(TestUtility.CreateBaseConfig());
-            Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
-
-            Assert.IsNotNull(Countly.Instance.CrashReports);
-            Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
-
-            await Countly.Instance.CrashReports.SendCrashReportAsync(null, "stackTrace", LogType.Log, null);
-            Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
-
-            await Countly.Instance.CrashReports.SendCrashReportAsync(" ", "stackTrace", LogType.Log, null);
-            Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
-
-            await Countly.Instance.CrashReports.SendCrashReportAsync("", "stackTrace", LogType.Log, null);
-            Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
-
-            Dictionary<string, object> seg = new Dictionary<string, object>{
-                { "ExampleSegmentation", "Segment1"},
-            };
-
-            await Countly.Instance.CrashReports.SendCrashReportAsync("Crash message", "stackTrace", LogType.Log, seg);
-            Assert.AreEqual(1, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
-
-            CountlyRequestModel requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
-            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
-            AssertCrashRequest(collection, "Crash message", "stackTrace", true, seg);
-        }
-
         // 'SendCrashReportAsync' method in CrashReportsCountlyService.
         // We verify if a CrashReport is sent with empty, null or whitespace messages
         // When provided a valid message, a crash report should be sent.
@@ -237,8 +204,8 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public void LimitOfAllowedBreadCrumbs()
         {
-            CountlyConfiguration configuration = TestUtility.CreateBaseConfig();
-            configuration.TotalBreadcrumbsAllowed = 5;
+            CountlyConfiguration configuration = TestUtility.CreateBaseConfig()
+                .SetMaxBreadcrumbCount(5);
             Countly.Instance.Init(configuration);
 
             Assert.IsNotNull(Countly.Instance.CrashReports);

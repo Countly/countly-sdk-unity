@@ -98,10 +98,6 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
 
-            if (_configuration.EnableTestMode) {
-                return;
-            }
-
             if (key.Length > _configuration.GetMaxKeyLength()) {
                 Log.Warning($"[EventCountlyService] RecordEventInternal, Max allowed key length is [{_configuration.GetMaxKeyLength()}]");
                 key = key.Substring(0, _configuration.GetMaxKeyLength());
@@ -156,10 +152,6 @@ namespace Plugins.CountlySDK.Services
         internal async Task RecordEventAsync(CountlyEventModel @event)
         {
             Log.Debug($"[EventCountlyService] RecordEventAsync, event: [{@event.ToString()}]");
-
-            if (_configuration.EnableTestMode) {
-                return;
-            }
 
             _eventRepo.Enqueue(@event);
 

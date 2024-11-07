@@ -151,10 +151,6 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
 
-            if (_configuration.EnableTestMode) {
-                return;
-            }
-
             string validBreadcrumb = value.Length > _configuration.GetMaxValueSize() ? value.Substring(0, _configuration.GetMaxValueSize()) : value;
 
             if (_crashBreadcrumbs.Count >= _configuration.GetMaxBreadcrumbCount()) {

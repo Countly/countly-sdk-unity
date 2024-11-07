@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿#pragma warning disable CS8632
+using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using Plugins.CountlySDK;
 using Plugins.CountlySDK.Models;
@@ -443,3 +444,4 @@ namespace Assets.Tests.PlayModeTests
         }
     }
 }
+#pragma warning restore CS8632

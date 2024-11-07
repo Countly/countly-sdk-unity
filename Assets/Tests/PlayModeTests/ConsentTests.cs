@@ -58,11 +58,7 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public void DefaultStateOfConsents()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                AppKey = _appKey,
-                ServerUrl = _serverUrl,
-            };
-
+            CountlyConfiguration configuration = new CountlyConfiguration(_appKey, _serverUrl); 
             Countly.Instance.Init(configuration);
 
             Assert.IsNotNull(Countly.Instance.Consents);
@@ -76,11 +72,7 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public void ConsentsRequest_RequiresConsent_IsFalse()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                AppKey = _appKey,
-                ServerUrl = _serverUrl,
-            };
-
+            CountlyConfiguration configuration = new CountlyConfiguration(_appKey, _serverUrl); 
             Countly.Instance.Init(configuration);
 
             Assert.IsNotNull(Countly.Instance.Consents);
@@ -98,40 +90,13 @@ namespace Assets.Tests.PlayModeTests
             Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
             Countly.Instance.Consents.RemoveConsent(new Consents[] { Consents.Sessions });
             Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
-
-        }
-
-        /// <summary>
-        /// It validates the initial consent request that generates after SDK initialization
-        /// </summary>
-        [Test]
-        public void ConsentRequest()
-        {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                AppKey = _appKey,
-                ServerUrl = _serverUrl,
-                RequiresConsent = true,
-            };
-
-            configuration.GiveConsent(new Consents[] { Consents.Crashes, Consents.Events, Consents.Clicks, Consents.StarRating, Consents.Views, Consents.Users, Consents.Push, Consents.RemoteConfig, Consents.Location, Consents.Feedback, Consents.Sessions });
-            Countly.Instance.Init(configuration);
-
-            Assert.IsNotNull(Countly.Instance.Consents);
-
-            CountlyRequestModel requestModel = Countly.Instance.Consents._requestCountlyHelper._requestRepo.Dequeue();
-
-            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
-            JObject consentObj = JObject.Parse(collection.Get("consent"));
-
-            Assert.AreEqual(11, consentObj.Count);
-            AssertConsentKeys(consentObj, new string[] { "push", "users", "views", "clicks", "events", "crashes", "sessions", "location", "feedback", "star-rating", "remote-config" }, true);
         }
 
         /// <summary>
         /// It validates the initial consent request that generates after SDK initialization using new CountlyConfiguration constructor and setter
         /// </summary>
         [Test]
-        public void ConsentRequest_NewConstructor()
+        public void ConsentRequest()
         {
             CountlyConfiguration configuration = new CountlyConfiguration(_appKey, _serverUrl)
                 .SetRequiresConsent(true);
@@ -156,12 +121,8 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public void ConsentRequest_WithConsentIsGivenorRemovedMultipleTimes()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                AppKey = _appKey,
-                ServerUrl = _serverUrl,
-                RequiresConsent = true,
-            };
-
+            CountlyConfiguration configuration = new CountlyConfiguration(_appKey, _serverUrl)
+                .SetRequiresConsent(true);
             Countly.Instance.Init(configuration);
 
             Assert.IsNotNull(Countly.Instance.Consents);
@@ -222,16 +183,10 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public void ConsentDefaultValuesWithRequiresConsentTrue()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                AppKey = _appKey,
-                ServerUrl = _serverUrl,
-                RequiresConsent = true
-            };
-
+            CountlyConfiguration configuration = new CountlyConfiguration(_appKey, _serverUrl)
+                .SetRequiresConsent(true);
             Countly.Instance.Init(configuration);
-
             Assert.IsNotNull(Countly.Instance.Consents);
-
             AssertConsentAll(expectedValue: false);
         }
 
@@ -242,36 +197,20 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public void ConsentDefaultValuesWithRequiresConsentFalse()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                AppKey = _appKey,
-                ServerUrl = _serverUrl,
-            };
-
+            CountlyConfiguration configuration = new CountlyConfiguration(_appKey, _serverUrl);
             string groupA = "GroupA";
             configuration.GiveConsent(new Consents[] { Consents.Crashes, Consents.Events });
-
             configuration.CreateConsentGroup(groupA, new Consents[] { Consents.Sessions, Consents.Location });
-
             configuration.GiveConsentToGroup(new string[] { groupA });
-
             Countly.Instance.Init(configuration);
-
             Assert.IsNotNull(Countly.Instance.Consents);
-
             AssertConsentAll(expectedValue: true);
-
             Countly.Instance.Consents.RemoveConsent(new Consents[] { Consents.Crashes, Consents.Location });
-
             AssertConsentAll(expectedValue: true);
-
             Countly.Instance.Consents.RemoveConsentOfGroup(new string[] { groupA });
-
             AssertConsentAll(expectedValue: true);
-
             Countly.Instance.Consents.RemoveAllConsent();
-
             AssertConsentAll(expectedValue: true);
-
         }
 
         /// <summary>
@@ -281,23 +220,14 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public void ConsentsGivenDuringInit()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                AppKey = _appKey,
-                ServerUrl = _serverUrl,
-                RequiresConsent = true
-            };
-
+            CountlyConfiguration configuration = new CountlyConfiguration(_appKey, _serverUrl)
+                .SetRequiresConsent(true);
             string groupA = "GroupA";
             configuration.GiveConsent(new Consents[] { Consents.Crashes, Consents.Events });
-
             configuration.CreateConsentGroup(groupA, new Consents[] { Consents.Sessions, Consents.Location });
-
             configuration.GiveConsentToGroup(new string[] { groupA });
-
             Countly.Instance.Init(configuration);
-
             Assert.IsNotNull(Countly.Instance.Consents);
-
             AssertConsentArray(new Consents[] { Consents.Events, Consents.Crashes, Consents.Sessions, Consents.Location }, true);
             AssertConsentArray(new Consents[] { Consents.Views, Consents.Users, Consents.Clicks, Consents.StarRating, Consents.RemoteConfig }, false);
         }
@@ -308,12 +238,8 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public void GiveAndRemoveAllConsent()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                AppKey = _appKey,
-                ServerUrl = _serverUrl,
-                RequiresConsent = true
-            };
-
+            CountlyConfiguration configuration = new CountlyConfiguration(_appKey, _serverUrl)
+                .SetRequiresConsent(true);
             Countly.Instance.Init(configuration);
 
             /// All consent shouldn't work.
@@ -335,17 +261,13 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public void ConfigGiveConsents()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                AppKey = _appKey,
-                ServerUrl = _serverUrl,
-                RequiresConsent = true,
-            };
+            CountlyConfiguration configuration = new CountlyConfiguration(_appKey, _serverUrl)
+                .SetRequiresConsent(true);
 
             string groupA = "GroupA";
             string groupB = "GroupB";
             string groupC = "GroupC";
 
-            configuration.RequiresConsent = true;
             configuration.GiveConsent(new Consents[] { Consents.Crashes, Consents.Events });
 
             configuration.CreateConsentGroup(groupA, new Consents[] { Consents.Sessions, Consents.Location });
@@ -368,13 +290,8 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public void GiveIndividualConsents()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                AppKey = _appKey,
-                ServerUrl = _serverUrl,
-                RequiresConsent = true,
-            };
-
-
+            CountlyConfiguration configuration = new CountlyConfiguration(_appKey, _serverUrl)
+                .SetRequiresConsent(true);
             Countly.Instance.Init(configuration);
 
             Assert.IsNotNull(Countly.Instance.Consents);
@@ -388,7 +305,6 @@ namespace Assets.Tests.PlayModeTests
             Countly.Instance.Consents.GiveConsent(new Consents[] { Consents.StarRating });
             AssertConsentArray(new Consents[] { Consents.Events, Consents.Crashes, Consents.StarRating }, true);
             AssertConsentArray(new Consents[] { Consents.Views, Consents.Users, Consents.Clicks, Consents.RemoteConfig, Consents.Sessions, Consents.Location }, false);
-
         }
 
         /// <summary>
@@ -397,11 +313,8 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public void RemovalIndividualConsents()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                AppKey = _appKey,
-                ServerUrl = _serverUrl,
-                RequiresConsent = true,
-            };
+            CountlyConfiguration configuration = new CountlyConfiguration(_appKey, _serverUrl)
+                .SetRequiresConsent(true);
 
             configuration.GiveConsent(new Consents[] { Consents.Crashes, Consents.Views, Consents.StarRating, Consents.Events, Consents.Users });
             Countly.Instance.Init(configuration);
@@ -420,27 +333,19 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public void GiveConsentToGroup()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                AppKey = _appKey,
-                ServerUrl = _serverUrl,
-                RequiresConsent = true,
-            };
+            CountlyConfiguration configuration = new CountlyConfiguration(_appKey, _serverUrl)
+                .SetRequiresConsent(true);
 
             string groupA = "GroupA";
             string groupB = "GroupB";
 
             configuration.CreateConsentGroup(groupA, new Consents[] { Consents.Sessions, Consents.Location });
             configuration.CreateConsentGroup(groupB, new Consents[] { Consents.RemoteConfig, Consents.Users });
-
             configuration.GiveConsentToGroup(new string[] { groupA });
-
             Countly.Instance.Init(configuration);
-
             Assert.IsNotNull(Countly.Instance.Consents);
             AssertConsentArray(new Consents[] { Consents.Sessions, Consents.Location }, true);
             AssertConsentArray(new Consents[] { Consents.Views, Consents.Users, Consents.Clicks, Consents.RemoteConfig, Consents.Events, Consents.Crashes, Consents.StarRating }, false);
-
-
             Countly.Instance.Consents.GiveConsentToGroup(new string[] { groupB });
             AssertConsentArray(new Consents[] { Consents.Sessions, Consents.Location, Consents.Users, Consents.RemoteConfig, }, true);
             AssertConsentArray(new Consents[] { Consents.Views, Consents.Clicks, Consents.Events, Consents.Crashes, Consents.StarRating }, false);
@@ -452,19 +357,14 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public void RemoveConsentOfGroup()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                AppKey = _appKey,
-                ServerUrl = _serverUrl,
-                RequiresConsent = true,
-            };
+            CountlyConfiguration configuration = new CountlyConfiguration(_appKey, _serverUrl)
+                .SetRequiresConsent(true);
 
             string groupA = "GroupA";
             string groupB = "GroupB";
 
             configuration.CreateConsentGroup(groupA, new Consents[] { Consents.Clicks, Consents.Views });
             configuration.CreateConsentGroup(groupB, new Consents[] { Consents.RemoteConfig, Consents.Users });
-
-
             Countly.Instance.Init(configuration);
 
             Assert.IsNotNull(Countly.Instance.Consents);
@@ -475,8 +375,6 @@ namespace Assets.Tests.PlayModeTests
             Countly.Instance.Consents.RemoveConsentOfGroup(new string[] { groupA });
             AssertConsentArray(new Consents[] { Consents.Sessions, Consents.Location, Consents.Users, Consents.RemoteConfig, Consents.Events, Consents.Crashes, Consents.StarRating }, true);
             AssertConsentArray(new Consents[] { Consents.Views, Consents.Clicks }, false);
-
-
             Countly.Instance.Consents.RemoveConsentOfGroup(new string[] { groupB });
             AssertConsentArray(new Consents[] { Consents.Sessions, Consents.Location, Consents.Events, Consents.Crashes, Consents.StarRating }, true);
             AssertConsentArray(new Consents[] { Consents.Views, Consents.Clicks, Consents.Users, Consents.RemoteConfig }, false);
@@ -489,11 +387,8 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public void LocationConsentChangedListener()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                AppKey = _appKey,
-                ServerUrl = _serverUrl,
-                RequiresConsent = true,
-            };
+            CountlyConfiguration configuration = new CountlyConfiguration(_appKey, _serverUrl)
+                .SetRequiresConsent(true);
 
             string city = "Houston";
             string countryCode = "us";
@@ -502,13 +397,9 @@ namespace Assets.Tests.PlayModeTests
             string ipAddress = "10.2.33.12";
 
             configuration.SetLocation(countryCode, city, latitude + "," + longitude, ipAddress);
-
             configuration.GiveConsent(new Consents[] { Consents.Location, Consents.RemoteConfig });
-
             Countly.Instance.Init(configuration);
-
             Assert.IsNotNull(Countly.Instance.Location);
-
             Assert.AreEqual(Countly.Instance.Location.City, "Houston");
             Assert.AreEqual(Countly.Instance.Location.CountryCode, "us");
             Assert.IsFalse(Countly.Instance.Location.IsLocationDisabled);
@@ -535,11 +426,8 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public void ListenerOnMultipleConsentOfSameFeature()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                AppKey = _appKey,
-                ServerUrl = _serverUrl,
-                RequiresConsent = true,
-            };
+            CountlyConfiguration configuration = new CountlyConfiguration(_appKey, _serverUrl)
+                .SetRequiresConsent(true);
 
             ConsentTestHelperClass listener = new ConsentTestHelperClass();
             CountlyLogHelper logHelper = new CountlyLogHelper(configuration);
@@ -562,11 +450,8 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public void ListenerOnConsentChanged()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                AppKey = _appKey,
-                ServerUrl = _serverUrl,
-                RequiresConsent = true,
-            };
+            CountlyConfiguration configuration = new CountlyConfiguration(_appKey, _serverUrl)
+                .SetRequiresConsent(true);
 
             ConsentTestHelperClass listener = new ConsentTestHelperClass();
             CountlyLogHelper logHelper = new CountlyLogHelper(configuration);
@@ -594,11 +479,8 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public void ListenerOnConsentGroups()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                AppKey = _appKey,
-                ServerUrl = _serverUrl,
-                RequiresConsent = true,
-            };
+            CountlyConfiguration configuration = new CountlyConfiguration(_appKey, _serverUrl)
+                .SetRequiresConsent(true);
 
             string groupA = "GroupA";
             string groupB = "GroupB";
@@ -640,11 +522,8 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public void ListenerOnAllConsentRemovalAndGiven()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                AppKey = _appKey,
-                ServerUrl = _serverUrl,
-                RequiresConsent = true,
-            };
+            CountlyConfiguration configuration = new CountlyConfiguration(_appKey, _serverUrl)
+                .SetRequiresConsent(true);
 
             string groupA = "GroupA";
 
@@ -689,9 +568,7 @@ namespace Assets.Tests.PlayModeTests
                 DeltaConsents deltaConsents;
                 deltaConsents.value = newConsentValue;
                 deltaConsents.updatedConsents = updatedConsents;
-
                 DeltaConsentsList.Add(deltaConsents);
-
             }
 
             internal bool Validate(int callIndex, Consents[] calledConsents, bool targetValue)

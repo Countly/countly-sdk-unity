@@ -24,10 +24,6 @@ namespace Notifications.Impls
 
             _countlyGameObject = countlyGameObject;
 
-            if (config.NotificationMode == TestMode.None) {
-                return;
-            }
-
 #if UNITY_ANDROID
             _service = new Notifications.Impls.Android.AndroidNotificationsService(_countlyGameObject, config, logHelper, eventCountlyService);
 #elif UNITY_IOS

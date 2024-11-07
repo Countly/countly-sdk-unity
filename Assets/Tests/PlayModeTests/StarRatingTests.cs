@@ -9,9 +9,6 @@ namespace Assets.Tests.PlayModeTests
 {
     public class StarRatingTests
     {
-        private readonly string _serverUrl = "https://xyz.com/";
-        private readonly string _appKey = "772c091355076ead703f987fee94490";
-
         private void AssertStarRatingModel(CountlyEventModel model, IDictionary<string, object> segmentation)
         {
             Assert.AreEqual(CountlyEventModel.StarRatingEvent, model.Key);
@@ -31,16 +28,11 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public void TestStarRatingRepoInitialState()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-            };
-
+            CountlyConfiguration configuration = TestUtility.CreateBaseConfig();
             Countly.Instance.Init(configuration);
 
             Assert.IsNotNull(Countly.Instance.StarRating);
             Assert.AreEqual(0, Countly.Instance.StarRating._eventCountlyService._eventRepo.Count);
-
         }
 
         /// <summary>
@@ -49,32 +41,23 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public async void TestStarRating_CheckEventConsentDependency()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-                RequiresConsent = true,
-            };
+            CountlyConfiguration configuration = TestUtility.CreateBaseConfig()
+                .SetRequiresConsent(true);
 
             configuration.GiveConsent(new Consents[] { Consents.StarRating });
-
             Countly.Instance.Init(configuration);
 
             Countly.Instance.StarRating._eventCountlyService._eventRepo.Clear();
             Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
-
             Assert.IsNotNull(Countly.Instance.StarRating);
             Assert.AreEqual(0, Countly.Instance.StarRating._eventCountlyService._eventRepo.Count);
-
             await Countly.Instance.StarRating.ReportStarRatingAsync("android", "0.1", 3);
             Assert.AreEqual(1, Countly.Instance.StarRating._eventCountlyService._eventRepo.Count);
-
             CountlyEventModel model = Countly.Instance.StarRating._eventCountlyService._eventRepo.Dequeue();
-
             IDictionary<string, object> segmentation = new Dictionary<string, object>();
             segmentation.Add("platform", "android");
             segmentation.Add("app_version", "0.1");
             segmentation.Add("rating", 3);
-
             AssertStarRatingModel(model, segmentation);
         }
 
@@ -84,21 +67,14 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public async void TestStarRatingConsent()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-                RequiresConsent = true
-            };
-
-
+            CountlyConfiguration configuration = TestUtility.CreateBaseConfig()
+                .SetRequiresConsent(true);
             Countly.Instance.Init(configuration);
 
             Countly.Instance.StarRating._eventCountlyService._eventRepo.Clear();
             Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
-
             Assert.IsNotNull(Countly.Instance.StarRating);
             Assert.AreEqual(0, Countly.Instance.StarRating._eventCountlyService._eventRepo.Count);
-
             await Countly.Instance.StarRating.ReportStarRatingAsync("android", "0.1", 3);
             Assert.AreEqual(0, Countly.Instance.StarRating._eventCountlyService._eventRepo.Count);
         }
@@ -109,12 +85,7 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public async void TestStarRatingMethod_ReportStarRatingAsync()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-            };
-
-            Countly.Instance.Init(configuration);
+            Countly.Instance.Init(TestUtility.CreateBaseConfig());
 
             Countly.Instance.StarRating._eventCountlyService._eventRepo.Clear();
             Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
@@ -140,7 +111,6 @@ namespace Assets.Tests.PlayModeTests
             segmentation.Add("rating", 5);
 
             AssertStarRatingModel(model, segmentation);
-
         }
 
         /// <summary>
@@ -149,18 +119,12 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public async void TestStarRating_ValidatesParams()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-            };
-
-            Countly.Instance.Init(configuration);
+            Countly.Instance.Init(TestUtility.CreateBaseConfig());
             Countly.Instance.StarRating._eventCountlyService._eventRepo.Clear();
             Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
 
             Assert.IsNotNull(Countly.Instance.StarRating);
             Assert.AreEqual(0, Countly.Instance.StarRating._eventCountlyService._eventRepo.Count);
-
 
             await Countly.Instance.StarRating.ReportStarRatingAsync("", "0.1", 4);
             Assert.AreEqual(0, Countly.Instance.StarRating._eventCountlyService._eventRepo.Count);
@@ -182,7 +146,6 @@ namespace Assets.Tests.PlayModeTests
 
             await Countly.Instance.StarRating.ReportStarRatingAsync("android", "0.1", 4);
             Assert.AreEqual(1, Countly.Instance.StarRating._eventCountlyService._eventRepo.Count);
-
         }
 
         /// <summary>
@@ -191,11 +154,8 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public async void TestStarRating_EventQueueThreshold_Limit()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-                EventQueueThreshold = 3
-            };
+            CountlyConfiguration configuration = TestUtility.CreateBaseConfig()
+                .SetEventQueueSizeToSend(3);
 
             Countly.Instance.Init(configuration);
             Countly.Instance.StarRating._eventCountlyService._eventRepo.Clear();

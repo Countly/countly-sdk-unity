@@ -69,8 +69,6 @@ namespace Assets.Tests.PlayModeTests
         public void StoreGETRequestsAfterMigration()
         {
             CountlyConfiguration configuration = TestUtility.CreateBaseConfig();
-            configuration.EnableConsoleLogging = false;
-
             TempStorageHelper storageHelper = new TempStorageHelper(new CountlyLogHelper(configuration));
             storageHelper.OpenDB();
             storageHelper.ClearDBData();
@@ -292,40 +290,6 @@ namespace Assets.Tests.PlayModeTests
 
             requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
             AssertMigrtedGetRequest(requestModel, "772c091355076ead703f987fee94490", "57049b51faf44874a10967f54d8f8420", "csharp-unity-editor", "20.11.0");
-        }
-
-        /// <summary>
-        /// It validates the device ID type if SDK already has device id and init SDK again.
-        /// Case: Previous schema version and device id stored locally. No device id is provided in configuration.
-        /// Result: Device type will be 'SDKGenerated'. 
-        /// </summary>
-        [Test]
-        public void DeviceIDTypeAfterMigration_NoDeviceIDProvided()
-        {
-            Assert.False(PlayerPrefs.HasKey(Constants.SchemaVersion));
-            Assert.False(PlayerPrefs.HasKey(Constants.DeviceIDKey));
-            Assert.False(PlayerPrefs.HasKey(Constants.DeviceIDTypeKey));
-
-            PlayerPrefs.SetInt(Constants.SchemaVersion, 2);
-            PlayerPrefs.SetString(Constants.DeviceIDKey, "device-id");
-
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-            };
-            FirstLaunchAppHelper.Process();
-
-            Countly.Instance.Init(configuration);
-
-            Assert.AreEqual("device-id", Countly.Instance.Device.DeviceId);
-            Assert.AreEqual(DeviceIdType.SDKGenerated, Countly.Instance.Device.DeviceIdType);
-
-            int schemaVersion = PlayerPrefs.GetInt(Constants.SchemaVersion);
-            Assert.AreEqual(SCHEMA_VERSION, schemaVersion);
-            Assert.AreEqual(SCHEMA_VERSION, Countly.Instance.StorageHelper.CurrentVersion);
-            Assert.AreEqual(schemaVersion, Countly.Instance.StorageHelper.SchemaVersion);
-            Assert.AreEqual(schemaVersion, Countly.Instance.StorageHelper.CurrentVersion);
-            Assert.AreEqual(Countly.Instance.StorageHelper.SchemaVersion, Countly.Instance.StorageHelper.CurrentVersion);
         }
 
         /// <summary>

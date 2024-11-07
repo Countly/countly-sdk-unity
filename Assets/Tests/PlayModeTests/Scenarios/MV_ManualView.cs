@@ -48,11 +48,6 @@ namespace Assets.Tests.PlayModeTests.Scenarios
 
             views.PauseViewWithID(null);
 
-            views.RecordCloseViewAsync(null);
-
-            views.RecordOpenViewAsync(null, null);
-            views.RecordOpenViewAsync(null, testSegmentation);
-
             views.ResumeViewWithID(null);
 
             views.SetGlobalViewSegmentation(null);
@@ -99,11 +94,6 @@ namespace Assets.Tests.PlayModeTests.Scenarios
             views.AddSegmentationToViewWithName("", testSegmentation);
 
             views.PauseViewWithID("");
-
-            views.RecordCloseViewAsync("");
-
-            views.RecordOpenViewAsync("", null);
-            views.RecordOpenViewAsync("", testSegmentation);
 
             views.ResumeViewWithID("");
 
@@ -407,8 +397,6 @@ namespace Assets.Tests.PlayModeTests.Scenarios
 
             TestUtility.ValidateRQEQSize(cly, 2, 0);
 
-            views.RecordOpenViewAsync("viewA");
-            views.RecordOpenViewAsync("viewB", testSegmentation);
             string viewIdC = views.StartAutoStoppedView("viewC");
             string viewIdD = views.StartAutoStoppedView("viewD", testSegmentation);
             string viewIdE = views.StartView("viewE");
@@ -424,8 +412,6 @@ namespace Assets.Tests.PlayModeTests.Scenarios
             views.ResumeViewWithID(viewIdE);
             views.ResumeViewWithID(viewIdF);
 
-            views.StopViewWithName("viewA");
-            views.StopViewWithName("viewB");
             views.StopViewWithName("viewC");
             views.StopViewWithName("viewD");
             views.StopViewWithName("viewE");

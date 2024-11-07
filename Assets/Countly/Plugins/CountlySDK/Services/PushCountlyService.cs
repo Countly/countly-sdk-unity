@@ -37,7 +37,7 @@ namespace Plugins.CountlySDK.Services
             Log.Debug("[PushCountlyService] EnableNotification");
 
             //Enables push notification on start
-            if (_configuration.EnableTestMode || !_consentService.CheckConsentInternal(Consents.Push) || _configuration.GetNotificationMode() == TestMode.None) {
+            if (!_consentService.CheckConsentInternal(Consents.Push) || _configuration.GetNotificationMode() == TestMode.None) {
                 return;
             }
 

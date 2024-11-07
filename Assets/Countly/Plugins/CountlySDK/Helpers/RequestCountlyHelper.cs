@@ -46,10 +46,6 @@ namespace Plugins.CountlySDK.Helpers
         {
             Log.Verbose($"[RequestCountlyHelper] AddRequestToQueue, Request: [{request.ToString()}]");
 
-            if (_config.EnableTestMode) {
-                return;
-            }
-
             if (_requestRepo.Count >= _config.GetMaxRequestQueueSize()) {
                 // Calculate how many items need to be removed from the queue to accommodate the new request.
                 int exceedAmount = _requestRepo.Count - _config.GetMaxRequestQueueSize();

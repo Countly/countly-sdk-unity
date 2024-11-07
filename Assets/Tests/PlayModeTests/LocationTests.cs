@@ -28,11 +28,7 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public void TestLocationValuesSetDuringInit()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-            };
-
+            CountlyConfiguration configuration = new CountlyConfiguration(_appKey, _serverUrl);
             string countryCode = "us";
             string city = "Houston";
             string latitude = "29.634933";
@@ -42,14 +38,11 @@ namespace Assets.Tests.PlayModeTests
             configuration.SetLocation(countryCode, city, latitude + "," + longitude, ipAddress);
             Countly.Instance.Init(configuration);
 
-
-
             CountlyConfiguration cc = Countly.Instance.Configuration;
             AssertLocation(cc.Location, cc.City, cc.IPAddress, cc.CountryCode, cc.IsLocationDisabled);
 
             Countly.Instance.Location.DisableLocation();
             AssertLocation(null, null, null, null, true);
-
         }
 
         /// <summary>
@@ -58,11 +51,7 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public void TestLocationValuesSetDuringInitOnOptionalLocationService()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-            };
-
+            CountlyConfiguration configuration = new CountlyConfiguration(_appKey, _serverUrl);
             string city = "Houston";
             string countryCode = "us";
             string latitude = "29.634933";
@@ -79,10 +68,7 @@ namespace Assets.Tests.PlayModeTests
         [Test]
         public void TestLocationValuesSetAfterInit()
         {
-            CountlyConfiguration configuration = new CountlyConfiguration {
-                ServerUrl = _serverUrl,
-                AppKey = _appKey,
-            };
+            CountlyConfiguration configuration = new CountlyConfiguration(_appKey, _serverUrl);
 
             string countryCode = "us";
             string city = "Houston";

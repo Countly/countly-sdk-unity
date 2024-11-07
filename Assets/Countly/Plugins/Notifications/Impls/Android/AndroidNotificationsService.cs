@@ -40,7 +40,7 @@ namespace Notifications.Impls.Android
 
             try {
                 AndroidJavaClass countlyPushPlugin = new AndroidJavaClass(CountlyPushPluginPackageName);
-                countlyPushPlugin.CallStatic("setEnableLog", config.EnableConsoleLogging);
+                countlyPushPlugin.CallStatic("setEnableLog", config.IsLoggingEnabled());
                 IsInitializedWithoutError = true;
             } catch (Exception ex) {
                 Log.Error("[AndroidNotificationsService] Exception in initializing service: " + ex.Message);

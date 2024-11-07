@@ -50,10 +50,6 @@ namespace Plugins.CountlySDK.Services
         {
             Log.Debug("[RemoteConfigCountlyService] InitConfig");
 
-            if (_configuration.EnableTestMode) {
-                return new CountlyResponse { IsSuccess = true };
-            }
-
             return await Update();
         }
 

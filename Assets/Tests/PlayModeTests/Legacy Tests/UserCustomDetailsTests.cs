@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿#pragma warning disable CS0618 
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Web;
 using Newtonsoft.Json.Linq;
@@ -492,3 +493,4 @@ namespace Assets.Tests.PlayModeTests.LegacyTests
         }
     }
 }
+#pragma warning restore CS0618
