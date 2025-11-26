@@ -602,8 +602,10 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
 
     internal override void DeviceIdChanged(string deviceId, bool merged)
     {
-        Log.Info($"[UserProfile] DeviceIdChanged, DeviceId change has occured. New DeviceId: [{deviceId}], Merged: [{merged}]. Calling Save");
-        SaveInternal();
+        Log.Info($"[UserProfile] DeviceIdChanged, DeviceId change has occured. New DeviceId: [{deviceId}], Merged: [{merged}]. Calling Save if not merged.");
+        if(!merged) {
+            SaveInternal();
+        }
     }
     #endregion
 }

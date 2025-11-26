@@ -168,6 +168,7 @@ namespace Plugins.CountlySDK.Services
             }
 
             _lastSessionRequestTime = DateTime.Now;
+            Countly.Instance.UserProfile.Save();
             //Session initiated
             IsSessionInitiated = true;
 
