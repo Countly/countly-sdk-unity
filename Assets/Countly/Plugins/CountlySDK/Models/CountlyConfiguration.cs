@@ -135,6 +135,8 @@ namespace Plugins.CountlySDK.Models
         [Obsolete("RequiresConsent is deprecated. Use SetRequiresConsent(bool enable) instead.")]
         public bool RequiresConsent = false;
 
+        internal bool AutoSendUserPropertiesOnSessions = true;
+
         internal ISafeIDGenerator SafeViewIDGenerator = null;
         internal ISafeIDGenerator SafeEventIDGenerator = null;
 
@@ -465,6 +467,16 @@ namespace Plugins.CountlySDK.Models
         public CountlyConfiguration SetUserProperties(Dictionary<string, object> userProperties)
         {
             providedUserProperties = userProperties;
+            return this;
+        }
+
+        /// <summary>
+        /// Disables automatic sending of user properties on session start
+        /// </summary>
+        /// <returns>Modified instance of the CountlyConfiguration</returns>
+        public CountlyConfiguration DisableAutoSendUserPropertiesOnSessions()
+        {
+            AutoSendUserPropertiesOnSessions = false;
             return this;
         }
         #endregion
