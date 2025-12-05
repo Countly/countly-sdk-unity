@@ -1,3 +1,6 @@
+## XX.XX.XX
+* Updated user properties caching mechanism according to sessions.
+
 ## 24.8.0
 * Added support for string key and Array/List value to all user given segmentations.
 * Added "SetID(string newDeviceId)" function in "Countly.Instance.Device" for managing device id changes.
