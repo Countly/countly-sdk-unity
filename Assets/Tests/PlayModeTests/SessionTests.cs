@@ -85,6 +85,56 @@ namespace Assets.Tests.PlayModeTests
             AssertSessionRequest(collection, "begin_session", null, true);
         }
 
+
+        /// <summary>
+        /// It validates the functionality of 'BeginSessionAsync' with auto user props saving
+        /// </summary>
+        [Test]
+        public void SessionBegin_UserPropsSave()
+        {
+            CountlyConfiguration config = TestUtility.CreateBaseConfig();
+            config.DisableAutomaticSessionTracking();
+            Countly.Instance.Init(config);
+
+            Countly cly = Countly.Instance;
+            cly.UserProfile.SetProperty("a12345", "My Property");
+            _ = cly.Session.BeginSessionAsync();
+
+            TestUtility.ValidateRQEQSize(cly, 2, 0);
+
+            CountlyRequestModel up1 = Countly.Instance.Session._requestCountlyHelper._requestRepo.Dequeue();
+            NameValueCollection collection1 = HttpUtility.ParseQueryString(up1.RequestData);
+            Assert.AreEqual("{\"custom\":{\"a12345\":\"My Property\"}}", collection1.Get("user_details"));
+
+            CountlyRequestModel requestModel = Countly.Instance.Session._requestCountlyHelper._requestRepo.Dequeue();
+            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+
+            AssertSessionRequest(collection, "begin_session", null, true);
+        }
+
+        /// <summary>
+        /// It validates the functionality of 'BeginSessionAsync' with auto user props saving reversed
+        /// </summary>
+        [Test]
+        public void SessionBegin_UserPropsSave_Reversed()
+        {
+            CountlyConfiguration config = TestUtility.CreateBaseConfig();
+            config.DisableAutomaticSessionTracking();
+            config.DisableAutoSendUserPropertiesOnSessions();
+            Countly.Instance.Init(config);
+
+            Countly cly = Countly.Instance;
+            cly.UserProfile.SetProperty("a12345", "My Property");
+            _ = cly.Session.BeginSessionAsync();
+
+            TestUtility.ValidateRQEQSize(cly, 1, 0);
+            
+            CountlyRequestModel requestModel = Countly.Instance.Session._requestCountlyHelper._requestRepo.Dequeue();
+            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+
+            AssertSessionRequest(collection, "begin_session", null, true);
+        }
+
         /// <summary>
         /// It validates the functionality of 'BeginSessionAsync' with location values.
         /// </summary>
