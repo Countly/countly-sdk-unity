@@ -1,3 +1,6 @@
+## 24.8.2
+* Fixed a bug where request parameter values containing reserved characters were not correctly URL-encoded.
+
 ## 24.8.1
 * Updated user properties caching mechanism according to sessions.
 
