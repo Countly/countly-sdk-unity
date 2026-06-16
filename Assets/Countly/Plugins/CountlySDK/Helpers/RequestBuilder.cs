@@ -40,19 +40,17 @@ internal class RequestBuilder
     /// <returns></returns>
     internal string BuildQueryString(IDictionary<string, object> queryParams)
     {
-        //  Dictionary<string, object> queryParams = JsonConvert.DeserializeObject<Dictionary<string, object>>(data);
         StringBuilder requestStringBuilder = new StringBuilder();
 
         //Query params supplied for creating request
         foreach (KeyValuePair<string, object> item in queryParams) {
             if (!string.IsNullOrEmpty(item.Key) && item.Value != null) {
-                requestStringBuilder.AppendFormat(requestStringBuilder.Length == 0 ? "{0}={1}" : "&{0}={1}", item.Key,
-                    Convert.ToString(item.Value));
+                string key = Uri.EscapeDataString(item.Key);
+                string value = Uri.EscapeDataString(Convert.ToString(item.Value));
+                requestStringBuilder.AppendFormat(requestStringBuilder.Length == 0 ? "{0}={1}" : "&{0}={1}", key, value);
             }
         }
 
-        string result = requestStringBuilder.ToString();
-
-        return Uri.EscapeUriString(result);
+        return requestStringBuilder.ToString();
     }
 }
