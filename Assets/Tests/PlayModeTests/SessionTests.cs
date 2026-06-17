@@ -2,6 +2,7 @@
 using NUnit.Framework;
 using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK;
+using System.Threading.Tasks;
 using System.Web;
 using System.Collections.Specialized;
 using Newtonsoft.Json.Linq;
@@ -51,21 +52,21 @@ namespace Assets.Tests.PlayModeTests
         /// <summary>
         /// It checks the working of session service if no 'Session' consent is given.
         /// </summary>
-        [Test]
-        public async void SessionConsent()
+        [UnityTest]
+        public IEnumerator SessionConsent()
         {
             Countly.Instance.Init(TestUtility.CreateBaseConfigConsent(null));
             Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
             Assert.IsNotNull(Countly.Instance.Session);
             Assert.AreEqual(0, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
 
-            await Countly.Instance.Session.BeginSessionAsync();
+            yield return Countly.Instance.Session.BeginSessionAsync().AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
 
-            await Countly.Instance.Session.ExtendSessionAsync();
+            yield return Countly.Instance.Session.ExtendSessionAsync().AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
 
-            await Countly.Instance.Session.EndSessionAsync();
+            yield return Countly.Instance.Session.EndSessionAsync().AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
         }
 

@@ -2,6 +2,9 @@
 using UnityEngine;
 using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK;
+using UnityEngine.TestTools;
+using System.Collections;
+using System.Threading.Tasks;
 using Plugins.CountlySDK.Enums;
 using System.Collections.Generic;
 
@@ -46,8 +49,8 @@ namespace Assets.Tests.PlayModeTests
         /// <summary>
         /// It validates the dependency of 'Event Consent' on StarRating Service.
         /// </summary>
-        [Test]
-        public async void TestStarRating_CheckEventConsentDependency()
+        [UnityTest]
+        public IEnumerator TestStarRating_CheckEventConsentDependency()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 ServerUrl = _serverUrl,
@@ -65,7 +68,7 @@ namespace Assets.Tests.PlayModeTests
             Assert.IsNotNull(Countly.Instance.StarRating);
             Assert.AreEqual(0, Countly.Instance.StarRating._eventCountlyService._eventRepo.Count);
 
-            await Countly.Instance.StarRating.ReportStarRatingAsync("android", "0.1", 3);
+            yield return Countly.Instance.StarRating.ReportStarRatingAsync("android", "0.1", 3).AsCoroutine();
             Assert.AreEqual(1, Countly.Instance.StarRating._eventCountlyService._eventRepo.Count);
 
             CountlyEventModel model = Countly.Instance.StarRating._eventCountlyService._eventRepo.Dequeue();
@@ -81,8 +84,8 @@ namespace Assets.Tests.PlayModeTests
         /// <summary>
         /// It checks the working of StarRating service if no StarRating consent is given.
         /// </summary>
-        [Test]
-        public async void TestStarRatingConsent()
+        [UnityTest]
+        public IEnumerator TestStarRatingConsent()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 ServerUrl = _serverUrl,
@@ -99,15 +102,15 @@ namespace Assets.Tests.PlayModeTests
             Assert.IsNotNull(Countly.Instance.StarRating);
             Assert.AreEqual(0, Countly.Instance.StarRating._eventCountlyService._eventRepo.Count);
 
-            await Countly.Instance.StarRating.ReportStarRatingAsync("android", "0.1", 3);
+            yield return Countly.Instance.StarRating.ReportStarRatingAsync("android", "0.1", 3).AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.StarRating._eventCountlyService._eventRepo.Count);
         }
 
         /// <summary>
         /// It validates functionality of method 'ReportStarRatingAsync'.
         /// </summary>
-        [Test]
-        public async void TestStarRatingMethod_ReportStarRatingAsync()
+        [UnityTest]
+        public IEnumerator TestStarRatingMethod_ReportStarRatingAsync()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 ServerUrl = _serverUrl,
@@ -120,7 +123,7 @@ namespace Assets.Tests.PlayModeTests
             Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
 
             Assert.IsNotNull(Countly.Instance.StarRating);
-            await Countly.Instance.StarRating.ReportStarRatingAsync("android", "0.1", 5);
+            yield return Countly.Instance.StarRating.ReportStarRatingAsync("android", "0.1", 5).AsCoroutine();
             Assert.AreEqual(1, Countly.Instance.StarRating._eventCountlyService._eventRepo.Count);
 
             CountlyEventModel model = Countly.Instance.StarRating._eventCountlyService._eventRepo.Dequeue();
@@ -146,8 +149,8 @@ namespace Assets.Tests.PlayModeTests
         /// <summary>
         /// It validates the parameters of 'ReportStarRatingAsync' method.
         /// </summary>
-        [Test]
-        public async void TestStarRating_ValidatesParams()
+        [UnityTest]
+        public IEnumerator TestStarRating_ValidatesParams()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 ServerUrl = _serverUrl,
@@ -162,25 +165,25 @@ namespace Assets.Tests.PlayModeTests
             Assert.AreEqual(0, Countly.Instance.StarRating._eventCountlyService._eventRepo.Count);
 
 
-            await Countly.Instance.StarRating.ReportStarRatingAsync("", "0.1", 4);
+            yield return Countly.Instance.StarRating.ReportStarRatingAsync("", "0.1", 4).AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.StarRating._eventCountlyService._eventRepo.Count);
 
-            await Countly.Instance.StarRating.ReportStarRatingAsync(null, "0.1", 4);
+            yield return Countly.Instance.StarRating.ReportStarRatingAsync(null, "0.1", 4).AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.StarRating._eventCountlyService._eventRepo.Count);
 
-            await Countly.Instance.StarRating.ReportStarRatingAsync("android", "", 4);
+            yield return Countly.Instance.StarRating.ReportStarRatingAsync("android", "", 4).AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.StarRating._eventCountlyService._eventRepo.Count);
 
-            await Countly.Instance.StarRating.ReportStarRatingAsync("android", null, 4);
+            yield return Countly.Instance.StarRating.ReportStarRatingAsync("android", null, 4).AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.StarRating._eventCountlyService._eventRepo.Count);
 
-            await Countly.Instance.StarRating.ReportStarRatingAsync("android", "0.1", 0);
+            yield return Countly.Instance.StarRating.ReportStarRatingAsync("android", "0.1", 0).AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.StarRating._eventCountlyService._eventRepo.Count);
 
-            await Countly.Instance.StarRating.ReportStarRatingAsync("android", "0.1", 6);
+            yield return Countly.Instance.StarRating.ReportStarRatingAsync("android", "0.1", 6).AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.StarRating._eventCountlyService._eventRepo.Count);
 
-            await Countly.Instance.StarRating.ReportStarRatingAsync("android", "0.1", 4);
+            yield return Countly.Instance.StarRating.ReportStarRatingAsync("android", "0.1", 4).AsCoroutine();
             Assert.AreEqual(1, Countly.Instance.StarRating._eventCountlyService._eventRepo.Count);
 
         }
@@ -188,8 +191,8 @@ namespace Assets.Tests.PlayModeTests
         /// <summary>
         /// It validates 'EventQueueThreshold' limit.
         /// </summary>
-        [Test]
-        public async void TestStarRating_EventQueueThreshold_Limit()
+        [UnityTest]
+        public IEnumerator TestStarRating_EventQueueThreshold_Limit()
         {
             CountlyConfiguration configuration = new CountlyConfiguration {
                 ServerUrl = _serverUrl,
@@ -207,10 +210,10 @@ namespace Assets.Tests.PlayModeTests
             Countly.Instance.Views.StartView("view");
             Assert.AreEqual(1, Countly.Instance.StarRating._eventCountlyService._eventRepo.Count);
 
-            await Countly.Instance.StarRating.ReportStarRatingAsync("android", "0.1", 4);
+            yield return Countly.Instance.StarRating.ReportStarRatingAsync("android", "0.1", 4).AsCoroutine();
             Assert.AreEqual(2, Countly.Instance.StarRating._eventCountlyService._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("test_event");
+            yield return Countly.Instance.Events.RecordEventAsync("test_event").AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.StarRating._eventCountlyService._eventRepo.Count);
         }
 

@@ -4,6 +4,9 @@ using System.Web;
 using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 using Plugins.CountlySDK;
+using UnityEngine.TestTools;
+using System.Collections;
+using System.Threading.Tasks;
 using Plugins.CountlySDK.Models;
 
 namespace Assets.Tests.PlayModeTests.LegacyTests
@@ -35,8 +38,8 @@ namespace Assets.Tests.PlayModeTests.LegacyTests
         // 'SetUserDetailsAsync' method in Countly.Instance.UserDetails
         // We call the method first with a null value then a valid user details value
         // Null value shouldn't record anything, valid values should be recorded correctly
-        [Test]
-        public async void SetUserDetailsAsync()
+        [UnityTest]
+        public IEnumerator SetUserDetailsAsync()
         {
             Countly.Instance.Init(TestUtility.CreateBaseConfig());
             Assert.IsNotNull(Countly.Instance.UserDetails);
@@ -46,7 +49,7 @@ namespace Assets.Tests.PlayModeTests.LegacyTests
 
             CountlyUserDetailsModel userDetails = null;
 
-            await Countly.Instance.UserDetails.SetUserDetailsAsync(userDetails);
+            yield return Countly.Instance.UserDetails.SetUserDetailsAsync(userDetails).AsCoroutine();
             TestUtility.ValidateRQEQSize(Countly.Instance, 0, 0);
 
             userDetails = new CountlyUserDetailsModel("Full Name", "username", "useremail@email.com", "Organization",
@@ -57,7 +60,7 @@ namespace Assets.Tests.PlayModeTests.LegacyTests
                         { "Hair", "Black" },
                         { "Height", "5.9" },
                     });
-            await Countly.Instance.UserDetails.SetUserDetailsAsync(userDetails);
+            yield return Countly.Instance.UserDetails.SetUserDetailsAsync(userDetails).AsCoroutine();
 
             TestUtility.ValidateRQEQSize(Countly.Instance, 1, 0);
             CountlyRequestModel requestModel = Countly.Instance.RequestHelper._requestRepo.Dequeue();
@@ -69,10 +72,16 @@ namespace Assets.Tests.PlayModeTests.LegacyTests
         // 'SetUserDetailAsync' method in Countly.Instance.UserDetails
         // We pass invalid URLs to the user profiles property as null, empty and non url string
         // Nothing should break and picture url should be recorded
-        [TestCase("Invalid URL", "Invalid URL")]
-        [TestCase(null, null)]
-        [TestCase("", "")]
-        public async void SetPicturePath(string setPictureUrl, string expectedValue)
+        [UnityTest]
+        public IEnumerator SetPicturePath_InvalidUrl() { yield return SetPicturePathImpl("Invalid URL", "Invalid URL"); }
+
+        [UnityTest]
+        public IEnumerator SetPicturePath_Null() { yield return SetPicturePathImpl(null, null); }
+
+        [UnityTest]
+        public IEnumerator SetPicturePath_Empty() { yield return SetPicturePathImpl("", ""); }
+
+        private IEnumerator SetPicturePathImpl(string setPictureUrl, string expectedValue)
         {
             Countly.Instance.Init(TestUtility.CreateBaseConfig());
             Countly.Instance.RequestHelper._requestRepo.Clear();
@@ -83,7 +92,7 @@ namespace Assets.Tests.PlayModeTests.LegacyTests
 
             // Attempt to set user details with a null user model
             CountlyUserDetailsModel userDetails = null;
-            await Countly.Instance.UserDetails.SetUserDetailsAsync(userDetails);
+            yield return Countly.Instance.UserDetails.SetUserDetailsAsync(userDetails).AsCoroutine();
             TestUtility.ValidateRQEQSize(Countly.Instance, 0, 0);
 
             // Initialize userDetails and assign an invalid picture URL to the user model
@@ -95,7 +104,7 @@ namespace Assets.Tests.PlayModeTests.LegacyTests
                         { "Song", "Billie Jean" },
                         { "Team", "Arsenal" },
                     });
-            await Countly.Instance.UserDetails.SetUserDetailsAsync(userDetails);
+            yield return Countly.Instance.UserDetails.SetUserDetailsAsync(userDetails).AsCoroutine();
 
             // Ensure that a request is added, retrieve and parse it for verification
             TestUtility.ValidateRQEQSize(Countly.Instance, 1, 0);
@@ -115,8 +124,8 @@ namespace Assets.Tests.PlayModeTests.LegacyTests
         // 'SetUserDetailAsync' method in Countly.Instance.UserDetails
         // We check configuration limits for user profile fields
         // Nothing should break and values should be recorded within limits
-        [Test]
-        public async void TestUserProfileFieldsLimits()
+        [UnityTest]
+        public IEnumerator TestUserProfileFieldsLimits()
         {
             CountlyConfiguration configuration = TestUtility.CreateBaseConfig()
                 .SetMaxValueSize(3);
@@ -129,7 +138,7 @@ namespace Assets.Tests.PlayModeTests.LegacyTests
 
             CountlyUserDetailsModel userDetails = null;
 
-            await Countly.Instance.UserDetails.SetUserDetailsAsync(userDetails);
+            yield return Countly.Instance.UserDetails.SetUserDetailsAsync(userDetails).AsCoroutine();
             TestUtility.ValidateRQEQSize(Countly.Instance, 0, 0);
             
             userDetails = new CountlyUserDetailsModel("Full Name", "username", "useremail@email.com", "Organization",
@@ -145,7 +154,7 @@ namespace Assets.Tests.PlayModeTests.LegacyTests
                         { "Hair", "Black" },
                         { "Height", "5.9" },
                     });
-            await Countly.Instance.UserDetails.SetUserDetailsAsync(userDetails);
+            yield return Countly.Instance.UserDetails.SetUserDetailsAsync(userDetails).AsCoroutine();
             TestUtility.ValidateRQEQSize(Countly.Instance, 1, 0);
             
             CountlyRequestModel requestModel = Countly.Instance.RequestHelper._requestRepo.Dequeue();
@@ -306,8 +315,8 @@ namespace Assets.Tests.PlayModeTests.LegacyTests
         // User detail methods in Countly.Instance.UserDetails
         // We validate custom user detail methods with invalid keys
         // Nothing should be recorded and nothing should break
-        [Test]
-        public async void CustomUserDetailInvalidKeys()
+        [UnityTest]
+        public IEnumerator CustomUserDetailInvalidKeys()
         {
             CountlyConfiguration configuration = TestUtility.CreateBaseConfig()
                 .SetMaxKeyLength(5)
@@ -342,7 +351,7 @@ namespace Assets.Tests.PlayModeTests.LegacyTests
             Countly.Instance.UserDetails.Max(null, 10000.0);
             Countly.Instance.UserDetails.Multiply(null, 10.0);
 
-            await Countly.Instance.UserDetails.SaveAsync();
+            yield return Countly.Instance.UserDetails.SaveAsync().AsCoroutine();
             TestUtility.ValidateRQEQSize(Countly.Instance, 0, 0);
         }
 
@@ -459,8 +468,8 @@ namespace Assets.Tests.PlayModeTests.LegacyTests
         // 'SaveAsync' method in Countly.Instance.UserDetails
         // We validate the user's custom properties before and after calling 'SaveAsync'.
         // Nothing should break, values should be recorded correctly
-        [Test]
-        public async void UserDetailService_SaveAsync()
+        [UnityTest]
+        public IEnumerator UserDetailService_SaveAsync()
         {
             // Initialize, ensure that the UserDetails instance is not null and request repository is empty
             Countly.Instance.Init(TestUtility.CreateBaseConfig());
@@ -478,7 +487,7 @@ namespace Assets.Tests.PlayModeTests.LegacyTests
             Dictionary<string, object> dic2 = Countly.Instance.UserDetails.RetrieveCustomDataValue("Age") as Dictionary<string, object>;
             Assert.AreEqual(new string[] { "29" }, dic2["$push"]);
 
-            await Countly.Instance.UserDetails.SaveAsync();
+            yield return Countly.Instance.UserDetails.SaveAsync().AsCoroutine();
 
             Assert.AreEqual(false, Countly.Instance.UserDetails.ContainsCustomDataKey("Age"));
             Assert.AreEqual(false, Countly.Instance.UserDetails.ContainsCustomDataKey("Distance"));

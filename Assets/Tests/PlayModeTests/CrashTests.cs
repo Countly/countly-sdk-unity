@@ -3,6 +3,8 @@ using NUnit.Framework;
 using UnityEngine;
 using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK;
+using UnityEngine.TestTools;
+using System.Threading.Tasks;
 using System.Web;
 using System.Collections.Specialized;
 using Newtonsoft.Json.Linq;
@@ -58,8 +60,8 @@ namespace Assets.Tests.PlayModeTests
         // 'SendCrashReportAsync' method in CrashReportsCountlyService
         // Checks if crash service is working if no 'Crash' consent is given.
         // If consent is not given, no report should be sent.
-        [Test]
-        public async void CrashConsent()
+        [UnityTest]
+        public IEnumerator CrashConsent()
         {
             CountlyConfiguration configuration = TestUtility.CreateBaseConfigConsent(new Plugins.CountlySDK.Enums.Consents[] { });
             Countly.Instance.Init(configuration);
@@ -74,7 +76,7 @@ namespace Assets.Tests.PlayModeTests
                 { "Retry Attempts", "10" }
             };
 
-            await Countly.Instance.CrashReports.SendCrashReportAsync("message", "StackTrace", seg);
+            yield return Countly.Instance.CrashReports.SendCrashReportAsync("message", "StackTrace", seg).AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
         }
 
@@ -98,8 +100,8 @@ namespace Assets.Tests.PlayModeTests
         // 'SendCrashReportAsync' method in CrashReportsCountlyService.
         // Validate SDK limits on crash parameters
         // The provided values should be limited by the limits
-        [Test]
-        public async void CrashLimits()
+        [UnityTest]
+        public IEnumerator CrashLimits()
         {
             CountlyConfiguration configuration = TestUtility.CreateBaseConfig()
                 .SetMaxValueSize(5)
@@ -121,7 +123,7 @@ namespace Assets.Tests.PlayModeTests
                 { "Temp", "100" }
             };
 
-            await Countly.Instance.CrashReports.SendCrashReportAsync("message", "StackTrace_1\nStackTrace_2\nStackTrace_3", seg);
+            yield return Countly.Instance.CrashReports.SendCrashReportAsync("message", "StackTrace_1\nStackTrace_2\nStackTrace_3", seg).AsCoroutine();
 
             // TODO: Instead use ValidateRQEQSize from TestUtility
             Assert.AreEqual(1, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
@@ -142,8 +144,8 @@ namespace Assets.Tests.PlayModeTests
         // 'SendCrashReportAsync' deprecated method in CrashReportsCountlyService.
         // We verify if a CrashReport is sent with empty, null or whitespace messages
         // Deprecated function with LogType variable should still have the functionality and valid message should be sent. 
-        [Test]
-        public async void SendCrashReportAsyncDeprecated()
+        [UnityTest]
+        public IEnumerator SendCrashReportAsyncDeprecated()
         {
             Countly.Instance.Init(TestUtility.CreateBaseConfig());
             Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
@@ -151,20 +153,20 @@ namespace Assets.Tests.PlayModeTests
             Assert.IsNotNull(Countly.Instance.CrashReports);
             Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
 
-            await Countly.Instance.CrashReports.SendCrashReportAsync(null, "stackTrace", LogType.Log, null);
+            yield return Countly.Instance.CrashReports.SendCrashReportAsync(null, "stackTrace", LogType.Log, null).AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
 
-            await Countly.Instance.CrashReports.SendCrashReportAsync(" ", "stackTrace", LogType.Log, null);
+            yield return Countly.Instance.CrashReports.SendCrashReportAsync(" ", "stackTrace", LogType.Log, null).AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
 
-            await Countly.Instance.CrashReports.SendCrashReportAsync("", "stackTrace", LogType.Log, null);
+            yield return Countly.Instance.CrashReports.SendCrashReportAsync("", "stackTrace", LogType.Log, null).AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
 
             Dictionary<string, object> seg = new Dictionary<string, object>{
                 { "ExampleSegmentation", "Segment1"},
             };
 
-            await Countly.Instance.CrashReports.SendCrashReportAsync("Crash message", "stackTrace", LogType.Log, seg);
+            yield return Countly.Instance.CrashReports.SendCrashReportAsync("Crash message", "stackTrace", LogType.Log, seg).AsCoroutine();
             Assert.AreEqual(1, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
 
             CountlyRequestModel requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
@@ -175,8 +177,8 @@ namespace Assets.Tests.PlayModeTests
         // 'SendCrashReportAsync' method in CrashReportsCountlyService.
         // We verify if a CrashReport is sent with empty, null or whitespace messages
         // When provided a valid message, a crash report should be sent.
-        [Test]
-        public async void SendCrashReportAsync()
+        [UnityTest]
+        public IEnumerator SendCrashReportAsync()
         {
             Countly.Instance.Init(TestUtility.CreateBaseConfig());
             Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
@@ -185,13 +187,13 @@ namespace Assets.Tests.PlayModeTests
             Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
 
             //crashes with bad params are not recorded
-            await Countly.Instance.CrashReports.SendCrashReportAsync("", "StackTrace", null);
+            yield return Countly.Instance.CrashReports.SendCrashReportAsync("", "StackTrace", null).AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
 
-            await Countly.Instance.CrashReports.SendCrashReportAsync(null, "StackTrace", null);
+            yield return Countly.Instance.CrashReports.SendCrashReportAsync(null, "StackTrace", null).AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
 
-            await Countly.Instance.CrashReports.SendCrashReportAsync(" ", "StackTrace", null);
+            yield return Countly.Instance.CrashReports.SendCrashReportAsync(" ", "StackTrace", null).AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
 
 
@@ -201,7 +203,7 @@ namespace Assets.Tests.PlayModeTests
             };
 
             // Send CrashReport with valid message and segmentation
-            await Countly.Instance.CrashReports.SendCrashReportAsync("message", "StackTrace", seg);
+            yield return Countly.Instance.CrashReports.SendCrashReportAsync("message", "StackTrace", seg).AsCoroutine();
             Assert.AreEqual(1, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
 
             CountlyRequestModel requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
@@ -273,8 +275,8 @@ namespace Assets.Tests.PlayModeTests
         // We provide segmentation with crash and check every supported data type
         // string, bool, float, double, string, long and, their list and arrays are supported types
         // Supported data types should be recorded, unsupported types should be removed correctly
-        [Test]
-        public async void SegmentationDataTypeValidation()
+        [UnityTest]
+        public IEnumerator SegmentationDataTypeValidation()
         {
             Countly.Instance.Init(TestUtility.CreateBaseConfig());
             Countly cly = Countly.Instance;
@@ -308,7 +310,7 @@ namespace Assets.Tests.PlayModeTests
 
             Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
             Assert.IsNotNull(Countly.Instance.CrashReports);
-            await Countly.Instance.CrashReports.SendCrashReportAsync("message", "StackTrace_1\nStackTrace_2\nStackTrace_3", seg);
+            yield return Countly.Instance.CrashReports.SendCrashReportAsync("message", "StackTrace_1\nStackTrace_2\nStackTrace_3", seg).AsCoroutine();
             TestUtility.ValidateRQEQSize(cly, 1, 0);
             CountlyRequestModel requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
             NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
