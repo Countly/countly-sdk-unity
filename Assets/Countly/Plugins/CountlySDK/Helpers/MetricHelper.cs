@@ -92,6 +92,16 @@ namespace Plugins.CountlySDK.Helpers
             }
         }
 
+        public string UnityVersion
+        {
+            get {
+                if (overridenMetrics != null && overridenMetrics.ContainsKey("_unity_version")) {
+                    return overridenMetrics["_unity_version"];
+                }
+                return Application.unityVersion.ToString();
+            }
+        }
+
         /// <summary>
         /// Generates a JSON representation of device and application metrics, combining default and overridden metrics.
         /// </summary>
@@ -105,7 +115,8 @@ namespace Plugins.CountlySDK.Helpers
                 { "_resolution", Resolution},
                 { "_app_version", AppVersion},
                 { "_density", Density},
-                { "_locale", Locale}
+                { "_locale", Locale},
+                { "_unity_version", UnityVersion}
             };
 
             if (overridenMetrics != null) {
