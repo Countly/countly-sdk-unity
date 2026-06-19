@@ -23,17 +23,21 @@ namespace Plugins.CountlySDK.Services
             _consentService = consentService;
         }
 
-        protected IDictionary<string, object> RemoveSegmentInvalidDataTypes(IDictionary<string, object> segments)
+        protected IDictionary<string, object> RemoveSegmentInvalidDataTypes(IDictionary<string, object> segments, ICollection<string> reservedKeys = null)
         {
             if (segments == null || segments.Count == 0) {
                 return segments;
             }
 
+            // Work on a copy so the caller-supplied dictionary is never mutated in place.
+            segments = new Dictionary<string, object>(segments);
+
             string moduleName = GetType().Name;
             int i = 0;
             List<string> toRemove = new List<string>();
             foreach (KeyValuePair<string, object> item in segments) {
-                if (++i > _configuration.GetMaxSegmentationValues()) {
+                // Reserved (SDK-injected) keys do not count toward the cap and are never dropped by it.
+                if ((reservedKeys == null || !reservedKeys.Contains(item.Key)) && ++i > _configuration.GetMaxSegmentationValues()) {
                     toRemove.Add(item.Key);
                     continue;
                 }

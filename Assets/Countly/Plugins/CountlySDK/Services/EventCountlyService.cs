@@ -126,7 +126,9 @@ namespace Plugins.CountlySDK.Services
                 }
             }
 
-            IDictionary<string, object> segments = RemoveSegmentInvalidDataTypes(segmentation);
+            // View events carry SDK-injected reserved keys (name/visit/start/segment) that must survive the cap.
+            IDictionary<string, object> segments = RemoveSegmentInvalidDataTypes(segmentation,
+                key.Equals(CountlyEventModel.ViewEvent) ? CountlyEventModel.ReservedViewSegmentationKeys : null);
             segments = FixSegmentKeysAndValues(segments);
 
             //before each event is recorded, check if user profile data needs to be saved
@@ -275,8 +277,9 @@ namespace Plugins.CountlySDK.Services
                 DateTime startTime = _timedEvents[key];
                 double duration = (DateTime.Now - startTime).TotalSeconds;
 
-                CountlyEventModel @event = new CountlyEventModel(key, segmentation, count, sum, duration);
-                _ = RecordEventAsync(@event);
+                // Route through the same pipeline as the normal record path so timed events get
+                // segmentation sanitization, key-length truncation, and event-id/peid generation.
+                _ = RecordEventInternal(key, segmentation, count, sum, duration);
                 _timedEvents.Remove(key);
             }
         }

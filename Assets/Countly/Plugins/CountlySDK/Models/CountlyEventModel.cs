@@ -82,6 +82,9 @@ namespace Plugins.CountlySDK.Models
         [JsonIgnore] public const string PushActionEvent = "[CLY]_push_action";
 
         [JsonIgnore] public const string OrientationEvent = "[CLY]_orientation";
+
+        // Segmentation keys the SDK injects into view events; exempt from the segmentation-count cap.
+        [JsonIgnore] public static readonly string[] ReservedViewSegmentationKeys = { "name", "visit", "start", "segment" };
         #endregion
 
         public override string ToString()

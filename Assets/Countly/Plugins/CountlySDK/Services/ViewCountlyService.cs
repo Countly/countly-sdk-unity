@@ -30,7 +30,7 @@ namespace Plugins.CountlySDK.Services
         internal readonly Countly _cly;
         internal readonly CountlyUtils _utils;
         internal ISafeIDGenerator safeViewIDGenerator;
-        readonly string[] reservedSegmentationKeysViews = { "name", "visit", "start", "segment" };
+        readonly string[] reservedSegmentationKeysViews = CountlyEventModel.ReservedViewSegmentationKeys;
         private readonly Dictionary<string, DateTime> _viewToLastViewStartTime = new Dictionary<string, DateTime>();
         internal ViewCountlyService(Countly countly, CountlyUtils utils, CountlyConfiguration configuration, CountlyLogHelper logHelper, EventCountlyService eventService, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
         {
@@ -648,7 +648,7 @@ namespace Plugins.CountlySDK.Services
             if (vd.ViewSegmentation == null) {
                 vd.ViewSegmentation = new Dictionary<string, object>(viewSegmentation);
             } else {
-                _utils.CopyDictionaryToDestination(vd.ViewSegmentation, vd.ViewSegmentation, Log);
+                _utils.CopyDictionaryToDestination(vd.ViewSegmentation, viewSegmentation, Log);
             }
         }
 

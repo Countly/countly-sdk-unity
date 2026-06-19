@@ -1,4 +1,9 @@
 ## 24.8.2
+* Fixed a bug where adding segmentation to a view more than once ("AddSegmentationToViewWithID"/"AddSegmentationToViewWithName") discarded every call after the first.
+* Fixed a bug where mandatory view segmentation keys ("name", "visit", "start", "segment") could be dropped when custom segmentation reached the segmentation value limit.
+* Fixed a bug where custom user property keys and values were not truncated to the configured limits.
+* Fixed a bug where recording an event mutated the caller-provided segmentation dictionary.
+* Fixed a bug where ending a timed event ("EndEvent") skipped segmentation sanitization and event ID generation.
 * Fixed a bug where request parameter values containing reserved characters were not correctly URL-encoded.
 
 ## 24.8.1
