@@ -1,5 +1,6 @@
 ## 24.8.2
 * Fixed a bug where request parameter values containing reserved characters were not correctly URL-encoded.
+* Fixed a bug where the SDK failed to compile under the ".NET Framework" API Compatibility Level due to a dependency on the System.Web assembly.
 
 ## 24.8.1
 * Updated user properties caching mechanism according to sessions.

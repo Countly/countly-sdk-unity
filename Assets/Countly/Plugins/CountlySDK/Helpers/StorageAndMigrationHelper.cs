@@ -12,7 +12,6 @@ using Plugins.CountlySDK.Persistance.Repositories;
 using Plugins.CountlySDK.Persistance.Repositories.Impls;
 using Plugins.iBoxDB;
 using UnityEngine;
-using System.Web;
 using System.Text;
 using UnityEngine.Networking;
 using Plugins.CountlySDK.Enums;
@@ -192,7 +191,7 @@ namespace Plugins.CountlySDK.Helpers
                     // remove the checksum and then write the request back as a string
                     int index = request.RequestUrl.IndexOf('?');
                     string uri = request.RequestUrl.Substring(index);
-                    NameValueCollection collection = HttpUtility.ParseQueryString(uri);
+                    NameValueCollection collection = CountlyUtils.ParseQueryString(uri);
 
                     Dictionary<string, object> queryParams = collection.AllKeys.ToDictionary(t => t, t => (object)collection[t]);
                     queryParams.Remove("checksum256");

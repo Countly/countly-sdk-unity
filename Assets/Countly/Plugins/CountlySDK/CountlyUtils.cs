@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
 using System.Security.Cryptography;
@@ -23,6 +24,39 @@ namespace Plugins.CountlySDK
             _countly = countly;
             ServerInputUrl = _countly.Configuration.ServerUrl + "/i?";
             ServerOutputUrl = _countly.Configuration.ServerUrl + "/o/sdk?";
+        }
+
+        /// <summary>
+        /// Parses a URL query string into a NameValueCollection without depending on System.Web
+        /// (which is not available under the ".NET Framework" API compatibility level on all platforms).
+        /// Mirrors the encoding produced by RequestBuilder.BuildQueryString: '&'-separated "key=value"
+        /// pairs escaped with Uri.EscapeDataString. A leading '?' is ignored if present.
+        /// </summary>
+        /// <param name="query">The query string to parse. May be null, empty, or prefixed with '?'.</param>
+        /// <returns>A NameValueCollection of the decoded key-value pairs. Never null.</returns>
+        public static NameValueCollection ParseQueryString(string query)
+        {
+            NameValueCollection result = new NameValueCollection();
+
+            if (string.IsNullOrEmpty(query)) {
+                return result;
+            }
+
+            // The migration code passes the URL fragment starting at '?'. Drop it if present.
+            string trimmed = query.StartsWith("?") ? query.Substring(1) : query;
+
+            foreach (string pair in trimmed.Split(new[] { '&' }, StringSplitOptions.RemoveEmptyEntries)) {
+                int separator = pair.IndexOf('=');
+                if (separator < 0) {
+                    result.Add(Uri.UnescapeDataString(pair), null);
+                } else {
+                    string key = Uri.UnescapeDataString(pair.Substring(0, separator));
+                    string value = Uri.UnescapeDataString(pair.Substring(separator + 1));
+                    result.Add(key, value);
+                }
+            }
+
+            return result;
         }
 
         public static string GetUniqueDeviceId()

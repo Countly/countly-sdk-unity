@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Web;
 using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 using Plugins.CountlySDK;
@@ -65,7 +64,7 @@ namespace Assets.Tests.PlayModeTests.LegacyTests
             TestUtility.ValidateRQEQSize(Countly.Instance, 1, 0);
             CountlyRequestModel requestModel = Countly.Instance.RequestHelper._requestRepo.Dequeue();
 
-            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            NameValueCollection collection = CountlyUtils.ParseQueryString(requestModel.RequestData);
             AssertlUserDetailRequest(collection, userDetails, userDetails.Custom);
         }
 
@@ -109,7 +108,7 @@ namespace Assets.Tests.PlayModeTests.LegacyTests
             // Ensure that a request is added, retrieve and parse it for verification
             TestUtility.ValidateRQEQSize(Countly.Instance, 1, 0);
             CountlyRequestModel requestModel = Countly.Instance.RequestHelper._requestRepo.Dequeue();
-            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            NameValueCollection collection = CountlyUtils.ParseQueryString(requestModel.RequestData);
 
             // Parse the "user_details" JSON from the request data
             JObject userDetailJson = JObject.Parse(collection["user_details"]);
@@ -158,7 +157,7 @@ namespace Assets.Tests.PlayModeTests.LegacyTests
             TestUtility.ValidateRQEQSize(Countly.Instance, 1, 0);
             
             CountlyRequestModel requestModel = Countly.Instance.RequestHelper._requestRepo.Dequeue();
-            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            NameValueCollection collection = CountlyUtils.ParseQueryString(requestModel.RequestData);
 
             userDetails = new CountlyUserDetailsModel("Ful", "use", "use", "Org",
                    "222",
@@ -196,7 +195,7 @@ namespace Assets.Tests.PlayModeTests.LegacyTests
             TestUtility.ValidateRQEQSize(Countly.Instance, 1, 0);
 
             CountlyRequestModel requestModel = Countly.Instance.RequestHelper._requestRepo.Dequeue();
-            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            NameValueCollection collection = CountlyUtils.ParseQueryString(requestModel.RequestData);
             AssertlUserDetailRequest(collection, null, userCustomDetail);
         }
 
@@ -229,7 +228,7 @@ namespace Assets.Tests.PlayModeTests.LegacyTests
             TestUtility.ValidateRQEQSize(Countly.Instance, 1, 0);
 
             CountlyRequestModel requestModel = Countly.Instance.RequestHelper._requestRepo.Dequeue();
-            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            NameValueCollection collection = CountlyUtils.ParseQueryString(requestModel.RequestData);
             JObject custom = JObject.Parse(collection["user_details"]);
 
             Assert.AreEqual("Black_", custom["custom"]["Hair"].ToString());

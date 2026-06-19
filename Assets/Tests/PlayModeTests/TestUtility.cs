@@ -343,7 +343,7 @@ namespace Assets.Tests.PlayModeTests
             foreach (var request in requests) {
                 var match = Regex.Match(request.RequestData, @"user_details=([^&]+)");
                 if (match.Success) {
-                    string userDetailsJson = System.Web.HttpUtility.UrlDecode(match.Groups[1].Value);
+                    string userDetailsJson = Uri.UnescapeDataString(match.Groups[1].Value);
 
                     try {
                         var userDetailsObj = JObject.Parse(userDetailsJson);
