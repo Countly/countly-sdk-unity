@@ -5,7 +5,6 @@ using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK;
 using UnityEngine.TestTools;
 using System.Threading.Tasks;
-using System.Web;
 using System.Collections.Specialized;
 using Newtonsoft.Json.Linq;
 using System;
@@ -130,7 +129,7 @@ namespace Assets.Tests.PlayModeTests
 
             // Dequeue the sent request and parse its data for further verification.
             CountlyRequestModel requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
-            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            NameValueCollection collection = CountlyUtils.ParseQueryString(requestModel.RequestData);
 
             Dictionary<string, object> segmentation = new Dictionary<string, object>
             {
@@ -170,7 +169,7 @@ namespace Assets.Tests.PlayModeTests
             Assert.AreEqual(1, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
 
             CountlyRequestModel requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
-            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            NameValueCollection collection = CountlyUtils.ParseQueryString(requestModel.RequestData);
             AssertCrashRequest(collection, "Crash message", "stackTrace", true, seg);
         }
 
@@ -207,7 +206,7 @@ namespace Assets.Tests.PlayModeTests
             Assert.AreEqual(1, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
 
             CountlyRequestModel requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
-            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            NameValueCollection collection = CountlyUtils.ParseQueryString(requestModel.RequestData);
             AssertCrashRequest(collection, "message", "StackTrace", true, seg);
         }
 
@@ -313,7 +312,7 @@ namespace Assets.Tests.PlayModeTests
             yield return Countly.Instance.CrashReports.SendCrashReportAsync("message", "StackTrace_1\nStackTrace_2\nStackTrace_3", seg).AsCoroutine();
             TestUtility.ValidateRQEQSize(cly, 1, 0);
             CountlyRequestModel requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
-            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            NameValueCollection collection = CountlyUtils.ParseQueryString(requestModel.RequestData);
 
             Dictionary<string, object> expectedSegm = new Dictionary<string, object>
             {

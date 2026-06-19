@@ -2,7 +2,6 @@
 using UnityEngine;
 using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK;
-using System.Web;
 using System.Collections.Specialized;
 using Plugins.CountlySDK.Helpers;
 using iBoxDB.LocalServer;
@@ -22,7 +21,7 @@ namespace Assets.Tests.PlayModeTests
 
         private void AssertMigrtedGetRequest(CountlyRequestModel requestModel, string appKey, string deviceId, string sdkName, string sdkVersion, string requestKey = "consent")
         {
-            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            NameValueCollection collection = CountlyUtils.ParseQueryString(requestModel.RequestData);
 
             Assert.AreEqual(appKey, collection.Get("app_key"));
             Assert.AreEqual(deviceId, collection.Get("device_id"));
@@ -86,7 +85,7 @@ namespace Assets.Tests.PlayModeTests
             Countly.Instance.Init(configuration);
             CountlyRequestModel requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
 
-            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            NameValueCollection collection = CountlyUtils.ParseQueryString(requestModel.RequestData);
             int schemaVersion = PlayerPrefs.GetInt(Constants.SchemaVersion);
             Assert.AreEqual(SCHEMA_VERSION, schemaVersion);
             Assert.AreEqual(SCHEMA_VERSION, Countly.Instance.StorageHelper.CurrentVersion);
@@ -133,16 +132,16 @@ namespace Assets.Tests.PlayModeTests
             Assert.AreEqual(Countly.Instance.StorageHelper.SchemaVersion, Countly.Instance.StorageHelper.CurrentVersion);
 
             CountlyRequestModel requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
-            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            NameValueCollection collection = CountlyUtils.ParseQueryString(requestModel.RequestData);
             AssertMigrtedGetRequest(requestModel, "772c091355076ead703f987fee94490", "57049b51faf44804a10967f54d8f8420", "csharp-unity-editor", "20.11.5");
 
             requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
-            collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            collection = CountlyUtils.ParseQueryString(requestModel.RequestData);
 
             AssertMigrtedGetRequest(requestModel, "772c091355076ead703f987fee94490", "57049b51faf44804a10967f54d8f8420", "csharp-unity-editor", "20.11.4");
 
             requestModel = Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Dequeue();
-            collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            collection = CountlyUtils.ParseQueryString(requestModel.RequestData);
             AssertMigrtedGetRequest(requestModel, "772c091355076ead703f987fee94490", "57049b51faf44804a10967f54d8f8420", "csharp-unity-editor", "20.11.3");
 
         }

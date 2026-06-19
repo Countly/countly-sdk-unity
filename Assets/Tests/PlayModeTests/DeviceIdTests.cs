@@ -5,7 +5,6 @@ using Plugins.CountlySDK;
 using UnityEngine.TestTools;
 using System.Collections;
 using System.Threading.Tasks;
-using System.Web;
 using System.Collections.Specialized;
 using Plugins.CountlySDK.Enums;
 using Newtonsoft.Json.Linq;
@@ -115,13 +114,13 @@ namespace Assets.Tests.PlayModeTests
             Assert.AreEqual(DeviceIdType.DeveloperProvided, Countly.Instance.Device.DeviceIdType);
 
             CountlyRequestModel requestModel = Countly.Instance.Device._requestCountlyHelper._requestRepo.Dequeue();
-            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            NameValueCollection collection = CountlyUtils.ParseQueryString(requestModel.RequestData);
 
             Assert.AreEqual("1", collection.Get("t"));
             AssertSessionRequest(collection, "end_session", oldDeviceId, true);
 
             requestModel = Countly.Instance.Device._requestCountlyHelper._requestRepo.Dequeue();
-            collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            collection = CountlyUtils.ParseQueryString(requestModel.RequestData);
 
             Assert.AreEqual("0", collection.Get("t"));
             AssertSessionRequest(collection, "begin_session", "new_device_id");
@@ -145,7 +144,7 @@ namespace Assets.Tests.PlayModeTests
             Assert.AreEqual(DeviceIdType.DeveloperProvided, Countly.Instance.Device.DeviceIdType);
 
             CountlyRequestModel requestModel = Countly.Instance.Device._requestCountlyHelper._requestRepo.Dequeue();
-            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            NameValueCollection collection = CountlyUtils.ParseQueryString(requestModel.RequestData);
 
             Assert.AreEqual("1", collection.Get("t"));
             AssertSessionRequest(collection, "end_session", oldDeviceId, true);
@@ -177,7 +176,7 @@ namespace Assets.Tests.PlayModeTests
             Assert.AreEqual(DeviceIdType.DeveloperProvided, Countly.Instance.Device.DeviceIdType);
 
             CountlyRequestModel requestModel = Countly.Instance.Device._requestCountlyHelper._requestRepo.Dequeue();
-            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            NameValueCollection collection = CountlyUtils.ParseQueryString(requestModel.RequestData);
 
             Assert.AreEqual("0", collection.Get("t"));
             Assert.AreEqual(oldDeviceId, collection.Get("old_device_id"));
@@ -203,7 +202,7 @@ namespace Assets.Tests.PlayModeTests
             Assert.AreEqual(DeviceIdType.DeveloperProvided, Countly.Instance.Device.DeviceIdType);
 
             CountlyRequestModel requestModel = Countly.Instance.Device._requestCountlyHelper._requestRepo.Dequeue();
-            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            NameValueCollection collection = CountlyUtils.ParseQueryString(requestModel.RequestData);
 
             Assert.AreEqual("1", collection.Get("t"));
             Assert.AreEqual(oldDeviceId, collection.Get("device_id"));
@@ -215,13 +214,13 @@ namespace Assets.Tests.PlayModeTests
             Assert.AreEqual(2, Countly.Instance.Device._requestCountlyHelper._requestRepo.Count);
 
             requestModel = Countly.Instance.Device._requestCountlyHelper._requestRepo.Dequeue();
-            collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            collection = CountlyUtils.ParseQueryString(requestModel.RequestData);
 
             JObject consentObj = JObject.Parse(collection.Get("consent"));
             AssertConsentKeys(consentObj, new string[] { "push", "users", "views", "clicks", "events", "crashes", "sessions", "location", "feedback", "star-rating", "remote-config" }, true);
 
             requestModel = Countly.Instance.Device._requestCountlyHelper._requestRepo.Dequeue();
-            collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            collection = CountlyUtils.ParseQueryString(requestModel.RequestData);
 
             AssertSessionRequest(collection, "begin_session", "new_device_id");
 
@@ -251,7 +250,7 @@ namespace Assets.Tests.PlayModeTests
             //RQ will have only consent request
             Assert.AreEqual(1, Countly.Instance.Device._requestCountlyHelper._requestRepo.Count);
             CountlyRequestModel requestModel = Countly.Instance.Device._requestCountlyHelper._requestRepo.Dequeue();
-            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            NameValueCollection collection = CountlyUtils.ParseQueryString(requestModel.RequestData);
 
             JObject consentObj = JObject.Parse(collection.Get("consent"));
             AssertConsentKeys(consentObj, new string[] { "push", "users", "views", "clicks", "events", "crashes", "sessions", "location", "feedback", "star-rating", "remote-config" }, true);

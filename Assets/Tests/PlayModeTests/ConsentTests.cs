@@ -6,7 +6,6 @@ using Plugins.CountlySDK.Enums;
 using Plugins.CountlySDK.Services;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 using Newtonsoft.Json.Linq;
 using System.Collections.Specialized;
 
@@ -87,7 +86,7 @@ namespace Assets.Tests.PlayModeTests
             Assert.AreEqual(1, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
 
             CountlyRequestModel requestModel = Countly.Instance.Consents._requestCountlyHelper._requestRepo.Dequeue();
-            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            NameValueCollection collection = CountlyUtils.ParseQueryString(requestModel.RequestData);
 
             Assert.IsNull(collection["consent"]);
 
@@ -120,7 +119,7 @@ namespace Assets.Tests.PlayModeTests
 
             CountlyRequestModel requestModel = Countly.Instance.Consents._requestCountlyHelper._requestRepo.Dequeue();
 
-            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            NameValueCollection collection = CountlyUtils.ParseQueryString(requestModel.RequestData);
             JObject consentObj = JObject.Parse(collection.Get("consent"));
 
             Assert.AreEqual(11, consentObj.Count);
@@ -143,7 +142,7 @@ namespace Assets.Tests.PlayModeTests
 
             CountlyRequestModel requestModel = Countly.Instance.Consents._requestCountlyHelper._requestRepo.Dequeue();
 
-            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            NameValueCollection collection = CountlyUtils.ParseQueryString(requestModel.RequestData);
             JObject consentObj = JObject.Parse(collection.Get("consent"));
 
             Assert.AreEqual(11, consentObj.Count);
@@ -171,7 +170,7 @@ namespace Assets.Tests.PlayModeTests
             Assert.AreEqual(1, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
 
             CountlyRequestModel requestModel = Countly.Instance.Consents._requestCountlyHelper._requestRepo.Dequeue();
-            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            NameValueCollection collection = CountlyUtils.ParseQueryString(requestModel.RequestData);
             JObject json = JObject.Parse(collection["consent"]);
 
             Assert.AreEqual(11, json.Count);
@@ -182,7 +181,7 @@ namespace Assets.Tests.PlayModeTests
             Assert.AreEqual(1, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
             requestModel = Countly.Instance.Consents._requestCountlyHelper._requestRepo.Dequeue();
 
-            collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            collection = CountlyUtils.ParseQueryString(requestModel.RequestData);
             json = JObject.Parse(collection["consent"]);
 
             Assert.AreEqual(11, json.Count);
@@ -196,7 +195,7 @@ namespace Assets.Tests.PlayModeTests
             Countly.Instance.Consents.RemoveConsent(new Consents[] { Consents.Crashes, Consents.Views });
             requestModel = Countly.Instance.Consents._requestCountlyHelper._requestRepo.Dequeue();
 
-            collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            collection = CountlyUtils.ParseQueryString(requestModel.RequestData);
             json = JObject.Parse(collection["consent"]);
 
             AssertConsentKeys(json, new string[] { "events", }, true);
@@ -205,7 +204,7 @@ namespace Assets.Tests.PlayModeTests
             Countly.Instance.Consents.RemoveConsent(new Consents[] { Consents.Events, Consents.Views });
             requestModel = Countly.Instance.Consents._requestCountlyHelper._requestRepo.Dequeue();
 
-            collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            collection = CountlyUtils.ParseQueryString(requestModel.RequestData);
             json = JObject.Parse(collection["consent"]);
 
             Assert.AreEqual(11, json.Count);
