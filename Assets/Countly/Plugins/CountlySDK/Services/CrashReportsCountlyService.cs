@@ -80,7 +80,7 @@ namespace Plugins.CountlySDK.Services
                 }
 
                 IDictionary<string, object> segmentation = RemoveSegmentInvalidDataTypes(segments);
-                segmentation = FixSegmentKeysAndValues(segments);
+                segmentation = FixSegmentKeysAndValues(segmentation);
 
                 CountlyExceptionDetailModel model = ExceptionDetailModel(message, ManipulateStackTrace(stackTrace), nonfatal, segmentation);
                 _ = SendCrashReportInternal(model);
@@ -113,7 +113,7 @@ namespace Plugins.CountlySDK.Services
                     }
 
                     IDictionary<string, object> segmentation = RemoveSegmentInvalidDataTypes(segments);
-                    segmentation = FixSegmentKeysAndValues(segments);
+                    segmentation = FixSegmentKeysAndValues(segmentation);
 
                     CountlyExceptionDetailModel model = ExceptionDetailModel(message, ManipulateStackTrace(stackTrace), nonfatal, segmentation);
                     _ = SendCrashReportInternal(model);

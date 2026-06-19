@@ -390,13 +390,13 @@ public class UserProfile : AbstractBaseService, IUserProfileModule
 
         // set user data
         if (namedFields.Count > 0) {
-            FixSegmentKeysAndValues(namedFields);
+            namedFields = (Dictionary<string, object>)FixSegmentKeysAndValues(namedFields);
             SetDataInternal(namedFields);
         }
 
         // set custom data
         if (customFields.Count > 0) {
-            FixSegmentKeysAndValues(customFields);
+            customFields = (Dictionary<string, object>)FixSegmentKeysAndValues(customFields);
             foreach (KeyValuePair<string, object> item in customFields) {
                 CustomDataProperties[item.Key] = item.Value;
             }
