@@ -69,6 +69,9 @@ namespace Plugins.CountlySDK.Services
         {
             lock (LockObj) {
                 Log.Info($"[CrashReportsCountlyService] SendCrashReportAsync, message: [{message}], stackTrace: [{stackTrace}]");
+                Log.Warning("[CrashReportsCountlyService] SendCrashReportAsync, this overload is deprecated, use 'SendCrashReportAsync(message, stackTrace, segments, nonfatal)' instead");
+                Log.RecordLogCode("w120");
+                Log.RecordUsage(HealthCheckCountlyService.AreaCrashes, "SendCrashReportAsync:d");
 
                 if (!_consentService.CheckConsentInternal(Consents.Crashes)) {
                     return;
@@ -76,6 +79,7 @@ namespace Plugins.CountlySDK.Services
 
                 if (string.IsNullOrEmpty(message) || string.IsNullOrWhiteSpace(message)) {
                     Log.Warning("[CrashReportsCountlyService] SendCrashReportAsync, The parameter 'message' can't be null or empty");
+                    Log.RecordLogCode("w700", HealthCheckCountlyService.AreaCrashes);
                     return;
                 }
 
@@ -99,17 +103,48 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async Task SendCrashReportAsync(string message, string stackTrace, IDictionary<string, object> segments = null, bool nonfatal = true)
         {
+            Log.RecordUsage(HealthCheckCountlyService.AreaCrashes, "record");
+            RecordCrash(message, stackTrace, segments, nonfatal);
+            await Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// Reports an exception Unity caught. While it is reported, the health check counts no method usage and no
+        /// log codes; the crash itself is counted as a stored number that the health check of the next start reports.
+        /// </summary>
+        /// <param name="message">the exception message</param>
+        /// <param name="stackTrace">the stack trace</param>
+        internal void SendAutomaticCrashReport(string message, string stackTrace)
+        {
+            HealthCheckCountlyService healthCheck = Log.HealthCheck;
+            healthCheck?.StopRecordingForCrash();
+            try {
+                if (RecordCrash(message, stackTrace, null, true)) {
+                    HealthCheckCountlyService.IncrementAutomaticCrashCount();
+                }
+            } finally {
+                healthCheck?.ResumeRecordingAfterCrash();
+            }
+        }
+
+        /// <summary>
+        /// Queues a crash report, while automatic crash reporting is enabled and crashes have consent.
+        /// </summary>
+        /// <returns>whether the report was queued</returns>
+        private bool RecordCrash(string message, string stackTrace, IDictionary<string, object> segments, bool nonfatal)
+        {
             if (_configuration.IsAutomaticCrashReportingEnabled()) {
                 lock (LockObj) {
                     Log.Info($"[CrashReportsCountlyService] SendCrashReportAsync, message: [{message}], stackTrace: [{stackTrace}]");
 
                     if (!_consentService.CheckConsentInternal(Consents.Crashes)) {
-                        return;
+                        return false;
                     }
 
                     if (string.IsNullOrEmpty(message) || string.IsNullOrWhiteSpace(message)) {
                         Log.Warning("[CrashReportsCountlyService] SendCrashReportAsync, The parameter 'message' can't be null or empty");
-                        return;
+                        Log.RecordLogCode("w700", HealthCheckCountlyService.AreaCrashes);
+                        return false;
                     }
 
                     IDictionary<string, object> segmentation = RemoveSegmentInvalidDataTypes(segments);
@@ -117,10 +152,11 @@ namespace Plugins.CountlySDK.Services
 
                     CountlyExceptionDetailModel model = ExceptionDetailModel(message, ManipulateStackTrace(stackTrace), nonfatal, segmentation);
                     _ = SendCrashReportInternal(model);
+                    return true;
                 }
             }
 
-            await Task.CompletedTask;
+            return false;
         }
 
         internal async Task SendCrashReportInternal(CountlyExceptionDetailModel model)
@@ -146,6 +182,7 @@ namespace Plugins.CountlySDK.Services
         public void AddBreadcrumbs(string value)
         {
             Log.Info($"[CrashReportsCountlyService] AddBreadcrumbs, value: [{value}]");
+            Log.RecordUsage(HealthCheckCountlyService.AreaCrashes, "log");
 
             if (!_consentService.CheckConsentInternal(Consents.Crashes)) {
                 return;
