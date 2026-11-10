@@ -99,6 +99,19 @@ namespace Plugins.CountlySDK.Services
         }
 
         /// <summary>
+        /// Sends the push token again, if the SDK has already received one.
+        /// </summary>
+        internal void ResendToken()
+        {
+            if (_token == null) {
+                return;
+            }
+
+            Log.Debug("[PushCountlyService] ResendToken");
+            _ = PostToCountlyAsync(_mode, _token);
+        }
+
+        /// <summary>
         /// Report Push Actions stored in local cache to Countly server.,
         /// </summary>
         private async Task<CountlyResponse> ReportPushActionAsync()

@@ -116,6 +116,16 @@ namespace Plugins.CountlySDK.Services
             return response;
         }
 
+        /// <summary>
+        /// Removes the stored remote config values from memory and from the database.
+        /// </summary>
+        internal void ClearStoredConfigs()
+        {
+            Log.Debug("[RemoteConfigCountlyService] ClearStoredConfigs");
+            Configs = null;
+            _configDao.RemoveAll();
+        }
+
         #region override Methods
         internal override void ConsentChanged(List<Consents> updatedConsents, bool newConsentValue, ConsentChangedAction action)
         {

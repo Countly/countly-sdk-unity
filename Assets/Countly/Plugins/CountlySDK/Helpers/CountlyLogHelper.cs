@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Plugins.CountlySDK.Enums;
 using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK.Services;
