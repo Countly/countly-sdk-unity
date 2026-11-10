@@ -115,6 +115,7 @@ namespace Plugins.CountlySDK
         internal CountlyUtils Utils;
         internal CountlyConfiguration Configuration;
         internal StorageAndMigrationHelper StorageHelper;
+        internal HealthCheckCountlyService HealthCheck { get; private set; }
         internal readonly object lockObj = new object();
         private bool _logSubscribed;
         private List<AbstractBaseService> _listeners = new List<AbstractBaseService>();
@@ -166,12 +167,15 @@ namespace Plugins.CountlySDK
         public void InitInternal(CountlyConfiguration configuration)
         {
             if (IsSDKInitialized) {
-                _logHelper.Error("[Countly] InitInternal, SDK has already been initialized, 'Init' should not be called a second time!");
+                _logHelper.Warning("[Countly] InitInternal, SDK has already been initialized, 'Init' should not be called a second time!");
+                _logHelper.RecordLogCode("w110");
                 return;
             }
 
             Configuration = configuration;
             _logHelper = new CountlyLogHelper(Configuration);
+            HealthCheck = new HealthCheckCountlyService(_logHelper);
+            _logHelper.SetHealthCheck(HealthCheck);
             _logHelper.Info($"[Countly] InitInternal, Initializing Countly, SdkName: [{Constants.SdkName}], SdkVersion: [{Constants.SdkVersion}]");
             configuration.metricHelper = new MetricHelper(configuration.overridenMetrics);
 
@@ -194,7 +198,8 @@ namespace Plugins.CountlySDK
             _logHelper.Debug($"[Countly] InitInternal, SDK initialized with the URL: [{configuration.GetServerUrl()}] and the appKey: [{configuration.GetAppKey()}]");
 
             if (configuration.GetUpdateSessionTimerDelay() < 1) {
-                _logHelper.Error("[Countly] InitInternal, Invalid session duration: less than 1. Setting it to the minimum allowed value of 1.");
+                _logHelper.Warning("[Countly] InitInternal, Invalid session duration: less than 1. Setting it to the minimum allowed value of 1.");
+                _logHelper.RecordLogCode("w121");
                 configuration.SetUpdateSessionTimerDelay(1);
             }
             _logHelper.Debug($"[Countly] InitInternal, Final session duration: [{configuration.GetUpdateSessionTimerDelay()}]");
@@ -220,13 +225,15 @@ namespace Plugins.CountlySDK
             }
 
             if (configuration.GetEventQueueSizeToSend() < 1) {
-                _logHelper.Error("[Countly] InitInternal, Invalid Event Queue Size: less than 1. Setting it to the minimum allowed value of 1.");
+                _logHelper.Warning("[Countly] InitInternal, Invalid Event Queue Size: less than 1. Setting it to the minimum allowed value of 1.");
+                _logHelper.RecordLogCode("w121");
                 configuration.SetEventQueueSizeToSend(1);
             }
             _logHelper.Debug($"[Countly] InitInternal, Final Event Queue Size: [{configuration.GetEventQueueSizeToSend()}]");
 
             if (configuration.GetMaxRequestQueueSize() < 1) {
-                _logHelper.Error("[Countly] InitInternal, Invalid Request Queue Size: less than 1. Setting it to the minimum allowed value of 1.");
+                _logHelper.Warning("[Countly] InitInternal, Invalid Request Queue Size: less than 1. Setting it to the minimum allowed value of 1.");
+                _logHelper.RecordLogCode("w121");
                 configuration.SetMaxRequestQueueSize(1);
             }
             _logHelper.Debug($"[Countly] InitInternal, Final Request Queue Size: [{configuration.GetMaxRequestQueueSize()}]");
@@ -235,6 +242,7 @@ namespace Plugins.CountlySDK
                 if (configuration.GetMaxKeyLength() < 1) {
                     configuration.SetMaxKeyLength(1);
                     _logHelper.Warning("[Countly] InitInternal, 'maxKeyLength' provided is less than 1. Resetting to 1.");
+                    _logHelper.RecordLogCode("w121");
                 }
                 _logHelper.Info($"[Countly] InitInternal, 'maxKeyLength' overridden: [{configuration.GetMaxKeyLength()}]");
             }
@@ -243,6 +251,7 @@ namespace Plugins.CountlySDK
                 if (configuration.GetMaxValueSize() < 1) {
                     configuration.SetMaxValueSize(1);
                     _logHelper.Warning("[Countly] InitInternal, 'maxValueSize' provided is less than 1. Resetting to 1.");
+                    _logHelper.RecordLogCode("w121");
                 }
                 _logHelper.Info($"[Countly] InitInternal, 'maxValueSize' overridden: [{configuration.GetMaxValueSize()}]");
             }
@@ -251,6 +260,7 @@ namespace Plugins.CountlySDK
                 if (configuration.GetMaxSegmentationValues() < 1) {
                     configuration.SetMaxSegmentationValues(1);
                     _logHelper.Warning("[Countly] InitInternal, 'maxSegmentationValues' provided is less than 1. Resetting to 1.");
+                    _logHelper.RecordLogCode("w121");
                 }
                 _logHelper.Info($"[Countly] InitInternal, 'maxSegmentationValues' overridden: [{configuration.GetMaxSegmentationValues()}]");
             }
@@ -259,6 +269,7 @@ namespace Plugins.CountlySDK
                 if (configuration.GetMaxBreadcrumbCount() < 1) {
                     configuration.SetMaxBreadcrumbCount(1);
                     _logHelper.Warning("[Countly] InitInternal, 'maxBreadcrumbCount' provided is less than 1. Resetting to 1.");
+                    _logHelper.RecordLogCode("w121");
                 }
                 _logHelper.Info($"[Countly] InitInternal, 'maxBreadcrumbCount' overridden: [{configuration.GetMaxBreadcrumbCount()}]");
             }
@@ -267,6 +278,7 @@ namespace Plugins.CountlySDK
                 if (configuration.GetMaxStackTraceLinesPerThread() < 1) {
                     configuration.SetMaxStackTraceLinesPerThread(1);
                     _logHelper.Warning("[Countly] InitInternal, 'maxStackTraceLinesPerThread' provided is less than 1. Resetting to 1.");
+                    _logHelper.RecordLogCode("w121");
                 }
                 _logHelper.Info($"[Countly] InitInternal, 'maxStackTraceLinesPerThread' overridden: [{configuration.GetMaxStackTraceLinesPerThread()}]");
             }
@@ -275,6 +287,7 @@ namespace Plugins.CountlySDK
                 if (configuration.GetMaxStackTraceLineLength() < 1) {
                     configuration.SetMaxStackTraceLineLength(1);
                     _logHelper.Warning("[Countly] InitInternal, 'maxStackTraceLineLength' provided is less than 1. Resetting to 1.");
+                    _logHelper.RecordLogCode("w121");
                 }
                 _logHelper.Info($"[Countly] InitInternal, 'maxStackTraceLineLength' overridden: [{configuration.GetMaxStackTraceLineLength()}]");
             }
@@ -325,6 +338,7 @@ namespace Plugins.CountlySDK
             UserProfile = new UserProfile(this, Configuration, _logHelper, RequestHelper, countlyUtils, Consents, Events);
             Views = new ViewCountlyService(this, countlyUtils, Configuration, _logHelper, Events, Consents);
             Device = new DeviceIdCountlyService(Configuration, _logHelper, Session, RequestHelper, Events, countlyUtils, Consents);
+            HealthCheck.SetConsentProvider(consent => Consents.CheckConsentInternal(consent));
 
             CreateListOfIBaseService();
             RegisterListenersToServices();
@@ -339,6 +353,8 @@ namespace Plugins.CountlySDK
                     listener.OnInitializationCompleted();
                 }
             }
+
+            await HealthCheck.SendHealthCheckAsync(Configuration, RequestHelper, Consents);
         }
 
         private void CreateListOfIBaseService()
@@ -517,6 +533,7 @@ namespace Plugins.CountlySDK
             }
 
             _logHelper.Debug("[Countly] OnApplicationQuit");
+            HealthCheck?.SaveState();
             Session?._sessionTimer?.Dispose();
             StorageHelper?.CloseDB();
         }
@@ -568,6 +585,7 @@ namespace Plugins.CountlySDK
 
                 if (pauseStatus) {
                     HandleAppPauseOrFocus();
+                    HealthCheck?.SaveState();
                     if (!Configuration.IsAutomaticSessionTrackingDisabled) {
                         _ = Session?.EndSessionAsync();
                     }
@@ -600,7 +618,7 @@ namespace Plugins.CountlySDK
         private void LogCallback(string condition, string stackTrace, LogType type)
         {
             if (type == LogType.Exception) {
-                CrashReports?.SendCrashReportAsync(condition, stackTrace);
+                CrashReports?.SendAutomaticCrashReport(condition, stackTrace);
             }
         }
 

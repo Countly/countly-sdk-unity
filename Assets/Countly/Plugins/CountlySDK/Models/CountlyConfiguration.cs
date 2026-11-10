@@ -146,6 +146,8 @@ namespace Plugins.CountlySDK.Models
         internal string CountryCode = null;
         internal bool IsLocationDisabled = false;
         internal bool IsAutomaticSessionTrackingDisabled = false;
+        internal Action<string, LogLevel> LogListener = null;
+        internal bool HealthCheckEnabled = true;
 
         internal Consents[] GivenConsent { get; private set; }
         internal string[] EnabledConsentGroups { get; private set; }
@@ -329,6 +331,19 @@ namespace Plugins.CountlySDK.Models
         }
 
         /// <summary>
+        /// Sets a listener that receives every log message of the SDK and its level, also when logging is disabled.
+        /// The listener is called inside the SDK's own calls, so it should return quickly and must not call the SDK.
+        /// </summary>
+        /// <param name="logListener">Called with the message and its level</param>
+        /// <returns>Modified instance of the CountlyConfiguration</returns>
+        public CountlyConfiguration SetLogListener(Action<string, LogLevel> logListener)
+        {
+            LogListener = logListener;
+
+            return this;
+        }
+
+        /// <summary>
         /// Set mode of push notification.
         /// </summary>
         /// <returns>Modified instance of the CountlyConfiguration</returns>
@@ -445,6 +460,21 @@ namespace Plugins.CountlySDK.Models
         public CountlyConfiguration DisableAutomaticCrashReporting()
         {
             EnableAutomaticCrashReporting = false;
+
+            return this;
+        }
+
+        /// <summary>
+        /// Disables the SDK health check. Once after initialization the SDK sends the server a short report about its
+        /// own state: how many warnings and errors it logged, the last request the server refused, how often its
+        /// session, event, view and crash methods were called, and which known problems occurred. It carries no data
+        /// the app recorded, and the server shows it in SDK Manager. With this option the report is not sent; the SDK
+        /// keeps counting.
+        /// </summary>
+        /// <returns>Modified instance of the CountlyConfiguration</returns>
+        public CountlyConfiguration DisableHealthCheck()
+        {
+            HealthCheckEnabled = false;
 
             return this;
         }
@@ -571,6 +601,11 @@ namespace Plugins.CountlySDK.Models
         /// Returns true if consent is required.
         /// </summary>
         public bool IsConsentRequired() { return RequiresConsent; }
+
+        /// <summary>
+        /// Returns true unless the health check was disabled.
+        /// </summary>
+        public bool IsHealthCheckEnabled() { return HealthCheckEnabled; }
 
         /// <summary>
         /// Returns provided user properties set.
