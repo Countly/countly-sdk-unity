@@ -146,6 +146,7 @@ namespace Plugins.CountlySDK.Models
         internal string CountryCode = null;
         internal bool IsLocationDisabled = false;
         internal bool IsAutomaticSessionTrackingDisabled = false;
+        internal Action<string, LogLevel> LogListener = null;
         internal bool HealthCheckEnabled = true;
 
         internal Consents[] GivenConsent { get; private set; }
@@ -325,6 +326,19 @@ namespace Plugins.CountlySDK.Models
         public CountlyConfiguration EnableLogging()
         {
             EnableConsoleLogging = true;
+
+            return this;
+        }
+
+        /// <summary>
+        /// Sets a listener that receives every log message of the SDK and its level, also when logging is disabled.
+        /// The listener is called inside the SDK's own calls, so it should return quickly and must not call the SDK.
+        /// </summary>
+        /// <param name="logListener">Called with the message and its level</param>
+        /// <returns>Modified instance of the CountlyConfiguration</returns>
+        public CountlyConfiguration SetLogListener(Action<string, LogLevel> logListener)
+        {
+            LogListener = logListener;
 
             return this;
         }
