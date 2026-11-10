@@ -147,6 +147,7 @@ namespace Plugins.CountlySDK.Models
         internal bool IsLocationDisabled = false;
         internal bool IsAutomaticSessionTrackingDisabled = false;
         internal Action<string, LogLevel> LogListener = null;
+        internal bool HealthCheckEnabled = true;
 
         internal Consents[] GivenConsent { get; private set; }
         internal string[] EnabledConsentGroups { get; private set; }
@@ -464,6 +465,21 @@ namespace Plugins.CountlySDK.Models
         }
 
         /// <summary>
+        /// Disables the SDK health check. Once after initialization the SDK sends the server a short report about its
+        /// own state: how many warnings and errors it logged, the last request the server refused, how often its
+        /// session, event, view and crash methods were called, and which known problems occurred. It carries no data
+        /// the app recorded, and the server shows it in SDK Manager. With this option the report is not sent; the SDK
+        /// keeps counting.
+        /// </summary>
+        /// <returns>Modified instance of the CountlyConfiguration</returns>
+        public CountlyConfiguration DisableHealthCheck()
+        {
+            HealthCheckEnabled = false;
+
+            return this;
+        }
+
+        /// <summary>
         /// Enables requirement of the consent.
         /// </summary>
         /// <returns>Modified instance of the CountlyConfiguration</returns>
@@ -585,6 +601,11 @@ namespace Plugins.CountlySDK.Models
         /// Returns true if consent is required.
         /// </summary>
         public bool IsConsentRequired() { return RequiresConsent; }
+
+        /// <summary>
+        /// Returns true unless the health check was disabled.
+        /// </summary>
+        public bool IsHealthCheckEnabled() { return HealthCheckEnabled; }
 
         /// <summary>
         /// Returns provided user properties set.

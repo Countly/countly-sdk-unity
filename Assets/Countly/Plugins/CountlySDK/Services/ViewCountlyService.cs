@@ -69,6 +69,7 @@ namespace Plugins.CountlySDK.Services
         {
             lock (LockObj) {
                 Log.Info($"[ViewCountlyService] StartView, viewName: [{viewName}]");
+                Log.RecordUsage(HealthCheckCountlyService.AreaViews, "start");
                 return StartViewInternal(viewName, null, false);
             }
         }
@@ -84,6 +85,7 @@ namespace Plugins.CountlySDK.Services
         {
             lock (LockObj) {
                 LogSegmentation(viewSegmentation, $"[ViewCountlyService] StartView, viewName: [{viewName}], segmentation: ");
+                Log.RecordUsage(HealthCheckCountlyService.AreaViews, "start");
                 return StartViewInternal(viewName, viewSegmentation, false);
             }
         }
@@ -115,6 +117,7 @@ namespace Plugins.CountlySDK.Services
         {
             lock (LockObj) {
                 LogSegmentation(viewSegmentation, $"[ViewCountlyService] StartAutoStoppedView, viewName: [{viewName}], segmentation: ");
+                Log.RecordUsage(HealthCheckCountlyService.AreaViews, "startAuto");
                 return StartViewInternal(viewName, viewSegmentation, true);
             }
         }
@@ -128,6 +131,7 @@ namespace Plugins.CountlySDK.Services
         {
             lock (LockObj) {
                 Log.Info($"[ViewCountlyService] StopViewWithName, viewName: [{viewName}]");
+                Log.RecordUsage(HealthCheckCountlyService.AreaViews, "stop");
                 StopViewWithNameInternal(viewName, null);
             }
         }
@@ -142,6 +146,7 @@ namespace Plugins.CountlySDK.Services
         {
             lock (LockObj) {
                 LogSegmentation(viewSegmentation, $"[ViewCountlyService] StopViewWithName, viewName: [{viewName}], segmentation: ");
+                Log.RecordUsage(HealthCheckCountlyService.AreaViews, "stop");
                 StopViewWithNameInternal(viewName, viewSegmentation);
             }
         }
@@ -154,6 +159,7 @@ namespace Plugins.CountlySDK.Services
         {
             lock (LockObj) {
                 Log.Info($"[ViewCountlyService] StopViewWithID, viewID: [{viewID}]");
+                Log.RecordUsage(HealthCheckCountlyService.AreaViews, "stop");
                 StopViewWithIDInternal(viewID, null);
             }
         }
@@ -167,6 +173,7 @@ namespace Plugins.CountlySDK.Services
         {
             lock (LockObj) {
                 LogSegmentation(viewSegmentation, $"[ViewCountlyService] StopViewWithID, viewID: [{viewID}], segmentation: ");
+                Log.RecordUsage(HealthCheckCountlyService.AreaViews, "stop");
                 StopViewWithIDInternal(viewID, viewSegmentation);
             }
         }
@@ -179,6 +186,7 @@ namespace Plugins.CountlySDK.Services
         {
             lock (LockObj) {
                 Log.Info($"[ViewCountlyService] PauseViewWithID, viewID: [{viewID}]");
+                Log.RecordUsage(HealthCheckCountlyService.AreaViews, "pause");
                 PauseViewWithIDInternal(viewID, false);
             }
         }
@@ -191,6 +199,7 @@ namespace Plugins.CountlySDK.Services
         {
             lock (LockObj) {
                 Log.Info($"[ViewCountlyService] ResumeViewWithID, viewID: [{viewID}]");
+                Log.RecordUsage(HealthCheckCountlyService.AreaViews, "resume");
                 ResumeViewWithIDInternal(viewID);
             }
         }
@@ -203,6 +212,7 @@ namespace Plugins.CountlySDK.Services
         {
             lock (LockObj) {
                 LogSegmentation(viewSegmentation, $"[ViewCountlyService] StopAllViews, segmentation: ");
+                Log.RecordUsage(HealthCheckCountlyService.AreaViews, "stopAll");
                 StopAllViewsInternal(viewSegmentation);
             }
         }
@@ -270,6 +280,7 @@ namespace Plugins.CountlySDK.Services
         {
             if (!_cly.IsSDKInitialized) {
                 Log.Warning("[ViewCountlyService] StartViewInternal, Countly.Instance.Init() must be called before 'StartViewInternal'");
+                Log.RecordLogCode("w101");
                 return null;
             }
 
@@ -280,6 +291,7 @@ namespace Plugins.CountlySDK.Services
 
             if (_utils.IsNullEmptyOrWhitespace(viewName)) {
                 Log.Warning("[ViewCountlyService] StartViewInternal, trying to record view with null or empty view name, ignoring request");
+                Log.RecordLogCode("w710", HealthCheckCountlyService.AreaViews);
                 return null;
             }
 
@@ -336,6 +348,7 @@ namespace Plugins.CountlySDK.Services
 
             if (_utils.IsNullEmptyOrWhitespace(viewName)) {
                 Log.Warning("[ViewCountlyService] StopViewWithNameInternal, trying to record view with null or empty view name, ignoring request");
+                Log.RecordLogCode("w700", HealthCheckCountlyService.AreaViews);
                 return;
             }
 
@@ -359,6 +372,7 @@ namespace Plugins.CountlySDK.Services
 
             if (viewID == null) {
                 Log.Warning($"[ViewCountlyService] StopViewWithNameInternal, no view entry found with the provided name: [{viewName}]");
+                Log.RecordLogCode("w730", HealthCheckCountlyService.AreaViews);
                 return;
             }
 
@@ -412,11 +426,13 @@ namespace Plugins.CountlySDK.Services
 
             if (_utils.IsNullEmptyOrWhitespace(viewID)) {
                 Log.Warning("[ViewCountlyService] StopViewWithIDInternal, trying to record view with null or empty view ID, ignoring request");
+                Log.RecordLogCode("w700", HealthCheckCountlyService.AreaViews);
                 return;
             }
 
             if (!viewDataMap.ContainsKey(viewID)) {
                 Log.Warning("[ViewCountlyService] StopViewWithIDInternal, there is no view with the provided view id to close");
+                Log.RecordLogCode("w730", HealthCheckCountlyService.AreaViews);
                 return;
             }
 
@@ -447,11 +463,13 @@ namespace Plugins.CountlySDK.Services
 
             if (_utils.IsNullEmptyOrWhitespace(viewID)) {
                 Log.Warning("[ViewCountlyService] PauseViewWithIDInternal, trying to record view with null or empty view ID, ignoring request");
+                Log.RecordLogCode("w700", HealthCheckCountlyService.AreaViews);
                 return;
             }
 
             if (!viewDataMap.ContainsKey(viewID)) {
                 Log.Warning("[ViewCountlyService] PauseViewWithIDInternal, there is no view with the provided view id to close");
+                Log.RecordLogCode("w730", HealthCheckCountlyService.AreaViews);
                 return;
             }
 
@@ -465,6 +483,7 @@ namespace Plugins.CountlySDK.Services
 
             if (vd.ViewStartTimeSeconds == 0) {
                 Log.Warning($"[ViewCountlyService] PauseViewWithIDInternal, pausing a view that is already paused. ID: [{viewID}], name: [{vd.ViewName}]");
+                Log.RecordLogCode("w731", HealthCheckCountlyService.AreaViews);
                 return;
             }
 
@@ -550,11 +569,13 @@ namespace Plugins.CountlySDK.Services
 
             if (_utils.IsNullEmptyOrWhitespace(viewID)) {
                 Log.Warning("[ViewCountlyService] ResumeViewWithIDInternal, trying to record view with null or empty view ID, ignoring request");
+                Log.RecordLogCode("w700", HealthCheckCountlyService.AreaViews);
                 return;
             }
 
             if (!viewDataMap.ContainsKey(viewID)) {
                 Log.Warning("[ViewCountlyService] ResumeViewWithIDInternal, there is no view with the provided view id to close");
+                Log.RecordLogCode("w730", HealthCheckCountlyService.AreaViews);
                 return;
             }
 
@@ -568,6 +589,7 @@ namespace Plugins.CountlySDK.Services
 
             if (vd.ViewStartTimeSeconds > 0) {
                 Log.Warning($"[ViewCountlyService] ResumeViewWithIDInternal, resuming a view that is already running. ID: [{viewID}], name: [{vd.ViewName}]");
+                Log.RecordLogCode("w731", HealthCheckCountlyService.AreaViews);
                 return;
             }
 
@@ -628,11 +650,13 @@ namespace Plugins.CountlySDK.Services
 
             if (_utils.IsNullEmptyOrWhitespace(viewID) || viewSegmentation == null) {
                 Log.Warning("[ViewsCountlyService] AddSegmentationToViewWithIDInternal, null or empty parameters provided");
+                Log.RecordLogCode("w700", HealthCheckCountlyService.AreaViews);
                 return;
             }
 
             if (!viewDataMap.ContainsKey(viewID)) {
                 Log.Warning("[ViewsCountlyService] AddSegmentationToViewWithIDInternal, there is no view with the provided view id");
+                Log.RecordLogCode("w730", HealthCheckCountlyService.AreaViews);
                 return;
             }
 
@@ -677,6 +701,7 @@ namespace Plugins.CountlySDK.Services
 
             if (viewID == null) {
                 Log.Warning($"[ViewsCountlyService] AddSegmentationToViewWithNameInternal, no view entry found with the provided name: [{viewName}]");
+                Log.RecordLogCode("w730", HealthCheckCountlyService.AreaViews);
                 return;
             }
 
@@ -698,6 +723,7 @@ namespace Plugins.CountlySDK.Services
 
             if (viewSegmentation == null) {
                 Log.Warning("[ViewCountlyService] UpdateGlobalViewSegmentationInternal, when updating segmentation values, they can't be 'null'. Ignoring request.");
+                Log.RecordLogCode("w700", HealthCheckCountlyService.AreaViews);
                 return;
             }
 
@@ -728,6 +754,9 @@ namespace Plugins.CountlySDK.Services
 
             lock (LockObj) {
                 Log.Info($"[ViewCountlyService] RecordOpenViewAsync, name: [{name}]");
+                Log.Warning("[ViewCountlyService] RecordOpenViewAsync, this function is deprecated, use 'StartView' instead");
+                Log.RecordLogCode("w120");
+                Log.RecordUsage(HealthCheckCountlyService.AreaViews, "RecordOpenViewAsync:d");
                 StartViewInternal(name, (Dictionary<string, object>)segmentation, false);
             }
 
@@ -753,6 +782,9 @@ namespace Plugins.CountlySDK.Services
 
             lock (LockObj) {
                 Log.Info($"[ViewCountlyService] RecordCloseViewAsync, name: [{name}]");
+                Log.Warning("[ViewCountlyService] RecordCloseViewAsync, this function is deprecated, use 'StopViewWithName' instead");
+                Log.RecordLogCode("w120");
+                Log.RecordUsage(HealthCheckCountlyService.AreaViews, "RecordCloseViewAsync:d");
                 StopViewWithNameInternal(name, null);
             }
 

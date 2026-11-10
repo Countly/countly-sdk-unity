@@ -55,6 +55,7 @@ namespace Plugins.CountlySDK.Helpers
                 int exceedAmount = _requestRepo.Count - _config.GetMaxRequestQueueSize();
                 int removeAmount = Mathf.Min(exceedAmount, countlyRequestRemoveLimit) + 1;
                 Log.Warning("[RequestCountlyHelper] AddRequestToQueue, Request Queue is full. Dropping the oldest request.");
+                Log.RecordLogCode("w310", removeAmount);
 
                 // Remove the calculated amount of oldest requests from the queue.
                 while (removeAmount > 0) {
@@ -104,6 +105,9 @@ namespace Plugins.CountlySDK.Helpers
 
                 if (!response.IsSuccess) {
                     Log.Verbose($"[RequestCountlyHelper] ProcessQueue, Request failed. Response: [{response.ToString()}]");
+                    if (response.StatusCode > 0) {
+                        Log.HealthCheck?.LogFailedNetworkRequest(response.StatusCode, response.Data);
+                    }
                     _isQueueBeingProcess = false;
                     break;
                 }
@@ -135,6 +139,27 @@ namespace Plugins.CountlySDK.Helpers
             Log.Debug($"[RequestCountlyHelper] ProcessRequest, Using HTTP GET");
             return await Task.Run(() => GetAsync(_countlyUtils.ServerInputUrl, model.RequestData));
 #endif
+        }
+
+        /// <summary>
+        /// Replaces the network for immediate requests: given the request data, it returns the answer. Null sends
+        /// them to the server. Set by the tests only.
+        /// </summary>
+        internal static Func<string, Task<CountlyResponse>> ImmediateRequestSender;
+
+        /// <summary>
+        /// Sends a request right away, outside the request queue, with the base request parameters, and returns the
+        /// answer. It is not stored and not retried.
+        /// </summary>
+        /// <param name="queryParams">the parameters of the request</param>
+        internal Task<CountlyResponse> SendImmediateRequestAsync(Dictionary<string, object> queryParams)
+        {
+            CountlyRequestModel requestModel = _requestBuilder.BuildRequest(_countlyUtils.GetBaseParams(), queryParams);
+            Func<string, Task<CountlyResponse>> sender = ImmediateRequestSender;
+            if (sender != null) {
+                return sender(requestModel.RequestData);
+            }
+            return ProcessRequest(requestModel);
         }
 
         /// <summary>

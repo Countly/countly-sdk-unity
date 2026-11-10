@@ -1,5 +1,9 @@
 ## XX.XX.XX
 * Added "SetLogListener" to "CountlyConfiguration" for receiving every log message of the SDK and its "LogLevel", also while logging is disabled. The listener is called inside the SDK's own calls, so it should return quickly and must not call the SDK.
+* Added the health check feature. The SDK now sends a health check request once after each initialization. Like any request, it updates the user's last seen time on the server.
+* Added "DisableHealthCheck()" configuration option to turn off the health check request.
+* The deprecated "RecordOpenViewAsync", "RecordCloseViewAsync" and the "SendCrashReportAsync" overload with a "LogType" now log a warning that names the call to use instead.
+* Invalid configuration values and a second "Init" call are now logged at warning level instead of error level. Messages of the SDK's own session handling, such as a session that has not started yet, are now logged at debug level.
 
 ## 24.8.2
 * Fixed a bug where adding segmentation to a view more than once ("AddSegmentationToViewWithID"/"AddSegmentationToViewWithName") discarded every call after the first.
