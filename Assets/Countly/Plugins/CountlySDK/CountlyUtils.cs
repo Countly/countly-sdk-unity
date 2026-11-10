@@ -14,16 +14,52 @@ namespace Plugins.CountlySDK
     public class CountlyUtils
     {
         private readonly Countly _countly;
+        private string _appKey;
         internal string ServerInputUrl { get; private set; }
         internal string ServerOutputUrl { get; private set; }
+
+        /// <summary>
+        /// App key of new requests, kept in memory only. Until it is set, the app key from the configuration is used.
+        /// </summary>
+        internal string AppKey
+        {
+            get { return _appKey ?? _countly.Configuration.GetAppKey(); }
+            set { _appKey = value; }
+        }
 
         string appVersion;
 
         public CountlyUtils(Countly countly)
         {
             _countly = countly;
-            ServerInputUrl = _countly.Configuration.ServerUrl + "/i?";
-            ServerOutputUrl = _countly.Configuration.ServerUrl + "/o/sdk?";
+            SetServerUrl(_countly.Configuration.GetServerUrl());
+        }
+
+        /// <summary>
+        /// Sets the server URL that requests are sent to. It is kept in memory only.
+        /// </summary>
+        /// <param name="serverUrl">server URL without a trailing "/"</param>
+        internal void SetServerUrl(string serverUrl)
+        {
+            ServerInputUrl = serverUrl + "/i?";
+            ServerOutputUrl = serverUrl + "/o/sdk?";
+        }
+
+        /// <summary>
+        /// Checks whether requests can be sent to a server URL: an absolute "http" or "https" URL with a host,
+        /// without a query, a fragment or surrounding whitespace.
+        /// </summary>
+        /// <param name="serverUrl">server URL to check</param>
+        /// <returns><c>true</c> if the server URL is valid; otherwise, <c>false</c>.</returns>
+        internal bool IsValidServerUrl(string serverUrl)
+        {
+            return serverUrl != null
+                && serverUrl.Trim() == serverUrl
+                && Uri.TryCreate(serverUrl, UriKind.Absolute, out Uri uri)
+                && (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps)
+                && !string.IsNullOrEmpty(uri.Host)
+                && string.IsNullOrEmpty(uri.Query)
+                && string.IsNullOrEmpty(uri.Fragment);
         }
 
         /// <summary>
@@ -101,7 +137,7 @@ namespace Plugins.CountlySDK
         {
             Dictionary<string, object> baseParams = new Dictionary<string, object>
             {
-                {"app_key", _countly.Configuration.AppKey},
+                {"app_key", AppKey},
                 {"device_id", _countly.Device.DeviceId},
                 {"t", Type()},
                 {"sdk_name", Constants.SdkName},
@@ -126,7 +162,7 @@ namespace Plugins.CountlySDK
         {
             return new Dictionary<string, object>
             {
-                {"app_key", _countly.Configuration.AppKey},
+                {"app_key", AppKey},
                 {"device_id", _countly.Device.DeviceId}
             };
         }

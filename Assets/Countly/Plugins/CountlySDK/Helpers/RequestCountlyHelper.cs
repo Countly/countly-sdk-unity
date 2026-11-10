@@ -96,23 +96,66 @@ namespace Plugins.CountlySDK.Helpers
                 return;
             }
 
-            foreach (CountlyRequestModel reqModel in requests) {
-                // Add the remaining request count in RequestData
-                reqModel.RequestData += "&rr=" + (requests.Length - 1);
+            try {
+                foreach (CountlyRequestModel reqModel in requests) {
+                    // The queue can be flushed or filtered while a request is on its way
+                    if (!IsFirstInQueue(reqModel)) {
+                        break;
+                    }
 
-                CountlyResponse response = await ProcessRequest(reqModel);
+                    // Add the remaining request count in RequestData
+                    reqModel.RequestData += "&rr=" + (requests.Length - 1);
 
-                if (!response.IsSuccess) {
-                    Log.Verbose($"[RequestCountlyHelper] ProcessQueue, Request failed. Response: [{response.ToString()}]");
-                    _isQueueBeingProcess = false;
-                    break;
+                    CountlyResponse response = await ProcessRequest(reqModel);
+
+                    if (!response.IsSuccess) {
+                        Log.Verbose($"[RequestCountlyHelper] ProcessQueue, Request failed. Response: [{response.ToString()}]");
+                        break;
+                    }
+
+                    if (IsFirstInQueue(reqModel)) {
+                        _requestRepo.Dequeue();
+                    }
                 }
-
-                _requestRepo.Dequeue();
+            } finally {
+                _isQueueBeingProcess = false;
             }
 
-            _isQueueBeingProcess = false;
             Log.Verbose("[RequestCountlyHelper] ProcessQueue, _isQueueBeingProcess is false");
+        }
+
+        /// <summary>
+        /// Checks whether the request is still the first one in the queue.
+        /// </summary>
+        private bool IsFirstInQueue(CountlyRequestModel request)
+        {
+            return _requestRepo.Count > 0 && ReferenceEquals(_requestRepo.Models.Peek(), request);
+        }
+
+        /// <summary>
+        /// Replaces the app key of every queued request with the current app key.
+        /// </summary>
+        internal void ReplaceAllAppKeysInQueue()
+        {
+            string appKeyParam = "app_key=" + Uri.EscapeDataString(_countlyUtils.AppKey);
+
+            foreach (CountlyRequestModel request in _requestRepo.Models.ToArray()) {
+                // "rr" is added in memory on every send attempt and is not part of the stored request
+                request.RequestData = string.Join("&", request.RequestData.Split('&')
+                    .Where(param => !param.StartsWith("rr="))
+                    .Select(param => param.StartsWith("app_key=") ? appKeyParam : param));
+                _requestRepo.Update(request);
+            }
+        }
+
+        /// <summary>
+        /// Removes the queued requests whose app key is not the current app key.
+        /// </summary>
+        /// <returns>number of removed requests</returns>
+        internal int RemoveDifferentAppKeysFromQueue()
+        {
+            string appKey = _countlyUtils.AppKey;
+            return _requestRepo.RemoveWhere(request => CountlyUtils.ParseQueryString(request.RequestData)["app_key"] != appKey);
         }
 
         /// <summary>

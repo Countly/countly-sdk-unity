@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK.Persistance.Entities;
 using Plugins.iBoxDB;
@@ -90,6 +91,28 @@ namespace Plugins.CountlySDK.Persistance.Repositories
         {
             Models.Clear();
             _dao.RemoveAll();
+        }
+
+        /// <summary>
+        /// Removes the models that match the condition from memory and from the database. The others keep their order.
+        /// </summary>
+        /// <returns>number of removed models</returns>
+        internal int RemoveWhere(Func<TModel, bool> match)
+        {
+            TModel[] models = Models.ToArray();
+            Models.Clear();
+
+            int removed = 0;
+            foreach (TModel model in models) {
+                if (match(model)) {
+                    _dao.Remove(model.Id);
+                    removed++;
+                } else {
+                    Models.Enqueue(model);
+                }
+            }
+
+            return removed;
         }
 
         protected abstract TModel ConvertEntityToModel(TEntity entity);

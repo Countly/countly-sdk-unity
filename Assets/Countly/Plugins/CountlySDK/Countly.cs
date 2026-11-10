@@ -112,6 +112,7 @@ namespace Plugins.CountlySDK
         internal SessionCountlyService Session { get; set; }
         internal InitializationCountlyService Initialization { get; private set; }
         internal RequestCountlyHelper RequestHelper;
+        internal CountlyUtils Utils;
         internal CountlyConfiguration Configuration;
         internal StorageAndMigrationHelper StorageHelper;
         internal readonly object lockObj = new object();
@@ -307,6 +308,7 @@ namespace Plugins.CountlySDK
             NonViewEventRepository nonViewEventRepo, Dao<ConfigEntity> configDao)
         {
             CountlyUtils countlyUtils = new CountlyUtils(this);
+            Utils = countlyUtils;
             RequestHelper = new RequestCountlyHelper(Configuration, _logHelper, countlyUtils, requestBuilder, requestRepo, this);
             Consents = new ConsentCountlyService(Configuration, _logHelper, Consents, RequestHelper);
             Events = new EventCountlyService(Configuration, _logHelper, RequestHelper, nonViewEventRepo, Consents, countlyUtils);
@@ -366,6 +368,143 @@ namespace Plugins.CountlySDK
             foreach (AbstractBaseService listener in _listeners) {
                 listener.LockObj = lockObj;
             }
+        }
+
+        /// <summary>
+        /// Changes the server URL of new and queued requests, in memory only: the next init uses the configured URL.
+        /// An invalid URL is ignored.
+        /// </summary>
+        /// <param name="serverUrl">absolute "http" or "https" URL of the new server, trailing "/" characters are removed</param>
+        public void ChangeServerUrl(string serverUrl)
+        {
+            RunIfInitialized(nameof(ChangeServerUrl), () => {
+                _logHelper.Info($"[Countly] ChangeServerUrl, serverUrl: [{serverUrl}]");
+
+                string url = serverUrl?.TrimEnd('/');
+                if (!Utils.IsValidServerUrl(url)) {
+                    _logHelper.Error($"[Countly] ChangeServerUrl, Invalid server URL: [{serverUrl}]. The current server URL stays in use.");
+                    return;
+                }
+
+                Utils.SetServerUrl(url);
+                SendCatchUpRequests();
+            });
+        }
+
+        /// <summary>
+        /// Changes the app key of new requests, in memory only: the next init uses the configured app key.
+        /// Before the change, it stops the running views, queues the recorded events and user profile changes and ends the session,
+        /// all with the old key. Afterwards it clears the stored remote config values and begins a new session if one was running.
+        /// Queued requests keep their app key. An invalid or unchanged app key is ignored.
+        /// </summary>
+        /// <param name="appKey">app key of the new app</param>
+        public void ChangeAppKey(string appKey)
+        {
+            RunIfInitialized(nameof(ChangeAppKey), () => {
+                _logHelper.Info($"[Countly] ChangeAppKey, appKey: [{appKey}]");
+
+                if (Utils.IsNullEmptyOrWhitespace(appKey) || appKey == "YOUR_APP_KEY") {
+                    _logHelper.Error($"[Countly] ChangeAppKey, Invalid app key: [{appKey}]. The current app key stays in use.");
+                    return;
+                }
+
+                if (appKey == Utils.AppKey) {
+                    _logHelper.Warning("[Countly] ChangeAppKey, Same app key provided. Will be ignored.");
+                    return;
+                }
+
+                bool sessionWasRunning = Session.IsSessionInitiated;
+                Views.StopAllViews(null);
+                Events.AddEventsToRequestQueue();
+                UserProfile.Save();
+                if (sessionWasRunning) {
+                    _ = Session.EndSessionAsync();
+                }
+
+                Utils.AppKey = appKey;
+                RemoteConfigs.ClearStoredConfigs();
+
+                if (sessionWasRunning) {
+                    // begin_session reads device metrics, which Unity allows only on the main thread
+                    countlyMainThreadHandler.RunOnMainThread(() => { _ = Session.BeginSessionAsync(); });
+                }
+
+                SendCatchUpRequests();
+            });
+        }
+
+        /// <summary>
+        /// Removes all requests from the request queue and all events from the event queue.
+        /// Timed events, running views and pending user profile changes are kept. A request that is already on its way is not stopped.
+        /// </summary>
+        public void FlushQueues()
+        {
+            RunIfInitialized(nameof(FlushQueues), () => {
+                _logHelper.Info($"[Countly] FlushQueues, requests: [{RequestHelper._requestRepo.Count}], events: [{Events._eventRepo.Count}]");
+                RequestHelper._requestRepo.Clear();
+                Events._eventRepo.Clear();
+            });
+        }
+
+        /// <summary>
+        /// Replaces the app key of all queued requests with the current app key,
+        /// so that the requests recorded before an app key change are sent to the current app.
+        /// </summary>
+        public void ReplaceAllAppKeysInQueueWithCurrentAppKey()
+        {
+            RunIfInitialized(nameof(ReplaceAllAppKeysInQueueWithCurrentAppKey), () => {
+                _logHelper.Info("[Countly] ReplaceAllAppKeysInQueueWithCurrentAppKey");
+                RequestHelper.ReplaceAllAppKeysInQueue();
+            });
+        }
+
+        /// <summary>
+        /// Removes the queued requests whose app key differs from the current app key,
+        /// so that the requests recorded before an app key change are not sent.
+        /// </summary>
+        public void RemoveDifferentAppKeysFromQueue()
+        {
+            RunIfInitialized(nameof(RemoveDifferentAppKeysFromQueue), () => {
+                int removed = RequestHelper.RemoveDifferentAppKeysFromQueue();
+                _logHelper.Info($"[Countly] RemoveDifferentAppKeysFromQueue, removed requests: [{removed}]");
+            });
+        }
+
+        /// <summary>
+        /// Packs the recorded events into a request and starts sending the queued requests right away.
+        /// </summary>
+        public void AttemptToSendStoredRequests()
+        {
+            RunIfInitialized(nameof(AttemptToSendStoredRequests), () => {
+                _logHelper.Info("[Countly] AttemptToSendStoredRequests");
+                Events.AddEventsToRequestQueue();
+                _ = RequestHelper.ProcessQueue();
+            });
+        }
+
+        /// <summary>
+        /// Runs the action under the SDK lock, or only logs a warning when the SDK is not initialized yet.
+        /// </summary>
+        private void RunIfInitialized(string caller, Action action)
+        {
+            if (!IsSDKInitialized) {
+                Debug.LogWarning($"[Countly] {caller}, Countly.Instance.Init() must be called before '{caller}'");
+                return;
+            }
+
+            lock (lockObj) {
+                action();
+            }
+        }
+
+        /// <summary>
+        /// Queues the consent state and the push token again for the new server or app, and sends the queue.
+        /// </summary>
+        private void SendCatchUpRequests()
+        {
+            _ = Consents.SendConsentChanges();
+            _push.ResendToken();
+            _ = RequestHelper.ProcessQueue();
         }
 
         /// <summary>

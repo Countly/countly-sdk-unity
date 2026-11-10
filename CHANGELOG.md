@@ -1,3 +1,13 @@
+## XX.XX.X
+* Added "ChangeServerUrl" function in "Countly.Instance" to change the server URL after init.
+* Added "ChangeAppKey" function in "Countly.Instance" to change the app key after init.
+* Added "FlushQueues" function in "Countly.Instance" to clear the request and event queues.
+* Added "ReplaceAllAppKeysInQueueWithCurrentAppKey" function in "Countly.Instance" to set the current app key on all queued requests.
+* Added "RemoveDifferentAppKeysFromQueue" function in "Countly.Instance" to remove queued requests of other app keys.
+* Added "AttemptToSendStoredRequests" function in "Countly.Instance" to send stored requests right away.
+* Fixed a bug where an unsent request could be dropped if the queue changed while a request was being sent.
+* Fixed a bug where the request queue could stop sending after an unexpected network error.
+
 ## 24.8.2
 * Fixed a bug where adding segmentation to a view more than once ("AddSegmentationToViewWithID"/"AddSegmentationToViewWithName") discarded every call after the first.
 * Fixed a bug where mandatory view segmentation keys ("name", "visit", "start", "segment") could be dropped when custom segmentation reached the segmentation value limit.
