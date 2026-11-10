@@ -1,3 +1,6 @@
+## XX.XX.XX
+* Added "SetLogListener" to "CountlyConfiguration" for receiving every log message of the SDK and its "LogLevel", also while logging is disabled. The listener is called inside the SDK's own calls, so it should return quickly and must not call the SDK.
+
 ## 24.8.2
 * Fixed a bug where adding segmentation to a view more than once ("AddSegmentationToViewWithID"/"AddSegmentationToViewWithName") discarded every call after the first.
 * Fixed a bug where mandatory view segmentation keys ("name", "visit", "start", "segment") could be dropped when custom segmentation reached the segmentation value limit.
