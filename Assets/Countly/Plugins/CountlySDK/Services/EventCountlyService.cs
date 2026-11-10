@@ -95,6 +95,7 @@ namespace Plugins.CountlySDK.Services
 
             if (string.IsNullOrEmpty(key) || string.IsNullOrWhiteSpace(key)) {
                 Log.Warning($"[EventCountlyService] RecordEventInternal, Event key ['{key}'] isn't valid.");
+                Log.RecordLogCode("w701", HealthCheckCountlyService.AreaEvents);
                 return;
             }
 
@@ -104,6 +105,7 @@ namespace Plugins.CountlySDK.Services
 
             if (key.Length > _configuration.GetMaxKeyLength()) {
                 Log.Warning($"[EventCountlyService] RecordEventInternal, Max allowed key length is [{_configuration.GetMaxKeyLength()}]");
+                Log.RecordLogCode("w201");
                 key = key.Substring(0, _configuration.GetMaxKeyLength());
             }
 
@@ -199,6 +201,7 @@ namespace Plugins.CountlySDK.Services
         {
             lock (LockObj) {
                 Log.Info($"[EventCountlyService] StartEvent, key: [{key}]");
+                Log.RecordUsage(HealthCheckCountlyService.AreaEvents, "start");
 
                 if (!_consentService.CheckConsentInternal(Consents.Events)) {
                     return;
@@ -206,11 +209,13 @@ namespace Plugins.CountlySDK.Services
 
                 if (string.IsNullOrEmpty(key) || string.IsNullOrWhiteSpace(key)) {
                     Log.Warning($"[EventCountlyService] StartEvent, The event key: [{key}] isn't valid.");
+                    Log.RecordLogCode("w700", HealthCheckCountlyService.AreaEvents);
                     return;
                 }
 
                 if (_timedEvents.ContainsKey(key)) {
                     Log.Warning($"[EventCountlyService] StartEvent, Event with key: [{key}] has already started.");
+                    Log.RecordLogCode("w722", HealthCheckCountlyService.AreaEvents);
                     return;
                 }
 
@@ -228,6 +233,7 @@ namespace Plugins.CountlySDK.Services
         {
             lock (LockObj) {
                 Log.Info($"[EventCountlyService] CancelEvent, key: [{key}]");
+                Log.RecordUsage(HealthCheckCountlyService.AreaEvents, "cancel");
 
                 if (!_consentService.CheckConsentInternal(Consents.Events)) {
                     return;
@@ -235,11 +241,13 @@ namespace Plugins.CountlySDK.Services
 
                 if (string.IsNullOrEmpty(key) || string.IsNullOrWhiteSpace(key)) {
                     Log.Warning($"[EventCountlyService] CancelEvent, The event key: [{key}] isn't valid.");
+                    Log.RecordLogCode("w700", HealthCheckCountlyService.AreaEvents);
                     return;
                 }
 
                 if (!_timedEvents.ContainsKey(key)) {
                     Log.Warning($"[EventCountlyService] CancelEvent, Time event with key: [{key}] doesn't exist.");
+                    Log.RecordLogCode("w721", HealthCheckCountlyService.AreaEvents);
                     return;
                 }
 
@@ -259,6 +267,7 @@ namespace Plugins.CountlySDK.Services
         {
             lock (LockObj) {
                 Log.Info($"[EventCountlyService] EndEvent, key: [{key}], segmentation: [{segmentation}], count: [{count}], sum: [{sum}]");
+                Log.RecordUsage(HealthCheckCountlyService.AreaEvents, "end");
 
                 if (!_consentService.CheckConsentInternal(Consents.Events)) {
                     return;
@@ -266,11 +275,13 @@ namespace Plugins.CountlySDK.Services
 
                 if (string.IsNullOrEmpty(key) || string.IsNullOrWhiteSpace(key)) {
                     Log.Warning($"[EventCountlyService] EndEvent, The event key: [{key}] isn't valid.");
+                    Log.RecordLogCode("w700", HealthCheckCountlyService.AreaEvents);
                     return;
                 }
 
                 if (!_timedEvents.ContainsKey(key)) {
                     Log.Warning($"[EventCountlyService] EndEvent, Time event with key: [{key}] doesn't exist.");
+                    Log.RecordLogCode("w720", HealthCheckCountlyService.AreaEvents);
                     return;
                 }
 
@@ -298,6 +309,7 @@ namespace Plugins.CountlySDK.Services
         {
             lock (LockObj) {
                 Log.Info($"[EventCountlyService] RecordEventAsync, key: [{key}], segmentation: [{segmentation}], count: [{count}], sum: [{sum}], duration: [{duration}]");
+                Log.RecordUsage(HealthCheckCountlyService.AreaEvents, "record");
 
                 _ = RecordEventInternal(key, segmentation, count, sum, duration);
             }

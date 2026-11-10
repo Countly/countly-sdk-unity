@@ -27,8 +27,10 @@ namespace Assets.Tests.PlayModeTests
         /// <returns>CountlyConfiguration object representing the basic configuration.</returns>
         public static CountlyConfiguration CreateBaseConfig()
         {
+            // the health check is off here, so no init sends it to the test host; HealthCheckTests turns it on
             CountlyConfiguration configuration = new CountlyConfiguration(SERVER_URL, APP_KEY)
-                .SetDeviceId(DEVICE_ID);
+                .SetDeviceId(DEVICE_ID)
+                .DisableHealthCheck();
             return configuration;
         }
 

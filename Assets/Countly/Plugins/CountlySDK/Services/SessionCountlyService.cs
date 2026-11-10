@@ -90,6 +90,7 @@ namespace Plugins.CountlySDK.Services
             Countly.Instance.UserProfile.Save();
             _eventService.AddEventsToRequestQueue();
             _ = _requestCountlyHelper.ProcessQueue();
+            Log.HealthCheck?.SaveState();
 
             if (!_configuration.IsAutomaticSessionTrackingDisabled) {
                 _ = ExtendSessionAsync();
@@ -163,7 +164,7 @@ namespace Plugins.CountlySDK.Services
             }
 
             if (IsSessionInitiated) {
-                Log.Warning("[SessionCountlyService] BeginSessionAsync, Session has already started!");
+                Log.Debug("[SessionCountlyService] BeginSessionAsync, Session has already started!");
                 return;
             }
 
@@ -173,6 +174,7 @@ namespace Plugins.CountlySDK.Services
             }
             //Session initiated
             IsSessionInitiated = true;
+            Log.RecordUsage(HealthCheckCountlyService.AreaSessions, "begin:a");
 
             Dictionary<string, object> requestParams = new Dictionary<string, object>();
             requestParams.Add("begin_session", 1);
@@ -218,11 +220,12 @@ namespace Plugins.CountlySDK.Services
             }
 
             if (!IsSessionInitiated) {
-                Log.Warning("[SessionCountlyService] EndSessionAsync, Session isn't started yet!");
+                Log.Debug("[SessionCountlyService] EndSessionAsync, Session isn't started yet!");
                 return;
             }
 
             IsSessionInitiated = false;
+            Log.RecordUsage(HealthCheckCountlyService.AreaSessions, "end:a");
             _eventService.AddEventsToRequestQueue();
             Countly.Instance.UserProfile.Save();
             Dictionary<string, object> requestParams = new Dictionary<string, object>
@@ -232,6 +235,7 @@ namespace Plugins.CountlySDK.Services
                 };
 
             _requestCountlyHelper.AddToRequestQueue(requestParams);
+            Log.HealthCheck?.SaveState();
             await _requestCountlyHelper.ProcessQueue();
         }
 
@@ -247,7 +251,7 @@ namespace Plugins.CountlySDK.Services
             }
 
             if (!IsSessionInitiated) {
-                Log.Warning("[SessionCountlyService] ExtendSessionAsync, Session isn't started yet!");
+                Log.Debug("[SessionCountlyService] ExtendSessionAsync, Session isn't started yet!");
                 return;
             }
 
@@ -259,6 +263,7 @@ namespace Plugins.CountlySDK.Services
                 };
 
             _lastSessionRequestTime = DateTime.Now;
+            Log.RecordUsage(HealthCheckCountlyService.AreaSessions, "update:a");
 
             _requestCountlyHelper.AddToRequestQueue(requestParams);
             await _requestCountlyHelper.ProcessQueue();
