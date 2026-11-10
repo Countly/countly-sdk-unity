@@ -33,7 +33,7 @@ namespace Assets.Tests.PlayModeTests
         /// </summary>
         private Countly InitSDK(string serverUrl, bool sessions = true, Consents[] consents = null)
         {
-            CountlyConfiguration config = new CountlyConfiguration(AppKey, serverUrl).SetDeviceId(DeviceId);
+            CountlyConfiguration config = new CountlyConfiguration(AppKey, serverUrl).SetDeviceId(DeviceId).DisableHealthCheck();
             if (!sessions) {
                 config.DisableAutomaticSessionTracking();
             }
