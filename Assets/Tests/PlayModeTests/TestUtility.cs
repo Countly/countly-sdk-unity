@@ -4,6 +4,8 @@ using Plugins.CountlySDK;
 using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK.Persistance.Entities;
 using Plugins.CountlySDK.Enums;
+using Plugins.CountlySDK.Services;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using UnityEngine;
 using NUnit.Framework;
@@ -325,6 +327,24 @@ namespace Assets.Tests.PlayModeTests
 
             CountlyEventModel[] events = cly.Events._eventRepo.Models.ToArray();
             Assert.AreEqual(expEQSize, events.Length);
+        }
+
+        /// <summary>
+        /// Checks that the session timer runs with the given delay, then stops it and runs its elapsed handler once on the
+        /// calling thread. The timer raises the handler on a thread pool thread, which can start it many seconds late
+        /// while network requests of earlier tests keep the pool busy.
+        /// </summary>
+        /// <param name="cly">initialized SDK whose session timer elapses</param>
+        /// <param name="delayInSeconds">expected update session timer delay</param>
+        public static void ElapseSessionTimer(Countly cly, int delayInSeconds)
+        {
+            System.Timers.Timer timer = cly.Session._sessionTimer;
+            Assert.IsTrue(timer.Enabled);
+            Assert.AreEqual(delayInSeconds * 1000d, timer.Interval);
+            timer.Stop();
+
+            MethodInfo onElapsed = typeof(SessionCountlyService).GetMethod("SessionTimerOnElapsedAsync", BindingFlags.NonPublic | BindingFlags.Instance);
+            onElapsed.Invoke(cly.Session, new object[] { timer, null });
         }
 
         // Extracts user profile request from the provided requests

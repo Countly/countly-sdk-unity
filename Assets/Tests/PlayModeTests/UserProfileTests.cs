@@ -388,7 +388,7 @@ namespace Assets.Tests.PlayModeTests
         }
 
         // Manual Session Timer with User Profile data is set
-        // We initialize the sdk with manual session with a timer delay of 3 seconds, begin session, record user profile data and wait 4 seconds
+        // We initialize the sdk with manual session with a timer delay of 3 seconds, begin session, record user profile data and let the session timer elapse
         // When session timer is elapsed, it should automaticly create an user profile request
         [Test]
         public void SessionTimerElapseWithRecordedValue_M_CNR()
@@ -403,7 +403,7 @@ namespace Assets.Tests.PlayModeTests
             cly.RequestHelper._requestRepo.Clear();
             cly.UserProfile.SetProperties(ExpectedUserProperty());
 
-            Thread.Sleep(4000);
+            TestUtility.ElapseSessionTimer(cly, 3);
 
             TestUtility.ValidateRQEQSize(cly, 1, 0);
             Dictionary<string, object> up1 = TestUtility.ExtractAndDeserializeUserDetails(cly.RequestHelper._requestRepo.Models);
@@ -440,7 +440,7 @@ namespace Assets.Tests.PlayModeTests
 
         // Manual Session Timer with User Profile data is set
         // We initialize the sdk with consent requirement, and provide consent.
-        // We start manual session with a timer delay of 3 seconds, record user profile data and wait 4 seconds
+        // We start manual session with a timer delay of 3 seconds, record user profile data and let the session timer elapse
         // When session timer is elapsed, it should automaticly create an user profile request
         [Test]
         public void SessionTimerElapseWithRecordedValue_M_CR_CG()
@@ -458,7 +458,7 @@ namespace Assets.Tests.PlayModeTests
 
             cly.UserProfile.SetProperties(ExpectedUserProperty());
 
-            Thread.Sleep(4000);
+            TestUtility.ElapseSessionTimer(cly, 3);
 
             TestUtility.ValidateRQEQSize(cly, 1, 0);
             Dictionary<string, object> up1 = TestUtility.ExtractAndDeserializeUserDetails(cly.RequestHelper._requestRepo.Models);

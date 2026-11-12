@@ -447,8 +447,8 @@ namespace Assets.Tests.PlayModeTests.Scenarios
         }
 
         // Manual session elapse with UserProfile changes
-        // We start a manual session with an update timer of 5 seconds, and record User Profile data, wait 6 seconds after that.
-        // User Data request should automaticly be created after 6 seconds
+        // We start a manual session with an update timer of 5 seconds, record User Profile data and let the session timer elapse.
+        // User Data request should automaticly be created when the session timer elapses
         // Expected Request Queue: Session Request, User Profile Request with all the data
         [Test]
         public void UP_210_CNR_M_duration()
@@ -464,7 +464,7 @@ namespace Assets.Tests.PlayModeTests.Scenarios
             TestUtility.ValidateRQEQSize(cly, 1, 0);
 
             SendUserData();
-            Thread.Sleep(6000);
+            TestUtility.ElapseSessionTimer(cly, 5);
             // Extract and validate user_details requests
             TestUtility.ValidateRQEQSize(cly, 2, 0);
             Dictionary<string, object> up1 = TestUtility.ExtractAndDeserializeUserDetails(cly.RequestHelper._requestRepo.Models);
