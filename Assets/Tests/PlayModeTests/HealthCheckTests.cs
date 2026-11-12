@@ -45,7 +45,7 @@ namespace Assets.Tests.PlayModeTests
 
         private static CountlyConfiguration HealthCheckConfig()
         {
-            return new CountlyConfiguration("https://xyz.com/", "772c091355076ead703f987fee94490").SetDeviceId("test_user");
+            return new CountlyConfiguration("772c091355076ead703f987fee94490", "https://xyz.com/").SetDeviceId("test_user");
         }
 
         private static int Usage(JObject hc, string area, string method)
