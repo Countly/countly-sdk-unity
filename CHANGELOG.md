@@ -1,5 +1,66 @@
-## XX.XX.X
-* Added "SetID(string newDeviceId)" function for managing device id changes.
+## XX.XX.XX
+* Added "SetLogListener" to "CountlyConfiguration" for receiving every log message of the SDK and its "LogLevel", also while logging is disabled. The listener is called inside the SDK's own calls, so it should return quickly and must not call the SDK.
+* Added the health check feature. The SDK now sends a health check request once after each initialization. Like any request, it updates the user's last seen time on the server.
+* Added "DisableHealthCheck()" configuration option to turn off the health check request.
+* Added "ChangeServerUrl" function in "Countly.Instance" to change the server URL after init.
+* Added "ChangeAppKey" function in "Countly.Instance" to change the app key after init.
+* Added "FlushQueues" function in "Countly.Instance" to clear the request and event queues.
+* Added "ReplaceAllAppKeysInQueueWithCurrentAppKey" function in "Countly.Instance" to set the current app key on all queued requests.
+* Added "RemoveDifferentAppKeysFromQueue" function in "Countly.Instance" to remove queued requests of other app keys.
+* Added "AttemptToSendStoredRequests" function in "Countly.Instance" to send stored requests right away.
+* Fixed a bug where an unsent request could be dropped if the queue changed while a request was being sent.
+* Fixed a bug where the request queue could stop sending after an unexpected network error.
+* The deprecated "RecordOpenViewAsync", "RecordCloseViewAsync" and the "SendCrashReportAsync" overload with a "LogType" now log a warning that names the call to use instead.
+* Invalid configuration values and a second "Init" call are now logged at warning level instead of error level. Messages of the SDK's own session handling, such as a session that has not started yet, are now logged at debug level.
+
+## 24.8.2
+* Fixed a bug where adding segmentation to a view more than once ("AddSegmentationToViewWithID"/"AddSegmentationToViewWithName") discarded every call after the first.
+* Fixed a bug where mandatory view segmentation keys ("name", "visit", "start", "segment") could be dropped when custom segmentation reached the segmentation value limit.
+* Fixed a bug where custom user property keys and values were not truncated to the configured limits.
+* Fixed a bug where recording an event mutated the caller-provided segmentation dictionary.
+* Fixed a bug where ending a timed event ("EndEvent") skipped segmentation sanitization and event ID generation.
+* Fixed a bug where request parameter values containing reserved characters were not correctly URL-encoded.
+* Fixed a bug where the SDK failed to compile under the ".NET Framework" API Compatibility Level due to a dependency on the System.Web assembly.
+
+## 24.8.1
+* Updated user properties caching mechanism according to sessions.
+
+## 24.8.0
+* Added support for string key and Array/List value to all user given segmentations.
+* Added "SetID(string newDeviceId)" function in "Countly.Instance.Device" for managing device id changes.
+* Added "Countly.Instance.UserProfile" with following calls and functionality
+  * "Increment" for incrementing custom property value by 1
+  * "IncrementBy" for incrementing custom property value by provided value.
+  * "SaveMax" for saving maximal value between existing and provided.
+  * "SaveMin" for saving minimal value between existing and provided.
+  * "Multiply" for multiplying custom property value by provided value.
+  * "Pull" for removing value from array.
+  * "Push" for inserting value to array which can have duplicates.
+  * "PushUnique" for inserting value to array of unique values.
+  * "Save" for sending provided values to server.
+  * "SetOnce" for setting value if it does not exist.
+  * "SetProperties" for setting either custom user properties or predefined user properties.
+  * "SetProperty" for setting a single user property. It can be either a custom one or one of the predefined ones.
+* Added the following calls in "Countly.Instance.Views":
+  * "StartView" for starting a view.
+  * "StartAutoStoppedView" for starting an auto-stopped view.
+  * "StopViewWithName" for stopping a view by name.
+  * "StopViewWithID" for stopping a view by ID.
+  * "PauseViewWithID" for pausing a view by ID.
+  * "ResumeViewWithID" for resuming a paused view by ID.
+  * "StopAllViews" for stopping all views.
+  * "SetGlobalViewSegmentation" for setting global view segmentation data.
+  * "AddSegmentationToViewWithID" for adding segmentation data to a view by ID.
+  * "AddSegmentationToViewWithName" for adding segmentation data to a view by name.
+  * "UpdateGlobalViewSegmentation" for updating global view segmentation data.
+* Deprecated the following calls from "Countly.Instance.Views":
+  * "RecordOpenViewAsync": Use "StartView" instead.
+  * "RecordCloseViewAsync": Use "StopView" instead.
+  * "ReportActionAsync": This will be removed in the future.
+* Deprecated "Countly.Instance.UserDetails" added "Countly.Instance.UserProfile" as replacement, mentioned above. 
+* Fixed a bug that allowed to make it possible to close non-started views.
+* Fixed issues that allowed to record User Profiles without consent.
+* Fixed a bug that caused requests being stuck in the queue for WebGL build targets.
 
 ## 23.12.1
 * Added 'UnityWebRequest' as the networking handler for WebGL builds.

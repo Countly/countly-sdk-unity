@@ -22,11 +22,11 @@ namespace Plugins.CountlySDK.Helpers
         {
             // Check if the input EventEntity is null
             if (entity == null) {
-                L?.Warning("[Converter] 'ConvertEventEntityToEventModel': EventEntity variable is null");
+                L?.Warning("[Converter] ConvertEventEntityToEventModel, EventEntity variable is null");
                 return null;
             }
             if (string.IsNullOrEmpty(entity.Json)) {
-                L?.Warning("[Converter] 'ConvertEventEntityToEventModel': EventEntity.Json variable is null or empty");
+                L?.Warning("[Converter] ConvertEventEntityToEventModel, EventEntity.Json variable is null or empty");
                 return null;
             }
 
@@ -39,7 +39,7 @@ namespace Plugins.CountlySDK.Helpers
 
             } catch (Exception ex) {
                 // Handle JSON serialization error
-                L?.Warning($"[Converter] 'ConvertEventEntityToEventModel': JSON serialization error: {ex.Message}");
+                L?.Warning($"[Converter] ConvertEventEntityToEventModel, JSON serialization error: {ex.Message}");
                 return null;
             }
         }
@@ -119,7 +119,7 @@ namespace Plugins.CountlySDK.Helpers
         public static Dictionary<string, object> ConvertJsonToDictionary(string json, CountlyLogHelper L)
         {
             if (json == null) {
-                L?.Warning("[Converter] 'ConvertJsonToDictionary': Provided Json is null");
+                L?.Warning("[Converter] ConvertJsonToDictionary, Provided Json is null");
                 return null;
             }
 

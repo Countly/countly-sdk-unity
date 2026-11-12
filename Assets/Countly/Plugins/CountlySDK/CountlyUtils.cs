@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
 using System.Security.Cryptography;
@@ -13,16 +14,85 @@ namespace Plugins.CountlySDK
     public class CountlyUtils
     {
         private readonly Countly _countly;
+        private string _appKey;
         internal string ServerInputUrl { get; private set; }
         internal string ServerOutputUrl { get; private set; }
+
+        /// <summary>
+        /// App key of new requests, kept in memory only. Until it is set, the app key from the configuration is used.
+        /// </summary>
+        internal string AppKey
+        {
+            get { return _appKey ?? _countly.Configuration.GetAppKey(); }
+            set { _appKey = value; }
+        }
 
         string appVersion;
 
         public CountlyUtils(Countly countly)
         {
             _countly = countly;
-            ServerInputUrl = _countly.Configuration.ServerUrl + "/i?";
-            ServerOutputUrl = _countly.Configuration.ServerUrl + "/o/sdk?";
+            SetServerUrl(_countly.Configuration.GetServerUrl());
+        }
+
+        /// <summary>
+        /// Sets the server URL that requests are sent to. It is kept in memory only.
+        /// </summary>
+        /// <param name="serverUrl">server URL without a trailing "/"</param>
+        internal void SetServerUrl(string serverUrl)
+        {
+            ServerInputUrl = serverUrl + "/i?";
+            ServerOutputUrl = serverUrl + "/o/sdk?";
+        }
+
+        /// <summary>
+        /// Checks whether requests can be sent to a server URL: an absolute "http" or "https" URL with a host,
+        /// without a query, a fragment or surrounding whitespace.
+        /// </summary>
+        /// <param name="serverUrl">server URL to check</param>
+        /// <returns><c>true</c> if the server URL is valid; otherwise, <c>false</c>.</returns>
+        internal bool IsValidServerUrl(string serverUrl)
+        {
+            return serverUrl != null
+                && serverUrl.Trim() == serverUrl
+                && Uri.TryCreate(serverUrl, UriKind.Absolute, out Uri uri)
+                && (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps)
+                && !string.IsNullOrEmpty(uri.Host)
+                && string.IsNullOrEmpty(uri.Query)
+                && string.IsNullOrEmpty(uri.Fragment);
+        }
+
+        /// <summary>
+        /// Parses a URL query string into a NameValueCollection without depending on System.Web
+        /// (which is not available under the ".NET Framework" API compatibility level on all platforms).
+        /// Mirrors the encoding produced by RequestBuilder.BuildQueryString: '&'-separated "key=value"
+        /// pairs escaped with Uri.EscapeDataString. A leading '?' is ignored if present.
+        /// </summary>
+        /// <param name="query">The query string to parse. May be null, empty, or prefixed with '?'.</param>
+        /// <returns>A NameValueCollection of the decoded key-value pairs. Never null.</returns>
+        public static NameValueCollection ParseQueryString(string query)
+        {
+            NameValueCollection result = new NameValueCollection();
+
+            if (string.IsNullOrEmpty(query)) {
+                return result;
+            }
+
+            // The migration code passes the URL fragment starting at '?'. Drop it if present.
+            string trimmed = query.StartsWith("?") ? query.Substring(1) : query;
+
+            foreach (string pair in trimmed.Split(new[] { '&' }, StringSplitOptions.RemoveEmptyEntries)) {
+                int separator = pair.IndexOf('=');
+                if (separator < 0) {
+                    result.Add(Uri.UnescapeDataString(pair), null);
+                } else {
+                    string key = Uri.UnescapeDataString(pair.Substring(0, separator));
+                    string value = Uri.UnescapeDataString(pair.Substring(separator + 1));
+                    result.Add(key, value);
+                }
+            }
+
+            return result;
         }
 
         public static string GetUniqueDeviceId()
@@ -67,7 +137,7 @@ namespace Plugins.CountlySDK
         {
             Dictionary<string, object> baseParams = new Dictionary<string, object>
             {
-                {"app_key", _countly.Configuration.AppKey},
+                {"app_key", AppKey},
                 {"device_id", _countly.Device.DeviceId},
                 {"t", Type()},
                 {"sdk_name", Constants.SdkName},
@@ -92,7 +162,7 @@ namespace Plugins.CountlySDK
         {
             return new Dictionary<string, object>
             {
-                {"app_key", _countly.Configuration.AppKey},
+                {"app_key", AppKey},
                 {"device_id", _countly.Device.DeviceId}
             };
         }
@@ -195,7 +265,7 @@ namespace Plugins.CountlySDK
 
             foreach (string rKey in reservedKeys) {
                 if (segmentation.ContainsKey(rKey)) {
-                    logger.Warning($"{messagePrefix} provided segmentation contains protected key [{rKey}]");
+                    logger.Warning($"{messagePrefix} provided segmentation contains protected key: [{rKey}]");
                     segmentation.Remove(rKey);
                 }
             }
@@ -256,7 +326,7 @@ namespace Plugins.CountlySDK
             }
 
             if (removed & logger != null) {
-                logger.Warning("[Utils] Unsupported data types were removed from provided segmentation");
+                logger.Warning("[Utils] RemoveUnsupportedDataTypes, Unsupported data types were removed from provided segmentation!");
             }
 
             return removed;
@@ -282,6 +352,31 @@ namespace Plugins.CountlySDK
                     break;
             }
             return type;
+        }
+
+        /// <summary>
+        /// Copies all key-value pairs from the source dictionary to the destination dictionary.
+        /// </summary>
+        /// <param name="destination">The dictionary to which the key-value pairs will be copied.</param>
+        /// <param name="source">The dictionary from which the key-value pairs will be copied.</param>
+        /// <param name="logger">CountlyLogHelper to log warnings if either dictionary is null.</param>
+        public void CopyDictionaryToDestination(Dictionary<string, object> destination, Dictionary<string, object> source, CountlyLogHelper logger)
+        {
+            logger.Verbose("[CountlyUtils] CopyDictionaryToDestination, Copying source dictionary into destination.");
+
+            if (destination == null) {
+                logger?.Warning("[CountlyUtils] CopyDictionaryToDestination, Provided destination is null.");
+                return;
+            }
+
+            if (source == null) {
+                logger?.Warning("[CountlyUtils] CopyDictionaryToDestination, Provided source is null.");
+                return;
+            }
+
+            foreach (KeyValuePair<string, object> kvp in source) {
+                destination[kvp.Key] = kvp.Value;
+            }
         }
     }
 }

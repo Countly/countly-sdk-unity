@@ -10,12 +10,6 @@ namespace Assets.Tests.PlayModeTests
 {
     public class HelpersTests
     {
-        [SetUp]
-        public void SetUp()
-        {
-            TestUtility.TestCleanup();
-        }
-
         // 'ConvertEventEntityToEventModel' method in Converter.
         // We convert an EventEntity into CountlyEventModel.
         // With a valid EventEntity provided, conversion should be successful.
@@ -303,6 +297,7 @@ namespace Assets.Tests.PlayModeTests
             Assert.AreEqual(metrics["_locale"], "English");
         }
 
+        [SetUp]
         [TearDown]
         public void End()
         {

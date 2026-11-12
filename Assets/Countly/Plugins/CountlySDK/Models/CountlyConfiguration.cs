@@ -135,6 +135,8 @@ namespace Plugins.CountlySDK.Models
         [Obsolete("RequiresConsent is deprecated. Use SetRequiresConsent(bool enable) instead.")]
         public bool RequiresConsent = false;
 
+        internal bool AutoSendUserPropertiesOnSessions = true;
+
         internal ISafeIDGenerator SafeViewIDGenerator = null;
         internal ISafeIDGenerator SafeEventIDGenerator = null;
 
@@ -144,12 +146,15 @@ namespace Plugins.CountlySDK.Models
         internal string CountryCode = null;
         internal bool IsLocationDisabled = false;
         internal bool IsAutomaticSessionTrackingDisabled = false;
+        internal Action<string, LogLevel> LogListener = null;
+        internal bool HealthCheckEnabled = true;
 
         internal Consents[] GivenConsent { get; private set; }
         internal string[] EnabledConsentGroups { get; private set; }
         internal List<INotificationListener> NotificationEventListeners;
         internal Dictionary<string, Consents[]> ConsentGroups { get; private set; }
         internal Dictionary<string, string> overridenMetrics;
+        private Dictionary<string, object> providedUserProperties = new Dictionary<string, object>();
         internal MetricHelper metricHelper;
 
         /// <summary>
@@ -326,6 +331,19 @@ namespace Plugins.CountlySDK.Models
         }
 
         /// <summary>
+        /// Sets a listener that receives every log message of the SDK and its level, also when logging is disabled.
+        /// The listener is called inside the SDK's own calls, so it should return quickly and must not call the SDK.
+        /// </summary>
+        /// <param name="logListener">Called with the message and its level</param>
+        /// <returns>Modified instance of the CountlyConfiguration</returns>
+        public CountlyConfiguration SetLogListener(Action<string, LogLevel> logListener)
+        {
+            LogListener = logListener;
+
+            return this;
+        }
+
+        /// <summary>
         /// Set mode of push notification.
         /// </summary>
         /// <returns>Modified instance of the CountlyConfiguration</returns>
@@ -447,6 +465,21 @@ namespace Plugins.CountlySDK.Models
         }
 
         /// <summary>
+        /// Disables the SDK health check. Once after initialization the SDK sends the server a short report about its
+        /// own state: how many warnings and errors it logged, the last request the server refused, how often its
+        /// session, event, view and crash methods were called, and which known problems occurred. It carries no data
+        /// the app recorded, and the server shows it in SDK Manager. With this option the report is not sent; the SDK
+        /// keeps counting.
+        /// </summary>
+        /// <returns>Modified instance of the CountlyConfiguration</returns>
+        public CountlyConfiguration DisableHealthCheck()
+        {
+            HealthCheckEnabled = false;
+
+            return this;
+        }
+
+        /// <summary>
         /// Enables requirement of the consent.
         /// </summary>
         /// <returns>Modified instance of the CountlyConfiguration</returns>
@@ -456,8 +489,27 @@ namespace Plugins.CountlySDK.Models
 
             return this;
         }
-        #endregion
 
+        /// <summary>
+        /// Sets user properties that would be sent as soon as possible
+        /// </summary>
+        /// <returns>Modified instance of the CountlyConfiguration</returns>
+        public CountlyConfiguration SetUserProperties(Dictionary<string, object> userProperties)
+        {
+            providedUserProperties = userProperties;
+            return this;
+        }
+
+        /// <summary>
+        /// Disables automatic sending of user properties on session start
+        /// </summary>
+        /// <returns>Modified instance of the CountlyConfiguration</returns>
+        public CountlyConfiguration DisableAutoSendUserPropertiesOnSessions()
+        {
+            AutoSendUserPropertiesOnSessions = false;
+            return this;
+        }
+        #endregion
         #region Getters
 
         /// <summary>
@@ -549,6 +601,17 @@ namespace Plugins.CountlySDK.Models
         /// Returns true if consent is required.
         /// </summary>
         public bool IsConsentRequired() { return RequiresConsent; }
+
+        /// <summary>
+        /// Returns true unless the health check was disabled.
+        /// </summary>
+        public bool IsHealthCheckEnabled() { return HealthCheckEnabled; }
+
+        /// <summary>
+        /// Returns provided user properties set.
+        /// </summary>
+        /// <returns></returns>
+        public Dictionary<string, object> GetUserProperties() { return providedUserProperties; }
         #endregion
     }
 }

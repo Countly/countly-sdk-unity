@@ -12,12 +12,6 @@ namespace Assets.Tests.PlayModeTests
         private readonly string _serverUrl = "https://xyz.com/";
         private readonly string _appKey = "772c091355076ead703f987fee94490";
 
-        [SetUp]
-        public void SetUp()
-        {
-            TestUtility.TestCleanup();
-        }
-
         /// <summary>
         /// It validates configuration values provided during init and URL sanitation.
         /// </summary>
@@ -308,11 +302,11 @@ namespace Assets.Tests.PlayModeTests
             Assert.AreEqual(TestMode.ProductionToken, config.NotificationMode);
         }
 
+        [SetUp]
         [TearDown]
         public void End()
         {
             TestUtility.TestCleanup();
         }
-
     }
 }

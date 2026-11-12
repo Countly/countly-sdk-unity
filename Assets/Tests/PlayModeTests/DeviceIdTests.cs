@@ -2,7 +2,9 @@ using NUnit.Framework;
 using UnityEngine;
 using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK;
-using System.Web;
+using UnityEngine.TestTools;
+using System.Collections;
+using System.Threading.Tasks;
 using System.Collections.Specialized;
 using Plugins.CountlySDK.Enums;
 using Newtonsoft.Json.Linq;
@@ -73,8 +75,8 @@ namespace Assets.Tests.PlayModeTests
         /// <summary>
         /// It validates the working of methods 'ChangeDeviceIdWithMerge' and 'ChangeDeviceIdWithoutMerge' on giving same device id.
         /// </summary>
-        [Test]
-        public async void TestSameDeviceIdLogic()
+        [UnityTest]
+        public IEnumerator TestSameDeviceIdLogic()
         {
             ConfigureAndInitSDK("device_id");
 
@@ -83,11 +85,11 @@ namespace Assets.Tests.PlayModeTests
             Assert.AreEqual(DeviceIdType.DeveloperProvided, Countly.Instance.Device.DeviceIdType);
 
             Countly.Instance.Device._requestCountlyHelper._requestRepo.Clear();
-            await Countly.Instance.Device.ChangeDeviceIdWithMerge("device_id");
+            yield return Countly.Instance.Device.ChangeDeviceIdWithMerge("device_id").AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.Device._requestCountlyHelper._requestRepo.Count);
             Assert.AreEqual(DeviceIdType.DeveloperProvided, Countly.Instance.Device.DeviceIdType);
 
-            await Countly.Instance.Device.ChangeDeviceIdWithoutMerge("device_id");
+            yield return Countly.Instance.Device.ChangeDeviceIdWithoutMerge("device_id").AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.Device._requestCountlyHelper._requestRepo.Count);
             Assert.AreEqual(DeviceIdType.DeveloperProvided, Countly.Instance.Device.DeviceIdType);
 
@@ -97,8 +99,8 @@ namespace Assets.Tests.PlayModeTests
         /// <summary>
         /// It validates the functionality of method 'ChangeDeviceIdWithoutMerge'.
         /// </summary>
-        [Test]
-        public async void TestDeviceServiceMethod_ChangeDeviceIdWithoutMerge()
+        [UnityTest]
+        public IEnumerator TestDeviceServiceMethod_ChangeDeviceIdWithoutMerge()
         {
             ConfigureAndInitSDK();
             Assert.IsNotNull(Countly.Instance.Consents);
@@ -106,19 +108,19 @@ namespace Assets.Tests.PlayModeTests
 
             string oldDeviceId = Countly.Instance.Device.DeviceId;
             Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
-            await Countly.Instance.Device.ChangeDeviceIdWithoutMerge("new_device_id");
+            yield return Countly.Instance.Device.ChangeDeviceIdWithoutMerge("new_device_id").AsCoroutine();
             //RQ will have begin session and end session requests
             Assert.AreEqual(2, Countly.Instance.Device._requestCountlyHelper._requestRepo.Count);
             Assert.AreEqual(DeviceIdType.DeveloperProvided, Countly.Instance.Device.DeviceIdType);
 
             CountlyRequestModel requestModel = Countly.Instance.Device._requestCountlyHelper._requestRepo.Dequeue();
-            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            NameValueCollection collection = CountlyUtils.ParseQueryString(requestModel.RequestData);
 
             Assert.AreEqual("1", collection.Get("t"));
             AssertSessionRequest(collection, "end_session", oldDeviceId, true);
 
             requestModel = Countly.Instance.Device._requestCountlyHelper._requestRepo.Dequeue();
-            collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            collection = CountlyUtils.ParseQueryString(requestModel.RequestData);
 
             Assert.AreEqual("0", collection.Get("t"));
             AssertSessionRequest(collection, "begin_session", "new_device_id");
@@ -127,8 +129,8 @@ namespace Assets.Tests.PlayModeTests
         /// <summary>
         /// It validates the consent removal after changing the device id without merging.
         /// </summary>
-        [Test]
-        public async void TestConsentRemoval_ChangeDeviceIdWithoutMerge()
+        [UnityTest]
+        public IEnumerator TestConsentRemoval_ChangeDeviceIdWithoutMerge()
         {
             ConfigureAndInitSDK(null, true, new Consents[] { Consents.Crashes, Consents.Events, Consents.Clicks, Consents.StarRating, Consents.Views, Consents.Users, Consents.Sessions, Consents.Push, Consents.RemoteConfig, Consents.Location, Consents.Feedback });
             Assert.IsNotNull(Countly.Instance.Consents);
@@ -136,13 +138,13 @@ namespace Assets.Tests.PlayModeTests
 
             Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
             string oldDeviceId = Countly.Instance.Device.DeviceId;
-            await Countly.Instance.Device.ChangeDeviceIdWithoutMerge("new_device_id_1");
+            yield return Countly.Instance.Device.ChangeDeviceIdWithoutMerge("new_device_id_1").AsCoroutine();
             //RQ will have end session request
             Assert.AreEqual(1, Countly.Instance.Device._requestCountlyHelper._requestRepo.Count);
             Assert.AreEqual(DeviceIdType.DeveloperProvided, Countly.Instance.Device.DeviceIdType);
 
             CountlyRequestModel requestModel = Countly.Instance.Device._requestCountlyHelper._requestRepo.Dequeue();
-            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            NameValueCollection collection = CountlyUtils.ParseQueryString(requestModel.RequestData);
 
             Assert.AreEqual("1", collection.Get("t"));
             AssertSessionRequest(collection, "end_session", oldDeviceId, true);
@@ -158,8 +160,8 @@ namespace Assets.Tests.PlayModeTests
         /// <summary>
         /// It validates functionality of method 'ChangeDeviceIdWithMerge'.
         /// </summary>
-        [Test]
-        public async void TestConset_ChangeDeviceIdWithMerge()
+        [UnityTest]
+        public IEnumerator TestConset_ChangeDeviceIdWithMerge()
         {
             ConfigureAndInitSDK();
 
@@ -168,13 +170,13 @@ namespace Assets.Tests.PlayModeTests
 
             string oldDeviceId = Countly.Instance.Device.DeviceId;
             Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
-            await Countly.Instance.Device.ChangeDeviceIdWithMerge("new_device_id");
+            yield return Countly.Instance.Device.ChangeDeviceIdWithMerge("new_device_id").AsCoroutine();
             //RQ will have begin session and end session requests
             Assert.AreEqual(1, Countly.Instance.Device._requestCountlyHelper._requestRepo.Count);
             Assert.AreEqual(DeviceIdType.DeveloperProvided, Countly.Instance.Device.DeviceIdType);
 
             CountlyRequestModel requestModel = Countly.Instance.Device._requestCountlyHelper._requestRepo.Dequeue();
-            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            NameValueCollection collection = CountlyUtils.ParseQueryString(requestModel.RequestData);
 
             Assert.AreEqual("0", collection.Get("t"));
             Assert.AreEqual(oldDeviceId, collection.Get("old_device_id"));
@@ -185,8 +187,8 @@ namespace Assets.Tests.PlayModeTests
         /// <summary>
         /// It validates the functionality of method 'ChangeDeviceIdWithoutMerge' when automatic session tracking is enabled.
         /// </summary>
-        [Test]
-        public async void TestMethod_ChangeDeviceIdWithoutMerge_WhenAutomaticSessionTrackingEnabled()
+        [UnityTest]
+        public IEnumerator TestMethod_ChangeDeviceIdWithoutMerge_WhenAutomaticSessionTrackingEnabled()
         {
             ConfigureAndInitSDK(null, true, new Consents[] { Consents.Crashes, Consents.Events, Consents.Clicks, Consents.StarRating, Consents.Views, Consents.Users, Consents.Sessions, Consents.Push, Consents.RemoteConfig, Consents.Location, Consents.Feedback });
             Assert.IsNotNull(Countly.Instance.Consents);
@@ -194,13 +196,13 @@ namespace Assets.Tests.PlayModeTests
 
             string oldDeviceId = Countly.Instance.Device.DeviceId;
             Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
-            await Countly.Instance.Device.ChangeDeviceIdWithoutMerge("new_device_id");
+            yield return Countly.Instance.Device.ChangeDeviceIdWithoutMerge("new_device_id").AsCoroutine();
             //RQ will have end session request
             Assert.AreEqual(1, Countly.Instance.Device._requestCountlyHelper._requestRepo.Count);
             Assert.AreEqual(DeviceIdType.DeveloperProvided, Countly.Instance.Device.DeviceIdType);
 
             CountlyRequestModel requestModel = Countly.Instance.Device._requestCountlyHelper._requestRepo.Dequeue();
-            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            NameValueCollection collection = CountlyUtils.ParseQueryString(requestModel.RequestData);
 
             Assert.AreEqual("1", collection.Get("t"));
             Assert.AreEqual(oldDeviceId, collection.Get("device_id"));
@@ -212,13 +214,13 @@ namespace Assets.Tests.PlayModeTests
             Assert.AreEqual(2, Countly.Instance.Device._requestCountlyHelper._requestRepo.Count);
 
             requestModel = Countly.Instance.Device._requestCountlyHelper._requestRepo.Dequeue();
-            collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            collection = CountlyUtils.ParseQueryString(requestModel.RequestData);
 
             JObject consentObj = JObject.Parse(collection.Get("consent"));
             AssertConsentKeys(consentObj, new string[] { "push", "users", "views", "clicks", "events", "crashes", "sessions", "location", "feedback", "star-rating", "remote-config" }, true);
 
             requestModel = Countly.Instance.Device._requestCountlyHelper._requestRepo.Dequeue();
-            collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            collection = CountlyUtils.ParseQueryString(requestModel.RequestData);
 
             AssertSessionRequest(collection, "begin_session", "new_device_id");
 
@@ -229,8 +231,8 @@ namespace Assets.Tests.PlayModeTests
         /// <summary>
         /// It validates the functionality of method 'ChangeDeviceIdWithoutMerge' when automatic session tracking is disabled.
         /// </summary>
-        [Test]
-        public async void TestMethod_ChangeDeviceIdWithoutMerge_WhenAutomaticSessionTrackingIsDisabled()
+        [UnityTest]
+        public IEnumerator TestMethod_ChangeDeviceIdWithoutMerge_WhenAutomaticSessionTrackingIsDisabled()
         {
             ConfigureAndInitSDK(null, true, new Consents[] { Consents.Crashes, Consents.Events, Consents.Clicks, Consents.StarRating, Consents.Views, Consents.Users, Consents.Sessions, Consents.Push, Consents.RemoteConfig, Consents.Location, Consents.Feedback }, true);
 
@@ -238,7 +240,7 @@ namespace Assets.Tests.PlayModeTests
             Assert.AreEqual(DeviceIdType.SDKGenerated, Countly.Instance.Device.DeviceIdType);
 
             Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
-            await Countly.Instance.Device.ChangeDeviceIdWithoutMerge("new_device_id");
+            yield return Countly.Instance.Device.ChangeDeviceIdWithoutMerge("new_device_id").AsCoroutine();
             //Since automatic session tracking is disabled, RQ will be empty
             Assert.AreEqual(0, Countly.Instance.Device._requestCountlyHelper._requestRepo.Count);
             Assert.AreEqual(DeviceIdType.DeveloperProvided, Countly.Instance.Device.DeviceIdType);
@@ -248,7 +250,7 @@ namespace Assets.Tests.PlayModeTests
             //RQ will have only consent request
             Assert.AreEqual(1, Countly.Instance.Device._requestCountlyHelper._requestRepo.Count);
             CountlyRequestModel requestModel = Countly.Instance.Device._requestCountlyHelper._requestRepo.Dequeue();
-            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            NameValueCollection collection = CountlyUtils.ParseQueryString(requestModel.RequestData);
 
             JObject consentObj = JObject.Parse(collection.Get("consent"));
             AssertConsentKeys(consentObj, new string[] { "push", "users", "views", "clicks", "events", "crashes", "sessions", "location", "feedback", "star-rating", "remote-config" }, true);
@@ -466,6 +468,7 @@ namespace Assets.Tests.PlayModeTests
             Object.DestroyImmediate(Countly.Instance);
         }
 
+        [SetUp]
         [TearDown]
         public void End()
         {

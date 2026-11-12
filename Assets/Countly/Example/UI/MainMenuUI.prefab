@@ -719,7 +719,7 @@ GameObject:
   - component: {fileID: 8402652500540409056}
   - component: {fileID: 8402652500540409063}
   m_Layer: 5
-  m_Name: User Details
+  m_Name: Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1351,7 +1351,7 @@ GameObject:
   - component: {fileID: 8402652501337541206}
   - component: {fileID: 8402652501337541205}
   m_Layer: 5
-  m_Name: User Details
+  m_Name: User Profile
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1828,7 +1828,7 @@ GameObject:
   - component: {fileID: 8402652501462404256}
   - component: {fileID: 8402652501462404263}
   m_Layer: 5
-  m_Name: User Details
+  m_Name: Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1894,7 +1894,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: User Details
+  m_Text: User Profile
 --- !u!1 &8402652501659694476
 GameObject:
   m_ObjectHideFlags: 0
@@ -2209,7 +2209,7 @@ GameObject:
   - component: {fileID: 8402652501762989137}
   - component: {fileID: 8402652501762989136}
   m_Layer: 5
-  m_Name: Device ID
+  m_Name: Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

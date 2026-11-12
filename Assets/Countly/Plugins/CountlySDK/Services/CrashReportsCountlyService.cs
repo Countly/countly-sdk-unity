@@ -14,7 +14,6 @@ namespace Plugins.CountlySDK.Services
     {
         internal bool IsApplicationInBackground { get; set; }
         internal readonly Queue<string> _crashBreadcrumbs = new Queue<string>();
-
         internal readonly RequestCountlyHelper _requestCountlyHelper;
 
         internal CrashReportsCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, RequestCountlyHelper requestCountlyHelper, ConsentCountlyService consentService) : base(configuration, logHelper, consentService)
@@ -32,15 +31,15 @@ namespace Plugins.CountlySDK.Services
 
                 int limit = lines.Length;
 
-                if (limit > _configuration.MaxStackTraceLinesPerThread) {
-                    limit = _configuration.MaxStackTraceLinesPerThread;
+                if (limit > _configuration.GetMaxStackTraceLinesPerThread()) {
+                    limit = _configuration.GetMaxStackTraceLinesPerThread();
                 }
 
                 for (int i = 0; i < limit; ++i) {
                     string line = lines[i];
 
-                    if (line.Length > _configuration.MaxStackTraceLineLength) {
-                        line = line.Substring(0, _configuration.MaxStackTraceLineLength);
+                    if (line.Length > _configuration.GetMaxStackTraceLineLength()) {
+                        line = line.Substring(0, _configuration.GetMaxStackTraceLineLength());
                     }
 
                     if (i + 1 != limit) {
@@ -66,22 +65,26 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         [Obsolete("SendCrashReportAsync(string message, string stackTrace, LogType type, IDictionary<string, object> segments = null, bool nonfatal = true) is deprecated, this is going to be removed in the future.")]
         public async Task SendCrashReportAsync(string message, string stackTrace, LogType type,
-            IDictionary<string, object> segments = null, bool nonfatal = true)
+        IDictionary<string, object> segments = null, bool nonfatal = true)
         {
             lock (LockObj) {
-                Log.Info("[CrashReportsCountlyService] SendCrashReportAsync : message = " + message + ", stackTrace = " + stackTrace);
+                Log.Info($"[CrashReportsCountlyService] SendCrashReportAsync, message: [{message}], stackTrace: [{stackTrace}]");
+                Log.Warning("[CrashReportsCountlyService] SendCrashReportAsync, this overload is deprecated, use 'SendCrashReportAsync(message, stackTrace, segments, nonfatal)' instead");
+                Log.RecordLogCode("w120");
+                Log.RecordUsage(HealthCheckCountlyService.AreaCrashes, "SendCrashReportAsync:d");
 
                 if (!_consentService.CheckConsentInternal(Consents.Crashes)) {
                     return;
                 }
 
                 if (string.IsNullOrEmpty(message) || string.IsNullOrWhiteSpace(message)) {
-                    Log.Warning("[CrashReportsCountlyService] SendCrashReportAsync : The parameter 'message' can't be null or empty");
+                    Log.Warning("[CrashReportsCountlyService] SendCrashReportAsync, The parameter 'message' can't be null or empty");
+                    Log.RecordLogCode("w700", HealthCheckCountlyService.AreaCrashes);
                     return;
                 }
 
                 IDictionary<string, object> segmentation = RemoveSegmentInvalidDataTypes(segments);
-                segmentation = FixSegmentKeysAndValues(segments);
+                segmentation = FixSegmentKeysAndValues(segmentation);
 
                 CountlyExceptionDetailModel model = ExceptionDetailModel(message, ManipulateStackTrace(stackTrace), nonfatal, segmentation);
                 _ = SendCrashReportInternal(model);
@@ -89,6 +92,7 @@ namespace Plugins.CountlySDK.Services
 
             await Task.CompletedTask;
         }
+
         /// <summary>
         /// Public method that sends crash details to the server. Set param "nonfatal" to true for Custom Logged errors
         /// </summary>
@@ -99,44 +103,76 @@ namespace Plugins.CountlySDK.Services
         /// <returns></returns>
         public async Task SendCrashReportAsync(string message, string stackTrace, IDictionary<string, object> segments = null, bool nonfatal = true)
         {
-            if (_configuration.EnableAutomaticCrashReporting) {
+            Log.RecordUsage(HealthCheckCountlyService.AreaCrashes, "record");
+            RecordCrash(message, stackTrace, segments, nonfatal);
+            await Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// Reports an exception Unity caught. While it is reported, the health check counts no method usage and no
+        /// log codes; the crash itself is counted as a stored number that the health check of the next start reports.
+        /// </summary>
+        /// <param name="message">the exception message</param>
+        /// <param name="stackTrace">the stack trace</param>
+        internal void SendAutomaticCrashReport(string message, string stackTrace)
+        {
+            HealthCheckCountlyService healthCheck = Log.HealthCheck;
+            healthCheck?.StopRecordingForCrash();
+            try {
+                if (RecordCrash(message, stackTrace, null, true)) {
+                    HealthCheckCountlyService.IncrementAutomaticCrashCount();
+                }
+            } finally {
+                healthCheck?.ResumeRecordingAfterCrash();
+            }
+        }
+
+        /// <summary>
+        /// Queues a crash report, while automatic crash reporting is enabled and crashes have consent.
+        /// </summary>
+        /// <returns>whether the report was queued</returns>
+        private bool RecordCrash(string message, string stackTrace, IDictionary<string, object> segments, bool nonfatal)
+        {
+            if (_configuration.IsAutomaticCrashReportingEnabled()) {
                 lock (LockObj) {
-                    Log.Info("[CrashReportsCountlyService] SendCrashReportAsync : message = " + message + ", stackTrace = " + stackTrace);
+                    Log.Info($"[CrashReportsCountlyService] SendCrashReportAsync, message: [{message}], stackTrace: [{stackTrace}]");
 
                     if (!_consentService.CheckConsentInternal(Consents.Crashes)) {
-                        return;
+                        return false;
                     }
 
                     if (string.IsNullOrEmpty(message) || string.IsNullOrWhiteSpace(message)) {
-                        Log.Warning("[CrashReportsCountlyService] SendCrashReportAsync : The parameter 'message' can't be null or empty");
-                        return;
+                        Log.Warning("[CrashReportsCountlyService] SendCrashReportAsync, The parameter 'message' can't be null or empty");
+                        Log.RecordLogCode("w700", HealthCheckCountlyService.AreaCrashes);
+                        return false;
                     }
 
                     IDictionary<string, object> segmentation = RemoveSegmentInvalidDataTypes(segments);
-                    segmentation = FixSegmentKeysAndValues(segments);
+                    segmentation = FixSegmentKeysAndValues(segmentation);
 
                     CountlyExceptionDetailModel model = ExceptionDetailModel(message, ManipulateStackTrace(stackTrace), nonfatal, segmentation);
                     _ = SendCrashReportInternal(model);
+                    return true;
                 }
             }
 
-            await Task.CompletedTask;
+            return false;
         }
+
         internal async Task SendCrashReportInternal(CountlyExceptionDetailModel model)
         {
-            Log.Debug("[CrashReportsCountlyService] SendCrashReportInternal : model = " + model.ToString());
+            Log.Debug($"[CrashReportsCountlyService] SendCrashReportInternal, model: [{model}]");
 
             Dictionary<string, object> requestParams = new Dictionary<string, object>
             {
                 {
                     "crash", JsonConvert.SerializeObject(model, Formatting.Indented,
-                        new JsonSerializerSettings {NullValueHandling = NullValueHandling.Ignore})
+                    new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore })
                 }
             };
 
             _requestCountlyHelper.AddToRequestQueue(requestParams);
             await _requestCountlyHelper.ProcessQueue();
-
         }
 
         /// <summary>
@@ -145,7 +181,8 @@ namespace Plugins.CountlySDK.Services
         /// <param name="value">a bread crumb for the crash report</param>
         public void AddBreadcrumbs(string value)
         {
-            Log.Info("[CrashReportsCountlyService] AddBreadcrumbs : " + value);
+            Log.Info($"[CrashReportsCountlyService] AddBreadcrumbs, value: [{value}]");
+            Log.RecordUsage(HealthCheckCountlyService.AreaCrashes, "log");
 
             if (!_consentService.CheckConsentInternal(Consents.Crashes)) {
                 return;
@@ -155,9 +192,9 @@ namespace Plugins.CountlySDK.Services
                 return;
             }
 
-            string validBreadcrumb = value.Length > _configuration.MaxValueSize ? value.Substring(0, _configuration.MaxValueSize) : value;
+            string validBreadcrumb = value.Length > _configuration.GetMaxValueSize() ? value.Substring(0, _configuration.GetMaxValueSize()) : value;
 
-            if (_crashBreadcrumbs.Count == _configuration.TotalBreadcrumbsAllowed) {
+            if (_crashBreadcrumbs.Count >= _configuration.GetMaxBreadcrumbCount()) {
                 _crashBreadcrumbs.Dequeue();
             }
 

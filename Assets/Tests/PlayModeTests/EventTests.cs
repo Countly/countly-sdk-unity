@@ -4,7 +4,11 @@ using NUnit.Framework;
 using UnityEngine.TestTools;
 using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK;
+using System.Collections;
+using System.Threading.Tasks;
 using Plugins.CountlySDK.Enums;
+using Newtonsoft.Json.Linq;
+using System;
 
 namespace Assets.Tests.PlayModeTests
 {
@@ -13,8 +17,8 @@ namespace Assets.Tests.PlayModeTests
         private void AssertAnEvent(CountlyEventModel model, string name, double? sum, double count, double? duration, IDictionary<string, object> segmentation)
         {
             Assert.AreEqual(name, model.Key);
-            Assert.AreEqual(model.Sum, sum);
-            Assert.AreEqual(model.Count, count);
+            Assert.AreEqual(sum, model.Sum);
+            Assert.AreEqual(count, model.Count);
 
             if (duration != null) {
                 Assert.IsTrue(duration <= model.Duration);
@@ -23,14 +27,34 @@ namespace Assets.Tests.PlayModeTests
             }
 
             if (segmentation != null) {
-                foreach (KeyValuePair<string, object> entry in model.Segmentation) {
-                    Assert.AreEqual(segmentation[entry.Key], entry.Value);
-                }
-
                 Assert.AreEqual(segmentation.Count, model.Segmentation.Count);
 
-            } else {
-                Assert.IsNull(model.Segmentation);
+                foreach (KeyValuePair<string, object> entry in segmentation) {
+                    string key = entry.Key;
+                    object expectedValue = entry.Value;
+
+                    // Check if key exists in model.Segmentation
+                    Assert.IsTrue(model.Segmentation.ContainsKey(key), $"Key '{key}' not found in segmentation");
+
+                    // Get actual value from model.Segmentation
+                    object actualValue = model.Segmentation[key];
+
+                    // Compare expected and actual values
+                    if (expectedValue is Array || expectedValue is IList) {
+                        // Convert expected value to JArray for comparison
+                        JArray expectedArray = JArray.FromObject(expectedValue);
+                        JArray actualArray = JArray.FromObject(actualValue);
+
+                        Assert.AreEqual(expectedArray.Count, actualArray.Count, $"Mismatch in array/list size for key '{key}'");
+
+                        for (int i = 0; i < expectedArray.Count; i++) {
+                            Assert.AreEqual(expectedArray[i].ToString(), actualArray[i].ToString(), $"Mismatch in array/list element at index {i} for key '{key}'");
+                        }
+                    } else {
+                        // Compare single values as strings
+                        Assert.AreEqual(expectedValue.ToString(), actualValue.ToString(), $"Mismatch for key '{key}'");
+                    }
+                }
             }
         }
 
@@ -48,8 +72,8 @@ namespace Assets.Tests.PlayModeTests
         /// <summary>
         /// It checks the working of event service if no event consent is given.
         /// </summary>
-        [Test]
-        public async void TestEventConsent()
+        [UnityTest]
+        public IEnumerator TestEventConsent()
         {
             CountlyConfiguration configuration = TestUtility.CreateBaseConfig()
                 .SetRequiresConsent(true);
@@ -60,11 +84,11 @@ namespace Assets.Tests.PlayModeTests
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
             Assert.AreEqual(0, Countly.Instance.Events._timedEvents.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("test_event");
+            yield return Countly.Instance.Events.RecordEventAsync("test_event").AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
             Assert.AreEqual(0, Countly.Instance.Events._timedEvents.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("test_event", segmentation: null, sum: 23, duration: 5);
+            yield return Countly.Instance.Events.RecordEventAsync("test_event", segmentation: null, sum: 23, duration: 5).AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
             Assert.AreEqual(0, Countly.Instance.Events._timedEvents.Count);
 
@@ -113,8 +137,8 @@ namespace Assets.Tests.PlayModeTests
         /// <summary>
         /// It validates the cancelation of timed events on changing device id without merge.
         /// </summary>
-        [Test]
-        public async void TestTimedEventsCancelationOnDeviceIdChange()
+        [UnityTest]
+        public IEnumerator TestTimedEventsCancelationOnDeviceIdChange()
         {
             Countly.Instance.Init(TestUtility.CreateBaseConfig());
 
@@ -126,7 +150,7 @@ namespace Assets.Tests.PlayModeTests
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
             Assert.AreEqual(2, Countly.Instance.Events._timedEvents.Count);
 
-            await Countly.Instance.Device.ChangeDeviceIdWithoutMerge("new_device_id");
+            yield return Countly.Instance.Device.ChangeDeviceIdWithoutMerge("new_device_id").AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
             Assert.AreEqual(0, Countly.Instance.Events._timedEvents.Count);
         }
@@ -220,21 +244,21 @@ namespace Assets.Tests.PlayModeTests
         /// <summary>
         /// It validates functionality of method 'RecordEventAsync'.
         /// </summary>
-        [Test]
-        public async void TestEventMethod_RecordEventAsync()
+        [UnityTest]
+        public IEnumerator TestEventMethod_RecordEventAsync()
         {
             Countly.Instance.Init(TestUtility.CreateBaseConfig());
             Assert.IsNotNull(Countly.Instance.Events);
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("test_event");
+            yield return Countly.Instance.Events.RecordEventAsync("test_event").AsCoroutine();
             Assert.AreEqual(1, Countly.Instance.Events._eventRepo.Count);
 
             CountlyEventModel model = Countly.Instance.Events._eventRepo.Dequeue();
             AssertAnEvent(model, "test_event", 0, 1, null, null);
 
 
-            await Countly.Instance.Events.RecordEventAsync("test_event1", segmentation: null, count: 5, duration: null, sum: null);
+            yield return Countly.Instance.Events.RecordEventAsync("test_event1", segmentation: null, count: 5, duration: null, sum: null).AsCoroutine();
             Assert.AreEqual(1, Countly.Instance.Events._eventRepo.Count);
 
             model = Countly.Instance.Events._eventRepo.Dequeue();
@@ -244,8 +268,8 @@ namespace Assets.Tests.PlayModeTests
         /// <summary>
         /// It validates the working of event service if 'EventQueueThreshold' limit reach.
         /// </summary>
-        [Test]
-        public async void TestEvent_EventQueueThreshold_Limit()
+        [UnityTest]
+        public IEnumerator TestEvent_EventQueueThreshold_Limit()
         {
             CountlyConfiguration configuration = TestUtility.CreateBaseConfig()
                 .SetEventQueueSizeToSend(3);
@@ -254,21 +278,21 @@ namespace Assets.Tests.PlayModeTests
             Assert.IsNotNull(Countly.Instance.Events);
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("test_event_1");
+            yield return Countly.Instance.Events.RecordEventAsync("test_event_1").AsCoroutine();
             Assert.AreEqual(1, Countly.Instance.Events._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("test_event_2");
+            yield return Countly.Instance.Events.RecordEventAsync("test_event_2").AsCoroutine();
             Assert.AreEqual(2, Countly.Instance.Events._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("test_event_3");
+            yield return Countly.Instance.Events.RecordEventAsync("test_event_3").AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
         }
 
         /// <summary>
         /// It validates functionality of method 'ReportCustomEventAsync'.
         /// </summary>
-        [Test]
-        public async void TestEventMethod_ReportCustomEventAsync()
+        [UnityTest]
+        public IEnumerator TestEventMethod_ReportCustomEventAsync()
         {
             Countly.Instance.Init(TestUtility.CreateBaseConfig());
             Assert.IsNotNull(Countly.Instance.Events);
@@ -281,7 +305,7 @@ namespace Assets.Tests.PlayModeTests
 
             SegmentModel segmentModel = new SegmentModel(segments);
 
-            await Countly.Instance.Events.RecordEventAsync("test_event", segmentation: segmentModel, sum: 23, duration: 5);
+            yield return Countly.Instance.Events.RecordEventAsync("test_event", segmentation: segmentModel, sum: 23, duration: 5).AsCoroutine();
 
             CountlyEventModel model = Countly.Instance.Events._eventRepo.Dequeue();
             AssertAnEvent(model, "test_event", 23, 1, 5, segments);
@@ -290,8 +314,8 @@ namespace Assets.Tests.PlayModeTests
         /// <summary>
         /// It validates the event limits.
         /// </summary>
-        [Test]
-        public async void TestEventLimits()
+        [UnityTest]
+        public IEnumerator TestEventLimits()
         {
             CountlyConfiguration configuration = TestUtility.CreateBaseConfig()
                 .SetMaxKeyLength(4)
@@ -309,7 +333,7 @@ namespace Assets.Tests.PlayModeTests
 
             SegmentModel segmentModel = new SegmentModel(segments);
 
-            await Countly.Instance.Events.RecordEventAsync("test_event", segmentation: segmentModel, sum: 23, duration: 5);
+            yield return Countly.Instance.Events.RecordEventAsync("test_event", segmentation: segmentModel, sum: 23, duration: 5).AsCoroutine();
 
             CountlyEventModel model = Countly.Instance.Events._eventRepo.Dequeue();
 
@@ -323,9 +347,12 @@ namespace Assets.Tests.PlayModeTests
 
         /// <summary>
         /// It validates the data type of segment items.
+        /// We provide segmentation with crash and check every supported data type
+        /// string, bool, float, double, string, long and, their list and arrays are supported types
+        /// Supported data types should be recorded, unsupported types should be removed correctly
         /// </summary>
-        [Test]
-        public async void TestSegmentItemsDataTypesValidation()
+        [UnityTest]
+        public IEnumerator SegmentationDataTypeValidation()
         {
             Countly.Instance.Init(TestUtility.CreateBaseConfig());
             Assert.IsNotNull(Countly.Instance.Events);
@@ -336,29 +363,55 @@ namespace Assets.Tests.PlayModeTests
                 { "key2", 1},
                 { "key3", 10.0},
                 { "key4", true},
-                { "key5", null},// invalid
-                { "key6", Countly.Instance} // invalid
+                { "key5", null}, // invalid
+                { "key6", Countly.Instance}, // invalid
+                { "MixedList", new List<object> { 1, "string", 2.3, true, new int[] { 1, 2, 3 }, new object(), Countly.Instance } }, // mixed list
+                { "MixedArray", new object[] { 1, "string", 2.3, true, new int[] { 1, 2, 3 }, new object(), Countly.Instance } }, // mixed array
+                { "IntArray", new int[] { 1, 2, 3 } },
+                { "BoolArray", new bool[] { true, false, true } },
+                { "FloatArray", new float[] { 1.1f, 2.2f, 3.3f } },
+                { "DoubleArray", new double[] { 1.1, 2.2, 3.3 } },
+                { "StringArray", new string[] { "a", "b", "c" } },
+                { "LongArray", new long[] { 10000000000L, 20000000000L, 30000000000L } },
+                { "IntList", new List<int> { 1, 2, 3 } },
+                { "BoolList", new List<bool> { true, false, true } },
+                { "FloatList", new List<float> { 1.1f, 2.2f, 3.3f } },
+                { "DoubleList", new List<double> { 1.1, 2.2, 3.3 } },
+                { "StringList", new List<string> { "a", "b", "c" } },
+                { "LongList", new List<long> { 10000000000L, 20000000000L, 30000000000L } }
             };
 
-            await Countly.Instance.Events.RecordEventAsync("test_event", segmentation: segments, sum: 23, duration: 5);
+            yield return Countly.Instance.Events.RecordEventAsync("test_event", segmentation: segments, sum: 23, duration: 5).AsCoroutine();
 
             CountlyEventModel model = Countly.Instance.Events._eventRepo.Dequeue();
 
-            Dictionary<string, object> requireSegments = new Dictionary<string, object>{
+            Dictionary<string, object> expectedSegm = new Dictionary<string, object>{
                 { "key1", "value1"},
                 { "key2", 1},
                 { "key3", 10.0},
                 { "key4", true},
+                { "IntArray", new int[] { 1, 2, 3 } },
+                { "BoolArray", new bool[] { true, false, true } },
+                { "FloatArray", new float[] { 1.1f, 2.2f, 3.3f } },
+                { "DoubleArray", new double[] { 1.1, 2.2, 3.3 } },
+                { "StringArray", new string[] { "a", "b", "c" } },
+                { "LongArray", new long[] { 10000000000L, 20000000000L, 30000000000L } },
+                { "IntList", new List<int> { 1, 2, 3 } },
+                { "BoolList", new List<bool> { true, false, true } },
+                { "FloatList", new List<float> { 1.1f, 2.2f, 3.3f } },
+                { "DoubleList", new List<double> { 1.1, 2.2, 3.3 } },
+                { "StringList", new List<string> { "a", "b", "c" } },
+                { "LongList", new List<long> { 10000000000L, 20000000000L, 30000000000L } }
             };
 
-            AssertAnEvent(model, "test_event", 23, 1, 5, requireSegments);
+            AssertAnEvent(model, "test_event", 23, 1, 5, expectedSegm);
         }
 
         /// <summary>
         /// It validates the mandatory and optional parameters of events.
         /// </summary>
-        [Test]
-        public async void TestEventsParameters()
+        [UnityTest]
+        public IEnumerator TestEventsParameters()
         {
             Countly.Instance.Init(TestUtility.CreateBaseConfig());
 
@@ -370,22 +423,22 @@ namespace Assets.Tests.PlayModeTests
                 { "key2", "value2"}
             };
 
-            await Countly.Instance.Events.RecordEventAsync("", segmentation: segments, sum: 23, duration: 5);
+            yield return Countly.Instance.Events.RecordEventAsync("", segmentation: segments, sum: 23, duration: 5).AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("");
+            yield return Countly.Instance.Events.RecordEventAsync("").AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync(null, segmentation: segments, sum: 23, duration: 5);
+            yield return Countly.Instance.Events.RecordEventAsync(null, segmentation: segments, sum: 23, duration: 5).AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync(" ");
+            yield return Countly.Instance.Events.RecordEventAsync(" ").AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("key", segmentation: null, sum: 23, duration: 5);
+            yield return Countly.Instance.Events.RecordEventAsync("key", segmentation: null, sum: 23, duration: 5).AsCoroutine();
             Assert.AreEqual(1, Countly.Instance.Events._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("key", segmentation: segments, sum: 23, duration: null);
+            yield return Countly.Instance.Events.RecordEventAsync("key", segmentation: segments, sum: 23, duration: null).AsCoroutine();
             Assert.AreEqual(2, Countly.Instance.Events._eventRepo.Count);
         }
 
@@ -393,8 +446,8 @@ namespace Assets.Tests.PlayModeTests
         /// <summary>
         /// It validates specific keys consents.
         /// </summary>
-        [Test]
-        public async void TestSpecificKeysConsent()
+        [UnityTest]
+        public IEnumerator TestSpecificKeysConsent()
         {
             CountlyConfiguration configuration = TestUtility.CreateBaseConfig()
                 .SetRequiresConsent(true);
@@ -404,36 +457,36 @@ namespace Assets.Tests.PlayModeTests
             Assert.IsNotNull(Countly.Instance.Events);
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("event");
+            yield return Countly.Instance.Events.RecordEventAsync("event").AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("[CLY]_view");
+            yield return Countly.Instance.Events.RecordEventAsync("[CLY]_view").AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("[CLY]_nps");
+            yield return Countly.Instance.Events.RecordEventAsync("[CLY]_nps").AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("[CLY]_action");
+            yield return Countly.Instance.Events.RecordEventAsync("[CLY]_action").AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("[CLY]_survey");
+            yield return Countly.Instance.Events.RecordEventAsync("[CLY]_survey").AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("[CLY]_push_action");
+            yield return Countly.Instance.Events.RecordEventAsync("[CLY]_push_action").AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("[CLY]_orientation");
+            yield return Countly.Instance.Events.RecordEventAsync("[CLY]_orientation").AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("[CLY]_star_rating");
+            yield return Countly.Instance.Events.RecordEventAsync("[CLY]_star_rating").AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
         }
 
         /// <summary>
         /// It validates 'recordEvent' against view specific key '[CLY]_view'.
         /// </summary>
-        [Test]
-        public async void TestEventMethod_RecordEventAgainstViewKey()
+        [UnityTest]
+        public IEnumerator TestEventMethod_RecordEventAgainstViewKey()
         {
             CountlyConfiguration configuration = TestUtility.CreateBaseConfig()
                 .SetRequiresConsent(true);
@@ -446,32 +499,32 @@ namespace Assets.Tests.PlayModeTests
             //[CLY]_view
             Countly.Instance.Consents.GiveConsent(new Consents[] { Consents.Views });
 
-            await Countly.Instance.Events.RecordEventAsync("event");
+            yield return Countly.Instance.Events.RecordEventAsync("event").AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("[CLY]_action");
+            yield return Countly.Instance.Events.RecordEventAsync("[CLY]_action").AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("[CLY]_push_action");
+            yield return Countly.Instance.Events.RecordEventAsync("[CLY]_push_action").AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("[CLY]_nps");
+            yield return Countly.Instance.Events.RecordEventAsync("[CLY]_nps").AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("[CLY]_orientation");
+            yield return Countly.Instance.Events.RecordEventAsync("[CLY]_orientation").AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("[CLY]_survey");
+            yield return Countly.Instance.Events.RecordEventAsync("[CLY]_survey").AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("[CLY]_star_rating");
+            yield return Countly.Instance.Events.RecordEventAsync("[CLY]_star_rating").AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("[CLY]_view");
+            yield return Countly.Instance.Events.RecordEventAsync("[CLY]_view").AsCoroutine();
             Assert.AreEqual(1, Countly.Instance.Events._eventRepo.Count);
 
             CountlyEventModel model = Countly.Instance.Events._eventRepo.Dequeue();
-            await Countly.Instance.Events.RecordEventAsync("[CLY]_view", segmentation: null, count: 5, duration: null, sum: 1);
+            yield return Countly.Instance.Events.RecordEventAsync("[CLY]_view", segmentation: null, count: 5, duration: null, sum: 1).AsCoroutine();
             Assert.AreEqual(1, Countly.Instance.Events._eventRepo.Count);
 
             model = Countly.Instance.Events._eventRepo.Dequeue();
@@ -481,8 +534,8 @@ namespace Assets.Tests.PlayModeTests
         /// <summary>
         /// It validates 'recordEvent' against action specific key '[CLY]_action'.
         /// </summary>
-        [Test]
-        public async void TestEventMethod_RecordEventAgainstActionKey()
+        [UnityTest]
+        public IEnumerator TestEventMethod_RecordEventAgainstActionKey()
         {
             CountlyConfiguration configuration = TestUtility.CreateBaseConfig()
                 .SetRequiresConsent(true);
@@ -494,34 +547,34 @@ namespace Assets.Tests.PlayModeTests
 
             Countly.Instance.Consents.GiveConsent(new Consents[] { Consents.Clicks });
 
-            await Countly.Instance.Events.RecordEventAsync("event");
+            yield return Countly.Instance.Events.RecordEventAsync("event").AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("[CLY]_push_action");
+            yield return Countly.Instance.Events.RecordEventAsync("[CLY]_push_action").AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("[CLY]_nps");
+            yield return Countly.Instance.Events.RecordEventAsync("[CLY]_nps").AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("[CLY]_orientation");
+            yield return Countly.Instance.Events.RecordEventAsync("[CLY]_orientation").AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("[CLY]_survey");
+            yield return Countly.Instance.Events.RecordEventAsync("[CLY]_survey").AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("[CLY]_view");
+            yield return Countly.Instance.Events.RecordEventAsync("[CLY]_view").AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("[CLY]_star_rating");
+            yield return Countly.Instance.Events.RecordEventAsync("[CLY]_star_rating").AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("[CLY]_action");
+            yield return Countly.Instance.Events.RecordEventAsync("[CLY]_action").AsCoroutine();
             Assert.AreEqual(1, Countly.Instance.Events._eventRepo.Count);
 
             CountlyEventModel model = Countly.Instance.Events._eventRepo.Dequeue();
             AssertAnEvent(model, "[CLY]_action", 0, 1, null, null);
 
-            await Countly.Instance.Events.RecordEventAsync("[CLY]_action", segmentation: null, count: 5, duration: null, sum: 1);
+            yield return Countly.Instance.Events.RecordEventAsync("[CLY]_action", segmentation: null, count: 5, duration: null, sum: 1).AsCoroutine();
             Assert.AreEqual(1, Countly.Instance.Events._eventRepo.Count);
 
             model = Countly.Instance.Events._eventRepo.Dequeue();
@@ -531,8 +584,8 @@ namespace Assets.Tests.PlayModeTests
         /// <summary>
         /// It validates 'recordEvent' against action specific key '[CLY]_star_rating'.
         /// </summary>
-        [Test]
-        public async void TestEventMethod_RecordEventAgainstStarRatingKey()
+        [UnityTest]
+        public IEnumerator TestEventMethod_RecordEventAgainstStarRatingKey()
         {
             CountlyConfiguration configuration = TestUtility.CreateBaseConfig()
                 .SetRequiresConsent(true);
@@ -544,34 +597,34 @@ namespace Assets.Tests.PlayModeTests
 
             Countly.Instance.Consents.GiveConsent(new Consents[] { Consents.StarRating });
 
-            await Countly.Instance.Events.RecordEventAsync("event");
+            yield return Countly.Instance.Events.RecordEventAsync("event").AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("[CLY]_push_action");
+            yield return Countly.Instance.Events.RecordEventAsync("[CLY]_push_action").AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("[CLY]_nps");
+            yield return Countly.Instance.Events.RecordEventAsync("[CLY]_nps").AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("[CLY]_orientation");
+            yield return Countly.Instance.Events.RecordEventAsync("[CLY]_orientation").AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("[CLY]_survey");
+            yield return Countly.Instance.Events.RecordEventAsync("[CLY]_survey").AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("[CLY]_view");
+            yield return Countly.Instance.Events.RecordEventAsync("[CLY]_view").AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("[CLY]_action");
+            yield return Countly.Instance.Events.RecordEventAsync("[CLY]_action").AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("[CLY]_star_rating");
+            yield return Countly.Instance.Events.RecordEventAsync("[CLY]_star_rating").AsCoroutine();
             Assert.AreEqual(1, Countly.Instance.Events._eventRepo.Count);
 
             CountlyEventModel model = Countly.Instance.Events._eventRepo.Dequeue();
             AssertAnEvent(model, "[CLY]_star_rating", 0, 1, null, null);
 
-            await Countly.Instance.Events.RecordEventAsync("[CLY]_star_rating", segmentation: null, count: 5, duration: null, sum: 1);
+            yield return Countly.Instance.Events.RecordEventAsync("[CLY]_star_rating", segmentation: null, count: 5, duration: null, sum: 1).AsCoroutine();
             Assert.AreEqual(1, Countly.Instance.Events._eventRepo.Count);
 
             model = Countly.Instance.Events._eventRepo.Dequeue();
@@ -581,8 +634,8 @@ namespace Assets.Tests.PlayModeTests
         /// <summary>
         /// It validates 'recordEvent' against push specific key '[CLY]_push_action'.
         /// </summary>
-        [Test]
-        public async void TestEventMethod_RecordEventAgainstPushActionKey()
+        [UnityTest]
+        public IEnumerator TestEventMethod_RecordEventAgainstPushActionKey()
         {
             CountlyConfiguration configuration = TestUtility.CreateBaseConfig()
                 .SetRequiresConsent(true);
@@ -595,34 +648,34 @@ namespace Assets.Tests.PlayModeTests
             //[CLY]_push_action
             Countly.Instance.Consents.GiveConsent(new Consents[] { Consents.Push });
 
-            await Countly.Instance.Events.RecordEventAsync("event");
+            yield return Countly.Instance.Events.RecordEventAsync("event").AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("[CLY]_nps");
+            yield return Countly.Instance.Events.RecordEventAsync("[CLY]_nps").AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("[CLY]_orientation");
+            yield return Countly.Instance.Events.RecordEventAsync("[CLY]_orientation").AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("[CLY]_survey");
+            yield return Countly.Instance.Events.RecordEventAsync("[CLY]_survey").AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("[CLY]_view");
+            yield return Countly.Instance.Events.RecordEventAsync("[CLY]_view").AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("[CLY]_star_rating");
+            yield return Countly.Instance.Events.RecordEventAsync("[CLY]_star_rating").AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("[CLY]_action");
+            yield return Countly.Instance.Events.RecordEventAsync("[CLY]_action").AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("[CLY]_push_action");
+            yield return Countly.Instance.Events.RecordEventAsync("[CLY]_push_action").AsCoroutine();
             Assert.AreEqual(1, Countly.Instance.Events._eventRepo.Count);
 
             CountlyEventModel model = Countly.Instance.Events._eventRepo.Dequeue();
             AssertAnEvent(model, "[CLY]_push_action", 0, 1, null, null);
 
-            await Countly.Instance.Events.RecordEventAsync("[CLY]_push_action", segmentation: null, count: 5, duration: null, sum: 1);
+            yield return Countly.Instance.Events.RecordEventAsync("[CLY]_push_action", segmentation: null, count: 5, duration: null, sum: 1).AsCoroutine();
             Assert.AreEqual(1, Countly.Instance.Events._eventRepo.Count);
 
             model = Countly.Instance.Events._eventRepo.Dequeue();
@@ -632,8 +685,8 @@ namespace Assets.Tests.PlayModeTests
         /// <summary>
         /// It validates 'recordEvent' against push specific key '[CLY]_orientation'.
         /// </summary>
-        [Test]
-        public async void TestEventMethod_RecordEventAgainstOrientationKey()
+        [UnityTest]
+        public IEnumerator TestEventMethod_RecordEventAgainstOrientationKey()
         {
             CountlyConfiguration configuration = TestUtility.CreateBaseConfig()
                 .SetRequiresConsent(true);
@@ -645,34 +698,34 @@ namespace Assets.Tests.PlayModeTests
 
             Countly.Instance.Consents.GiveConsent(new Consents[] { Consents.Users });
 
-            await Countly.Instance.Events.RecordEventAsync("event");
+            yield return Countly.Instance.Events.RecordEventAsync("event").AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("[CLY]_view");
+            yield return Countly.Instance.Events.RecordEventAsync("[CLY]_view").AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("[CLY]_action");
+            yield return Countly.Instance.Events.RecordEventAsync("[CLY]_action").AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("[CLY]_Push_Action");
+            yield return Countly.Instance.Events.RecordEventAsync("[CLY]_Push_Action").AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("[CLY]_push_action");
+            yield return Countly.Instance.Events.RecordEventAsync("[CLY]_push_action").AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("[CLY]_star_rating");
+            yield return Countly.Instance.Events.RecordEventAsync("[CLY]_star_rating").AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("[CLY]_survey");
+            yield return Countly.Instance.Events.RecordEventAsync("[CLY]_survey").AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("[CLY]_orientation");
+            yield return Countly.Instance.Events.RecordEventAsync("[CLY]_orientation").AsCoroutine();
             Assert.AreEqual(1, Countly.Instance.Events._eventRepo.Count);
 
             CountlyEventModel model = Countly.Instance.Events._eventRepo.Dequeue();
             AssertAnEvent(model, "[CLY]_orientation", 0, 1, null, null);
 
-            await Countly.Instance.Events.RecordEventAsync("[CLY]_orientation", segmentation: null, count: 5, duration: null, sum: 1);
+            yield return Countly.Instance.Events.RecordEventAsync("[CLY]_orientation", segmentation: null, count: 5, duration: null, sum: 1).AsCoroutine();
             Assert.AreEqual(1, Countly.Instance.Events._eventRepo.Count);
 
             model = Countly.Instance.Events._eventRepo.Dequeue();
@@ -682,8 +735,8 @@ namespace Assets.Tests.PlayModeTests
         /// <summary>
         /// It validates 'recordEvent' against nps([CLY]_nps) and survey([CLY]_survey) specific keys.
         /// </summary>
-        [Test]
-        public async void TestEventMethod_RecordEventAsyncWithSpecificKeys()
+        [UnityTest]
+        public IEnumerator TestEventMethod_RecordEventAsyncWithSpecificKeys()
         {
             CountlyConfiguration configuration = TestUtility.CreateBaseConfig()
                 .SetRequiresConsent(true);
@@ -695,28 +748,28 @@ namespace Assets.Tests.PlayModeTests
 
             Countly.Instance.Consents.GiveConsent(new Consents[] { Consents.Feedback });
 
-            await Countly.Instance.Events.RecordEventAsync("event");
+            yield return Countly.Instance.Events.RecordEventAsync("event").AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("[CLY]_view");
+            yield return Countly.Instance.Events.RecordEventAsync("[CLY]_view").AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("[CLY]_action");
+            yield return Countly.Instance.Events.RecordEventAsync("[CLY]_action").AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("[CLY]_Push_Action");
+            yield return Countly.Instance.Events.RecordEventAsync("[CLY]_Push_Action").AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("[CLY]_push_action");
+            yield return Countly.Instance.Events.RecordEventAsync("[CLY]_push_action").AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("[CLY]_star_rating");
+            yield return Countly.Instance.Events.RecordEventAsync("[CLY]_star_rating").AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("[CLY]_orientation");
+            yield return Countly.Instance.Events.RecordEventAsync("[CLY]_orientation").AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("[CLY]_survey");
+            yield return Countly.Instance.Events.RecordEventAsync("[CLY]_survey").AsCoroutine();
             Assert.AreEqual(1, Countly.Instance.Events._eventRepo.Count);
 
             CountlyEventModel model = Countly.Instance.Events._eventRepo.Dequeue();
@@ -727,19 +780,19 @@ namespace Assets.Tests.PlayModeTests
             Assert.IsNull(model.Duration);
             Assert.IsNull(model.Segmentation);
 
-            await Countly.Instance.Events.RecordEventAsync("[CLY]_survey", segmentation: null, count: 5, duration: null, sum: 1);
+            yield return Countly.Instance.Events.RecordEventAsync("[CLY]_survey", segmentation: null, count: 5, duration: null, sum: 1).AsCoroutine();
             Assert.AreEqual(1, Countly.Instance.Events._eventRepo.Count);
 
             model = Countly.Instance.Events._eventRepo.Dequeue();
             AssertAnEvent(model, "[CLY]_survey", 1, 5, null, null);
 
-            await Countly.Instance.Events.RecordEventAsync("[CLY]_nps");
+            yield return Countly.Instance.Events.RecordEventAsync("[CLY]_nps").AsCoroutine();
             Assert.AreEqual(1, Countly.Instance.Events._eventRepo.Count);
 
             model = Countly.Instance.Events._eventRepo.Dequeue();
             AssertAnEvent(model, "[CLY]_nps", 0, 1, null, null);
 
-            await Countly.Instance.Events.RecordEventAsync("[CLY]_nps", segmentation: null, count: 5, duration: null, sum: 1);
+            yield return Countly.Instance.Events.RecordEventAsync("[CLY]_nps", segmentation: null, count: 5, duration: null, sum: 1).AsCoroutine();
             Assert.AreEqual(1, Countly.Instance.Events._eventRepo.Count);
 
             model = Countly.Instance.Events._eventRepo.Dequeue();
@@ -749,8 +802,8 @@ namespace Assets.Tests.PlayModeTests
         /// <summary>
         /// It validates 'recordEvent' against specific event keys.
         /// </summary>
-        [Test]
-        public async void TestEventMethod_RecordEventAgainstSpecificEventKeys()
+        [UnityTest]
+        public IEnumerator TestEventMethod_RecordEventAgainstSpecificEventKeys()
         {
             CountlyConfiguration configuration = TestUtility.CreateBaseConfig()
                 .SetRequiresConsent(true);
@@ -762,28 +815,28 @@ namespace Assets.Tests.PlayModeTests
 
             Countly.Instance.Consents.GiveConsent(new Consents[] { Consents.Events });
 
-            await Countly.Instance.Events.RecordEventAsync("[CLY]_view");
+            yield return Countly.Instance.Events.RecordEventAsync("[CLY]_view").AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("[CLY]_action");
+            yield return Countly.Instance.Events.RecordEventAsync("[CLY]_action").AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("[CLY]_nps");
+            yield return Countly.Instance.Events.RecordEventAsync("[CLY]_nps").AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("[CLY]_survey");
+            yield return Countly.Instance.Events.RecordEventAsync("[CLY]_survey").AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("[CLY]_orientation");
+            yield return Countly.Instance.Events.RecordEventAsync("[CLY]_orientation").AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("[CLY]_star_rating");
+            yield return Countly.Instance.Events.RecordEventAsync("[CLY]_star_rating").AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("[CLY]_push_action");
+            yield return Countly.Instance.Events.RecordEventAsync("[CLY]_push_action").AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.Events._eventRepo.Count);
 
-            await Countly.Instance.Events.RecordEventAsync("event");
+            yield return Countly.Instance.Events.RecordEventAsync("event").AsCoroutine();
             Assert.AreEqual(1, Countly.Instance.Events._eventRepo.Count);
 
             CountlyEventModel model = Countly.Instance.Events._eventRepo.Dequeue();
@@ -794,7 +847,7 @@ namespace Assets.Tests.PlayModeTests
             Assert.IsNull(model.Duration);
             Assert.IsNull(model.Segmentation);
 
-            await Countly.Instance.Events.RecordEventAsync("event", segmentation: null, count: 5, duration: null, sum: 1);
+            yield return Countly.Instance.Events.RecordEventAsync("event", segmentation: null, count: 5, duration: null, sum: 1).AsCoroutine();
             Assert.AreEqual(1, Countly.Instance.Events._eventRepo.Count);
 
             model = Countly.Instance.Events._eventRepo.Dequeue();
@@ -805,8 +858,7 @@ namespace Assets.Tests.PlayModeTests
         [TearDown]
         public void End()
         {
-            Countly.Instance.ClearStorage();
-            UnityEngine.Object.DestroyImmediate(Countly.Instance);
+            TestUtility.TestCleanup();
         }
     }
 }

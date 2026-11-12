@@ -19,52 +19,29 @@ namespace Plugins.CountlySDK
 {
     public class Countly : MonoBehaviour
     {
-        //SDK limit defaults
-        internal const int MaxKeyLengthDefault = 128;
-        internal const int MaxValueSizeDefault = 256;
-        internal const int MaxSegmentationValuesDefault = 100;
-        internal const int MaxBreadcrumbCountDefault = 100;
-        internal const int MaxStackTraceLinesPerThreadDefault = 30;
-        internal const int MaxStackTraceLineLengthDefault = 200;
-        internal const int MaxStackTraceThreadCountDefault = 30;
-
-        public CountlyAuthModel Auth;
-        public CountlyConfigModel Config;
-        internal RequestCountlyHelper RequestHelper;
-        internal CountlyConfiguration Configuration;
-
         /// <summary>
-        /// Check if SDK has been initialized.
-        /// </summary>
-        /// <returns>bool</returns>
-        public bool IsSDKInitialized { get; private set; }
-
-        private CountlyLogHelper _logHelper;
-        private static Countly _instance = null;
-        internal StorageAndMigrationHelper StorageHelper;
-        internal readonly object lockObj = new object();
-        private List<AbstractBaseService> _listeners = new List<AbstractBaseService>();
-
-        /// <summary>
-        /// Return countly shared instance.
+        /// Return Countly shared instance.
         /// </summary>
         /// <returns>Countly</returns>
         public static Countly Instance
         {
             get {
                 if (_instance == null) {
-
                     GameObject gameObject = new GameObject("_countly");
                     _instance = gameObject.AddComponent<Countly>();
                 }
-
                 return _instance;
-
             }
             internal set {
                 _instance = value;
             }
         }
+
+        /// <summary>
+        /// Check if SDK has been initialized.
+        /// </summary>
+        /// <returns>bool</returns>
+        public bool IsSDKInitialized { get; private set; }
 
         /// <summary>
         /// Check/Update consent for a particular feature.
@@ -90,8 +67,6 @@ namespace Plugins.CountlySDK
         /// <returns>EventCountlyService</returns>
         public EventCountlyService Events { get; private set; }
 
-        internal InitializationCountlyService Initialization { get; private set; }
-
         /// <summary>
         /// Exposes functionality to set location parameters.
         /// </summary>
@@ -114,27 +89,50 @@ namespace Plugins.CountlySDK
         /// Exposes functionality to set and change custom user properties and interact with custom property modifiers.
         /// </summary>
         /// <returns>UserDetailsCountlyService</returns>
+        [Obsolete("UserDetailsCountlyService is deprecated and will be removed in the future. Please use UserProfile instead.")]
         public UserDetailsCountlyService UserDetails { get; private set; }
 
         /// <summary>
-        /// Exposes functionality to start and stop recording views and report positions for heat-map.
+        /// Exposes functionality for managing view lifecycle with segmentation options. Includes global view segmentation and adding segmentation to ongoing views.
         /// </summary>
-        /// <returns>ViewCountlyService</returns>
-        public ViewCountlyService Views { get; private set; }
+        public IViewModule Views { get; private set; }
 
-        public MetricHelper MetricHelper { get; private set; }
-        internal SessionCountlyService Session { get; set; }
+        /// <summary>
+        /// Exposes functionality to set and change custom user properties and interact with custom property modifiers.
+        /// </summary>
+        public IUserProfileModule UserProfile { get; private set; }
 
         /// <summary>
         /// Add callbacks to listen to push notification events for when a notification is received and when it is clicked.
         /// </summary>
         /// <returns>NotificationsCallbackService</returns>
         public NotificationsCallbackService Notifications { get; set; }
-
+        public CountlyAuthModel Auth;
+        public CountlyConfigModel Config;
+        internal SessionCountlyService Session { get; set; }
+        internal InitializationCountlyService Initialization { get; private set; }
+        internal RequestCountlyHelper RequestHelper;
+        internal CountlyUtils Utils;
+        internal CountlyConfiguration Configuration;
+        internal StorageAndMigrationHelper StorageHelper;
+        internal HealthCheckCountlyService HealthCheck { get; private set; }
+        internal readonly object lockObj = new object();
         private bool _logSubscribed;
+        private List<AbstractBaseService> _listeners = new List<AbstractBaseService>();
+        private CountlyLogHelper _logHelper;
+        private static Countly _instance = null;
         private PushCountlyService _push;
-
         private CountlyMainThreadHandler countlyMainThreadHandler;
+
+        #region SDK limit defaults
+        internal const int MaxKeyLengthDefault = 128;
+        internal const int MaxValueSizeDefault = 256;
+        internal const int MaxSegmentationValuesDefault = 100;
+        internal const int MaxBreadcrumbCountDefault = 100;
+        internal const int MaxStackTraceLinesPerThreadDefault = 30;
+        internal const int MaxStackTraceLineLengthDefault = 200;
+        internal const int MaxStackTraceThreadCountDefault = 30;
+        #endregion
 
         /// <summary>
         /// Initialize SDK at the start of your app
@@ -162,128 +160,136 @@ namespace Plugins.CountlySDK
                 countlyMainThreadHandler.RunOnMainThread(() => { InitInternal(configuration); });
 
                 // Avoid potential issues with SDK initialization on non-main threads
-                Debug.LogWarning("[Countly] [Init] Initialization process is being moved to the main thread. Ensure this is intended behavior.");
+                Debug.LogWarning("[Countly] Init, Initialization process is being moved to the main thread. Ensure this is intended behavior.");
             }
         }
 
         public void InitInternal(CountlyConfiguration configuration)
         {
             if (IsSDKInitialized) {
-                _logHelper.Error("SDK has already been initialized, 'Init' should not be called a second time!");
+                _logHelper.Warning("[Countly] InitInternal, SDK has already been initialized, 'Init' should not be called a second time!");
+                _logHelper.RecordLogCode("w110");
                 return;
             }
 
             Configuration = configuration;
             _logHelper = new CountlyLogHelper(Configuration);
-
-            _logHelper.Info("[Init] Initializing Countly [SdkName: " + Constants.SdkName + " SdkVersion: " + Constants.SdkVersion + "]");
-
+            HealthCheck = new HealthCheckCountlyService(_logHelper);
+            _logHelper.SetHealthCheck(HealthCheck);
+            _logHelper.Info($"[Countly] InitInternal, Initializing Countly, SdkName: [{Constants.SdkName}], SdkVersion: [{Constants.SdkVersion}]");
             configuration.metricHelper = new MetricHelper(configuration.overridenMetrics);
 
             if (configuration.Parent != null) {
                 transform.parent = configuration.Parent.transform;
             }
 
-            if (string.IsNullOrEmpty(configuration.ServerUrl)) {
-                throw new ArgumentNullException(configuration.ServerUrl, "Server URL is required.");
+            if (string.IsNullOrEmpty(configuration.GetServerUrl())) {
+                throw new ArgumentNullException(configuration.GetServerUrl(), "Server URL is required.");
             }
 
-            if (string.IsNullOrEmpty(configuration.AppKey)) {
-                throw new ArgumentNullException(configuration.AppKey, "App Key is required.");
+            if (string.IsNullOrEmpty(configuration.GetAppKey())) {
+                throw new ArgumentNullException(configuration.GetAppKey(), "App Key is required.");
             }
 
-            if (configuration.ServerUrl[configuration.ServerUrl.Length - 1] == '/') {
-                configuration.ServerUrl = configuration.ServerUrl.Remove(configuration.ServerUrl.Length - 1);
+            if (configuration.GetServerUrl()[configuration.GetServerUrl().Length - 1] == '/') {
+                configuration.ServerUrl = configuration.GetServerUrl().Remove(configuration.GetServerUrl().Length - 1);
             }
 
-            _logHelper.Debug("[Init] SDK initialized with the URL:[" + configuration.ServerUrl + "] and the appKey:[" + configuration.AppKey + "]");
+            _logHelper.Debug($"[Countly] InitInternal, SDK initialized with the URL: [{configuration.GetServerUrl()}] and the appKey: [{configuration.GetAppKey()}]");
 
-
-            if (configuration.SessionDuration < 1) {
-                _logHelper.Error("[Init] provided session duration is less than 1. Replacing it with 1.");
-                configuration.SessionDuration = 1;
+            if (configuration.GetUpdateSessionTimerDelay() < 1) {
+                _logHelper.Warning("[Countly] InitInternal, Invalid session duration: less than 1. Setting it to the minimum allowed value of 1.");
+                _logHelper.RecordLogCode("w121");
+                configuration.SetUpdateSessionTimerDelay(1);
             }
-            _logHelper.Debug("[Init] session duration set to [" + configuration.SessionDuration + "]");
+            _logHelper.Debug($"[Countly] InitInternal, Final session duration: [{configuration.GetUpdateSessionTimerDelay()}]");
 
-            if (configuration.EnablePost) {
-                _logHelper.Debug("[Init] Setting HTTP POST to be forced");
-            }
-
-            if (configuration.Salt != null) {
-                _logHelper.Debug("[Init] Enabling tamper protection");
+            if (configuration.IsForcedHttpPostEnabled()) {
+                _logHelper.Debug("[Countly] InitInternal, Forced HTTP POST enabled.");
             }
 
-            if (configuration.NotificationMode != TestMode.None) {
-                _logHelper.Debug("[Init] Enabling push notification");
+            if (configuration.GetParameterTamperingProtectionSalt() != null) {
+                _logHelper.Debug("[Countly] InitInternal, Parameter Tampering Protection enabled.");
+            }
+
+            if (configuration.GetNotificationMode() != TestMode.None) {
+                _logHelper.Debug("[Countly] InitInternal, Push Notifications enabled.");
             }
 
             if (configuration.EnableTestMode) {
-                _logHelper.Warning("[Init] Enabling test mode");
+                _logHelper.Warning("[Countly] InitInternal, Test mode enabled.");
             }
 
-            if (configuration.EnableAutomaticCrashReporting) {
-                _logHelper.Debug("[Init] Enabling automatic crash reporting");
+            if (configuration.IsAutomaticCrashReportingEnabled()) {
+                _logHelper.Debug("[Countly] InitInternal, Automatic Crash Reporting enabled.");
             }
 
-            // Have a look at the SDK limit values
-            if (configuration.EventQueueThreshold < 1) {
-                _logHelper.Error("[Init] provided event queue size is less than 1. Replacing it with 1.");
-                configuration.EventQueueThreshold = 1;
+            if (configuration.GetEventQueueSizeToSend() < 1) {
+                _logHelper.Warning("[Countly] InitInternal, Invalid Event Queue Size: less than 1. Setting it to the minimum allowed value of 1.");
+                _logHelper.RecordLogCode("w121");
+                configuration.SetEventQueueSizeToSend(1);
             }
-            _logHelper.Debug("[Init] event queue size set to [" + configuration.EventQueueThreshold + "]");
+            _logHelper.Debug($"[Countly] InitInternal, Final Event Queue Size: [{configuration.GetEventQueueSizeToSend()}]");
 
-            if (configuration.StoredRequestLimit < 1) {
-                _logHelper.Error("[Init] provided request queue size is less than 1. Replacing it with 1.");
-                configuration.StoredRequestLimit = 1;
+            if (configuration.GetMaxRequestQueueSize() < 1) {
+                _logHelper.Warning("[Countly] InitInternal, Invalid Request Queue Size: less than 1. Setting it to the minimum allowed value of 1.");
+                _logHelper.RecordLogCode("w121");
+                configuration.SetMaxRequestQueueSize(1);
             }
-            _logHelper.Debug("[Init] request queue size set to [" + configuration.StoredRequestLimit + "]");
+            _logHelper.Debug($"[Countly] InitInternal, Final Request Queue Size: [{configuration.GetMaxRequestQueueSize()}]");
 
-            if (configuration.MaxKeyLength != MaxKeyLengthDefault) {
-                if (configuration.MaxKeyLength < 1) {
-                    configuration.MaxKeyLength = 1;
-                    _logHelper.Warning("[Init] provided 'maxKeyLength' is less than '1'. Setting it to '1'.");
+            if (configuration.GetMaxKeyLength() != MaxKeyLengthDefault) {
+                if (configuration.GetMaxKeyLength() < 1) {
+                    configuration.SetMaxKeyLength(1);
+                    _logHelper.Warning("[Countly] InitInternal, 'maxKeyLength' provided is less than 1. Resetting to 1.");
+                    _logHelper.RecordLogCode("w121");
                 }
-                _logHelper.Info("[Init] provided 'maxKeyLength' override:[" + configuration.MaxKeyLength + "]");
+                _logHelper.Info($"[Countly] InitInternal, 'maxKeyLength' overridden: [{configuration.GetMaxKeyLength()}]");
             }
 
-            if (configuration.MaxValueSize != MaxValueSizeDefault) {
-                if (configuration.MaxValueSize < 1) {
-                    configuration.MaxValueSize = 1;
-                    _logHelper.Warning("[Init] provided 'maxValueSize' is less than '1'. Setting it to '1'.");
+            if (configuration.GetMaxValueSize() != MaxValueSizeDefault) {
+                if (configuration.GetMaxValueSize() < 1) {
+                    configuration.SetMaxValueSize(1);
+                    _logHelper.Warning("[Countly] InitInternal, 'maxValueSize' provided is less than 1. Resetting to 1.");
+                    _logHelper.RecordLogCode("w121");
                 }
-                _logHelper.Info("[Init] provided 'maxValueSize' override:[" + configuration.MaxValueSize + "]");
+                _logHelper.Info($"[Countly] InitInternal, 'maxValueSize' overridden: [{configuration.GetMaxValueSize()}]");
             }
 
-            if (configuration.MaxSegmentationValues != MaxSegmentationValuesDefault) {
-                if (configuration.MaxSegmentationValues < 1) {
-                    configuration.MaxSegmentationValues = 1;
-                    _logHelper.Warning("[Init] provided 'maxSegmentationValues' is less than '1'. Setting it to '1'.");
+            if (configuration.GetMaxSegmentationValues() != MaxSegmentationValuesDefault) {
+                if (configuration.GetMaxSegmentationValues() < 1) {
+                    configuration.SetMaxSegmentationValues(1);
+                    _logHelper.Warning("[Countly] InitInternal, 'maxSegmentationValues' provided is less than 1. Resetting to 1.");
+                    _logHelper.RecordLogCode("w121");
                 }
-                _logHelper.Info("[Init] provided 'maxSegmentationValues' override:[" + configuration.MaxSegmentationValues + "]");
+                _logHelper.Info($"[Countly] InitInternal, 'maxSegmentationValues' overridden: [{configuration.GetMaxSegmentationValues()}]");
             }
 
-            if (configuration.TotalBreadcrumbsAllowed != MaxBreadcrumbCountDefault) {
-                if (configuration.TotalBreadcrumbsAllowed < 1) {
-                    configuration.TotalBreadcrumbsAllowed = 1;
-                    _logHelper.Warning("[Init] provided 'maxBreadcrumbCount' is less than '1'. Setting it to '1'.");
+            if (configuration.GetMaxBreadcrumbCount() != MaxBreadcrumbCountDefault) {
+                if (configuration.GetMaxBreadcrumbCount() < 1) {
+                    configuration.SetMaxBreadcrumbCount(1);
+                    _logHelper.Warning("[Countly] InitInternal, 'maxBreadcrumbCount' provided is less than 1. Resetting to 1.");
+                    _logHelper.RecordLogCode("w121");
                 }
-                _logHelper.Info("[Init] provided 'maxBreadcrumbCount' override:[" + configuration.TotalBreadcrumbsAllowed + "]");
+                _logHelper.Info($"[Countly] InitInternal, 'maxBreadcrumbCount' overridden: [{configuration.GetMaxBreadcrumbCount()}]");
             }
 
-            if (configuration.MaxStackTraceLinesPerThread != MaxStackTraceLinesPerThreadDefault) {
-                if (configuration.MaxStackTraceLinesPerThread < 1) {
-                    configuration.MaxStackTraceLinesPerThread = 1;
-                    _logHelper.Warning("[Init] provided 'maxStackTraceLinesPerThread' is less than '1'. Setting it to '1'.");
+            if (configuration.GetMaxStackTraceLinesPerThread() != MaxStackTraceLinesPerThreadDefault) {
+                if (configuration.GetMaxStackTraceLinesPerThread() < 1) {
+                    configuration.SetMaxStackTraceLinesPerThread(1);
+                    _logHelper.Warning("[Countly] InitInternal, 'maxStackTraceLinesPerThread' provided is less than 1. Resetting to 1.");
+                    _logHelper.RecordLogCode("w121");
                 }
-                _logHelper.Info("[Init] provided 'maxStackTraceLinesPerThread' override:[" + configuration.MaxStackTraceLinesPerThread + "]");
+                _logHelper.Info($"[Countly] InitInternal, 'maxStackTraceLinesPerThread' overridden: [{configuration.GetMaxStackTraceLinesPerThread()}]");
             }
 
-            if (configuration.MaxStackTraceLineLength != MaxStackTraceLineLengthDefault) {
-                if (configuration.MaxStackTraceLineLength < 1) {
-                    configuration.MaxStackTraceLineLength = 1;
-                    _logHelper.Warning("[Init] provided 'maxStackTraceLineLength' is less than '1'. Setting it to '1'.");
+            if (configuration.GetMaxStackTraceLineLength() != MaxStackTraceLineLengthDefault) {
+                if (configuration.GetMaxStackTraceLineLength() < 1) {
+                    configuration.SetMaxStackTraceLineLength(1);
+                    _logHelper.Warning("[Countly] InitInternal, 'maxStackTraceLineLength' provided is less than 1. Resetting to 1.");
+                    _logHelper.RecordLogCode("w121");
                 }
-                _logHelper.Info("[Init] provided 'maxStackTraceLineLength' override:[" + configuration.MaxStackTraceLineLength + "]");
+                _logHelper.Info($"[Countly] InitInternal, 'maxStackTraceLineLength' overridden: [{configuration.GetMaxStackTraceLineLength()}]");
             }
 
             if (configuration.SafeEventIDGenerator == null) {
@@ -295,49 +301,44 @@ namespace Plugins.CountlySDK
             }
 
             FirstLaunchAppHelper.Process();
-
             RequestBuilder requestBuilder = new RequestBuilder();
             StorageHelper = new StorageAndMigrationHelper(_logHelper, requestBuilder);
             StorageHelper.OpenDB();
 
             IDictionary<string, object> migrationParams = new Dictionary<string, object>()
             {
-                {StorageAndMigrationHelper.key_from_2_to_3_custom_id_set, configuration.DeviceId != null },
+                {StorageAndMigrationHelper.key_from_2_to_3_custom_id_set, configuration.GetDeviceId() != null },
             };
 
             StorageHelper.RunMigration(migrationParams);
-
             Init(requestBuilder, StorageHelper.RequestRepo, StorageHelper.EventRepo, StorageHelper.ConfigDao);
-
-            Device.InitDeviceId(configuration.DeviceId);
+            Device.InitDeviceId(configuration.GetDeviceId());
             OnInitialisationComplete();
-
-            _logHelper.Debug("[Countly] Finished Initializing SDK.");
+            _logHelper.Debug("[Countly] InitInternal, Finished Initializing SDK.");
         }
 
         private void Init(RequestBuilder requestBuilder, RequestRepository requestRepo,
             NonViewEventRepository nonViewEventRepo, Dao<ConfigEntity> configDao)
         {
             CountlyUtils countlyUtils = new CountlyUtils(this);
+            Utils = countlyUtils;
             RequestHelper = new RequestCountlyHelper(Configuration, _logHelper, countlyUtils, requestBuilder, requestRepo, this);
-
             Consents = new ConsentCountlyService(Configuration, _logHelper, Consents, RequestHelper);
             Events = new EventCountlyService(Configuration, _logHelper, RequestHelper, nonViewEventRepo, Consents, countlyUtils);
-
             Location = new Services.LocationService(Configuration, _logHelper, RequestHelper, Consents);
             Notifications = new NotificationsCallbackService(Configuration, _logHelper);
             ProxyNotificationsService notificationsService = new ProxyNotificationsService(transform, Configuration, _logHelper, InternalStartCoroutine, Events);
             _push = new PushCountlyService(Configuration, _logHelper, RequestHelper, notificationsService, Notifications, Consents);
-            Session = new SessionCountlyService(Configuration, _logHelper, Events, RequestHelper, Location, Consents);
-
+            Session = new SessionCountlyService(Configuration, _logHelper, Events, RequestHelper, Location, Consents, this);
             CrashReports = new CrashReportsCountlyService(Configuration, _logHelper, RequestHelper, Consents);
             Initialization = new InitializationCountlyService(Configuration, _logHelper, Location, Session, Consents);
             RemoteConfigs = new RemoteConfigCountlyService(Configuration, _logHelper, RequestHelper, countlyUtils, configDao, Consents, requestBuilder);
-
             StarRating = new StarRatingCountlyService(Configuration, _logHelper, Consents, Events);
             UserDetails = new UserDetailsCountlyService(Configuration, _logHelper, RequestHelper, countlyUtils, Consents);
-            Views = new ViewCountlyService(Configuration, _logHelper, Events, Consents);
+            UserProfile = new UserProfile(this, Configuration, _logHelper, RequestHelper, countlyUtils, Consents, Events);
+            Views = new ViewCountlyService(this, countlyUtils, Configuration, _logHelper, Events, Consents);
             Device = new DeviceIdCountlyService(Configuration, _logHelper, Session, RequestHelper, Events, countlyUtils, Consents);
+            HealthCheck.SetConsentProvider(consent => Consents.CheckConsentInternal(consent));
 
             CreateListOfIBaseService();
             RegisterListenersToServices();
@@ -353,6 +354,7 @@ namespace Plugins.CountlySDK
                 }
             }
 
+            await HealthCheck.SendHealthCheckAsync(Configuration, RequestHelper, Consents);
         }
 
         private void CreateListOfIBaseService()
@@ -360,7 +362,7 @@ namespace Plugins.CountlySDK
             _listeners.Clear();
 
             _listeners.Add(_push);
-            _listeners.Add(Views);
+            _listeners.Add((ViewCountlyService)Views);
             _listeners.Add(Events);
             _listeners.Add(Device);
             _listeners.Add(Session);
@@ -368,6 +370,7 @@ namespace Plugins.CountlySDK
             _listeners.Add(Consents);
             _listeners.Add(StarRating);
             _listeners.Add(UserDetails);
+            _listeners.Add((UserProfile)UserProfile);
             _listeners.Add(CrashReports);
             _listeners.Add(RemoteConfigs);
             _listeners.Add(Initialization);
@@ -384,6 +387,143 @@ namespace Plugins.CountlySDK
         }
 
         /// <summary>
+        /// Changes the server URL of new and queued requests, in memory only: the next init uses the configured URL.
+        /// An invalid URL is ignored.
+        /// </summary>
+        /// <param name="serverUrl">absolute "http" or "https" URL of the new server, trailing "/" characters are removed</param>
+        public void ChangeServerUrl(string serverUrl)
+        {
+            RunIfInitialized(nameof(ChangeServerUrl), () => {
+                _logHelper.Info($"[Countly] ChangeServerUrl, serverUrl: [{serverUrl}]");
+
+                string url = serverUrl?.TrimEnd('/');
+                if (!Utils.IsValidServerUrl(url)) {
+                    _logHelper.Error($"[Countly] ChangeServerUrl, Invalid server URL: [{serverUrl}]. The current server URL stays in use.");
+                    return;
+                }
+
+                Utils.SetServerUrl(url);
+                SendCatchUpRequests();
+            });
+        }
+
+        /// <summary>
+        /// Changes the app key of new requests, in memory only: the next init uses the configured app key.
+        /// Before the change, it stops the running views, queues the recorded events and user profile changes and ends the session,
+        /// all with the old key. Afterwards it clears the stored remote config values and begins a new session if one was running.
+        /// Queued requests keep their app key. An invalid or unchanged app key is ignored.
+        /// </summary>
+        /// <param name="appKey">app key of the new app</param>
+        public void ChangeAppKey(string appKey)
+        {
+            RunIfInitialized(nameof(ChangeAppKey), () => {
+                _logHelper.Info($"[Countly] ChangeAppKey, appKey: [{appKey}]");
+
+                if (Utils.IsNullEmptyOrWhitespace(appKey) || appKey == "YOUR_APP_KEY") {
+                    _logHelper.Error($"[Countly] ChangeAppKey, Invalid app key: [{appKey}]. The current app key stays in use.");
+                    return;
+                }
+
+                if (appKey == Utils.AppKey) {
+                    _logHelper.Warning("[Countly] ChangeAppKey, Same app key provided. Will be ignored.");
+                    return;
+                }
+
+                bool sessionWasRunning = Session.IsSessionInitiated;
+                Views.StopAllViews(null);
+                Events.AddEventsToRequestQueue();
+                UserProfile.Save();
+                if (sessionWasRunning) {
+                    _ = Session.EndSessionAsync();
+                }
+
+                Utils.AppKey = appKey;
+                RemoteConfigs.ClearStoredConfigs();
+
+                if (sessionWasRunning) {
+                    // begin_session reads device metrics, which Unity allows only on the main thread
+                    countlyMainThreadHandler.RunOnMainThread(() => { _ = Session.BeginSessionAsync(); });
+                }
+
+                SendCatchUpRequests();
+            });
+        }
+
+        /// <summary>
+        /// Removes all requests from the request queue and all events from the event queue.
+        /// Timed events, running views and pending user profile changes are kept. A request that is already on its way is not stopped.
+        /// </summary>
+        public void FlushQueues()
+        {
+            RunIfInitialized(nameof(FlushQueues), () => {
+                _logHelper.Info($"[Countly] FlushQueues, requests: [{RequestHelper._requestRepo.Count}], events: [{Events._eventRepo.Count}]");
+                RequestHelper._requestRepo.Clear();
+                Events._eventRepo.Clear();
+            });
+        }
+
+        /// <summary>
+        /// Replaces the app key of all queued requests with the current app key,
+        /// so that the requests recorded before an app key change are sent to the current app.
+        /// </summary>
+        public void ReplaceAllAppKeysInQueueWithCurrentAppKey()
+        {
+            RunIfInitialized(nameof(ReplaceAllAppKeysInQueueWithCurrentAppKey), () => {
+                _logHelper.Info("[Countly] ReplaceAllAppKeysInQueueWithCurrentAppKey");
+                RequestHelper.ReplaceAllAppKeysInQueue();
+            });
+        }
+
+        /// <summary>
+        /// Removes the queued requests whose app key differs from the current app key,
+        /// so that the requests recorded before an app key change are not sent.
+        /// </summary>
+        public void RemoveDifferentAppKeysFromQueue()
+        {
+            RunIfInitialized(nameof(RemoveDifferentAppKeysFromQueue), () => {
+                int removed = RequestHelper.RemoveDifferentAppKeysFromQueue();
+                _logHelper.Info($"[Countly] RemoveDifferentAppKeysFromQueue, removed requests: [{removed}]");
+            });
+        }
+
+        /// <summary>
+        /// Packs the recorded events into a request and starts sending the queued requests right away.
+        /// </summary>
+        public void AttemptToSendStoredRequests()
+        {
+            RunIfInitialized(nameof(AttemptToSendStoredRequests), () => {
+                _logHelper.Info("[Countly] AttemptToSendStoredRequests");
+                Events.AddEventsToRequestQueue();
+                _ = RequestHelper.ProcessQueue();
+            });
+        }
+
+        /// <summary>
+        /// Runs the action under the SDK lock, or only logs a warning when the SDK is not initialized yet.
+        /// </summary>
+        private void RunIfInitialized(string caller, Action action)
+        {
+            if (!IsSDKInitialized) {
+                Debug.LogWarning($"[Countly] {caller}, Countly.Instance.Init() must be called before '{caller}'");
+                return;
+            }
+
+            lock (lockObj) {
+                action();
+            }
+        }
+
+        /// <summary>
+        /// Queues the consent state and the push token again for the new server or app, and sends the queue.
+        /// </summary>
+        private void SendCatchUpRequests()
+        {
+            _ = Consents.SendConsentChanges();
+            _push.ResendToken();
+            _ = RequestHelper.ProcessQueue();
+        }
+
+        /// <summary>
         /// End session on application close/quit
         /// </summary>
         private void OnApplicationQuit()
@@ -393,6 +533,7 @@ namespace Plugins.CountlySDK
             }
 
             _logHelper.Debug("[Countly] OnApplicationQuit");
+            HealthCheck?.SaveState();
             Session?._sessionTimer?.Dispose();
             StorageHelper?.CloseDB();
         }
@@ -409,10 +550,8 @@ namespace Plugins.CountlySDK
             }
 
             _logHelper.Debug("[Countly] ClearStorage");
-
             PlayerPrefs.DeleteAll();
             StorageHelper?.ClearDBData();
-
             StorageHelper?.CloseDB();
         }
 
@@ -422,7 +561,7 @@ namespace Plugins.CountlySDK
                 return;
             }
 
-            _logHelper?.Debug("[Countly] OnApplicationFocus: " + hasFocus);
+            _logHelper?.Debug($"[Countly] OnApplicationFocus, Application focus state changed: [{hasFocus}]");
 
             if (hasFocus) {
                 SubscribeAppLog();
@@ -438,7 +577,7 @@ namespace Plugins.CountlySDK
                     return;
                 }
 
-                _logHelper?.Debug("[Countly] OnApplicationPause: " + pauseStatus);
+                _logHelper?.Debug($"[Countly] OnApplicationPause, Application pause status: [{pauseStatus}]");
 
                 if (CrashReports != null) {
                     CrashReports.IsApplicationInBackground = pauseStatus;
@@ -446,6 +585,7 @@ namespace Plugins.CountlySDK
 
                 if (pauseStatus) {
                     HandleAppPauseOrFocus();
+                    HealthCheck?.SaveState();
                     if (!Configuration.IsAutomaticSessionTrackingDisabled) {
                         _ = Session?.EndSessionAsync();
                     }
@@ -478,9 +618,8 @@ namespace Plugins.CountlySDK
         private void LogCallback(string condition, string stackTrace, LogType type)
         {
             if (type == LogType.Exception) {
-                CrashReports?.SendCrashReportAsync(condition, stackTrace);
+                CrashReports?.SendAutomaticCrashReport(condition, stackTrace);
             }
-
         }
 
         private void SubscribeAppLog()

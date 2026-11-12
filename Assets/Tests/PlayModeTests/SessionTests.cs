@@ -2,7 +2,7 @@
 using NUnit.Framework;
 using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK;
-using System.Web;
+using System.Threading.Tasks;
 using System.Collections.Specialized;
 using Newtonsoft.Json.Linq;
 using Plugins.CountlySDK.Enums;
@@ -51,21 +51,21 @@ namespace Assets.Tests.PlayModeTests
         /// <summary>
         /// It checks the working of session service if no 'Session' consent is given.
         /// </summary>
-        [Test]
-        public async void SessionConsent()
+        [UnityTest]
+        public IEnumerator SessionConsent()
         {
             Countly.Instance.Init(TestUtility.CreateBaseConfigConsent(null));
             Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Clear();
             Assert.IsNotNull(Countly.Instance.Session);
             Assert.AreEqual(0, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
 
-            await Countly.Instance.Session.BeginSessionAsync();
+            yield return Countly.Instance.Session.BeginSessionAsync().AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
 
-            await Countly.Instance.Session.ExtendSessionAsync();
+            yield return Countly.Instance.Session.ExtendSessionAsync().AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
 
-            await Countly.Instance.Session.EndSessionAsync();
+            yield return Countly.Instance.Session.EndSessionAsync().AsCoroutine();
             Assert.AreEqual(0, Countly.Instance.CrashReports._requestCountlyHelper._requestRepo.Count);
         }
 
@@ -80,7 +80,57 @@ namespace Assets.Tests.PlayModeTests
             Assert.AreEqual(1, Countly.Instance.Session._requestCountlyHelper._requestRepo.Count);
 
             CountlyRequestModel requestModel = Countly.Instance.Session._requestCountlyHelper._requestRepo.Dequeue();
-            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            NameValueCollection collection = CountlyUtils.ParseQueryString(requestModel.RequestData);
+
+            AssertSessionRequest(collection, "begin_session", null, true);
+        }
+
+
+        /// <summary>
+        /// It validates the functionality of 'BeginSessionAsync' with auto user props saving
+        /// </summary>
+        [Test]
+        public void SessionBegin_UserPropsSave()
+        {
+            CountlyConfiguration config = TestUtility.CreateBaseConfig();
+            config.DisableAutomaticSessionTracking();
+            Countly.Instance.Init(config);
+
+            Countly cly = Countly.Instance;
+            cly.UserProfile.SetProperty("a12345", "My Property");
+            _ = cly.Session.BeginSessionAsync();
+
+            TestUtility.ValidateRQEQSize(cly, 2, 0);
+
+            CountlyRequestModel up1 = Countly.Instance.Session._requestCountlyHelper._requestRepo.Dequeue();
+            NameValueCollection collection1 = CountlyUtils.ParseQueryString(up1.RequestData);
+            Assert.AreEqual("{\"custom\":{\"a12345\":\"My Property\"}}", collection1.Get("user_details"));
+
+            CountlyRequestModel requestModel = Countly.Instance.Session._requestCountlyHelper._requestRepo.Dequeue();
+            NameValueCollection collection = CountlyUtils.ParseQueryString(requestModel.RequestData);
+
+            AssertSessionRequest(collection, "begin_session", null, true);
+        }
+
+        /// <summary>
+        /// It validates the functionality of 'BeginSessionAsync' with auto user props saving reversed
+        /// </summary>
+        [Test]
+        public void SessionBegin_UserPropsSave_Reversed()
+        {
+            CountlyConfiguration config = TestUtility.CreateBaseConfig();
+            config.DisableAutomaticSessionTracking();
+            config.DisableAutoSendUserPropertiesOnSessions();
+            Countly.Instance.Init(config);
+
+            Countly cly = Countly.Instance;
+            cly.UserProfile.SetProperty("a12345", "My Property");
+            _ = cly.Session.BeginSessionAsync();
+
+            TestUtility.ValidateRQEQSize(cly, 1, 0);
+            
+            CountlyRequestModel requestModel = Countly.Instance.Session._requestCountlyHelper._requestRepo.Dequeue();
+            NameValueCollection collection = CountlyUtils.ParseQueryString(requestModel.RequestData);
 
             AssertSessionRequest(collection, "begin_session", null, true);
         }
@@ -99,7 +149,7 @@ namespace Assets.Tests.PlayModeTests
 
             CountlyRequestModel requestModel = Countly.Instance.Session._requestCountlyHelper._requestRepo.Dequeue();
 
-            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            NameValueCollection collection = CountlyUtils.ParseQueryString(requestModel.RequestData);
             AssertLocation(collection, "10.0,10.0", "Lahore", "192.168.100.51", "PK");
             AssertSessionRequest(collection, "begin_session", null, true);
         }
@@ -118,7 +168,7 @@ namespace Assets.Tests.PlayModeTests
 
             CountlyRequestModel requestModel = Countly.Instance.Session._requestCountlyHelper._requestRepo.Dequeue();
 
-            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            NameValueCollection collection = CountlyUtils.ParseQueryString(requestModel.RequestData);
             Assert.AreEqual(string.Empty, collection.Get("location"));
             AssertSessionRequest(collection, "begin_session", null, true);
         }
@@ -140,7 +190,7 @@ namespace Assets.Tests.PlayModeTests
             Countly.Instance.Session._requestCountlyHelper._requestRepo.Dequeue(); // Remove consent Request
             CountlyRequestModel requestModel = Countly.Instance.Session._requestCountlyHelper._requestRepo.Dequeue();
 
-            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            NameValueCollection collection = CountlyUtils.ParseQueryString(requestModel.RequestData);
             AssertSessionRequest(collection, "begin_session", null, true);
         }
 
@@ -216,7 +266,7 @@ namespace Assets.Tests.PlayModeTests
 
             CountlyRequestModel requestModel = Countly.Instance.Session._requestCountlyHelper._requestRepo.Dequeue();
 
-            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            NameValueCollection collection = CountlyUtils.ParseQueryString(requestModel.RequestData);
             AssertSessionRequest(collection, "begin_session", null, true);
 
             System.DateTime startTime = System.DateTime.UtcNow;
@@ -238,7 +288,7 @@ namespace Assets.Tests.PlayModeTests
 
             requestModel = Countly.Instance.Session._requestCountlyHelper._requestRepo.Dequeue();
 
-            collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            collection = CountlyUtils.ParseQueryString(requestModel.RequestData);
             AssertSessionRequest(collection, null, duration);
         }
 
@@ -275,7 +325,7 @@ namespace Assets.Tests.PlayModeTests
 
             CountlyRequestModel requestModel = Countly.Instance.Session._requestCountlyHelper._requestRepo.Dequeue();
 
-            NameValueCollection collection = HttpUtility.ParseQueryString(requestModel.RequestData);
+            NameValueCollection collection = CountlyUtils.ParseQueryString(requestModel.RequestData);
             AssertSessionRequest(collection, "end_session", duration);
         }
 
@@ -350,11 +400,6 @@ namespace Assets.Tests.PlayModeTests
         }
 
         [SetUp]
-        public void SetUp()
-        {
-            TestUtility.TestCleanup();
-        }
-
         [TearDown]
         public void End()
         {

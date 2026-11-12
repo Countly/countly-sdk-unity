@@ -5,6 +5,11 @@ using Plugins.CountlySDK.Models;
 using Plugins.CountlySDK.Persistance.Entities;
 using Plugins.CountlySDK.Enums;
 using System.Text.RegularExpressions;
+using UnityEngine;
+using NUnit.Framework;
+using System;
+using System.Collections;
+using Newtonsoft.Json;
 
 namespace Assets.Tests.PlayModeTests
 {
@@ -16,18 +21,19 @@ namespace Assets.Tests.PlayModeTests
         readonly static string SERVER_URL = "https://xyz.com/";
         readonly static string APP_KEY = "772c091355076ead703f987fee94490";
         readonly static string DEVICE_ID = "test_user";
-
         /// <summary>
         /// Creates a basic Countly configuration with predefined server URL, app key, and device ID.
         /// </summary>
         /// <returns>CountlyConfiguration object representing the basic configuration.</returns>
         public static CountlyConfiguration CreateBaseConfig()
         {
+            // the health check is off here, so no init sends it to the test host; HealthCheckTests turns it on
             CountlyConfiguration configuration = new CountlyConfiguration(SERVER_URL, APP_KEY)
-                .SetDeviceId(DEVICE_ID);
+                .SetDeviceId(DEVICE_ID)
+                .DisableHealthCheck();
             return configuration;
         }
-        
+
         /// <summary>
         /// Creates a Countly configuration with setting consent requirement to true, predefined server URL, app key, and device ID.
         /// </summary>
@@ -42,12 +48,38 @@ namespace Assets.Tests.PlayModeTests
         }
 
         /// <summary>
+        /// Creates a Countly configuration with setting consent requirement to true
+        /// </summary>
+        /// <returns>CountlyConfiguration object with no given consent</returns>
+        public static CountlyConfiguration CreateNoConsentConfig()
+        {
+            CountlyConfiguration configuration = CreateBaseConfig()
+                .SetRequiresConsent(true);
+
+            return configuration;
+        }
+
+        /// <summary>
+        /// Creates a Countly configuration for testing View functionality by setting related fields
+        /// </summary>
+        /// <returns>CountlyConfiguration object representing the basic configuration.</returns>
+        public static CountlyConfiguration CreateViewConfig(CustomIdProvider customIdProvider)
+        {
+            CountlyConfiguration configuration = CreateBaseConfig()
+                .SetRequiresConsent(true);
+            configuration.SafeViewIDGenerator = customIdProvider;
+            configuration.GiveConsent(new Consents[] { Consents.Views });
+
+            return configuration;
+        }
+
+        /// <summary>
         /// Clears the queues of the Countly SDK.
         /// </summary>
         /// <param name="CountlyInstance"></param>
         public static void ClearSDKQueues(Countly CountlyInstance)
         {
-            CountlyInstance.Views._eventService._eventRepo.Clear();
+            CountlyInstance.Events._eventRepo.Clear();
             CountlyInstance.CrashReports._requestCountlyHelper._requestRepo.Clear();
         }
 
@@ -185,8 +217,231 @@ namespace Assets.Tests.PlayModeTests
         /// </summary>
         public static void TestCleanup()
         {
+            _ = Countly.Instance.Session?.EndSessionAsync();
+            Countly.Instance.Session?.StopSessionTimer();
             Countly.Instance.ClearStorage();
             UnityEngine.Object.DestroyImmediate(Countly.Instance);
+        }
+
+        public static Dictionary<string, object> TestSegmentation()
+        {
+            Dictionary<string, object> segmentation = new Dictionary<string, object>();
+            segmentation.Add("string", "Hello!");
+            segmentation.Add("int", 42);
+            segmentation.Add("double", 3.14);
+            segmentation.Add("float", 2.5f);
+            segmentation.Add("long", 1234567890123456789L);
+            segmentation.Add("bool", true);
+
+            return segmentation;
+        }
+
+        public static Dictionary<string, object> BaseViewTestSegmentation(string viewName, bool isVisit, bool isStart)
+        {
+            Dictionary<string, object> segmentation = new Dictionary<string, object>();
+            segmentation.Add("name", viewName);
+            if (isVisit) {
+                segmentation.Add("visit", 1);
+            }
+            if (isStart) {
+                segmentation.Add("start", 1);
+            }
+            segmentation.Add("segment", Application.platform.ToString().ToLower());
+
+            return segmentation;
+        }
+
+        public static Dictionary<string, object> TestTimeMetrics()
+        {
+            return TimeMetricModel.GetTimeMetricModel();
+        }
+
+        // Validates the properties of a CountlyEventModel object for view events or view action events
+        public static void ViewEventValidator(CountlyEventModel eventModel, int? expectedCount, double? expectedSum,
+            int? expectedDuration, Dictionary<string, object>? expectedSegmentation,
+            string? expectedEventId, string? expectedPreviousViewId, string? expectedCurrentViewId,
+            string? expectedPreviousEventId, Dictionary<string, object>? expectedTimeMetrics, bool isAction = false)
+        {
+            if (isAction) {
+                Assert.AreEqual(eventModel.Key, "[CLY]_action");
+            } else {
+                Assert.AreEqual(eventModel.Key, "[CLY]_view");
+            }
+
+            Assert.AreEqual(eventModel.Count, expectedCount);
+            Assert.AreEqual(eventModel.Sum, expectedSum);
+            Assert.AreEqual(eventModel.Duration, expectedDuration);
+
+            if (expectedSegmentation != null) {
+                foreach (KeyValuePair<string, object> entry in expectedSegmentation) {
+                    string key = entry.Key;
+                    object expectedValue = entry.Value;
+
+                    // Check if key exists in custom
+                    Assert.IsTrue(eventModel.Segmentation.ContainsKey(key), $"Key '{key}' not found in custom");
+
+                    // Get actual value from custom
+                    object actualValue = eventModel.Segmentation[key];
+
+                    // Compare expected and actual values
+                    if (expectedValue is Array || expectedValue is IList) {
+                        // Convert expected value to JArray for comparison
+                        JArray expectedArray = JArray.FromObject(expectedValue);
+                        JArray actualArray = (JArray)actualValue;
+
+                        for (int i = 0; i < actualArray.Count; i++) {
+                            Assert.AreEqual(expectedArray[i].ToString(), actualArray[i].ToString());
+                        }
+                    } else {
+                        // Compare single values as strings
+                        Assert.AreEqual(expectedValue.ToString(), actualValue.ToString(), $"Mismatch for key '{key}'");
+                    }
+                }
+            }
+
+            Assert.AreEqual(eventModel.EventID, expectedEventId);
+            Assert.AreEqual(eventModel.PreviousViewID, expectedPreviousViewId);
+            Assert.AreEqual(eventModel.CurrentViewID, expectedCurrentViewId);
+            Assert.AreEqual(eventModel.PreviousEventID, expectedPreviousEventId);
+
+            // Check time metrics if provided
+            if (expectedTimeMetrics != null) {
+                foreach (var kvp in expectedTimeMetrics) {
+                    if (kvp.Key == "timestamp") {
+                        Assert.IsTrue(Mathf.Abs(eventModel.Timestamp - (long)kvp.Value) < 6000);
+                    } else if (kvp.Key == "hour") {
+                        Assert.AreEqual(eventModel.Hour, kvp.Value);
+                    } else if (kvp.Key == "dow") {
+                        Assert.AreEqual(eventModel.DayOfWeek, kvp.Value);
+                    }
+                }
+            }
+        }
+
+        public static void ValidateRQEQSize(Countly cly, int expRQSize, int expEQSize)
+        {
+            CountlyRequestModel[] requests = cly.RequestHelper._requestRepo.Models.ToArray();
+            Assert.AreEqual(expRQSize, requests.Length);
+
+            CountlyEventModel[] events = cly.Events._eventRepo.Models.ToArray();
+            Assert.AreEqual(expEQSize, events.Length);
+        }
+
+        // Extracts user profile request from the provided requests
+        public static Dictionary<string, object> ExtractAndDeserializeUserDetails(IEnumerable<CountlyRequestModel> requests)
+        {
+            string NAME_KEY = "name";
+            string USERNAME_KEY = "username";
+            string EMAIL_KEY = "email";
+            string ORG_KEY = "organization";
+            string PHONE_KEY = "phone";
+            string PICTURE_KEY = "picture";
+            string GENDER_KEY = "gender";
+            string BYEAR_KEY = "byear";
+            string CUSTOM_KEY = "custom";
+
+            var userDetails = new Dictionary<string, object>();
+
+            foreach (var request in requests) {
+                var match = Regex.Match(request.RequestData, @"user_details=([^&]+)");
+                if (match.Success) {
+                    string userDetailsJson = Uri.UnescapeDataString(match.Groups[1].Value);
+
+                    try {
+                        var userDetailsObj = JObject.Parse(userDetailsJson);
+
+                        // Ensure specific keys are always recorded
+                        foreach (string key in new[] { NAME_KEY, USERNAME_KEY, EMAIL_KEY, ORG_KEY, PHONE_KEY, PICTURE_KEY, GENDER_KEY, BYEAR_KEY }) {
+                            if (userDetailsObj[key] != null) {
+                                userDetails[key] = ConvertJTokenToValue(userDetailsObj[key]);
+                            }
+                        }
+
+                        // Handle custom properties
+                        if (userDetailsObj[CUSTOM_KEY] is JObject customObj) {
+                            foreach (var customProperty in customObj.Properties()) {
+                                userDetails[customProperty.Name] = ConvertJTokenToValue(customProperty.Value);
+                            }
+                        }
+
+                        break; // Exit loop once processed the first matching request
+                    } catch (JsonReaderException ex) {
+                        Debug.Log($"Error parsing userDetailsJson: {ex.Message}");
+                    }
+                }
+            }
+
+            return userDetails;
+        }
+
+        public static void ValidateUserDetails(Dictionary<string, object> actualUserDetails, Dictionary<string, object> expectedUserDetails)
+        {
+            foreach (string key in expectedUserDetails.Keys) {
+                Assert.IsTrue(actualUserDetails.ContainsKey(key), $"Key {key} is missing in actual user details.");
+                Assert.AreEqual(expectedUserDetails[key], actualUserDetails[key], $"Value for key {key} does not match.");
+            }
+        }
+
+        private static object ConvertJTokenToValue(JToken token)
+        {
+            switch (token.Type) {
+                case JTokenType.Object:
+                    var dict = new Dictionary<string, object>();
+                    foreach (var property in token.Children<JProperty>()) {
+                        dict[property.Name] = ConvertJTokenToValue(property.Value);
+                    }
+                    return dict;
+
+                case JTokenType.Array:
+                    var firstItem = token.First;
+                    if (firstItem != null) {
+                        switch (firstItem.Type) {
+                            case JTokenType.Integer:
+                                return token.ToObject<int[]>();
+
+                            case JTokenType.Float:
+                                return token.ToObject<float[]>();
+
+                            case JTokenType.String:
+                                return token.ToObject<string[]>();
+
+                            case JTokenType.Boolean:
+                                return token.ToObject<bool[]>();
+
+                            case JTokenType.Date:
+                                return token.ToObject<DateTime[]>();
+
+                            case JTokenType.Object:
+                                var list = new List<object>();
+                                foreach (var item in token.Children()) {
+                                    list.Add(ConvertJTokenToValue(item));
+                                }
+                                return list;
+
+                            default:
+                                return token.ToObject<object[]>();
+                        }
+                    }
+                    return new object[0]; // Empty array if no items
+
+                case JTokenType.Integer:
+                    return token.ToObject<int>();
+
+                case JTokenType.Float:
+                    return token.ToObject<float>();
+
+                case JTokenType.String:
+                    return token.ToString();
+
+                case JTokenType.Boolean:
+                    return token.ToObject<bool>();
+
+                case JTokenType.Date:
+                    return token.ToObject<DateTime>();
+
+                default:
+                    return token.ToObject<object>();
+            }
         }
     }
 }

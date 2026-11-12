@@ -9,17 +9,11 @@ namespace Plugins.CountlySDK.Services
     public class StarRatingCountlyService : AbstractBaseService
     {
         internal readonly EventCountlyService _eventCountlyService;
-
         internal StarRatingCountlyService(CountlyConfiguration configuration, CountlyLogHelper logHelper, ConsentCountlyService consentService, EventCountlyService eventCountlyService) : base(configuration, logHelper, consentService)
         {
             Log.Debug("[StarRatingCountlyService] Initializing.");
-
             _eventCountlyService = eventCountlyService;
         }
-
-        #region override Methods
-        #endregion
-
 
         /// <summary>
         /// Sends app rating to the server.
@@ -38,17 +32,17 @@ namespace Plugins.CountlySDK.Services
                 }
 
                 if (string.IsNullOrEmpty(platform) || string.IsNullOrWhiteSpace(platform)) {
-                    Log.Warning("[StarRatingCountlyService] ReportStarRatingAsync : The platform name'" + platform + "'isn't valid.");
+                    Log.Warning($"[StarRatingCountlyService] ReportStarRatingAsync, platform name: [{platform}] isn't valid.");
                     return;
                 }
 
                 if (string.IsNullOrEmpty(appVersion) || string.IsNullOrWhiteSpace(appVersion)) {
-                    Log.Warning("[StarRatingCountlyService] ReportStarRatingAsync : The appVersion '" + appVersion + "'isn't valid.");
+                    Log.Warning($"[StarRatingCountlyService] ReportStarRatingAsync, appVersion: [{appVersion}] isn't valid.");
                     return;
                 }
 
                 if (rating < 1 || rating > 5) {
-                    Log.Warning("[StarRatingCountlyService] ReportStarRatingAsync : The rating value'" + rating + "'isn't valid.");
+                    Log.Warning($"[StarRatingCountlyService] ReportStarRatingAsync, rating value: [{rating}] isn't valid.");
                     return;
                 }
 
@@ -65,7 +59,6 @@ namespace Plugins.CountlySDK.Services
 
             await Task.CompletedTask;
         }
-
 
         /// <summary>
         /// Custom Segmentation for Star Rating event.
@@ -86,8 +79,6 @@ namespace Plugins.CountlySDK.Services
                     {"rating", Rating},
                 };
             }
-
         }
-
     }
 }
