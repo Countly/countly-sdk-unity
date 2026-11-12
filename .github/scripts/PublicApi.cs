@@ -109,6 +109,9 @@ internal static class PublicApi
                     lines.Add($"{prefix}{del.Identifier.Text}{Flatten(del.TypeParameterList)} delegate {Flatten(del.ReturnType)}{Parameters(del.ParameterList)}");
                 }
                 return;
+            default:
+                // Type members are listed below.
+                break;
         }
 
         if (!scopeVisible || !IsVisible(member.Modifiers, true, inInterface))
