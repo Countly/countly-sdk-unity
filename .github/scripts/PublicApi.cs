@@ -151,6 +151,9 @@ internal static class PublicApi
             case ConversionOperatorDeclarationSyntax conversion:
                 lines.Add($"{prefix}{conversion.ImplicitOrExplicitKeyword.Text} operator {Flatten(conversion.Type)}{Parameters(conversion.ParameterList)} conversion");
                 break;
+            default:
+                // Explicit interface implementations, static constructors and finalizers are left out.
+                break;
         }
     }
 
@@ -173,11 +176,11 @@ internal static class PublicApi
     /// <summary>
     /// Returns the parameter list with the types, modifiers and optional markers, without parameter names.
     /// </summary>
-    /// <param name="parameters">The parameter list to describe.</param>
+    /// <param name="list">The parameter list to describe.</param>
     /// <returns>The parameters as "(type, ref type, type = ...)".</returns>
-    private static string Parameters(BaseParameterListSyntax parameters)
+    private static string Parameters(BaseParameterListSyntax list)
     {
-        IEnumerable<string> described = parameters.Parameters.Select(parameter =>
+        IEnumerable<string> described = list.Parameters.Select(parameter =>
             string.Join(" ", parameter.Modifiers.Select(modifier => modifier.Text).Append(Flatten(parameter.Type)))
             + (parameter.Default != null ? " = ..." : ""));
         return "(" + string.Join(", ", described) + ")";
@@ -186,16 +189,16 @@ internal static class PublicApi
     /// <summary>
     /// Returns the accessors of a property or indexer that code outside the assembly can call.
     /// </summary>
-    /// <param name="accessors">The accessor list, or null for an expression-bodied member.</param>
+    /// <param name="list">The accessor list, or null for an expression-bodied member.</param>
     /// <param name="expressionBody">The expression body, which means a getter only.</param>
     /// <returns>The visible accessors as " { get; set; }".</returns>
-    private static string Accessors(AccessorListSyntax accessors, ArrowExpressionClauseSyntax expressionBody)
+    private static string Accessors(AccessorListSyntax list, ArrowExpressionClauseSyntax expressionBody)
     {
-        if (accessors == null)
+        if (list == null)
         {
             return expressionBody != null ? " { get; }" : "";
         }
-        IEnumerable<string> visible = accessors.Accessors
+        IEnumerable<string> visible = list.Accessors
             .Where(accessor => !accessor.Modifiers.Any(SyntaxKind.PrivateKeyword) && !(accessor.Modifiers.Any(SyntaxKind.InternalKeyword) && !accessor.Modifiers.Any(SyntaxKind.ProtectedKeyword)))
             .Select(accessor => accessor.Keyword.Text + ";");
         return " { " + string.Join(" ", visible) + " }";
@@ -205,11 +208,11 @@ internal static class PublicApi
     /// Returns the listed keywords that the modifiers contain, each preceded by a space.
     /// </summary>
     /// <param name="modifiers">The declaration's modifiers.</param>
-    /// <param name="keywords">The keywords to report, in the order they are printed.</param>
+    /// <param name="wanted">The keywords to report, in the order they are printed.</param>
     /// <returns>For example " static abstract", or an empty string.</returns>
-    private static string Keywords(SyntaxTokenList modifiers, params string[] keywords)
+    private static string Keywords(SyntaxTokenList modifiers, params string[] wanted)
     {
-        return string.Concat(keywords.Where(keyword => modifiers.Any(modifier => modifier.Text == keyword)).Select(keyword => " " + keyword));
+        return string.Concat(wanted.Where(keyword => modifiers.Any(modifier => modifier.Text == keyword)).Select(keyword => " " + keyword));
     }
 
     /// <summary>
