@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using System.Collections.Specialized;
+using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 using Plugins.CountlySDK;
 using Plugins.CountlySDK.Models;
@@ -89,6 +91,30 @@ namespace Assets.Tests.PlayModeTests.Scenarios
             };
 
             return expectedUserDetails;
+        }
+
+        /// <summary>
+        /// Validates the request queue after a device ID change with merge followed by a save: the merge request comes first,
+        /// then the request with the recorded event and the request with the cached user details, both under the new device ID.
+        /// </summary>
+        private void ValidateSavedAfterMerge(Countly cly, string oldDeviceId, string newDeviceId, string eventKey, Dictionary<string, object> expectedUserData)
+        {
+            TestUtility.ValidateRQEQSize(cly, 3, 0);
+            CountlyRequestModel[] requests = cly.RequestHelper._requestRepo.Models.ToArray();
+
+            NameValueCollection merge = CountlyUtils.ParseQueryString(requests[0].RequestData);
+            Assert.AreEqual(oldDeviceId, merge["old_device_id"]);
+            Assert.AreEqual(newDeviceId, merge["device_id"]);
+
+            NameValueCollection events = CountlyUtils.ParseQueryString(requests[1].RequestData);
+            Assert.AreEqual(newDeviceId, events["device_id"]);
+            JArray recordedEvents = JArray.Parse(events["events"]);
+            Assert.AreEqual(1, recordedEvents.Count);
+            Assert.AreEqual(eventKey, (string)recordedEvents[0]["key"]);
+
+            NameValueCollection userDetails = CountlyUtils.ParseQueryString(requests[2].RequestData);
+            Assert.AreEqual(newDeviceId, userDetails["device_id"]);
+            TestUtility.ValidateUserDetails(TestUtility.ExtractAndDeserializeUserDetails(requests), expectedUserData);
         }
 
         // UserProfile calls in Countly.Instance.UserProfile
@@ -274,7 +300,8 @@ namespace Assets.Tests.PlayModeTests.Scenarios
         // DeviceID changes with UserProfile changes
         // We record events and User Profile data without consent requirement. We also change device id with and without merge
         // Since consent is not required, events, device id change with merge and events should be recorded correctly
-        // Expected Request Queue: -Begin session -Event A and B -User Property a12345 = 4 -End Session -Event C -User Data -Merge ID -User Property a12345 = 4 -User Property a12345 = 4
+        // A device ID change with merge does not save the User Profile, the cached data is sent with the next save under the new device ID
+        // Expected Request Queue: -Begin session -Event A and B -User Property a12345 = 4 -End Session -Merge ID -Event C -User Data -User Property a12345 = 4 -User Property a12345 = 4
         // Expected Event Queue: -Event D
         [Test]
         public void UP_207_CNR_M()
@@ -303,10 +330,12 @@ namespace Assets.Tests.PlayModeTests.Scenarios
             SendUserData();
             _ = cly.Session.EndSessionAsync();
             _ = cly.Device.ChangeDeviceIdWithMerge("merge_id");
-            // Extract and validate user_details requests: Event C, User Profile and Change Device Id with Merge Requests
-            TestUtility.ValidateRQEQSize(cly, 3, 0);
-            Dictionary<string, object> up2 = TestUtility.ExtractAndDeserializeUserDetails(cly.RequestHelper._requestRepo.Models);
-            TestUtility.ValidateUserDetails(up2, ExpectedUserData());
+            // Change Device Id with Merge Request only: Event C stays in the EQ and the User Profile data stays cached
+            TestUtility.ValidateRQEQSize(cly, 1, 1);
+            Assert.AreEqual(0, TestUtility.ExtractAndDeserializeUserDetails(cly.RequestHelper._requestRepo.Models).Count);
+
+            cly.UserProfile.Save();
+            ValidateSavedAfterMerge(cly, "test_user", "merge_id", "BasicEventC", ExpectedUserData());
             cly.RequestHelper._requestRepo.Clear();
 
             SendSameData();
@@ -329,7 +358,8 @@ namespace Assets.Tests.PlayModeTests.Scenarios
         // DeviceID changes with UserProfile changes
         // We record events and User Profile data with consent requirement. We also change device id with and without merge
         // Since consent is required, events, device id change with merge and events should be recorded correctly and post id change events shouldn't be recorded
-        // Expected Request Queue: -Begin session -Event A and B -User Property a12345 = 4 -End Session -Event C -User Data -Merge ID
+        // A device ID change with merge does not save the User Profile, the cached data is sent with the next save under the new device ID
+        // Expected Request Queue: -Begin session -Event A and B -User Property a12345 = 4 -End Session -Merge ID -Event C -User Data
         [Test]
         public void UP_208_CR_CG_M()
         {
@@ -361,11 +391,12 @@ namespace Assets.Tests.PlayModeTests.Scenarios
             _ = cly.Session.EndSessionAsync();
             _ = cly.Device.ChangeDeviceIdWithMerge("merge_id");
 
-            // Extract and validate user_details requests: Event C, User Profile, Change Device Id with Merge Requests 
-            TestUtility.ValidateRQEQSize(cly, 3, 0);
+            // Change Device Id with Merge Request only: Event C stays in the EQ and the User Profile data stays cached
+            TestUtility.ValidateRQEQSize(cly, 1, 1);
+            Assert.AreEqual(0, TestUtility.ExtractAndDeserializeUserDetails(cly.RequestHelper._requestRepo.Models).Count);
 
-            Dictionary<string, object> up2 = TestUtility.ExtractAndDeserializeUserDetails(cly.RequestHelper._requestRepo.Models);
-            TestUtility.ValidateUserDetails(up2, ExpectedUserData());
+            cly.UserProfile.Save();
+            ValidateSavedAfterMerge(cly, "test_user", "merge_id", "BasicEventC", ExpectedUserData());
             cly.RequestHelper._requestRepo.Clear();
 
             SendSameData();

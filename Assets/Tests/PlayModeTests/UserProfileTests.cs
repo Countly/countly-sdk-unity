@@ -316,8 +316,9 @@ namespace Assets.Tests.PlayModeTests
         }
 
         // Changing Device ID with merge while User Profile Data is set
-        // We initialize the sdk, record user profile data and change the device id
-        // Changing device id should create a request for device id change and user profile data
+        // We initialize the sdk, record user profile data, change the device id with merge and end the session
+        // Changing device id with merge should create only a request for device id change, the user profile data stays cached
+        // and is sent when the session ends, after the device id change request and under the new device id
         [Test]
         public void ChangeDeviceIdWithMergeWithRecordedValue_A_CNR()
         {
@@ -327,9 +328,19 @@ namespace Assets.Tests.PlayModeTests
             cly.UserProfile.SetProperties(ExpectedUserProperty());
             _ = cly.Device.ChangeDeviceIdWithMerge("new_deviceid");
 
-            TestUtility.ValidateRQEQSize(cly, 3, 0);
-            Dictionary<string, object> up1 = TestUtility.ExtractAndDeserializeUserDetails(cly.RequestHelper._requestRepo.Models);
-            TestUtility.ValidateUserDetails(up1, ExpectedUserProperty());
+            // 1 request for session and 1 for device id change
+            TestUtility.ValidateRQEQSize(cly, 2, 0);
+            Assert.AreEqual(0, TestUtility.ExtractAndDeserializeUserDetails(cly.RequestHelper._requestRepo.Models).Count);
+
+            _ = cly.Session.EndSessionAsync();
+
+            // 1 more request for user profile data and 1 for end session
+            TestUtility.ValidateRQEQSize(cly, 4, 0);
+            CountlyRequestModel[] requests = cly.RequestHelper._requestRepo.Models.ToArray();
+            Assert.AreEqual("test_user", CountlyUtils.ParseQueryString(requests[1].RequestData)["old_device_id"]);
+            Assert.AreEqual("new_deviceid", CountlyUtils.ParseQueryString(requests[2].RequestData)["device_id"]);
+            TestUtility.ValidateUserDetails(TestUtility.ExtractAndDeserializeUserDetails(new[] { requests[2] }), ExpectedUserProperty());
+            Assert.AreEqual("1", CountlyUtils.ParseQueryString(requests[3].RequestData)["end_session"]);
             cly.RequestHelper._requestRepo.Clear();
         }
 
