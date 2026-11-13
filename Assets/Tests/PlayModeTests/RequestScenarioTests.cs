@@ -142,7 +142,7 @@ namespace Assets.Tests.PlayModeTests
         /// <returns>the config</returns>
         private static CountlyConfiguration Config()
         {
-            CountlyConfiguration config = new CountlyConfiguration("https://parity.example", "parity-app-key")
+            CountlyConfiguration config = new CountlyConfiguration("parity-app-key", "https://parity.example")
                 .SetDeviceId("parity-device-001")
                 .DisableHealthCheck();
             config.DisableAutomaticSessionTracking();
