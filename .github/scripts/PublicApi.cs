@@ -167,7 +167,7 @@ internal static class PublicApi
     /// <returns>True for a file under a folder named obj or bin.</returns>
     private static bool IsBuildOutput(string path)
     {
-        return path.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar).Any(part => part == "obj" || part == "bin");
+        return path.Split(new[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar }).Any(part => part == "obj" || part == "bin");
     }
 
     /// <summary>

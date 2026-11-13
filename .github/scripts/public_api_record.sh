@@ -22,7 +22,7 @@ for pair in "$@"; do
   cp "$current" "$out/$record"
   {
     printf '### The public API differs from %s\n\n' "$record"
-    printf 'Commit `%s` from the `public-api-record` artifact of this run, with a changelog line for the change.\n\n' "$record"
+    printf "Commit \`%s\` from the \`public-api-record\` artifact of this run, with a changelog line for the change.\n\n" "$record"
     if [ -f "$record" ]; then
       printf '```diff\n'
       tr -d '\r' < "$record" > "$recorded"
