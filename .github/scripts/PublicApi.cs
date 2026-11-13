@@ -32,7 +32,7 @@ internal static class PublicApi
         }
 
         string[][] symbolSets = args[0].Split(';').Select(set => set.Split(',', StringSplitOptions.RemoveEmptyEntries)).ToArray();
-        List<string> files = args.Skip(1).SelectMany(dir => Directory.EnumerateFiles(dir, "*.cs", SearchOption.AllDirectories)).OrderBy(f => f, StringComparer.Ordinal).ToList();
+        List<string> files = args.Skip(1).SelectMany(dir => Directory.EnumerateFiles(dir, "*.cs", SearchOption.AllDirectories)).Where(f => !IsBuildOutput(f)).OrderBy(f => f, StringComparer.Ordinal).ToList();
         SortedSet<string> lines = new SortedSet<string>(StringComparer.Ordinal);
         foreach (string[] symbols in symbolSets)
         {
@@ -158,6 +158,16 @@ internal static class PublicApi
                 // Explicit interface implementations, static constructors and finalizers are left out.
                 break;
         }
+    }
+
+    /// <summary>
+    /// Returns whether a source file lies under a build output folder, obj or bin, whose generated files are not API.
+    /// </summary>
+    /// <param name="path">The source file's path.</param>
+    /// <returns>True for a file under a folder named obj or bin.</returns>
+    private static bool IsBuildOutput(string path)
+    {
+        return path.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar).Any(part => part == "obj" || part == "bin");
     }
 
     /// <summary>

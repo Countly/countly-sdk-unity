@@ -52,6 +52,7 @@ jobs:
 
       # The first parent of the pull request's merge commit is the base branch it merges into.
       - name: Compare the public API with the base branch
+        id: compare
         run: |
           git worktree add "$RUNNER_TEMP/base" HEAD^1
           for side in base head; do
@@ -79,6 +80,21 @@ jobs:
             exit 1
           fi
           echo "::warning title=Breaking API change::This pull request breaks the public API. Check that CHANGELOG.md marks it as a breaking change."
+
+      # The committed record keeps every change to the public API visible in the pull request's diff.
+      - name: Compare the public API with its record
+        id: record
+        if: ${{ !cancelled() && steps.compare.outcome == 'success' }}
+        run: >
+          bash .github/scripts/public_api_record.sh
+          "$RUNNER_TEMP/head.txt=api/countly-sdk-unity.api"
+
+      - name: Upload the new record
+        if: ${{ !cancelled() && steps.record.outcome == 'failure' }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: public-api-record
+          path: ${{ runner.temp }}/public-api-record
 
   comment:
     name: Comment the public API changes
