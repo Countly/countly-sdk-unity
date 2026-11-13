@@ -1,0 +1,175 @@
+[
+  {
+    "path": "/i",
+    "params": {
+      "app_key": "parity-app-key",
+      "av": "<masked>",
+      "consent": {
+        "clicks": false,
+        "crashes": false,
+        "events": false,
+        "feedback": false,
+        "location": false,
+        "push": false,
+        "remote-config": false,
+        "sessions": false,
+        "star-rating": false,
+        "users": false,
+        "views": false
+      },
+      "device_id": "parity-device-001",
+      "dow": "<masked>",
+      "hour": "<masked>",
+      "rr": "<masked>",
+      "sdk_name": "csharp-unity-editor",
+      "sdk_version": "<masked>",
+      "t": "0",
+      "timestamp": "<masked>",
+      "tz": "<masked>"
+    }
+  },
+  {
+    "path": "/i",
+    "params": {
+      "app_key": "parity-app-key",
+      "av": "<masked>",
+      "device_id": "parity-device-001",
+      "dow": "<masked>",
+      "hour": "<masked>",
+      "location": "",
+      "sdk_name": "csharp-unity-editor",
+      "sdk_version": "<masked>",
+      "t": "0",
+      "timestamp": "<masked>",
+      "tz": "<masked>"
+    }
+  },
+  {
+    "path": "/i",
+    "params": {
+      "app_key": "parity-app-key",
+      "av": "<masked>",
+      "consent": {
+        "clicks": false,
+        "crashes": false,
+        "events": true,
+        "feedback": false,
+        "location": false,
+        "push": false,
+        "remote-config": false,
+        "sessions": true,
+        "star-rating": false,
+        "users": false,
+        "views": false
+      },
+      "device_id": "parity-device-001",
+      "dow": "<masked>",
+      "hour": "<masked>",
+      "sdk_name": "csharp-unity-editor",
+      "sdk_version": "<masked>",
+      "t": "0",
+      "timestamp": "<masked>",
+      "tz": "<masked>"
+    }
+  },
+  {
+    "path": "/i",
+    "params": {
+      "app_key": "parity-app-key",
+      "av": "<masked>",
+      "begin_session": "1",
+      "device_id": "parity-device-001",
+      "dow": "<masked>",
+      "hour": "<masked>",
+      "location": "",
+      "metrics": {
+        "_app_version": "<masked>",
+        "_density": "<masked>",
+        "_device": "<masked>",
+        "_locale": "<masked>",
+        "_os": "<masked>",
+        "_os_version": "<masked>",
+        "_resolution": "<masked>",
+        "_unity_version": "<masked>"
+      },
+      "sdk_name": "csharp-unity-editor",
+      "sdk_version": "<masked>",
+      "t": "0",
+      "timestamp": "<masked>",
+      "tz": "<masked>"
+    }
+  },
+  {
+    "path": "/i",
+    "params": {
+      "app_key": "parity-app-key",
+      "av": "<masked>",
+      "device_id": "parity-device-001",
+      "dow": "<masked>",
+      "events": [
+        {
+          "count": 1,
+          "cvid": "<masked>",
+          "dow": "<masked>",
+          "hour": "<masked>",
+          "id": "<masked>",
+          "key": "consented",
+          "peid": "<masked>",
+          "sum": 0.0,
+          "timestamp": "<masked>"
+        }
+      ],
+      "hour": "<masked>",
+      "sdk_name": "csharp-unity-editor",
+      "sdk_version": "<masked>",
+      "t": "0",
+      "timestamp": "<masked>",
+      "tz": "<masked>"
+    }
+  },
+  {
+    "path": "/i",
+    "params": {
+      "app_key": "parity-app-key",
+      "av": "<masked>",
+      "consent": {
+        "clicks": false,
+        "crashes": false,
+        "events": false,
+        "feedback": false,
+        "location": false,
+        "push": false,
+        "remote-config": false,
+        "sessions": true,
+        "star-rating": false,
+        "users": false,
+        "views": false
+      },
+      "device_id": "parity-device-001",
+      "dow": "<masked>",
+      "hour": "<masked>",
+      "sdk_name": "csharp-unity-editor",
+      "sdk_version": "<masked>",
+      "t": "0",
+      "timestamp": "<masked>",
+      "tz": "<masked>"
+    }
+  },
+  {
+    "path": "/i",
+    "params": {
+      "app_key": "parity-app-key",
+      "av": "<masked>",
+      "device_id": "parity-device-001",
+      "dow": "<masked>",
+      "end_session": "1",
+      "hour": "<masked>",
+      "sdk_name": "csharp-unity-editor",
+      "sdk_version": "<masked>",
+      "session_duration": "<masked>",
+      "t": "0",
+      "timestamp": "<masked>",
+      "tz": "<masked>"
+    }
+  }
+]
