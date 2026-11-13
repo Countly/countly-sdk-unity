@@ -1,0 +1,473 @@
+CountlyLogHelper class
+CountlyMainThreadHandler class : MonoBehaviour
+CountlyMainThreadHandler.Instance property CountlyMainThreadHandler { get; } static
+CountlyMainThreadHandler.IsMainThread() method bool
+CountlyMainThreadHandler.RunOnMainThread(Action) method void
+IOSBridge class : MonoBehaviour
+IOSBridge.ButtonIndex property string { get; set; }
+IOSBridge.GetToken() method void
+IOSBridge.ListenClickResult(Action<string, int>) method void
+IOSBridge.ListenReceiveResult(Action<string>) method void
+IOSBridge.ListenTokenResult(Action<string>) method void
+IOSBridge.Log property CountlyLogHelper { get; set; }
+IOSBridge.MessageId property string { get; set; }
+IOSBridge.registerForRemoteNotifications() method void static
+IUserProfileModule interface
+IUserProfileModule.Increment(string) method void
+IUserProfileModule.IncrementBy(string, double) method void
+IUserProfileModule.Multiply(string, double) method void
+IUserProfileModule.Pull(string, string) method void
+IUserProfileModule.Push(string, string) method void
+IUserProfileModule.PushUnique(string, string) method void
+IUserProfileModule.Save() method void
+IUserProfileModule.SaveMax(string, double) method void
+IUserProfileModule.SaveMin(string, double) method void
+IUserProfileModule.SetOnce(string, string) method void
+IUserProfileModule.SetProperties(Dictionary<string, object>) method void
+IUserProfileModule.SetProperty(string, object) method void
+IViewModule interface
+IViewModule.AddSegmentationToViewWithID(string, Dictionary<string, object>) method void
+IViewModule.AddSegmentationToViewWithName(string, Dictionary<string, object>) method void
+IViewModule.PauseViewWithID(string) method void
+IViewModule.RecordCloseViewAsync(string) method Task
+IViewModule.RecordOpenViewAsync(string, IDictionary<string, object> = ...) method Task
+IViewModule.ReportActionAsync(string, int, int, int, int) method Task
+IViewModule.ResumeViewWithID(string) method void
+IViewModule.SetGlobalViewSegmentation(Dictionary<string, object>) method void
+IViewModule.StartAutoStoppedView(string) method string
+IViewModule.StartAutoStoppedView(string, Dictionary<string, object>) method string
+IViewModule.StartView(string) method string
+IViewModule.StartView(string, Dictionary<string, object>) method string
+IViewModule.StopAllViews(Dictionary<string, object>) method void
+IViewModule.StopViewWithID(string) method void
+IViewModule.StopViewWithID(string, Dictionary<string, object>) method void
+IViewModule.StopViewWithName(string) method void
+IViewModule.StopViewWithName(string, Dictionary<string, object>) method void
+IViewModule.UpdateGlobalViewSegmentation(Dictionary<string, object>) method void
+Notifications.INotificationListener interface
+Notifications.INotificationListener.OnNotificationClicked(string, int) method void
+Notifications.INotificationListener.OnNotificationReceived(string) method void
+Notifications.INotificationsService interface
+Notifications.INotificationsService.GetToken(Action<string>) method void
+Notifications.INotificationsService.IsInitializedWithoutError property bool { get; set; }
+Notifications.INotificationsService.OnNotificationClicked(Action<string, int>) method void
+Notifications.INotificationsService.OnNotificationReceived(Action<string>) method void
+Notifications.INotificationsService.ReportPushActionAsync() method Task<CountlyResponse>
+Notifications.Impls.Android.AndroidBridge class : MonoBehaviour
+Notifications.Impls.Android.AndroidBridge.ListenClickResult(Action<string, int>) method void
+Notifications.Impls.Android.AndroidBridge.ListenReceiveResult(Action<string>) method void
+Notifications.Impls.Android.AndroidBridge.ListenTokenResult(Action<string>) method void
+Notifications.Impls.Android.AndroidBridge.Log property CountlyLogHelper { get; set; }
+Notifications.Impls.Android.AndroidBridge.OnNotificationClicked(string) method void
+Notifications.Impls.Android.AndroidBridge.OnNotificationReceived(string) method void
+Notifications.Impls.Android.AndroidBridge.OnTokenResult(string) method void
+Notifications.Impls.Android.AndroidNotificationsService class : INotificationsService
+Notifications.Impls.Android.AndroidNotificationsService.GetToken(Action<string>) method void
+Notifications.Impls.Android.AndroidNotificationsService.IsInitializedWithoutError property bool { get; set; }
+Notifications.Impls.Android.AndroidNotificationsService.OnNotificationClicked(Action<string, int>) method void
+Notifications.Impls.Android.AndroidNotificationsService.OnNotificationReceived(Action<string>) method void
+Notifications.Impls.Android.AndroidNotificationsService.ReportPushActionAsync() method Task<CountlyResponse>
+Notifications.Impls.ProxyNotificationsService class : INotificationsService
+Notifications.Impls.ProxyNotificationsService.GetToken(Action<string>) method void
+Notifications.Impls.ProxyNotificationsService.IsInitializedWithoutError property bool { get; set; }
+Notifications.Impls.ProxyNotificationsService.OnNotificationClicked(Action<string, int>) method void
+Notifications.Impls.ProxyNotificationsService.OnNotificationReceived(Action<string>) method void
+Notifications.Impls.ProxyNotificationsService.ReportPushActionAsync() method Task<CountlyResponse>
+Notifications.Impls.iOs.IOsNotificationsService class : INotificationsService
+Notifications.Impls.iOs.IOsNotificationsService.GetToken(Action<string>) method void
+Notifications.Impls.iOs.IOsNotificationsService.IsInitializedWithoutError property bool { get; set; }
+Notifications.Impls.iOs.IOsNotificationsService.OnNotificationClicked(Action<string, int>) method void
+Notifications.Impls.iOs.IOsNotificationsService.OnNotificationReceived(Action<string>) method void
+Notifications.Impls.iOs.IOsNotificationsService.ReportPushActionAsync() method Task<CountlyResponse>
+Notifications.NotificationsCallbackService class
+Notifications.NotificationsCallbackService.AddListener(INotificationListener) method void
+Notifications.NotificationsCallbackService.RemoveListener(INotificationListener) method void
+Plugins.CountlySDK.Countly class : MonoBehaviour
+Plugins.CountlySDK.Countly.AttemptToSendStoredRequests() method void
+Plugins.CountlySDK.Countly.Auth field CountlyAuthModel
+Plugins.CountlySDK.Countly.ChangeAppKey(string) method void
+Plugins.CountlySDK.Countly.ChangeServerUrl(string) method void
+Plugins.CountlySDK.Countly.Config field CountlyConfigModel
+Plugins.CountlySDK.Countly.Consents property ConsentCountlyService { get; }
+Plugins.CountlySDK.Countly.CrashReports property CrashReportsCountlyService { get; }
+Plugins.CountlySDK.Countly.Device property DeviceIdCountlyService { get; }
+Plugins.CountlySDK.Countly.Events property EventCountlyService { get; }
+Plugins.CountlySDK.Countly.FlushQueues() method void
+Plugins.CountlySDK.Countly.Init(CountlyConfiguration) method void
+Plugins.CountlySDK.Countly.InitInternal(CountlyConfiguration) method void
+Plugins.CountlySDK.Countly.Instance property Countly { get; } static
+Plugins.CountlySDK.Countly.IsSDKInitialized property bool { get; }
+Plugins.CountlySDK.Countly.Location property Services.LocationService { get; }
+Plugins.CountlySDK.Countly.Notifications property NotificationsCallbackService { get; set; }
+Plugins.CountlySDK.Countly.RemoteConfigs property RemoteConfigCountlyService { get; }
+Plugins.CountlySDK.Countly.RemoveDifferentAppKeysFromQueue() method void
+Plugins.CountlySDK.Countly.ReplaceAllAppKeysInQueueWithCurrentAppKey() method void
+Plugins.CountlySDK.Countly.StarRating property StarRatingCountlyService { get; }
+Plugins.CountlySDK.Countly.UserDetails property UserDetailsCountlyService { get; }
+Plugins.CountlySDK.Countly.UserProfile property IUserProfileModule { get; }
+Plugins.CountlySDK.Countly.Views property IViewModule { get; }
+Plugins.CountlySDK.CountlyUtils class
+Plugins.CountlySDK.CountlyUtils.CopyDictionaryToDestination(Dictionary<string, object>, Dictionary<string, object>, CountlyLogHelper) method void
+Plugins.CountlySDK.CountlyUtils.CountlyUtils(Countly) constructor
+Plugins.CountlySDK.CountlyUtils.CurrentTimestampSeconds() method int
+Plugins.CountlySDK.CountlyUtils.GetAppKeyAndDeviceIdParams() method Dictionary<string, object>
+Plugins.CountlySDK.CountlyUtils.GetAppVersion() method string
+Plugins.CountlySDK.CountlyUtils.GetBaseParams() method Dictionary<string, object>
+Plugins.CountlySDK.CountlyUtils.GetStringFromBytes(byte[]) method string
+Plugins.CountlySDK.CountlyUtils.GetUniqueDeviceId() method string static
+Plugins.CountlySDK.CountlyUtils.IsNullEmptyOrWhitespace(string) method bool
+Plugins.CountlySDK.CountlyUtils.IsPictureValid(string) method bool
+Plugins.CountlySDK.CountlyUtils.ParseQueryString(string) method NameValueCollection static
+Plugins.CountlySDK.CountlyUtils.RemoveReservedKeysFromSegmentation(Dictionary<string, object>?, string[], string, CountlyLogHelper) method void
+Plugins.CountlySDK.CountlyUtils.RemoveUnsupportedDataTypes(Dictionary<string, object>?, CountlyLogHelper?) method bool
+Plugins.CountlySDK.CountlyUtils.SafeRandomVal() method string static
+Plugins.CountlySDK.CountlyUtils.TruncateSegmentationValues(Dictionary<string, object>?, int, string, CountlyLogHelper) method void
+Plugins.CountlySDK.Enums.Consents enum
+Plugins.CountlySDK.Enums.Consents.Clicks enum value
+Plugins.CountlySDK.Enums.Consents.Crashes enum value
+Plugins.CountlySDK.Enums.Consents.Events enum value
+Plugins.CountlySDK.Enums.Consents.Feedback enum value
+Plugins.CountlySDK.Enums.Consents.Location enum value
+Plugins.CountlySDK.Enums.Consents.Push enum value
+Plugins.CountlySDK.Enums.Consents.RemoteConfig enum value
+Plugins.CountlySDK.Enums.Consents.Sessions enum value
+Plugins.CountlySDK.Enums.Consents.StarRating enum value
+Plugins.CountlySDK.Enums.Consents.Users enum value
+Plugins.CountlySDK.Enums.Consents.Views enum value
+Plugins.CountlySDK.Enums.DeviceIdType enum
+Plugins.CountlySDK.Enums.DeviceIdType.DeveloperProvided enum value
+Plugins.CountlySDK.Enums.DeviceIdType.SDKGenerated enum value
+Plugins.CountlySDK.Enums.LogLevel enum
+Plugins.CountlySDK.Enums.LogLevel.Debug enum value
+Plugins.CountlySDK.Enums.LogLevel.Error enum value
+Plugins.CountlySDK.Enums.LogLevel.Info enum value
+Plugins.CountlySDK.Enums.LogLevel.Verbose enum value
+Plugins.CountlySDK.Enums.LogLevel.Warning enum value
+Plugins.CountlySDK.Enums.TestMode enum
+Plugins.CountlySDK.Enums.TestMode.AndroidTestToken enum value
+Plugins.CountlySDK.Enums.TestMode.None enum value
+Plugins.CountlySDK.Enums.TestMode.ProductionToken enum value
+Plugins.CountlySDK.Enums.TestMode.iOSAdHocToken enum value
+Plugins.CountlySDK.Enums.TestMode.iOSTestToken enum value
+Plugins.CountlySDK.Helpers.Converter class static
+Plugins.CountlySDK.Helpers.Converter.ConvertEventEntityToEventModel(EventEntity, CountlyLogHelper) method CountlyEventModel static
+Plugins.CountlySDK.Helpers.Converter.ConvertEventModelToEventEntity(CountlyEventModel, long) method EventEntity static
+Plugins.CountlySDK.Helpers.Converter.ConvertJsonToDictionary(string, CountlyLogHelper) method Dictionary<string, object> static
+Plugins.CountlySDK.Helpers.Converter.ConvertRequestEntityToRequestModel(RequestEntity) method CountlyRequestModel static
+Plugins.CountlySDK.Helpers.Converter.ConvertRequestModelToRequestEntity(CountlyRequestModel, long) method RequestEntity static
+Plugins.CountlySDK.Helpers.Converter.ConvertSegmentEntityToSegmentModel(SegmentEntity) method SegmentModel static
+Plugins.CountlySDK.Helpers.Converter.ConvertSegmentModelToSegmentEntity(SegmentModel, long) method SegmentEntity static
+Plugins.CountlySDK.Helpers.CountlyResponse struct
+Plugins.CountlySDK.Helpers.CountlyResponse.Data property string { get; set; }
+Plugins.CountlySDK.Helpers.CountlyResponse.ErrorMessage property string { get; set; }
+Plugins.CountlySDK.Helpers.CountlyResponse.IsSuccess property bool { get; set; }
+Plugins.CountlySDK.Helpers.CountlyResponse.StatusCode property int { get; set; }
+Plugins.CountlySDK.Helpers.CountlyResponse.ToString() method string override
+Plugins.CountlySDK.Helpers.EntityType enum
+Plugins.CountlySDK.Helpers.EntityType.Configs enum value
+Plugins.CountlySDK.Helpers.EntityType.EventNumberInSameSessions enum value
+Plugins.CountlySDK.Helpers.EntityType.NonViewEventSegments enum value
+Plugins.CountlySDK.Helpers.EntityType.NonViewEvents enum value
+Plugins.CountlySDK.Helpers.EntityType.Requests enum value
+Plugins.CountlySDK.Helpers.EntityType.ViewEventSegments enum value
+Plugins.CountlySDK.Helpers.EntityType.ViewEvents enum value
+Plugins.CountlySDK.Helpers.MetricHelper class
+Plugins.CountlySDK.Helpers.MetricHelper.AppVersion property string { get; }
+Plugins.CountlySDK.Helpers.MetricHelper.Density property string { get; }
+Plugins.CountlySDK.Helpers.MetricHelper.Device property string { get; }
+Plugins.CountlySDK.Helpers.MetricHelper.Locale property string { get; }
+Plugins.CountlySDK.Helpers.MetricHelper.MetricHelper() constructor
+Plugins.CountlySDK.Helpers.MetricHelper.MetricHelper(Dictionary<string, string>) constructor
+Plugins.CountlySDK.Helpers.MetricHelper.OS property string { get; }
+Plugins.CountlySDK.Helpers.MetricHelper.OSVersion property string { get; }
+Plugins.CountlySDK.Helpers.MetricHelper.Resolution property string { get; }
+Plugins.CountlySDK.Helpers.MetricHelper.UnityVersion property string { get; }
+Plugins.CountlySDK.Helpers.MetricHelper.buildMetricJSON() method string
+Plugins.CountlySDK.Helpers.RequestCountlyHelper class
+Plugins.CountlySDK.ISafeIDGenerator interface
+Plugins.CountlySDK.ISafeIDGenerator.GenerateValue() method string
+Plugins.CountlySDK.Models.CountlyAuthModel class
+Plugins.CountlySDK.Models.CountlyAuthModel.AppKey field string
+Plugins.CountlySDK.Models.CountlyAuthModel.DeviceId field string
+Plugins.CountlySDK.Models.CountlyAuthModel.ServerUrl field string
+Plugins.CountlySDK.Models.CountlyConfigModel class
+Plugins.CountlySDK.Models.CountlyConfigModel.CountlyConfigModel(string = ..., bool = ..., bool = ..., bool = ..., bool = ..., bool = ..., int = ..., int = ..., int = ..., int = ..., TestMode = ..., bool = ...) constructor
+Plugins.CountlySDK.Models.CountlyConfigModel.EnableAutomaticCrashReporting field bool
+Plugins.CountlySDK.Models.CountlyConfigModel.EnableConsoleLogging field bool
+Plugins.CountlySDK.Models.CountlyConfigModel.EnableManualSessionHandling field bool readonly
+Plugins.CountlySDK.Models.CountlyConfigModel.EnablePost field bool
+Plugins.CountlySDK.Models.CountlyConfigModel.EnableTestMode field bool
+Plugins.CountlySDK.Models.CountlyConfigModel.EventQueueThreshold field int
+Plugins.CountlySDK.Models.CountlyConfigModel.NotificationMode field TestMode
+Plugins.CountlySDK.Models.CountlyConfigModel.Salt field string
+Plugins.CountlySDK.Models.CountlyConfigModel.SessionDuration field int
+Plugins.CountlySDK.Models.CountlyConfigModel.StoredRequestLimit field int
+Plugins.CountlySDK.Models.CountlyConfigModel.ToString() method string override
+Plugins.CountlySDK.Models.CountlyConfigModel.TotalBreadcrumbsAllowed field int
+Plugins.CountlySDK.Models.CountlyConfiguration class
+Plugins.CountlySDK.Models.CountlyConfiguration.AddNotificationListener(INotificationListener) method void
+Plugins.CountlySDK.Models.CountlyConfiguration.AppKey field string
+Plugins.CountlySDK.Models.CountlyConfiguration.CountlyConfiguration() constructor
+Plugins.CountlySDK.Models.CountlyConfiguration.CountlyConfiguration(string, string) constructor
+Plugins.CountlySDK.Models.CountlyConfiguration.CreateConsentGroup(string, Consents[]) method void
+Plugins.CountlySDK.Models.CountlyConfiguration.DeviceId field string
+Plugins.CountlySDK.Models.CountlyConfiguration.DisableAutoSendUserPropertiesOnSessions() method CountlyConfiguration
+Plugins.CountlySDK.Models.CountlyConfiguration.DisableAutomaticCrashReporting() method CountlyConfiguration
+Plugins.CountlySDK.Models.CountlyConfiguration.DisableAutomaticSessionTracking() method void
+Plugins.CountlySDK.Models.CountlyConfiguration.DisableHealthCheck() method CountlyConfiguration
+Plugins.CountlySDK.Models.CountlyConfiguration.DisableLocation() method void
+Plugins.CountlySDK.Models.CountlyConfiguration.EnableAutomaticCrashReporting field bool
+Plugins.CountlySDK.Models.CountlyConfiguration.EnableConsoleLogging field bool
+Plugins.CountlySDK.Models.CountlyConfiguration.EnableForcedHttpPost() method CountlyConfiguration
+Plugins.CountlySDK.Models.CountlyConfiguration.EnableLogging() method CountlyConfiguration
+Plugins.CountlySDK.Models.CountlyConfiguration.EnableManualSessionHandling field bool readonly
+Plugins.CountlySDK.Models.CountlyConfiguration.EnablePost field bool
+Plugins.CountlySDK.Models.CountlyConfiguration.EnableTestMode field bool
+Plugins.CountlySDK.Models.CountlyConfiguration.EventQueueThreshold field int
+Plugins.CountlySDK.Models.CountlyConfiguration.GetAppKey() method string
+Plugins.CountlySDK.Models.CountlyConfiguration.GetDeviceId() method string
+Plugins.CountlySDK.Models.CountlyConfiguration.GetEventQueueSizeToSend() method int
+Plugins.CountlySDK.Models.CountlyConfiguration.GetMaxBreadcrumbCount() method int
+Plugins.CountlySDK.Models.CountlyConfiguration.GetMaxKeyLength() method int
+Plugins.CountlySDK.Models.CountlyConfiguration.GetMaxRequestQueueSize() method int
+Plugins.CountlySDK.Models.CountlyConfiguration.GetMaxSegmentationValues() method int
+Plugins.CountlySDK.Models.CountlyConfiguration.GetMaxStackTraceLineLength() method int
+Plugins.CountlySDK.Models.CountlyConfiguration.GetMaxStackTraceLinesPerThread() method int
+Plugins.CountlySDK.Models.CountlyConfiguration.GetMaxValueSize() method int
+Plugins.CountlySDK.Models.CountlyConfiguration.GetNotificationMode() method TestMode
+Plugins.CountlySDK.Models.CountlyConfiguration.GetParameterTamperingProtectionSalt() method string
+Plugins.CountlySDK.Models.CountlyConfiguration.GetServerUrl() method string
+Plugins.CountlySDK.Models.CountlyConfiguration.GetUpdateSessionTimerDelay() method int
+Plugins.CountlySDK.Models.CountlyConfiguration.GetUserProperties() method Dictionary<string, object>
+Plugins.CountlySDK.Models.CountlyConfiguration.GiveConsent(Consents[]) method void
+Plugins.CountlySDK.Models.CountlyConfiguration.GiveConsentToGroup(string[]) method void
+Plugins.CountlySDK.Models.CountlyConfiguration.IsAutomaticCrashReportingEnabled() method bool
+Plugins.CountlySDK.Models.CountlyConfiguration.IsConsentRequired() method bool
+Plugins.CountlySDK.Models.CountlyConfiguration.IsForcedHttpPostEnabled() method bool
+Plugins.CountlySDK.Models.CountlyConfiguration.IsHealthCheckEnabled() method bool
+Plugins.CountlySDK.Models.CountlyConfiguration.IsLoggingEnabled() method bool
+Plugins.CountlySDK.Models.CountlyConfiguration.MaxKeyLength field int
+Plugins.CountlySDK.Models.CountlyConfiguration.MaxSegmentationValues field int
+Plugins.CountlySDK.Models.CountlyConfiguration.MaxStackTraceLineLength field int
+Plugins.CountlySDK.Models.CountlyConfiguration.MaxStackTraceLinesPerThread field int
+Plugins.CountlySDK.Models.CountlyConfiguration.MaxValueSize field int
+Plugins.CountlySDK.Models.CountlyConfiguration.NotificationMode field TestMode
+Plugins.CountlySDK.Models.CountlyConfiguration.Parent field GameObject
+Plugins.CountlySDK.Models.CountlyConfiguration.RequiresConsent field bool
+Plugins.CountlySDK.Models.CountlyConfiguration.Salt field string
+Plugins.CountlySDK.Models.CountlyConfiguration.ServerUrl field string
+Plugins.CountlySDK.Models.CountlyConfiguration.SessionDuration field int
+Plugins.CountlySDK.Models.CountlyConfiguration.SetDeviceId(string) method CountlyConfiguration
+Plugins.CountlySDK.Models.CountlyConfiguration.SetEventQueueSizeToSend(int) method CountlyConfiguration
+Plugins.CountlySDK.Models.CountlyConfiguration.SetLocation(string, string, string, string) method CountlyConfiguration
+Plugins.CountlySDK.Models.CountlyConfiguration.SetLogListener(Action<string, LogLevel>) method CountlyConfiguration
+Plugins.CountlySDK.Models.CountlyConfiguration.SetMaxBreadcrumbCount(int) method CountlyConfiguration
+Plugins.CountlySDK.Models.CountlyConfiguration.SetMaxKeyLength(int) method CountlyConfiguration
+Plugins.CountlySDK.Models.CountlyConfiguration.SetMaxRequestQueueSize(int) method CountlyConfiguration
+Plugins.CountlySDK.Models.CountlyConfiguration.SetMaxSegmentationValues(int) method CountlyConfiguration
+Plugins.CountlySDK.Models.CountlyConfiguration.SetMaxStackTraceLineLength(int) method CountlyConfiguration
+Plugins.CountlySDK.Models.CountlyConfiguration.SetMaxStackTraceLinesPerThread(int) method CountlyConfiguration
+Plugins.CountlySDK.Models.CountlyConfiguration.SetMaxValueSize(int) method CountlyConfiguration
+Plugins.CountlySDK.Models.CountlyConfiguration.SetMetricOverride(Dictionary<string, string>) method void
+Plugins.CountlySDK.Models.CountlyConfiguration.SetNotificationMode(TestMode) method CountlyConfiguration
+Plugins.CountlySDK.Models.CountlyConfiguration.SetParameterTamperingProtectionSalt(string) method CountlyConfiguration
+Plugins.CountlySDK.Models.CountlyConfiguration.SetRequiresConsent(bool) method CountlyConfiguration
+Plugins.CountlySDK.Models.CountlyConfiguration.SetUpdateSessionTimerDelay(int) method CountlyConfiguration
+Plugins.CountlySDK.Models.CountlyConfiguration.SetUserProperties(Dictionary<string, object>) method CountlyConfiguration
+Plugins.CountlySDK.Models.CountlyConfiguration.StoredRequestLimit field int
+Plugins.CountlySDK.Models.CountlyConfiguration.ToString() method string override
+Plugins.CountlySDK.Models.CountlyConfiguration.TotalBreadcrumbsAllowed field int
+Plugins.CountlySDK.Models.CountlyEventModel class : IModel
+Plugins.CountlySDK.Models.CountlyEventModel.Count property int? { get; set; }
+Plugins.CountlySDK.Models.CountlyEventModel.CountlyEventModel() constructor
+Plugins.CountlySDK.Models.CountlyEventModel.CountlyEventModel(string, IDictionary<string, object> = ..., int? = ..., double? = ..., double? = ..., string? = ..., string? = ..., string? = ..., string? = ...) constructor
+Plugins.CountlySDK.Models.CountlyEventModel.CurrentViewID property string? { get; set; }
+Plugins.CountlySDK.Models.CountlyEventModel.DayOfWeek property int { get; set; }
+Plugins.CountlySDK.Models.CountlyEventModel.Duration property double? { get; set; }
+Plugins.CountlySDK.Models.CountlyEventModel.EventID property string? { get; set; }
+Plugins.CountlySDK.Models.CountlyEventModel.Hour property int { get; set; }
+Plugins.CountlySDK.Models.CountlyEventModel.Id property long { get; set; }
+Plugins.CountlySDK.Models.CountlyEventModel.Key property string { get; set; }
+Plugins.CountlySDK.Models.CountlyEventModel.NPSEvent field string const
+Plugins.CountlySDK.Models.CountlyEventModel.OrientationEvent field string const
+Plugins.CountlySDK.Models.CountlyEventModel.PreviousEventID property string? { get; set; }
+Plugins.CountlySDK.Models.CountlyEventModel.PreviousViewID property string? { get; set; }
+Plugins.CountlySDK.Models.CountlyEventModel.PushActionEvent field string const
+Plugins.CountlySDK.Models.CountlyEventModel.ReservedViewSegmentationKeys field string[] static readonly
+Plugins.CountlySDK.Models.CountlyEventModel.Segmentation property SegmentModel { get; set; }
+Plugins.CountlySDK.Models.CountlyEventModel.StarRatingEvent field string const
+Plugins.CountlySDK.Models.CountlyEventModel.Sum property double? { get; set; }
+Plugins.CountlySDK.Models.CountlyEventModel.SurveyEvent field string const
+Plugins.CountlySDK.Models.CountlyEventModel.Timestamp property long { get; set; }
+Plugins.CountlySDK.Models.CountlyEventModel.ToString() method string override
+Plugins.CountlySDK.Models.CountlyEventModel.ViewActionEvent field string const
+Plugins.CountlySDK.Models.CountlyEventModel.ViewEvent field string const
+Plugins.CountlySDK.Models.CountlyRequestModel class : IModel
+Plugins.CountlySDK.Models.CountlyRequestModel.CountlyRequestModel(string, string) constructor
+Plugins.CountlySDK.Models.CountlyRequestModel.Id property long { get; set; }
+Plugins.CountlySDK.Models.CountlyRequestModel.RequestData property string { get; set; }
+Plugins.CountlySDK.Models.CountlyRequestModel.RequestUrl property string { get; set; }
+Plugins.CountlySDK.Models.CountlyRequestModel.ToString() method string override
+Plugins.CountlySDK.Models.CountlyUserDetailsModel class
+Plugins.CountlySDK.Models.CountlyUserDetailsModel.CountlyUserDetailsModel(IDictionary<string, object>) constructor
+Plugins.CountlySDK.Models.CountlyUserDetailsModel.CountlyUserDetailsModel(string, string, string, string, string, string, string, string, IDictionary<string, object>) constructor
+Plugins.CountlySDK.Models.CountlyUserDetailsModel.ToString() method string override
+Plugins.CountlySDK.Models.SegmentModel class : Dictionary<string, object>, IModel
+Plugins.CountlySDK.Models.SegmentModel.Id property long { get; set; }
+Plugins.CountlySDK.Models.SegmentModel.SegmentModel() constructor
+Plugins.CountlySDK.Models.SegmentModel.SegmentModel(IDictionary<string, object>) constructor
+Plugins.CountlySDK.Models.SegmentModel.ToString() method string override
+Plugins.CountlySDK.Persistance.Dao.SegmentDao class : Dao<SegmentEntity>
+Plugins.CountlySDK.Persistance.Dao.SegmentDao.GetByEventId(long) method SegmentEntity
+Plugins.CountlySDK.Persistance.Dao.SegmentDao.SegmentDao(AutoBox, string, CountlyLogHelper) constructor
+Plugins.CountlySDK.Persistance.Entities.ConfigEntity class : IEntity
+Plugins.CountlySDK.Persistance.Entities.ConfigEntity.GetId() method long
+Plugins.CountlySDK.Persistance.Entities.ConfigEntity.Id field long
+Plugins.CountlySDK.Persistance.Entities.ConfigEntity.Json field string
+Plugins.CountlySDK.Persistance.Entities.EventEntity class : IEntity
+Plugins.CountlySDK.Persistance.Entities.EventEntity.GetId() method long
+Plugins.CountlySDK.Persistance.Entities.EventEntity.Id field long
+Plugins.CountlySDK.Persistance.Entities.EventEntity.Json field string
+Plugins.CountlySDK.Persistance.Entities.EventNumberInSameSessionEntity class : IEntity
+Plugins.CountlySDK.Persistance.Entities.EventNumberInSameSessionEntity.EventKey field string
+Plugins.CountlySDK.Persistance.Entities.EventNumberInSameSessionEntity.GetId() method long
+Plugins.CountlySDK.Persistance.Entities.EventNumberInSameSessionEntity.Id field long
+Plugins.CountlySDK.Persistance.Entities.EventNumberInSameSessionEntity.Number field int
+Plugins.CountlySDK.Persistance.Entities.IEntity interface
+Plugins.CountlySDK.Persistance.Entities.IEntity.GetId() method long
+Plugins.CountlySDK.Persistance.Entities.RequestEntity class : IEntity
+Plugins.CountlySDK.Persistance.Entities.RequestEntity.GetId() method long
+Plugins.CountlySDK.Persistance.Entities.RequestEntity.Id field long
+Plugins.CountlySDK.Persistance.Entities.RequestEntity.Json field string
+Plugins.CountlySDK.Persistance.Entities.SegmentEntity class : IEntity
+Plugins.CountlySDK.Persistance.Entities.SegmentEntity.EventId field long
+Plugins.CountlySDK.Persistance.Entities.SegmentEntity.GetId() method long
+Plugins.CountlySDK.Persistance.Entities.SegmentEntity.Id field long
+Plugins.CountlySDK.Persistance.Entities.SegmentEntity.Json field string
+Plugins.CountlySDK.Persistance.IModel interface
+Plugins.CountlySDK.Persistance.IModel.Id property long { set; get; }
+Plugins.CountlySDK.Persistance.Repositories.AbstractEventRepository class abstract : Repository<EventEntity, CountlyEventModel>
+Plugins.CountlySDK.Persistance.Repositories.AbstractEventRepository.AbstractEventRepository(Dao<EventEntity>, SegmentDao, CountlyLogHelper) constructor protected
+Plugins.CountlySDK.Persistance.Repositories.AbstractEventRepository.Clear() method void override
+Plugins.CountlySDK.Persistance.Repositories.AbstractEventRepository.ConvertEntityToModel(EventEntity) method CountlyEventModel protected override
+Plugins.CountlySDK.Persistance.Repositories.AbstractEventRepository.ConvertModelToEntity(CountlyEventModel) method EventEntity protected override
+Plugins.CountlySDK.Persistance.Repositories.AbstractEventRepository.Dequeue() method CountlyEventModel override
+Plugins.CountlySDK.Persistance.Repositories.AbstractEventRepository.Enqueue(CountlyEventModel) method bool override
+Plugins.CountlySDK.Persistance.Repositories.AbstractEventRepository.Initialize() method void override
+Plugins.CountlySDK.Persistance.Repositories.AbstractEventRepository.Log field CountlyLogHelper protected readonly
+Plugins.CountlySDK.Persistance.Repositories.Impls.NonViewEventRepository class : AbstractEventRepository
+Plugins.CountlySDK.Persistance.Repositories.Impls.NonViewEventRepository.NonViewEventRepository(Dao<EventEntity>, SegmentDao, CountlyLogHelper) constructor
+Plugins.CountlySDK.Persistance.Repositories.Impls.NonViewEventRepository.ValidateModelBeforeEnqueue(CountlyEventModel) method bool protected override
+Plugins.CountlySDK.Persistance.Repositories.Impls.ViewEventRepository class : AbstractEventRepository
+Plugins.CountlySDK.Persistance.Repositories.Impls.ViewEventRepository.ValidateModelBeforeEnqueue(CountlyEventModel) method bool protected override
+Plugins.CountlySDK.Persistance.Repositories.Impls.ViewEventRepository.ViewEventRepository(Dao<EventEntity>, SegmentDao, CountlyLogHelper) constructor
+Plugins.CountlySDK.Persistance.Repositories.Repository<TEntity, TModel> class abstract
+Plugins.CountlySDK.Persistance.Repositories.Repository<TEntity, TModel>.Clear() method void virtual
+Plugins.CountlySDK.Persistance.Repositories.Repository<TEntity, TModel>.ConvertEntityToModel(TEntity) method TModel protected abstract
+Plugins.CountlySDK.Persistance.Repositories.Repository<TEntity, TModel>.ConvertModelToEntity(TModel) method TEntity protected abstract
+Plugins.CountlySDK.Persistance.Repositories.Repository<TEntity, TModel>.DeleteEntry(TModel) method void virtual
+Plugins.CountlySDK.Persistance.Repositories.Repository<TEntity, TModel>.Dequeue() method TModel virtual
+Plugins.CountlySDK.Persistance.Repositories.Repository<TEntity, TModel>.Enqueue(TModel) method bool virtual
+Plugins.CountlySDK.Persistance.Repositories.Repository<TEntity, TModel>.GenerateNewId() method long protected
+Plugins.CountlySDK.Persistance.Repositories.Repository<TEntity, TModel>.Initialize() method void virtual
+Plugins.CountlySDK.Persistance.Repositories.Repository<TEntity, TModel>.RefreshMemoryCache() method void virtual
+Plugins.CountlySDK.Persistance.Repositories.Repository<TEntity, TModel>.Repository(Dao<TEntity>, CountlyLogHelper) constructor protected
+Plugins.CountlySDK.Persistance.Repositories.Repository<TEntity, TModel>.Update(TModel) method bool virtual
+Plugins.CountlySDK.Persistance.Repositories.Repository<TEntity, TModel>.ValidateModelBeforeEnqueue(TModel) method bool protected abstract
+Plugins.CountlySDK.SafeIDGenerator class : ISafeIDGenerator
+Plugins.CountlySDK.SafeIDGenerator.GenerateValue() method string
+Plugins.CountlySDK.Services.AbstractBaseService class abstract
+Plugins.CountlySDK.Services.AbstractBaseService.AbstractBaseService(CountlyConfiguration, CountlyLogHelper, ConsentCountlyService) constructor protected
+Plugins.CountlySDK.Services.AbstractBaseService.FixSegmentKeysAndValues(IDictionary<string, object>) method IDictionary<string, object> protected
+Plugins.CountlySDK.Services.AbstractBaseService.Log property CountlyLogHelper { get; } protected
+Plugins.CountlySDK.Services.AbstractBaseService.LogSegmentation(Dictionary<string, object>, string) method void protected
+Plugins.CountlySDK.Services.AbstractBaseService.RemoveSegmentInvalidDataTypes(IDictionary<string, object>, ICollection<string> = ...) method IDictionary<string, object> protected
+Plugins.CountlySDK.Services.AbstractBaseService.TrimKey(string) method string protected
+Plugins.CountlySDK.Services.AbstractBaseService.TrimValue(string, string) method string protected
+Plugins.CountlySDK.Services.AbstractBaseService.TrimValues(string[]) method string[] protected
+Plugins.CountlySDK.Services.AbstractBaseService._configuration field CountlyConfiguration protected readonly
+Plugins.CountlySDK.Services.AbstractBaseService._consentService field ConsentCountlyService protected readonly
+Plugins.CountlySDK.Services.ConsentCountlyService class : AbstractBaseService
+Plugins.CountlySDK.Services.ConsentCountlyService.CheckConsent(Consents) method bool
+Plugins.CountlySDK.Services.ConsentCountlyService.GiveConsent(Consents[]) method void
+Plugins.CountlySDK.Services.ConsentCountlyService.GiveConsentAll() method void
+Plugins.CountlySDK.Services.ConsentCountlyService.GiveConsentToGroup(string[]) method void
+Plugins.CountlySDK.Services.ConsentCountlyService.RemoveAllConsent() method void
+Plugins.CountlySDK.Services.ConsentCountlyService.RemoveConsent(Consents[]) method void
+Plugins.CountlySDK.Services.ConsentCountlyService.RemoveConsentOfGroup(string[]) method void
+Plugins.CountlySDK.Services.CrashReportsCountlyService class : AbstractBaseService
+Plugins.CountlySDK.Services.CrashReportsCountlyService.AddBreadcrumbs(string) method void
+Plugins.CountlySDK.Services.CrashReportsCountlyService.SendCrashReportAsync(string, string, IDictionary<string, object> = ..., bool = ...) method Task
+Plugins.CountlySDK.Services.CrashReportsCountlyService.SendCrashReportAsync(string, string, LogType, IDictionary<string, object> = ..., bool = ...) method Task
+Plugins.CountlySDK.Services.DeviceIdCountlyService class : AbstractBaseService
+Plugins.CountlySDK.Services.DeviceIdCountlyService.ChangeDeviceIdWithMerge(string) method Task
+Plugins.CountlySDK.Services.DeviceIdCountlyService.ChangeDeviceIdWithoutMerge(string) method Task
+Plugins.CountlySDK.Services.DeviceIdCountlyService.DeviceId property string { get; }
+Plugins.CountlySDK.Services.DeviceIdCountlyService.DeviceIdType property DeviceIdType { get; }
+Plugins.CountlySDK.Services.DeviceIdCountlyService.SetId(string) method void
+Plugins.CountlySDK.Services.EventCountlyService class : AbstractBaseService
+Plugins.CountlySDK.Services.EventCountlyService.CancelEvent(string) method void
+Plugins.CountlySDK.Services.EventCountlyService.EndEvent(string, IDictionary<string, object> = ..., int? = ..., double? = ...) method void
+Plugins.CountlySDK.Services.EventCountlyService.RecordEventAsync(string, IDictionary<string, object> = ..., int? = ..., double? = ..., double? = ...) method Task
+Plugins.CountlySDK.Services.EventCountlyService.StartEvent(string) method void
+Plugins.CountlySDK.Services.InitializationCountlyService class : AbstractBaseService
+Plugins.CountlySDK.Services.LocationService class : AbstractBaseService
+Plugins.CountlySDK.Services.LocationService.DisableLocation() method void
+Plugins.CountlySDK.Services.LocationService.SetLocation(string, string, string, string) method void
+Plugins.CountlySDK.Services.PushCountlyService class : AbstractBaseService
+Plugins.CountlySDK.Services.RemoteConfigCountlyService class : AbstractBaseService
+Plugins.CountlySDK.Services.RemoteConfigCountlyService.Configs property Dictionary<string, object> { get; }
+Plugins.CountlySDK.Services.RemoteConfigCountlyService.Update() method Task<CountlyResponse>
+Plugins.CountlySDK.Services.SessionCountlyService class : AbstractBaseService
+Plugins.CountlySDK.Services.StarRatingCountlyService class : AbstractBaseService
+Plugins.CountlySDK.Services.StarRatingCountlyService.ReportStarRatingAsync(string, string, int) method Task
+Plugins.CountlySDK.Services.UserDetailsCountlyService class : AbstractBaseService
+Plugins.CountlySDK.Services.UserDetailsCountlyService.ContainsCustomDataKey(string) method bool
+Plugins.CountlySDK.Services.UserDetailsCountlyService.Increment(string) method void
+Plugins.CountlySDK.Services.UserDetailsCountlyService.IncrementBy(string, double) method void
+Plugins.CountlySDK.Services.UserDetailsCountlyService.Max(string, double) method void
+Plugins.CountlySDK.Services.UserDetailsCountlyService.Min(string, double) method void
+Plugins.CountlySDK.Services.UserDetailsCountlyService.Multiply(string, double) method void
+Plugins.CountlySDK.Services.UserDetailsCountlyService.Pull(string, string[]) method void
+Plugins.CountlySDK.Services.UserDetailsCountlyService.Push(string, string[]) method void
+Plugins.CountlySDK.Services.UserDetailsCountlyService.PushUnique(string, string[]) method void
+Plugins.CountlySDK.Services.UserDetailsCountlyService.RetrieveCustomDataValue(string) method object
+Plugins.CountlySDK.Services.UserDetailsCountlyService.SaveAsync() method Task
+Plugins.CountlySDK.Services.UserDetailsCountlyService.Set(string, string) method void
+Plugins.CountlySDK.Services.UserDetailsCountlyService.SetCustomUserDetails(Dictionary<string, object>) method void
+Plugins.CountlySDK.Services.UserDetailsCountlyService.SetOnce(string, string) method void
+Plugins.CountlySDK.Services.UserDetailsCountlyService.SetUserDetailsAsync(CountlyUserDetailsModel) method Task
+Plugins.CountlySDK.Services.ViewCountlyService class : AbstractBaseService, IViewModule, IViewIDProvider
+Plugins.CountlySDK.Services.ViewCountlyService.AddSegmentationToViewWithID(string, Dictionary<string, object>) method void
+Plugins.CountlySDK.Services.ViewCountlyService.AddSegmentationToViewWithName(string, Dictionary<string, object>) method void
+Plugins.CountlySDK.Services.ViewCountlyService.GetCurrentViewId() method string
+Plugins.CountlySDK.Services.ViewCountlyService.GetPreviousViewId() method string
+Plugins.CountlySDK.Services.ViewCountlyService.PauseViewWithID(string) method void
+Plugins.CountlySDK.Services.ViewCountlyService.RecordCloseViewAsync(string) method Task
+Plugins.CountlySDK.Services.ViewCountlyService.RecordOpenViewAsync(string, IDictionary<string, object> = ...) method Task
+Plugins.CountlySDK.Services.ViewCountlyService.ReportActionAsync(string, int, int, int, int) method Task
+Plugins.CountlySDK.Services.ViewCountlyService.ResumeViewWithID(string) method void
+Plugins.CountlySDK.Services.ViewCountlyService.SetGlobalViewSegmentation(Dictionary<string, object>) method void
+Plugins.CountlySDK.Services.ViewCountlyService.StartAutoStoppedView(string) method string
+Plugins.CountlySDK.Services.ViewCountlyService.StartAutoStoppedView(string, Dictionary<string, object>) method string
+Plugins.CountlySDK.Services.ViewCountlyService.StartView(string) method string
+Plugins.CountlySDK.Services.ViewCountlyService.StartView(string, Dictionary<string, object>) method string
+Plugins.CountlySDK.Services.ViewCountlyService.StopAllViews(Dictionary<string, object>) method void
+Plugins.CountlySDK.Services.ViewCountlyService.StopViewWithID(string) method void
+Plugins.CountlySDK.Services.ViewCountlyService.StopViewWithID(string, Dictionary<string, object>) method void
+Plugins.CountlySDK.Services.ViewCountlyService.StopViewWithName(string) method void
+Plugins.CountlySDK.Services.ViewCountlyService.StopViewWithName(string, Dictionary<string, object>) method void
+Plugins.CountlySDK.Services.ViewCountlyService.UpdateGlobalViewSegmentation(Dictionary<string, object>) method void
+UserProfile class : AbstractBaseService, IUserProfileModule
+UserProfile.Increment(string) method void
+UserProfile.IncrementBy(string, double) method void
+UserProfile.Multiply(string, double) method void
+UserProfile.Pull(string, string) method void
+UserProfile.Push(string, string) method void
+UserProfile.PushUnique(string, string) method void
+UserProfile.Save() method void
+UserProfile.SaveMax(string, double) method void
+UserProfile.SaveMin(string, double) method void
+UserProfile.SetOnce(string, string) method void
+UserProfile.SetProperties(Dictionary<string, object>) method void
+UserProfile.SetProperty(string, object) method void
