@@ -366,7 +366,7 @@ namespace Plugins.CountlySDK.Helpers
         /// <param name="data"></param>
         /// <param name="callback"></param>
         /// <returns></returns>
-        private IEnumerator ProcessRequestCoroutine(string uri, string data, Action<CountlyResponse> callback)
+        internal IEnumerator ProcessRequestCoroutine(string uri, string data, Action<CountlyResponse> callback)
         {
             Log.Debug($"[RequestCountlyHelper] ProcessRequestCoroutine, Start");
             CountlyResponse countlyResponse = new CountlyResponse();
