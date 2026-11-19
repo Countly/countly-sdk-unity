@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading;
 using NUnit.Framework;
 using Plugins.CountlySDK;
+using Plugins.CountlySDK.Helpers;
 using Plugins.CountlySDK.Models;
 using UnityEngine.TestTools;
 
@@ -34,15 +35,20 @@ namespace Assets.Tests.PlayModeTests
         public IEnumerator Request_SendsTheParametersAndChecksumInTheBodyOnly()
         {
             RecordingServer server = StartServer();
-            Countly.Instance.Init(new CountlyConfiguration(AppKey, server.Url)
+            CountlyConfiguration config = new CountlyConfiguration(AppKey, server.Url)
                 .SetDeviceId(DeviceId)
                 .DisableHealthCheck()
-                .DisableAutomaticSessionTracking()
-                .SetParameterTamperingProtectionSalt(Salt));
+                .SetParameterTamperingProtectionSalt(Salt);
+            config.DisableAutomaticSessionTracking();
+            Countly.Instance.Init(config);
             string data = "app_key=" + AppKey + "&device_id=" + DeviceId + "&marker=webgl_probe&events=%5B%5D";
 
-            CountlyResponse response = null;
-            yield return Countly.Instance.RequestHelper.ProcessRequestCoroutine(server.Url + "/i?", data, (r) => response = r);
+            bool answered = false;
+            CountlyResponse response = default(CountlyResponse);
+            yield return Countly.Instance.RequestHelper.ProcessRequestCoroutine(server.Url + "/i?", data, (r) => {
+                response = r;
+                answered = true;
+            });
 
             RecordedRequest request = server.Requests().Single(r => r.Body.Contains("marker=webgl_probe") || r.Query.Contains("marker=webgl_probe"));
             Assert.AreEqual("POST", request.Method);
@@ -50,7 +56,7 @@ namespace Assets.Tests.PlayModeTests
             Assert.AreEqual("", request.Query, "no parameter travels in the URL");
             StringAssert.StartsWith("application/x-www-form-urlencoded", request.ContentType);
             Assert.AreEqual(data + "&checksum256=" + Sha256Hex(data + Salt), request.Body);
-            Assert.IsNotNull(response);
+            Assert.IsTrue(answered);
             Assert.IsTrue(response.IsSuccess);
         }
 
@@ -61,10 +67,11 @@ namespace Assets.Tests.PlayModeTests
         public IEnumerator Request_WithoutSalt_SendsTheParametersInTheBody()
         {
             RecordingServer server = StartServer();
-            Countly.Instance.Init(new CountlyConfiguration(AppKey, server.Url)
+            CountlyConfiguration config = new CountlyConfiguration(AppKey, server.Url)
                 .SetDeviceId(DeviceId)
-                .DisableHealthCheck()
-                .DisableAutomaticSessionTracking());
+                .DisableHealthCheck();
+            config.DisableAutomaticSessionTracking();
+            Countly.Instance.Init(config);
             string data = "app_key=" + AppKey + "&device_id=" + DeviceId + "&marker=webgl_plain";
 
             yield return Countly.Instance.RequestHelper.ProcessRequestCoroutine(server.Url + "/i?", data, null);
