@@ -328,7 +328,7 @@ namespace Plugins.CountlySDK.Helpers
         }
 
         /// <summary>
-        /// Asynchronously initiates a request routine, combining URL and data, and starts a coroutine to process the request with checksum validation.
+        /// Asynchronously initiates a request routine: starts a coroutine that sends the data, with its checksum, in the body of a POST to the URL.
         /// </summary>
         /// <param name="uri"></param>
         /// <param name="data"></param>
@@ -360,32 +360,31 @@ namespace Plugins.CountlySDK.Helpers
         }
 
         /// <summary>
-        /// Processes a UnityWebRequest coroutine, handling response and errors, and invoking a callback with the CountlyResponse.
+        /// Sends a request with a UnityWebRequest, as a form POST with the data and its checksum in the body, the way
+        /// PostAsync sends it, and invokes the callback with the CountlyResponse.
         /// </summary>
-        /// <param name="uri"></param>
-        /// <param name="data"></param>
-        /// <param name="callback"></param>
-        /// <returns></returns>
-        private IEnumerator ProcessRequestCoroutine(string uri, string data, Action<CountlyResponse> callback)
+        /// <param name="uri">the URL to send to, with no parameters of its own</param>
+        /// <param name="data">the url encoded request data, without the checksum</param>
+        /// <param name="callback">called with the answer, or null</param>
+        /// <returns>the coroutine that sends the request</returns>
+        internal IEnumerator ProcessRequestCoroutine(string uri, string data, Action<CountlyResponse> callback)
         {
             Log.Debug($"[RequestCountlyHelper] ProcessRequestCoroutine, Start");
             CountlyResponse countlyResponse = new CountlyResponse();
 
-            string query = AddChecksum(data);
-            string url = uri + query;
+            string body = AddChecksum(data);
 
-            using (UnityWebRequest webRequest = UnityWebRequest.Put(url, data)) {
+            using (UnityWebRequest webRequest = UnityWebRequest.Put(uri, body)) {
                 webRequest.method = UnityWebRequest.kHttpVerbPOST;
+                webRequest.SetRequestHeader("Content-Type", "application/x-www-form-urlencoded");
                 yield return webRequest.SendWebRequest();
-                string[] pages = url.Split('?');
-                int page = pages.Length - 1;
                 int code = (int)webRequest.responseCode;
 
                 countlyResponse.Data = webRequest.downloadHandler.text;
                 countlyResponse.ErrorMessage = webRequest.error;
                 countlyResponse.StatusCode = code;
                 countlyResponse.IsSuccess = IsSuccess(countlyResponse);
-                Log.Debug($"[RequestCountlyHelper] ProcessRequestCoroutine, Request URL: [{uri}], Body: [{pages[page]}], Response: [{countlyResponse}]");
+                Log.Debug($"[RequestCountlyHelper] ProcessRequestCoroutine, Request URL: [{uri}], Body: [{body}], Response: [{countlyResponse}]");
             }
             Log.Debug($"[RequestCountlyHelper] ProcessRequestCoroutine, Process completed invoking callback.");
             callback?.Invoke(countlyResponse);
